@@ -37,10 +37,14 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 my($this, $tagname, $text, $attr)=@_;
                                                 unless($_plaintext) {
                                                     if($tagname eq 'a' and $attr->{href} and $attr->{href} =~ m!^/(\d+)\.docid!) {
-                                                        my $uri;
-                                                        my $d = $obvius->get_doc_by_id($1);
-                                                        $uri = $obvius->get_doc_uri($d) if($d);
-                                                        $text =~ s!/$1\.docid/?!$prefix$uri! if($uri);
+                                                        my $docid = $1;
+                                                        my $d = $obvius->get_doc_by_id($docid);
+                                                        my $uri = $obvius->get_doc_uri($d) if($d);
+                                                        if($uri) {
+                                                            # Remove ending / if the document has a "file extension":
+                                                            $uri =~ s!(\.\w+)/$!$1!;
+                                                            $text =~ s!/$docid\.docid/?!$prefix$uri! if($uri);
+                                                        }
                                                         $out.=$text;
                                                     } elsif($tagname eq 'img' and $attr->{src} and $attr->{src} =~ m!^/(\d+).docid!) {
                                                         # Do docid trick on images:
