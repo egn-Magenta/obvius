@@ -3706,6 +3706,15 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">... vis alle</translation>
   </text>
 
+  <text key="ObviusLinkDocumentExplanation">
+    <translation lang="en">This linkdocument isn't shown as a document on
+        the public website as such; if you click on it, you will be automatically
+        transferred to</translation>
+    <translation lang="da">Dette linkdokument ses ikke som et dokument på
+        det offentlige website; hvis man klikker sig ind på det, kommer man
+        automatisk direkte til adressen</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
