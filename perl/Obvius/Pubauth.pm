@@ -97,6 +97,76 @@ sub delete_public_users {
     return $set->Delete($where);
 }
 
+# Metadata
+
+# insert_public_user_metadata($user, $metadataname, $metadatavalueref) -
+# inserts a list of metadata values for a given user
+# and metadata name.
+sub insert_public_user_metadata {
+    my ($this, $user, $name, $values) = @_;
+
+    return undef unless($user);
+    return undef unless(ref($values) and ref($values) eq 'ARRAY');
+
+    my $set=DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'     => 'public_users_metadata',
+                                            }
+                                        );
+    for my $value (@$values) {
+        $set->Insert({user_id => $user->{id}, name => $name, value => $value});
+    }
+
+    return 1;
+}
+
+# insert_public_user_metadata_values($user, $nameslistref) -
+# Lookups the metadata specified in by the nameslistref
+# and put the values on the $user object.
+sub get_public_user_metadata {
+    my ($this, $user, $nameslist) = @_;
+
+    return undef unless($user);
+    return undef unless(ref($nameslist) and ref($nameslist) eq 'ARRAY');
+
+    my $set=DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'     => 'public_users_metadata',
+                                            }
+                                        );
+    for my $name (@$nameslist) {
+        $set->Search({user_id => $user->{id}, name => $name});
+
+        my @result;
+        while(my $rec = $set->Next) {
+            push(@result, $rec->{value});
+        }
+
+        $user->{$name} = \@result;
+    }
+
+    $set->Disconnect;
+
+    return 1;
+}
+
+# delete_public_user_metadata -
+# Deletes metadata for a given user and metadata name.
+sub delete_public_user_metadata {
+    my ($this, $user, $name) = @_;
+
+    my $set=DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'     => 'public_users_metadata',
+                                            }
+                                        );
+    return $set->Delete({user_id => $user->{id}, name => $name});
+
+}
+
 ## Handle public_users_areas:
 
 # create_public_user_area - adds the supplied user to the given
