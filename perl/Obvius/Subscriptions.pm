@@ -2,15 +2,15 @@ package Obvius::Subscriptions;
 
 ########################################################################
 #
-# Obvius.pm - Content Manager, database handling
+# Subscriptions.pm - handling the subscription system
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
-#                    aparte A/S, Denmark (http://www.aparte.dk/),
-#                    FI, Denmark (http://www.fi.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
-#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
-#          Peter Makholm (pma@fi.dk)
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#          Peter Makholm (pma@fi.dk),
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,10 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #
 ########################################################################
 
+# get_subscriber - given a hash-ref with sufficient key-value pairs to
+#                  identify at least one subscriber, returns a
+#                  hash-ref containing the data of the first match in
+#                  the subscribers table.
 sub get_subscriber {
     my ($this, $subscriber) = @_;
 
@@ -325,7 +329,6 @@ sub subscriber_categories_on {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -341,7 +344,7 @@ Obvius::Subscriptions - subscription related functions for L<Obvius>.
 
   $obvius->get_subscriptions($where);
 
-  etc.
+  my $href=$obvius->get_subscriber({ email=>'asjo@magenta-aps.dk' });
 
 =head1 DESCRIPTION
 
@@ -352,11 +355,11 @@ It is not intended for use as a standalone module.
 
 None.
 
-=head1 AUTHOR
-
-Adam Sjøgren, E<lt>adam@aparte.dkE<gt>
+=head1 AUTHORS
 
 Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
+Peter Makholm E<lt>pma@fi.dkE<gt>
+Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
