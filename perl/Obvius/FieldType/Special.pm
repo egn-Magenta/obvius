@@ -8,6 +8,8 @@ use warnings;
 
 use Obvius::FieldType;
 use Date::Calc qw(check_date);
+use LWP::UserAgent;
+use HTTP::Request::Common;
 
 our @ISA = qw( Obvius::FieldType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -42,6 +44,10 @@ sub copy_in {
     }
 
     if ($this->{VALIDATE_ARGS} eq 'CorrectDate') {
+        return $value;
+    }
+
+    if ($this->{VALIDATE_ARGS} eq 'ValidXhtml') {
         return $value;
     }
 
@@ -88,6 +94,10 @@ sub copy_out {
         }
     }
 
+    if ($this->{VALIDATE_ARGS} eq 'ValidXhtml') {
+        return $this->check_xhtml($value, $obvius, $fspec);
+    }
+
     return $value;
 }
 
@@ -100,6 +110,69 @@ sub validate {
     return $this->copy_in($obvius, $fspec, $value);
 }
 
+# check_xhtml($value, $obvius, $fspec)
+#   - takes a value and runs it through the w3c html validator. Returns undef
+#     if the value is not valid xhtml, otherwise returns the value. The url for
+#     the w3c validator needs to be specified in the sites' configuration file.
+sub check_xhtml {
+    my ($this, $value, $obvius, $fspec) = @_;
+
+    return $value if(not $value or $value =~ m!^\s+$!s);
+
+    my $w3c_check_url = $obvius->config->param('w3c_check_url');
+
+    unless($w3c_check_url) {
+        print STDERR "No w3c_check_url specified in config file - can't validate xhtml\n";
+        return undef;
+    }
+
+    my $tmpfile = "/tmp/obvius-htmlcheck-" . $fspec->param('name') . "-" . time . ".html";
+
+    if(open(FH, "> $tmpfile")) {
+        print FH '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' . "\n";
+        print FH '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' . "\n";
+        print FH '<head>' . "\n";
+        print FH '<title>Obvius test of Xhtml</title>' . "\n";
+        print FH '<meta http-equiv="content-Type" content="text/html; charset=iso-8859-1" />' . "\n";
+        print FH '</head>' . "\n";
+        print FH '<body>' . "\n";
+        print FH '<div>' . "\n";
+        print FH "$value\n";
+        print FH '</div>' . "\n";
+        print FH '</body>' . "\n";
+        print FH '</html>' . "\n";
+        close(FH);
+
+
+        # Post file to the validator:
+        my $ua  = LWP::UserAgent->new();
+        my $req = POST($w3c_check_url,
+                        Content_Type => "form-data",
+                        Content      => [
+                                            uploaded_file =>  [ "$tmpfile" ]
+                                        ]);
+        my $response = $ua->request($req);
+
+        unlink($tmpfile);
+
+        if ($response->is_success()) {
+            my $output = $response->content;
+
+            if($output =~ m!This Page Is Valid!) {
+                return $value;
+            } else {
+                return undef;
+            }
+        } else {
+            print STDERR "Error from validator: " .  $response->as_string;
+            return undef;
+        }
+    } else {
+        print STDERR "Couldn't open temporary file while checking XHTML\n";
+        return undef;
+    }
+
+}
 
 
 1;
