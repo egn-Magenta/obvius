@@ -14,8 +14,11 @@ for(keys %{$image_doctype->{FIELDS}}) {
 
 my $in_src = $r->param('in_src') || '';
 my $selected_size;
-if($in_src and $in_src =~ m/size=\d+x\d+/) {
+if($in_src and $in_src =~ m/size=(\d+)x(\d+)/) {
     $selected_size = $1 . "x" . $2;
+}
+if($in_src and $in_src =~ m/size=(\d+)%/) {
+    $selected_size = $1 . '%';
 }
 
 if($r->param('reedit')) {
@@ -51,9 +54,11 @@ function adjust_size() {
     var url = document.pageform.in_url.value;
     if(! url) {
         alert('Vælg et billede først');
+        return;
     }
 
     url = url.replace(/&?size=\d+x\d+/gi, '');
+    url = url.replace(/&?size=\d+%/gi, '');
     url = url.replace(/\?$/, '');
 
     var val = document.pageform.size.options[document.pageform.size.selectedIndex].value;
@@ -67,6 +72,18 @@ function adjust_size() {
 
     document.pageform.in_url.value = url;
 }
+
+function check_start_size() {
+    var size_arr = document.pageform.size.options;
+    for(var i=0; i<size_arr.length; i++) {
+        if(size_arr[i].value == '<% $selected_size %>') {
+            document.pageform.size.selectedIndex = i;
+            break;
+        }
+    }
+}
+
+onload_array[onload_array.length] = check_start_size;
 </script>
 <form name="pageform">
 <table border="0" align="center">
@@ -106,8 +123,12 @@ function adjust_size() {
         <td>
             <select name="size" onchange="adjust_size()">
                 <option value="">Normal</option>
-%for(@sizes){
+%if($m->comp_exists('/defaults/imagesizes')) {
+                <& /defaults/imagesizes &>;
+%} else {
+% for(@sizes){
                 <option value="<% $_ %>"<% $selected_size eq $_ ? 'SELECTED' : '' %>><% $_ %></option>
+% }
 %}
             </select>
         </td>
