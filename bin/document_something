@@ -1,0 +1,166 @@
+#!/usr/bin/perl
+
+# document_something - a small script that finds all undocumented
+#                      functions and delegates the work of documenting
+#                      a random one of them to a random person.
+#
+#                      Notice: "documented" is naïvely determined by
+#                      examining whether the line preceeding a
+#                      functions start was a comment or not.
+#
+# Copyright (C), 2004, Magenta ApS. By Adam Sjøgren. Under the GPL.
+#
+# $Id$
+
+use strict;
+use warnings;
+
+use File::Find;
+use Net::SMTP;
+
+use Getopt::Long;
+
+my $path='/home/magenta/asjo/udvikling/document_something/obvius/perl';
+my @default_emails=(
+                   'asjo@magenta-aps.dk',
+                   'jubk@magenta-aps.dk',
+                   'jensk@magenta-aps.dk',
+                   'martin@magenta-aps.dk'
+                  );
+my @emails;
+my $send;
+
+GetOptions('path=s'=>\$path, 'email=s'=>\@emails, 'send'=>\$send) or die 'Garbled options, stopping';
+@emails=@default_emails unless (scalar(@emails));
+
+die 'You must give a path to the perl-module(s)' unless ($path and (-d $path or -f $path));
+die 'You must supply some emails to nag' unless (scalar(@emails));
+
+my @files=();
+File::Find::find({wanted=>\&wanted}, $path);
+
+my @documented=();
+my @undocumented=();
+foreach my $file (@files) {
+    my $fh;
+    open $fh, $file or die "Couldn't read $file, argh";
+    my $commented=0;
+    my $i=0;
+    while (my $line=<$fh>) {
+        $i++;
+        if ($line=~/^\s*#/) {
+            $commented=1;
+            next;
+        }
+        elsif ($line=~/sub\s+(\w+)/) {
+            if ($commented) {
+                push @documented, { file=>$file, sub=>$1, linenum=>$i };
+            }
+            else {
+                push @undocumented, { file=>$file, sub=>$1, linenum=>$i };
+            }
+        }
+        $commented=0;
+    }
+    close $fh;
+}
+
+my $random_function=$undocumented[int rand scalar(@undocumented)];
+my $random_email=$emails[int rand scalar(@emails)];
+
+my $message=send_message($random_email, $random_function);
+print $message; # unless ($send);
+
+exit 0;
+
+
+sub send_message {
+    my ($to, $random_function)=@_;
+
+    my $file=$random_function->{file};
+    $file=~s!^$path/!!;
+
+    my $message='';
+
+    $message.="Function to be documented:\n";
+    $message.=" $random_function->{sub}\n";
+    $message.=" $file line: $random_function->{linenum}\n";
+    $message.="\nLucky person to document it:\n";
+    $message.=" $random_email\n\n";
+
+    my $total=scalar(@documented)+scalar(@undocumented);
+    $message.="Statistics:\n";
+    $message.=sprintf "   Documented functions: %3.0d (%2.1f%%)\n", scalar(@documented), scalar(@documented)*100/$total;
+    $message.=sprintf " Undocumented functions: %3.0d (%2.1f%%)\n", scalar(@undocumented), scalar(@undocumented)*100/$total;
+    $message.=sprintf "        Total functions: %3.0d\n", $total;
+
+    if ($send) {
+        my $email=<<EOT;
+From: Daily Dispatcher of Documentation Labour <bitbucket\@magenta-aps.dk>
+To: $to
+Subject: Please document '$random_function->{sub}', $file:$random_function->{linenum}
+User-Agent: document_something/2
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+$message
+
+  Thank you for shopping Obvius, have a nice day,
+
+    The Daily Dispatcher of Good News.
+
+
+P.S. Here are the tentative guidelines for what to do:
+
+ 1) Add a comment before the function, documenting what it does. In
+    the form:
+
+    # funname(arguments) - creates a fun name, while still keeping
+    #                      the sanity intact and maintaining
+    #                      atomicity and astronomy. Returns a reference
+    #                      to a hash, describing the shape of the world.
+    sub funname {
+        my (\$letters, \$length)=\@_;
+
+    (The line preceeding the sub-definition *must* be a comment-line).
+
+ 2) Add an example usage to the SYNOPSIS of the POD-documentation, in
+    the bottom of the module.
+
+    Like so:
+
+    =head1 SYNOPSIS
+
+        use Obvius::NamesAndGames;
+
+        \$hashref=funname(\$arrayref, \$number);
+
+    If a longer discussion of the function is in order, add it in the
+    DESCRIPTION-section.
+
+ 3) Optionally also clean up the POD if necessary. The DESCRIPTION
+    should start with an overview of the entire module.
+
+ 4) Optionally also check if the GPL-boilerplate in the beginning of
+    the file, updating/adding it if necessary.
+EOT
+
+        my $smtp=Net::SMTP->new('localhost');
+        $smtp->mail('bitbucket@magenta-aps.dk');
+        $smtp->to($to);
+        $smtp->data();
+        $smtp->datasend($email);
+        $smtp->dataend();
+        $smtp->quit();
+    }
+
+    return $message;
+}
+
+sub wanted {
+    my ($dev,$ino,$mode,$nlink,$uid,$gid);
+
+    push @files, $File::Find::name if ((($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
+    -f _);
+}
