@@ -237,16 +237,20 @@ sub get_public_user_area {
     return $obvius->get_table_record('public_users_areas', { public_userid=>$user->{id}, docid=>$area->{docid} });
 }
 
-# get_public_users_area - returns an array-ref containing the users in
-#                         the area. Returns an empty array-ref if
-#                         there are none.
+# get_public_users_area - returns an array-ref containing the matching
+#                         users in the area. If the area does not
+#                         specifiy a docid, matching users in all
+#                         areas are returned. Returns an empty
+#                         array-ref if there are none.
 sub get_public_users_area {
     my ($obvius, $area, %options)=@_;
 
     my $now=strftime('%Y-%m-%d %H:%M:%S', localtime);
 
     my @users=();
-    my @recs=$obvius->get_table_record('public_users_areas', { docid=>$area->{docid} });
+    my %search_options;
+    $search_options{docid}=$area->{docid} if (defined $area->{docid});
+    my @recs=$obvius->get_table_record('public_users_areas', \%search_options);
 
     my $ret=1;
     foreach my $rec (@recs) {
