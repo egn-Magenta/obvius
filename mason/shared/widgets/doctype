@@ -43,7 +43,7 @@ if(my $dt_value = $docparams->param('admin_doctypes_available')) {
 
 
 # XXX Other way of checking this?
-my $is_admin_user = $obvius->param('user') =~ /^admin$/;
+my $is_admin_user = $obvius->user_has_capabilities($doc, qw(admin));
 
 foreach (@{$obvius->{DOCTYPES}}) {
     next unless $_;
