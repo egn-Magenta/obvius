@@ -51,6 +51,7 @@ sub action {
     my %sort_map = (
                     'title' => 'title',
                     '-docdate' => 'docdate DESC',
+                    '+docdate' => 'docdate',
                     'docdate' => 'docdate',
                     'eventtype' => 'eventtype',
                     'contactinfo' => 'contactinfo'
