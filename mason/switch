@@ -61,105 +61,56 @@ my $content="subsite";
 my $session=undef;
 $r->pnotes(capabilities=>$obvius->user_capabilities($doc));
 
+my %ops = (
+            versions => '/versions',
+            navigator => '/navigator/main',
+            picturedlg => '/picturedlg',
+            linkdlg => '/linkdlg',
+            anchordlg => '/anchordlg',
+            expertgroups => '/expertgroups/main',
+            seqselect => '/seqselect',
+            print => '/print',
+            mcms_code_editor => '/mcms_code_editor',
+            html_code_editor => '/html_code_editor',
+        );
+
+my %contents = (
+                    edit => '/edit/edit',
+                    publish => '/publish',
+                    unpublish => '/unpublish',
+                    delete => '/delete',
+                    rename => '/rename',
+                    new => '/new/new',
+                    edit_new => '/edit/new',
+                    new_version => '/new/version',
+                    edit_new_version => '/edit/new_version',
+                    siblings => '/siblings',
+                    access => '/access',
+                    manual_subscription => '/manual_subscription',
+                    clear_cache => '/clear_cache',
+                    dview => '/show_data',
+                    send => '/send',
+                    import_csv => '/import_csv',
+                    delete_single_version => '/delete_single_version',
+                    docparams => '/docparams'
+            );
+
+
 if (defined $obvius_page and $obvius_page eq 'abort') {
     $content=$m->comp('/switch:abort');
-}
-elsif ($obvius_op and ($obvius_op eq 'edit')) {
-    $content='/edit/edit';
-}
-elsif ($obvius_op and ($obvius_op eq 'publish')) {
-    $content='/publish';
-}
-elsif ($obvius_op and ($obvius_op eq 'unpublish')) {
-    $content='/unpublish';
-}
-elsif ($obvius_op and ($obvius_op eq 'delete')) {
-    $content='/delete';
-}
-elsif ($obvius_op and ($obvius_op eq 'rename')) {
-    $content='/rename';
-}
-elsif ($obvius_op and ($obvius_op eq 'new')) {
-    $content='/new/new';
-}
-elsif ($obvius_op and ($obvius_op eq 'edit_new')) {
-    $content='/edit/new';
-}
-elsif ($obvius_op and ($obvius_op eq 'new_version')) {
-    $content='/new/version';
-}
-elsif ($obvius_op and ($obvius_op eq 'edit_new_version')) {
-    $content='/edit/new_version';
-}
-elsif ($obvius_op and ($obvius_op eq 'siblings')) {
-    $content='/siblings';
-}
-elsif ($obvius_op and ($obvius_op eq 'versions')) {
-    $op='/versions';
-}
-elsif ($obvius_op and ($obvius_op eq 'access')) {
-    $content='/access';
-}
-elsif ($obvius_op and ($obvius_op eq 'manual_subscription')) {
-    $content='/manual_subscription';
-}
-elsif ($obvius_op and ($obvius_op eq 'clear_cache')) {
-    $content='/clear_cache';
-}
-elsif ($obvius_op and ($obvius_op eq 'tablelist')) {
+} elsif ($obvius_op and $contents{$obvius_op}) {
+    $content=$contents{$obvius_op};
+} elsif ($obvius_op and $m->comp_exists("/custom_contents/$obvius_op")) {
+    $content="/custom_contents/$obvius_op";
+} elsif ($obvius_op and $ops{$obvius_op}) {
+    $op=$ops{$obvius_op};
+} elsif ($obvius_op and $m->comp_exists("/custom_obvius_ops/$obvius_op")) {
+    $op="/custom_obvius_ops/$obvius_op";
+} elsif ($obvius_op and ($obvius_op eq 'tablelist')) {
     if (defined $obvius_comp) {
-	$content=$obvius_comp;
+        $content=$obvius_comp;
     }
-}
-elsif ($obvius_op and ($obvius_op eq 'dview'))
-{
-    #$content='/in_portal';
-    #$alt_content= '/show_data';
-    $content='/show_data';
-}
-elsif ($obvius_op and ($obvius_op eq 'navigator')) {
-    $op='/navigator/main';
-}
-elsif ($obvius_op and ($obvius_op eq 'picturedlg')) {
-    $op='/picturedlg';
-}
-elsif ($obvius_op and ($obvius_op eq 'linkdlg')) {
-    $op='/linkdlg';
-}
-elsif ($obvius_op and ($obvius_op eq 'anchordlg')) {
-    $op='/anchordlg';
-}
-elsif ($obvius_op and ($obvius_op eq 'switchjava')) {
-    $op='/switchjava';
-}
-elsif ($obvius_op and ($obvius_op eq 'expertgroups')) {
-    $op='/expertgroups/main';
-}
-elsif ($obvius_op and ($obvius_op eq 'seqselect')) {
-    $op='/seqselect';
-}
-elsif ($obvius_op and ($obvius_op eq 'send')) {
-    $content='/send';
-}
-elsif ($obvius_op and ($obvius_op eq 'import_csv')) {
-    $content='/import_csv';
-}
-elsif ($obvius_op and ($obvius_op eq 'print')) {
-    $op='/print';
-}
-elsif ($obvius_op and ($obvius_op eq 'mcms_code_editor')) {
-    $op='/mcms_code_editor';
-}
-elsif ($obvius_op and ($obvius_op eq 'html_code_editor')) {
-    $op='/html_code_editor';
-}
-elsif ($obvius_op and ($obvius_op eq 'delete_single_version')) {
-    $content='/delete_single_version';
-}
-elsif ($obvius_op and ($obvius_op eq 'docparams')) {
-    $content='/docparams';
-}
-elsif ($obvius_session) {
+} elsif ($obvius_session) {
     my $admin=$r->pnotes('site');
     $session=$admin->get_session($obvius_session);
 
