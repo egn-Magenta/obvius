@@ -42,6 +42,18 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         $uri = $obvius->get_doc_uri($d) if($d);
                                                         $text =~ s!/$1\.docid/?!$prefix$uri! if($uri);
                                                         $out.=$text;
+                                                    } elsif($tagname eq 'img' and $attr->{src} and $attr->{src} =~ m!^/(\d+).docid!) {
+                                                        # Do docid trick on images:
+                                                        if(my $doc = $obvius->get_doc_by_id($1)) {
+                                                            my $uri = $obvius->get_doc_uri($doc);
+                                                            if($r->pnotes('site')->param('is_admin')) {
+                                                                $uri = 'http://' . $r->hostname . '/admin' . $uri;
+                                                                $uri =~ s!/$!!;
+                                                            }
+
+                                                            $text =~ s!/(\d+).docid!$uri!;
+                                                        }
+                                                        $out.=$text;
                                                     } elsif($r->notes('is_admin') and $tagname eq 'img' and $attr->{src} and $attr->{src} =~ s!/$!!) {
                                                         $out .= "<img " . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ">";
                                                     } elsif($pclass and $tagname eq 'p' and not $attr->{class}) {
