@@ -8,10 +8,9 @@
     }
 </script>
 
-%if($output->param('start')) {
-% my $teaser = $obvius->get_version_field($vdoc, 'teaser');
-<& /shared/htmlize, text => $teaser &>
-%}
+<& headline &>
+
+<& teaser &>
 
 %if(@$docs) {
 <div align="center">
