@@ -28,7 +28,7 @@
 <tr>
 <td valign="top" width="15"><b>&#149;</b></td>
 <td colspan="2" class="subdoc">
-<a href="<% $kwdoc->{url} %>" title="<% $kwdoc->{short_title} %>"<% $target %>><% $kwdoc->{title} %></a>
+<a href="<% $prefix . $kwdoc->{url} %>" title="<% $kwdoc->{short_title} %>"<% $target %>><% $kwdoc->{title} %></a>
 </td>
 </tr>
 %	if ($show_searchdoc_teaser) {
