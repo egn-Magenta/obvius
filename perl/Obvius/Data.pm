@@ -119,6 +119,10 @@ sub delete {
     return $oldvalue;
 }
 
+# params(param1, param2, .. ) - returns a hash with the values of the
+#   requested parameters.  According to context either the hash itself
+#   or a reference to it is returned
+#
 sub params {
     my $this = shift;
     my %values = map { $_ => $this->{uc $_} } @_;
@@ -270,6 +274,10 @@ Obvius::Data - Perl extension for blah blah blah
   $obj->param(); # Returns [param1, param2]
   $obj->param('param1'); # Returns value1
   $obj->param('param1' => $new_value); # Assigns $new_value and returns value1
+
+  # Usages of params:
+  $param_hash_ref = $obj->params('param1', 'param2');
+  %param_hash = $obj->params('param1', 'param2');
 
   # Usage of delete:
   $obj->('param2'); # Deletes param2 and returns value2
