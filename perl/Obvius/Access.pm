@@ -66,6 +66,10 @@ sub get_capability_rules {
     }
 }
 
+# user_has_capabilities - Return true if the user has all of the capabilities listed in
+#                         @capabilities on $doc. Note: this method returns false if the user
+#                         is missing just one of the capabilites requested.
+#                         Always returns true for 'admin'.
 sub user_has_capabilities {
     my ($this, $doc, @capabilities) = @_;
     return 1 if ($this->{USER} eq 'admin' and $this->get_userid($this->{USER})==1);
@@ -78,6 +82,8 @@ sub user_has_capabilities {
     return 1;
 }
 
+# user_has_any_capability - Return a count of how many of the capabilites in @capabilites the user 
+#                           has on $doc. Always returns 1 for 'admin'.
 sub user_has_any_capability {
     my ($this, $doc, @capabilities) = @_;
     return 1 if ($this->{USER} eq 'admin' and $this->get_userid($this->{USER})==1);
@@ -201,14 +207,17 @@ sub set_access_data {
 }
 
 
-
+# can_create_new_document - Return true if the user can create a new document.
+#                           Always returns true for 'admin'.
 sub can_create_new_document {
     my ($this, $parent) = @_;
 
     return $this->user_has_capabilities($parent, qw(create));
 }
 
-
+# can_create_new_version - return true if the current user is allowed to 
+#                          create new versions of $doc. Returns false if
+#                          the user doesn't have the necessary rights.
 sub can_create_new_version {
     my ($this, $doc) = @_;
 
@@ -320,6 +329,12 @@ Obvius::Access - Access related functions for L<Obvius>.
   $obvius->user_capabilities($doc);
 
   $ret=$obvius->can_delete_document($doc);
+
+  $ret=$obvius->can_create_new_version($doc);
+
+  $ret=$obvius->user_has_capabilities($doc, qw (edit delete create));
+
+  $ret=$obvius->user_has_any_capability($doc, qw (edit delete create));
 
 =head1 DESCRIPTION
 
