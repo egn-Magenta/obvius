@@ -56,6 +56,7 @@ sub add_to_sitemap{
                                 [ 'title', 'short_title', 'seq' ],
                                 "(seq >= 0 AND parent = " . $vdoc->DocId . ")",
                                 needs_document_fields => [ 'parent', 'name' ],
+                                straight_documents_join => 1,
                                 public => 1,
                                 notexpired => 1,
                                 sortvdoc => $vdoc
