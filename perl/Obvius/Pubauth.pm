@@ -32,6 +32,9 @@ use POSIX qw(strftime);
 
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+# get_public_users($how) -
+# Gets a list of public users matching the $how statement. Returns
+# the list of users or undef if no users were found.
 sub get_public_users {
     my ($this, $where) = @_;
 
@@ -55,6 +58,9 @@ sub get_public_users {
 
 }
 
+# update_public_users($datahashrefs, $where) -
+# Updates the public users specified by $where with the data in
+# $datahashref.
 sub update_public_users {
     my ($this, $data, $where) = @_;
 
@@ -69,6 +75,9 @@ sub update_public_users {
     return $set->Update($data, $where);
 }
 
+# create_public_user($datahashref) -
+# Creates a public user using the data in $datahasref.
+# Returns the id of the new public user.
 sub create_public_user {
     my ($this, $data) = @_;
 
@@ -76,13 +85,19 @@ sub create_public_user {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users',
+                                                '!Serial'   => 'id'
                                             }
                                         );
 
 
-    return $set->Insert($data);
+    $set->Insert($data);
+
+    return $set->LastSerial;
 }
 
+
+# delete_public_users($where) -
+# Deletes the public users specified by $where.
 sub delete_public_users {
     my ($this, $where) = @_;
 
