@@ -1,5 +1,3 @@
-Page_max er: <% $page_max %><br>
-
 % if ($page_max>1) {
 <!-- begin pager -->
 %if($page) {
