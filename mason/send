@@ -165,7 +165,12 @@ $tmpfh->close();
 
 my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug =>0);
 
-$smtp->mail($fields->param('from'));
+my $from = $fields->param('from') || '';
+if($from =~ /<([^>]+)>/) {
+    $from = $1;
+}
+
+$smtp->mail($from);
 map { $smtp->to($_) } split /\s*,\s*/, $fields->param('to');
 if ($fields->param('cc')) {
     map { $smtp->to($_) } split /\s*,\s*/, $fields->param('cc');
