@@ -263,10 +263,6 @@ sub access_handler ($$) {
     my $doc    =$this->obvius_document($req, $uri);
     return NOT_FOUND unless ($doc);
 
-    if($obvius->config->param('use_public_authentication')) {
-        $this->public_login_cookie($req, $obvius);
-    }
-
     $req->pnotes('document'=>$doc);
     $req->pnotes('site'    =>$this);
 
@@ -405,6 +401,20 @@ sub authen_handler ($$) {
     return OK;
 }
 
+sub public_authen_handler($$) {
+    my ($this, $req) = @_;
+
+    return OK unless ($req->is_initial_req);
+
+    my $obvius = $this->obvius_connect($req);
+
+    # Handle obvius_public_login cookie
+    $this->public_login_cookie($req, $obvius);
+
+    return OK;
+
+}
+
 sub authz_handler ($$) {
     my ($this, $req) = @_;
 
@@ -414,7 +424,6 @@ sub authz_handler ($$) {
 
     return $this->access_handler($req);
 }
-
 
 #######################################################################
 #
