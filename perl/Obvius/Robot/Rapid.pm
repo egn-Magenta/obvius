@@ -301,10 +301,10 @@ sub retrieve_real_title {
 sub narrow_unicode_utf8 {
     my ($text)=@_;
 
-    $text=~s/â€™/\'/g;
-    $text=~s/â‚¬/euro/g;
-    $text=~s/â€œ/\"/g;
-    $text=~s/â€/\"/g;
+    $text=~s/€™/\'/g;
+    $text=~s/‚¬/euro/g;
+    $text=~s/€œ/\"/g;
+    $text=~s/€/\"/g;
 
     return $text;
 }
