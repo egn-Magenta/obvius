@@ -65,6 +65,19 @@ sub db_rollback	{
      $this->{DB}->DBHdl->rollback;
 }
 
+# db_number_of_rows_in_table - returns the number of rows in the table
+#                              given.
+#
+sub db_number_of_rows_in_table {
+    my ($this, $table)=@_;
+
+    my $sth=$this->{DB}->DBHdl->prepare('SELECT COUNT(*) FROM ' . $table);
+    $sth->execute;
+    my $count=$sth->fetchrow;
+
+    return $count;
+}
+
 sub db_insert_document {
     my ($this, $name, $parent, $type, $owner, $grp) = @_;
 
