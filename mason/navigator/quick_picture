@@ -10,14 +10,14 @@
 <!--
 function pictureform_submit() {
     if(! document.pageform.title.value) {
-        alert('Du skal angive en titel');
+        alert('<& SELF:msg, text=>'You must specify a title' &>');
         return;
     }
     if(! document.pageform.short_title.value) {
         document.pageform.short_title.value = document.pageform.title.value;
     }
     if(! document.pageform.image_data.value) {
-        alert('Du skal angive et billede');
+        alert('<& SELF:msg, text=>'You must specify a picture' &>');
         return;
     }
     document.pageform.quick_picture.value = 1;
@@ -27,11 +27,11 @@ function pictureform_submit() {
 }
 
 var quality_list = [
-                    [ 0, '0: Laveste kvalitet' ],
+                    [ 0, '0: <& SELF:msg, text=>'Lowest quality' &>' ],
                     [ 25, '25' ],
                     [ 50, '50' ],
-                    [ 75, '75: Standard kvalitet', 1 ],
-                    [ 100, '100: Højeste kvalitet' ]
+                    [ 75, '75: <& SELF:msg, text=>'Standard quality' &>', 1 ],
+                    [ 100, '100: <& SELF:msg, text=>'Highest quality' &>' ]
                 ];
 
 function change_scaleby() {
@@ -106,33 +106,33 @@ function adjust_hoejde() {
 <tr>
 <td>
 
-<h2>Nyt billede</h2>
+<h2><& SELF:msg, text=>'New picture' &></h2>
 %if($error) {
-    <strong>Der opstod følgende fejl ved oprettelsen af billede:</strong><br>
+    <strong><& SELF:msg, text=>'There was an error while creating the picture' &>:</strong><br>
     <% $error %><br>
     <br>
 %}
 
 <input type="hidden" name="go" value="">
 
-Billedets titel<br>
+<& SELF:msg, text=>'Picture title' &><br>
 <input type="text" name="title" size=50><br>
 <br>
-Kort titel<br>
+<& SELF:msg, text=>'Short title' &><br>
 <input type="text" name="short_title" size=50><br>
 <br>
 %if($show_teaser) {
-Teaser<br>
+<& SELF:msg, text=>'Teaser' &><br>
 <textarea rows="4" cols="50" name="teaser"></textarea><br>
 <br>
 %}
-Billedfil<br>
+<& SELF:msg, text=>'Picture file' &><br>
 <input type="file" size="40" name="image_data" accept="image/*">
 <br>
 <br>
-Rettigheder<br>
-Bruger: <% $obvius->{USER} %> &nbsp;
-Gruppe:
+<& SELF:msg, text=>'Permissions' &><br>
+<& SELF:msg, text=>'User' &>: <% $obvius->{USER} %> &nbsp;
+<& SELF:msg, text=>'Group' &>:
 <select name="group">
 %for(@$user_groups) {
     <option value="<% $_->{grp} %>"><% $obvius->{GROUPS}->{$_->{grp}}->{name} %>  </option>
@@ -140,7 +140,7 @@ Gruppe:
 </select>
 <br>
 <br>
-<input type="button" value="Upload billede" onclick="pictureform_submit()">
+<input type="button" value="<& SELF:msg, text=>'Upload picture' &>" onclick="pictureform_submit()">
 
 </td>
 </tr>
@@ -149,32 +149,32 @@ Gruppe:
 </tr>
 <tr>
     <td>
-        Skaler billede til:<br>
+        <& SELF:msg, text=>'Scale picture to' &>:<br>
         <select name="scaleby" onchange="change_scaleby()">
             <option value="200%">200%</option>
             <option value="175%">175%</option>
             <option value="150%">150%</option>
             <option value="125%">125%</option>
-            <option value="100%" SELECTED>Oprindelig størrelse</option>
+            <option value="100%" SELECTED><& SELF:msg, text=>'Original size' &></option>
             <option value="75%">75%</option>
             <option value="50%">50%</option>
             <option value="25%">25%</option>
-            <option value="">Manuelt angivet nedenfor</option>
+            <option value=""><& SELF:msg, text=>'Manually specified below' &></option>
         </select>
     </td>
 </tr>
 <tr>
     <td>
-        Bredde: <input type="text" name="new_width" size="6" onchange="adjust_bredde()">
+        <& SELF:msg, text=>'Width' &>: <input type="text" name="new_width" size="6" onchange="adjust_bredde()">
         &nbsp;
-        Højde: <input type="text" name="new_height" size="6" onchange="adjust_hoejde()">
+        <& SELF:msg, text=>'Height' &>: <input type="text" name="new_height" size="6" onchange="adjust_hoejde()">
     </td>
 </tr>
 <tr>
     <td>
-        Upload i format:<br>
+        <& SELF:msg, text=>'Upload in format' &>:<br>
         <select name="new_format" onchange="change_format()">
-            <option value="" SELECTED>Oprindeligt format</option>
+            <option value="" SELECTED><& SELF:msg, text=>'Original format' &></option>
             <option value="jpeg">JPEG</option>
             <option value="gif">GIF</option>
             <option value="png">PNG</option>
@@ -183,7 +183,7 @@ Gruppe:
 </tr>
 <tr>
     <td>
-        Vælg eventuel kvalitet (kun JPEG og PNG):<br>
+        <& SELF:msg, text=>'Choose quality (only JPEG and PNG)' &>:<br>
         <select name="quality">
         </select>
     </td>

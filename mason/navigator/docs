@@ -2,19 +2,19 @@
         <tr>
           <td valign="top" class="navtop">
 %if($one_up) {
-            <b><font size="1"><a href="javascript:navigator_navigate('<% $one_up %>')"><img border="0" src="/grafik/navigator/op.png" alt="Et niveau op" width="11" height="7"></a></font></b>
+            <b><font size="1"><a href="javascript:navigator_navigate('<% $one_up %>')"><img border="0" src="/grafik/navigator/op.png" alt="<& SELF:msg, text=>'One level up' &>" width="11" height="7"></a></font></b>
 %} else {
             <b><font size="1"><img border="0" src="/grafik/navigator/op.png" alt="Et niveau op" width="11" height="7"></font></b>
 %}
           </td>
-          <td valign="top" class="navtop">Underdokumenter:</td>
+          <td valign="top" class="navtop"><& SELF:msg, text=>'navi:Subdocuments' &>:</td>
           <td valign="top" nowrap class="navtop">&nbsp;</td>
 %unless($simple) {
           <td valign="top" nowrap class="navtop">&nbsp;</td>
           <td valign="top" nowrap class="navtop">&nbsp;</td>
-          <td valign="top" nowrap class="navtop">Dato:</td>
+          <td valign="top" nowrap class="navtop"><& SELF:msg, text=>'Date' &>:</td>
           <td valign="top" nowrap class="navtop">&nbsp;</td>
-          <td valign="top" nowrap class="navtop">Sprog:</td>
+          <td valign="top" nowrap class="navtop"><& SELF:msg, text=>'Language' &>:</td>
           <td valign="top" nowrap class="navtop">&nbsp;</td>
           <td valign="top" nowrap class="navtop">&nbsp;</td>
 %}
@@ -34,13 +34,13 @@
 %        }
             <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><strong><% $_->Title %></strong></a>
           </td>
-          <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[Vælg]</a></td>
+          <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[<& SELF:msg, text=>'Choose' &>]</a></td>
 %unless($simple) {
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
           <td valign="top" nowrap class="mellemstr"><font size="1"><% $_->Date %></font></td>
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
-          <td valign="top" nowrap class="mellemstr"><% $country_codes{$_->Lang} %></td>
+          <td valign="top" nowrap class="mellemstr"><% $_->Lang %></td>
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
 %}
 %   if($_->Public) {
@@ -66,7 +66,7 @@
             <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><% $_->Title %></a>
           </td>
 %        if($_->{java_action}) {
-          <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[Vælg]</a></td>
+          <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[<& SELF:msg, text=>'Choose' &>]</a></td>
 %        } else {
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
 %        }
@@ -75,7 +75,7 @@
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
           <td valign="top" nowrap class="mellemstr"><font size="1"><% $_->Date %></font></td>
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
-          <td valign="top" nowrap class="mellemstr"><% $country_codes{$_->Lang} %></td>
+          <td valign="top" nowrap class="mellemstr"><% $_->Lang %></td>
           <td valign="top" nowrap class="mellemstr">&nbsp;</td>
 %}
 %   if($_->Public) {
@@ -88,7 +88,7 @@
 %unless($simple) {
         <tr>
           <td valign="top" class="mellemstr">&nbsp;</td>
-          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_picture('<% $path %>')"><strong><& SELF:msg, text=>'Opret nyt billede her' &></a></strong></td>
+          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_picture('<% $path %>')"><strong><& SELF:msg, text=>'Create new picture here' &></a></strong></td>
           <td valign="top" align="center" class="mellemstr">-</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
@@ -100,7 +100,7 @@
         </tr>
         <tr>
           <td valign="top" class="mellemstr">&nbsp;</td>
-          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_upload('<% $path %>')"><strong><& SELF:msg, text=>'Opret upload-dokument her' &></a></strong></td>
+          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_upload('<% $path %>')"><strong><& SELF:msg, text=>'Create new upload-document here' &></a></strong></td>
           <td valign="top" align="center" class="mellemstr">-</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
           <td valign="top" class="mellemstr">&nbsp;</td>

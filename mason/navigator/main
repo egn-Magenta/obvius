@@ -80,7 +80,7 @@ document.pageform.method = 'GET';
 </table>
 <table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
   <tr>
-    <td class="navheader"><font color="#FFFFFF" size="1">Dokument:</font></td>
+    <td class="navheader"><font color="#FFFFFF" size="1"><& SELF:msg, text=>'Document' &>:</font></td>
     <td width="100%" bgColor="white"><font size="1">&nbsp;<% $path %></font></td>
     <td bgColor="white">&nbsp;</td>
   </tr>
@@ -191,7 +191,7 @@ my $author = $vdoc->field('author') || $m->scomp('SELF:msg', text=>'Ingen forfat
 my $vdoc_doctype = $obvius->get_doctype_by_id($vdoc->Type);
 $vdoc_doctype = $m->scomp('SELF:msg', text=>$vdoc_doctype->Name);
 
-my $language = $country_codes{$vdoc->Lang} || $vdoc->Lang;
+my $language = $vdoc->Lang;
 
 my $last_path;
 my @here_docs;

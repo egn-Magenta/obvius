@@ -10,14 +10,14 @@
 <!--
 function uploadform_submit() {
     if(! document.pageform.title.value) {
-        alert('Du skal angive en titel');
+        alert('<& SELF:msg, text=>'You must specify a title' &>');
         return;
     }
     if(! document.pageform.short_title.value) {
         document.pageform.short_title.value = document.pageform.title.value;
     }
     if(! document.pageform.upload_data.value) {
-        alert('Du skal angive et upload-dokument');
+        alert('<& SELF:msg, text=>'You must specify an upload document' &>');
         return;
     }
     document.pageform.quick_upload.value = 1;
@@ -32,33 +32,33 @@ function uploadform_submit() {
 <tr>
 <td>
 
-<h2>Nyt upload-dokument</h2>
+<h2><& SELF:msg, text=>'New upload document' &></h2>
 %if($error) {
-    <strong>Der opstod følgende fejl ved oprettelsen af upload-dokumentet:</strong><br>
+    <strong><& SELF:msg, text=>'The following error was encountered while uploading the document' &>:</strong><br>
     <% $error %><br>
     <br>
 %}
 
 <input type="hidden" name="go" value="">
 
-Dokumentets titel<br>
+<& SELF:msg, text=>'Document title' &><br>
 <input type="text" name="title" size=50><br>
 <br>
-Kort titel<br>
+<& SELF:msg, text=>'Short title' &><br>
 <input type="text" name="short_title" size=50><br>
 <br>
 %if($show_teaser) {
-Teaser<br>
+<& SELF:msg, text=>'Teaser' &><br>
 <textarea rows="4" cols="50" name="teaser"></textarea><br>
 <br>
 %}
-Upload-fil<br>
+<& SELF:msg, text=>'Upload-file' &><br>
 <input type="file" size="40" name="upload_data">
 <br>
 <br>
-Rettigheder<br>
-Bruger: <% $obvius->{USER} %> &nbsp;
-Gruppe:
+<& SELF:msg, text=>'Permissions' &><br>
+<& SELF:msg, text=>'User' &>: <% $obvius->{USER} %> &nbsp;
+<& SELF:msg, text=>'Group' &>:
 <select name="group">
 %for(@$user_groups) {
     <option value="<% $_->{grp} %>"><% $obvius->{GROUPS}->{$_->{grp}}->{name} %>  </option>
@@ -66,7 +66,7 @@ Gruppe:
 </select>
 <br>
 <br>
-<input type="button" value="Upload dokument" onclick="uploadform_submit()">
+<input type="button" value="<& SELF:msg, text=>'Upload document' &>" onclick="uploadform_submit()">
 
 </td>
 </tr>
