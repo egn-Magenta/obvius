@@ -46,7 +46,7 @@ function initEditor_<% $name %>() {
 
   config.pageStyle = 'body { padding: 5px; margin: 0px; }';
 
-  config.baseURL = '<% $uri . $uri_extra %>';
+  config.baseURL = 'http://<% $r->hostname %><% $uri . $uri_extra %>';
 
   config.editorStyleSheets = [ "/css/public.css", "/css/common.css" ];
 
