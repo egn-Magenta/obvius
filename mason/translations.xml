@@ -4085,6 +4085,21 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">... skjul skjulte</translation>
   </text>
 
+  <text key="How should the uploaded data be downloaded">
+    <translation lang="en">How should the uploaded data be downloaded?</translation>
+    <translation lang="da">Hvordan skal de uploadede data downloades?</translation>
+  </text>
+
+  <text key="Download to disk">
+    <translation lang="en">Download to disk</translation>
+    <translation lang="da">Gem på harddisken</translation>
+  </text>
+
+  <text key="Show inline in browser">
+    <translation lang="en">Show inline in browser</translation>
+    <translation lang="da">Vis i browseren</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
