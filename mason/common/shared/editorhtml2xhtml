@@ -63,6 +63,23 @@ my $p = HTML::Parser->new(api_version=>3,
                                                     if($attr->{style} and not grep { $_ eq 'style' } @$attrseq) {
                                                         push(@$attrseq, "style");
                                                     }
+
+                                                    # Make sure we have an alt-tag
+                                                    unless(grep { $_ eq 'alt' } @$attrseq) {
+                                                        push(@$attrseq, 'alt');
+                                                        $attr->{alt} ||= "";
+                                                    }
+                                                  }
+
+                                                  if($tagname eq 'a') {
+                                                    if(my $t = $attr->{target}) {
+                                                        # Don't put _self in there since it's the default:
+                                                        if($t ne '_self') {
+                                                            $attr->{onclick} = "this.target='" . $t . "'";
+                                                            push(@$attrseq, 'onclick') unless(grep { $_ eq 'onclick' } @$attrseq);
+                                                        }
+                                                        @$attrseq = grep { $_ ne 'target' } @$attrseq;
+                                                    }
                                                   }
 
 

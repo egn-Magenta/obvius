@@ -72,6 +72,14 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         }
                                                     }
 
+                                                    if($tagname eq 'a') {
+                                                        if($attr->{onclick} and $attr->{onclick} =~ m!this.target='([^']+)'!) {
+                                                            $attr->{target} = $1;
+                                                            push(@$attrseq, 'target') unless (grep { $_ eq 'target'} @$attrseq);
+                                                            @$attrseq = grep { $_ ne 'onclick' } @$attrseq;
+                                                        }
+                                                    }
+
                                                     if($adjust) {
                                                         my $endtag = ' /';
                                                         $text = "<$tagname";
