@@ -11,6 +11,8 @@ of the data when having more than one editor.
 - Added a config option, resizeToolbars, to make the toolbars
 be resized to the same size as the editor/textarea.
 
+- Re-enabled the warning about MSIE-fullscreen mode not
+working properly.
 
 
 obvius_htmlarea.js file:
@@ -36,3 +38,7 @@ htmlarea functions:
     stripping down urls to the baseURL. We do this since
     Obvius wants URLs starting with a "/".
 
+
+htmlarea.css file:
+
+- Added a 1px solid black border to all htmlarea iframes.

@@ -1583,7 +1583,7 @@ HTMLArea.prototype.execCommand = function(cmdID, UI, param) {
 		// this object will be passed to the newly opened window
 		HTMLArea._object = this;
 		if (HTMLArea.is_ie) {
-			//if (confirm(HTMLArea.I18N.msg["IE-sucks-full-screen"]))
+			if (confirm(HTMLArea.I18N.msg["IE-sucks-full-screen"]))
 			{
 				window.open(this.popupURL("fullscreen.html"), "ha_fullscreen",
 					    "toolbar=no,location=no,directories=no,status=no,menubar=no," +

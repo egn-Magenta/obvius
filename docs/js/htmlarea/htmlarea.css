@@ -1,5 +1,9 @@
 .htmlarea { background: #fff; }
 
+div.htmlarea iframe {
+    border: 1px solid #000000;
+}
+
 .htmlarea .toolbar {
   cursor: default;
   background: ButtonFace;
