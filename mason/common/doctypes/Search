@@ -157,6 +157,10 @@ return (@matches ? \@matches : undef);
 $output
 </%args>
 %
+<%once>
+use Unicode::String qw(utf8 latin1);
+</%once>
+%
 <%init>
 my %search_type_desc=(
 		      phonetic=>'fonetisk',
@@ -172,7 +176,12 @@ my $teaser = $obvius->get_version_field($vdoc, 'teaser');
 
 my $search_type=$output->param('search_type');
 my $search_term=$output->param('search_term');
-my $words=$output->param('_incoming_words');
+my $words=$output->param('_incoming_words') || '';
+if ($words =~ /Ã/) {
+    $words = lc(utf8($words)->latin1);
+} else {
+    $words = lc($words);
+}
 my $site=$r->pnotes('site');
 my $search_words_log=$site->param('search_words_log');
 if ($search_words_log and defined $search_term) {
