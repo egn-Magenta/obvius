@@ -254,5 +254,5 @@ else {
 $ghosted=1 if ($session);
 my $sitename=$r->pnotes('site')->Sitename;
 
-$ghosted=0 if ($obvius_op eq 'publish');
+$ghosted=0 if ($obvius_op and $obvius_op eq 'publish');
 </%init>
