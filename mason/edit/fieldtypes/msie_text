@@ -377,22 +377,59 @@ function obvius_<% $name %>_selection_change() {
     var selRange = eval("selection.createRange()");
     if(selRange) {
         var parentElem = selRange.parentElement();
-        var headingTypeIndex = 0;
-        if(parentElem.tagName == 'H1') {
-            headingTypeIndex = 1;
-        } else if(parentElem.tagName == 'H2') {
-            headingTypeIndex = 2;
-        } else if(parentElem.tagName == 'H3') {
-            headingTypeIndex = 3;
-        } else if(parentElem.tagName == 'H4') {
-            headingTypeIndex = 4;
-        } else if(parentElem.tagName == 'H5') {
-            headingTypeIndex = 5;
-        } else if(parentElem.tagName == 'H6') {
-            headingTypeIndex = 6;
+        var headingTypeIndex;
+        var selTagName = '';
+
+        if(parentElem.hasChildNodes() && parentElem.children.length > 1) {
+            for(var i=0; i < parentElem.children.length; i++) {
+                var child = parentElem.children[i];
+                // If the tagnames differ we have mixed content
+                if(selTagName && selTagName != child.tagName) {
+                    selTagName = 'mixed';
+                    break;
+                } else {
+                    selTagName = child.tagName;
+                }
+            }
+        } else {
+            selTagName = parentElem.tagName;
         }
+
+        if(selTagName == 'H1') {
+            headingTypeIndex = 1;
+        } else if(selTagName == 'H2') {
+            headingTypeIndex = 2;
+        } else if(selTagName == 'H3') {
+            headingTypeIndex = 3;
+        } else if(selTagName == 'H4') {
+            headingTypeIndex = 4;
+        } else if(selTagName == 'H5') {
+            headingTypeIndex = 5;
+        } else if(selTagName == 'H6') {
+            headingTypeIndex = 6;
+        } else if(selTagName == 'P' || selTagName == 'DIV') {
+            headingTypeIndex = 0;
+        }
+
         var dropDowns = document.getElementsByName('obvius_<% $name %>_FontSize');
+
         if(dropDowns) {
+            // Mixed should only be in the dropdown when mixed content is selected
+            if(selTagName == 'mixed') {
+                // Add a mixed option to the dropdown if it doesn't exist
+                if(dropDowns[0].length < 8) {
+                    dropDowns[0][7] = new Option('Mixed', '');
+                }
+                // set the dropdown to mixed content
+                headingTypeIndex = 7;
+            } else {
+                // Make sure mixed is not there
+                if(dropDowns[0][7]) {
+                    dropDowns[0][7] = null;
+                }
+            }
+
+
             dropDowns[0].selectedIndex = headingTypeIndex;
         }
     }
