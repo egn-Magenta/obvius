@@ -20,11 +20,12 @@ sub raw_document_data {
 
     $this->tracer($doc, $vdoc, $obvius) if ($this->{DEBUG});
 
-    my $fields = $obvius->get_version_fields($vdoc, ['mimetype', 'uploaddata']);
+    my $fields = $obvius->get_version_fields($vdoc, ['mimetype', 'uploaddata', 'contentdisposition']);
 
     my $name = $doc->Name || '';
     if($name =~ /\.\w+$/) {
-        return ($fields->param('mimetype'), $fields->param('uploaddata'), $name);
+        my $con_disp = $vdoc->field('contentdisposition') || 'attachment';
+        return ($fields->param('mimetype'), $fields->param('uploaddata'), $name, $con_disp);
     } else {
         return ($fields->param('mimetype'), $fields->param('uploaddata'));
     }

@@ -297,7 +297,7 @@ sub handler ($$) {
 	    return $this->redirect($req, $alternate, 'force-external');
 	}
 
-	my ($mime_type, $data, $filename) = $doctype->raw_document_data($doc, $vdoc, $obvius, $req, $output);
+	my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data($doc, $vdoc, $obvius, $req, $output);
 
 	if ($data) {
 	    $mime_type ||= 'application/octet-stream';
@@ -306,7 +306,10 @@ sub handler ($$) {
 
 	    $this->set_expire_header($req);
 	    $req->content_type($mime_type);
-	    $req->header_out("Content-Disposition", "attachment; filename=$filename") if($filename);
+	    if($filename) {
+	        $con_disp ||= 'attachment';
+	        $req->header_out("Content-Disposition", "$con_disp; filename=$filename");
+	    }
 	    $req->set_content_length(length($data));
 	    $req->send_http_header;
 
