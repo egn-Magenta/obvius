@@ -36,6 +36,7 @@ use Obvius::DocType;
 use Obvius::DocType::ComboSearch;
 
 use XML::RSS;
+use Unicode::String qw(utf8 latin1);
 
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;;
@@ -102,8 +103,9 @@ sub raw_document_data {
 					   dc => \%item_dc
 					   );
 	}
-	
-	return ('text/xml', $rss->as_string);
+
+	my $rss_string = latin1($rss->as_string)->utf8;
+	return ('text/xml', $rss_string);
 }
 
 
