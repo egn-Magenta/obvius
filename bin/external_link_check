@@ -75,7 +75,7 @@ foreach my $vdoc (@$vdocs) {
 
 print "Found $num_docs documents containing $num_links external links.\n\n";
 
-my $ua=new LWP::RobotUA 'Obvius external linkcheck/1.3', 'asjo\@aparte-test.dk';
+my $ua=new LWP::RobotUA 'Obvius external linkcheck/1.3', 'jubk@magenta-aps.dk';
 $ua->delay(0); # Minutes is too long
 $ua->env_proxy();
 my ($num_bad)=0;
