@@ -7,16 +7,25 @@
 %if($output->param('print_form')) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td align="left" height="20" bgcolor="#666666"><strong>&nbsp;Fritekstsøgning</strong></td>
+<td>
+<img src="/grafik/1x1.gif" height="10">
+</td>
+<td>
+<img src="/grafik/1x1.gif" height="10">
+</td>
 
-<td align="right" height="20" bgcolor="#666666">
+</tr>
+<tr>
+<td align="left" height="20"><b>Fritekstsøgning</b></td>
+
+<td align="right" height="20">
 &nbsp;
 </td>
 </tr>
 </table>
 <table width="100%" cellpadding="0" cellspacing="5" border="0">
 <tr><td align="left" height="15">&nbsp;</td></tr>
-<tr><td align="left"><p class="content"><strong>Søgeord</strong></p><form action="<% $prefix . $uri %>" method="get">
+<tr><td align="left"><p class="content"><b>Søgeord</b></p><form action="<% $prefix . $uri %>" method="get">
 <input type="hidden" name="op" value="search">
 <input type="text" name="words" value="">
 </td>
@@ -36,7 +45,7 @@
       <& /textbox_start &>
       <table cellspacing="0" cellpadding="0" border="0" width="100%">
 
-      <strong>Søgning efter: <% $output->param('search_term') %><% $search_type and $search_type !~ /^normal/ ? ' (' . $search_type_desc{$search_type} . ')' : '' %></strong><br /><br />
+      <b>Søgning efter: <% $output->param('search_term') %><% $search_type and $search_type !~ /^normal/ ? ' (' . $search_type_desc{$search_type} . ')' : '' %></b><br /><br />
 	<tr>
 	  <td align="left" colspan="2" height="20">
 	    <span class="tekstGraaLille">Oversigt&nbsp;over&nbsp;søgeresultat:</span></td>
@@ -59,7 +68,7 @@
 %               }
 %           } else {
 %               if($output->param('restrict')) {
-	      <strong>Intet fundet</strong>
+	      <b>Intet fundet</b>
 %               } else {
                     -
 %               }
@@ -77,8 +86,8 @@
 
 %       if ($search_type !~ /^synonyms/ and my $matches=$m->comp('ask_synonyms', search_term=>$search_term)) {
 <p>
-Du har søgt på: <strong><% $words %></strong>. Der er fundet følgende
-synonymer: <strong><% join ", ", @$matches %></strong>. Ønsker du at gentage
+Du har søgt på: <b><% $words %></b>. Der er fundet følgende
+synonymer: <b><% join ", ", @$matches %></b>. Ønsker du at gentage
 søgningen med disse tilføjet, <a href="./?op=search&words=<% $words |u %>&search_type=synonyms">så klik her</a>.
 </p>
 %       }
@@ -96,13 +105,13 @@ søgningen med disse tilføjet, <a href="./?op=search&words=<% $words |u %>&search
 %       }
 %   } else {
         <p>
-        Du har søgt <% $search_type !~ /^normal/ ? $search_type_desc{$search_type} : '' %> på følgende: <strong><% $words |h %></strong>. Der var ikke noget resultat.
+        Du har søgt <% $search_type !~ /^normal/ ? $search_type_desc{$search_type} : '' %> på følgende: <b><% $words |h %></b>. Der var ikke noget resultat.
         </p>
 
 %       if ($search_type !~ /^synonyms/ and my $matches=$m->comp('ask_synonyms', search_term=>$search_term)) {
 <p>
-Der er fundet følgende synonymer: <strong><% join ", ", @$matches
-%></strong>. Ønsker du at gentage søgningen med disse tilføjet, <a
+Der er fundet følgende synonymer: <b><% join ", ", @$matches
+%></b>. Ønsker du at gentage søgningen med disse tilføjet, <a
 href="./?op=search&words=<% $words |u %>&search_type=synonyms">så klik
 her</a>.
 </p>
