@@ -1,13 +1,22 @@
-a:link { color: #91001d; background: transparent; }
-a:visited { color: #540010; background: transparent; }
-a:active { color: #f98752; background: transparent; }
-a:hover { color: #540010; background: #fff5ad; }
+a:link { color: #91001d; background: transparent; text-decoration: none;}
+a:visited { color: #540010; background: transparent; text-decoration: none;}
+a:active { color: #f98752; background: transparent; text-decoration: none;}
+a:hover { color: #540010; background: transparent; text-decoration: underline;}
 
-h1 { font-size: 1.22em; }
-h2 { font-size: 1.2em;  }
-h3 { font-size: 1.1em;  }
-h4 { font-size: 1em;    }
-h5 { font-size: 0.9em;  }
+H1 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 8px;}
+H2 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 13px; font-weight: bold; }
+H3 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 12px; font-weight: bold; }
+H4 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 12px; font-weight: bold; }
+H5 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 10px; font-weight: bold; }
+H6 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 10px; font-weight: normal;}
+
+
+H1.title {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 8px;}
+
+.content {
+  font-family: Verdana,Arial,Helvetica,sans-serif; 
+  font-size: 12px;
+}
 
 img { border: none }
 
@@ -20,6 +29,89 @@ div.breadcrumbs {
   color: gray;
   background: transparent;
 }
+
+/* CALENDAR CLASSES - START */
+
+.calendarday {
+    font-family: Arial,Verdana,Helvetica,sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #ffffff;
+    text-align: center;
+    background-color: #666666; 
+}
+
+.tekstGraaLille {
+    font-family: Arial,Verdana,Helvetica,sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    text-decoration: none;
+    color: #000000;
+    text-align: left;
+}
+
+.tekstLille {
+    font-family: Arial,Verdana,Helvetica,sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    text-decoration: none;
+    color: #000000;
+    text-align: left;
+}
+
+.event {
+    font-family: Arial,Verdana,Helvetica,sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    text-decoration: none;
+    color: #000000;
+    text-align: left;
+}
+
+/* CALENDAR CLASSES - END */
+
+
+/* FORM FONTS */
+
+form td {
+  font-family: Arial,Verdana,Helvetica,sans-serif; 
+  font-size: 12px;
+}
+
+form td input {
+  font-family: Arial,Verdana,Helvetica,sans-serif; 
+  font-size: 12px;
+}
+
+form td select {
+  font-family: Arial,Verdana,Helvetica,sans-serif; 
+  font-size: 12px;
+}
+
+/* FORM FONTS - END*/
+
+/* COMBO/KEYWORD SEARCH */
+
+.bigletter  {
+  font-family: Arial,Verdana,Helvetica,sans-serif; 
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.subdoc  {
+  font-family: Arial,Verdana,Helvetica,sans-serif; 
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.docdate  {
+  font-family: Arial,Verdana,Helvetica,sans-serif; 
+  font-size: 12px;
+  font-weight: normal;
+}
+
+/* COMBO/KEYWORD SEARCH - END */
 
 /*
  Local Variables: ***
