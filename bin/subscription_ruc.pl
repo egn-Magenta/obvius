@@ -52,15 +52,15 @@ croak ("Could not get Obvius object for $site")
     unless(defined($obvius));
 
 croak ("Must have a sitename") unless($sitename);
-my $base_dir = '/home/httpd/'. $sitename;
+my $base_dir = '/home/httpd/www.ruc2.dk';
 
 my $institute_name = $institute || 'ruc';
 
 ## "Main" program part
 
-do { send_automatic(); exit (0) } if ($automatic);
+do { send_automatic($institute_name); exit (0) } if ($automatic);
 
-do { send_manual($docid); exit (0) } if ($manual);
+do { send_manual($docid, $institute_name); exit (0) } if ($manual);
 
 print STDERR "No subscriptions sent\n";
 
@@ -68,6 +68,7 @@ exit(0);
 
 sub send_manual {
     my $docid = shift;
+    my $institute_name = shift;
 
     my $doc = $obvius->get_doc_by_id($docid);
     die "No doc with id $docid\n" unless($doc);
@@ -119,6 +120,8 @@ sub send_manual {
                                                 url=>$obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
                                                 docid => $vdoc->DocId
                                              } ];
+            
+            $subscriber->{'institute'} = $institute_name;
 
             my $mail_error = send_mail($sender, $subscriber, $mailtemplate);
 
@@ -134,7 +137,9 @@ sub send_manual {
 }
 
 
-sub send_automatic ($institute_name) {
+sub send_automatic {
+    my $institute_name = shift;
+
     my @subscribers_2_send;
 
     # Make a timestamp now so subscribers wont miss documents published while
