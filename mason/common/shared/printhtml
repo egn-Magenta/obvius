@@ -27,7 +27,12 @@ my $farve='';
 my $pclass='';
 my $_plaintext;
 my $p = HTML::Parser->new(api_version=>3,
-                            default_h=> [ sub { my($this, $text)=@_; $text ||= ''; $out.=$text }, "self, dtext" ],
+                            default_h=> [ sub {
+                                                my($this, $text, $dtext)=@_;
+                                                my $out_text = ($_plaintext ? $dtext : $text);
+                                                $out_text ||= '';
+                                                $out.=$text
+                                            }, "self, text, dtext" ],
                             start_h=> [sub {
                                                 my($this, $tagname, $text, $attr)=@_;
                                                 unless($_plaintext) {
