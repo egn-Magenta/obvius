@@ -109,7 +109,7 @@ if(my $name = $r->param('upload_data')) {
                 $fields->param($_ => $upload_doctype->{FIELDS}->{$_}->{DEFAULT_VALUE});
             }
 
-            $fields->param('appdata' => $value);
+            $fields->param('uploaddata' => $value);
             $fields->param('mimetype' => $upload->type);
             $fields->param('size' => length($value));
 
