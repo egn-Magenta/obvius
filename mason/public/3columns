@@ -6,41 +6,37 @@
     <link rel="shortcut icon" href="/grafik/siteicon.gif" type="image/gif">
     <& metatags, format=>'text/html'&>
   </head>
- <body TOPMARGIN="0" LEFTMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" class="height100">
+ <body class="height100">
     <table border="0" cellspacing="0" cellpadding="0" width="100%" class="height100">
 	<tr>
             <td width="100%" align="center">
-              <table border="1" cellspacing="0" cellpadding="0" width="760" class="height100">
+              <table border="0" cellspacing="0" cellpadding="0" width="760" class="height100">
                   <tr>
                     <td width="100%" align="center" valign="top">
                       <table border="0" cellspacing="0" cellpadding="0" width="100%">
                           <tr>
-                            <td height="100">
-
+                            <td height="100" bgcolor="#cdcdcd">
+                                  <div align="center">Insert top gif here</div>
                             </td>
                           </tr>
                       </table>
                     </td>
                   </tr>
                   <tr>
-                    <td><img src="/grafik/1x1.gif" height="20"></td>
-                  </tr>
-                  <tr>
                     <td width="100%" valign="top" class="height100">
                       <table border="0" cellspacing="0" cellpadding="0" width="100%" class="height100">
                           <tr>
-                            <td width="131" valign="top">
+                            <td width="131" valign="top" bgcolor="#dedede">
                               <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                      <noindex follow>
+                                        <br>
                                         <& leftmenu &>
-                                      </follow>
                                      </td>
                                  </tr>
                                   <tr>
                                     <td>
-                                      <img src="/grafik/1x1.gif" height="20">
+                                      <img src="/grafik/1x1.gif" height="20" alt="">
                                      </td>
                                     </tr>
                                   <tr>
@@ -56,7 +52,7 @@
                             </td>
                             <td width="10"><img src="/grafik/1x1.gif" width="10" alt=""></td>
 %if ($show_news == 1) {
-                            <td width="131" valign="top">
+                            <td width="131" valign="top" bgcolor="#dedede">
                               <& news &>
                             </td>
 %}
@@ -65,7 +61,10 @@
                     </td>
                   </tr>
               </table>
-    </body>
+        </td>
+      </tr>
+    </table>
+  </body>
 
 <%init>
 print STDERR ">>> public/switch\n";

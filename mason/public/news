@@ -2,7 +2,6 @@
 <table border="0" cellspacing="0" cellpadding="5" width="145">
 <tr>
 <td height="50">
-
 %my $newsnumber = 1;
 % if (@newsitems) {
 %    foreach my $newsitem (@newsitems) {
@@ -21,8 +20,7 @@
 <td><span class="ti"><a href="<% $language eq 'en' ? '/nyheder_en/' : '/nyheder/' %>"><% $language eq 'en' ? 'All...' : 'Alle...' %></a></span></td>
 </tr>
 %} else {
-<td height="50" align="center">
-<span class="nonews"><% $language eq 'en' ? 'No news' : 'Ingen nyheder' %></span>
+<div class="nonews" align="center"><% $language eq 'en' ? 'No news' : 'Ingen nyheder' %></div>
 </td>
 </tr>
 
