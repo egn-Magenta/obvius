@@ -70,7 +70,7 @@ my $random_function;
 my $safety_net=0;
 while (!defined $random_function and $safety_net<10000) {
     $random_function=$undocumented[int rand scalar(@undocumented)];
-    map { $random_function=undef if ($random_function=~/^$_/); } @ignore_paths;
+    map { $random_function=undef if ($random_function->{file}=~/$_/); } @ignore_paths;
     $safety_net++;
 }
 my $random_email=$emails[int rand scalar(@emails)];
