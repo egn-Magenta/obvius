@@ -1,20 +1,27 @@
 <% $teaser %>
+<% $date %>
 %
 <%args>
-$no_date=>0
+$show_date=>0
+$show_teaser=>1
 $field=>'teaser'
 </%args>
 %
 <%init>
-$obvius->get_version_fields($vdoc, [$field, 'docdate']);
 
+$obvius->get_version_fields($vdoc, [$field, 'docdate', 'show_date', 'show_teaser']);
+$show_date = $vdoc->Show_date;
+$show_teaser = $vdoc->Show_teaser;
 my $teaser='';
-if ($vdoc->field($field)) {
+my $date='';
+
+if ($vdoc->field($field) and $show_teaser == 1) {
     $teaser=$m->scomp('/shared/htmlize', text=>$vdoc->field($field), class=>'teaser');
 }
 
-if (!$no_date and  $uri ne '/' and $uri !~ m!^/\w+[/]?$! ) {
-    $teaser.='<p class="enddate">' . $m->scomp('/shared/display_date',
+if ($show_date == 1 and $uri ne '/' and $uri !~ m!^/\w+[/]?$!) {
+    $date='<p class="enddate">' . $m->scomp('/shared/display_date',
 			date=>$vdoc->Docdate, format=>'verbatim') . '</p>';
 }
+
 </%init>
