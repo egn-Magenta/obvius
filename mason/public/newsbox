@@ -1,0 +1,80 @@
+<!-- News box start -->
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td height="10" colspan="3"><img src="/grafik/1x1.gif" height="10" alt=""></td>
+</tr>
+<tr>
+    <td colspan="3" class="black" width="149"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
+</tr>
+<tr>
+   <td height="16" class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
+   <td height="16" width="149" valign="middle" class="newstop"><% $language eq 'en' ? 'News' : 'Nyheder' %></td>
+   <td height="16" class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
+</tr>
+<tr>
+    <td colspan="3" class="black" width="149"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
+</tr>
+<tr>
+<td class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
+<td width="147">
+
+<& news &>
+
+</td>
+<td class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img src="/grafik/1x1.gif" width="1" height="1" alt=""/></td>
+</tr>
+<tr>
+<td valign="top" colspan="3"><img class="block" alt="newsbox bund" src="/grafik/news/bund2.gif" height="18" width="149"/></td>
+</tr>
+</table>
+<!--News box slut -->
+%
+<& /shared/path_section &>
+%
+<%args>
+$max=>4
+</%args>
+%
+<%init>
+my $section=$r->pnotes('section');
+my $path = $r->pnotes('path');
+my $language = $r->notes('language');
+
+my $path_number = scalar(@$path);
+#return if $m->cache_self(expire_next=>'day', keep_in_memory=>1, key=>$section->Name);
+
+my @newsitems=();
+
+
+my $all;
+my $sorted;
+
+unless (($all and @$all) or ($sorted and @$sorted)) {
+    # Frontpage-news:
+    $all=$obvius->search([qw(front_prio front_dura published)],
+			  'front_prio=1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura',
+			   notexpired=>1, public=>1,
+			   obvius_dump=>1,	
+			  order=>'published DESC');
+    $sorted=$obvius->search([qw(front_prio front_dura published)],
+			  'front_prio>1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura',
+			   notexpired=>1, public=>1,
+			   obvius_dump=>1,
+			  order=>'front_prio DESC, published DESC',
+			  max=>(($all and @$all) ? $max-1 : $max),
+			 );
+}
+
+if (($sorted and @$sorted) or ($all and @$all)) {
+    foreach my $newsvdoc (@$sorted, @$all) {
+	my $newsdoc=$obvius->get_doc_by_id($newsvdoc->Docid);
+	$obvius->get_version_fields($newsvdoc, [qw(docdate short_title title teaser sec_prio front_prio)]);
+	push @newsitems, {
+			  url=>$obvius->get_doc_uri($newsdoc),
+			  date=>$newsvdoc->Docdate,
+			  title=>($newsvdoc->Short_title ? $newsvdoc->Short_title : $newsvdoc->Title),
+			  teaser=>($newsvdoc->Teaser ? $newsvdoc->Teaser : ''),
+			 };
+    }
+}
+</%init>
