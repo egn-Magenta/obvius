@@ -76,6 +76,7 @@ sub action {
                     $data = "(\'" . join("\',\'", @$list) . "\')";
                     $how = 'IN';
                 } else {
+                    warn "Unknown how$i: \"$how\", skipping $i";
                     next;
                 }
 
@@ -85,9 +86,17 @@ sub action {
                     $data =~ s/'/\\'/g;
                     $data = "\'" . $data . "\'"
                 }
-                push(@fields, $field) if($obvius->get_fieldspec($field));
-                # XXX Had to add an extra space here. Guess something is wrong with some regexps in $obvius->search().
-                $where = "(" . $where . "$op ($field  $how $data)) ";
+
+                # $field can be a list of fields, where either one of them can match:
+                my @field_list=split /\s*,\s*/, $field;
+                foreach (@field_list) {
+                    push(@fields, $_) if($obvius->get_fieldspec($_));
+                }
+                # XXX Had to add an extra space here (before
+                # $how). Guess something is wrong with some regexps in
+                # $obvius->search():
+                my $where_list=join " OR ", (map { "($_  $how $data)" } @field_list);
+                $where = "(" . $where . "$op ( $where_list ) ) ";
             }
         }
 
