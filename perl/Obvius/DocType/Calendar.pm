@@ -223,6 +223,9 @@ sub action {
             my $time = $e->{date};
             my ($start_year, $start_month, $start_day) = ($time =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
 
+            # Skip events with invalid dates.
+            next unless(check_date($start_year, $start_month, $start_day));
+
             $timemin = $time unless (defined($timemin) and $timemin le $time);
             $timemax = $time unless (defined($timemax) and $timemax ge $time);
 
@@ -235,7 +238,7 @@ sub action {
                 my $end_day = $3;
 
                 $timemax = $endtime unless (defined($timemax) and $timemax ge $endtime);
-                if(check_date($start_year, $start_month, $start_day) and check_date($end_year, $end_month, $end_day)) {
+                if(check_date($end_year, $end_month, $end_day)) {
                     my $dds = Delta_Days($start_year, $start_month, $start_day, $end_year, $end_month, $end_day);
 
                     $delta_days = $dds if($dds > 0);
