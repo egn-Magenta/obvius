@@ -22,6 +22,7 @@ var TinyMCE_advanced_buttons = [
 		['cut', 'cut.gif', '{$lang_cut_desc}', 'Cut'],
 		['copy', 'copy.gif', '{$lang_copy_desc}', 'Copy'],
 		['paste', 'paste.gif', '{$lang_paste_desc}', 'Paste'],
+		['pastetext', 'pastetext.gif', '{$lang_pastetext_desc}', 'PasteText'],
 		['undo', 'undo.gif', '{$lang_undo_desc}', 'Undo'],
 		['redo', 'redo.gif', '{$lang_redo_desc}', 'Redo'],
 		['link', 'link.gif', '{$lang_link_desc}', 'mceLink', true],
@@ -46,7 +47,7 @@ var TinyMCE_advanced_buttons = [
  * Returns HTML code for the specificed control.
  */
 function TinyMCE_advanced_getControlHTML(button_name) {
-	var buttonTileMap = new Array('anchor.gif','backcolor.gif','bullist.gif','center.gif','charmap.gif','cleanup.gif','code.gif','copy.gif','custom_1.gif','cut.gif','forecolor.gif','full.gif','help.gif','hr.gif','image.gif','indent.gif','left.gif','link.gif','numlist.gif','outdent.gif','paste.gif','redo.gif','removeformat.gif','right.gif','strikethrough.gif','sub.gif','sup.gif','undo.gif','unlink.gif','visualaid.gif');
+	var buttonTileMap = new Array('pastetext.gif','anchor.gif','backcolor.gif','bullist.gif','center.gif','charmap.gif','cleanup.gif','code.gif','copy.gif','custom_1.gif','cut.gif','forecolor.gif','full.gif','help.gif','hr.gif','image.gif','indent.gif','left.gif','link.gif','numlist.gif','outdent.gif','paste.gif','redo.gif','removeformat.gif','right.gif','strikethrough.gif','sub.gif','sup.gif','undo.gif','unlink.gif','visualaid.gif');
 
 	// Lookup button in button list
 	for (var i=0; i<TinyMCE_advanced_buttons.length; i++) {
@@ -406,9 +407,9 @@ function TinyMCE_advanced_getEditorTemplate(settings) {
 /**
  * Insert link template function.
  */
+ 
 function TinyMCE_advanced_getInsertLinkTemplate() {
 	var template = new Array();
-
 	template['file'] = 'link.htm';
 	template['width'] = 320;
 	template['height'] = 170;
