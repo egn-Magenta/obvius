@@ -16,9 +16,8 @@
 #  Fields: expires Expiring
 # End
 # Page: 2
-#  Title: Classification and keywords
+#  Title: Keywords
 #  Desc: Choose the appropriate keywords
-#  Fields: category Select classification codes
 #  Fields: keyword Choose keywords
 # End
 # Page: 3
@@ -27,7 +26,7 @@
 #  Fields: seq Order of succession
 #  Fields: pagesize Number of subdocuments on one page
 #  Fields: sortorder Sort order of sub documents - sort according to
-#  Fields: subscribeable Subscription possibility?
+#  Fields: subscribeable Subscription possibility
 # End
 # Page: P
 #  Title: Publish document
@@ -36,7 +35,7 @@
 #  Fields: sec_dura Section news duration 
 #  Fields: front_prio Frontpage news inclusion
 #  Fields: front_dura Frontpage news duration 
-#  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+#  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
 ##  Fields: publish_on Publish later
 # End
 
@@ -47,26 +46,15 @@ DocType: Standard
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
   Fields: content Text
-  Fields: picture URL to picture;doctype=Image
-  Fields: url Web address reference (if any)
   Fields: author Author;distinct=1
   Fields: docdate Date (yyyy-mm-dd)
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Desc: Choose the appropriate classification and keywords for this document:
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
  End
  Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
   Title: Meta
   Desc: The fields below are important if you want your web pages to
   Desc: be easily found by search machines and users of the Internet
@@ -74,22 +62,25 @@ DocType: Standard
   Fields: contributors Contributors
   Fields: source Source
  End
- Page: 5
+ Page: 4
   Title: Display
-  Fields: seq Order of succession
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_date Show date;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_news Show news;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1
+  Fields: show_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1
   Fields: sortorder Sort order of sub documents - sort according to
   Fields: pagesize Number of subdocuments on one page
-  Fields: votebox URL to votebox;doctype=MultiChoice
-  Fields: section_news Show section news;label_0=No, label_1=Yes, reverse_options=1
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
+  Fields: subscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual, subtitle=Subscription, nopagenav=1
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=News, nopagenav=1
+  Fields: front_dura News duration
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: KeywordSearch
@@ -100,42 +91,37 @@ DocType: KeywordSearch
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
   Fields: base Base of search
-  Fields: search_type Type of search
-  Fields: search_expression Search for;rows=1,no_msie_editor=1
+  Fields: search_type
+  Fields: search_expression Type keyword;rows=1,no_msie_editor=1
   Fields: docdate Date (YYYY-MM-DD)
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Desc: Choose the appropriate classification and keywords for this document:
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
  End
  Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
   Title: Display
-  Fields: new_window Open results in new window?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: show_urls Show both URL and title?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: show_teasers Also show teaser?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: show_new_titles Show new titles;label_0=No, label_1=Yes, reverse_options=1
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
-  Fields: sortorder Sort order of sub documents - sort according to
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_date Show date;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_news Show news;label_0=No, label_1=Yes, reverse_options=1
+  Fields: sortorder Sort order of search results - sort according to;subtitle=Search results, nopagenav=1,disabled=1
+  Fields: pagesize Number of search results on one page
+  Fields: new_window Open results in new window;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_new_titles Show alphabetic index;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_searchdoc_teaser Show teaser on search results;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_searchdoc_date Show date on search results;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_searchdoc_url Show urls to search results;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1,disabled=1
+  Fields: subscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual, subtitle=Subscription, nopagenav=1
  End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: ComboSearch
@@ -149,78 +135,44 @@ DocType: ComboSearch
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Desc: Choose the appropriate classification and keywords for this document:
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
  End
  Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
   Title: Display
-  Fields: new_window Open results in new window?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: show_urls Show both URL and title?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: show_teasers Also show teaser?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
-  Fields: sortorder Sort order of sub documents - sort according to
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
+  Copy: KeywordSearch (3)
  End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: HTML
  Page: 1
-  Title: Text and pictures
+  Title: HTML and pictures
   Desc: HTML-documents can contain HTML in the Text-fields. Using the "Browse"-button
   Desc: below each field a local HTML-file can be uploaded.
   Fields: title Title
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
-  Fields: html_content Text
-  Fields: bare Show title and teaser?;label_0=Yes, label_1=No
+  Fields: html_content HTML
   Fields: docdate Date (YYYY-MM-DD)
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Desc: Choose the appropriate classification and keywords for this document:
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
  End
  Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
-  Title: Display
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
-  Fields: sortorder Sort order of sub documents - sort according to
-  Fields: votebox URL to votebox;doctype=MultiChoice
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
+  Copy: Standard (4)
  End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration 
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: Image
@@ -232,18 +184,15 @@ DocType: Image
   Fields: short_title Short title
   Fields: data Image-file
   Fields: docdate Date (yyyy-mm-dd)
-  Fields: expires Expiring
 #  Fields: width Width
 #  Fields: height Height
 #  Fields: align Alignment
 #  Fields: size Size
-#  Fields: seq Order of succession
+#  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
  End
  Page: 2
-  Title: Classification and keywords
-  Desc: Choose the appropriate classification and keywords for this document:
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
  End
  Page: P
   Title: Publish
@@ -253,23 +202,16 @@ DocType: Image
 
 DocType: Sitemap
  Page: 1
-  Title: Text
+  Title: Text and levels
   Desc: Documents of this type automatically generates a (dynamic) sitemap.
   Fields: title Title
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
   Fields: short_title Short title
   Fields: content Text;rows=4
-  Fields: teaser Teaser;rows=4, no_msie_editor=1
   Fields: levels Levels
   Fields: docdate Date (YYYY-MM-DD)
-  Fields: seq Order of succession
-#  Fields: sortorder Sort order of sub documents - sort according to
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
  End
-# Page: 2
-#  Title: Classification and keywords
-#  Desc: Choose the appropriate classification and keywords for this document:
-#  Fields: category Select classification codes
-#  Fields: keyword Choose keywords
-# End
  Page: P
   Title: Publish document
   Desc: Publish now?
@@ -283,91 +225,43 @@ DocType: Upload
   Fields: title Title
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
-  Fields: uploaddata Upload data
   Fields: mimetype MIME-type;distinct=1
-  Fields: url Web address
+  Fields: uploaddata Upload data
   Fields: author Author;distinct=1
+  Fields: seq Order of succession
   Fields: docdate Date (YYYY-MM-DD)
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Desc: Choose the appropriate classification and keywords for this document:
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
  End
  Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
   Title: Meta
   Desc: The fields below are important if you want your web pages to be easily found by search machines and users of the Internet
   Fields: docref Reference
   Fields: contributors Contributors
   Fields: source Source
  End
- Page: 5
-  Title: Display
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
-  Fields: sortorder Sort order of sub documents - sort according to
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
- End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration 
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
-
-DocType: MultiChoice
- Page: 1
-  Title: Text
-  Fields: title Spørgsmål
-  Fields: short_title Short title
-  Fields: teaser Uddybende information;rows=4
-  Fields: author Author;distinct=1
-  Fields: docdate Date (yyyy-mm-dd)
-  Fields: expires Expiring
-  Fields: seq Order of succession
- End
- Page: 2
-  Title: Choices
-#  Fields: bar_width Choose the maximum width of the graphics bar; size=4
-  Fields: vote_option Answers in the poll (format: [letter] text)
- End
- Page: P
-  Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
- End
-
 
 DocType: Search
  Page: 1
-  Title: Text
+  Title: Free text search
   Desc: A Search-document makes it possible to create a free-text search of the
   Desc: entire website.
   Fields: title Title
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
   Fields: form Alternative search-form (leave empty for default)
   Fields: docdate Date (YYYY-MM-DD)
-  Fields: expires Expiring
- End
- Page: 2
-  Title: Display
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
  End
  Page: P
   Title: Publish document
@@ -385,12 +279,12 @@ DocType: Link
   Fields: teaser Teaser;rows=4
   Fields: url Web address
   Fields: author Author;distinct=1
+  Fields: seq Order of succession
   Fields: docdate Date (YYYY-MM-DD)
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Fields: category Select classification codes
+  Title: Keywords
   Fields: keyword Choose keywords
  End
  Page: 3
@@ -400,43 +294,30 @@ DocType: Link
   Fields: contributors Contributors
   Fields: source Source
  End
- Page: 4
-  Title: Display
-  Desc: Make the link subscribeable. This is only usefull in special cases like when you want to make a forum subscribeable
-  Fields: seq Order of succession
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
- End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration 
+  #Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: Subscribe
  Page: 1
-  Title: Document data
+  Title: Subscription data and display
   Fields: title Title
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
   Fields: short_title Short title
-  Fields: teaser Teaser;rows=4
-  Fields: content Tekst
+  Fields: teaser Teaser (filled out);rows=4
+  Fields: content Tekst;rows=4
   Fields: docdate Date (YYYY-MM-DD)
-  Fields: expires Expiring
- End
- Page: 2
-  Title: Subscription data
-  Fields: mailfrom Sender in subscription emails
+  Fields: mailfrom Sender in subscription emails;subtitle=Subscription data, nopagenav=1,disabled=1
   Fields: passwdmsg The template used send subscription passwords
- End
- Page: 3
-  Title: Display-only
   Fields: seq Order of succession
+  Fields: show_news Show news;label_0=No, label_1=Yes, reverse_options=1
  End
  Page: P
   Title: Publish document
-  Desc: Publish the document?
+  Desc: Publish the document
  End
 
 DocType: OrderForm
@@ -448,36 +329,28 @@ DocType: OrderForm
   Fields: html_content Form (HTML)
   Fields: mailto Send email to
   Fields: mailmsg Use email-template
-  Fields: bare Show title and teaser?;label_0=No, label_1=Yes, reverse_options=1
   Fields: docdate Date (YYYY-MM-DD)
   Fields: expires Expiring
  End
  Page: 2
-  Title: Classification and keywords
-  Fields: category Select classification codes
+  Title: Keywords
   Fields: keyword Choose keywords
  End
  Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
-  Title: Display
+  Title: Display-only
   Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
-  Fields: sortorder Sort order of sub documents - sort according to
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_news Show news;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1
+  Fields: show_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1
  End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration 
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: DBSearch
@@ -495,6 +368,8 @@ DocType: DBSearch
   Fields: seq Order of succession
   Fields: pagesize Number of subdocuments on one page
   Fields: sortorder Sort order of sub documents - sort according to
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1
  End
  Page: P
   Title: Publish document
@@ -514,13 +389,6 @@ DocType: TableList
   Fields: newcomp New row component
   Fields: docdate Date (yyyy-mm-dd)
  End
- Page: 2
-  Title: Display
-  Desc: How the table-rows are displayed
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
-  Fields: sortorder Sort order of sub documents - sort according to
- End
  Page: P
   Title: Publish document
   Desc: Publish now?
@@ -531,7 +399,7 @@ DocType: CalendarEvent
   Title: Event Info
   Fields: title Title
   Fields: short_title Short title
-  Fields: eventtype Event Type
+  Fields: eventtype Event Type;distinct=1
   Fields: docdate Date
   Fields: eventtime Time (optional)
   Fields: eventplace Place where the event occurs
@@ -541,29 +409,42 @@ DocType: CalendarEvent
  Page: 2
   Title: Display-only
   Fields: seq Order of succession
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_news Show news;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1
+  Fields: show_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1
  End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: front_dura News duration 
+  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
 DocType: Calendar
  Page: 1
-  Title: Document data
+  Title: Titel og visning
+  Fields: show_as How to show calendar
+  Fields: Show_event Show event by;label_type=Type, label_title=Title, reverse_options=1
   Fields: title Title
+  Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
+  Fields: seq Order of succession
+  Fields: show_news Show news;label_0=No, label_1=Yes, reverse_options=1
   Fields: docdate Date
+  Fields: show_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1
+  Fields: show_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1
+  Fields: sortorder Sort order of sub documents - sort according to
+  Fields: pagesize Number of subdocuments on one page
  End
  Page: 2
   Title: Search information
   Desc: The fields below will be used to find relevant calendar events
-  Fields: startdate Events after this date
-  Fields: enddate Events before this date
-  Fields: s_event_path Only documents under (set to / for global search)
-  Fields: s_event_type Event type is
+  Fields: startdate Events from this date
+  Fields: enddate Events to this date
+  Fields: s_event_path Only show events under this page (set to / for global search)
+  Fields: s_event_type Event type is;subtitle=Limit the search for events,doctypename=CalendarEvent,fieldname=eventtype
   Fields: s_event_title Event title field contains
   Fields: s_event_contact Event contact info field contains
   Fields: s_event_place Event place field contains
@@ -571,89 +452,13 @@ DocType: Calendar
   Fields: s_event_order_by Order events by
  End
  Page: 3
-  Title: Display-only
-  Fields: show_as How to show calendar
-  Fields: seq Order of succession
-  Fields: pagesize Number of subdocuments on one page
+  Title: Subscription
+  Fields: subscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual
  End
  Page: P
   Title: Publish document
   Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
+  Fields: front_dura Frontpage news duration
   Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
  End
 
-DocType: SubDocuments
- Page: 1
-  Title: Text and pictures
-  Fields: title Title
-  Fields: short_title Short title
-  Fields: teaser Teaser;rows=4
-  Fields: logo URL to logo;doctype=Image
-  Fields: picture URL to picture;doctype=Image
-  Fields: url Web address reference (if any)
-  Fields: author Author;distinct=1
-  Fields: docdate Date (YYYY-MM-DD)
-  Fields: expires Expiring
- End
- Page: 2
-  Title: Classification and keywords
-  Fields: category Select classification codes
-  Fields: keyword Choose keywords
- End
- Page: 3
-  Title: Related knowledge
-  Desc: Choose the classification and keywords to be used to find
-  Desc: links to related documents.
-  Fields: rel_category Related classification
-  Fields: rel_keyword Related keywords;new=0
- End
- Page: 4
-  Title: Meta
-  Desc: The fields below are important if you want your web pages to
-  Desc: be easily found by search machines and users of the Internet
-  Fields: docref Reference
-  Fields: contributors Contributors
-  Fields: source Source
- End
- Page: 5
-  Title: Display
-  Fields: seq Order of succession
-  Fields: sortorder Sort order of sub documents - sort according to
-  Fields: pagesize Number of subdocuments on one page
-  Fields: votebox URL to votebox;doctype=MultiChoice
-  Fields: show_teasers Show teasers?;label_0=No, label_1=Yes, reverse_options=1
-  Fields: subscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual
- End
- Page: P
-  Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration 
-  Fields: sec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1
-  Fields: sec_dura Section news duration 
-  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
- End
-
-DocType: CreateDocument
- Page: 1
-  Title: Basic information
-  Fields: title Title
-  Fields: docdate Date
-  Fields: form Create form (HTML)
- End
- Page: 2
-  Title: Document creation information
-  Fields: doctype What doctype the created documents should have
-  Fields: language What language the created documents should have;size=2
-  Fields: where Where the documents should be created
-  Fields: name_prefix Prefix for names of the created documents
-  Fields: publish_mode How to publish create documents;label_immediate=Immediate, label_moderator=Using a moderator
-  Fields: subscribe_include Include created documents in subscription when publishing;label_0=No, label_1=Yes, reverse_options=1
-  Fields: email Moderator email
- End
- Page: P
-  Title: Publishing
-  Desc: Publish now?
- End
