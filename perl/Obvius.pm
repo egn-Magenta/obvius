@@ -1541,6 +1541,19 @@ sub read_fieldspecs_table {
     $set->Disconnect;
 }
 
+# adjust_doctype_hierarchy - after the doctypes are read from the
+#                            database, this function takes care of the
+#                            inheritance of fields (normal and
+#                            publish) and also of the setting of
+#                            sortorder_field_is.
+#                            This is done after all doctypes are read
+#                            from the database and all the objects
+#                            have been created, because doctypes can
+#                            inherit from eachother, and they are not
+#                            necessarily read parent-first from the
+#                            database.
+#                            This function is internal, used by
+#                            read_type_info only.
 sub adjust_doctype_hierarchy {
     my ($this) = @_;
 
@@ -2215,7 +2228,6 @@ sub get_editpages {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -2235,6 +2247,8 @@ Obvius - Content Manager, database handling.
 
     my ($hashref, $arrayref) = $obvius->calc_order_for_query($vdoc);
 
+    $obvius->adjust_doctype_hierarchy(); # Internal.
+
 =head1 DESCRIPTION
 
 Obvius is the main object for accessing the content manager.
@@ -2243,10 +2257,9 @@ Obvius is the main object for accessing the content manager.
 
 None by default.
 
-
 =head1 AUTHOR
 
-René Seindal <lt>rene@magenta-aps.dk<gt>
+René Seindal
 Adam Sjøgren <lt>asjo@magenta-aps.dk<gt>
 Jørgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
 
