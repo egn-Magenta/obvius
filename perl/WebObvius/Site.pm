@@ -625,9 +625,9 @@ sub set_public_login_cookie {
     my %options=(
                  -name    =>  'obvius_public_login',
                  -value   =>  $cookie_value,
-                 -expires =>  $expire,
                  -path    =>  '/'
                 );
+    $options{'-expires'}=$expire if ($expire);
     my $domain=$obvius->config->param('cookiedomain');
     $options{'-domain'}=$domain if ($domain);
 
@@ -638,18 +638,22 @@ sub set_public_login_cookie {
     $obvius->update_public_users({cookie => $cookie_value}, {id=>$user->{id}});
 }
 
-# expire_public_login_cookie($req, $user)
+# expire_public_login_cookie($req, $obvius)
 # Expires (removes) the obvius_public_login cookie. Used
 # for logging out public users.
 sub expire_public_login_cookie {
-    my ($this, $req) = @_;
+    my ($this, $req, $obvius) = @_;
 
-    my $cookie = Apache::Cookie->new($req,
-                                        -name    =>  'obvius_public_login',
-                                        -value   =>  '',
-                                        -expires =>  '-3M',
-                                        -path    =>  '/'
-                                    );
+    my %options=(
+		 -name    =>  'obvius_public_login',
+		 -value   =>  '',
+		 -expires =>  '-3M',
+		 -path    =>  '/'
+		 );
+    my $domain=$obvius->config->param('cookiedomain');
+    $options{'-domain'}=$domain if ($domain);
+
+    my $cookie = Apache::Cookie->new($req, %options);
     $cookie->bake;
 }
 
