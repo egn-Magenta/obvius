@@ -195,6 +195,12 @@ sub create_new_user {
     return $userid;
 }
 
+# update_user - updates the information about a user in the
+#               database. Input is a user hash-ref and a document
+#               object. The update only takes place if the current
+#               admin-user has the power to create a new user on the
+#               document given. Returns undef on error and true on
+#               success.
 sub update_user {
     my ($this, $user, $doc) = @_;
 
@@ -349,6 +355,8 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
   my $href=$obvius->get_user($userid);
 
   my $grpid=$obvius->get_grpid($group_name);
+
+  my $ret=$obvius->update_user($user, $doc);
 
 =head1 DESCRIPTION
 
