@@ -1,29 +1,10 @@
-<!-- News box start -->
-<table border="0" cellspacing="0" cellpadding="0">
+<!-- News start -->
+<table border="0" cellspacing="0" cellpadding="5" width="145">
 <tr>
-<td height="12" colspan="3">
-<img src="/grafik/1x1.gif" height="12" alt="">
-</td>
-</tr>
-<tr>
-    <td colspan="3" class="black" width="149"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
-</tr>
-<tr>
-   <td height="16" class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
-   <td height="16" width="149" valign="middle" class="newstop"><% $language eq 'en' ? 'News' : 'Nyheder' %></td>
-   <td height="16" class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
-</tr>
-<tr>
-    <td colspan="3" class="black" width="149"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
-</tr>
-<tr>
-<td class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img alt="" src="/grafik/1x1.gif" width="1" height="1"></td>
-<td width="147">
-<table border="0" cellspacing="0" cellpadding="5" width="100%">
-<tr>
+<td height="50">
+
 %my $newsnumber = 1;
 % if (@newsitems) {
-<td height="50">
 %    foreach my $newsitem (@newsitems) {
 <span class="newsheader"><a href="<% $newsitem->{url} %>"><& /shared/htmlunmap, text=>$m->scomp('/shared/shorten', text=>$newsitem->{title}, len=>48) &></a><br></span>
 %if ($newsitem->{teaser} and $newsitem->{teaser} !~ /^\s+$/) {
@@ -33,6 +14,7 @@
 <br><span class="newsdate"><& /shared/display_date, date=>$newsitem->{date} &></span><br> <% scalar(@newsitems) == $newsnumber ? '' : '<br>'%>
 % $newsnumber++;
 %    }
+
 </td>
 </tr>
 <tr>
@@ -47,14 +29,9 @@
 % }
 %
 </table>
-</td>
-<td class="black" style="background-image: url(/grafik/1x1.gif);" width="1"><img src="/grafik/1x1.gif" width="1" height="1" alt=""/></td>
-</tr>
-<tr>
-<td valign="top" colspan="3"><img class="block" alt="newsbox bund" src="/grafik/news/bund2.gif" height="18" width="149"/></td>
-</tr>
-</table>
-<!--News box slut -->
+<!--News end -->
+
+
 %
 <& /shared/path_section &>
 %
