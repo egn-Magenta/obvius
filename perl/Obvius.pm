@@ -727,6 +727,12 @@ sub get_nr_of_subdocs {
 #
 ########################################################################
 
+# calc_order_for_query($sortvdoc) - Determines how subdocuments to a
+#           document should be sorted. Takes a $vdoc as argument and
+#           returns a hashref which keys represent unique fields to be
+#           used in the sorting and an arrayref containing the order of
+#           the fields. The content of the array can be joined together
+#           with "," and used for an SQL ORDER BY clause.
 sub calc_order_for_query {
     my ($this, $sortvdoc) = @_;
 
@@ -2226,6 +2232,8 @@ Obvius - Content Manager, database handling.
     $obvius->connect;
 
     my $doc=$obvius->lookup_document($path);
+
+    my ($hashref, $arrayref) = $obvius->calc_order_for_query($vdoc);
 
 =head1 DESCRIPTION
 
