@@ -1519,6 +1519,12 @@ sub read_fieldtypes_table {
     #print STDERR "Fieldtypes: ", Dumper($this->{FIELDTYPES});
 }
 
+# read_fieldspecs_table - reads the fieldspecs from the database,
+#                         creates objects and plugs them into the
+#                         fieldtypes- and doctypes-objects. The
+#                         argument make_objects isn't used. Doesn't
+#                         return anything. Used internally by
+#                         read_type_info().
 sub read_fieldspecs_table {
     my ($this, $make_objects) = @_;
 
