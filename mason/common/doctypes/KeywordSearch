@@ -47,25 +47,22 @@
 </tr>
 %}
 
+%if($show_searchdoc_url) {
 <tr>
 <td></td>
 <td class="url">
-
-%       if($show_searchdoc_url) {
 %         my $d = $obvius->get_doc_by_id($kwdoc->{id});
 %         my $linkurl = 'http://' . $r->pnotes('site')->Sitename . $obvius->get_doc_uri($d) if($d);
 %	  if($linkurl and $linkurl !~ /^http:\/\//) {
 %          $linkurl = 'http://' . $linkurl;
 %         }
      <% $linkurl ? $linkurl : '' %>
-%       }
-
-
 </td>
 </tr>
+% }
 
 <tr>
-<td colspan="2" height="3"><img src="/grafik/1x1.gif" height="3" alt=""></td>
+<td colspan="2" height="7"><img src="/grafik/1x1.gif" height="7" alt=""></td>
 </tr>
 
 %     }
@@ -99,7 +96,7 @@ $target = ' target="_blank"' if($obvius->get_version_field($vdoc, 'new_window'))
 
 my $kwdocs = $output->param('kwdocs');
 
-if ($show_teaser) {
+if ($show_searchdoc_teaser) {
     foreach (@$kwdocs) {
         if (my $doc=$obvius->get_doc_by_id($_->{id})) {
             if (my $vdoc=$obvius->get_public_version($doc)) {
