@@ -8,9 +8,11 @@
 % }
 %
 <%init>
-my $subvdocs=$obvius->get_document_subdocs($doc, nothidden=>1,
-					 public=>(1-($r->pnotes('site')->param('is_admin') || 0)),
-					 sortvdoc=>$vdoc);
+my $subvdocs=$obvius->get_document_subdocs($doc,
+                                            nothidden=>1,
+                                            public=>($r->pnotes('site')->param('is_admin') ? 0 : 1),
+                                            notexpired => ($r->pnotes('site')->param('is_admin') ? 0 : 1),
+                                            sortvdoc=>$vdoc);
 my $subdocs_with_teaser=$obvius->get_version_field($vdoc, qw(subdocs_with_teaser));
 
 my @subdocs=map {
