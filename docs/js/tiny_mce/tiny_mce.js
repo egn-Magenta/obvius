@@ -682,7 +682,6 @@ function TinyMCE_handleEvent(e) {
 				window.setTimeout("tinyMCE.execInstanceCommand('" + e.target.editorId + "', 'mceCleanupWord', false, null);", 1);
 
 			break;
-
 		case "beforecut":
 		case "beforepaste":
 			if (tinyMCE.selectedInstance)
@@ -1866,6 +1865,16 @@ function TinyMCE__cleanupHTML(doc, config, element, visual, on_save) {
 	tinyMCE.cleanup_idCount = 0;
 	tinyMCE.cleanup_elementLookupTable = new Array();
 
+	if( tinyMCE.cleanup_on_save ){
+		var elements = this.getElementsByAttributeValue(doc.body, "img", "alt", "mceVisualAid");
+		for( var a=0;a<elements.length;a++){
+			var cE = elements[a];
+			cE.parentNode.removeChild(cE);
+		}
+		
+		
+	}
+
 	var startTime = new Date().getTime();
 
 	tinyMCE._convertOnClick(element);
@@ -2583,6 +2592,7 @@ function TinyMCE_openWindow(template, args) {
 }
 
 function TinyMCE_handleVisualAid(element, deep, state) {
+	
 	function getAttrib(elm, name) {
 		return elm.getAttribute(name) ? elm.getAttribute(name) : "";
 	}
@@ -3610,7 +3620,34 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 			} else
 				tinyMCE.triggerNodeChange();
 		break;
+		
+		case "PasteText":
+			var cmdFailed = false;
+			
+			// Try executing command
+			
+			try {
+			
+				var text = clipboardData.getData("Text")
+				text = text.replace( /\n/g, '<BR>' ) ;
+			
+				tinyMCE.execCommand('mceInsertContent', false, text);
+//				this.contentDocument.execCommand("Paste", user_interface, value);
+			} catch (e) {
+				cmdFailed = true;
+			}
 
+			// Alert error in gecko if command failed
+			if (tinyMCE.isGecko && cmdFailed) {
+				// Confirm more info
+				if (confirm(tinyMCE.getLang('lang_clipboard_msg')))
+					window.open('http://www.mozilla.org/editor/midasdemo/securityprefs.html', 'mceExternal');
+
+				return;
+			} else
+				tinyMCE.triggerNodeChange();
+		break;
+		
 		case "mceLink":
 			var selectedText = "";
 
@@ -3626,7 +3663,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 					return;
 			}
 
-			var href = "", target = "", title = "", onclick = "", action = "insert";
+			var href = "", target = "", title = "", onclick = "", action = "insert", links = [];
 
 			if (tinyMCE.selectedElement.nodeName.toLowerCase() == "a")
 				tinyMCE.linkElement = tinyMCE.selectedElement;
@@ -3655,13 +3692,24 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 				href = eval(tinyMCE.settings['urlconvertor_callback'] + "(href, tinyMCE.linkElement, true);");
 				action = "update";
 			}
-
+			
+			var aElements = this.contentDocument.getElementsByTagName('a')
+			for( var a=0;a<aElements.length;a++){
+				var name = aElements[a].getAttribute('name')
+				if(name){
+					links.push([tinyMCELang['lang_insert_link_popup_anchor'] + '#' + name, '#'  + name])
+				}
+			}
+			
+			
+			
+			
 			if (this.settings['insertlink_callback']) {
 				var returnVal = eval(this.settings['insertlink_callback'] + "(href, target, title, onclick, action);");
 				if (returnVal && returnVal['href'])
 					tinyMCE.insertLink(returnVal['href'], returnVal['target'], returnVal['title'], returnVal['onclick']);
 			} else {
-				tinyMCE.openWindow(this.insertLinkTemplate, {href : href, target : target, title : title, onclick : onclick, action : action});
+				tinyMCE.openWindow(this.insertLinkTemplate, {href : href, target : target, title : title, onclick : onclick, action : action, links: links });
 			}
 		break;
 
@@ -3697,6 +3745,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 
 				onmouseover = tinyMCE.cleanupEventStr(onmouseover);
 				onmouseout = tinyMCE.cleanupEventStr(onmouseout);
+				
 
 				// Fix for drag-drop/copy paste bug in Mozilla
 				mceRealSrc = getAttrib(tinyMCE.imgElement, 'mce_real_src');
@@ -3783,6 +3832,15 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 							}
 						}
 					}
+					
+					
+					var aElements = this.contentDocument.getElementsByTagName('a')
+					for( var a=0;a<aElements.length;a++){
+						if( aElements[a].getAttribute('name') && aElements[a].getAttribute('name').toLowerCase() == value.toLowerCase()){
+							alert( tinyMCELang['lang_theme_anchor_exist'].replace('$value', value ))
+							return true
+						}
+					}
 
 					for (var x=0; x<elementArray.length; x++) {
 						var elm = elementArray[x];
@@ -3800,12 +3858,10 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 
 						elm.parentNode.replaceChild(aElm, elm);
 					}
-					//Chris Benjaminse BeIT ApS **
 					if( !elementArray.length ){
 						var html = '<a name="'+ value +'"></a>'
 						tinyMCE.execCommand('mceInsertContent', false, html);
 					}
-					//**
 					
 				}
 
