@@ -56,6 +56,7 @@ sub action {
     #  XXX Set protocol/version automati/dynamically?
     my $via='HTTP/1.1 ' . $obvius->config->Sitename . ' (Obvius::DocType::Proxy ' . $VERSION . ')';
     if (!check_via_ok($input, $via)) {
+        $output->param('OBVIUS_HEADERS_OUT'=>{ Via=>$input->param('OBVIUS_HEADERS_IN')->{Via} });;
         $output->param('via_loop_detected'=>1);
         return OBVIUS_OK;
     }
@@ -267,9 +268,13 @@ sub make_request {
     my $method='GET';
 
     # User-Agent, Request, Response:
-    my $ua=LWP::UserAgent->new;
-    $ua->agent('Obvius::DocType::Proxy ' . $VERSION);
-    $ua->parse_head(0);
+    my $ua=LWP::UserAgent->new(
+                               agent=>'Obvius::DocType::Proxy ' . $VERSION,
+                               requests_redirectable=>[],
+                               parse_head=>0,
+                               protocols_forbidden=>[qw(mailto file)],
+                               max_size=>4*1024*1024,
+                              );
 
     my $proxy_request=HTTP::Request->new($method=>$url); # XXX Make sure $url does not
                                                          # refer til file: or mailto:!
@@ -279,6 +284,8 @@ sub make_request {
     # POST:
     #  content_type application/x-www-form-urlencoded
     #  content
+
+    # XXX Check ua->is_protocol_supported
 
     return $ua->request($proxy_request);
 }
@@ -293,6 +300,8 @@ my %proxy_to_client_headers_prune=(
 # XXX handle response-codes:
 sub handle_response {
     my ($response, $url, $via, $output)=@_;
+
+    # XXX Check "Client-Aborted" (if size is too big)
 
     if ($response->is_success) {
         # Set resulting headers by creating the hashref
@@ -314,14 +323,26 @@ sub handle_response {
     }
     else {
         # Should perhaps signal that no caching should be done?
-        if ($response->code() == 403) {
-            $output->param(error=>'403 Forbidden; possible loop');
+        my $status=$response->code();
+        if ($status==403) { # Forbidden
+            if ($response->headers->header('via')) {
+                $output->param(error=>'403 Proxying of a proxy-document detected');
+            }
+            else {
+                $output->param(error=>'403 Forbidden');
+            }
         }
-        elsif ($response->code() == 404) {
+        elsif ($status==404) { # Not found
             $output->param(error=>'404 Not Found');
         }
+        elsif ($status==301 or $status==302 or $status==303 or $status==307) { # Moved permanently, Found, See other, Temporary Redirect
+            # XXX Read rfc to check semantics.
+            my $location=$response->headers->header('location');
+            $output->param(redirect=>'./?obvius_proxy_url=' . uri_escape($location));
+            $output->param(status=>$response->code);
+        }
         else {
-            $output->param(error=>$response->code() . ' Unhandled error');
+            $output->param(error=>$status . ' Unhandled error');
         }
     }
 }
