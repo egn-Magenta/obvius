@@ -140,19 +140,22 @@ sub obvius_document {
 
         my $doctype=$obvius->get_document_type($doc); # XXX Should look at the public version?
 
-        print STDERR "doc: ", $obvius->get_doc_uri($doc), "\npath_info: $path_info\n";
-        print STDERR "doctype: ", $doctype->Name, "\n";
+        print STDERR "path $path not found\n";
+        print STDERR " first doc found: ", $obvius->get_doc_uri($doc), "\n path_info: $path_info\n";
+        print STDERR "  doctype: ", $doctype->Name, "\n";
 
         # It can:
         if ($doctype->handle_path_info()) {
-            print STDERR "HANDLED BY: ", $obvius->get_doc_uri($doc), "\n";
+            print STDERR "   handled by: ", $obvius->get_doc_uri($doc), "\n";
             $req->notes('obvius_path_info'=>$path_info);
-            $req->uri($obvius->get_doc_uri($doc));
+            my $handle_uri=$obvius->get_doc_uri($doc);
+            $req->notes(uri=>$handle_uri);
+            $req->uri($handle_uri);
             return $doc;
         }
 
         # It couldn't:
-        print STDERR "UNHANDLED, not found\n";
+        print STDERR "   unhandled, returning undef\n";
         return undef;
     }
     else {
