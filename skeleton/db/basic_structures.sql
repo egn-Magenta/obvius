@@ -152,6 +152,7 @@ INSERT INTO documents VALUES (4,3,'users',19,1,1,NULL);
 INSERT INTO documents VALUES (5,3,'groups',19,1,1,NULL);
 INSERT INTO documents VALUES (6,3,'subscribers',19,1,1,NULL);
 INSERT INTO documents VALUES (7,1,'sitemap',13,1,1,NULL);
+INSERT INTO documents VALUES (8,1,'frontpage_en',2,1,1,NULL);
 
 --
 -- Table structure for table 'editpages'
@@ -172,80 +173,56 @@ CREATE TABLE editpages (
 --
 
 
-INSERT INTO editpages VALUES (2,'1','Text and pictures','','title Title\nshort_title Short title\nteaser Teaser;rows=4\ncontent Text\npicture URL to picture;doctype=Image\nurl Web address reference (if any)\nauthor Author;distinct=1\ndocdate Date (yyyy-mm-dd)\nexpires Expiring');
-INSERT INTO editpages VALUES (2,'2','Classification and keywords','Choose the appropriate classification and keywords for this document:','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (2,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (2,'4','Meta','The fields below are important if you want your web pages to\nbe easily found by search machines and users of the Internet','docref Reference\ncontributors Contributors\nsource Source');
-INSERT INTO editpages VALUES (2,'5','Display','','seq Order of succession\nsortorder Sort order of sub documents - sort according to\npagesize Number of subdocuments on one page\nvotebox URL to votebox;doctype=MultiChoice\nsection_news Show section news;label_0=No, label_1=Yes, reverse_options=1\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (2,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (5,'1','Search information','In the fields below you can specify your local search','title Title\nshort_title Short title\nteaser Teaser;rows=4\nbase Base of search\nsearch_type Type of search\nsearch_expression Search for;rows=1,no_msie_editor=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (5,'2','Classification and keywords','Choose the appropriate classification and keywords for this document:','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (5,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (5,'4','Display','','new_window Open results in new window?;label_0=No, label_1=Yes, reverse_options=1\nshow_urls Show both URL and title?;label_0=No, label_1=Yes, reverse_options=1\nshow_teasers Also show teaser?;label_0=No, label_1=Yes, reverse_options=1\nshow_new_titles Show new titles;label_0=No, label_1=Yes, reverse_options=1\nseq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (5,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (2,'1','Text and pictures','','title Title\nshort_title Short title\nteaser Teaser;rows=4\ncontent Text\nauthor Author;distinct=1\ndocdate Date (yyyy-mm-dd)\nexpires Expiring');
+INSERT INTO editpages VALUES (2,'2','Keywords','','keyword Choose the appropriate keywords for this document:');
+INSERT INTO editpages VALUES (2,'3','Meta','The fields below are important if you want your web pages to\nbe easily found by search machines and users of the Internet','docref Reference\ncontributors Contributors\nsource Source');
+INSERT INTO editpages VALUES (2,'4','Display','','seq Order of succession;subtitle=Display-only, nopagenav=1\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1\nshow_date Show date;label_0=No, label_1=Yes, reverse_options=1\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1\nshow_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nshow_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nsortorder Sort order of sub documents - sort according to\npagesize Number of subdocuments on one page\nsubscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual, subtitle=Subscription, nopagenav=1');
+INSERT INTO editpages VALUES (2,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=News, nopagenav=1\nfront_dura News duration\nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (5,'1','Search information','In the fields below you can specify your local search','title Title\nshort_title Short title\nteaser Teaser;rows=4\nbase Base of search\nsearch_type\nsearch_expression Type keyword;rows=1,no_msie_editor=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
+INSERT INTO editpages VALUES (5,'2','Keywords','','keyword Choose the appropriate keywords for this document:');
+INSERT INTO editpages VALUES (5,'3','Display','','seq Order of succession;subtitle=Display-only, nopagenav=1\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1\nshow_date Show date;label_0=No, label_1=Yes, reverse_options=1\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\nsortorder Sort order of search results - sort according to;subtitle=Search results, nopagenav=1,disabled=1\npagesize Number of search results on one page\nnew_window Open results in new window;label_0=No, label_1=Yes, reverse_options=1\nshow_new_titles Show alphabetic index;label_0=No, label_1=Yes, reverse_options=1\nshow_searchdoc_teaser Show teaser on search results;label_0=No, label_1=Yes, reverse_options=1\nshow_searchdoc_date Show date on search results;label_0=No, label_1=Yes, reverse_options=1\nshow_searchdoc_url Show urls to search results;label_0=No, label_1=Yes, reverse_options=1\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1,disabled=1\nsubscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual, subtitle=Subscription, nopagenav=1');
+INSERT INTO editpages VALUES (5,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration\nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
 INSERT INTO editpages VALUES (4,'1','Search information','','title Title\nshort_title Short title\nteaser Teaser;rows=4\nsearch_expression Search expression;no_msie_editor=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (4,'2','Classification and keywords','Choose the appropriate classification and keywords for this document:','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (4,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (4,'4','Display','','new_window Open results in new window?;label_0=No, label_1=Yes, reverse_options=1\nshow_urls Show both URL and title?;label_0=No, label_1=Yes, reverse_options=1\nshow_teasers Also show teaser?;label_0=No, label_1=Yes, reverse_options=1\nseq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (4,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (6,'1','Text and pictures','HTML-documents can contain HTML in the Text-fields. Using the \"Browse\"-button\nbelow each field a local HTML-file can be uploaded.','title Title\nshort_title Short title\nteaser Teaser;rows=4\nhtml_content Text\nbare Show title and teaser?;label_0=Yes, label_1=No\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (6,'2','Classification and keywords','Choose the appropriate classification and keywords for this document:','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (6,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (6,'4','Display','','seq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to\nvotebox URL to votebox;doctype=MultiChoice\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (6,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (15,'1','Image','Image-documents are a little special; they do not contain text\nbut instead image-data.','title Title\nshort_title Short title\ndata Image-file\ndocdate Date (yyyy-mm-dd)\nexpires Expiring');
-INSERT INTO editpages VALUES (15,'2','Classification and keywords','Choose the appropriate classification and keywords for this document:','category Select classification codes\nkeyword Choose keywords');
+INSERT INTO editpages VALUES (4,'2','Keywords','','keyword Choose the appropriate keywords for this document:');
+INSERT INTO editpages VALUES (4,'3','Display','','seq Order of succession;subtitle=Display-only, nopagenav=1\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1\nshow_date Show date;label_0=No, label_1=Yes, reverse_options=1\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\nsortorder Sort order of search results - sort according to;subtitle=Search results, nopagenav=1,disabled=1\npagesize Number of search results on one page\nnew_window Open results in new window;label_0=No, label_1=Yes, reverse_options=1\nshow_new_titles Show alphabetic index;label_0=No, label_1=Yes, reverse_options=1\nshow_searchdoc_teaser Show teaser on search results;label_0=No, label_1=Yes, reverse_options=1\nshow_searchdoc_date Show date on search results;label_0=No, label_1=Yes, reverse_options=1\nshow_searchdoc_url Show urls to search results;label_0=No, label_1=Yes, reverse_options=1\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1,disabled=1\nsubscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual, subtitle=Subscription, nopagenav=1');
+INSERT INTO editpages VALUES (4,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration\nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (6,'1','HTML and pictures','HTML-documents can contain HTML in the Text-fields. Using the \"Browse\"-button\nbelow each field a local HTML-file can be uploaded.','title Title\nshort_title Short title\nteaser Teaser;rows=4\nhtml_content HTML\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
+INSERT INTO editpages VALUES (6,'2','Keywords','','keyword Choose the appropriate keywords for this document:');
+INSERT INTO editpages VALUES (6,'3','Display','','seq Order of succession;subtitle=Display-only, nopagenav=1\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1\nshow_date Show date;label_0=No, label_1=Yes, reverse_options=1\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1\nshow_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nshow_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nsortorder Sort order of sub documents - sort according to\npagesize Number of subdocuments on one page\nsubscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual, subtitle=Subscription, nopagenav=1');
+INSERT INTO editpages VALUES (6,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration \nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (15,'1','Image','Image-documents are a little special; they do not contain text\nbut instead image-data.','title Title\nshort_title Short title\ndata Image-file\ndocdate Date (yyyy-mm-dd)');
+INSERT INTO editpages VALUES (15,'2','Keywords','','keyword Choose the appropriate keywords for this document:');
 INSERT INTO editpages VALUES (15,'P','Publish','Publishing the picture will make it visible on the public part\nof the website.','');
-INSERT INTO editpages VALUES (13,'1','Text','Documents of this type automatically generates a (dynamic) sitemap.','title Title\nshort_title Short title\ncontent Text;rows=4\nteaser Teaser;rows=4, no_msie_editor=1\nlevels Levels\ndocdate Date (YYYY-MM-DD)\nseq Order of succession');
+INSERT INTO editpages VALUES (13,'1','Text and levels','Documents of this type automatically generates a (dynamic) sitemap.','title Title\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshort_title Short title\ncontent Text;rows=4\nlevels Levels\ndocdate Date (YYYY-MM-DD)\nseq Order of succession;subtitle=Display-only, nopagenav=1');
 INSERT INTO editpages VALUES (13,'P','Publish document','Publish now?','');
-INSERT INTO editpages VALUES (7,'1','Upload','The Upload-document if for all types of binary files besides\nimages (for instance PDF-files, Word-documents, Excel-files etc.)','title Title\nshort_title Short title\nteaser Teaser;rows=4\nuploaddata Upload data\nmimetype MIME-type;distinct=1\nurl Web address\nauthor Author;distinct=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (7,'2','Classification and keywords','Choose the appropriate classification and keywords for this document:','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (7,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (7,'4','Meta','The fields below are important if you want your web pages to be easily found by search machines and users of the Internet','docref Reference\ncontributors Contributors\nsource Source');
-INSERT INTO editpages VALUES (7,'5','Display','','seq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (7,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (10,'1','Text','','title Spørgsmål\nshort_title Short title\nteaser Uddybende information;rows=4\nauthor Author;distinct=1\ndocdate Date (yyyy-mm-dd)\nexpires Expiring\nseq Order of succession');
-INSERT INTO editpages VALUES (10,'2','Choices','','vote_option Answers in the poll (format: [letter] text)');
-INSERT INTO editpages VALUES (10,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (3,'1','Text','A Search-document makes it possible to create a free-text search of the\nentire website.','title Title\nshort_title Short title\nteaser Teaser;rows=4\nform Alternative search-form (leave empty for default)\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (3,'2','Display','','seq Order of succession\npagesize Number of subdocuments on one page');
+INSERT INTO editpages VALUES (7,'1','Upload','The Upload-document if for all types of binary files besides\nimages (for instance PDF-files, Word-documents, Excel-files etc.)','title Title\nshort_title Short title\nteaser Teaser;rows=4\nmimetype MIME-type;distinct=1\nuploaddata Upload data\nauthor Author;distinct=1\nseq Order of succession\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
+INSERT INTO editpages VALUES (7,'2','Keywords','','keyword Choose the appropriate keywords for this document:');
+INSERT INTO editpages VALUES (7,'3','Meta','The fields below are important if you want your web pages to be easily found by search machines and users of the Internet','docref Reference\ncontributors Contributors\nsource Source');
+INSERT INTO editpages VALUES (7,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration \nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (3,'1','Free text search','A Search-document makes it possible to create a free-text search of the\nentire website.','title Title\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshort_title Short title\nteaser Teaser;rows=4\nform Alternative search-form (leave empty for default)\ndocdate Date (YYYY-MM-DD)\nseq Order of succession;subtitle=Display-only, nopagenav=1');
 INSERT INTO editpages VALUES (3,'P','Publish document','Publish now?','');
-INSERT INTO editpages VALUES (16,'1','Link data','Link-documents are special because they redirect the user to\nthe web address when clicked. In effect they are placeholders,\nthat enable keeping classification and meta-data for external links.','title Title\nshort_title Short title\nteaser Teaser;rows=4\nurl Web address\nauthor Author;distinct=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (16,'2','Classification and keywords','','category Select classification codes\nkeyword Choose keywords');
+INSERT INTO editpages VALUES (16,'1','Link data','Link-documents are special because they redirect the user to\nthe web address when clicked. In effect they are placeholders,\nthat enable keeping classification and meta-data for external links.','title Title\nshort_title Short title\nteaser Teaser;rows=4\nurl Web address\nauthor Author;distinct=1\nseq Order of succession\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
+INSERT INTO editpages VALUES (16,'2','Keywords','','keyword Choose keywords');
 INSERT INTO editpages VALUES (16,'3','Meta','The fields below are important if you want your web pages to be easily found by search machines and users of the Internet','docref Reference\ncontributors Contributors\nsource Source');
-INSERT INTO editpages VALUES (16,'4','Display','Make the link subscribeable. This is only usefull in special cases like when you want to make a forum subscribeable','seq Order of succession\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (16,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (14,'1','Document data','','title Title\nshort_title Short title\nteaser Teaser;rows=4\ncontent Tekst\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (14,'2','Subscription data','','mailfrom Sender in subscription emails\npasswdmsg The template used send subscription passwords');
-INSERT INTO editpages VALUES (14,'3','Display-only','','seq Order of succession');
-INSERT INTO editpages VALUES (14,'P','Publish document','Publish the document?','');
-INSERT INTO editpages VALUES (11,'1','Text','','title Title\nshort_title Short title\nteaser Teaser;rows=4\nhtml_content Form (HTML)\nmailto Send email to\nmailmsg Use email-template\nbare Show title and teaser?;label_0=No, label_1=Yes, reverse_options=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (11,'2','Classification and keywords','','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (11,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (11,'4','Display','','seq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (11,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (16,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration ');
+INSERT INTO editpages VALUES (14,'1','Subscription data and display','','title Title\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshort_title Short title\nteaser Teaser (filled out);rows=4\ncontent Tekst;rows=4\ndocdate Date (YYYY-MM-DD)\nmailfrom Sender in subscription emails;subtitle=Subscription data, nopagenav=1,disabled=1\npasswdmsg The template used send subscription passwords\nseq Order of succession\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (14,'P','Publish document','Publish the document','');
+INSERT INTO editpages VALUES (11,'1','Text','','title Title\nshort_title Short title\nteaser Teaser;rows=4\nhtml_content Form (HTML)\nmailto Send email to\nmailmsg Use email-template\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
+INSERT INTO editpages VALUES (11,'2','Keywords','','keyword Choose keywords');
+INSERT INTO editpages VALUES (11,'3','Display-only','','seq Order of succession\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1\nshow_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nshow_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (11,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration \nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
 INSERT INTO editpages VALUES (17,'1','Text','','title Title\nshort_title Short title\nteaser Teaser;rows=4\nform Alternative search-form (leave empty for default)\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (17,'2','Display-only','','seq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to');
+INSERT INTO editpages VALUES (17,'2','Display-only','','seq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_teaser Show teaser;label_0=No, label_1=Yes, reverse_options=1');
 INSERT INTO editpages VALUES (17,'P','Publish document','Publish now?','');
 INSERT INTO editpages VALUES (19,'1','Table information','This is an administrative documenttype only.','title Title\nshort_title Short title\nteaser Teaser\ntable Table\nfields Fields in list (one per line)\neditcomp Edit row component\nnewcomp New row component\ndocdate Date (yyyy-mm-dd)');
-INSERT INTO editpages VALUES (19,'2','Display','How the table-rows are displayed','seq Order of succession\npagesize Number of subdocuments on one page\nsortorder Sort order of sub documents - sort according to');
 INSERT INTO editpages VALUES (19,'P','Publish document','Publish now?','');
-INSERT INTO editpages VALUES (20,'1','Event Info','','title Title\nshort_title Short title\neventtype Event Type\ndocdate Date\neventtime Time (optional)\neventplace Place where the event occurs\ncontactinfo Contact info\neventinfo Other info');
-INSERT INTO editpages VALUES (20,'2','Display-only','','seq Order of succession');
-INSERT INTO editpages VALUES (20,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (21,'1','Document data','','title Title\ndocdate Date');
-INSERT INTO editpages VALUES (21,'2','Search information','The fields below will be used to find relevant calendar events','startdate Events after this date\nenddate Events before this date\ns_event_path Only documents under (set to / for global search)\ns_event_type Event type is\ns_event_title Event title field contains\ns_event_contact Event contact info field contains\ns_event_place Event place field contains\ns_event_info Event info field contains\ns_event_order_by Order events by');
-INSERT INTO editpages VALUES (21,'3','Display-only','','show_as How to show calendar\nseq Order of succession\npagesize Number of subdocuments on one page');
-INSERT INTO editpages VALUES (21,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (22,'1','Text and pictures','','title Title\nshort_title Short title\nteaser Teaser;rows=4\nlogo URL to logo;doctype=Image\npicture URL to picture;doctype=Image\nurl Web address reference (if any)\nauthor Author;distinct=1\ndocdate Date (YYYY-MM-DD)\nexpires Expiring');
-INSERT INTO editpages VALUES (22,'2','Classification and keywords','','category Select classification codes\nkeyword Choose keywords');
-INSERT INTO editpages VALUES (22,'3','Related knowledge','Choose the classification and keywords to be used to find\nlinks to related documents.','rel_category Related classification\nrel_keyword Related keywords;new=0');
-INSERT INTO editpages VALUES (22,'4','Meta','The fields below are important if you want your web pages to\nbe easily found by search machines and users of the Internet','docref Reference\ncontributors Contributors\nsource Source');
-INSERT INTO editpages VALUES (22,'5','Display','','seq Order of succession\nsortorder Sort order of sub documents - sort according to\npagesize Number of subdocuments on one page\nvotebox URL to votebox;doctype=MultiChoice\nshow_teasers Show teasers?;label_0=No, label_1=Yes, reverse_options=1\nsubscribeable Subscription possibility?;label_none=No, label_automatic=Automatic, label_manual=Manual');
-INSERT INTO editpages VALUES (22,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration \nsec_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Afsnit nyt, nopagenav=1\nsec_dura Section news duration \nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
-INSERT INTO editpages VALUES (12,'1','Basic information','','title Title\ndocdate Date\nform Create form (HTML)');
-INSERT INTO editpages VALUES (12,'2','Document creation information','','doctype What doctype the created documents should have\nlanguage What language the created documents should have;size=2\nwhere Where the documents should be created\nname_prefix Prefix for names of the created documents\npublish_mode How to publish create documents;label_immediate=Immediate, label_moderator=Using a moderator\nsubscribe_include Include created documents in subscription when publishing;label_0=No, label_1=Yes, reverse_options=1\nemail Moderator email');
-INSERT INTO editpages VALUES (12,'P','Publishing','Publish now?','');
+INSERT INTO editpages VALUES (20,'1','Event Info','','title Title\nshort_title Short title\neventtype Event Type;distinct=1\ndocdate Date\neventtime Time (optional)\neventplace Place where the event occurs\ncontactinfo Contact info\neventinfo Other info');
+INSERT INTO editpages VALUES (20,'2','Display-only','','seq Order of succession\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1\nshow_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nshow_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (20,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura News duration \nin_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1');
+INSERT INTO editpages VALUES (21,'1','Titel og visning','','show_as How to show calendar\nShow_event Show event by;label_type=Type, label_title=Title, reverse_options=1\ntitle Title\nshow_title Show title;label_0=No, label_1=Yes, reverse_options=1\nseq Order of succession\nshow_news Show news;label_0=No, label_1=Yes, reverse_options=1\ndocdate Date\nshow_subdocs Show subdocuments;label_0=No, label_1=Yes, reverse_options=1, subtitle=Subdocuments, nopagenav=1\nshow_subdoc_teaser Show teaser on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nshow_subdoc_date Show date on subdocuments;label_0=No, label_1=Yes, reverse_options=1\nsortorder Sort order of sub documents - sort according to\npagesize Number of subdocuments on one page');
+INSERT INTO editpages VALUES (21,'2','Search information','The fields below will be used to find relevant calendar events','startdate Events from this date\nenddate Events to this date\ns_event_path Only show events under this page (set to / for global search)\ns_event_type Event type is;subtitle=Limit the search for events,doctypename=CalendarEvent,fieldname=eventtype\ns_event_title Event title field contains\ns_event_contact Event contact info field contains\ns_event_place Event place field contains\ns_event_info Event info field contains\ns_event_order_by Order events by');
+INSERT INTO editpages VALUES (21,'3','Subscription','','subscribeable Subscription possibility;label_none=No, label_automatic=Automatic, label_manual=Manual');
+INSERT INTO editpages VALUES (21,'P','Publish document','','front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1\nfront_dura Frontpage news duration\nin_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1');
 
 --
 -- Table structure for table 'fieldspecs'
@@ -274,7 +251,6 @@ CREATE TABLE fieldspecs (
 
 INSERT INTO fieldspecs VALUES (1,'title',8,0,0,1,1,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (1,'short_title',9,0,0,1,1,0,0,NULL,NULL);
-INSERT INTO fieldspecs VALUES (1,'category',2,1,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (1,'keyword',3,1,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (1,'docdate',5,0,0,1,1,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (1,'seq',12,0,0,0,1,0,0,'10.00',NULL);
@@ -286,13 +262,16 @@ INSERT INTO fieldspecs VALUES (1,'published',6,0,0,1,1,1,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (1,'publish_on',29,0,0,1,1,1,128,'0000-00-00 00:00:00',NULL);
 INSERT INTO fieldspecs VALUES (1,'in_subscription',15,0,0,1,1,1,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (1,'mimetype',9,0,0,1,1,0,0,NULL,NULL);
-INSERT INTO fieldspecs VALUES (1,'rel_category',2,1,1,1,1,0,128,NULL,NULL);
-INSERT INTO fieldspecs VALUES (1,'rel_keyword',3,1,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (1,'front_prio',25,0,0,1,1,1,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (1,'front_dura',17,0,0,1,1,1,128,'0',NULL);
-INSERT INTO fieldspecs VALUES (1,'sec_prio',25,0,0,1,1,1,128,'0',NULL);
-INSERT INTO fieldspecs VALUES (1,'sec_dura',17,0,0,1,1,1,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (1,'sec',18,0,1,1,1,1,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_title',15,0,0,0,0,0,128,'1',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_teaser',15,0,0,0,0,0,128,'1',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_date',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_news',15,0,0,0,0,0,128,'1',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_subdocs',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_subdoc_teaser',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (1,'show_subdoc_date',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (2,'author',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (2,'teaser',10,0,0,1,0,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (2,'content',10,0,0,1,1,0,128,NULL,NULL);
@@ -301,7 +280,6 @@ INSERT INTO fieldspecs VALUES (2,'docref',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (2,'contributors',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (2,'source',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (2,'picture',22,0,1,1,1,0,128,NULL,NULL);
-INSERT INTO fieldspecs VALUES (2,'votebox',22,0,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (2,'section_news',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (3,'form',11,0,0,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (3,'search_expression',10,0,0,0,0,0,128,NULL,NULL);
@@ -309,8 +287,13 @@ INSERT INTO fieldspecs VALUES (3,'new_window',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (3,'show_urls',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (3,'show_teasers',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (3,'show_new_titles',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (3,'show_searchdoc_teaser',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (3,'show_searchdoc_date',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (3,'show_searchdoc_url',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (4,'show_new_titles',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (5,'base',22,0,0,0,0,0,128,NULL,NULL);
-INSERT INTO fieldspecs VALUES (5,'search_type',23,0,0,0,0,0,128,NULL,NULL);
+INSERT INTO fieldspecs VALUES (5,'search_type',23,0,0,0,0,0,128,'keyword',NULL);
+INSERT INTO fieldspecs VALUES (5,'show_new_titles',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (6,'author',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (6,'teaser',10,0,0,1,0,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (6,'url',9,0,0,1,1,0,64,NULL,NULL);
@@ -318,8 +301,6 @@ INSERT INTO fieldspecs VALUES (6,'docref',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (6,'contributors',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (6,'source',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (6,'html_content',11,0,0,1,1,0,128,NULL,NULL);
-INSERT INTO fieldspecs VALUES (6,'bare',15,0,0,0,0,0,128,'0',NULL);
-INSERT INTO fieldspecs VALUES (6,'votebox',22,0,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (7,'author',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (7,'teaser',10,0,0,1,0,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (7,'url',9,0,0,1,1,0,64,NULL,NULL);
@@ -347,9 +328,11 @@ INSERT INTO fieldspecs VALUES (12,'form',11,0,0,1,0,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (12,'publish_mode',28,0,0,1,1,0,128,'moderator',NULL);
 INSERT INTO fieldspecs VALUES (12,'subscribe_include',15,0,0,1,1,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (12,'email',24,0,1,1,1,0,128,NULL,NULL);
-INSERT INTO fieldspecs VALUES (13,'levels',16,0,0,0,0,0,128,'2',NULL);
+INSERT INTO fieldspecs VALUES (13,'levels',33,0,0,0,0,0,128,'2',NULL);
 INSERT INTO fieldspecs VALUES (14,'mailfrom',24,0,0,0,0,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (14,'passwdmsg',9,0,0,0,0,0,128,NULL,NULL);
+INSERT INTO fieldspecs VALUES (14,'show_title',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (14,'show_teaser',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (15,'title',8,0,0,1,1,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (15,'short_title',9,0,0,1,1,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (15,'docdate',5,0,0,1,1,0,0,NULL,NULL);
@@ -362,7 +345,6 @@ INSERT INTO fieldspecs VALUES (15,'data',4,0,0,0,0,0,192,NULL,NULL);
 INSERT INTO fieldspecs VALUES (15,'size',17,0,0,0,0,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (15,'mimetype',9,0,0,1,1,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (15,'seq',12,0,0,0,1,0,0,'-10.00',NULL);
-INSERT INTO fieldspecs VALUES (15,'category',2,1,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (15,'keyword',3,1,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (16,'author',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (16,'teaser',10,0,0,1,0,0,64,NULL,NULL);
@@ -372,6 +354,8 @@ INSERT INTO fieldspecs VALUES (16,'source',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (16,'contributors',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (17,'teaser',10,0,0,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (17,'form',11,0,0,1,1,0,128,NULL,NULL);
+INSERT INTO fieldspecs VALUES (17,'show_title',15,0,0,0,0,0,128,'0',NULL);
+INSERT INTO fieldspecs VALUES (17,'show_teaser',15,0,0,0,0,0,128,'0',NULL);
 INSERT INTO fieldspecs VALUES (18,'mailfrom',24,0,0,0,0,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (19,'title',8,0,0,1,1,0,0,NULL,NULL);
 INSERT INTO fieldspecs VALUES (19,'short_title',9,0,0,1,1,0,0,NULL,NULL);
@@ -401,6 +385,7 @@ INSERT INTO fieldspecs VALUES (21,'s_event_info',9,0,0,0,0,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (21,'s_event_order_by',30,0,0,0,0,0,128,'-docdate',NULL);
 INSERT INTO fieldspecs VALUES (21,'s_event_path',22,0,0,0,0,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (21,'show_as',27,0,0,1,0,0,128,'2D',NULL);
+INSERT INTO fieldspecs VALUES (21,'show_event',34,0,0,1,0,0,128,'title',NULL);
 INSERT INTO fieldspecs VALUES (22,'author',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (22,'teaser',10,0,0,1,0,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (22,'url',9,0,0,1,1,0,64,NULL,NULL);
@@ -409,7 +394,6 @@ INSERT INTO fieldspecs VALUES (22,'contributors',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (22,'source',9,0,0,1,1,0,64,NULL,NULL);
 INSERT INTO fieldspecs VALUES (22,'logo',22,0,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (22,'picture',22,0,1,1,1,0,128,NULL,NULL);
-INSERT INTO fieldspecs VALUES (22,'votebox',22,0,1,1,1,0,128,NULL,NULL);
 INSERT INTO fieldspecs VALUES (22,'show_teasers',15,0,0,1,1,0,128,'0',NULL);
 
 --
@@ -446,7 +430,7 @@ INSERT INTO fieldtypes VALUES (6,'datetime','datetime','','regexp','^\\d\\d\\d\\
 INSERT INTO fieldtypes VALUES (7,'time','time','','regexp','^\\d\\d:\\d\\d:\\d\\d$','none','',0,'date');
 INSERT INTO fieldtypes VALUES (8,'title','line','','regexp','.','none','',0,'text');
 INSERT INTO fieldtypes VALUES (9,'line','line','','none','','none','',0,'text');
-INSERT INTO fieldtypes VALUES (10,'text','texteditor','','none','','none','',0,'text');
+INSERT INTO fieldtypes VALUES (10,'text','combinededitor','','none','','none','',0,'text');
 INSERT INTO fieldtypes VALUES (11,'textwupload','textwupload','','none','','none','',0,'text');
 INSERT INTO fieldtypes VALUES (12,'double','line','','regexp','^-?\\d+(\\.\\d+)?','none','',0,'double');
 INSERT INTO fieldtypes VALUES (13,'lang','line','','regexp','^\\w\\w$','none','',0,'text');
@@ -466,8 +450,11 @@ INSERT INTO fieldtypes VALUES (26,'subscribeable','radio','none|automatic|manual
 INSERT INTO fieldtypes VALUES (27,'showcal','radio','2D|list','regexp','^(2D|list)$','none','',0,'text');
 INSERT INTO fieldtypes VALUES (28,'publishmode','radio','immediate|moderator','regexp','^(immediate|moderator)$','none','',0,'text');
 INSERT INTO fieldtypes VALUES (29,'publish_on','publishon','','regexp','^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d$','none','',0,'date');
-INSERT INTO fieldtypes VALUES (30,'orderevents','radio','+title|-docdate|+docdate|+eventtype|+contactinfo','regexp','^(+title|-docdate|+docdate|+eventtype|+contactinfo)$','none','',0,'text');
+INSERT INTO fieldtypes VALUES (30,'orderevents','radio','+title|-docdate|+docdate|+eventtype|+contactinfo','regexp','^(\\+title|-docdate|\\+docdate|\\+eventtype|\\+contactinfo)$','none','',0,'text');
 INSERT INTO fieldtypes VALUES (31,'pagesize','pagesize','','regexp','^\\d+$','none','',0,'int');
+INSERT INTO fieldtypes VALUES (32,'fileupload2','fileupload2','','none','','none','',0,'text');
+INSERT INTO fieldtypes VALUES (33,'priority6','radio','1|2|3|4|5','regexp','^[12345]$','none','',0,'int');
+INSERT INTO fieldtypes VALUES (34,'showevent','radio','type|title','regexp','^(type|title)$','none','',0,'text');
 
 --
 -- Table structure for table 'groups'
@@ -605,8 +592,8 @@ CREATE TABLE users (
 --
 
 
-INSERT INTO users VALUES (1,'admin','$1$safdasdf$hjqFW5Yb3JysogKILEjBd.','Admin','webmaster@${domain}','');
-INSERT INTO users VALUES (2,'nobody','$1$safdasdf$1nrCPtQuzQdXcU74o11Tk/','Nobody','nobody@${domain}','');
+INSERT INTO users VALUES (1,'admin','$1$safdasdf$hjqFW5Yb3JysogKILEjBd.','Admin','webmaster@madsen.dk','');
+INSERT INTO users VALUES (2,'nobody','$1$safdasdf$1nrCPtQuzQdXcU74o11Tk/','Nobody','nobody@madsen.dk','');
 
 --
 -- Table structure for table 'versions'
@@ -638,6 +625,7 @@ INSERT INTO versions VALUES (4,'2003-03-31 13:25:14',19,0,0,'da');
 INSERT INTO versions VALUES (5,'2003-03-31 13:27:33',19,0,0,'da');
 INSERT INTO versions VALUES (6,'2003-03-31 13:29:32',19,0,0,'da');
 INSERT INTO versions VALUES (7,'2003-03-31 13:31:22',13,1,0,'da');
+INSERT INTO versions VALUES (8,'2003-11-30 16:08:40',2,1,0,'en');
 
 --
 -- Table structure for table 'vfields'
@@ -804,6 +792,35 @@ INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','FRONT_DURA',NULL,0,NULL,NUL
 INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','PUBLISH_ON',NULL,NULL,NULL,'0000-00-00 00:00:00');
 INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','IN_SUBSCRIPTION',NULL,0,NULL,NULL);
 INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SEC_DURA',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SORTORDER','+seq,+title',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_SUBDOC_DATE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','EXPIRES',NULL,NULL,NULL,'9999-01-01 00:00:00');
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','TITLE','English frontpage',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_DATE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SECTION_NEWS',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_TITLE',NULL,1,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','DOCDATE',NULL,NULL,NULL,'2003-11-30 00:00:00');
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_NEWS',NULL,1,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_SUBDOC_TEASER',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_SUBDOCS',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHORT_TITLE','English frontpage',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SUBSCRIBEABLE','none',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SEQ',NULL,NULL,10,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SHOW_TEASER',NULL,1,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SOURCE',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','MIMETYPE',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','DOCREF',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','CONTENT',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','AUTHOR',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','URL',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','TEASER',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','CONTRIBUTORS',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','PUBLISHED',NULL,NULL,NULL,'2003-11-30 16:08:44');
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','FRONT_PRIO',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','SEC',NULL,8,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','PUBLISH_ON',NULL,NULL,NULL,'0000-00-00 00:00:00');
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','IN_SUBSCRIPTION',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (8,'2003-11-30 16:08:40','FRONT_DURA',NULL,0,NULL,NULL);
 
 --
 -- Table structure for table 'voters'
