@@ -1,12 +1,6 @@
 <!-- left-menu starts -->
-<table border="0" cellspacing="0" cellpadding="0">
-<tr>
-<td height="18" colspan="3"><img src="/grafik/menu/top.gif" height="18" width="149" alt=""></td>
-</tr>
-<tr>
-<td class="black" width="1"  style="background-image: url(/grafik/admin/1x1.gif);"><img alt="" src="/grafik/1x1.gif" width="1" height="1"/></td>
-<td width="147" height="40" valign="top">
-<table border="0" cellspacing="0" cellpadding="1">
+
+<table border="0" cellspacing="0" cellpadding="1" width="145">
     <tr>
         <td width="7" height="1" ><img class="block" border="0" src="/grafik/1x1.gif" alt="" width="7" height="2"/></td>
         <td width="100%" height="1" colspan="2" ><img class="block" border="0" src="/grafik/1x1.gif"  alt="" width="100%" height="2"/></td>
@@ -15,6 +9,11 @@
 
 %if(scalar(@$menu)) {
 % for(@$menu) {
+%if ($language eq 'en') {
+%next if ($_->Name !~ /_en/);
+%} else {
+%next if ($_->Name =~ /_en/);
+%}
     <tr>
         <td width="10" align="right" valign="top" ><% ($_->param('active') and ! $path->[4]) ? '<img border="0" src="/grafik/menu/bullet.gif" alt="bullet"/>' : '<img border="0" src="/grafik/1x1.gif" width="7" height="13" alt=""/>' %></td>
         <td colspan="2" ><a class="submenu" href="<% $_->Url %>"><& /shared/shorten, text=>($_->field('short_title') ? $_->Short_Title : $_->Title), len=>33 &></a></td>
@@ -35,22 +34,12 @@
 %   }
 %  }
 %}
+%}
     <tr>
         <td width="7" height="1" ><img class="block" border="0" src="/grafik/1x1.gif" alt="" width="7" height="2"/></td>
         <td width="100%" height="1" colspan="2" ><img class="block" border="0" src="/grafik/1x1.gif"  alt="" width="100%" height="2"/></td>
         <td width="7" height="1" ><img class="block" border="0" src="/grafik/1x1.gif" alt="" width="7" height="2"/></td>
     </tr>
-</table>
-%}
-
-</td>
-<td class="black" width="1"  style="background-image: url(/grafik/admin/1x1.gif);"><img alt="" src="/grafik/1x1.gif" width="1" height="1"/></td>
-</tr>
-
-<tr>
-<td  colspan="3"><img src="/grafik/menu/bund1.gif" width="149" height="18" alt=""></td>
-</tr>
-
 </table>
 
 <%init>
@@ -66,10 +55,13 @@ my $url_2level;
 my $leftbox;
 my $leftbox_pub;
 my $leftbox_content;
+my $siteflag = $r->notes('siteflag');
+my $language = $r->notes('language');
 
 
-use Data::Dumper;
-
+if ($uri eq '/' and (not defined $siteflag)) {
+$language = 'da';
+}
 if($path->[2]) {
 $pub_version = $obvius->get_public_version($path->[2]);
 $obvius->get_version_fields($pub_version, [qw(url)]);
@@ -89,22 +81,19 @@ my %search_options = (
 		      notexpired=>1,
 		      public=>1,
                       nothidden=>1,
-		      needs_document_fields => [ 'parent' ],
+		      needs_document_fields => [ 'parent','name' ],
 		     );
 
 my @parent = $obvius->get_doc_by_path('/');
 
-
 #if ($path_number <= 2){
-$menu = $obvius->search([qw(title seq)], "parent = " . $parent[0]->Id, sortvdoc => $obvius->get_public_version($section), %search_options) if($section and $uri ne '/');
+$menu = $obvius->search([qw(title seq)], "parent = " . $parent[0]->Id, sortvdoc => $obvius->get_public_version($section), %search_options);# if($section and $uri ne '/');
 #} else {
 #$menu = $obvius->search([qw(title seq)], "parent = " . $path->[2]->Id, sortvdoc => $obvius->get_public_version($path->[2]), %search_options) if($section and $uri ne '/');
 #}
 $menu = [] unless(defined($menu));
 
 my $second_level;
-
-print STDERR "HER er path :" .Dumper($path)."\n";
 
 if($path->[1]) {
 
@@ -120,6 +109,22 @@ if($path->[1]) {
 			$_->param(active => 1);
 		}
 	}
+} else {
+
+    $second_level = $obvius->search([qw(title seq)], "parent = " . $path->[0]->Id, %search_options);
+
+    $second_level = [] unless($second_level);
+
+    for(@$second_level) {
+		my $doc = $obvius->get_doc_by_id($_->DocId);
+		$obvius->get_version_field($_, qw(short_title));
+		$_->param(url => $obvius->get_doc_uri($doc));
+		if($path->[1] and $doc->Name eq $path->[1]->Name) {
+			$_->param(active => 1);
+		}
+	}
+
+
 }
 
 for(@$menu) {
@@ -128,10 +133,11 @@ for(@$menu) {
 	$_->param(url => $obvius->get_doc_uri($doc));
 	if($doc and $path->[1] and $doc->Name eq $path->[1]->Name) {
 		$_->param(active => 1);
-        if ($second_level and @$second_level) {
-            $_->param(subdocs => $second_level);
-        }
+          if ($second_level and @$second_level) {
+              $_->param(subdocs => $second_level);
+          }
 	}
 }
+
 </%init>
 <!-- left-menu ends -->
