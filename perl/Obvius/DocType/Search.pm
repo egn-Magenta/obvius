@@ -171,6 +171,7 @@ sub action {
             }
         }
     } else {
+        $output->param('print_form' => 1);
         return OBVIUS_OK;
     }
 
