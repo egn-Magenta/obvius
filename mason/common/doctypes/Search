@@ -31,16 +31,11 @@
 </table>
 %} else {
 %   if($output->param('results') > 0) {
-<!--
-  Prøv også:
-  <a href="/avanceret_soegning/">Avanceret fritekstsøgning</a> eller
-  <a href="/databasesoegning/">databasesøgning</a>.<br>
--->
     <br />
       <& /textbox_start &>
       <table cellspacing="0" cellpadding="0" border="0" width="100%">
 
-      <strong>Søgning efter: <% $output->param('search_term') %><% $search_type !~ /^normal/ ? ' (' . $search_type_desc{$search_type} . ')' : '' %></strong><br /><br />
+      <strong>Søgning efter: <% $output->param('search_term') %><% $search_type and $search_type !~ /^normal/ ? ' (' . $search_type_desc{$search_type} . ')' : '' %></strong><br /><br />
 	<tr>
 	  <td align="left" colspan="2" height="20">
 	    <span class="tekstGraaLille">Oversigt&nbsp;over&nbsp;søgeresultat:</span></td>
