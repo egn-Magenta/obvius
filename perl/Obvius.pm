@@ -946,8 +946,8 @@ sub get_distinct_vfields {
     if($options{lang}) {
         $where .= " AND versions.lang = '" . $options{lang} . "'";
     }
-    $where .= " AND versions.public > 0 AND vfields.name = '$name'";
-    
+    $where .= " AND versions.public = 1 AND vfields.name = '$name'";
+
     # Handle a matching vfield
     if(my $vf = $options{vfields_match}) {
         if($vf->{name} and $vf->{type} and $vf->{value}) {
@@ -957,9 +957,11 @@ sub get_distinct_vfields {
         }
     }
 
+    my $order = ($options{sortrecent} ? 'versions.version DESC' : "vfields." . $value_field);
+
     my $set=DBIx::Recordset->SetupObject( {'!DataSource'=>$this->{DB},
                                             '!Table'     =>$tables,
-                                            '!Order'     =>"vfields." . $value_field,
+                                            '!Order'     =>$order,
                                             '!Fields'    =>"DISTINCT vfields.$value_field",
                                         } );
 
