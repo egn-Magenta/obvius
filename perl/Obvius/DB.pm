@@ -121,10 +121,10 @@ sub db_update_document {
 					     '!Table'      => 'documents',
 					     '!PrimKey'    => 'id',
 					    });
-    $set->Update(\%data);
+    my $ret=$set->Update(\%data);
     $set->Disconnect;
 
-    return;
+    return $ret;
 }
 
 sub db_delete_document {
