@@ -98,6 +98,11 @@ sub prepare_edit {
 #
 ########################################################################
 
+# get_session - if given a string with a session id, tries to get the
+#               corresponding session. If the argument is undefined, a
+#               new session is created and returned. Returns a
+#               hash-ref to the session on success and undef on
+#               failure.
 sub get_session {
     my ($this, $id) = @_;
 
