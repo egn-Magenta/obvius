@@ -33,16 +33,16 @@ tinyMCELang['lang_insert_table_align_bottom'] = 'Bund';
 tinyMCELang['table_insert_cell_before_desc'] = 'Inds&#230;t celle f&#248;r';
 tinyMCELang['table_insert_cell_after_desc'] = 'Inds&#230;t celle efter';
 tinyMCELang['lang_table_delete_cell_desc'] = 'Fjern celle';
-tinyMCELang['lang_table_merge_cells_desc'] = 'Merge cells';
+tinyMCELang['lang_table_merge_cells_desc'] = 'Flet celler';
 
-tinyMCELang['lang_table_merge_cells_title'] = 'Merge cells';
-tinyMCELang['lang_table_merge_cells_width'] = 'Row span';
-tinyMCELang['lang_table_merge_cells_height'] = 'Column span';
-tinyMCELang['lang_table_merge_cells_merge'] = 'Merge';
+tinyMCELang['lang_table_merge_cells_title'] = 'Flet celler';
+tinyMCELang['lang_table_merge_cells_width'] = 'Antal r&#230;kker nedad';
+tinyMCELang['lang_table_merge_cells_height'] = 'Antal kolonner til h&#248;jre';
+tinyMCELang['lang_table_merge_cells_merge'] = 'Flet';
 
-tinyMCELang['lang_insert_table_caption'] = 'Caption';
-tinyMCELang['lang_insert_table_summary'] = 'Summary';
+tinyMCELang['lang_insert_table_caption'] = 'Tabeltitel';
+tinyMCELang['lang_insert_table_summary'] = 'Resum' + unescape('%E9');
 
 // Added by jubk:
-tinyMCELang['lang_table_td_to_th_desc'] = 'Tabelcelle til tabelheading';
-tinyMCELang['lang_table_th_to_td_desc'] = 'Tabelheading til tabelcelle';
+tinyMCELang['lang_table_td_to_th_desc'] = 'Alm. celle til overskriftcelle';
+tinyMCELang['lang_table_th_to_td_desc'] = 'Overskriftcelle til alm. celle';
