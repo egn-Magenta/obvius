@@ -1,10 +1,10 @@
-//mcms_<% $name %>_editor
-//mcms_<% $name %>_html
+//obvius_<% $name %>_editor
+//obvius_<% $name %>_html
 
 function parseFrameInnerHTML(editNbr){
 	var tmpFrame, tmpFmElement
-	tmpFrame = eval("mcms_"+editNbr+"_editor")
-	tmpFmElement = eval("'mcms_"+editNbr+"_html'")
+	tmpFrame = eval("obvius_"+editNbr+"_editor")
+	tmpFmElement = eval("'obvius_"+editNbr+"_html'")
 	
 	strTmp = tmpFrame.document.body.innerHTML
 
@@ -27,8 +27,8 @@ function parseFrameInnerHTML(editNbr){
 function fixInternalAnchorLinks(editNbr){
 	var tmpFrame, tmpFmElement, tmpArrayA, root, tmpHref
 	
-	tmpFrame = eval("mcms_"+editNbr+"_editor")
-	tmpFmElement = eval("'mcms_"+editNbr+"_html'")
+	tmpFrame = eval("obvius_"+editNbr+"_editor")
+	tmpFmElement = eval("'obvius_"+editNbr+"_html'")
 	root = tmpFrame.document.documentElement.lastChild;
 	
 	tmpArrayA = root.getElementsByTagName("A")
@@ -38,7 +38,7 @@ function fixInternalAnchorLinks(editNbr){
 		if(tmpArrayA[i].getAttribute("href").indexOf(tmpFrame.location.href)!= -1){
 			tmpHref = tmpArrayA[i].getAttribute("href").substring(tmpArrayA[i].getAttribute("href").indexOf('#'))
 			tmpArrayA[i].removeAttribute("href")
-			tmpArrayA[i].setAttribute("href",tmpHref)			
+			tmpArrayA[i].setAttribute("href",tmpHref)
 		}
 	}
 }
@@ -50,13 +50,13 @@ function fixInternalLinks(editNbr, doc_uri){
 	
 	var tmpFrame, tmpFmElement, tmpArrayA, root, tmpHref
 	
-	tmpFrame = eval("mcms_"+editNbr+"_editor")
-	tmpFmElement = eval("'mcms_"+editNbr+"_html'")
+	tmpFrame = eval("obvius_"+editNbr+"_editor")
+	tmpFmElement = eval("'obvius_"+editNbr+"_html'")
 	root = tmpFrame.document.documentElement.lastChild;
 
 	var editor_href = tmpFrame.location.href;
 	editor_href = editor_href.replace(/iframeSource\.html$/, '');
-		
+	
 	tmpArrayA = root.getElementsByTagName("A")
 
 	for(i=0;i<tmpArrayA.length;i++){
@@ -65,7 +65,7 @@ function fixInternalLinks(editNbr, doc_uri){
 			tmpHref = tmpArrayA[i].getAttribute("href");
 			tmpHref = tmpHref.replace(editor_href, '');
 			tmpArrayA[i].removeAttribute("href")
-			tmpArrayA[i].setAttribute("href",tmpHref)			
+			tmpArrayA[i].setAttribute("href",tmpHref)
 		}
 	}
 }
@@ -83,8 +83,8 @@ function removeMutipleNBSP(tmpStr){
 function traverseDom(editNbr){
 	var tmpFrame, tmpFmElement
 
-	tmpFrame = eval("mcms_"+editNbr+"_editor")
-	tmpFmElement = eval("'mcms_"+editNbr+"_html'")
+	tmpFrame = eval("obvius_"+editNbr+"_editor")
+	tmpFmElement = eval("'obvius_"+editNbr+"_html'")
 	
 	
 	
@@ -116,8 +116,8 @@ function traverseDom(editNbr){
 function removeUnusedAttribute(editNbr,tag,attribute){
 	var tmpFrame, tmpFmElement, tmpArray, root
 	
-	tmpFrame = eval("mcms_"+editNbr+"_editor")
-	tmpFmElement = eval("'mcms_"+editNbr+"_html'")
+	tmpFrame = eval("obvius_"+editNbr+"_editor")
+	tmpFmElement = eval("'obvius_"+editNbr+"_html'")
 	root = tmpFrame.document.documentElement.lastChild;
 	
 	tmpArray = root.getElementsByTagName(tag)
@@ -131,8 +131,8 @@ function removeUnusedAttribute(editNbr,tag,attribute){
 
 function removeEmptyTags(editNbr){
 	var tmpFrame, tmpFmElement, tmpArray, root, tmpArrayToRemove, j
-	tmpFrame = eval("mcms_"+editNbr+"_editor")
-	tmpFmElement = eval("'mcms_"+editNbr+"_html'")
+	tmpFrame = eval("obvius_"+editNbr+"_editor")
+	tmpFmElement = eval("'obvius_"+editNbr+"_html'")
 	root = tmpFrame.document.documentElement.lastChild;
 	tmpArrayToRemove = new Array()
 	j = 0
@@ -155,7 +155,7 @@ function removeEmptyTags(editNbr){
 }
 
 function fix_ol(editNbr){
-    var tmpFrame = eval("mcms_"+editNbr+"_editor");
+    var tmpFrame = eval("obvius_"+editNbr+"_editor");
     var root = tmpFrame.document.documentElement.lastChild;
 
     ol_tags = root.getElementsByTagName("OL");
@@ -176,7 +176,7 @@ function fix_ol(editNbr){
 }
 
 function fix_ul(editNbr){
-    var tmpFrame = eval("mcms_"+editNbr+"_editor");
+    var tmpFrame = eval("obvius_"+editNbr+"_editor");
     var root = tmpFrame.document.documentElement.lastChild;
 
     ul_tags = root.getElementsByTagName("UL");
