@@ -28,6 +28,7 @@ var choose_link_url_for_<% $name %> = 'http://<% $hostname %>/admin/?obvius_op=n
 var choose_image_url_for_<% $name %> = 'http://<% $hostname %>/admin/?obvius_op=navigator&path=<% $uri %>&doctype=Image';
 var stylesheets_for_<% $name %> = 'http://<% $hostname %>/css/public.css,http://<% $hostname %>/css/common.css';
 var basehref_for_<% $name %> = 'http://<% $hostname . $uri . $uri_extra %>';
+var imagesizes_for_<% $name %> = '<% $imagesizes %>';
 </script>
 %  }
 
@@ -71,6 +72,9 @@ my $value=$session->{fields_out}->param(uc($name));
    $value=$session->{fields_in}->param(uc($name)) unless defined($value);
 
 $value = $m->scomp('/shared/printhtml', html => $value, noprefix => 1) if($value);
+
+my $imagesizes = '';
+
 if($is_composite_compatible) {
     my $hostname = $r->hostname;
     # Make sure the editor shows images correctly
@@ -78,6 +82,22 @@ if($is_composite_compatible) {
     $value =~ s#src=(["'])([^/:]+)/#src=$1$uri$2/#gi;
 
     $value =~ s#src=(["'])/#src=$1http://$hostname/#gi;
+    
+    # Get image sizes:
+    my @sizes;
+    my $sizehtml = $m->scomp('/defaults/imagesizes');
+    my @lines = split(/\r?\n/, $sizehtml);
+    for(@lines) {
+	my ($value) = (/value="([^"]+)"/);
+	if($value) {
+	    my ($label) = (/<option[^>]*>([^<]+)/);
+	    if($label) {
+		$label =~ s/&nbsp;//g;
+		push(@sizes, "$label:$value");
+	    }
+	}
+    }
+    $imagesizes = join(",", @sizes);
 }
 
 $wrap=' WRAP="' . $wrap . '" ';
