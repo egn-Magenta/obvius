@@ -3701,6 +3701,16 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Klik her for at oprette den</translation>
   </text>
 
+  <text key="lang_notification:msg7">
+    <translation lang="en">Click here to go to the </translation>
+    <translation lang="da">Klik her for at gå til den</translation>
+  </text>
+
+  <text key="lang_notification:msg8">
+    <translation lang="en">version of this document</translation>
+    <translation lang="da">version af dette dokument</translation>
+  </text>
+
   <text key="... vis alle">
     <translation lang="en">... show all</translation>
     <translation lang="da">... vis alle</translation>

@@ -10,6 +10,11 @@
 %}
 </div>
 <br>
+%} else {
+<div style="border: 2px solid black; padding: 5px;">
+<a href="<% $prefix . $good_path %>"><& SELF:msg, text=>'lang_notification:msg7' &> <& SELF:msg, text=>$missing_type &> <& SELF:msg, text=>'lang_notification:msg8' &></a>.
+</div>
+<br>
 %}
 <%init>
 my $needs_path = 1;
