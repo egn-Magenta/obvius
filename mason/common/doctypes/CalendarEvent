@@ -1,27 +1,41 @@
-<h2>Tidspunkt</h2>
-<p>
- <& /shared/display_date, date=>$date &> <% $time %>
-</p>
-
-<h2>Sted</h2>
-<p>
- <% $place %>
-</p>
-
-<h2>Kontakt</h2>
-<& /shared/htmlize, text=>$contactinfo &>
-
-<h2>Type</h2>
-<p>
- <% $eventtype %>
-</p>
-
-<h2>Information</h2>
-<& /shared/htmlize, text=>$eventinfo &>
+<& headline &>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="100" valign="top">
+Tidspunkt :
+</td>
+<td><& /shared/display_date, date=>$date &> kl. <% $time %></td>
+</tr>
+<tr>
+<td width="100" valign="top">
+Sted :
+</td>
+<td> <% $place %></td>
+</tr>
+<tr>
+<td width="100" valign="top">
+Kontakt :
+</td>
+<td><% $contactinfo %></td>
+</tr>
+<tr>
+<td width="100" valign="top">
+Type :
+</td>
+<td> <% $eventtype %>
+</td>
+</tr>
+<tr>
+<td width="100" valign="top">
+Information :
+</td>
+<td><& /shared/htmlize, text=>$eventinfo &>
+</td>
+</tr>
+</table>
 
 <%init>
 my $fields = $obvius->get_version_fields($vdoc, 128);
-
 my $eventtype = $fields->param('EventType');
 my $date = $fields->param('DocDate');
 my $time = $fields->param('EventTime');
