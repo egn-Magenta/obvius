@@ -2,15 +2,16 @@
 <table border="0" cellspacing="0" cellpadding="5" width="145">
 <tr>
 <td height="50">
+<br>
 %my $newsnumber = 1;
 % if (@newsitems) {
 %    foreach my $newsitem (@newsitems) {
 <span class="newsheader"><a href="<% $newsitem->{url} %>"><& /shared/htmlunmap, text=>$m->scomp('/shared/shorten', text=>$newsitem->{title}, len=>48) &></a><br></span>
 %if ($newsitem->{teaser} and $newsitem->{teaser} !~ /^\s+$/) {
 %my $teaser = $m->scomp('/shared/htmlize', text=>$m->scomp('/shared/shorten', text=>$newsitem->{teaser}, len=>45), no_first_paragraph=>1);
-<span class="newsteaser"><% $teaser %></span>
+<span class="newsteaser"><% $teaser %></span><br>
 %}
-<br><span class="newsdate"><& /shared/display_date, date=>$newsitem->{date} &></span><br> <% scalar(@newsitems) == $newsnumber ? '' : '<br>'%>
+<span class="newsdate"><& /shared/display_date, date=>$newsitem->{date} &></span><br> <% scalar(@newsitems) == $newsnumber ? '' : '<br>'%>
 % $newsnumber++;
 %    }
 
