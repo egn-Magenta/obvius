@@ -34,10 +34,12 @@ var imagesizes_for_<% $name %> = '<% $imagesizes %>';
 
 <table border="0" cellspacing="0" cellpadding="0">
     <tr>
+%if ($mcmscodes and $mcmscodes == 1) {
         <td valign="top">
             <a href="javascript:OpenWin('/admin/?obvius_op=mcms_code_editor&get_html=1&fieldname=<% $name %>', 750, 550)"><span style="font-size: 10px;"><& SELF:msg, text=>'Rediger med MCMS koder' &></a><br><br></span></td>
+%}
 %  if($is_composite_compatible) {
-        <td valign="top" align="right"><a href="javascript:downloadObviusEd()" id="starteditor_button_for_<% $name %>"><span style="font-size: 10px;"><& SELF:msg, text=>'Download/installer Obvius Ed editor' &></span></a></td>
+        <td valign="top" align="right"><a href="javascript:downloadObviusEd()" id="starteditor_button_for_<% $name %>"><span style="font-size: 10px;"><& SELF:msg, text=>'Download/installer Obvius Ed editor' &></span></a><br><br></td>
 %  }
     </tr>
     <tr>
@@ -54,6 +56,7 @@ var imagesizes_for_<% $name %> = '<% $imagesizes %>';
 my $use_msie = 0;
 my $user_agent = $r->header_in('user-agent');
 my $is_composite_compatible = 0;
+my $mcmscodes = $obvius->config->param('ALLOW_EDIT_MCMSCODES');
 print STDERR "User agent: " . $user_agent . "\n";
 unless($no_msie_editor) {
     if($user_agent =~ /Win/ and $user_agent !~ /Win3.11/ and $user_agent =~ /MSIE [^1234]/) {
