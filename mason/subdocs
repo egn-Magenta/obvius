@@ -90,7 +90,7 @@
 %     } @$subdocs;
 %     if ($extra>0 or $obvius_show_hidden) {
 %         if ($obvius_show_hidden) {
-	      <& SELF:link, link=>"./?obvius_show_hidden=0", title=>"Show normal", text=>'... skjul skjulte', ghosted=>$ghosted, ghosted_class=>'ghostedmoredocuments', class=>'moredocuments', tabindex=>$tabindex &>
+	      <& SELF:link, link=>"./?obvius_show_hidden=0", title=>"Show normal", text=>'... hide hidden', ghosted=>$ghosted, ghosted_class=>'ghostedmoredocuments', class=>'moredocuments', tabindex=>$tabindex &>
 %         }
 %         else {
 	      <& SELF:link, link=>"./?obvius_show_hidden=1", title=>"Show all", text=>'... vis alle', ghosted=>$ghosted, ghosted_class=>'ghostedmoredocuments', class=>'moredocuments', tabindex=>$tabindex &>
