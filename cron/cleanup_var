@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# cleanup_var - clean up the var-dir of the Obvius websites located in
+#               /var/www/
+#
+#               Dirs that doesn't contain a conf-dir are skipped. As
+#               are dirs without a var-dir.
+#
+#               Could be run once a week from cron:
+#               30 23 * * 7 /var/www/obvius/cron/cleanup_var
+#
+#
+# Copyright (C) 2003-2004, aparte, Magenta. By Adam Sjøgren (asjo@magenta-aps.dk).
+# Under the GPL.
+#
+# $Id$
+
+DOCUMENT_CACHE_RETAIN=7
+SESSIONS_RETAIN=14
+
+for d in /var/www/*/; do
+    test -d ${d}conf || continue
+    test -d ${d}var || continue
+
+    site="$(basename $d)"
+    HOSTNAME="$(hostname)"
+    echo "#Cleaning up in var under ${site} on ${HOSTNAME}"
+
+    # Handle document_cache
+    if [ -f ${d}var/document_cache.txt ]; then
+        first_entry=$(head -n 1 ${d}var/document_cache.txt | awk '{print $2}')
+        first_entry="${d}var/document_${first_entry/\//}"
+        if [ -f ${first_entry} ]; then
+            # Files that are 1) older than the first cache-entry and
+            # 2) older than ${DOCUMENT_CACHE_RETAIN} days => deleted
+            find ${d}var/document_cache/ -type f -atime +${DOCUMENT_CACHE_RETAIN} -and -not -anewer ${first_entry} | xargs rm -f
+        fi
+    fi
+
+
+    # Handle edit_sessions and user_sessions; delete files older than
+    # ${SESSIONS_RETAIN} days:
+    if [ -d ${d}var/edit_sessions ]; then
+        find ${d}var/edit_sessions/ -type f -atime +${SESSIONS_RETAIN} | xargs rm -f
+    fi
+    if [ -d ${d}var/user_sessions ]; then
+        find ${d}var/user_sessions/ -type f -atime +${SESSIONS_RETAIN} | xargs rm -f
+    fi
+done
