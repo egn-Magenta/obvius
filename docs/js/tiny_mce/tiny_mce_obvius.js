@@ -179,7 +179,7 @@ function obvius_tinymce_removeEmptyTags(rootElem){
         // We have to simulate MSIE innerText:
         var innerText = tmpArray[i].innerHTML + "";
         innerText = innerText.replace(/<[^>]+>/g,"");
-        if(innerText == "" || innerText == " "){
+        if(!tmpArray[i].childNodes[0] && (innerText == "" || innerText == " ")){
                 tmpArrayToRemove[j] = tmpArray[i];
                 j++
         }
