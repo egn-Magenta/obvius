@@ -1,7 +1,7 @@
 %if (not defined($show_subdocs) or $show_subdocs == 1) {
 <& doctypes/pager, output=>$output &>
 % if (@subdocs) {
-    <ul>
+    <ul class="show_subdocs">
 %     foreach (@subdocs) {
 %       my $date = $m->scomp('/shared/display_date', date=>$_->{docdate}, format=>'verbatim') || '';
         <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a>
