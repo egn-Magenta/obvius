@@ -49,7 +49,7 @@ my $doc_last = $output->param('doc_last');
 my $doc_total = $output->param('doc_total');
 my $page_prev = $output->param('page_prev');
 my $page_next = $output->param('page_next');
-my $page_max = $output->param('page_max');
+my $page_max = $output->param('page_max') || 0;
 
 my $page_list = $output->param('page_list');
 $page_list = [] unless($page_list);
