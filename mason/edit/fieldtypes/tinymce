@@ -1,0 +1,206 @@
+%# This fieldtype is ment to combine all the avaiable editors in the Obvius system.
+%#
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>59
+$rows=>22
+$pixelwidth=>undef
+$pixelheight=>undef
+$wrap=>1
+$onlylineif=>undef
+$no_msie_editor=>undef
+</%args>
+
+%unless($user_agent =~ /opera/i) {
+
+%# Only load script once:
+%unless($r->notes('tinymce_script_loaded')) {
+<!-- load the main Tinymce files -->
+<script type="text/javascript" src="/admin_js/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="/admin_js/tiny_mce/tiny_mce_obvius.js"></script>
+
+
+
+<script type="text/javascript">
+    tinyMCE.init({
+        theme : "advanced",
+        language : "da",
+        mode : "specific_textareas",
+        content_css : "http://<% $r->hostname %>/css/editor.css",
+        valid_elements : "*[*]",
+        plugins : "table",
+        file_browser_callback : "obvius_tinymce_navigator_callback",
+        cleanup_callback : "obvius_tinymce_html_cleanup",
+        entities : "160,nbsp,38,amp,34,quot,162,cent,8364,euro,163,pound,165,yen,169,copy,174,reg,8482,trade,8240,permil,181,micro,183,middot,8226,bull,8230,hellip,8242,prime,8243,Prime,167,sect,182,para,223,szlig,8249,lsaquo,8250,rsaquo,171,laquo,187,raquo,8216,lsquo,8217,rsquo,8220,ldquo,8221,rdquo,8218,sbquo,8222,bdquo,60,lt,62,gt,8804,le,8805,ge,8211,ndash,8212,mdash,175,macr,8254,oline,164,curren,166,brvbar,168,uml,161,iexcl,191,iquest,710,circ,732,tilde,176,deg,8722,minus,177,plusmn,247,divide,8260,frasl,215,times,185,sup1,178,sup2,179,sup3,188,frac14,189,frac12,190,frac34,402,fnof,8747,int,8721,sum,8734,infin,8730,radic,8764,sim,8773,cong,8776,asymp,8800,ne,8801,equiv,8712,isin,8713,notin,8715,ni,8719,prod,8743,and,8744,or,172,not,8745,cap,8746,cup,8706,part,8704,forall,8707,exist,8709,empty,8711,nabla,8727,lowast,8733,prop,8736,ang,180,acute,184,cedil,170,ordf,186,ordm,8224,dagger,8225,Dagger,192,Agrave,194,Acirc,195,Atilde,196,Auml,199,Ccedil,200,Egrave,202,Ecirc,203,Euml,204,Igrave,206,Icirc,207,Iuml,208,ETH,209,Ntilde,210,Ograve,212,Ocirc,213,Otilde,214,Ouml,338,OElig,217,Ugrave,219,Ucirc,220,Uuml,376,Yuml,222,THORN,224,agrave,226,acirc,227,atilde,228,auml,231,ccedil,232,egrave,234,ecirc,235,euml,236,igrave,238,icirc,239,iuml,240,eth,241,ntilde,242,ograve,244,ocirc,245,otilde,246,ouml,339,oelig,249,ugrave,251,ucirc,252,uuml,254,thorn,255,yuml,914,Beta,915,Gamma,916,Delta,917,Epsilon,918,Zeta,919,Eta,920,Theta,921,Iota,922,Kappa,923,Lambda,924,Mu,925,Nu,926,Xi,927,Omicron,928,Pi,929,Rho,931,Sigma,932,Tau,933,Upsilon,934,Phi,935,Chi,936,Psi,937,Omega,945,alpha,946,beta,947,gamma,948,delta,949,epsilon,950,zeta,951,eta,952,theta,953,iota,954,kappa,955,lambda,956,mu,957,nu,958,xi,959,omicron,960,pi,961,rho,962,sigmaf,963,sigma,964,tau,965,upsilon,966,phi,967,chi,968,psi,969,omega,8501,alefsym,982,piv,8476,real,977,thetasym,978,upsih,8472,weierp,8465,image,8592,larr,8593,uarr,8594,rarr,8595,darr,8596,harr,8629,crarr,8656,lArr,8657,uArr,8658,rArr,8659,dArr,8660,hArr,8756,there4,8834,sub,8835,sup,8836,nsub,8838,sube,8839,supe,8853,oplus,8855,otimes,8869,perp,8901,sdot,8968,lceil,8969,rceil,8970,lfloor,8971,rfloor,9001,lang,9002,rang,9674,loz,9824,spades,9827,clubs,9829,hearts,9830,diams,8194,ensp,8195,emsp,8201,thinsp,8204,zwnj,8205,zwj,8206,lrm,8207,rlm,173,shy",
+        theme_advanced_toolbar_location: "top",
+        theme_advanced_buttons2_add_before: "cut,copy,paste,separator",
+        theme_advanced_buttons3_add_before : "tablecontrols,separator",
+        theme_advanced_disable : "styleselect,help",
+        document_base_url : 'http://<% $r->hostname %><% $uri . $uri_extra %>',
+        relative_urls : false,
+        remove_script_host : false,
+        debug : false
+        //save_callback : "customSave",
+    });
+
+    function obvius_save_tinymce() {
+        tinyMCE.triggerSave();
+    }
+
+    onsubmit_array[onsubmit_array.length] = obvius_save_tinymce;
+</script>
+
+% $r->notes('tinymce_script_loaded' => 1);
+%}
+%}
+
+<textarea mce_editable="true" id="<% $name %>" name="<% $name %>" cols="<% $cols %>" rows="<% $rows %>" style="height: <% $pixelheight %>px; width: <% $pixelwidth %>px;" <% $wrap %> tabindex="10"><% $value |h %></textarea>
+
+<input type="hidden" name="obvius_<% $name %>_compare" value="<% $value |h %>">
+<div id="<% $name %>_check_xhtml">
+    <a href="#" onclick="window.open('/admin/?obvius_op=check_editor_xhtml&fieldname=<% $name %>')">Valider Xhtml<a>
+</div>
+<br />
+%
+<%init>
+my $use_msie = 0;
+my $user_agent = $r->header_in('user-agent');
+
+print STDERR "User-agent: $user_agent\n";
+
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+$value = $m->scomp('/shared/printhtml', html => $value, noprefix => 1) if($value);
+
+$value = $m->scomp('/shared/xhtml2editorhtml', html => $value) if($value);
+
+my $imagesizes = '';
+
+$wrap=' WRAP="' . $wrap . '" ';
+
+# Figure out whether we are creating a new document or editing an old.
+# If we are creating a new one we should add the documents name
+# to the document base used in the editors
+my $uri_extra = '';
+if(my $ses_doc = $session->{document}) {
+    unless($ses_doc->param('id')) {
+        $uri_extra = $ses_doc->param('name') . '/';
+    }
+}
+
+# Calculate dimensions:
+unless($pixelheight) {
+    $pixelheight = ($rows + 6) * 16;
+}
+
+unless($pixelwidth) {
+    $pixelwidth = $cols * 10;
+}
+
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name=>undef
+</%args>
+<%perl>
+if(defined($value)) {
+    $value =~ s/\r//g;
+    if($value =~ m#^\s*<P>&nbsp;</P>\s*$#si) {
+        $value = '';
+    }
+}
+$out = '';
+$p->parse($value);
+$p->eof;
+$value = $out;
+$value = $m->scomp('/shared/editorhtml2xhtml', html=>$value);
+
+# Remove extra linebreaks at the end of the text:
+$value =~ s!\s+$!\n!s;
+
+return $value;
+</%perl>
+</%method>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $hostname_from_req = $r->hostname;
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                if($tagname eq 'a' and $attr->{href}) {
+
+                                                    # Make urls relative to / and convert to .docid format if possible:
+
+                                                    my $uri = $attr->{href};
+                                                    my $org_uri = $uri;
+
+                                                    if($uri) {
+                                                        $uri =~ s!^http://$hostname_from_req/!/!;
+                                                        $uri =~ s!^/admin/!/!;
+
+                                                        if($uri =~ m!^/!) {
+                                                            # Remove anchor ref and querystring:
+                                                            $uri =~ s!#.*$!!;
+                                                            $uri =~ s!\?.*$!!;
+
+                                                            if(my $doc = $obvius->lookup_document($uri)) {
+                                                                $uri = "/" . $doc->Id . ".docid";
+                                                                $text =~ s!\Q$org_uri\E!$uri!;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    $out.=$text;
+
+                                                } elsif($tagname eq 'img') {
+
+                                                    # Make images relative to / and convert to .docid format if possible:
+
+                                                    my $org_src = $attr->{src};
+
+                                                    if($org_src) {
+                                                        # Remove achor and querystring:
+                                                        $org_src =~ s!#.*$!!;
+                                                        $org_src =~ s!\?.*$!!;
+
+                                                        my $src = $org_src;
+
+                                                        # Remove hostname:
+                                                        $src =~ s!^http://$hostname_from_req/!/!;
+                                                        $src =~ s!^/admin/!/!;
+
+
+                                                        if($src =~ m!^/!) {
+                                                            if(my $imgdoc = $obvius->lookup_document($src)) {
+                                                                $src = "/" . $imgdoc->Id . ".docid";
+                                                            }
+                                                        }
+
+                                                        $text =~ s!\Q$org_src\E!$src!;
+                                                    }
+
+                                                    $out .= $text;
+                                                } else {
+                                                    $out.=$text;
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=$text;
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+</%once>
