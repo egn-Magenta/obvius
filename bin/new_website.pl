@@ -57,6 +57,8 @@ my @dirs=(
 	  { dir=>'docs', },
 	  { dir=>'docs/grafik', },
 	  { dir=>'docs/grafik/pager', },
+	  { dir=>'docs/grafik/news', },
+	  { dir=>'docs/grafik/menu', },
 	  { dir=>'docs/css', },
 	  { dir=>'htdig', },
 	  { dir=>'htdig/db', group=>$options{httpd_group}, },
