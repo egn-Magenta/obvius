@@ -3608,9 +3608,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Dokumenttype</translation>
   </text>
 
-  <text key="Opret nyt billede her">
-    <translation lang="en">Upload new picture</translation>
+  <text key="Create new picture here">
+    <translation lang="en">Create new picture here</translation>
     <translation lang="da">Opret nyt billede her</translation>
+  </text>
+
+  <text key="Create new upload-document here">
+    <translation lang="en">Create new upload-document here</translation>
+    <translation lang="da">Opret nyt upload-dokument her</translation>
   </text>
 
   <text key="Luk">
@@ -3955,11 +3960,124 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">underdokumenter</translation>
   </text>
 
+  <text key="Choose">
+    <translation lang="en">Choose</translation>
+    <translation lang="da">Vælg</translation>
+  </text>
+
+  <text key="Choose quality (only JPEG and PNG)">
+    <translation lang="en">Choose quality (only JPEG and PNG)</translation>
+    <translation lang="da">Vælg kvalitet (kun JPEG og PNG)</translation>
+  </text>
+
+  <text key="Document title">
+    <translation lang="en">Document title</translation>
+    <translation lang="da">Dokumentets titel</translation>
+  </text>
+
+  <text key="Highest quality">
+    <translation lang="en">Highest quality</translation>
+    <translation lang="da">Højeste kvalitet</translation>
+  </text>
+
+  <text key="Lowest quality">
+    <translation lang="en">Lowest quality</translation>
+    <translation lang="da">Laveste kvalitet</translation>
+  </text>
+
+  <text key="Manually specified below">
+    <translation lang="en">Manually specified below</translation>
+    <translation lang="da">Manuelt angivet nedenfor</translation>
+  </text>
+
+  <text key="navi:Subdocuments">
+    <translation lang="en">Subdocuments</translation>
+    <translation lang="da">Underdokumenter</translation>
+  </text>
+
+  <text key="New picture">
+    <translation lang="en">New picture</translation>
+    <translation lang="da">Nyt billede</translation>
+  </text>
+
+  <text key="New upload document">
+    <translation lang="en">New upload document</translation>
+    <translation lang="da">Nyt upload dokument</translation>
+  </text>
+
+  <text key="Original format">
+    <translation lang="en">Original format</translation>
+    <translation lang="da">Oprindeligt format</translation>
+  </text>
+
+  <text key="Original size">
+    <translation lang="en">Original size</translation>
+    <translation lang="da">Oprindelig størrelse</translation>
+  </text>
+
+  <text key="Permissions">
+    <translation lang="en">Permissions</translation>
+    <translation lang="da">Rettingheder</translation>
+  </text>
+
+  <text key="Picture file">
+    <translation lang="en">Picture file</translation>
+    <translation lang="da">Billed-fil</translation>
+  </text>
+
+  <text key="Picture title">
+    <translation lang="en">Picture title</translation>
+    <translation lang="da">Billedets titel</translation>
+  </text>
+
+  <text key="Scale picture to">
+    <translation lang="en">Scale picture to</translation>
+    <translation lang="da">Scaler billede til</translation>
+  </text>
+
+  <text key="Standard quality">
+    <translation lang="en">Standard quality</translation>
+    <translation lang="da">Standard kvalitet</translation>
+  </text>
+
+  <text key="Upload document">
+    <translation lang="en">Upload document</translation>
+    <translation lang="da">Upload dokument</translation>
+  </text>
+
+  <text key="Upload-file">
+    <translation lang="en">Upload-file</translation>
+    <translation lang="da">Upload-fil</translation>
+  </text>
+
+  <text key="Upload in format">
+    <translation lang="en">Upload in format</translation>
+    <translation lang="da">Upload i følgende format</translation>
+  </text>
+
+  <text key="Upload picture">
+    <translation lang="en">Upload picture</translation>
+    <translation lang="da">Upload billede</translation>
+  </text>
+
+  <text key="You must specify an upload document">
+    <translation lang="en">You must specify an upload document</translation>
+    <translation lang="da">Du skal angive et upload-dokument</translation>
+  </text>
+
+  <text key="You must specify a picture">
+    <translation lang="en">You must specify a picture</translation>
+    <translation lang="da">Du skal angive et billede</translation>
+  </text>
+
+  <text key="You must specify a title">
+    <translation lang="en">You must specify a title</translation>
+    <translation lang="da">Du skal angive en titel</translation>
+  </text>
 
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
   </text>
-
 
 </messages>
