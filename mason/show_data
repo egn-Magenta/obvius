@@ -28,11 +28,11 @@
     </TD>
 </TR>
 %} else {
-<TR><TD class="sublevel"><& SELF:msg, text=>'This version' &></td><TD class="sublevel">: <% $vdoc->Version %></TD></TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'This version' &></td><TD class="sublevel">: <% $vdoc->Version %> <% $vdoc->Lang %></TD></TR>
 %}
-<TR><TD class="sublevel"><& SELF:msg, text=>'Latest version' &></td><TD class="sublevel">: <% $latest->Version %></TD></TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Latest version' &></td><TD class="sublevel">: <% $latest->Version %> <% $latest->Lang %></TD></TR>
 % if ($public) {
-<TR><TD class="sublevel"><& SELF:msg, text=>'Public version' &></td><TD class="sublevel">: <% $public->Version %></TD></TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Public version' &></td><TD class="sublevel">: <% $public->Version %> <% $public->Lang %></TD></TR>
 <TR><TD class="sublevel"><& SELF:msg, text=>'Expires' &><TD class="sublevel">: <% $expires %></TD></TR>
 % }
 % else {
