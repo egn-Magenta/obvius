@@ -15,8 +15,8 @@
 %next if ($_->Name =~ /_en/);
 %}
     <tr>
-        <td width="10" align="right" valign="top" ><% ($_->param('active') and ! $path->[4]) ? '<img border="0" src="/grafik/menu/bullet.gif" alt="bullet"/>' : '<img border="0" src="/grafik/1x1.gif" width="7" height="13" alt=""/>' %></td>
-        <td colspan="2" ><a class="submenu" href="<% $_->Url %>"><& /shared/shorten, text=>($_->field('short_title') ? $_->Short_Title : $_->Title), len=>33 &></a></td>
+        <td width="10" align="right" valign="top" ><img border="0" src="/grafik/1x1.gif" width="7" height="13" alt=""/></td>
+        <td colspan="2" ><a class="<% $_->param('active') ? 'submenu_active' : 'submenu' %>" href="<% $_->Url %>"><& /shared/shorten, text=>($_->field('short_title') ? $_->Short_Title : $_->Title), len=>33 &></a></td>
         <td width="7" height="1" ><img class="block" border="0" src="/grafik/1x1.gif" alt="" width="7" height="2"/></td>
 
     </tr>
@@ -26,8 +26,8 @@
 %    next if ($_->Seq< 0.0 );
      <tr>
         <td width="10" ><img border="0" src="/grafik/1x1.gif" width="10" height="1" alt=""/></td>
-        <td width="7" align="right" valign="top" ><% $_->param('active') ? '<img border="0" src="/grafik/menu/bullet.gif" alt="bullet"/>' : '<img border="0" src="/grafik/1x1.gif" width="10" height="10" alt=""/>' %></td>
-        <td width="110" ><a class="submenu" href="<% $_->Url %>"><& /shared/shorten, text=>($_->field('short_title') ? $_->Short_Title : $_->Title), len=>33 &></a></td>
+        <td width="7" align="right" valign="top" ><img border="0" src="/grafik/1x1.gif" width="10" height="10" alt=""/></td>
+        <td width="110" ><a class="<% $_->param('active') ? 'submenu_active' : 'submenu' %>" href="<% $_->Url %>"><& /shared/shorten, text=>($_->field('short_title') ? $_->Short_Title : $_->Title), len=>33 &></a></td>
         <td width="7" height="1" ><img class="block" border="0" src="/grafik/1x1.gif" alt="" width="7" height="2"/></td>
 
      </tr>
