@@ -1,0 +1,201 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$doctypeid=>undef
+$doctypename=>undef
+</%args>
+%
+<script language="javascript" type="text/javascript">
+function obvius_<% $name %>_add_from_pool() {
+    var pool = document.pageform.obvius_<% $name %>_pool.options;
+    if(pool.selectedIndex == -1) {
+        return;
+    }
+    var newElem = pool[pool.selectedIndex];
+
+
+    // Check whether the option exists
+    var options = document.pageform.<% $name %>.options;
+    for(var i=0;i<options.length;i++) {
+        if(newElem.value == options[i].value) {
+            alert("That option is already chosen");
+            // Remove it from the pool...
+            pool[pool.selectedIndex] = null;
+            return;
+        }
+    }
+
+    // Add to chosen
+    options[options.length] = new Option(newElem.value, newElem.value);
+    document.pageform.<% $name %>.selectedIndex = options.length - 1;
+    // Remove from pool
+    pool[pool.selectedIndex] = null;
+
+}
+
+function obvius_<% $name %>_add_new() {
+    var newVal = document.pageform.obvius_<% $name %>_input_new.value;
+
+    if(! newVal)
+        return;
+
+    // Check whether the option exists
+    var options = document.pageform.<% $name %>.options;
+    for(var i=0;i<options.length;i++) {
+        if(newVal == options[i].value) {
+            alert("That option is already chosen");
+            return;
+        }
+    }
+
+    options[options.length] = new Option(newVal, newVal);
+    document.pageform.<% $name %>.selectedIndex = options.length - 1;
+
+}
+
+function obvius_<% $name %>_select_all() {
+    var tmpElem = document.pageform.<% $name %>.options;
+    for(var i=0;i<tmpElem.length;i++) {
+        tmpElem[i].selected = 1;
+    }
+}
+
+function obvius_<% $name %>_remove() {
+    var formElem = document.pageform.<% $name %>;
+    var poolElem = document.pageform.obvius_<% $name %>_pool;
+
+    if(formElem.selectedIndex == -1) {
+        alert("You must choose the element you want to remove");
+        return;
+    }
+
+    while(formElem.selectedIndex != -1) {
+        var tmpVal = formElem.options[formElem.selectedIndex].value;
+
+        // Remove option
+        formElem.options[formElem.selectedIndex] = null;
+
+        // And add it back to the pool, but only if it's not already there
+        for(var i=0;i<poolElem.options.length;i++) {
+            if(poolElem.options[i].value == tmpVal) {
+                tmpValue = null;
+                break;
+            }
+        }
+        if(tmpVal)
+            poolElem.options[poolElem.options.length] = new Option(tmpVal, tmpVal);
+
+    }
+}
+
+function obvius_<% $name %>_startup() {
+    // Empty the select
+    var formElem = document.pageform.<% $name %>;
+    for(var i=0; i < formElem.options.length; i++) {
+        formElem.options[i] = null;
+    }
+
+    // Add already chosen options
+%for(@$value) {
+    formElem.options[formElem.options.length] = new Option("<% $_ %>", "<% $_ %>");
+%}
+
+}
+
+onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_select_all;
+onload_array[onload_array.length] = obvius_<% $name %>_startup;
+
+</script>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+    <td colspan="2" bgcolor="black"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="1"></td>
+</tr>
+<tr>
+    <td colspan="2"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="10"></td>
+</tr>
+<tr>
+    <td colspan="2" style="padding-left: 20px">Chosen values</td>
+</tr>
+<tr>
+    <td valign="top" style="padding-left: 20px">
+        <select name="<% $name %>" multiple="1" size="4" style="width:400px">
+            <option value="" SELECTED>MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM</option>
+        </select>
+    </td>
+    <td valign="top"><input type="button" value="Remove" onclick="obvius_<% $name %>_remove()"></td>
+</tr>
+<tr>
+    <td colspan="2"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="10"></td>
+</tr>
+<tr>
+    <td colspan="2" style="padding-left: 20px">Add excisting values</td>
+</tr>
+<tr>
+    <td valign="top" style="padding-left: 20px">
+        <select name="obvius_<% $name %>_pool" style="width:400px">
+%for(@options) {
+            <option value="<% $_ |h %>"><% $_ %></option>
+%}
+        </select>
+    </td>
+    <td valign="top">
+        <input type="button" value="Add existing" onclick="obvius_<% $name %>_add_from_pool()">
+    </td>
+</tr>
+<tr>
+    <td colspan="2"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="10"></td>
+</tr>
+<tr>
+    <td colspan="2" style="padding-left: 20px">Add a new value</td>
+</tr>
+<tr>
+    <td valign="top" style="padding-left: 20px">
+        <input type="text" name="obvius_<% $name %>_input_new" style="width:400px"></input>
+    </td>
+    <td valign="top">
+        <input type="button" value="Add new" onclick="obvius_<% $name %>_add_new()">
+    </td>
+</tr>
+<tr>
+    <td colspan="2"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="20"></td>
+</tr>
+<tr>
+    <td colspan="2" bgcolor="black"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="1"></td>
+</tr>
+</table>
+<br>
+<br>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+$value = [] unless(defined($value));
+$value = [$value] unless(ref($value) eq 'ARRAY');
+
+if(!$doctypeid and $doctypename) {
+    my $dtype = $obvius->get_doctype_by_name($doctypename);
+    $doctypeid = $dtype->Id if($dtype);
+}
+
+my %values;
+for(@$value) {
+    $values{$_} = 1;
+}
+
+my @options = grep {! $values{$_} } @{$obvius->get_distinct_vfields($name, 'text', doctypeid => $doctypeid ) || []};
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$fieldspec
+</%args>
+<%perl>
+    return $value;
+</%perl>
+</%method>
