@@ -10,13 +10,13 @@ print STDERR ">>> /edit/validate/page\n";
 # Validate and store input from previous page (number in $obvius_shownpage):
 my $editpages=$session->{pages};
 
-my @fieldlists;
+my @fieldlists=();
 if ($obvius_shownpage eq "A") {
     foreach my $editpage (@$editpages) {
 	push @fieldlists, $editpage->{fieldlist};
     }
 }
-else {
+elsif ($obvius_shownpage=~/^\d+$/) {
     my $editpage=$editpages->[($obvius_shownpage-1)];
     push @fieldlists, $editpage->{fieldlist};
 }

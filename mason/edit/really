@@ -1,6 +1,6 @@
 <form action="<% $prefix %><% $uri %>?obvius_session=<% $obvius_session %>" method="post" enctype="multipart/form-data">
 <input type="hidden" name="obvius_page" value="done">
-<input type="hidden" name="obvius_shownpage" value="<% $obvius_shownpage %>">
+<input type="hidden" name="obvius_shownpage" value="done">
 
 <h3 class="admin"><& SELF:msg, text=>'Confirm' &></h3>
 
