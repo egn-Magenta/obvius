@@ -63,6 +63,7 @@ sub get_table_data {
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
 					    '!Table'      => $table,
+                                            '!TieRow'     => 0,
 					   } );
 
     $set->Search(\%search_options);
@@ -144,7 +145,8 @@ sub get_table_record {
     my $wantarray=wantarray; # Changes inside the eval!
     eval {
         my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => $table,
+					        '!Table'      => $table,
+                                                '!TieRow'     => 0,
 					   } );
         $set->Search($how);
 
@@ -177,7 +179,8 @@ sub insert_table_record {
     my $ret;
     eval {
         my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => $table,
+					        '!Table'      => $table,
+                                                '!TieRow'     => 0,
 					   } );
 
         $ret=$set->Insert($rec);
@@ -204,10 +207,13 @@ sub delete_table_record {
     $this->db_begin;
     my $err;
     eval {
-        my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => $table,
-                                            '!PrimKey'    => 'id',
-					   } );
+        my %set_source=(
+                        '!DataSource' => $this->{DB},
+                        '!Table'      => $table,
+                        '!TieRow'     => 0,
+                       );
+        $set_source{'!PrimKey'}='id' if (defined $rec->{id});
+        my $set = DBIx::Recordset->SetupObject(\%set_source);
 
         $err=$set->Delete($where); # XXX - Changed, is delete table record in use anywhere? Anyone? Someone? Speak up!
         $set->Disconnect;
@@ -233,10 +239,13 @@ sub update_table_record {
     return if (!defined $rec->{id} and !defined $where); # XXX This does not check that the $where
                                                          #     supplied only matches one row.
 
-    my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => $table,
-                                            '!PrimKey'    => 'id',
-					   } );
+    my %set_source=(
+                    '!DataSource' => $this->{DB},
+                    '!Table'      => $table,
+                    '!TieRow'     => 0,
+                   );
+    $set_source{'!PrimKey'}='id' if (defined $rec->{id});
+    my $set = DBIx::Recordset->SetupObject(\%set_source);
 
     my $err=$set->Update($rec, $where);
     $set->Disconnect;
