@@ -18,7 +18,7 @@ $noreset=>undef
 <& /shared/add_reset_field, name=>$name &>
 % } else {
 %
-<input type="<% $type %>" size="<% $size %>" name="<% $name %>" value="<% $value %>" tabindex="10">
+<input type="<% $type %>" size="<% $size %>" name="<% $name %>" value="<% $value |h %>" tabindex="10">
 % if($choose) {
 %  my $navigator_url = "/admin/?obvius_op=navigator&fieldname=$name&path=$uri";
 <input class="normalknap" type="button" value="<& SELF:msg, text=>'Browse' &>..." onClick="javascript:OpenWin('<% $navigator_url %>',750,550);">
