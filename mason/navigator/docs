@@ -27,6 +27,9 @@
           <td valign="top">&nbsp;</td>
 %        }
           <td valign="top" class="mellemstr">
+%        if(my $img_url = $_->param('img_url')) {
+            <img src="<% $img_url %>?size=30x40" alt="" width="30" height="40" style="border: 1px solid black;" align="top">
+%        }
             <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><strong><% $_->Title %></strong></a>
           </td>
           <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[Vælg]</a></td>
@@ -53,6 +56,9 @@
           <td valign="top">&nbsp;</td>
 %        }
           <td valign="top" class="mellemstr">
+%        if(my $img_url = $_->param('img_url')) {
+            <img src="<% $img_url %>?size=30x40" alt="" width="30" height="40" style="border: 1px solid black;" align="top">
+%        }
             <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><% $_->Title %></a>
           </td>
 %        if($_->{java_action}) {
@@ -150,6 +156,12 @@ if(scalar(@$here_docs)){
         my $icon = $icons{$doctype->Name};
         $vdoc->{icon} = $icon if($icon);
 
+        if($vdoc->Type == $image_doctype->Id) {
+            my $img_url = $prefix . $_->Url;
+            $img_url =~ s!/$!!;
+            $vdoc->param('img_url' => $img_url);
+        }
+
         if($doctypeid and $vdoc->Type == $doctypeid) {
             $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "');";
             push(@special_docs, $vdoc);
@@ -176,5 +188,6 @@ my %icons = (
                 Standard => '/grafik/admin/nav_ikoner/standard.png',
                 HTML => '/grafik/admin/nav_ikoner/html.png'
             );
+my $image_doctype = $obvius->get_doctype_by_name('Image');
 </%once>
 
