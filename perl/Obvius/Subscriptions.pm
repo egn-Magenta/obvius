@@ -102,7 +102,8 @@ sub update_subscriber {
         $this->update_subscriber_categories($subscriber->{id}, $options{categories})
     }
 }
-
+# delete_subscriber($subscriber) - Removes the subscriber with ID $subscriber and
+#                                  all his subscriptions and subscriber categories.
 sub delete_subscriber {
     my ($this, $subscriber) = @_;
 
