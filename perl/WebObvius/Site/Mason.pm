@@ -336,7 +336,7 @@ sub handler ($$) {
 
         my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
 
-	if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius)) {
+	if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri)) {
 	    return NOT_FOUND if (Apache->define('NOREDIR'));
 	    return $this->redirect($req, $alternate, 'force-external');
 	}
