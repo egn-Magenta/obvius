@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="/css/public.css" Title="Public">
     <link rel="stylesheet" type="text/css" href="/css/common.css" Title="Public">
     <link rel="shortcut icon" href="/grafik/siteicon.gif" type="image/gif">
-    <& metatags,format=>'text/html',publisher=>'Lisa Radov',rights=>'http://www.radov.dk/copyright/'&>
+    <& metatags, format=>'text/html'&>
   </head>
  <body TOPMARGIN="0" LEFTMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" class="height100">
     <table border="0" cellspacing="0" cellpadding="0" width="100%" class="height100">
