@@ -2105,12 +2105,7 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Adgangsregler</translation>
   </text>
 
-  <text key="Change documenttype">
-    <translation lang="en">Change document type</translation>
-    <translation lang="da">Skift dokumenttype</translation>
-  </text>
-
-  <text key="New language">
+    <text key="New language">
     <translation lang="en">New language</translation>
     <translation lang="da">Nyt sprog</translation>
   </text>
@@ -3560,6 +3555,12 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">underdokumenter</translation>
   </text>
 
+  <text key="Change documenttype">
+    <translation lang="en">Document type</translation>
+    <translation lang="da">Dokumenttype</translation>
+  </text>
+
+
   <text key="Navigér">
     <translation lang="en">Navigate</translation>
     <translation lang="da">Navigér</translation>
@@ -3630,6 +3631,24 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Afsnit nyt</translation>
   </text>
 
+  <text key="Link to">
+    <translation lang="en">Link to</translation>
+    <translation lang="da">Link til</translation>
+  </text>
 
+  <text key="Banners">
+    <translation lang="en">Banners</translation>
+    <translation lang="da">Bannere</translation>
+  </text>
+
+  <text key="Afdforside">
+    <translation lang="en">Unit front page</translation>
+    <translation lang="da">Enheds-forside</translation>
+  </text>
+
+  <text key="Sduforside">
+    <translation lang="en">SDU front page</translation>
+    <translation lang="da">SDU Forside</translation>
+  </text>
 
 </messages>
