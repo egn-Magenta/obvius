@@ -228,6 +228,7 @@ DocType: Upload
   Fields: teaser Teaser;rows=4
   Fields: mimetype MIME-type;distinct=1
   Fields: uploaddata Upload data
+  Fields: contentdisposition How should the uploaded data be downloaded;label_attachment=Download to disk,label_inline=Show inline in browser
   Fields: author Author;distinct=1
   Fields: seq Order of succession
   Fields: docdate Date (YYYY-MM-DD)

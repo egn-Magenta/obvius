@@ -73,6 +73,7 @@ DocType: Upload parent=Base basis
  source        line                         searchable sortable threshold=64
  uploaddata    appdata						threshold=192
  size	       int>=0						threshold=192
+ contentdisposition condisp                 searchable sortable default_value=attachment
 
 DocType: Quiz parent=Standard basis searchable
  mailto            email
