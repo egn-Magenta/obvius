@@ -21,6 +21,7 @@ use Net::SMTP;
 use Getopt::Long;
 
 my $path='/home/magenta/asjo/udvikling/document_something/obvius/perl';
+my @ignore_paths=qw( WebObvius/Template/ );
 my @default_emails=(
                    'asjo@magenta-aps.dk',
                    'jubk@magenta-aps.dk',
@@ -65,7 +66,13 @@ foreach my $file (@files) {
     close $fh;
 }
 
-my $random_function=$undocumented[int rand scalar(@undocumented)];
+my $random_function;
+my $safety_net=0;
+while (!defined $random_function and $safety_net<10000) {
+    $random_function=$undocumented[int rand scalar(@undocumented)];
+    map { $random_function=undef if ($random_function=~/^$_/); } @ignore_paths;
+    $safety_net++;
+}
 my $random_email=$emails[int rand scalar(@emails)];
 
 my $message=send_message($random_email, $random_function);
