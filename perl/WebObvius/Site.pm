@@ -232,7 +232,7 @@ sub set_expire_header {
 	$req->header_out('Cache-Control', 'no-cache');
 
 	if (defined $output) {
-	    $output->param(http_equiv=>[ 
+	    $output->param(http_equiv=>[
 					{ name=>'Pragma',
 					  value=>'no-cache',
 					}
@@ -241,7 +241,14 @@ sub set_expire_header {
     } else {
 	# 15 minutes time to live
 	$req->header_out('Expires', ht_time($req->request_time + 15*60));
-	$req->header_out('Cache-Control', "max-age=" . 15*60);
+
+	# If another Cache-Control header was specified, use that one:
+	my $cache_control = $req->header_out('Cache-Control');
+
+	unless($cache_control) {
+	    $req->header_out('Cache-Control', "max-age=" . 15*60);
+	    $cache_control="max-age=" . 15*60;
+	}
 
 	if (defined $output) {
 	    $output->param(http_equiv=>[
@@ -249,7 +256,7 @@ sub set_expire_header {
 					  value=>ht_time($req->request_time + 15*60),
 					},
 					{ name=>'Cache-Control',
-					  value=>"max-age=" . 15*60,
+					  value=>$cache_control,
 					},
 				       ]);
 	}
