@@ -21,8 +21,9 @@ $ENV{'PERL5LIB'} = $ENV{'PERL5LIB'} . ":/home/httpd/obvius/perl_blib";
 my %options=(
     website=>undef,
     dbname=>undef,
-    dbuser=>'root',
+    dbuser=>'root', # For this script to access the database
     dbpasswd=>'',
+    dbusername=>undef, # For the website to access the database
     perlname=>undef,
     domain=>undef,
     wwwroot=>'/var/www',
@@ -37,6 +38,7 @@ GetOptions(
 	   'dbname=s'     =>\$options{dbname},
 	   'dbuser=s'     =>\$options{dbuser},
 	   'dbpasswd=s'   =>\$options{dbpasswd},
+           'dbusername=s' =>\$options{dbusername},
 	   'perlname=s'   =>\$options{perlname},
 	   'domain=s'     =>\$options{domain},
 	   'wwwroot=s'    =>\$options{wwwroot},
@@ -48,6 +50,7 @@ GetOptions(
 usage("Please supply website and dbname, stopping") unless ($options{website} and $options{dbname});
 $options{perlname}=ucfirst($options{dbname}) unless ($options{perlname});
 ($options{domain})=($options{website}=~/^[^.]*[.](.*)$/) unless ($options{domain});
+$options{dbusername}=substr($options{dbname}, 0, 4) unless ($options{dbusername}); # Must not be too long
 
 my @dirs=(
 	  { dir=>'backup', },
@@ -225,19 +228,19 @@ sub make_conf {
 	print $fh <<EOT;
 DSN = DBI:mysql:$options{dbname}
 
-normal_db_login=$options{dbname}_normal
+normal_db_login=$options{dbusername}_normal
 normal_db_passwd=default_normal
 
-privileged_db_login= $options{dbname}_priv
+privileged_db_login= $options{dbusername}_priv
 privileged_db_passwd=default_priv
 
 administrator = admin
 
-htdig_config = $options{domain}
+htdig_config = $options{dbname}
 htdig_title = $options{domain} - 
 
 debug = 0
-benchmark = 1
+benchmark = 0
 
 sitename=$options{website}
 perlname=$options{perlname}
@@ -289,14 +292,18 @@ sub usage {
 Usage: new_website.pl --website <website> --dbname <dbname>
 
 Further options:
-                        default:
+                           default:
 
- --perlname <perlname>  <Dbname>
- --domain <domain>      <website> after the first dot to the end
- --wwwroot <wwwroot>    /var/www
- --httpd_group <group>  www-data
- --staff_group <group>  staff
- --skeleton_dir <dir>   /var/www/obvius/skeleton
+ --perlname <perlname>     <Dbname>
+ --dbusername <short name> First 4 characters of dbname
+ --domain <domain>         <website> after the first dot to the end
+ --wwwroot <wwwroot>       /var/www
+ --httpd_group <group>     www-data
+ --staff_group <group>     staff
+ --skeleton_dir <dir>      /var/www/obvius/skeleton
+
+ --dbuser <database user>  root (what user to use when creating the database)
+ --dbpasswd <password>
 EOT
     exit(1);
 }
