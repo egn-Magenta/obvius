@@ -1,5 +1,31 @@
 package Obvius::Robot::Rapid;
 
+########################################################################
+#
+# Rapid.pm - robot for fetching news from Rapid
+#
+# Copyright (C) 2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
+# $Id$
+
 use strict;
 use warnings;
 
@@ -139,6 +165,11 @@ sub store_document {
     $self->{doc} = {};
 }
 
+# parse_document_list - runs the HTML::Parser defined by this module
+#                       on the text-parameter, optionally with debug
+#                       turned on, and returns an array-ref with the
+#                       eu_docs collected. Each collected document is
+#                       a hash-ref.
 sub parse_document_list {
     my ($text, $debug) = @_;
 
@@ -268,36 +299,29 @@ sub retrieve_real_title {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::Robot::Rapid - Perl extension for blah blah blah
+Obvius::Robot::Rapid - robot for fetching news from Rapid
 
 =head1 SYNOPSIS
 
   use Obvius::Robot::Rapid;
-  blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Robot::Rapid, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+=head2 EXPORTS
 
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+ parse_document_list
+ set_lang_and_links
+ retrieve_real_title
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::Robot>.
 
 =cut
