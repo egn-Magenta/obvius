@@ -119,7 +119,7 @@ sub read_htdig_output {
 }
 
 sub get_search_words {
-    my $words = shift;
+    my ($this, $words)=@_;
 
     return () unless ($words);
 
@@ -184,27 +184,27 @@ sub action {
     if ($advanced) {
 	my $first = 1;
 
-	my @w1 = get_search_words($input->param('words1'));
+	my @w1 = $this->get_search_words($input->param('words1'));
 	if (@w1) {
 	    $search_term = '(' . join(' and ', @w1) . ')';
 	    $first = 0;
 	}
 
-	my @w2 = get_search_words($input->param('words2'));
+	my @w2 = $this->get_search_words($input->param('words2'));
 	if (@w2) {
 	    $search_term .= (' ' . $input->param('bool2') . ' ') unless ($first);
 	    $search_term .= '(' . join(' and ', @w2) . ')';
 	    $first = 0;
 	}
 
-	my @w3 = get_search_words($input->param('words3'));
+	my @w3 = $this->get_search_words($input->param('words3'));
 	if (@w3) {
 	    $search_term .= (' ' . $input->param('bool3') . ' ') unless ($first);
 	    $search_term .= '(' . join(' and ', @w3) . ')';
 	    $first = 0;
 	}
 
-	my @w4 = get_search_words($input->param('words4'));
+	my @w4 = $this->get_search_words($input->param('words4'));
 	if (@w4) {
 	    $search_term .= (' ' . $input->param('bool4') . ' ') unless ($first);
 	    $search_term .= '(' . join(' and ', @w4) . ')';
@@ -215,7 +215,7 @@ sub action {
 
 	$search_method = 'boolean';
     } else {
-	my @words = get_search_words($input->param('words'));
+	my @words = $this->get_search_words($input->param('words'));
 	return OBVIUS_OK unless (@words); # XXX Orig. HTTP_NO_CONTENT
 
 	$search_term = join(' and ', @words);
