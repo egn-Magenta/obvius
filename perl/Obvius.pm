@@ -895,11 +895,9 @@ sub search {
 #                                           '!Debug'		=> 2,
                                         });
 
-    $having = ($having ? " HAVING $having" : '');
-
     my $query = {
                     '$where'	=> join(' AND ', @where, "($where)"),
-                    '$group'	=> "versions.docid, versions.version, versions.lang $having",
+                    '$group'	=> $having ? "versions.docid, versions.lang HAVING $having" : "versions.docid, versions.version, versions.lang",
                 };
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
@@ -947,7 +945,7 @@ sub get_distinct_vfields {
         $where .= " AND versions.lang = '" . $options{lang} . "'";
     }
     $where .= " AND versions.public > 0 AND vfields.name = '$name'";
-    
+
     # Handle a matching vfield
     if(my $vf = $options{vfields_match}) {
         if($vf->{name} and $vf->{type} and $vf->{value}) {
