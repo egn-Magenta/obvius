@@ -4117,6 +4117,11 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Tekst og links</translation>
   </text>
 
+  <text key="Choose the appropriate classification and keywords for this document:">
+    <translation lang="en">Choose the appropriate classification and keywords for this document:</translation>
+    <translation lang="da">Vælg klassifikation og nøgleord for dette dokument:</translation>
+  </text>
+
   <text key="admin_doctypes_available:admin_doctypes_notice">
     <translation lang="en">Doctypes marked with (*) are normally resticted in this area,
     but are visible to users with admin-rights.</translation>
