@@ -106,7 +106,7 @@ sub read_htdig_output {
             $s =~ s!http://[^/]+/!/!g;
             $s =~ s/\@TITLE\@/$title/ge;
             $s =~ s/\@SECTION\@/$part->Name/ge;
-            $s =~ s/\@SEARCH_PAGE\@\?/sprintf('.\/?op=search_page&part=%s;', $part->Name)/ge;
+            $s =~ s/\@SEARCH_PAGE\@\?/sprintf('.\/?op=search_page&amp;part=%s;', $part->Name)/ge;
             $s =~ s/>[^><]+?\s+-\s+/>/g;
 
             $s;
