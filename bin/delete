@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+
+# delete - small script for obvius to delete documents. Be careful. Really.
+#
+# Copyright (C) 2004, Magenta. By Adam Sjøgren. Under the GPL.
+#
+# $Id$
+
+use strict;
+use warnings;
+
+use Obvius;
+use Obvius::Config;
+use Obvius::Log;
+
+use Getopt::Long;
+
+my ($site, $recursive, $docid, $subdocsonly, $help)=(undef, 0, 0, 0, 0);
+GetOptions(
+           'site=s',     => \$site,
+           'recursive'   => \$recursive,
+           'docid'       => \$docid,
+           'subdocsonly' => \$subdocsonly,
+           'help'        => \$help,
+          );
+
+if ($help) {
+    print <<EOT;
+Usage: delete --site=sitename [OPTIONS] document[s]
+
+  --site           the name of the site to delete from (mandatory)
+  --recursive, -r  delete recursively. Be. Careful.
+  --subdocsonly    delete only the subdocs of the documents specified
+  --docid          the documents are given as docids, not as paths
+
+Note: wildcards do not work. Sorry.
+      caches are not handled.
+EOT
+    exit 0;
+}
+
+die "No site given, stopping" unless ($site);
+
+my $conf=Obvius::Config->new($site);
+die "Could not get config for $site" unless(defined($conf));
+
+my $log=Obvius::Log->new('notice');
+die "Could not get logging" unless(defined($log));
+
+my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
+die "Could not get Obvius object for $site" unless(defined($obvius));
+$obvius->{USER} = 'admin';
+
+map { delete_doc($_, $docid, $recursive, 1-$subdocsonly) } @ARGV;
+
+exit 0;
+
+
+sub delete_doc {
+    my ($doc_ident, $docid, $recursive, $self)=@_;
+
+    my $path=($docid ? $obvius->get_doc_uri($obvius->get_doc_by_id($doc_ident)) : $doc_ident);
+
+    die "Sorry, wildcards are not implemented, stopping" if ($path=~/[*]/);
+
+    my $doc=$obvius->lookup_document($path);
+    die "Couldn't find document $path" unless ($doc);
+
+    if ($recursive) {
+        my %seen=();
+        my $subvdocs=$obvius->get_document_subdocs($doc, notexpired=>0, nothidden=>0, public=>0);
+        foreach my $subvdoc (@$subvdocs) {
+            next if ($seen{$subvdoc->Docid});
+            $seen{$subvdoc->Docid}=1;
+
+            my $subdoc=$obvius->get_doc_by_id($subvdoc->Docid);
+            my $subpath=$obvius->get_doc_uri($subdoc);
+
+            delete_doc($subpath, 0, $recursive, 1);
+        }
+    }
+    $obvius->delete_document($doc) if ($self);
+    print "$path deleted.\n" if ($self);
+}

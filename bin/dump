@@ -1,0 +1,153 @@
+#!/usr/bin/perl
+
+# dump - dump an Obvius document.
+#
+# Copyright (C) 2004, Magenta. By Adam Sjøgren. Under the GPL.
+#
+# $Id$
+
+use strict;
+use warnings;
+
+use Obvius;
+use Obvius::Config;
+use Obvius::Log;
+
+use XML::Simple;
+use MIME::Base64;
+
+use Getopt::Long;
+
+my ($site, $recursive, $one_version, $docid, $help)=(undef, 0, 0, 0, 0, 0);
+GetOptions(
+           'site=s',     => \$site,
+           'recursive'   => \$recursive,
+           'one-version' => \$one_version,
+           'docid'       => \$docid,
+           'help'        => \$help,
+          );
+
+if ($help) {
+    print <<EOT;
+Usage: dump --site=sitename [OPTIONS] document[s]
+
+  --site           the name of the site to dump from (mandatory)
+  --recursive, -r  dump recursively
+  --docid          the documents are given as docids, not as paths
+
+Note: wildcards do not work. Sorry.
+
+NOTE: Does not handle binary data well. Only fields called DATA are
+      encoded.
+
+NOTE: Publish fields are not exported.
+
+EOT
+    exit 0;
+}
+
+die "No site given, stopping" unless ($site);
+
+my $conf=Obvius::Config->new($site);
+die "Could not get config for $site" unless(defined($conf));
+
+my $log=Obvius::Log->new('notice');
+die "Could not get logging" unless(defined($log));
+
+my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
+die "Could not get Obvius object for $site" unless(defined($obvius));
+$obvius->{USER} = 'admin';
+
+if (scalar(@ARGV)) {
+    print '<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>', "\n";
+    print "<documentcollection>\n";
+    map { dump_doc($_, $docid, $recursive, $one_version) } @ARGV;
+    print "</documentcollection>\n";
+}
+else {
+    print STDERR "Nothing to dump. Easy job.\n";
+}
+
+exit 0;
+
+
+sub dump_doc {
+    my ($doc_ident, $docid, $recursive, $one_version)=@_;
+
+    my $path=($docid ? $obvius->get_doc_uri($obvius->get_doc_by_id($doc_ident)) : $doc_ident);
+
+    die "Sorry, wildcards are not implemented, stopping" if ($path=~/[*]/);
+
+    # Get document:
+    my $doc=$obvius->lookup_document($path);
+    die "Couldn't find document $path" unless ($doc);
+
+    # Get all versions or the public/latest version:
+    my $vdocs;
+    if ($one_version) {
+        $vdocs=[ ($obvius->get_public_version($doc) || $obvius->get_latest_version($doc)) ];
+
+        # Remove funny things stored in the document object:
+        $doc->delete('public_versions');
+        $doc->delete('public_version');
+    }
+    else {
+        $vdocs=$obvius->get_versions($doc);
+    }
+
+    # Get fields and store the type and login as strings:
+    if (defined $vdocs) {
+        map {
+            $obvius->get_version_fields($_, 255);
+            $_->param(obvius_dump_type_name=>$obvius->get_version_type($_)->Name);
+            $_->param(obvius_dump_user_login=>$obvius->get_user($_->User)->{login});
+        } @$vdocs;
+    }
+
+    # Clean up $doc-object:
+    $doc->delete('versions');
+
+    # "Connect":
+    $doc->param(version=>$vdocs);
+    $doc->param(obvius_dump_doc_uri=>$obvius->get_doc_uri($doc));
+    my $parent=$obvius->get_doc_by_id($doc->Parent);
+    if ($parent) {
+        $doc->param(obvius_dump_parent_uri=>$obvius->get_doc_uri($parent));
+    }
+    $doc->param(obvius_dump_type_name=>$obvius->get_document_type($doc)->Name);
+    $doc->param(obvius_dump_owner_login=>$obvius->get_user($doc->Owner)->{login});
+    $doc->param(obvius_dump_grp_name=>$obvius->get_group($doc->Grp)->{name});
+
+    # Un-objectify:
+    my $doc_hash=hashify($doc);
+
+    # Dump:
+    print XMLout($doc_hash, rootname=>'document', noattr=>1), "\n";
+}
+
+sub hashify {
+    my ($obj, $name)=@_; # name is optional
+
+    # XXX TODO: Handle binary fields better!
+
+    my $ref=ref $obj;
+
+    if (!$ref) { # Scalar:
+        if (defined $obj and defined $name and $name eq 'data') { # XXX If the name is 'data', base64-encode it:
+            return encode_base64($obj);
+        }
+        return (defined $obj ? $obj : '');
+    }
+    elsif ($ref eq 'ARRAY') { # Array:
+        return [ map { hashify($_) } @$obj ];
+    }
+    elsif ($ref eq 'HASH') { # Hash:
+        return { map { lc($_)=>hashify($obj->{$_}, lc($_)) } keys (%$obj) };
+    }
+    elsif ($obj->UNIVERSAL::can('param')) { # Object with param-method:
+        return { map { lc($_)=>hashify($obj->param($_), lc($_)) } $obj->param() };
+    }
+    else {
+        return 'UNHASHIFIABLE';
+    }
+}

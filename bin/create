@@ -1,0 +1,212 @@
+#!/usr/bin/perl
+
+# create - create an Obvius document.
+#
+#  Example usage:
+#
+#   $ time /var/www/obvius/bin/delete --site deg -r --subdocsonly /videnbasen/\
+#      && time /var/www/obvius/bin/create --site deg --path /videnbasen /tmp/videnbasen.xml
+#
+#
+# Copyright (C) 2004, Magenta. By Adam Sjøgren. Under the GPL.
+#
+# $Id$
+
+use strict;
+use warnings;
+
+use Obvius;
+use Obvius::Config;
+use Obvius::Log;
+
+use XML::Simple;
+use MIME::Base64;
+use POSIX qw(strftime);
+use Unicode::String qw(utf8);
+
+use Getopt::Long;
+
+my ($site, $path, $help)=(undef, '', 0);
+GetOptions(
+           'site=s',     => \$site,
+           'path=s',     => \$path,
+           'help'        => \$help,
+          );
+
+if ($help) {
+    print <<EOT;
+Usage: create --site=sitename [OPTIONS] document[s]
+
+  --site           the name of the site to create documents in (mandatory)
+  --path           where to create the new documents (defaults to /)
+
+NOTE: Does not handle binary data well, only fields called DATA are
+      decoded.
+
+NOTE: Versions get new dates (obviusly).
+
+EOT
+    exit 0;
+}
+
+die "No site given, stopping" unless ($site);
+
+my $conf=Obvius::Config->new($site);
+die "Could not get config for $site" unless(defined($conf));
+
+my $log=Obvius::Log->new('notice');
+die "Could not get logging" unless(defined($log));
+
+my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
+die "Could not get Obvius object for $site" unless(defined($obvius));
+$obvius->{USER} = 'admin';
+
+my $path_doc=$obvius->lookup_document($path);
+die "The path $path does not exist, stopping" unless ($path_doc);
+
+print STDERR "Reading XML...\n";
+my $data=XMLin($ARGV[0], keyattr=>[]);
+print STDERR "Converting from utf8...\n";
+$data=unutf8ify($data); # For some strange reason I don't understand,
+                        # the text is converted from iso-8859-1 to
+                        # utf-8 on read. So I convert it back, here.
+$data->{document}=[ $data->{document} ] unless (ref $data->{document} eq 'ARRAY');
+
+my $default_doctype=$obvius->get_doctype_by_name('Standard');
+die "Could not get default doctype Standard, stopping" unless ($default_doctype);
+
+print STDERR "Creating documents...\n";
+my $num=0;
+foreach my $document (@{$data->{document}}) { # Must be in parent-before-child order!
+    create_document($document, $path);
+    $num++;
+}
+print STDERR "$num documents\n";
+
+exit 0;
+
+sub create_document {
+    my ($document, $path)=@_;
+
+    my $new_uri=$document->{obvius_dump_doc_uri};
+    if (defined $path) {
+        $new_uri=$path . $document->{obvius_dump_doc_uri};
+    }
+
+    print "$document->{obvius_dump_doc_uri} -> $new_uri\n";
+
+    my $versions=$document->{version};
+    $versions=[ $versions ] unless (ref $versions eq 'ARRAY');
+
+    foreach my $version (@$versions) {
+        map { $version->{fields}->{$_}=decode_base64($version->{fields}->{$_}) if ($_ eq 'data'); }
+            keys %{$version->{fields}};
+    }
+
+    if ($obvius->lookup_document($new_uri)) {
+        print " warning: a document already exists at $new_uri, skipping creation.\n";
+    }
+    else {
+        foreach my $version (@$versions) {
+            my $error='';
+            my ($new_docid, $new_version)=create_obvius_document($new_uri, $document, $version, \$error);
+        }
+    }
+}
+
+sub create_obvius_document {
+    my ($new_uri, $document, $version, $errorref)=@_;
+
+    # Defaults:
+    my $fields=Obvius::Data->new(
+                                 seq=>'10',
+                                 sortorder=>'+seq,+title',
+                                 expires=>'9999-01-01 00:00:00',
+                                 docdate=>strftime('%Y-%m-%d 00:00:00', localtime),
+                                 subscribeable=>'none',
+                                 hide_subdocs=>1,
+                                 bare=>1,
+                                );
+
+    # Fill out fields:
+    map { $fields->param($_=>$version->{fields}->{$_}); } keys (%{$version->{fields}});
+
+    my @ret=();
+    my $document_already_exists=$obvius->lookup_document($new_uri);
+    if ($document_already_exists) {
+        my $doctype=$obvius->get_doctype_by_name($version->{obvius_dump_type_name}) || $default_doctype;
+        print " (", $doctype->Name, ")";
+
+        # XXX Only one version per second, so wait for the next one to come up:
+        sleep 1;
+        @ret=($document_already_exists->Id, $obvius->create_new_version($document_already_exists, $doctype->Id, $version->{lang}, $fields));
+    }
+    else {
+        my @parent_uri=split '/', $new_uri;
+        pop @parent_uri;
+        my $parent_uri=join '/', @parent_uri;
+        my $parent=$obvius->lookup_document($parent_uri);
+
+        my $doctype=$obvius->get_doctype_by_name($document->{obvius_dump_type_name}) || $default_doctype;
+        print " (", $doctype->Name, ")";
+
+        my $owner=$obvius->get_userid($document->{obvius_dump_owner_login});
+        my $grp=$obvius->get_grpid($document->{obvius_dump_grp_name});
+
+        @ret=$obvius->create_new_document($parent, $document->{name}, $doctype->Id, $version->{lang}, $fields, $owner, $grp, $errorref);
+    }
+
+    print " $ret[0], $ret[1]";
+
+    if ($version->{public}) {
+        publish_doc_version(@ret);
+    }
+
+    print "\n";
+    return @ret;
+}
+
+sub publish_doc_version {
+    my ($new_docid, $new_version)=@_;
+
+    my $new_doc=$obvius->get_doc_by_id($new_docid);
+    my $new_vdoc = $obvius->get_version($new_doc, $new_version);
+
+    $obvius->get_version_fields($new_vdoc, 255, 'PUBLISH_FIELDS');
+
+    # Set published
+    my $publish_fields = $new_vdoc->publish_fields;
+    $publish_fields->param(PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
+    $publish_fields->param(in_subscription => 0);
+
+    my $publish_error;
+    $obvius->publish_version($new_vdoc, \$publish_error);
+
+    if($publish_error) {
+        print " Not published: $publish_error";
+        return 0;
+    }
+    else {
+        print " Published.";
+        return 1;
+    }
+}
+
+sub unutf8ify {
+    my ($obj)=@_;
+
+    my $ref=ref $obj;
+
+    if (!$ref) { # Scalar:
+        return utf8($obj)->latin1;
+    }
+    elsif ($ref eq 'ARRAY') { # Array:
+        return [ map { unutf8ify($_) } @$obj ];
+    }
+    elsif ($ref eq 'HASH') { # Hash:
+        return { map { $_=>unutf8ify($obj->{$_}) } keys (%$obj) };
+    }
+    else {
+        return 'UNUTF8IFIABLE';
+    }
+}
