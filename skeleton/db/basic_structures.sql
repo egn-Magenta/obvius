@@ -726,4 +726,117 @@ INSERT INTO vfields VALUES (3,'2003-03-31 13:21:54','AUTHOR',NULL,NULL,NULL,NULL
 INSERT INTO vfields VALUES (3,'2003-03-31 13:21:54','URL',NULL,NULL,NULL,NULL);
 INSERT INTO vfields VALUES (3,'2003-03-31 13:21:54','TEASER',NULL,NULL,NULL,NULL);
 INSERT INTO vfields VALUES (3,'2003-03-31 13:21:54','CONTRIBUTORS',NULL,NULL,NULL,NULL);
-INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','HTML_CONTENT','<p>\nAdministration af brugere, grupper, abonnenter og login-adgang:\n<ul>\n<li><a href=\"users/\">Brugere</a>\n<li><a href=\"groups/\">Grupper</a>\n<li><a href=\"subscribers/\">Abonnenter</a>\n</ul>\n</p>\n\n<p>\nServer-cache:\n<ul>\n<li><a href=\"./?mcms_op=clear_cache\">Ryd server-cache</a>.\n</ul>\n</p>\n\n<p>\nAdminJump:\n</p>\n\n<p>\nHøjreklik på AdminJump-linket nedenfor og vælg \"Føj til foretrukne...\".  Hvis værktøjslinien \"Hyperlinks\" ikke er slået til, så gør det i menuen \"Vis/Værktøjslinier/Hyperlinks\" - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen \"AdminJump\" i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).\n<ul>\n<li><a href=\"javascript:q=location.href;if(q&&q!=%22%22){q=String(q);r=new RegExp(%22http[s]?(://[^/]*/)(.*)%22);m=q.match(r);if(m){admin=%22admin/%22;ra=new RegExp(%22admin/(
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','HTML_CONTENT','<p>\nAdministration af brugere, grupper, abonnenter og login-adgang:\n<ul>\n<li><a href=\"users/\">Brugere</a>\n<li><a href=\"groups/\">Grupper</a>\n<li><a href=\"subscribers/\">Abonnenter</a>\n</ul>\n</p>\n\n<p>\nServer-cache:\n<ul>\n<li><a href=\"./?mcms_op=clear_cache\">Ryd server-cache</a>.\n</ul>\n</p>\n\n<p>\nAdminJump:\n</p>\n\n<p>\nHøjreklik på AdminJump-linket nedenfor og vælg \"Føj til foretrukne...\".  Hvis værktøjslinien \"Hyperlinks\" ikke er slået til, så gør det i menuen \"Vis/Værktøjslinier/Hyperlinks\" - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen \"AdminJump\" i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).\n<ul>\n<li><a href=\"javascript:q=location.href;if(q&&q!=%22%22){q=String(q);r=new RegExp(%22http[s]?(://[^/]*/)(.*)%22);m=q.match(r);if(m){admin=%22admin/%22;ra=new RegExp(%22admin/(.*)%22);ma=m[2].match(ra);if(ma){admin=%22%22;m[2]=ma[1];}location.href=%22http%22+m[1]+admin+m[2];}else{alert(%22Dont know how to admin %22+q+%22, sorry%22);location.href=location.href;}}else{location.href=location.href;}\">AdminJump</a>\n</ul>\n</p>',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','SORTORDER','+seq,+title',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','EXPIRES',NULL,NULL,NULL,'9999-01-01 00:00:00');
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','TITLE','Administration',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','DOCDATE',NULL,NULL,NULL,'2003-03-31 00:00:00');
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','SHORT_TITLE','Administration',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','SUBSCRIBEABLE','none',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','SEQ',NULL,NULL,-100,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','PAGESIZE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','BARE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','SOURCE',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','MIMETYPE',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','DOCREF',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','AUTHOR',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','URL',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','TEASER',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (3,'2003-03-31 13:23:10','CONTRIBUTORS',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','FIELDS','login login\nname Navn\nemail email\ngrp Grupper (groups.id,grp_user.user)\n',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','EDITCOMP','/new/user',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','DOCDATE',NULL,NULL,NULL,'2003-03-31 00:00:00');
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','NEWCOMP','/new/user',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','TABLE','users',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','SHORT_TITLE','Brugere',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','SORTORDER','+seq,+short_title',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','SEQ',NULL,NULL,10,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','EXPIRES',NULL,NULL,NULL,'9999-01-01 00:00:00');
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','PAGESIZE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','TITLE','Administration af brugere',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (4,'2003-03-31 13:25:14','TEASER',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','FIELDS','name Navn\nuser Medlemmer (users.id,grp_user.grp)\n',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','EDITCOMP','/edit/group',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','DOCDATE',NULL,NULL,NULL,'2003-03-31 00:00:00');
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','NEWCOMP','/new/group',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','TABLE','groups',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','SHORT_TITLE','Grupper',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','SORTORDER','+seq,+short_title',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','SEQ',NULL,NULL,20,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','EXPIRES',NULL,NULL,NULL,'9999-01-01 00:00:00');
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','PAGESIZE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','TITLE','Administration af grupper',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (5,'2003-03-31 13:27:33','TEASER',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','FIELDS','name Navn\ncompany Firma (notinlist)\nemail email\npasswd Kodeord (notinlist)\nsuspended Susp.\ndocid Abb._på (documents.id,subscriptions.subscriber,notinlist)\n',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','EDITCOMP','/edit/subscriber',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','DOCDATE',NULL,NULL,NULL,'2003-03-31 00:00:00');
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','NEWCOMP','/new/subscriber',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','TABLE','subscribers',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','SHORT_TITLE','Abonnementer',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','SORTORDER','+seq,+short_title',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','SEQ',NULL,NULL,30,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','EXPIRES',NULL,NULL,NULL,'9999-01-01 00:00:00');
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','PAGESIZE',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','TITLE','Administration af abonnementer',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (6,'2003-03-31 13:29:32','TEASER',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','LEVELS',NULL,2,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SORTORDER','+seq,+title',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','EXPIRES',NULL,NULL,NULL,'9999-01-01 00:00:00');
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','TITLE','Sitemap',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SECTION_NEWS',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','DOCDATE',NULL,NULL,NULL,'2003-03-31 00:00:00');
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SHORT_TITLE','Sitemap',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SUBSCRIBEABLE','none',NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SEQ',NULL,NULL,10,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SOURCE',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','MIMETYPE',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','DOCREF',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','CONTENT',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','AUTHOR',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','URL',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','TEASER',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','CONTRIBUTORS',NULL,NULL,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SEC_PRIO',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','PUBLISHED',NULL,NULL,NULL,'2003-03-31 13:31:25');
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','FRONT_PRIO',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SEC',NULL,7,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','FRONT_DURA',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','PUBLISH_ON',NULL,NULL,NULL,'0000-00-00 00:00:00');
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','IN_SUBSCRIPTION',NULL,0,NULL,NULL);
+INSERT INTO vfields VALUES (7,'2003-03-31 13:31:22','SEC_DURA',NULL,0,NULL,NULL);
+
+--
+-- Table structure for table 'voters'
+--
+
+DROP TABLE IF EXISTS voters;
+CREATE TABLE voters (
+  docid int(8) unsigned NOT NULL default '0',
+  cookie char(64) NOT NULL default '',
+  PRIMARY KEY  (docid,cookie)
+) TYPE=MyISAM PACK_KEYS=1;
+
+--
+-- Dumping data for table 'voters'
+--
+
+
+
+--
+-- Table structure for table 'votes'
+--
+
+DROP TABLE IF EXISTS votes;
+CREATE TABLE votes (
+  docid int(8) unsigned NOT NULL default '0',
+  answer char(32) NOT NULL default '',
+  total int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (docid,answer)
+) TYPE=MyISAM PACK_KEYS=1;
+
+--
+-- Dumping data for table 'votes'
+--
+
+
+
