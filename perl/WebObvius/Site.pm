@@ -194,9 +194,9 @@ sub redirect {
             # Jason: Added to detect whether to redirect to https
             my $script_uri = $req->subprocess_env('script_uri');
             my $protocol = ($script_uri =~ /^https/ or $req->subprocess_env('https')) ? 'https' : 'http';
-	    $uri = sprintf('%s://%s%s', $protocol, $req->hostname,
-			   ($req->get_server_port != 80 ? ':'.$req->get_server_port : ''))
-		. $uri;
+            my $port=$req->get_server_port;
+            $uri = sprintf('%s://%s%s', $protocol, $req->hostname,
+                           (($port!=80 and $port!=81) ? ':'.$port : '')) . $uri;
 	} else {
 	    $req->internal_redirect($uri);
 	    return DONE;
