@@ -53,7 +53,6 @@ croak ("Could not get Obvius object for $site")
 croak ("Must have a sitename") unless($sitename);
 my $base_dir = '/var/www/'. $sitename;
 
-
 ## "Main" program part
 
 do { send_automatic(); exit (0) } if ($automatic);
@@ -159,8 +158,10 @@ sub send_automatic {
             my $subdocs = get_subdocs_recursive($_, $obvius);
             $_->param('subdocs' => $subdocs);
             $docs_by_id{$_->DocId} = $_;
+            print STDERR Dumper($_) if($debug);
         }
     }
+
 
     # Get all subscribers from the database
     my $subscribers = $obvius->get_all_subscribers;
@@ -256,9 +257,34 @@ sub send_automatic {
     }
 }
 
+my $in_subscription_cache;
+
+sub get_in_subscription_docs {
+
+    return $in_subscription_cache if($in_subscription_cache);
+    my %in_subscription_docs;
+
+    my $docs = $obvius->search(
+                                ['in_subscription'],
+                                "in_subscription = 1",
+                                public => 1
+                            ) || [];
+    for(@$docs) {
+        $in_subscription_docs{$_->DocId} = $_;
+    }
+
+    $in_subscription_cache = \%in_subscription_docs;
+
+    use Data::Dumper;
+    print STDERR Dumper(\%in_subscription_docs);
+
+    print scalar(keys %in_subscription_docs) . "\n";
+
+    return \%in_subscription_docs;
+}
+
 sub get_subdocs_recursive {
     my ($vdoc) = @_;
-
 
     my $doctype = $obvius->get_doctype_by_id($vdoc->Type);
 
@@ -266,29 +292,34 @@ sub get_subdocs_recursive {
         return get_docs_by_search($vdoc);
     }
 
+    my $in_subscription_hash = get_in_subscription_docs();
+
     my @worklist;
     my @result;
-    push(@worklist, $vdoc);
+    push(@worklist, $obvius->get_doc_by_id($vdoc->DocId));
 
-    while ($vdoc = shift @worklist) {
-        my $doc = $obvius->get_doc_by_id($vdoc->DocId);
-        my $subdocs = $obvius->get_document_subdocs($doc);
+    while (my $doc = shift @worklist) {
+        my $subdocs = $obvius->get_docs_by(parent => $doc->Id);
         if($subdocs) {
             unshift(@worklist, @$subdocs);
         }
 
-        $obvius->get_version_fields($vdoc, [ 'published', 'in_subscription' ], 'PUBLISH_FIELDS');
-        $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category' ]);
+        if($in_subscription_hash->{$doc->Id}) {
+            my $vdoc = $obvius->get_public_version($doc);
 
-        push(@result, {
-                        published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
-                        title => $vdoc->Title,
-                        teaser => $vdoc->field('teaser'),
-                        category => $vdoc->field('category'),
-                        url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
-                        vdoc => $vdoc
-                    }
-                ) if($vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION} and $vdoc->{PUBLISH_FIELDS}->{PUBLISHED});
+            $obvius->get_version_fields($vdoc, [ 'published', 'in_subscription' ], 'PUBLISH_FIELDS');
+            $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category' ]);
+
+            push(@result, {
+                            published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
+                            title => $vdoc->Title,
+                            teaser => $vdoc->field('teaser'),
+                            category => $vdoc->field('category'),
+                            url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
+                            vdoc => $vdoc
+                        }
+                    ) if($vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION} and $vdoc->{PUBLISH_FIELDS}->{PUBLISHED});
+        }
     }
 
     return \@result;
@@ -303,6 +334,8 @@ sub get_docs_by_search {
     my $input = new Obvius::Data;
     my $output = new Obvius::Data;
 
+    $obvius->get_version_fields($vdoc, 256);
+
     # Hack pagesize
     $vdoc->{FIELDS}->{PAGESIZE} = 0;
 
@@ -314,7 +347,6 @@ sub get_docs_by_search {
 
 
     for my $vdoc (@$vdocs) {
-        $obvius->get_version_fields($vdoc, [ 'in_subscription' ], 'PUBLISH_FIELDS');
         $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category', 'docdate' ]);
 
         push(@result, {
@@ -333,7 +365,6 @@ sub get_docs_by_search {
 
         return \@result;
 }
-
 
 sub send_mail {
     my ($from, $subscriber, $mailtemplate) = @_;
