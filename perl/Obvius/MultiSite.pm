@@ -15,22 +15,24 @@ sub new {
 
     my $this = $class->SUPER::new($obvius_config, $user, $password, $doctypes, $fieldtypes, $fieldspecs, %options);
 
-    # Store siteroot
-    if(my $siteroot = $options{siteroot}) {
-        $this->{SITEROOT} = $siteroot;
-        if($options{rootid}) {
-            $this->{ROOTID} = $options{rootid};
-        } else {
-            my $rootdoc = $this->lookup_document($siteroot, break_siteroot => 1);
-            if($rootdoc) {
-                $this->{ROOTID} = $rootdoc->Id;
+    if($this) {
+        # Store siteroot
+        if(my $siteroot = $options{siteroot}) {
+            $this->{SITEROOT} = $siteroot;
+            if($options{rootid}) {
+                $this->{ROOTID} = $options{rootid};
             } else {
-                die "Couldn't lookup root document $this->{SITEROOT}";
+                my $rootdoc = $this->lookup_document($siteroot, break_siteroot => 1);
+                if($rootdoc) {
+                    $this->{ROOTID} = $rootdoc->Id;
+                } else {
+                    die "Couldn't lookup root document $this->{SITEROOT}";
+                }
             }
+        } else {
+            $this->{SITEROOT} = '';
+            $this->{ROOTID} = 1; # XXX root ref
         }
-    } else {
-        $this->{SITEROOT} = '';
-        $this->{ROOTID} = 1; # XXX root ref
     }
 
     return $this;
