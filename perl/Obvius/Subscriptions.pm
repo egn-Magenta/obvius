@@ -219,6 +219,10 @@ sub update_subscription {
 
 }
 
+# update_descriptions - Updates the subsciption list for a subscriber. Arguments
+#                       are a subscriber id and an array of docid's the subscriber
+#                       should subscribe to. The array must contain ALL the docids
+#                       the subscribers want a subscription on, not just the changes.
 sub update_subscriptions {
     my ($this, $subscriber, $docids) = @_;
 

@@ -684,6 +684,8 @@ sub db_update_table {
     return;
 }
 
+# db_delete_table - Deletes records from a table. Input is a hash with the
+#                   keys: table,id,key. "key" is optional, its default value is "id".
 sub db_delete_table {
     my ($this, %args) = @_;
 
