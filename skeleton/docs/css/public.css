@@ -9,12 +9,30 @@ body {
 
 /* LEFTMENU CLASSES - START  */
 
-.submenu {
+.submenu_active {
   color: #8A004F;
   font-weight: bold;
-  font-size: 10px;
+  font-size: 11px;
   text-decoration: none;
 }
+
+.submenu_active A:link {text-decoration: none;}
+.submenu_active A:visited {text-decoration: none;}
+.submenu_active A:active {text-decoration: none;}
+.submenu_active A:hover { text-decoration: underline;}
+
+
+.submenu {
+  color: #8A004F;
+  font-weight: normal;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.submenu A:link {text-decoration: none;}
+.submenu A:visited {text-decoration: none;}
+.submenu A:active {text-decoration: none;}
+.submenu A:hover { text-decoration: underline;}
 
 /* LEFTMENU CLASSES - END  */
 
