@@ -35,8 +35,8 @@ use Obvius;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(combo_search_parse);
-our @EXPORT = ();
+our @EXPORT_OK = qw(handle_search_expression combo_search_parse);
+our @EXPORT = qw(handle_search_expression);
 our $VERSION = '0.01';
 
 use Data::Dumper;
@@ -99,6 +99,26 @@ sub combo_search_parse {
 
     return ($where, @fields);
 }
+
+sub handle_search_expression {
+    my $program = shift;
+
+    return (undef, undef) unless($program);
+
+    # Remove windows stuff
+    $program =~ s/\r//g;
+
+    return (undef, undef) unless($program);
+
+    # Remove start and end
+    $program =~ s/^.*?\@search\b//s;
+    $program =~ s/\@end\b.*$//s;
+
+    return (undef, undef) unless($program);
+
+    return combo_search_parse($program);
+}
+
 
 sub new {
     my ($class, %options) = @_;
