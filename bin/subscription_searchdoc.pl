@@ -205,19 +205,6 @@ sub send_automatic {
             $subdocs = [] unless($subdocs);
 
             @docs_2_send = grep { $s->{last_update} lt $_->{published} } @$subdocs;
-            # Filter out docs that aren't categorized with the selected categories.
-            # No categories, means don't filter at all.
-            if ($_->{categories} and @{$_->{categories}}) {
-                @docs_2_send=grep {
-                    my $ret=0;
-                    foreach my $c (@{$_->{category}}) {
-                        if ($subscriber_categories{$c->Id}) {
-                            $ret=1; last;
-                        }
-                    }
-                    $ret;
-                } @docs_2_send;
-            }
 
             if($vdoc and @docs_2_send) {
                 push(@subscriptions_2_send, {
@@ -303,13 +290,12 @@ sub get_subdocs_recursive {
             my $vdoc = $obvius->get_public_version($doc);
 
             $obvius->get_version_fields($vdoc, [ 'published', 'in_subscription' ], 'PUBLISH_FIELDS');
-            $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category' ]);
+            $obvius->get_version_fields($vdoc, [ 'title', 'teaser' ]);
 
             push(@result, {
                             published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
                             title => $vdoc->Title,
                             teaser => $vdoc->field('teaser'),
-                            category => $vdoc->field('category'),
                             url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
                             vdoc => $vdoc
                         }
@@ -328,7 +314,7 @@ sub get_docs_by_search {
 
     my $input = new Obvius::Data;
     my $output = new Obvius::Data;
-    
+
     $obvius->get_version_fields($vdoc, 256);
 
     $obvius->get_version_fields($vdoc, 256);
@@ -343,7 +329,7 @@ sub get_docs_by_search {
     my @result;
 
     for my $vdoc (@$vdocs) {
-        $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category', 'docdate' ]);
+        $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'docdate' ]);
 
         push(@result, {
                         # Cheat and use docdate for "published" - this way we don't risk
@@ -352,7 +338,6 @@ sub get_docs_by_search {
                         published => $vdoc->field('docdate'),
                         title => $vdoc->Title,
                         teaser => $vdoc->field('teaser'),
-                        category => $vdoc->field('category'),
                         url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
                         vdoc => $vdoc
                     }
