@@ -22,6 +22,7 @@ $postfix=>''
 $parent=>0
 $link_add_version=>0
 $return=>undef
+$no_redirect=>0
 </%args>
 %
 <%init>
@@ -48,5 +49,7 @@ $r->content_type('text/html');
 #$r->header_out('Location' => "$prefix$linkuri");
 #$m->abort(301);
 $linkuri=~s/ /%20/g;
-$r->notes(redirect=>"$prefix$linkuri");
+unless ($no_redirect) {
+    $r->notes(redirect=>"$prefix$linkuri");
+}
 </%init>
