@@ -236,10 +236,14 @@ function obvius_go_edit_page(pagenr) {
 <!-- :top header -->
 % }
 %
+<%once>
+use URI::Escape;
+</%once>
+%
 <%init>
 my $title=$vdoc->Title || $vdoc->Short_title || '';
 my $version=$vdoc->Version;
-my $version_url = $_escape->($version, 'u');
+my $version_url = uri_escape($version);
 my $user=$obvius->{USERS}->{$obvius->User}->{name};
 
 my $editpages;

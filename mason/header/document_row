@@ -28,6 +28,11 @@
     </tr>
 </table>
 %}
+%
+<%once>
+use URI::Escape;
+</%once>
+%
 <%args>
 $ghosted=>0
 </%args>
@@ -36,7 +41,7 @@ $ghosted=>0
 my $public=$obvius->get_public_version($doc);
 my $displayed_version_is_public=($public and $public->Version eq $vdoc->Version);
 
-my $docversion = $_escape->($vdoc->Version, 'u');
+my $docversion = uri_escape($vdoc->Version);
 
 my %ghosted=(
 	     view_public=>!$public,

@@ -51,7 +51,7 @@
                     <a href="javascript:navigator_navigate('<% $document->Url %>')">
 %       if ($is_current) {
 %         if($simple) {
-%                       $_out->('[' . $document->Name . '/]');
+[<% $document->Name %>/]\
 %         } else {
                         <font color="#ffffff"><% $document->Name %>/</font>
 %         }
