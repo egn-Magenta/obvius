@@ -7,6 +7,7 @@ use strict;
 use warnings;
 
 use Obvius::FieldType;
+use Date::Calc qw(check_date);
 
 our @ISA = qw( Obvius::FieldType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -40,6 +41,10 @@ sub copy_in {
         }
     }
 
+    if ($this->{VALIDATE_ARGS} eq 'CorrectDate') {
+        return $value;
+    }
+
     $obvius->log->notice("Obvius::FieldType::Special unknown special type $this->{VALIDATE_ARGS}, falling through.");
     return $value;
 }
@@ -70,6 +75,16 @@ sub copy_out {
             } else {
                 return $value;
             }
+        }
+    }
+
+    if ($this->{VALIDATE_ARGS} eq 'CorrectDate') {
+        return undef unless($value);
+        my ($year, $month, $day) = ($value =~ /(\d\d\d\d)-(\d\d)-(\d\d)/);
+        if(check_date($year, $month, $day)) {
+            return $value;
+        } else {
+            return undef;
         }
     }
 
