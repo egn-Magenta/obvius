@@ -44,6 +44,42 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
+    my $session = $input->param('session') || {};
+    my $sesdocs = $session->{docs};
+
+    if($sesdocs and scalar(@$sesdocs)) {
+        # Carry on session ID
+        $output->param('SESSION_ID' => $session->{_session_id}) if($session->{_session_id});
+
+        $output->param('show_as' => $session->{show_as});
+
+        my $pagesize = $session->{pagesize};
+        my $require = $session->{require};
+        if($pagesize) {
+            my $page = $input->param('p') || 1;
+            $this->export_paged_doclist($pagesize, $sesdocs, $output, $obvius,
+                                        name=>'tmpevents',
+                                        page=>$page,
+                                        require=>$require,
+                                        include_images=>1,
+                                        return_vdoclist => 1,
+                                    );
+        } else {
+            $this->export_doclist($sesdocs,  $output, $obvius,
+                                    name=>'tmpevents',
+                                    #prefix => $prefix,
+                                    require=>$require,
+                                    include_images=>1,
+                                    return_vdoclist => 1,
+                        );
+        }
+
+        my $tmpevents = $output->param('tmpevents') || [];
+        $output->param('events' => $this->export_eventlist($obvius, $tmpevents));
+
+        return OBVIUS_OK;
+    }
+
     my $event_doctype = $obvius->get_doctype_by_name('CalendarEvent');
 
     croak("Couldn't find event doctypeid\n") unless($event_doctype);
@@ -68,7 +104,8 @@ sub action {
                                         's_event_place',
                                         's_event_info',
                                         's_event_order_by',
-                                        'show_as'
+                                        'show_as',
+                                        'pagesize'
                                         ]);
 
     my @fields = ( 'docdate' );
@@ -138,56 +175,80 @@ sub action {
     $output->param(Obvius_DEPENCIES => 1);
     my $result = $obvius->search(\@fields, $where, %options);
     $result = [] unless($result);
-    #Now, let's make a neat list
-    my @events;
-    for(@$result) {
-        my $doc = $obvius->get_doc_by_id($_->DocId);
-        my $url = $obvius->get_doc_uri($doc);
-        $obvius->get_version_fields($_, [
-                                        'title',
-                                        'eventtype',
-                                        'eventtime',
-                                        'eventplace',
-                                        'contactinfo',
-                                        'eventinfo'
-                                    ]
-                                );
-        push(@events, {
-                        'title' => $_->field('title'),
-                        'eventtype' => $_->field('eventtype'),
-                        'date' => $_->DocDate,
-                        'time' => $_->field('eventtime'),
-                        'place' => $_->field('eventplace'),
-                        'contactinfo' => $_->field('contactinfo'),
-                        'eventinfo' => $_->field('eventinfo'),
-                        'url' => $url
-                    });
-    }
 
     $output->param(show_as => $show_as);
 
     if($show_as eq 'list') {
-        $output->param(events => \@events);
+        # Show as a list..
+        my $session = {};
+
+        my $pagesize = $vdoc->field('pagesize') || 0;
+
+        if ($pagesize) {
+            my $page = $input->param('p') || 1;
+            $this->export_paged_doclist($pagesize, $result, $output, $obvius,
+                                        name=>'tmpevents', page=>$page,
+                                        require=>'teaser',
+                                        include_images=>1,
+                                        return_vdoclist => 1,
+                                    );
+        } else {
+            $this->export_doclist($result,  $output, $obvius,
+                                    name=>'tmpevents',
+                                    require=>'teaser',
+                                    include_images=>1,
+                                    return_vdoclist => 1,
+                                );
+
+        }
+
+        my $tmpevents = $output->param('tmpevents') || [];
+        $output->param('events' => $this->export_eventlist($obvius, $tmpevents));
+
+        # Store stuff in session
+        $session->{docs} = $result;
+        $session->{pagesize} = $pagesize;
+        $session->{require} = '';
+        $session->{show_as} = 'list';
+        $output->param('session' => $session);
     } else {
+        #Now, let's make a neat list
+        my $events = $this->export_eventlist($obvius, $result);
+
         my $event_hash = {};
 
         my ($timemin, $timemax);
 
-        for my $e (@events) {
+        for my $e (@$events) {
             my $time = $e->{date};
-            my ($e_year, $e_month, $e_day) = ($time =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
+            my ($start_year, $start_month, $start_day) = ($time =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
 
             $timemin = $time unless (defined($timemin) and $timemin le $time);
             $timemax = $time unless (defined($timemax) and $timemax ge $time);
 
-            my $weekno;
-            ($weekno, $e_year) = Week_of_Year($e_year, $e_month, $e_day);
-            $weekno = sprintf("%4.4d%2.2d", $e_year, $weekno);
-            my $weekday = Day_of_Week($e_year, $e_month, $e_day);
+            my $delta_days = 0;
 
-            $event_hash->{$weekno}->{$weekday} = [] unless (defined($event_hash->{$weekno}->{$weekday}));
+            my $endtime = $e->{enddate};
+            if($endtime and $endtime ne $time and $endtime =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/) {
+                my $end_year = $1;
+                my $end_month = $2;
+                my $end_day = $3;
 
-            push(@{$event_hash->{$weekno}->{$weekday}}, $e);
+                $timemax = $endtime unless (defined($timemax) and $timemax ge $endtime);
+                my $dds = Delta_Days($start_year, $start_month, $start_day, $end_year, $end_month, $end_day);
+
+                $delta_days = $dds if($dds > 0);
+            }
+
+            for(0..$delta_days) {
+                my ($year, $month, $day) = Add_Delta_Days($start_year, $start_month, $start_day, $_);
+                my ($weekno, $w_year) = Week_of_Year($year, $month, $day);
+                $weekno = sprintf("%4.4d%2.2d", $w_year, $weekno);
+                my $weekday = Day_of_Week($year, $month, $day);
+
+                $event_hash->{$weekno}->{$weekday} = [] unless (defined($event_hash->{$weekno}->{$weekday}));
+                push(@{$event_hash->{$weekno}->{$weekday}}, $e);
+            }
         }
 
         my ($weekmin, $weekmax);
@@ -259,6 +320,39 @@ sub adjust_ymd {
     $d = $dim if($d > $dim);
 
     return($y, $m, $d);
+}
+
+sub export_eventlist {
+    my ($this, $obvius, $events) = @_;
+
+    my @events;
+    for(@$events) {
+        my $doc = $obvius->get_doc_by_id($_->DocId);
+        my $url = $obvius->get_doc_uri($doc);
+        $obvius->get_version_fields($_, [
+                                        'title',
+                                        'eventtype',
+                                        'eventtime',
+                                        'eventplace',
+                                        'contactinfo',
+                                        'eventinfo',
+                                        'enddate'
+                                    ]
+                                );
+        push(@events, {
+                        'title' => $_->field('title'),
+                        'eventtype' => $_->field('eventtype'),
+                        'date' => $_->DocDate,
+                        'enddate' => $_->field('enddate'),
+                        'time' => $_->field('eventtime'),
+                        'place' => $_->field('eventplace'),
+                        'contactinfo' => $_->field('contactinfo'),
+                        'eventinfo' => $_->field('eventinfo'),
+                        'url' => $url
+                    });
+    }
+
+    return \@events;
 }
 
 1;
