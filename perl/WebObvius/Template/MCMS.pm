@@ -1295,6 +1295,12 @@ sub create_anchorized_content_html {
     return 0;
 }
 
+# do_make_anchors_hook - provides a #make_anchors command to the
+#                        template (I think), that fills in the
+#                        list-variable "anchors" with the anchors
+#                        created by calling create_anchorized_content
+#                        (if any); passed from there to here via
+#                        pnotes.
 sub do_make_anchors_hook {
     my($this, $n, $c)=@_;
 
@@ -1307,6 +1313,10 @@ sub do_make_anchors_hook {
     return '';
 }
 
+# do_make_anchors_hook_html - same as do_make_anchors_hook, except it
+#                             calls create_anchorized_content_html,
+#                             thusly this is for HTML-documents, the
+#                             one before for MCMS-coded documents.
 sub do_make_anchors_html_hook {
     my($this, $n)=@_;
 
