@@ -1,7 +1,11 @@
 %for(@$events) {
 	<table>
 	  <tr>
+%if ($show_event eq 'type') {
 	    <th><% $_->{eventtype} %></th>
+%} else {
+            <th><% $_->{title} %></th>
+%}
 	  </tr>
 	  <tr>
 	    <td valign="top" align="right">Titel:</td>
@@ -33,3 +37,8 @@
 <%args>
 $events=>[]
 </%args>
+
+<%init>
+$obvius->get_version_fields($vdoc, [qw(show_event)]);
+my $show_event = $vdoc->Show_event;
+</%init>
