@@ -235,7 +235,8 @@ function replaceWordParagraphs(editNbr)
 	  //Add all descendants of the old node to the new node
 	  var children = tmpArray[i].childNodes;
 	  for (n=0;n<children.length;n++) {
-		newElem.appendChild(children[n]);
+		nNode = children[n].cloneNode(true); //We need to clone the child because its removed later on
+		newElem.appendChild(nNode);
 	  }
 
 	  tmpArray[i].parentNode.replaceChild(newElem, tmpArray[i]);
