@@ -122,8 +122,17 @@ if(my $ses_doc = $session->{document}) {
 <%args>
 $value=>undef
 $name=>undef
+$session=>undef
 </%args>
 <%perl>
+# Setup base uri:
+$base_uri = $uri;
+if(my $ses_doc = $session->{document}) {
+    unless($ses_doc->param('id')) {
+        $base_uri = $uri . $ses_doc->param('name') . '/';
+    }
+}
+
 if(defined($value)) {
     $value =~ s/\r//g;
     if($value =~ m#^\s*<P>&nbsp;</P>\s*$#i) {
@@ -151,25 +160,81 @@ return $value;
 <%once>
 # $out should be reset before parsing.
 my $out='';
+my $base_uri='';
 my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
-                                                my($this, $tagname, $text, $attr)=@_;
-                                                if($tagname eq 'a' and $attr->{href} and $attr->{href} =~ m!^/! and not $attr->{href} =~ m!^/\d+\.docid!) {
-                                                    my $uri = $attr->{href};
-                                                    # Remove anchor ref
-                                                    $uri =~ s!#.*$!!;
-                                                    # Remove querystring
-                                                    $uri =~ s!\?.*$!!;
-                                                    my $doc = $obvius->lookup_document($uri);
-                                                    my $docid;
-                                                    $docid = $doc->Id if($doc);
-                                                    $text =~ s!$uri!/$docid.docid! if($docid);
-                                                    $out.=$text;
-                                                } else {
-                                                    $out.=$text;
+                                                my($this, $tagname, $text, $attr, $attrseq)=@_;
+
+                                                # Fixup relative image paths:
+                                                if($tagname eq 'img' and $attr->{src} and $attr->{src} !~ m!^(\w+:|/)!) {
+                                                    my $test_src = $attr->{src};
+                                                    # Remove anchor and querystring:
+                                                    $test_src =~ s!#.*$!!;
+                                                    $test_src =~ s!\?.*$!!;
+                                                    if($obvius->lookup_document($uri . $test_src)) {
+                                                        $attr->{src} = $uri . $attr->{src};
+                                                    } elsif($obvius->lookup_document($base_uri . $test_src)) {
+                                                        $attr->{src} = $base_uri . $attr->{src};
+                                                    }
                                                 }
-                                                }, "self, tagname, text, attr" ],
+
+                                                if($tagname eq 'a' and $attr->{href}) {
+                                                    my $doc;
+                                                    if($attr->{href} =~ m!^\w+:!) {
+                                                        # Full protocol URL, do nothing
+                                                    } elsif($attr->{href} =~ m!^/! and not $attr->{href} =~ m!^/\d+\.docid!) {
+                                                        # URL relative to root, check for local document:
+                                                        my $href = $attr->{href};
+
+                                                        # Remove anchor ref and querystring
+                                                        $href =~ s!#.*$!!;
+                                                        $href =~ s!\?.*$!!;
+
+                                                        $doc = $obvius->lookup_document($href);
+                                                    } else {
+                                                        # Might be a relative local URL - check for it:
+                                                        my $href = $attr->{href};
+
+                                                        # Remove anchor ref and querystring
+                                                        $href =~ s!#.*$!!;
+                                                        $href =~ s!\?.*$!!;
+
+                                                        # Check both below current uri and below the base uri since these differ
+                                                        # when creating new documents:
+                                                        $doc = $obvius->lookup_document($uri . $href) || $obvius->lookup_document($base_uri . $href);
+                                                    }
+
+                                                    if($doc) {
+                                                        # Replace URI with /XXX.docid:
+                                                        my $docid;
+                                                        $docid = $doc->Id if($doc);
+
+                                                        my $replace_uri = $attr->{href};
+                                                        $replace_uri =~ s!#.*$!!;
+                                                        $replace_uri =~ s!\?.*$!!;
+
+                                                        $attr->{href} =~ s!$replace_uri!/$docid.docid!;
+                                                    }
+                                                }
+
+                                                my $endtag = "";
+                                                $endtag = " /" if($tagname =~ /^(br|img|input)$/);
+
+                                                $text = "<$tagname";
+                                                for(@$attrseq) {
+                                                    if($_ eq '/') {
+                                                        $endtag = " /";
+                                                        next;
+                                                    }
+
+                                                    $text .= " " . lc($_) . '="' . $attr->{$_} . '"' unless ($tagname =~ /^br$/);
+                                                }
+
+                                                $text .= "$endtag>";
+
+                                                $out.= $text;
+                                                }, "self, tagname, text, attr, attrseq" ],
                             end_h=> [sub {
                                             my($this, $tagname, $text, $attr)=@_;
                                             $out.=$text;
