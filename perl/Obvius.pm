@@ -758,6 +758,9 @@ sub search {
     my $i = 0;
     my $xrefs = 0;
 
+    # Default override_repeatable to an empty hash:
+    $options{override_repeatable} ||= {};
+
     # Options:
     my $limit;
     my @limit_fields;
@@ -794,7 +797,7 @@ sub search {
     my %seen;
     for (@$fields) {
 	my $fspec = $this->get_fieldspec($_);
-	next if (defined $seen{$_} and !$fspec->Repeatable); # Duplicate skippage
+	next if (defined $seen{$_} and (!$fspec->Repeatable or $options{override_repeatable}->{$_})); # Duplicate skippage
 	$seen{$_}++;
 
 	# Would be cleaner to have a separate list for sorting-fields:
@@ -829,7 +832,7 @@ sub search {
 	}
 	else {
 	    push(@fields,  "vf$i.${field}_value as $_");
-	    if ($fspec->Repeatable and not ($options{override_repeatable} and $options{override_repeatable}->{$_})) {
+	    if ($fspec->Repeatable and not $options{override_repeatable}->{$_}) {
 		$where =~ s/$_([^\d])/$_$i$1/;
 		$map{$_ . $i} = "vf$i.${field}_value";
 	    }

@@ -64,6 +64,17 @@ sub action {
 
     $obvius->log->debug("ComboSearch: >>>$program<<<<");
 
+    # Handle overriding repeatable fields
+    my %no_repeatable;
+    if($program =~ m!^force_no_repeatable=(.*)$!m) {
+        my $no_repeatable = $1;
+        $no_repeatable =~ s/^\s*//;
+        $no_repeatable =~ s/\s*$//;
+        for(split(/\s*,\s*/, $no_repeatable)) {
+            $no_repeatable{$_} = 1;
+        }
+    }
+
     $program =~ s/^.*?\@search\b//s;
     $program =~ s/\@end\b.*$//s;
 
@@ -133,6 +144,7 @@ sub action {
 			      sortvdoc=>$vdoc,
 			      notexpired=>!$is_admin,
 			      public=>!$is_admin,
+			      override_repeatable => \%no_repeatable,
 			      %extra_search_options
 			     );
 
