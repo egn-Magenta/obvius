@@ -28,3 +28,18 @@ tinyMCELang['lang_table_cell_desc'] = 'Table cell properties';
 tinyMCELang['lang_insert_table_valign'] = 'Vertical alignment';
 tinyMCELang['lang_insert_table_align_top'] = 'Top';
 tinyMCELang['lang_insert_table_align_bottom'] = 'Bottom';
+
+//Chris Benjaminsen BeIT ApS **
+tinyMCELang['table_insert_cell_before_desc'] = 'Insert cell before';
+tinyMCELang['table_insert_cell_after_desc'] = 'Insert cell after';
+tinyMCELang['lang_table_delete_cell_desc'] = 'Remove cell';
+tinyMCELang['lang_table_merge_cells_desc'] = 'Merge cells';
+
+tinyMCELang['lang_table_merge_cells_title'] = 'Merge cells';
+tinyMCELang['lang_table_merge_cells_width'] = 'Row span';
+tinyMCELang['lang_table_merge_cells_height'] = 'Column span';
+tinyMCELang['lang_table_merge_cells_merge'] = 'Merge';
+
+tinyMCELang['lang_insert_table_caption'] = 'Caption';
+tinyMCELang['lang_insert_table_summary'] = 'Summary';
+//**

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>{$lang_table_merge_cells_title}</title>
+<script language="javascript" type="text/javascript" src="../../tiny_mce_popup.js"></script>
+<script language="javascript" type="text/javascript">
+function mergeCells() {
+	if (window.opener) {
+		var args = new Array();
+		args["height"] = document.forms[0].width.value;
+		args["width"] = document.forms[0].height.value;
+		window.opener.tinyMCE.execCommand("mceTableMergeCells", false, args);
+		top.close();
+	}
+}
+
+function init() {
+	selectCells(1,1)
+	window.focus();
+}
+
+function selectCells(width,height){
+	for( var x=0;x<maxWidth;x++){
+		for( var y=0;y<maxHeight;y++){
+			var cNode = document.getElementById('subCell' + x + 'x' + y)
+			var color = x<width && y<height ? '#398EFF' : 'transparent'
+			cNode.style.backgroundColor = color
+		}
+	}
+	document.forms[0].width.value = selectedWidth = Math.min( width , maxWidth )
+	document.forms[0].height.value = selectedHeight = Math.min( height, maxHeight )
+}
+
+function markCells(width,height){
+	for( var x=0;x<maxWidth;x++){
+		for( var y=0;y<maxHeight;y++){
+			var cNode = document.getElementById('subCell' + x + 'x' + y)
+			var color = x<=width && y<=height ? '#A6CCFF' : 'transparent'
+			
+			if( x >= selectedWidth || y >= selectedHeight ){
+				cNode.style.backgroundColor = color
+			}
+		}
+	}
+}
+
+function reScan(){
+	var width = parseInt(document.forms[0].width.value) || 1
+	var height = parseInt(document.forms[0].height.value) || 1
+	selectCells(width,height)
+}
+
+function cancelAction() {
+	top.close();
+}
+
+var selectedWidth = null
+var selectedHeight = null
+
+var maxWidth = tinyMCE.getWindowArg('maxWidth')
+var maxHeight = tinyMCE.getWindowArg('maxHeight')
+
+</script>
+</head>
+<body onload="window.focus();init();">
+<form onsubmit="mergeCells();return false;">
+  <table border="1" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center" valign="middle">
+		<table border="0" cellpadding="4" cellspacing="0" width="100%">
+          <tr>
+            <td colspan="4" class="title">{$lang_table_merge_cells_title}</td>
+          </tr>
+          <tr>
+			<td valign="top">
+				<table border="0" cellpadding="4" cellspacing="0">
+					<tr>
+						<td>{$lang_table_merge_cells_width}:</td>
+						<td><input name="width" type="text" size="4" onchange="reScan()" maxlength="4" value="1"></td>
+					</tr>
+					<tr>
+						<td>{$lang_table_merge_cells_height}:</td>
+						<td><input name="height" type="text" size="4" onchange="reScan()" maxlength="4" value="1"></td>
+					</tr>
+				</table>
+			</td>
+			<td valign="top">
+				<table border="1" cellpadding="4" cellspacing="0" onmouseout="markCells(0,0)">
+					<script language="javascript">
+						for( var x=0;x<maxWidth;x++){
+							document.write('<tr>')
+							for( var y=0;y<maxHeight;y++){
+								document.write('<td style="width:20px;height:20px;font-size:2px" id="subCell'+x+'x'+y+'" onmouseover="markCells('+x+','+y+')" onclick="selectCells('+(x+1)+','+(y+1)+')">&nbsp;</td>')
+							}
+							document.write('</tr>')
+						}
+					</script>	          
+				</table>
+			</td>
+          </tr>
+          <tr>
+            <td><input type="button" id="insert" name="insert" value="{$lang_table_merge_cells_merge}" onclick="mergeCells();"></td>
+            <td align="right"><input type="button" id="cancel" name="cancel" value="{$lang_cancel}" onclick="cancelAction();"></td>
+          </tr>
+        </table></td>
+    </tr>
+  </table>
+</form>
+</body>
+</html>
+
+

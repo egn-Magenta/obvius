@@ -15,6 +15,12 @@ function insertTable() {
 		args["cellspacing"] = document.forms[0].cellspacing.value;
 		args["width"] = document.forms[0].width.value;
 		args["height"] = document.forms[0].height.value;
+
+		//Chris Benjaminsen BeIT ApS **
+		args["caption"] = document.forms[0].caption.value;
+		args["summary"] = document.forms[0].summary.value;
+		//**
+		
 		args["align"] = document.forms[0].align.options[document.forms[0].align.selectedIndex].value;
 		args["className"] = document.forms[0].styleSelect.options[document.forms[0].styleSelect.selectedIndex].value;
 
@@ -68,6 +74,10 @@ function init() {
 	formObj.width.value = tinyMCE.getWindowArg('width');
 	formObj.height.value = tinyMCE.getWindowArg('height');
 	formObj.insert.value = tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('action')); 
+	//Chris Benjaminsen BeIT ApS **
+	formObj.caption.value = tinyMCE.getWindowArg('caption');
+	formObj.summary.value = tinyMCE.getWindowArg('summary');
+	//**
 
 	window.focus();
 }
@@ -85,6 +95,16 @@ function cancelAction() {
           <tr>
             <td colspan="4" class="title">{$lang_insert_table_title}</td>
           </tr>
+		  <!-- Chris Benjaminsen BeIT ApS ** -->
+          <tr>
+            <td colspan="2">{$lang_insert_table_caption}:</td>
+            <td colspan="2"><input name="caption" type="text" value="" size="25"></td>
+          </tr>
+          <tr>
+            <td colspan="2">{$lang_insert_table_summary}:</td>
+            <td colspan="2"><input name="summary" type="text" value="" size="25"></td>
+          </tr>
+          <!-- ** -->
           <tr>
             <td>{$lang_insert_table_cols}:</td>
             <td><input name="cols" type="text" id="cols" value="" size="3" maxlength="3"></td>
