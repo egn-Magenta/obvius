@@ -83,11 +83,17 @@ sub new {
 	$new->param('SITE_SCALAR_REF'=>$options{out_method});
     }
     $new->{interp}=new HTML::Mason::Interp(%interp_conf);
+
+    # If $class ends in ::Common or ::Public, set auto_send_headers to
+    # false (we still want headers sent automatically in admin,
+    # because less of the handler() is used there (and more is handled
+    # in Mason in admin):
     $new->{handler}=new HTML::Mason::ApacheHandler(
 						   interp=>$new->{interp},
 						   apache_status_title=>'HTML::Mason: ' . $class,
 #						   error_mode=> $options{debug} ? 'html' : 'fatal',
 						   decline_dirs=>0,
+                                                   auto_send_headers=>(scalar($class)=~/::(Common|Public)$/) ? 0 : 1,
 						  );
 
     chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
@@ -351,8 +357,20 @@ sub handler ($$) {
         }
         ${$this->{'SITE_SCALAR_REF'}}='';
 
-        $req->set_content_length(length($html));
-        #$req->send_http_header;
+        # Previously the ::Common object would send the headers, so
+        # the Public-object had to not do that.  Now the
+        # WebObvius::Site::Mason::new()-method sets auto_send_header to
+        # false if the objects name ends in ::Common or ::Public, so the
+        # the Public-object must (can!) send the headers here, now.
+        #
+        # The benefit is that we can set_content_length, and that
+        # means that browser can keepalive the connection, and don't
+        # have to make another one to get the rest of the stuff. That
+        # should amount to an efficiency-improvement...
+        $req->status($status) if ($status!=OK);
+        $req->set_content_length(length($html)) unless ($req->header_only or $status!=OK);
+        $req->send_http_header;
+
         $req->print(\$html) unless ($req->header_only or $status!=OK);
 
         # Add to cache:
