@@ -218,7 +218,9 @@ sub push_news_item {
 	     );
     }
 }
-
+# convert_date ($date)
+# - Convert $date from yyyy-mm-dd to dd-mm-yyyy
+#
 sub convert_date {
     my ($year, $mon, $day, undef) = split /-|\s/, shift;
     return $day . "-" . $mon . "-" . $year;
