@@ -31,7 +31,7 @@ foreach my $fieldlist (@fieldlists) {
 	# I want to cook keywords (to register new), even if none are selected:
 	# (needs to be done way much better. Perhaps cook all, even if there is
 	#  no new value, and then... uhm). - Maybe repeatable is a decent clue?
-	if (defined $ARGS{$name} or $name =~ /keyword/) {
+	if (defined $ARGS{$name} or $name =~ /keyword/ or $r->param("obvius_force_undef_value_$name")) {
 	    my $value=$m->comp('/edit/fieldtypes/' . $fieldtype->Edit . ':cook',
 			       %ARGS,
 			       fieldspec=>$fieldspec, fieldtype=>$fieldtype, name=>$name,

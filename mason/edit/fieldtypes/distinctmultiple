@@ -110,6 +110,8 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_select_all;
 onload_array[onload_array.length] = obvius_<% $name %>_startup;
 
 </script>
+%# This tells the system to allways store a new value even though it's undef:
+<input type="hidden" name="obvius_force_undef_value_<% $name %>" value="1">
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
     <td colspan="2" bgcolor="black"><img src="/grafik/admin/1x1.gif" alt="" width="1" height="1"></td>
@@ -197,6 +199,11 @@ $value=>undef
 $fieldspec
 </%args>
 <%perl>
-    return $value;
+if(defined($value)) {
+    $value = [ $value ] unless(ref($value));
+} else {
+    $value = [];
+}
+return $value;
 </%perl>
 </%method>
