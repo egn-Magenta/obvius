@@ -1,13 +1,13 @@
 %if(@$weeks) {
     <table border="0" cellpadding="2" cellspacing="1" bgcolor="#333333" width="100%">
         <tr>
-            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Mandag</span></font></td>
-            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Tirsdag</span></font></td>
-            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Onsdag</span></font></td>
-            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Torsdag</span></font></td>
-            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Fredag</span></font></td>
-            <td width="15%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Lørdag</span></font></td>
-            <td width="15%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Søndag</span></font></td>
+            <td width="14%" class="calendarday">Mandag</td>
+            <td width="14%" class="calendarday">Tirsdag</td>
+            <td width="14%" class="calendarday">Onsdag</td>
+            <td width="14%" class="calendarday">Torsdag</td>
+            <td width="14%" class="calendarday">Fredag</td>
+            <td width="15%" class="calendarday">Lørdag</td>
+            <td width="15%" class="calendarday">Søndag</td>
         </tr>
 % for my $week (@$weeks) {
 %  my $weekdays = $week->{weekdays};
