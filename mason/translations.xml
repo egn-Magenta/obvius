@@ -49,6 +49,10 @@
     <translation lang="en">Text and pictures</translation>
     <translation lang="da">Tekst og billeder</translation>
   </text>
+  <text key="HTML and pictures">
+    <translation lang="en">HTML and pictures</translation>
+    <translation lang="da">HTML og billeder</translation>
+  </text>
   <text key="Short title">
     <translation lang="en">Short title</translation>
     <translation lang="da">Kort titel</translation>
@@ -81,6 +85,10 @@
   <text key="Sort order of sub documents - sort according to">
     <translation lang="en">Sort order of sub documents - sort according to</translation>
     <translation lang="da">Sortering af underdokumenter</translation>
+  </text>
+  <text key="Sort order of search results - sort according to">
+    <translation lang="en">Sort order of search results - sort according to</translation>
+    <translation lang="da">Sortering af søgeresultater</translation>
   </text>
   <text key="sequence number (climbing)">
     <translation lang="en">sequence number (ascending)</translation>
@@ -116,8 +124,7 @@
   </text>
 <text key="title (rev.)">
     <translation lang="en">title (rev.)</translation>
-    <translation lang="da">Efter dokumentets titel (omvendt)
-</translation>
+    <translation lang="da">Efter dokumentets titel (omvendt)</translation>
   </text>
 <text key="date of expiry">
     <translation lang="en">date of expiry</translation>
@@ -240,9 +247,9 @@
   </text>
 
 
-  <text key="Subscription possibility?">
-    <translation lang="en">Subscription possibility?</translation>
-    <translation lang="da">Kan der abonneres på dette sted?</translation>
+  <text key="Subscription possibility">
+    <translation lang="en">Subscription possibility</translation>
+    <translation lang="da">Abonnement</translation>
   </text>
   <text key="Choose keywords">
     <translation lang="en">Choose keywords</translation>
@@ -412,6 +419,10 @@
     <translation lang="en">Number of subdocuments on one page</translation>
     <translation lang="da">Antal underdokumenter, der vises ad gangen</translation>
   </text>
+  <text key="Number of search results on one page">
+    <translation lang="en">Number of search results on one page</translation>
+    <translation lang="da">Antal søgeresultater, der vises ad gangen</translation>
+  </text>
   <text key="Classification">
     <translation lang="en">Classification</translation>
     <translation lang="da">Klassifikation</translation>
@@ -447,6 +458,10 @@
   <text key="Search">
     <translation lang="en">Search</translation>
     <translation lang="da">Søg</translation>
+  </text>
+  <text key="Free text search">
+    <translation lang="en">Free text search</translation>
+    <translation lang="da">Fritekstsøgning</translation>
   </text>
   <text key="Choose version">
     <translation lang="en">Choose version</translation>
@@ -545,7 +560,7 @@
   </text>
   <text key="Teaser">
     <translation lang="en">Teaser</translation>
-    <translation lang="da">Teaser</translation>
+    <translation lang="da">Resumé</translation>
   </text>
   <text key="New file name">
     <translation lang="en">New file name</translation>
@@ -1748,12 +1763,17 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Search for">
     <translation lang="en">Search for</translation>
-    <translation lang="da">Hvad skal der søges efter?</translation>
+    <translation lang="da">Søg efter</translation>
   </text>
 
   <text key="Text">
     <translation lang="en">Text</translation>
     <translation lang="da">Tekst</translation>
+  </text>
+
+  <text key="Text and levels">
+    <translation lang="en">Text and levels</translation>
+    <translation lang="da">Tekst og niveauer</translation>
   </text>
 
   <text key="Contributors">
@@ -2135,9 +2155,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Varighed (antal dage)</translation>
   </text>
 
-  <text key="Include in subscription?">
-    <translation lang="en">Include in subscription?</translation>
-    <translation lang="da">Inkludér i abonnementsudsendelse?</translation>
+  <text key="Include in subscription">
+    <translation lang="en">Include in subscription</translation>
+    <translation lang="da">Inkludér i abonnementsudsendelse</translation>
   </text>
 
   <text key="Send email to">
@@ -2167,12 +2187,12 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Base of search">
     <translation lang="en">Base of search</translation>
-    <translation lang="da">Hvor skal der søges?</translation>
+    <translation lang="da">Hvor skal der søges</translation>
   </text>
 
-  <text key="Type of search">
-    <translation lang="en">Type of search</translation>
-    <translation lang="da">Søgekriterier</translation>
+  <text key="Type keyword">
+    <translation lang="en">Type keyword (if left blank all keywords are searched for)</translation>
+    <translation lang="da">Angiv nøgleord (hvis intet er angivet søges på alt)</translation>
   </text>
 
   <text key="HTML-documents can contain HTML in the Text-fields. Using the &quot;Browse&quot;-button below each field a local HTML-file can be uploaded.">
@@ -2180,9 +2200,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Denne dokumenttype indeholder HTML i tekstfeltet. Man kan bruge &quot;Gennemse&quot;-knappen under tekstfeltet til at sende en HTML-fil fra sin egen computer til content management systemet.</translation>
   </text>
 
-  <text key="Show title and teaser?">
-    <translation lang="en">Show title and teaser?</translation>
-    <translation lang="da">Vis titel og teaser?</translation>
+  <text key="Show title and teaser">
+    <translation lang="en">Show title and teaser</translation>
+    <translation lang="da">Vis titel og teaser</translation>
   </text>
 
   <text key="The Upload-document if for all types of binary files besides images (for instance PDF-files, Word-documents, Excel-files etc.)">
@@ -2266,9 +2286,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Man kan abonnere på links. Denne funktion kan blandt andet benyttes i forbindelse med abonnement på nye indlæg i debatfora</translation>
   </text>
 
-
-
-
   <text key="Event Info">
     <translation lang="en">Event Info</translation>
     <translation lang="da">Oplysninger om arrangementet</translation>
@@ -2276,7 +2293,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Event Type">
     <translation lang="en">Event Type</translation>
-    <translation lang="da">Type af begivenhed</translation>
+    <translation lang="da">Kategori</translation>
   </text>
 
   <text key="Place where the event occurs">
@@ -2982,7 +2999,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="HTML">
     <translation lang="en">HTML</translation>
-    <translation lang="da">HTML </translation>
+    <translation lang="da">HTML</translation>
   </text>
 
   <text key="Hjælp">
@@ -2991,8 +3008,8 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="How your calendar will be displayed">
-    <translation lang="en">How should the calendar be displayed?</translation>
-    <translation lang="da">Hvordan skal kalenderen vises?</translation>
+    <translation lang="en">How should the calendar be displayed</translation>
+    <translation lang="da">Hvordan skal kalenderen vises</translation>
   </text>
 
   <text key="Ikke godkendt">
@@ -3135,9 +3152,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Kun dokumenter under...</translation>
   </text>
 
-  <text key="Open results in new window?">
-    <translation lang="en">Open results in new window?</translation>
-    <translation lang="da">Skal resultaterne åbne i et nyt vindue?</translation>
+  <text key="Open results in new window">
+    <translation lang="en">Open results in new window</translation>
+    <translation lang="da">Søgeresultater i et nyt browservindue</translation>
   </text>
 
   <text key="Ordbog">
@@ -3205,9 +3222,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Vælg hovedkategori</translation>
   </text>
 
-  <text key="Show both URL and title?">
-    <translation lang="en">Show both URL and title?</translation>
-    <translation lang="da">Skal både fil-navnet og titlen vises?</translation>
+  <text key="Show both URL and title">
+    <translation lang="en">Show both URL and title</translation>
+    <translation lang="da">Skal både fil-navnet og titlen vises</translation>
   </text>
 
   <text key="Show picture in article">
@@ -3225,9 +3242,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Vis biledet på forsiden</translation>
   </text>
 
-  <text key="Show title as heading?">
-    <translation lang="en">Show title as heading?</translation>
-    <translation lang="da">Skal titlen vises som overskrift?</translation>
+  <text key="Show title as heading">
+    <translation lang="en">Show title as heading</translation>
+    <translation lang="da">Skal titlen vises som overskrift</translation>
   </text>
 
   <text key="Slutdato for debatten">
@@ -3306,8 +3323,8 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="What doctype the created documents should have">
-    <translation lang="en">What doctype should the created documents have?</translation>
-    <translation lang="da">Hvilken dokumenttype skal det oprettede dokument have?</translation>
+    <translation lang="en">What doctype should the created documents have</translation>
+    <translation lang="da">Hvilken dokumenttype skal det oprettede dokument have</translation>
   </text>
 
   <text key="What language the created documents should have">
@@ -3340,9 +3357,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">år</translation>
   </text>
 
-  <text key="Show teasers?">
-    <translation lang="en">Show teasers?</translation>
-    <translation lang="da">Vis teasere?</translation>
+  <text key="Show teasers">
+    <translation lang="en">Show teasers</translation>
+    <translation lang="da">Vis teasere</translation>
   </text>
 
   <text key="Click for help">
@@ -3351,8 +3368,8 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="Section news inclusion">
-    <translation lang="en">Should document be included in section news?</translation>
-    <translation lang="da">Skal dokumentet med på søjlenyheder?</translation>
+    <translation lang="en">Should document be included in section news</translation>
+    <translation lang="da">Skal dokumentet med på søjlenyheder</translation>
   </text>
 
   <text key="MultimediaEmbed">
@@ -3385,9 +3402,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Adresse</translation>
   </text>
 
-  <text key="Also show teaser?">
-    <translation lang="en">Also show teaser?</translation>
-    <translation lang="da">Vis teaser?</translation>
+  <text key="Also show teaser">
+    <translation lang="en">Also show teaser</translation>
+    <translation lang="da">Vis teaser</translation>
   </text>
 
   <text key="This is an administrative documenttype only.">
@@ -3800,9 +3817,120 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Til dokumentet</translation>
   </text>
 
+  <text key="Show title">
+    <translation lang="en">Show title</translation>
+    <translation lang="da">Vis titel</translation>
+  </text>
+
+  <text key="Show teaser">
+    <translation lang="en">Show teaser</translation>
+    <translation lang="da">Vis resumé</translation>
+  </text>
+
+  <text key="Show date">
+    <translation lang="en">Show date</translation>
+    <translation lang="da">Vis dato</translation>
+  </text>
+
+  <text key="Show news">
+    <translation lang="en">Show news</translation>
+    <translation lang="da">Vis nyheder</translation>
+  </text>
+
+  <text key="Subdocuments">
+    <translation lang="en">Subdocuments</translation>
+    <translation lang="da">Underdokumenter</translation>
+  </text>
+
+  <text key="Search results">
+    <translation lang="en">Search results</translation>
+    <translation lang="da">Søgeresultater</translation>
+  </text>
+
+  <text key="Show subdocuments">
+    <translation lang="en">Show subdocuments</translation>
+    <translation lang="da">Vis Underdokumenter</translation>
+  </text>
+
+  <text key="Show teaser on subdocuments">
+    <translation lang="en">Show teaser on subdocuments</translation>
+    <translation lang="da">Vis resumé på underdokumenter</translation>
+  </text>
+
+  <text key="Show date on subdocuments">
+    <translation lang="en">Show date on subdocuments</translation>
+    <translation lang="da">Vis dato på underdokumenter</translation>
+  </text>
+
+  <text key="Show teaser on search results">
+    <translation lang="en">Show teaser on search results</translation>
+    <translation lang="da">Vis resumé på søgeresultater</translation>
+  </text>
+
+  <text key="Show date on search results">
+    <translation lang="en">Show date on search results</translation>
+    <translation lang="da">Vis dato på søgeresultater</translation>
+  </text>
+
+  <text key="News">
+    <translation lang="en">News</translation>
+    <translation lang="da">Nyheder</translation>
+  </text>
+
+  <text key="News duration">
+    <translation lang="en">News duration</translation>
+    <translation lang="da">Nyhedens varighed</translation>
+  </text>
+
+  <text key="Show alphabetic index">
+    <translation lang="en">Show alphabetic index</translation>
+    <translation lang="da">Vis alfabetisk oversigt</translation>
+  </text>
+
+   <text key="Show urls to search results">
+    <translation lang="en">Show urls to search results</translation>
+    <translation lang="da">Vis sti til søgeresultater</translation>
+  </text>
+
+  <text key="Limit the search for events">
+    <translation lang="en">Limit the search for events</translation>
+    <translation lang="da">Begræns søgningen af arrangementer</translation>
+  </text>
+
+  <text key="Choose the appropriate keywords for this document:">
+    <translation lang="en">Choose the appropriate keywords for this document:</translation>
+    <translation lang="da">Vælg relevante nøgleord til dette dokument:</translation>
+  </text>
+
+  <text key="Subscription data and display">
+    <translation lang="en">Subscription data and display</translation>
+    <translation lang="da">Abonnementsdata og visning</translation>
+  </text>
+
+  <text key="Teaser (filled out)">
+    <translation lang="en">Teaser (if this field is filled out, the text will replace the text above the checkboxes)</translation>
+    <translation lang="da">Resumé (Hvis feltet udfyldes erstatter denne tekst teksten over checkboksene)</translation>
+  </text>
+
+  <text key="Only show events under this page (set to / for global search)">
+    <translation lang="en">Only show events under this page (set to / for global search)</translation>
+    <translation lang="da">Vis kun arrangementer under denne url</translation>
+  </text>
+
+  <text key="Show event by">
+    <translation lang="en">Show event by</translation>
+    <translation lang="da">Arrangementer vises med</translation>
+  </text>
+
+  <text key="Type">
+    <translation lang="en">Type</translation>
+    <translation lang="da">Kategori</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
   </text>
+
 
 </messages>
