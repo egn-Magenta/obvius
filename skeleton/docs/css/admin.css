@@ -62,9 +62,17 @@ h2 {
 }
 
 h3 {
-	font-size:12px;
+	font-size:13px;
   /* XXX: */
   color: #000
+}
+
+h4.admin {
+	font-size: 12px;
+  /* XXX: */
+  color: #000;
+  margin-top: 10px;
+  margin-bottom: 7px;
 }
 
 

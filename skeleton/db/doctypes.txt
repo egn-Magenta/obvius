@@ -34,7 +34,7 @@ DocType: Standard parent=Base basis searchable
  contributors  line                         searchable sortable threshold=64
  source        line                         searchable sortable threshold=64
  picture       path                         searchable sortable optional threshold=128
- secion_news  bool                         default_value=0
+ section_news  bool                         default_value=0
 
 DocType: Search parent=Standard basis searchable
  form          textwupload                  searchable sortable threshold=128

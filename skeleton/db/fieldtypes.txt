@@ -29,7 +29,7 @@ subscribeable	text	radio (none|automatic|manual)	regexp (^(none|automatic|manual
 showcal         text    radio (2D|list)			regexp (^(2D|list)$)            none
 publishmode    text    radio (immediate|moderator)      regexp (^(immediate|moderator)$) none
 publish_on	date	publishon			regexp (^\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d$)	none
-orderevents     text    radio (+title|-docdate|+docdate|+eventtype|+contactinfo)    regexp (^(+title|-docdate|+docdate|+eventtype|+contactinfo)$)   none
+orderevents     text    radio (+title|-docdate|+docdate|+eventtype|+contactinfo)    regexp (^(\+title|-docdate|\+docdate|\+eventtype|\+contactinfo)$)   none
 pagesize	int     pagesize			regexp (^\d+$)					none
 fileupload2 text    fileupload2         none                            none
 priority6       int     radio (1|2|3|4|5)               regexp (^[12345]$)                              none
