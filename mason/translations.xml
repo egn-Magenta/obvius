@@ -4124,6 +4124,11 @@ abonnement på samme email-adresse.</translation>
     men er synlige for admin-brugeren.</translation>
   </text>
 
+  <text key="Text and data">
+    <translation lang="en">Text and data</translation>
+    <translation lang="da">Tekst og data</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
