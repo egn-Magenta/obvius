@@ -1,0 +1,41 @@
+<img<% $id %><% $class %> width="<% $width %>" height="<% $height %>" src="<% $prefix %><% $picture %><% $extra %>" alt="<% $picture_vdoc->field('short_title') || $picture_vdoc->Title %>" />
+%
+<%args>
+$picture=>undef
+$class=>''
+$id=>''
+$size=>undef
+</%args>
+%
+<%init>
+return if (!defined $picture or $picture eq '/');
+
+my $picture_doc=$obvius->lookup_document($picture);
+return unless ($picture_doc);
+
+my $picture_vdoc=$obvius->get_public_version($picture_doc);
+$picture_vdoc=$obvius->get_latest_version($picture_doc) if (!$picture_vdoc and $r->pnotes('site')->param('is_admin'));
+return unless ($picture_vdoc);
+
+my $picture_type=$obvius->get_version_type($picture_vdoc);
+if ($picture_type->Name ne 'Image') {
+    $obvius->log->notice('Picture-document is not an image, not showing');
+    return;
+}
+
+$obvius->get_version_fields($picture_vdoc, [qw(title short_title width height expires)]);
+
+return if ($picture_vdoc->Expires lt $r->notes('now'));
+
+my $extra='';
+my ($width, $height)=($picture_vdoc->Width, $picture_vdoc->Height);
+if ($size and $size=~/^(\d+)x(\d+)$/) {
+    ($width, $height)=($1, $2);
+    $extra="?size=$size";
+}
+
+$class=" class=\"$class\"" if ($class);
+$id=" id=\"$id\"" if ($id);
+
+$picture=~s!/$!! if ($r->pnotes('site')->param('is_admin'));
+</%init>
