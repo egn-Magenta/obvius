@@ -6,7 +6,6 @@ $path=>'/'
 </%args>
 %
 <%perl>
-print STDERR "I SET COOKIE \n";
 my $c=Apache::Cookie->new($r,
 		          -name => $cookie,
                           -value => $value,
