@@ -4129,6 +4129,21 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Tekst og data</translation>
   </text>
 
+  <text key="Docparam name">
+    <translation lang="en">Docparam name</translation>
+    <translation lang="da">Dokumentparamter navn</translation>
+  </text>
+
+  <text key="Docparam options (comma separated list or function:functionname)">
+    <translation lang="en">Docparam options (comma separated list or function:functionname)</translation>
+    <translation lang="da">Valgmuligheder (kommasepareret liste eller function:funktionsnavn)</translation>
+  </text>
+
+  <text key="Default set of checked values">
+    <translation lang="en">Default set of checked values</translation>
+    <translation lang="da">Set af default-værdier</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
