@@ -6,7 +6,7 @@
 # TODO: * Perhaps move symlinks to the skeleton directory instead?
 #       * When stuff exists, check permissions anyway.
 #
-# Copyright (C) 2002-2003, by Adam Sjøgren. Under the GPL.
+# Copyright (C) 2002-2004, by Adam Sjøgren. Under the GPL.
 #
 # $Id$
 
@@ -17,6 +17,8 @@ use Getopt::Long;
 
 # Set env for scripts 
 $ENV{'PERL5LIB'} = $ENV{'PERL5LIB'} . ":/home/httpd/obvius/perl_blib";
+
+my $obvius_conf_dir='/etc/obvius/';
 
 my %options=(
     website=>undef,
@@ -30,6 +32,7 @@ my %options=(
     httpd_group=>'www-data',
     staff_group=>'staff',
     skeleton_dir=>'/var/www/obvius/skeleton',
+    fromconf=>undef,
    );
 # Remember to update sub usage below, when updating options.
 
@@ -45,9 +48,14 @@ GetOptions(
 	   'httpd_group=s'=>\$options{httpd_group},
 	   'staff_group=s'=>\$options{staff_group},
 	   'skeleton_dir=s'=>\$options{skeleton_dir},
+           'fromconf:s'   =>\$options{fromconf},
 	  ) or usage("Couldn't understand options, stopping");
 
-usage("Please supply website and dbname, stopping") unless ($options{website} and $options{dbname});
+usage("Please supply website, stopping") unless ($options{website});
+
+read_conf(\%options) if (defined $options{fromconf});
+
+usage("Please supply dbname, stopping") unless ($options{dbname});
 $options{perlname}=ucfirst($options{dbname}) unless ($options{perlname});
 ($options{domain})=($options{website}=~/^[^.]*[.](.*)$/) unless ($options{domain});
 $options{dbusername}=substr($options{dbname}, 0, 4) unless ($options{dbusername}); # Must not be too long
@@ -135,15 +143,15 @@ foreach my $skeleton_file (@skeleton_files) {
 }
 
 # Create Obvius dir:
-unless (-d "/etc/obvius/") {
-    print "creating /etc/obvius/ ...\n";
-    make_dir("/etc/obvius/", $options{staff_group});
+unless (-d $obvius_conf_dir) {
+    print "creating $obvius_conf_dir ...\n";
+    make_dir($obvius_conf_dir, $options{staff_group});
 }
 
 # Create Obvius conf-file:
 print "Configuration and database ...\n";
 
-make_conf("/etc/obvius/$options{dbname}.conf");
+make_conf("$obvius_conf_dir$options{dbname}.conf");
 
 # Create database:
 make_db($options{dbname});
@@ -286,6 +294,97 @@ sub db_exists {
     }
 }
 
+sub read_conf {
+    my ($options)=@_;
+
+    my $confname;
+
+    if ($options->{fromconf}) {
+        $confname=$options->{fromconf};
+    }
+    else {
+        $confname=$options->{website};
+        $confname=~s/^[^.]+[.]//;
+        $confname=~s/[.][^.]+$//;
+        $confname.='.conf';
+    }
+
+    my $conffile="$obvius_conf_dir$confname";
+    my %conf;
+    my $conffh;
+    open $conffh, $conffile or die "Couldn't read $conffile, stopping";
+    while (my $line=<$conffh>) {
+        next if ($line=~/^\s*\#/);
+        chomp $line;
+        my ($key, $value)=split /\s*=\s*/, $line, 2;
+        next unless (defined $key);
+        $conf{$key}=$value;
+    }
+    close $conffh;
+
+    print "Options gathered from $conffile:\n";
+
+    # Options that are given (required):
+    #  website
+    #  fromconf (takes us here)
+
+    # Options we can't deduce from the .conf:
+    #  httpd_group
+    #  skeleton_dir
+    #  dbuser
+    #  dbpasswd
+    #  staff_group
+    #  wwwroot
+
+    # Options we can get from the .conf:
+    #  dbusername
+    #  domain
+    #  dbname
+    #  perlname
+
+    my @convertions=(
+                     {
+                      optionkey=>'dbusername',
+                      confkey=>'normal_db_login',
+                      pattern=>'^([^_]+)_',
+                     },
+                     {
+                      optionkey=>'domain',
+                      confkey=>'sitename',
+                      pattern=>'^[^.]*[.](.*)',
+                     },
+                     {
+                      optionkey=>'dbname',
+                      confkey=>'DSN',
+                      pattern=>'^DBI:\w+:(?:database=|)(\w+)', # '(?:' means do not put this in $N
+                     },                                        # So I can keep '$1' in the loop below
+                     {
+                      optionkey=>'perlname',
+                      confkey=>'perlname',
+                      pattern=>"^(.*)\$",
+                     },
+                    );
+
+    foreach my $convertion (@convertions) {
+        if (!defined $options{$convertion->{optionkey}}) {
+            my $regexp=$convertion->{pattern};
+            if ($conf{$convertion->{confkey}}=~/$regexp/) {
+                $options{$convertion->{optionkey}}=$1;
+                print " ", $convertion->{optionkey}, ":\t", $options{$convertion->{optionkey}}, "\n";
+            }
+        }
+    }
+
+    print "Does the above look right? [Y/n] ";
+    my $yn=<STDIN>;
+    if ($yn=~/n/i) {
+        print "Please supply additional options then. Sorry I couldn't be of more help.\n";
+        exit 0;
+    }
+
+    print "Ok, proceeding.\n";
+}
+
 sub usage {
     print <<EOT;
 
@@ -304,6 +403,8 @@ Further options:
 
  --dbuser <database user>  root (what user to use when creating the database)
  --dbpasswd <password>
+
+ --fromconf [confname]
 EOT
     exit(1);
 }
