@@ -276,7 +276,8 @@ sub action {
 
 	my @path = $obvius->get_doc_by_path('/');
 
-	my $top = $obvius->get_doc_by_id(1);	# ROOT DEP
+	my $rootid = $obvius->{ROOTID} || 1;
+	my $top = $obvius->get_doc_by_id($rootid);	# ROOT DEP
 
 	my $doc;
 	my $first_level = $obvius->get_document_subdocs($top);
