@@ -1165,12 +1165,32 @@ sub set_fieldspec {
     $t->param($doctypeid=>$fspec);
 }
 
-
+
 ########################################################################
 #
 #	Document parameters
 #
 ########################################################################
+
+sub get_docparams_by {
+    my ($this, @how) = @_;
+
+    $this->tracer(@how) if($this->{DEBUG});
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'docparms',
+                                            });
+    $set->Search({@how});
+
+    my $docparams = new Obvius::Data;
+
+    while(my $rec = $set->Next) {
+        $docparams->param($rec->{name} => new Obvius::Data($rec));
+    }
+    $set->Disconnect;
+
+    return $docparams;
+
+}
 
 # Get all parameters as hash of hash
 sub get_docparams {
@@ -1180,19 +1200,7 @@ sub get_docparams {
 
     return $doc->param('docparams') if (defined $doc->param('docparams'));
 
-    my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => 'docparms',
-					   });
-
-    $set->Search({docid	     => $doc->param('id'),
-		  '$fields'  => 'name, value, type',
-		 });
-
-    my $docparams = new Obvius::Data;
-    while (my $rec = $set->Next) {
-	$docparams->param($rec->{name} => new Obvius::Data($rec));
-    }
-    $set->Disconnect;
+    my $docparams = $this->get_docparams_by(docid => $doc->Id);
 
     $doc->param(docparams => $docparams);
     return $docparams;
@@ -1226,15 +1234,16 @@ sub get_docparam_recursive {
     $this->tracer($doc, $name) if ($this->{DEBUG});
 
     do {
-	my $param = $this->get_docparam($doc, $name);
-	return $param if (defined $param);
+        my $param = $this->get_docparam($doc, $name);
+        return $param if (defined $param);
 
-	my $parent = $doc->param('parent');
-	$doc = $parent ? $this->get_doc_by_id($parent) : undef;
+        my $parent = $doc->param('parent');
+        $doc = $parent ? $this->get_doc_by_id($parent) : undef;
     } while ($doc);
 
     return undef;
 }
+
 sub get_docparam_value_recursive {
     my ($this, $doc, $name) = @_;
 
@@ -1244,6 +1253,63 @@ sub get_docparam_value_recursive {
     return $param ? $param->param('value') : undef;
 }
 
+# Gets all docparams on the path collected as one hash.
+sub get_docparams_recursive {
+    my ($this, $doc) = @_;
+
+    my @paramslist;
+
+    do {
+        my $params = $this->get_docparams($doc);
+        unshift(@paramslist, $params);
+        my $parent = $doc->param('parent');
+        $doc = $parent ? $this->get_doc_by_id($parent) : undef;
+    } while ($doc);
+
+    my $result = new Obvius::Data;
+
+    for my $paramset (@paramslist) {
+        for($paramset->param) {
+            $result->param($_ => $paramset->param($_));
+        }
+    }
+
+    return $result;
+}
+
+# Setting docparams
+sub set_docparams {
+    my ($this, $doc, $params, $errorref) = @_;
+
+    unless($this->can_set_docparams($doc)) {
+        $$errorref = "User $this->{USER} does not have access to set docparams for this document" if($errorref);
+        return undef;
+    }
+
+    $this->db_begin;
+    eval {
+        die "Params object has no param() method\n"
+            unless (ref $params and $params->UNIVERSAL::can('param'));
+
+        $this->{LOG}->info("====> Setting docparams ... deleting old");
+        $this->db_delete_docparams($doc);
+        $this->{LOG}->info("====> Setting docparams ... inserting new");
+        $this->db_insert_docparams($doc, $params);
+    };
+
+    if($@) {
+        $this->{DB_Error} = $@;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Setting docparams ... failed ($@)");
+        $$errorref = $@ if($errorref);
+        return undef;
+    }
+
+    undef $this->{DB_Error};
+    $this->{LOG}->info("====> Setting docparams ... done");
+    return 1;
+
+}
 
 ########################################################################
 #
@@ -1956,8 +2022,6 @@ sub delete_single_version {
     return 1;
 }
 
-
-
 ########################################################################
 ########################################################################
 #
@@ -2013,7 +2077,7 @@ sub sanity_check {			# Check whether all DocTypes are available
 }
 
 
-
+
 ########################################################################
 #
 #	DocType external methods

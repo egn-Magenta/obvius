@@ -289,6 +289,13 @@ sub can_delete_comment {
     return $this->user_has_capabilities($doc, qw(delete));
 }
 
+sub can_set_docparams {
+    my ($this, $doc) = @_;
+
+    # Should this be modes?
+    return $this->user_has_capabilities($doc, qw(modes));
+}
+
 
 1;
 __END__

@@ -662,6 +662,45 @@ sub db_delete_table {
     return;
 }
 
+sub db_insert_docparams {
+    my ($this, $doc, $params) = @_;
+
+    $this->tracer($doc, $params) if($this->{DEBUG});
+
+    $this->{LOG}->info("====> Inserting docparams for docid " . $doc->Id . "...");
+
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'docparms',
+                                            });
+    for($params->param) {
+        $set->Insert({
+                        docid => $doc->Id,
+                        name => $_,
+                        value => $params->param($_)
+                    });
+    }
+    $set->Disconnect;
+
+    return;
+}
+
+sub db_delete_docparams {
+    my ($this, $doc) = @_;
+
+    $this->tracer($doc) if($this->{DEBUG});
+
+    $this->{LOG}->info("====> Deleting docparams for docid " . $doc->Id . "...");
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'docparms',
+                                            });
+    $set->Delete({docid => $doc->Id});
+    $set->Disconnect;
+
+    return;
+}
+
 1;
 __END__
 # Below is stub documentation for your module. You better edit it!
