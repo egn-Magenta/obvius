@@ -11,10 +11,11 @@ function reply() {
     var regex = new RegExp('^(http://<% $hostname %>)?<% $doc_uri %>');
     path = path.replace(regex, '');
     var new_window = document.pageform.in_new_window.checked;
+    var title = document.pageform.in_title.value;
     if(new_window) {
-        window.opener.<% $reply_function %>(path, 1);
+        window.opener.<% $reply_function %>(path, true, title);
     } else {
-        window.opener.<% $reply_function %>(path);
+        window.opener.<% $reply_function %>(path, false, title);
     }
     window.close();
 }
@@ -26,12 +27,18 @@ function reply() {
         <td>&nbsp;</td>
     </tr>
     <tr>
-        <td><strong>Url</strong></td>
+        <td valign="top"><strong>Url</strong></td>
         <td>
             <input type="text" size="40" name="in_url" value="<% $r->param('in_href') %>">
             <input type="button" value="Find" onclick="OpenWin('/admin/?obvius_op=navigator&fieldname=in_url&path=<% $doc_uri %>',750,550)"><br>
 %           my $new_window = ($r->param('in_target') and $r->param('in_target') eq '_blank');
             <input type="checkbox" name="in_new_window"<% $new_window  ? 'CHECKED' : '' %>> Åbn link i nyt vindue
+        </td>
+    </tr>
+    <tr>
+        <td valign="top"><strong>Title</strong></td>
+        <td>
+            <input type="text" size="40" name="in_title" value="<% $r->param('in_title') %>" />
         </td>
     </tr>
     <tr>

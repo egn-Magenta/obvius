@@ -55,7 +55,7 @@ function obvius_<% $name %>_insertimage(in_url, in_align, in_alt, in_space, in_p
 }
 
 // Still needs params for adding title and other tags.
-function obvius_<% $name %>_insertlink(in_link, in_new_window)
+function obvius_<% $name %>_insertlink(in_link, in_new_window, in_title)
 {
     var ed = eval("frames.obvius_<% $name %>_editor");
     ed.focus(); // Whoa.. If doesn't do this we might insert the picture into the portal :)
@@ -82,6 +82,9 @@ function obvius_<% $name %>_insertlink(in_link, in_new_window)
             linkElem.target = '_blank';
         }
 
+        if(in_title) {
+            linkElem.title = in_title;
+        }
 
         // Fix links
         fixInternalLinks('<% $name %>');
@@ -329,6 +332,7 @@ function obvius_<% $name %>_start_linkdlg() {
 
     var href = '';
     var target = '';
+    var title = '';
 
     if(selRange) {
         var parentElem;
@@ -340,6 +344,9 @@ function obvius_<% $name %>_start_linkdlg() {
         if(parentElem.tagName == 'A') {
             href = parentElem.href;
             target = parentElem.target;
+            if(parentElem.title) {
+                title = parentElem.title;
+            }
         } else {
             if(selRange.htmlText) {
                 var htmlText = selRange.htmlText;
@@ -358,6 +365,8 @@ function obvius_<% $name %>_start_linkdlg() {
                             href = aElem.href;
                             if(aElem.target)
                                 target = aElem.target;
+                            if(aElem.title)
+                                title = aElem.title;
                             done = true;
                         }
                     } else {
@@ -376,10 +385,13 @@ function obvius_<% $name %>_start_linkdlg() {
         if(target) {
             urlExtra += '&in_target=' + escape(target);
         }
+        if(title) {
+            urlExtra += '&in_title=' + escape(title);
+        }
     }
 
 
-    OpenWin('/admin/?obvius_op=linkdlg&reply_function=obvius_<% $name %>_insertlink&doc_uri=<% $uri |u %>' + urlExtra,450,100);
+    OpenWin('/admin/?obvius_op=linkdlg&reply_function=obvius_<% $name %>_insertlink&doc_uri=<% $uri |u %>' + urlExtra,450,130);
 
 }
 
