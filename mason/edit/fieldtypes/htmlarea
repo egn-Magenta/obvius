@@ -194,16 +194,10 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             }
                                                         }
 
-                                                        print STDERR "Text before: $text\n";
-
                                                         $text =~ s!\Q$org_src\E!$src!;
-
-                                                        print STDERR "Text after: $text\n";
-
                                                     }
 
                                                     $out .= $text;
-
                                                 } else {
                                                     $out.=$text;
                                                 }
