@@ -4,6 +4,8 @@ use strict;
 use warnings;
 
 use Obvius::Config;
+use Obvius::Log::Apache;
+
 use WebObvius::Site::Mason;
 use WebObvius::Access;
 use WebObvius::Admin;
@@ -66,8 +68,8 @@ our $Public = ${perlname}::Site::Public->new(
 					comp_root=>[
 						    [docroot  =>"$base/docs"],
 						    [sitecomp =>"$base/mason/public"],
-						    [commoncomp => "$base/mason/common"],
 						    [globalpubliccomp =>"$globalbase/obvius/mason/public"],
+						    [commoncomp => "$base/mason/common"],
 						    [globalcommoncomp =>"$globalbase/obvius/mason/common"],
 						   ],
 					search_words_log => "$base/htdig/log/search_words.log",
@@ -90,7 +92,9 @@ our $Admin = ${perlname}::Site::Admin->new(
 				      comp_root=>[
 						  [docroot  =>"$base/docs"],
 						  [sitecomp =>"$base/mason/admin"],
-						  [admincomp=>"$globalbase/obvius/mason"],
+						  [admincomp=>"$globalbase/obvius/mason/admin"],
+						  [commoncomp => "$base/mason/common"],
+						  [globalcommoncomp =>"$globalbase/obvius/mason/common"],
 						 ],
 				      search_words_log => "$base/htdig/log/search_words.log",
 				      log => $log,
