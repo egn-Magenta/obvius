@@ -35,6 +35,11 @@ use Obvius::DocType;
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+# action($input, $output, $doc, $vdoc, $obvius)
+#
+#    - directs control to the function 'createdocument' if this is
+#      requested by the parameter 'mode' on the input-object ($input)
+#
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
@@ -89,8 +94,8 @@ Obvius::DocType::Fangstrapport - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::Fangstrapport;
-  blah blah blah
+  action is called automatically by WebObvius during construction of
+  the content area
 
 =head1 DESCRIPTION
 
