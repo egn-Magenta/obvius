@@ -51,7 +51,7 @@ croak ("Could not get Obvius object for $site")
     unless(defined($obvius));
 
 croak ("Must have a sitename") unless($sitename);
-my $base_dir = '/var/www/'. $sitename;
+my $base_dir = '/home/httpd/'. $sitename;
 
 ## "Main" program part
 
@@ -328,6 +328,8 @@ sub get_docs_by_search {
 
     my $input = new Obvius::Data;
     my $output = new Obvius::Data;
+    
+    $obvius->get_version_fields($vdoc, 256);
 
     $obvius->get_version_fields($vdoc, 256);
 
