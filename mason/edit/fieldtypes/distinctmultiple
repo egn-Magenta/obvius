@@ -137,7 +137,7 @@ onload_array[onload_array.length] = obvius_<% $name %>_startup;
     <td valign="top" style="padding-left: 20px">
         <select name="obvius_<% $name %>_pool" style="width:400px">
 %for(@options) {
-            <option value="<% $_ |h %>"><% $_ %></option>
+            <option value="<% $_ |h %>"><% $_ |h %></option>
 %}
         </select>
     </td>
