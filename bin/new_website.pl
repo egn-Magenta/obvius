@@ -145,7 +145,7 @@ make_db($options{dbname});
 print "Do you want to import some basic documents (Y/n)? ";
 my $test = <STDIN>;
 unless($test and $test =~ /^n/i) {
-    system("cat $options{wwwroot}/obvius/otto/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
+    system("cat $options{wwwroot}/$options{website}/db/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
 }
 
 exit 0;
