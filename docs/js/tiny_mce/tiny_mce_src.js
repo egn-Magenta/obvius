@@ -994,7 +994,7 @@ function TinyMCE_handleEvent(e) {
 
 			// Run image/link fix on Gecko if diffrent document base
 			if (tinyMCE.isGecko && tinyMCE.settings['document_base_url'] != "" + document.location.href)
-				window.setTimeout('tinyMCE.getInstanceById("' + instance.editorId + '").fixBrokenURLs();', 10);
+				window.setTimeout('tinyMCE.getInstanceById("' + tinyMCE.selectedInstance.editorId + '").fixBrokenURLs();', 10);
 
 			return false;
 		break;
@@ -3870,7 +3870,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 				// If target node is text do special treatment, (Mozilla 1.3 fix)
 				if (rng.startContainer.nodeType == 3) {
 					var node = rng.startContainer.splitText(rng.startOffset);
-					node.parentNode.insertBefore(value, node); 
+					node.parentNode.insertBefore(value, node);
 				} else
 					rng.insertNode(value);
 
