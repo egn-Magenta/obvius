@@ -3743,13 +3743,13 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="Events from this date">
-    <translation lang="en">Events from this date</translation>
-    <translation lang="da">Arrangementer fra og med denne dato</translation>
+    <translation lang="en">Events from this date (2003-12-01)</translation>
+    <translation lang="da">Arrangementer fra og med denne dato (2003-12-01)</translation>
   </text>
 
   <text key="Events to this date">
-    <translation lang="en">Events to this date</translation>
-    <translation lang="da">Arrangementer til og med denne dato</translation>
+    <translation lang="en">Events to this date (2003-12-31)</translation>
+    <translation lang="da">Arrangementer til og med denne dato (2003-12-31)</translation>
   </text>
 
   <text key="Vis/Rediger HTML">
