@@ -20,6 +20,11 @@
 % }
 
 <p>
+<& SELF:msg, text=>'Be aware that you will delete the entire document and all versions.' &><br>
+<& SELF:msg, text=>'You can delete a single version under the edit page \'About the document\'' &><br> 
+</p>
+
+<p>
 <input class="okknap" type="submit" value="<& SELF:msg, text=>'Delete document' &>">
 <input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
 </p>
