@@ -49,9 +49,6 @@ sub add_to_sitemap{
     my $uri = $url . $vdoc->{NAME} . '/';
     my $seq = $vdoc->{SEQ};
 
-	use Data::Dumper;
-	print STDERR Dumper($uri);
-
     my $element = {
                     'title' => $title,
                     'url'   => $uri,
