@@ -621,12 +621,17 @@ sub set_public_login_cookie {
     # Set a new cookie:
     my $cookie_value = md5_hex($req->request_time . $req->the_request);
     my $expire = $this->get_public_login_expire($user->{login_type});
-    my $cookie = Apache::Cookie->new($req,
-                                        -name    =>  'obvius_public_login',
-                                        -value   =>  $cookie_value,
-                                        -expires =>  $expire,
-                                        -path    =>  '/'
-                                    );
+
+    my %options=(
+                 -name    =>  'obvius_public_login',
+                 -value   =>  $cookie_value,
+                 -expires =>  $expire,
+                 -path    =>  '/'
+                );
+    my $domain=$obvius->config->param('cookiedomain');
+    $options{'-domain'}=$domain if ($domain);
+
+    my $cookie = Apache::Cookie->new($req, %options);
     $cookie->bake;
 
     #Update the DB with the new cookie value:
