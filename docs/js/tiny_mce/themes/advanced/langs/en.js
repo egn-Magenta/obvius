@@ -56,5 +56,7 @@ tinyMCELang['lang_link_list'] = 'Link list';
 tinyMCELang['lang_image_list'] = 'Image list';
 tinyMCELang['lang_browse'] = 'Browse';
 tinyMCELang['lang_theme_showanchor_desc'] = 'Toggle anchor visibility';
-
-
+tinyMCELang['lang_insert_link_popup_anchor'] = 'Anchor: ';
+tinyMCELang['lang_pastetext_desc'] = 'Paste as text';
+tinyMCELang['lang_theme_anchor_exist'] = 'An anchor with the name "$value" already exist, please choose another name.';
+tinyMCELang['lang_anchor_list'] = 'Anchors';

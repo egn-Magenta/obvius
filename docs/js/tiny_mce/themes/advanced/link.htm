@@ -75,15 +75,19 @@ if (url != null)
           </tr>
 		  <!-- Link list -->
 		  <script language="javascript">
+			var links = tinyMCE.getWindowArg('links');
 			if (typeof(tinyMCELinkList) != "undefined" && tinyMCELinkList.length > 0) {
+				links = tinyMCELinkList.concat(links);
+			}
+			if (links && links.length > 0) {
 				var html = "";
 
-				html += '<tr><td>{$lang_link_list}:</td>';
+				html += '<tr><td>{$lang_anchor_list}:</td>';
 				html += '<td><select name="link_list" style="width: 200px" onchange="this.form.href.value=this.options[this.selectedIndex].value;">';
 				html += '<option value="">---</option>';
 
-				for (var i=0; i<tinyMCELinkList.length; i++)
-					html += '<option value="' + tinyMCELinkList[i][1] + '">' + tinyMCELinkList[i][0] + '</option>';
+				for (var i=0; i<links.length; i++)
+					html += '<option value="' + links[i][1] + '">' + links[i][0] + '</option>';
 
 				html += '</select></td></tr>';
 

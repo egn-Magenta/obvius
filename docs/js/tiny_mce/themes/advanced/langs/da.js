@@ -55,3 +55,7 @@ tinyMCELang['lang_paste_desc'] = 'S&#230;t ind';
 tinyMCELang['lang_link_list'] = 'Link list';
 tinyMCELang['lang_image_list'] = 'Image list';
 tinyMCELang['lang_browse'] = 'Find';
+tinyMCELang['lang_insert_link_popup_anchor'] = 'Bogm&#230;rke: ';
+tinyMCELang['lang_pastetext_desc'] = 'Sæt ind som ren tekst';
+tinyMCELang['lang_theme_anchor_exist'] = 'Et anker med navnet "$value" findes allrede. V' + unescape("%E6") + 'lg venligst et andet navn.';
+tinyMCELang['lang_anchor_list'] = 'Bogm&#230;rker';
