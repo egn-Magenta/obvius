@@ -17,7 +17,7 @@
 % if (my $v=$vdoc->field('docdate')) {
     <meta name="DC.Date" scheme="ISO8601" content="<% substr($v, 0, 10) %>"<% $endtag %>>
 % }
-% if (my $v=$vdoc->field('lang') || 'da') {
+% if (my $v=$vdoc->param('lang') || 'da') {
     <meta name="DC.Language" scheme="ISO639-1" content="<% $v |h %>"<% $endtag %>>
 % }
 %
@@ -29,7 +29,7 @@ $format=>'text/html'
 %
 <%init>
 $obvius->get_version_fields($vdoc, [qw(title version author category keyword teaser
-				     docdate lang docref source expires)]);
+				     docdate docref source expires)]);
 my %metadata=(
 	      'DC.Title'=>$vdoc->Title,
 	      'DC.Title.Release'=>$vdoc->Version,
