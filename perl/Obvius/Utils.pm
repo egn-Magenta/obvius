@@ -319,6 +319,8 @@ sub delete_expertgroup {
 # is quite expensive. They don't really belong here, but until now
 # it's the best place to put 'em.
 
+# get_phorum_names($config_suffix) - Returns the names of forums created under the chosen
+#                    config_suffix. Returns an array-ref.
 sub get_phorum_names {
     my ($this, $suffix_limit) = @_;
 
@@ -347,6 +349,8 @@ sub get_phorum_names {
     return \@data;
 }
 
+# get_phorum_id_by_name($name) - Returns the Phorum ID of the forum called
+#                                $name. Returns undef if no forum was found.
 sub get_phorum_id_by_name {
     my ($this, $name) = @_;
 
@@ -372,7 +376,8 @@ sub get_phorum_id_by_name {
         return undef;
     }
 }
-
+# get_phorum_by_id ($id) - Returns the name of the forum with $id. Returns undef
+#                        - if no forum was found.
 sub get_phorum_by_id {
     my ($this, $id) = @_;
 
@@ -577,14 +582,21 @@ Obvius::Utils - Utility functions for Obvius.pm
 
   $obvius->create_msg_digest();
 
-  can_create_new_passwordprotedtedurl();
+  can_create_new_passwordprotectedurl();
 
   my $ret=$obvius->create_new_synonyms( { synonyms=>'hest pony hingst hoppe' } );
+
+  my $phorums=$obvius->get_phorum_names('hope');
+  my $phorum_id=$obvius->get_phorum_id_by_name('Almen debat');
+  my $phorum_name=$obvius->get_phorum_by_id('12');
 
 =head1 DESCRIPTION
 
 This module adds extra functions to the L<Obvius> module. It should not be
 used as a stand alone module.
+
+All functions related to phorum usage should be used with caution since a new
+database connection is made on each invocation.
 
 =head2 EXPORT
 
@@ -595,6 +607,8 @@ None.
 Adam Sjøgren, E<lt>adam@aparte.dkE<gt>
 
 Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
+
+Martin Skøtt E<lt>martin@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 
