@@ -139,12 +139,14 @@ sub update_passwordprotectedurl {
 #
 ########################################################################
 
+# get_synonyms - Returns all synonyms with $id
 sub get_synonyms {
     my ($this, $id) = @_;
 
     return $this->get_table_record('synonyms', {id=>$id});
 }
 
+# can_create_new_synonyms - Check if the current user is allowed to create new synonyms
 sub can_create_new_synonyms {
     my ($this) = @_;
 
@@ -152,6 +154,8 @@ sub can_create_new_synonyms {
     return $this->user_has_capabilities($doc, qw(admin)); # Changed from 'modes' to 'admin'
 }
 
+# delete_synonyms - Removes synonyms with $id from the database if they exist
+#                   and the user has the necessary rights. Returns undef on failure.
 sub delete_synonyms {
     my ($this, $id) = @_;
 
