@@ -175,7 +175,13 @@ if(! $doctypeid and $doctype) {
     $doctypeid = $doct->Id if($doct);
 }
 
-my @path = $obvius->get_doc_by_path($path);
+my $extra_path_info;
+my @path = $obvius->get_doc_by_path($path, \$extra_path_info);
+
+if($extra_path_info) {
+    $path =~ s!\Q$extra_path_info\E/?$!!;
+    $ARGS{path} = $path;
+}
 
 my $vdoc = $obvius->get_public_version($path[-1]) || $obvius->get_latest_version($path[-1]);
 $obvius->get_version_fields($vdoc, [ 'title', 'author', 'docdate' ]);
