@@ -71,6 +71,10 @@ sub is_cacheable { return 1; }
 sub alternate_location { return undef; }
 sub raw_document_data { return undef; }
 
+# handle_path_info - returns true if the document type wants to handle
+#                    excess $path_info itself.
+sub handle_path_info { return undef; }
+
 
 #########################################################################
 #
