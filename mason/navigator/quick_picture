@@ -224,7 +224,7 @@ if(my $name = $r->param('image_data')) {
                                                             $r->param('new_format'),
                                                             $r->param('quality')
                                                         );
-            my $fields = new MCMS::Data;
+            my $fields = new Obvius::Data;
 
 
             # Set default values
