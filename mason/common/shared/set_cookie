@@ -1,0 +1,16 @@
+<%args>
+$cookie
+$value=>undef
+$expires=>'+3M'
+$path=>'/'
+</%args>
+%
+<%perl>
+my $c=Apache::Cookie->new($r,
+		          -name => $cookie,
+                          -value => $value,
+                          -expires => $expires,
+			  -path => $path,
+                         );
+$c->bake;
+</%perl>
