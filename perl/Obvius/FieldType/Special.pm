@@ -17,13 +17,27 @@ sub copy_in {
     my ($this, $obvius, $fspec, $value) = @_;
 
     if ($this->{VALIDATE_ARGS} eq 'DocumentPathCheck') {
-	return undef unless($value);
-	if (my $doc=$obvius->get_doc_by_id($value)) {
-	    return $obvius->get_doc_uri($doc);
-	}
-	else {
-	    return undef;
-	}
+        return undef unless($value);
+        if (my $doc=$obvius->get_doc_by_id($value)) {
+            return $obvius->get_doc_uri($doc);
+        } else {
+            return undef;
+        }
+    }
+
+    if ($this->{VALIDATE_ARGS} eq 'DocidLink') {
+        return undef unless(defined($value));
+
+        if ($value =~ /(\d+)\.docid/) {
+            my $doc = $obvius->get_doc_by_id($1);
+            if($doc) {
+                return ($obvius->get_doc_uri($doc));
+            } else {
+                return $value;
+            }
+        } else {
+            return $value;
+        }
     }
 
     $obvius->log->notice("Obvius::FieldType::Special unknown special type $this->{VALIDATE_ARGS}, falling through.");
@@ -36,13 +50,27 @@ sub copy_out {
     my ($this, $obvius, $fspec, $value) = @_;
 
     if ($this->{VALIDATE_ARGS} eq 'DocumentPathCheck') {
-	if (my $doc=$obvius->lookup_document($value)) {
-	    return $doc->Id;
-	}
-	else {
-	    return undef;
-	}
+        if (my $doc=$obvius->lookup_document($value)) {
+            return $doc->Id;
+        } else {
+            return undef;
+        }
 
+    }
+
+    if ($this->{VALIDATE_ARGS} eq 'DocidLink') {
+        return undef unless(defined($value));
+
+        # If value starts with a / it might be a local URL.
+        # If so store it as XX.docid
+        if ($value =~ m!^/!) {
+            my $doc = $obvius->lookup_document($value);
+            if($doc) {
+                return $doc->Id . ".docid";
+            } else {
+                return $value;
+            }
+        }
     }
 
     return $value;
@@ -58,7 +86,7 @@ sub validate {
 }
 
 
-
+
 1;
 __END__
 # Below is stub documentation for your module. You better edit it!
