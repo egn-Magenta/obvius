@@ -1,0 +1,105 @@
+<% $out %>\
+<%args>
+$html
+</%args>
+<%init>
+$out = '';
+$p->parse($html);
+$p->eof;
+</%init>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr, $attrseq)=@_;
+                                                  if($tagname eq 'img') {
+                                                    my $adjust = 0;
+                                                    if($attr->{style}) {
+                                                        # Set align from float:
+                                                        if($attr->{style} =~ s!float:([^;]+);!!) {
+                                                            my $align_val = $1;
+                                                            $align_val =~ s/^\s+//;
+
+                                                            $attr->{align} = $align_val;
+
+                                                            push(@$attrseq, "align") unless(grep { $_ eq 'align' } @$attrseq);
+
+                                                            $adjust = 1;
+                                                        }
+
+                                                        if($attr->{style} =~ m!margin-top:([^;]+);!) {
+                                                            my $top_val = $1;
+                                                            $top_val =~ s/^\s+//;
+                                                            if($attr->{style} =~ m!margin-bottom:([^;]+);!) {
+                                                                my $bottom_val = $1;
+                                                                $bottom_val =~ s/^\s+//;
+
+                                                                if($bottom_val eq $top_val) {
+                                                                    # Remove styles:
+                                                                    $attr->{style} =~ s!margin-(bottom|top):[^;]+;!!g;
+
+                                                                    # Set vspace:
+                                                                    $top_val =~ s!\D*(\d+)\D*!$1!;
+                                                                    $attr->{vspace} = $top_val;
+
+                                                                    push(@$attrseq, "vspace") unless(grep { $_ eq 'vspace' } @$attrseq);
+                                                                    $adjust = 1;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        if($attr->{style} =~ m!margin-left:([^;]+);!) {
+                                                            my $left_val = $1;
+                                                            $left_val =~ s/^\s+//;
+                                                            if($attr->{style} =~ m!margin-right:([^;]+);!) {
+                                                                my $right_val = $1;
+                                                                $right_val =~ s/^\s+//;
+
+                                                                if($left_val eq $right_val) {
+                                                                    # Remove styles:
+                                                                    $attr->{style} =~ s!margin-(left|right):[^;]+;!!g;
+
+                                                                    # Set hspace:
+                                                                    $left_val =~ s!\D*(\d+)\D*!$1!;
+                                                                    $attr->{hspace} = $left_val;
+
+                                                                    push(@$attrseq, "hspace") unless(grep { $_ eq 'hspace' } @$attrseq);
+                                                                    $adjust = 1;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if($adjust) {
+                                                        my $endtag = ' /';
+                                                        $text = "<$tagname";
+                                                        for(@$attrseq) {
+                                                            next if($_ eq 'style' and not $attr->{style});
+                                                            if($_ eq '/') {
+                                                                $endtag = " /";
+                                                                next;
+                                                            } elsif(/^(mce_|editor_id)/) {
+                                                                # Skip tinymce tags:
+                                                                next;
+                                                            }
+                                                            $text .= " " . lc($_) . '="' . $attr->{$_} . '"' unless ($tagname =~ /^br$/);
+                                                        }
+                                                        $text .= "$endtag>";
+                                                    }
+                                                  }
+
+                                                  $out.= $text;
+                                                }, "self, tagname, text, attr, attrseq" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=lc($text);
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+
+</%once>

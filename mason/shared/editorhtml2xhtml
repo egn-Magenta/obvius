@@ -20,10 +20,48 @@ my $p = HTML::Parser->new(api_version=>3,
                                                   my $endtag = "";
                                                   $endtag = " /" if($tagname =~ /^(br|img|input)$/);
 
+                                                  # Some things should be handled by styles instead of attributes:
+                                                  $attr->{style} ||= '';
+
+                                                  # Add a ; to the end of existing styles if it's not already there:
+                                                  if($attr->{style} and $attr->{style} !~ m!;$!) {
+                                                    $attr->{style} .= ";";
+                                                  }
+
+                                                  if(my $align = $attr->{align}) {
+                                                    $attr->{style} =~ s/float:[^;]+;//;
+                                                    $attr->{style} .= "float: $align;";
+                                                  }
+
+                                                  if(my $vspace = $attr->{vspace}) {
+                                                    $attr->{style} =~ s/margin-top:[^;]+;//;
+                                                    $attr->{style} =~ s/margin-bottom:[^;]+;//;
+
+                                                    $attr->{style} .= "margin-top: ${vspace}px;";
+                                                    $attr->{style} .= "margin-bottom: ${vspace}px;";
+                                                  }
+
+                                                  if(my $hspace = $attr->{hspace}) {
+                                                    $attr->{style} =~ s/margin-left:[^;]+;//;
+                                                    $attr->{style} =~ s/margin-right:[^;]+;//;
+
+                                                    $attr->{style} .= "margin-left: ${hspace}px;";
+                                                    $attr->{style} .= "margin-right: ${hspace}px;";
+                                                  }
+
+                                                  # Add style to attrseq if it isn't already there:
+                                                  if($attr->{style} and not grep { $_ eq 'style' } @$attrseq) {
+                                                    push(@$attrseq, "style");
+                                                  }
+
+
                                                   my $text = "<$tagname";
                                                   for(@$attrseq) {
                                                     if($_ eq '/') {
                                                         $endtag = " /";
+                                                        next;
+                                                    } elsif(/^(mce_|editor_id)/) {
+                                                        # Skip tinymce tags:
                                                         next;
                                                     }
                                                     $text .= " " . lc($_) . '="' . $attr->{$_} . '"' unless ($tagname =~ /^br$/);
