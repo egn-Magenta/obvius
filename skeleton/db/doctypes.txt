@@ -52,7 +52,7 @@ DocType: ComboSearch parent=Search basis searchable
 
 DocType: KeywordSearch parent=Search basis searchable
  base                     path
- search_type              searchtype
+ search_type              searchtype        default_value=keyword            
  show_new_titles          bool              default_value=0
 
 DocType: HTML parent=Base basis searchable
