@@ -114,6 +114,13 @@ sub export_doclist {
     # Ok, we have a vdoclist, declare depencies:
     $output->param(Obvius_DEPENCIES => 1);
 
+    # The configfile might tell us to just export the vdocs
+    if($obvius->config->param('searchdocs_exports_vdocs')) {
+        $output->param($options{name} || 'subdocs', $vdoclist);
+        return $vdoclist;
+    }
+
+
     # my $req = $output->request;
     # my $obvius = $output->obvius;
 
