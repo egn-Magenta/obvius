@@ -9,5 +9,5 @@ my $common =$admin->Subsite;
 
 my $data = $common->generate_subsite($common, $r, $doc, $vdoc, $doctype, $obvius, is_admin=>1);
 
-my $admin_lang_link = $obvius->config->param('admin_lang_link');
+my $admin_lang_link = $obvius->config->param('admin_lang_link') || '';
 </%init>
