@@ -31,3 +31,4 @@ publishmode    text    radio (immediate|moderator)      regexp (^(immediate|mode
 publish_on	date	publishon			regexp (^\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d$)	none
 orderevents     text    radio (+title|-docdate|+docdate|+eventtype|+contactinfo)    regexp (^(+title|-docdate|+docdate|+eventtype|+contactinfo)$)   none
 pagesize	int     pagesize			regexp (^\d+$)					none
+fileupload2 text    fileupload2         none                            none
