@@ -128,9 +128,9 @@ sub encrypt_password {
 }
 
 sub delete_user {
-    my ($this, $userid) = @_;
+    my ($this, $userid, $doc) = @_;
 
-    return undef unless $this->can_create_new_user();
+    return undef unless $this->can_create_new_user($doc);
 
     return undef unless $this->get_user($userid);
 
@@ -156,9 +156,9 @@ sub delete_user {
 }
 
 sub create_new_user {
-    my ($this, $user) = @_;
+    my ($this, $user, $doc) = @_;
 
-    return undef unless $this->can_create_new_user();
+    return undef unless $this->can_create_new_user($doc);
 
     return undef if ($this->get_userid($user->{login}));
 
@@ -188,9 +188,9 @@ sub create_new_user {
 }
 
 sub update_user {
-    my ($this, $user) = @_;
+    my ($this, $user, $doc) = @_;
 
-    return undef unless $this->can_create_new_user(); # Perhaps different?
+    return undef unless $this->can_create_new_user($doc); # Perhaps different?
 
     $user->{passwd}=$this->encrypt_password($user->{password})
 	if (defined $user->{password} and $user->{password});
@@ -222,9 +222,9 @@ sub update_user {
 }
 
 sub delete_group {
-    my ($this, $grpid) = @_;
+    my ($this, $grpid, $doc) = @_;
 
-    return undef unless $this->can_create_new_group();
+    return undef unless $this->can_create_new_group($doc);
 
     return undef unless $this->get_group($grpid);
 
@@ -250,9 +250,9 @@ sub delete_group {
 }
 
 sub create_new_group {
-    my ($this, $group) = @_;
+    my ($this, $group, $doc) = @_;
 
-    return undef unless $this->can_create_new_group();
+    return undef unless $this->can_create_new_group($doc);
 
     $group->{user}=[$group->{user}] if (defined $group->{user} and ref $group->{user} ne 'ARRAY');
 
@@ -278,9 +278,9 @@ sub create_new_group {
 }
 
 sub update_group {
-    my ($this, $group) = @_;
+    my ($this, $group, $doc) = @_;
 
-    return undef unless $this->can_create_new_group(); # Perhaps different?
+    return undef unless $this->can_create_new_group($doc); # Perhaps different?
 
     $group->{user}=[$group->{user}] if (defined $group->{user} and ref $group->{user} ne 'ARRAY');
 
