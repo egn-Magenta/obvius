@@ -226,6 +226,11 @@ sub db_delete_subscriptions {
     return;
 }
 
+# db_insert_version - Creates a new entry in the versions table based on the supplied docid.
+#                     Returns version which is a string of the format "%Y-%m-%d %H:%M:%S".
+#                     TODO:
+#                     Check that the supplied arguments are correct (eg. does docid and type make sense).
+#                     Handle when the insert goes wrong.
 sub db_insert_version {
     my ($this, $docid, $type, $lang) = @_;
 
