@@ -5,6 +5,10 @@
 <% $html %>
 %} else {
 %if($output->param('print_form')) {
+%    if ($form!~/^\s*$/s) {
+<% $form %>
+%    }
+%    else {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
 <td>
@@ -39,6 +43,7 @@
 </td>
 </tr>
 </table>
+%    }
 %} else {
 %   if($output->param('results') > 0) {
     <br />
@@ -173,6 +178,7 @@ my $search_data=$output->param('search_data');
 my $do_search_page = $output->param('do_search_page');
 
 my $teaser = $obvius->get_version_field($vdoc, 'teaser');
+my $form = $obvius->get_version_field($vdoc, 'form');
 
 my $search_type=$output->param('search_type');
 my $search_term=$output->param('search_term');
