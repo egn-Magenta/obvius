@@ -395,7 +395,14 @@ $r->pnotes('doctype' =>$doctype);
 $r->pnotes('site')->read_translations($r, 'translations', 'da', $obvius);
 
 # help-webserver:
+
+my $helpserver = $obvius->config->param('HELP_SERVER');
+if ($helpserver) {
+$r->notes('helpserver'=>"$helpserver");
+} else {
 $r->notes('helpserver'=>'help.aparte-test.dk');
+}
+
 # Don't cache this:
 $r->no_cache(1);
 </%init>
