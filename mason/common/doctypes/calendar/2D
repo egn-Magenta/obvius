@@ -31,7 +31,7 @@
 	    <td align="left"><span class="tekstGraaLille"><% $day->{mday} %>.</span></td>
 	  </tr>
 	  <tr>
-	    <td bgcolor="<% scalar(@$docs) ? $colordark : $color %>" align="center">
+	    <td align="center">
 %   if(scalar(@$docs)) {
 %   for my $doc(@$docs) {
 	      <p align="left">
