@@ -2139,7 +2139,10 @@ sub get_field {
 #
 ########################################################################
 
-sub sanity_check {			# Check whether all DocTypes are available
+# sanity_check - goes through the doctypes and checks if
+#                Obvius::DocType::doctypename can be use'd
+#                Obsolete method, not called from anywhere.
+sub sanity_check {
     my ($this, $config) = @_;
 
     $this->tracer($config) if ($this->{DEBUG});
@@ -2248,6 +2251,8 @@ Obvius - Content Manager, database handling.
     my ($hashref, $arrayref) = $obvius->calc_order_for_query($vdoc);
 
     $obvius->adjust_doctype_hierarchy(); # Internal.
+
+    $obvius->sanity_check($config); # Obsolete, not used.
 
 =head1 DESCRIPTION
 
