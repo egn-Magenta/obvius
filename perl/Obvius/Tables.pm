@@ -205,6 +205,9 @@ sub insert_table_record {
     return $ret;
 }
 
+
+# XXX asjo TODO: clean up this method, and adjust callers appropriately.
+
 sub delete_table_record {
     my ($this, $table, $rec, $where) = @_;
 
