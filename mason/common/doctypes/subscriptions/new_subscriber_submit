@@ -22,8 +22,8 @@ Der opstod følgende fejl ved oprettelsen af deres abonnement:<br>
 %   unless($mail_error) {
 <p>
 Tak for din tilmelding til nyhedsservice. Du vil nu modtage en e-mail
-på <% $mailto %> som du skal bekræfte ved enten at klikke på linket i
-mailen eller besvare mailen.
+på <% $mailto %> som du skal bekræfte ved at klikke på linket i
+mailen.
 </p>
 
 %   } else {
