@@ -1,0 +1,27 @@
+<p>
+<em>
+<& teaser &>
+</em>
+</p>
+
+<p>
+Title:     <% $vdoc->Title %><br>
+Short title: <% $vdoc->field('short_title') %><br>
+Mimetype:  <% $vdoc->Mimetype %><br>
+Size:      <% $vdoc->Size %> bytes<br>
+File:      <a href="<% $linkuri %>" title="Download file"><% $linkuri %></a>
+</p>
+%
+% #####################
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title short_title teaser size mimetype uploadfile)]);
+
+my $obvius_version=$output->param('_incoming_obvius_version');
+
+my $linkuri=$vdoc->field('uploadfile');
+</%init>
