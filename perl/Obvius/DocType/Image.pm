@@ -321,6 +321,11 @@ of an action, because an Image document doesn't return a piece of
 If the parameter "size" is given, a scaled version - "thumbnail" - of
 the image is returned.
 
+TODO: Image::Magick has a tendency to segfault when scaling/handling
+      animated gifs, so skipping scaling of such images might be in
+      order. Perhaps look at MCMS::DocType::Image to see how it is
+      done there.
+
 META: Document how the scaled versions are stored, maintained and
       retrieved.
 
