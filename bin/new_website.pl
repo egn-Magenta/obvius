@@ -238,6 +238,8 @@ benchmark = 1
 
 sitename=$options{website}
 perlname=$options{perlname}
+
+help_server = help.obvius.org
 EOT
     }
 }
