@@ -15,10 +15,16 @@ function parseFrameInnerHTML(editNbr){
 	strTmp = strTmp.replace(/\s*tab-stops:[^'";]*;?/g,'')
 	strTmp = strTmp.replace(/\s*LETTER-SPACING:[^\s'";]*;?/g,'')
 	strTmp = strTmp.replace(/\s*class=MsoNormal/g,'')
-	strTmp = strTmp.replace(/\s*class=MsoBodyText/g,'')
-	
+	strTmp = strTmp.replace(/\s*class=MsoBodyText[2345678]?/g,'')
+
 	strTmp = strTmp.replace(/<o:p>/g,'')
 	strTmp = strTmp.replace(/<\/o:p>/g,'')
+
+	strTmp = strTmp.replace(/<v:[^>]*>/g,'')
+	strTmp = strTmp.replace(/<\/v:[^>]*>/g,'')
+
+	strTmp = strTmp.replace(/<w:[^>]*>/g,'')
+	strTmp = strTmp.replace(/<\/w:[^>]*>/g,'')
 	
 	tmpFrame.document.body.innerHTML = strTmp;
 	//document.forms[0].elements[tmpFmElement].value = strTmp;
