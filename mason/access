@@ -78,7 +78,7 @@ if (!defined $obvius_session) {
                    {title=>'Owner',        fieldspec=>$owner_fspec},
                    {title=>'Group',        fieldspec=>$group_fspec},
                    {title=>'Access rules', fieldspec=>$accessrules_fspec,
-                    options=>{rows=>5, cols=>40}},
+                    options=>{rows=>15, cols=>90}},
                   );
 
     $page{fieldlist}=\@fieldlist;
