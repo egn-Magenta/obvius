@@ -1,0 +1,91 @@
+<& headline &>
+%   if ($op eq 'kontakt') {
+%       if($mail_error) {
+            <h2>Der er opstået følgende fejl i forbindelse med afsendelse af e-mailen:</h2>
+            <p><% $mail_error %></p>
+%       } else {
+            <h2>Tak for din henvendelse</h2>
+            <p><a href="<% $prefix . "/" %>">Klik her for at fortsætte.</a></p>
+%       }
+%   } else {
+%       if (!$vdoc->field('bare')) {
+            <& teaser &>
+%       }
+%       if ($url) {
+            Send adressen: <a href="http://www.example.com<% $url |h %>">http://www.example.com<% $url |h %></a>
+%       }
+        <& content, prefix=>'html_', htmlize=>0 &>
+%       if ($url) {
+            <script language="javascript">
+                document.send_til_ven.url.value = '<% $url %>';
+            </script>
+%       }
+%   }
+<%args>
+$output
+</%args>
+<%init>
+my $op = $output->param('_incoming_op') || '';
+my $mail_error;
+my $url = $r->param("url") || undef;
+
+if($op eq 'kontakt') {
+    my $mailmsg = $output->param('mailmsg');
+    my $mailto = $output->param('recipient');
+
+    my $mailtxt;
+    $mailtxt = $m->scomp( '/' . $mailmsg, output=>$output) if($mailmsg);
+
+    # print STDERR $mailtxt;
+    $mail_error = "Kunne ikke lave mail besked" unless($mailtxt);
+
+    $r->pnotes('OBVIUS_OUTPUT')->param(OBVIUS_SIDE_EFFECTS => 1);
+    my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => $obvius->Debug);
+    my $from = $output->param('Email');
+    my $name = $output->param('Navn');
+
+
+    $mail_error = "E-mail ikke udfyldt<br>" unless ($output->param('_incoming_not_obligatory_email') or $from);
+    $mail_error = "E-mail-adresse ikke korrekt udfyldt<br>" if (!$output->param('_incoming_not_obligatory_email') and !$mail_error and $from !~ /^[^@]+@[^@]+\.\w+$/);
+    $mail_error .= "Navn ikke udfyldt" unless ($output->param('_incoming_not_obligatory_navn') or $name);
+
+
+    $mail_error = "Failed to specify a sender [$from]\n"        unless ($mail_error or $smtp->mail($from));
+    $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
+    $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailtxt]));
+    $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
+}
+
+if ($op eq 'send_til_ven') {
+    my $mailmsg = $output->param('mailmsg');
+    my $include_text=$output->param('includetext');
+
+    my $mailtxt = $m->scomp( '/' . $mailmsg, output=>$output, url=>$url, include_text=>$include_text)
+	if($mailmsg);
+
+    $mail_error = "Kunne ikke generere mail besked" unless($mailtxt);
+
+    $r->pnotes('OBVIUS_OUTPUT')->param(OBVIUS_SIDE_EFFECTS => 1);
+    my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => $obvius->Debug);
+
+    my $name = $output->param('NavnFra');
+    my $from = $output->param('MailFra');
+    my $mailto = $output->param('MailTil');
+
+    $mail_error = "Din e-mail-adresse er ikke udfyldt<br>" unless ($from);
+    $mail_error .= "Vens e-mail-adresse er ikke udfyldt<br>" unless ($mailto);
+    $mail_error .= "Dit navn er ikke udfyldt<br>" unless ($name);
+
+    if (!$mail_error) {
+        $mail_error = "Din e-mail-adresse er ikke korrekt udfyldt<br>" if ($from !~ /^[^@]+@[^@]+\.\w+$/);
+        $mail_error .= "Vens e-mail-adresse er ikke korrekt udfyldt<br>" if ($mailto !~ /^[^@]+@[^@]+\.\w+$/);
+    }
+
+    $mail_error = "Failed to specify a sender [$from]\n"        unless ($mail_error or $smtp->mail($from));
+    $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
+    $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailtxt]));
+    $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
+}
+
+$obvius->get_version_field($vdoc, 'teaser');
+</%init>
