@@ -10,6 +10,7 @@ $doctypename=>undef
 </%args>
 %
 <select name="<% $name %>">
+    <option value=""></option>
 %for(@options) {
     <option value="<% $_ |h %>"><% $_ %></option>
 %}

@@ -5,6 +5,7 @@ $fieldtype
 $name
 $session
 $new=>1
+$limit_new_by_modes=>undef
 </%args>
 <div style="margin-left: 1em">
 <& SELF:msg, text=>'Der er i forvejen valgt' &> <% scalar(@$value)  %>
@@ -42,6 +43,14 @@ my %selected;
 map {
     $selected{$_->Id}=1;
 } sort { lc($a->Name) cmp lc($b->Name) } @$value;
+
+if($limit_new_by_modes) {
+    if($obvius->user_has_capabilities($doc, 'modes')) {
+        $new = 1;
+    } else {
+        $new = 0;
+    }
+}
 </%init>
 </%method>
 %
