@@ -146,6 +146,9 @@ sub db_delete_versions {
     return;
 }
 
+# sub db_delete_single_version - Deletes a single version of a document from the database.
+#                                XXX: No check is done on input values before the command is run. 
+#                                     What would happen if this method is called only with $lanf defined?
 sub db_delete_single_version {
     my ($this, $docid, $version, $lang) = @_;
 
