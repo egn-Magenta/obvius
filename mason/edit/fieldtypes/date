@@ -16,6 +16,8 @@ $add_days=>undef
 add_date_separator();
 add_date_buttons('<% $name %>');
 add_date_separator(2);
+add_date_now_just_date('<% $name %>', '<& /shared/msg, text=>'Now' &>');
+add_date_separator(2);
 add_field_reset('<% $name %>');
 </script>
 

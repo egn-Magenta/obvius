@@ -4149,9 +4149,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Default-værdier</translation>
   </text>
 
-  <text key="">
-    <translation lang="en"></translation>
-    <translation lang="da"></translation>
+  <text key="Now">
+    <translation lang="en">Now</translation>
+    <translation lang="da">Nu</translation>
   </text>
 
 </messages>

@@ -272,3 +272,7 @@ function add_time_buttons(field, other_field) {
 function add_date_now(field, value) {
     add_date_button("var d = new Date; d.withTime = 1; date_to_field(d, "+field+");", value);
 }
+
+function add_date_now_just_date(field, value) {
+    add_date_button("var d = new Date; d.withTime = 1; date_to_field(d, "+field+"); "+field+".value="+field+".value.substr(0,10);", value);
+}
