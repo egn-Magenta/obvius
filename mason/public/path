@@ -1,5 +1,9 @@
+<%args>
+$description=>'Sti'
+$frontpage_name=>'Forside'
+</%args>
 <div class="breadcrumbs">
-      Sti: <a href="/">Forside</a>
+      <% $description %>: <a href="/"><% $frontpage_name %></a>
 % map {
       &gt; <a href="<% $_->{sofar} %>" title="<% $_->{long_title} %>"><% $_->{title} %></a>
 % } @outpath;
