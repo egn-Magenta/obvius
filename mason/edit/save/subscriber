@@ -1,9 +1,37 @@
+<%def .message>
+%
+<%args>
+$already_there
+</%args>
+%
+<p align="center">
+  <& SELF:msg, text=>'A subscriber already exists with the email address' &>
+  <strong><% $already_there->{email} |h %></strong> - <strong><% $already_there->{name} |h %></strong>.
+</p>
+<p align="center">
+  <a href="./?email=<% $already_there->{email} |u %>&mode=form"><& SELF:msg, text=>'Edit subscriber' &> <% $already_there->{name} |h %></a><br />
+  <a href="./"><& SELF:msg, text=>'Back' &></a>
+</p>
+</%def>
+%
 <%args>
 $session
 </%args>
 %
+%
 <%init>
 print STDERR ">>> /edit/save/subscriber XXX\n";
 
-return (1, '/new/subscriber:Do');
+my $already_there=undef;
+unless ($session->{fields_out}->param('id')) { # New, not update - check if email already exists:
+    $already_there=$obvius->get_subscriber({ email=>$session->{fields_out}->param('email') });
+}
+
+if ($already_there) {
+    $r->notes(skip_in_portal=>1);
+    return (0, '', message=>$m->scomp('.message', already_there=>$already_there), no_redirect=>1);
+}
+else {
+    return (1, '/new/subscriber:Do');
+}
 </%init>
