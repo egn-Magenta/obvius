@@ -1,0 +1,15 @@
+<h1><% $title %></h1>
+<& /shared/htmlize, text=>$vdoc->field('teaser') &>
+<p>RSS feed: <a href="<% $url %>"><% $url %></p>
+<p class="obviusnotice">
+<strong><& /shared/msg, text=>'Notice' &>:</strong>
+<& /shared/msg, text=>'ObviusRSSFeedExplanation' &>
+</p>
+
+
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title teaser)]);
+
+my $title=$vdoc->Title;
+my $url = $obvius->get_doc_uri($doc);
+</%init>
