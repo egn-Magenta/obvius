@@ -56,7 +56,7 @@ our $obvius=new Obvius($conf);
 croak ("Couldn't get Obvius object for $site") unless ($obvius);
 
 my $vdocs = $obvius->search(
-			  [qw(content teaser url expires)],
+			  ['~content', 'teaser', '~url', 'expires'],
 			  'expires>NOW()',
 			  notexpired=>1,
 			  public=>1
@@ -75,14 +75,14 @@ foreach my $vdoc (@$vdocs) {
 
 print "Found $num_docs documents containing $num_links external links.\n\n";
 
-my $ua=new LWP::RobotUA 'Obvius external linkcheck/1.3', 'jubk@magenta-aps.dk';
+my $ua=new LWP::RobotUA('Obvius external linkcheck/1.3', 'jubk@magenta-aps.dk');
 $ua->delay(0); # Minutes is too long
 $ua->env_proxy();
 my ($num_bad)=0;
 map {
     my ($res, $mes);
     if ($_ =~ /^file:\/\//i) {
-	($res, $mes)=(0, 'file://-links are of no use on a public website');
+	($res, $mes)=(0, 'file://-links are of no use on a public website'); #' GRRR, buggy highlight
     }
     elsif ($_ =~ /^([\w]+):/) {
 	my $protocol=$1;
@@ -141,27 +141,35 @@ sub check_uri {
 sub harvest_links {
     my ($vdoc, $hostname, $links)=@_;
 
+    $obvius->get_version_fields($vdoc, ['content', 'url', 'teaser']);
+
     my $content='';
-    $content.=$vdoc->Content if ($vdoc->Content);
+    $content.=$vdoc->Content if ($vdoc->field('Content'));
     $content.=" " . $vdoc->Teaser if ($vdoc->Teaser);
 
     # Type of parsing needed, HTML or MCMS:
     if ($content =~ /<A\s/mi) {
 	# HTML:
 	print STDERR "HTML\n" if ($DEBUG);
-	$content.=' <a href="' . $vdoc->Url . '">link</a>' if ($vdoc->Url);
+	$content.=' <a href="' . $vdoc->Url . '">link</a>' if ($vdoc->field('Url'));
 	$vdoc->param(content=>$content);
 	harvest_links_html($vdoc, $hostname, $links);
     }
     elsif ($content =~ /L<[^>]+>/m) {
 	# MCMS:
 	print STDERR "MCMS\n" if ($DEBUG);
-	$content.=' L<' . $vdoc->Url . '>' if ($vdoc->Url);
+	$content.=' L<' . $vdoc->Url . '>' if ($vdoc->field('Url'));
 	$vdoc->param(content=>$content);
 	harvest_links_obvius($vdoc, $hostname, $links);
     }
     else {
-	print STDERR "No links\n" if ($DEBUG);
+	if(my $url = $vdoc->field('url')) {
+	    $content = '<a href="' . $url . '">link</a>';
+	    $vdoc->param(content=>$content);
+	    harvest_links_html($vdoc, $hostname, $links);
+	} else {
+	    print STDERR "No links\n" if ($DEBUG);
+	}
     }
 }
 
