@@ -1,0 +1,42 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>60
+</%args>
+<input type="file" size="<% $size %>" name="<% $name %>" accept="image/*" tabindex="10">
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name
+$fields
+</%args>
+<%perl>
+use Image::Size;
+
+$value=$fields->param($name); # Default to previous value
+
+# Change _if_ there is a new image:
+if (my $upload=$r->upload($name)) {
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
+	local $/ = undef;
+	$value=<$fh>;
+	$fields->param('mimetype'=>$upload->type);
+	$fields->param('size'=>$upload->size);
+	my ($w, $h)=imgsize(\$value);
+	$fields->param('width'=>$w);
+	$fields->param('height'=>$h);
+    }
+}
+
+return $value;
+</%perl>
+</%method>

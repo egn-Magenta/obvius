@@ -1,0 +1,96 @@
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+<%args>
+$obvius_new_doctype_name
+$obvius_parent_doctype
+</%args>
+<%init>
+print STDERR ">>> /edit/new_doctype\n";
+
+unless ($obvius_new_doctype_name =~ /^[a-zA-Z0-9._-]+$/) {
+    $m->comp(
+                '/new/doctype',
+                obvius_error=>'Malformed name (letters, numbers, ., _ and - are valid); try again',
+                obvius_new_doctype_name=>$obvius_new_doctype_name,
+            );
+    return;
+}
+if($obvius->get_doctype_by_name($obvius_new_doctype_name)) {
+    $m->comp(
+                '/new/doctype',
+                obvius_error=>'A doctype with that name already exists',
+                obvius_new_doctype_name=>$obvius_new_doctype_name,
+            );
+    return;
+}
+my $parent_doctype = $obvius->get_doctype_by_id($obvius_parent_doctype);
+unless ($parent_doctype) {
+    $m->comp(
+                '/new/doctype',
+                obvius_error=>'Couldn\'t find the chosen parent doctype',
+                obvius_parent_doctype=>$obvius_parent_doctype,
+            );
+    return;
+}
+my $test = eval( 'require Obvius::DocType::' . $obvius_new_doctype_name );
+if($test) {
+    $m->comp(
+                '/new/doctype',
+                obvius_error=>'This doctype already exists as a perl module - perheps for another site - please choose another name',
+                obvius_parent_doctype=>$obvius_parent_doctype,
+            );
+    return;
+}
+
+
+#Validating done - set up editpages
+my $session;
+
+$session=$r->pnotes('site')->get_session();
+die "No session available - fatally wounded.\n" unless ($session);
+
+my %page=(
+            title=>'Fields',
+            description=>'',
+            comp=>'/edit/page',
+            fieldlist=> [
+                            {
+                                title => 'New doctype fields',
+                                fieldspec => new Obvius::FieldSpec({
+                                                                    fieldtype => new Obvius::FieldType({
+                                                                                                        name=>'new_doctype_fields',
+                                                                                                        value_field=>'text',
+                                                                                                        bin=>0,
+                                                                                                        validate=>'regexp',
+                                                                                                        validate_args=>'.',
+                                                                                                        edit=>'line',
+                                                                                                        edit_args=>'',
+                                                                                                    }),
+                                                                    default_value=>undef,
+                                                                    name=>'obvius_new_doctype_fields',
+                                                                    optional=>0,
+                                                                    searchable=>0,
+                                                                    repeatable=>1,
+                                                            })
+                            }
+                    ]
+        );
+
+$session->{pages}=[ \%page ];
+
+$session->{parent_doctype} = $parent_doctype;
+$session->{new_doctype_name} = $obvius_new_doctype_name;
+$session->{get_editpages_from_session} = 1;
+
+$session->{fields_in}=new Obvius::Data;
+$session->{fields_out}=new Obvius::Data;
+$session->{document}=$doc;
+$session->{version}=$vdoc;
+$session->{doctype}=$doctype;
+$session->{validate_comp}='/edit/validate/page_synonyms';
+$session->{done_comp}='/edit/save/synonyms';
+$session->{done_label}='Save';
+
+my $obvius_session=$session->{_session_id};
+$r->pnotes(session=>$session);
+$r->notes(obvius_session=>$obvius_session);
+</%init>

@@ -1,0 +1,85 @@
+#!/bin/sh
+# $Id$
+
+export PATH=/usr/local/mysql/bin:$PATH
+
+rdistopts=younger
+rsh=/usr/bin/ssh
+
+hostname="$(hostname)"
+today="$(date '+%Y%m%d')"
+
+FORCE=
+while getopts f c; do
+    case $c in
+    f)        FORCE=1;;
+    ?)        echo "Usage $0 [-f] file ..." 2>&1; exit 1;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+orig_pwd=$(pwd)
+for site; do
+    cd $orig_pwd
+    cd $site || cd /home/httpd/$site || continue
+    test -e "SERVER_IS_$hostname" -o "$FORCE" || continue
+    
+    echo "#$hostname: backup_cleanup of $site"
+    /home/httpd/obvius/bin/backup_cleanup .
+
+    echo "#$hostname: backup of $site"
+
+    # First dump all databases
+    test -d backup || mkdir backup
+
+    for file in MYSQL:*; do
+	if [ -e "$file" ]; then
+	    db="$(echo "$file" | cut -d: -f2)"
+	    mysqldump --add-drop-table $db | gzip > backup/$db-$today.sql.gz
+	fi
+    done
+
+    # Copy files to another server
+
+
+    otherhost=
+    case "$hostname" in
+    milano|torino)
+	otherhost=roma
+	;;
+    roma)
+	otherhost=milano
+	;;
+    esac
+
+    if [ -z "$otherhost" ]; then
+	echo "$hostname: cannot backup $site: no known other host"
+    else
+	if [ "$otherhost" != "NONE" ]; then
+	    # Copy normal stuff silently
+	    pwd="$(pwd)"
+	    dirs=
+	    for d in backup stats logs mail; do
+		test -d "$pwd/$d" && dirs="$dirs $pwd/$d"
+	    done
+
+	    rdist -P $rsh -oquiet,$rdistopts -c $dirs "$otherhost:"
+
+	    if [ -e Distfile ]; then
+		if grep '^backup:' Distfile >/dev/null; then
+		    rdist -P $rsh -o $rdistopts -m "$otherhost" -f Distfile backup
+		else
+		    if grep '^data:' Distfile >/dev/null; then
+			rdist -P $rsh -o $rdistopts -m "$otherhost" -f Distfile data
+			done=yes
+		    fi
+		    if [ -z "$done" ]; then
+			rdist -P $rsh -o $rdistopts -m "$otherhost" -f Distfile
+		    fi
+		fi
+	    else
+		rdist -P $rsh -o $rdistopts -c "$(pwd)" "$otherhost:"
+	    fi
+	fi
+    fi
+done

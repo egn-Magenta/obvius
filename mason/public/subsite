@@ -1,0 +1,12 @@
+<% $data %>\
+%
+<%init>
+my $site  =$r->pnotes('site');
+my $common=$site->Subsite;
+
+my $data = $common->generate_subsite($common, $r, $doc, $vdoc, $doctype, $obvius);
+if (!defined $data or $data eq "") {
+    print STDERR scalar localtime(), " generate_subsite failed to produce any output ($uri)\n";
+    $r->no_cache(1);
+}
+</%init>

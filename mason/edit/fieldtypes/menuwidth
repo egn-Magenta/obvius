@@ -1,0 +1,33 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>60
+</%args>
+% if ($session->{document}->{PARENT}==1) {
+    <input type="text" size="<% $size %>" name="<% $name %>" value="<% $value %>" tabindex="10">
+% }
+% else {
+    <input type="hidden" name="<% $name %>" value="<% $value %>">
+% }
+
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+
+</%init>
+</%method>
+%
+
+<%method cook>
+<%args>
+$value=>undef
+$fieldspec
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

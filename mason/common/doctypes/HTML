@@ -1,0 +1,26 @@
+<!-- HTML doctype: -->
+
+<h1><% $title %></h1>
+%
+<& teaser &>
+%
+<& content, prefix=>'html_', htmlize=>0 &>
+%
+% if (my $url=$vdoc->field('url')) {
+<a href="<% $url %>"><% $url |h %></a>
+% }
+
+<!-- :HTML doctype -->
+%
+% #####################
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title url teaser docdate hide_subdocs)]);
+my $title = $vdoc->Title;
+
+$r->notes('hide_subdocs'=>$vdoc->Hide_subdocs) if (defined $vdoc->field('hide_subdocs'));
+</%init>

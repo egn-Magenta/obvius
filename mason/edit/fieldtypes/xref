@@ -1,0 +1,71 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>60
+</%args>
+% if ($fieldspec->Repeatable) {
+<select name="<% $name %>" multiple size="8" tabindex="10">
+% }
+% else {
+<select name="<% $name %>" tabindex="10">
+%     if ($fieldspec->Optional) {
+<option value=""> </option>
+%     }
+% }
+% map {
+%   my $selected=($selected{$_->{$idfield}} ? ' SELECTED' : '');
+<option value="<% $_->{$idfield} %>"<% $selected %>><% $_->{name} %></option>
+% } @$choices;
+</select>
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my $table_idfield=(split /[,]/, $fieldtype->param('edit_args'))[0];
+my($table, $idfield)=split /[.]/, $table_idfield;
+my $choices=$obvius->get_table_data($table);
+
+#use Data::Dumper;
+#print STDERR " idfield: $idfield\n";
+#print STDERR " choices: " . Dumper($choices);
+#print STDERR " edit xref value: " . Dumper($value);
+#print STDERR " ref: " . (ref $value) . "\n";
+
+my %selected;
+if ($fieldspec->Repeatable) {
+    map {
+	if (ref $_) {
+	    $selected{$_->param($idfield)}=1;
+	}
+	else {
+	    $selected{$_}=1;
+	}
+    } @$value;
+}
+else {
+    if (ref $value) {
+	$selected{$value->param($idfield)}=1;
+    }
+    else {
+	$selected{$value}=1;
+    }
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$value=>undef
+</%args>
+<%perl>
+if ($fieldspec->Repeatable and !ref $value) {
+    $value=[ $value ];
+}
+return $value;
+</%perl>
+</%method>

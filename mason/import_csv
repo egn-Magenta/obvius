@@ -1,0 +1,145 @@
+<%args>
+$obvius_destination=>undef
+$obvius_doctype=>undef
+$obvius_csvfile=>undef
+$obvius_try=>0
+$obvius_lang=>'da'
+$obvius_defdest=>''
+$obvius_publish=>0
+</%args>
+% if ($obvius_try) {
+<%perl>
+    my ($csvfile, $destination, $doctype);
+    if (my $file=$r->upload('obvius_csvfile')) {
+	if (my $fh=$file->fh) {
+	    local $/ = undef;
+	    $csvfile=<$fh>;
+	}
+    }
+
+   $destination=$obvius->lookup_document($obvius_destination);
+   $doctype=$obvius->get_doctype($obvius_doctype);
+</%perl>
+%     if (defined $destination and defined $doctype and defined $csvfile) {
+<%perl>
+use Digest::MD5 qw(md5_hex);
+my $doctypename=$doctype->Name;
+
+# The importer is the user:
+my $userid=$obvius->get_userid($obvius->{USER});
+# Ponder what group to use:
+my $grpid=0;
+my @groups=@{$obvius->get_user_groups($userid)};
+if (scalar(@groups)>1) {
+    if (grep { $_ == $destination->Grp } @groups) { # Use parent group if possible:
+	$grpid=$destination->Grp;
+    }
+}
+
+if (!$grpid and scalar(@groups)>0) { # If the user only belongs to one group, well, that's it:
+    $grpid=$groups[0];               # (or doesn't belong to the parent group - use first group).
+}
+
+# Write to tmp-file:
+my $tmpfilename='/tmp/' . md5_hex($csvfile . localtime() . $$);
+my $tmpfh;
+open($tmpfh, ">$tmpfilename") or die "Couldnt write temporary file";
+chmod 0600, $tmpfilename;
+print $tmpfh $csvfile;
+close($tmpfh);
+
+my $output;
+my $pipefh;
+# XXX Paths and language, bad bad:
+open($pipefh, "cat $tmpfilename | //usr/local/stow/mcms/src/obvius/bin/prep_csv | /usr/local/stow/mcms/src/obvius/bin/import_csv ". $obvius->{OBVIUS_CONFIG}->param('name') . " $obvius_destination $doctypename $obvius_lang $userid $grpid $obvius_publish |") or die "Couldn't start import program";
+while (<$pipefh>) {
+    $output.=$_;
+}
+close($pipefh);
+unlink $tmpfilename;
+
+</%perl>
+<pre>
+<% $output %>
+</pre>
+%     }
+%     else {
+<pre>
+destination: [<% $obvius_destination %>]
+doctype:     [<% $doctype %>]
+csvfile:     [<% $csvfile %>]
+</pre>
+<& .showform, obvius_destination=>$obvius_destination, destination=>$destination, obvius_doctype=>$obvius_doctype, obvius_csvfile=>$obvius_csvfile &>
+%     }
+% }
+% else {
+<& .showform, destination=>'', obvius_destination=>$obvius_defdest &>
+% }
+%
+%
+<%def .showform>
+<%args>
+$obvius_destination=>''
+$destination=>undef
+$obvius_doctype=>''
+$obvius_csvfile=>''
+</%args>
+<h3 class="admin">Import CSV</h3>
+
+% unless (defined $destination and defined $obvius_doctype and defined $obvius_csvfile) {
+<p>
+Udfyld venligst alle felter. Tak.
+</p>
+% }
+
+<table>
+<tr>
+<td>
+ <input type="hidden" name="obvius_op" value="import_csv">
+ <input type="hidden" name="obvius_try" value="1">
+% if (!defined $destination) {
+ <span style="color: red">Destination:</span>
+% } else {
+ Destination:
+% }
+</td>
+<td>
+ <input type="text" size="50" name="obvius_destination" value="<% $obvius_destination %>">
+ <input type="button" value="<& SELF:msg, text=>'Browse' &>..." onClick="javascript:OpenWin('<% $navigator_url %>',750,550);">
+</td>
+</tr>
+<& /shared/widgets/doctype, limit=>'^TestAf', selected=>$obvius_doctype||undef, add_empty=>1 &>
+<tr>
+<td>
+% if (!defined $obvius_csvfile) {
+ <span style="color: red">CSV file:</span>
+% } else {
+CSV file:
+% }
+</td>
+<td>
+ <input type="file" name="obvius_csvfile"><br>
+</td>
+</tr>
+<tr>
+<td>
+ Offentliggør alle:
+</td>
+<td>
+ <input type="radio" name="obvius_publish" value="1">Ja</input>
+ <input type="radio" name="obvius_publish" value="0" checked>Nej</input>
+</td>
+<tr>
+<td>
+ <input class="normalknap" type="submit" value="Import CSV-file">
+</td>
+</tr>
+</table>
+%
+<%init>
+# Stolen from /edit/fieldtypes/path:
+my $navigator_url = "/admin/?obvius_op=navigator";
+$navigator_url .= "&fieldname=obvius_destination";
+$navigator_url .= "&path=/test/";
+</%init>
+</%def>

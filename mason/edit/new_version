@@ -1,0 +1,30 @@
+<%args>
+$obvius_doctype=>undef
+$obvius_lang=>undef
+$obvius_new=>undef
+</%args>
+<%init>
+print STDERR ">>> /edit/new_version\n";
+
+print STDERR "obvius_doctype: $obvius_doctype\n";
+print STDERR "vdoc->Type  : $vdoc->Type\n";
+print STDERR "obvius_lang   : $obvius_lang\n";
+print STDERR "vdoc->Lang  : $vdoc->Lang\n";
+
+if ($obvius_doctype == $vdoc->Type and $obvius_lang eq $vdoc->Lang) {
+    $m->comp('/new/version', obvius_error=>"If you're not going to change it, you need to <a href=\"$prefix$uri?obvius_op=edit&obvius_version=". $vdoc->Version ."\">edit the version</a> instead.", obvius_new=>$obvius_new);
+    return undef;
+}
+else {
+    $vdoc->param(type=>$obvius_doctype);
+    $vdoc->param(lang=>$obvius_lang);
+
+    my $new_doctype=$obvius->get_version_type($vdoc);
+
+    my $sessionid=$r->pnotes('site')->prepare_edit($r, $doc, $vdoc, $new_doctype, $obvius);
+    my $session=$r->pnotes('site')->get_session($sessionid);
+    $r->pnotes(session=>$session);
+    $r->notes(obvius_session=>$sessionid);
+    $m->comp('/edit/page', obvius_session=>$sessionid, obvius_page=>1, session=>$session);
+}
+</%init>

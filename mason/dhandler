@@ -1,0 +1,10 @@
+<html>
+<head>
+<title>/home/httpd/root/admin/dhandler</title>
+</head>
+<body>
+
+dhandler: <% $r->uri %>
+
+</body>
+</html>

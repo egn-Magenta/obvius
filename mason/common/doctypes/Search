@@ -1,0 +1,181 @@
+<!-- begin Search -->
+%if($do_search_page) {
+% my $html = $output->param('htdig_results');
+<% $html %>
+%} else {
+%if($output->param('print_form')) {
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="left" height="20" bgcolor="#666666"><strong>&nbsp;Fritekstsøgning</strong></td>
+
+<td align="right" height="20" bgcolor="#666666">
+&nbsp;
+</td>
+</tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="5" border="0">
+<tr><td align="left" height="15">&nbsp;</td></tr>
+<tr><td align="left"><p class="content"><strong>Søgeord</strong></p><form action="<% $prefix . $uri %>" method="get">
+<input type="hidden" name="op" value="search">
+<input type="text" name="words" value="">
+</td>
+</tr>
+<tr><td align="left" height="20"><input type="submit" value="Søg"></td>
+</tr>
+<tr>
+<td>
+<br />
+<& /shared/htmlize, text => $teaser &>
+</td>
+</tr>
+</table>
+%} else {
+%   if($output->param('results') > 0) {
+<!--
+  Prøv også:
+  <a href="/avanceret_soegning/">Avanceret fritekstsøgning</a> eller
+  <a href="/databasesoegning/">databasesøgning</a>.<br>
+-->
+    <br />
+      <& /textbox_start &>
+      <table cellspacing="0" cellpadding="0" border="0" width="100%">
+
+      <strong>Søgning efter: <% $output->param('search_term') %><% $search_type !~ /^normal/ ? ' (' . $search_type_desc{$search_type} . ')' : '' %></strong><br /><br />
+	<tr>
+	  <td align="left" colspan="2" height="20">
+	    <span class="tekstGraaLille">Oversigt&nbsp;over&nbsp;søgeresultat:</span></td>
+	</tr>
+	<tr>
+	  <td width="100%" colspan="2" bgcolor="#C0C0C0">
+	    <img border="0" alt="" src="/grafik/spacer.gif" width="1" height="1"></td>
+	</tr>
+
+%       for( sort { $b->{count} <=> $a->{count} } @$search_data ) {
+%	if ($_->{count} > 0) {
+	  <tr>
+            <td width="70%" class="search<% $_->{section} %>"><% ucfirst($_->{section}) %>:</td>
+            <td width="30%" class="search<% $_->{section} %>">
+%           if($_->{count}) {
+%               if ($_->{count} == 1) {
+	      Et dokument
+%               } else {
+	      <% $_->{count} %>&nbsp;dokumenter
+%               }
+%           } else {
+%               if($output->param('restrict')) {
+	      <strong>Intet fundet</strong>
+%               } else {
+                    -
+%               }
+%           }
+            </td>
+	  </tr>
+	  <tr>
+	    <td width="100%" colspan="2" bgcolor="#C0C0C0">
+	      <img border="0" alt="" src="/grafik/admin/1x1.gif" width="1" height="1"></td>
+	  </tr>
+%	}
+%       }
+
+      </table>
+
+%       if ($search_type !~ /^synonyms/ and my $matches=$m->comp('ask_synonyms', search_term=>$search_term)) {
+<p>
+Du har søgt på: <strong><% $words %></strong>. Der er fundet følgende
+synonymer: <strong><% join ", ", @$matches %></strong>. Ønsker du at gentage
+søgningen med disse tilføjet, <a href="./?op=search&words=<% $words |u %>&search_type=synonyms">så klik her</a>.
+</p>
+%       }
+     <p>
+      <& /shared/htmlize, text=>$teaser &>
+     </p>
+
+      <& /textbox_end &>
+
+
+%       for( sort { $b->{count} <=> $a->{count} } @$search_data ) {
+%           if($_->{count}) {
+                <br /><% $_->{htdig_results} %>
+%           }
+%       }
+%   } else {
+        <p>
+        Du har søgt <% $search_type !~ /^normal/ ? $search_type_desc{$search_type} : '' %> på følgende: <strong><% $words |h %></strong>. Der var ikke noget resultat.
+        </p>
+
+%       if ($search_type !~ /^synonyms/ and my $matches=$m->comp('ask_synonyms', search_term=>$search_term)) {
+<p>
+Der er fundet følgende synonymer: <strong><% join ", ", @$matches
+%></strong>. Ønsker du at gentage søgningen med disse tilføjet, <a
+href="./?op=search&words=<% $words |u %>&search_type=synonyms">så klik
+her</a>.
+</p>
+%       }
+
+% # %       if (!$search_type or $search_type =~ /^normal/) {
+% #         <p>
+% # 	Prøv også <a href="./?op=search&words=<% $words |u %>&search_type=phonetic">den fonetiske søgning</a>.
+% #         <p>
+% # %       }
+%   }
+%}
+%}
+<!-- end Search -->
+
+%
+<%def ask_synonyms>\
+<%args>
+$search_term=>undef
+</%args>\
+<%perl>
+return undef unless($search_term);
+
+# What is prefered, larger og shorter words first?
+my @words=sort { length($b) <=> length($a) } grep { ! /(and|not|or)/ } split /\s/, $search_term;
+return undef unless(@words);
+
+my $synonyms=$obvius->get_table_data('synonyms');
+my $regexp='(' . (join '|', @words) . ')';
+my $prev='';
+my @matches=
+    grep { if($prev eq $_){ 0 } else { $prev=$_; 1 } } # Remove duplicated
+    sort                                       # Sort results
+    grep { ! /^$regexp$/i }                    # Filter out exact matches
+    map { split /\s/ } grep { /\b$regexp\b/i } # Match synonyms, split them word by word
+    map { $_->{synonyms} } @$synonyms;         # Get synonyms
+
+return (@matches ? \@matches : undef);
+</%perl>\
+</%def>
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+my %search_type_desc=(
+		      phonetic=>'fonetisk',
+		      phonetic_substring=>'fonetisk',
+		      synonyms=>'med synonymer',
+		      synonyms_substring=>'med synonymer',
+		     );
+
+my $search_data=$output->param('search_data');
+my $do_search_page = $output->param('do_search_page');
+
+my $teaser = $obvius->get_version_field($vdoc, 'teaser');
+
+my $search_type=$output->param('search_type');
+my $search_term=$output->param('search_term');
+my $words=$output->param('_incoming_words');
+my $site=$r->pnotes('site');
+my $search_words_log=$site->param('search_words_log');
+if ($search_words_log and defined $search_term) {
+    if(my $log_fh=Apache::File->new(">>$search_words_log")) {
+	print $log_fh $r->notes('now') . " " . (defined $search_type ? $search_type : 'normal') . " " . $output->param('results') . " $search_term\n";
+    }
+    else {
+	warn "Couldn't write to search_words_log!";
+    }
+}
+</%init>

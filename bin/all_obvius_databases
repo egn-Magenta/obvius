@@ -1,0 +1,28 @@
+#!/bin/sh
+# $Id$
+
+hostname="$(hostname)"
+sql="$*"
+
+FORCE=
+while getopts f c; do
+    case $c in
+    f)        FORCE=1;;
+    ?)        echo "Usage $0 [-f] file ..." 2>&1; exit 1;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+for dir in /home/httpd/*/; do
+    cd $dir || cd /home/httpd/$dir || continue
+    test -e "SERVER_IS_$hostname" -o "$FORCE" || continue
+    test -d var/edit_sessions -a -d var/document_cache || continue
+    
+    for file in MYSQL:*; do
+	if [ -e "$file" ]; then
+	    db="$(expr "$file" : 'MYSQL:\(.*\)$')"
+	    mysql $db -e "$sql"
+	fi
+    done
+
+done

@@ -1,0 +1,65 @@
+%# $Id$
+%#
+%if($login_failed) {
+<p>
+Password er ikke korrekt => <a href="./">prøv igen</a>!
+</p>
+%}
+%else {
+
+<form method="post" action="./">
+<input type="hidden" name="op" value="subscribe">
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+<input type="hidden" name="mode" value="login">
+%if($add_one) {
+<input type="hidden" name="add_one" value="<% $add_one %>">
+%}
+%if($add_one_url) {
+<input type="hidden" name="add_one_url" value="<% $add_one_url %>">
+%}
+
+<tr>
+<td>
+<p>Du kan ændre eller afmelde dit abonnemet ved at klikke på linket nederst i de email du modtager fra nyhedsservice.</p>
+
+<p>Få tilsendt en ny email straks ved at indsætte din email-adresse
+herunder og klik på send.</p>
+
+<BR>
+%if($error_email) {
+<BR><B>Email-feltet skal udfyldes korrekt!</B><BR>
+%} else {
+<br>Email.<br>
+%}
+<input class="INPUT" type="text" size="32" name="email" VALUE="<% $email %>">
+
+</td>
+</tr>
+
+<tr>
+<td>
+<br>
+<input type="submit" value="Send">
+</td>
+</tr>
+</table>
+</form>
+%}
+%
+<%args>
+$output
+</%args>
+<%init>
+my $login_failed = $output->param('login_failed');
+my $error_email = $output->param('error_email');
+my $email = $output->param('email');
+my $add_one = $output->param('add_one');
+my $add_one_url = $output->param('add_one_url');
+my $url_options = '';
+$url_options .= '&add_one=' . $add_one if($add_one);
+$url_options .= '&add_one_url=' . $add_one_url if($add_one_url);
+
+$obvius->get_version_field($vdoc, qw(title));
+</%init>

@@ -1,0 +1,7 @@
+% # Placeholder:
+<& /new/synonyms, %ARGS &>
+<%method ReallyDelete>
+<%perl>
+$m->comp('/new/synonyms:ReallyDelete', %ARGS);
+</%perl>
+</%method>

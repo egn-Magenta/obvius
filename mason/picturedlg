@@ -1,0 +1,127 @@
+<%args>
+$reply_function
+$doc_uri
+</%args>
+<%init>
+my $hostname = $r->hostname;
+my $image_doctype = $obvius->get_doctype_by_name('Image');
+my @sizes;
+for(keys %{$image_doctype->{FIELDS}}) {
+    if(/^DATA_(\d+)x(\d+)$/i) {
+        push(@sizes, "$1x$2");
+    }
+}
+
+my $in_src = $r->param('in_src') || '';
+my $selected_size;
+if($in_src and $in_src =~ m/size=\d+x\d+/) {
+    $selected_size = $1 . "x" . $2;
+}
+
+if($r->param('reedit')) {
+    $reply_function =~ s#_insertimage#_replace_image#;
+}
+</%init>
+<script language="javascript">
+function reply() {
+    var path = document.pageform.in_url.value;
+    if(path && ! path.match(/^http:\/\//)) {
+        if(path.match(/^\//)) {
+            path = 'http://<% $hostname %>' + path;
+        } else {
+            path = 'http://<% $hostname . $doc_uri %>' + path;
+        }
+    }
+
+    var align = document.pageform.in_align.options[document.pageform.in_align.selectedIndex].value;
+    var alt = document.pageform.in_alt.value;
+    var space = document.pageform.in_space.value;
+    var pictext = document.pageform.in_pictext.value;
+    if(pictext) {
+        pictext = pictext.replace(/</g, '&lt');
+        pictext = pictext.replace(/>/g, '&gt');
+    }
+
+    var has_pictext = <% $r->param('has_pictext') ? 1 : 0 %>;
+
+    window.opener.<% $reply_function %>(path, align, alt, space, pictext, has_pictext);
+    window.close();
+}
+function adjust_size() {
+    var url = document.pageform.in_url.value;
+    if(! url) {
+        alert('Vælg et billede først');
+    }
+
+    url = url.replace(/&?size=\d+x\d+/gi, '');
+    url = url.replace(/\?$/, '');
+
+    var val = document.pageform.size.options[document.pageform.size.selectedIndex].value;
+    if(val && val != '') {
+        if(url.match(/\?/)) {
+            url += '&size=' + val;
+        } else {
+            url += '?size=' + val;
+        }
+    }
+
+    document.pageform.in_url.value = url;
+}
+</script>
+<form name="pageform">
+<table border="0" align="center">
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><strong>Url</strong></td>
+        <td>
+            <input type="text" size="25" name="in_url" value="<% $in_src %>" style="width: 265px">
+            <input type="button" value="Find" onclick="OpenWin('/admin/?obvius_op=navigator&doctype=Image&fieldname=in_url&path=<% $doc_uri %>',750,550)">
+    </tr>
+    <tr>
+        <td><strong>Alt tekst</strong></td>
+        <td><input type="text" size="25" name="in_alt" value="<% $r->param('in_alt') %>" style="width: 265px"></td>
+    </tr>
+    <tr>
+        <td><strong>Alignment</strong></td>
+        <td align="right">
+%my $align = $r->param('in_align') || '';
+            <select name="in_align" align="left">
+                <option value="">Ingen</option>
+                <option value="left"<% $align eq 'left' ? 'SELECTED' : ''%>>Venstre</option>
+                <option value="middle"<% $align eq 'middle' ? 'SELECTED' : ''%>>Midten</option>
+                <option value="right"<% $align eq 'right' ? 'SELECTED' : ''%>>Højre</option>
+                <option value="bottom"<% $align eq 'bottom' ? 'SELECTED' : ''%>>Bund</option>
+                <option value="top"<% $align eq 'top' ? 'SELECTED' : ''%>>Top</option>
+            </select>
+            <strong>Luft om billede</strong>
+            <input type="text" size="5" name="in_space" value="<% defined($r->param('in_spacing')) ? $r->param('in_spacing') : 8 %>">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Size</strong></td>
+        <td>
+            <select name="size" onchange="adjust_size()">
+                <option value="">Normal</option>
+%for(@sizes){
+                <option value="<% $_ %>"<% $selected_size eq $_ ? 'SELECTED' : '' %>><% $_ %></option>
+%}
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Billedtekst</strong></td>
+% my $pictext = $r->param('in_pictext') || '';
+        <td><textarea name="in_pictext" cols="20" rows="4" style="width: 265px"><% $pictext |h %></textarea></td>
+    </tr>
+    <tr>
+        <td colspan="2" align="middle">
+            <input type="button" onclick="reply()" value=" OK ">
+            <input type="button" onclick="window.close()" value="Annuller">
+        </td>
+    </tr>
+</table>
+</form>

@@ -1,0 +1,22 @@
+%# $Id$
+%if($subscription_exists) {
+    Du abonnerer allerede på det angivne dokument.<br>
+%} elsif($subscribe_error) {
+    Du kunne ikke abonnere på det angivne dokument på grund af følgende fejl:<br>
+    <br>
+    <% $subscribe_error %><br>
+%} else {
+    Du abonnerer nu på "<% $added_title %>".<br>
+%}
+%if($add_url) {
+    Klik <a href="<% $prefix . $add_url %>">her</a> for at vende tilbage.<br>
+%}
+<%args>
+$output
+</%args>
+<%init>
+my $subscription_exists = $output->param('subscription_exists');
+my $subscribe_error = $output->param('subscribe_error');
+my $added_title = $output->param('add_title');
+my $add_url = $output->param('add_one_url');
+</%init>

@@ -1,0 +1,320 @@
+%
+<%method edit>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+
+my @sorted_options =  sort {
+                                my ($_a) = ($a =~ /^(\d+)/);
+                                my ($_b) = ($b =~ /^(\d+)/);
+                                $_a <=> $_b;
+                            } @$value;
+my @options;
+my $i = 0;
+for(@sorted_options) {
+    my ($nr, $type, $tekst1, $rest) = /^(\d)+¤([^¤]*)¤([^¤]*)¤(.*)$/s;
+    my $name = $tekst1;
+    if($type ne 'tableheading' and $type ne 'subheading') {
+        $name = substr($name, 0, 40);
+        $name = '"' . $name . '..."';
+    }
+    push(@options, { name => $name, value => ($i * 10) . "¤$type¤$tekst1¤$rest"});
+    $i++;
+}
+
+</%init>
+%
+<!-- data format: sortorder¤type¤heading¤description¤data -->
+<script language="javascript">
+
+function <% $name %>_add_to_list() {
+    var nr = document.pageform.<% $name %>.options.length;
+    if(nr == -1) {
+        nr = 0;
+    } else {
+        nr = nr * 10;
+    }
+
+    var text = <% $name %>_fields_to_text();
+    if(text) {
+        var type = document.pageform.obvius_<% $name %>_type.options[document.pageform.obvius_<% $name %>_type.selectedIndex].value + '';
+        var name = document.pageform.obvius_<% $name %>_heading.value;
+        var o = new Option(name, nr + '¤' + text)
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.options.length] = o;
+        document.pageform.<% $name %>.selectedIndex = -1;
+        document.pageform.<% $name %>.selectedIndex = document.pageform.<% $name %>.options.length - 1;
+    }
+}
+
+function <% $name %>_delete_from_list() {
+    if(document.pageform.<% $name %>.selectedIndex == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den');
+    } else {
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex] = null;
+        <% $name %>_empty_fields();
+        document.pageform.<% $name %>.selectedIndex = -1;
+    }
+}
+
+function <% $name %>_save_changes() {
+    if(document.pageform.<% $name %>.selectedIndex == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den');
+    } else {
+        var text = <% $name %>_fields_to_text();
+        if(! text) {
+            return;
+        }
+
+        // Get old number
+        var oldval = document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].value;
+        var nr = oldval.match(/^\d+/);
+        if(nr != '') {
+            var type = document.pageform.obvius_<% $name %>_type.options[document.pageform.obvius_<% $name %>_type.selectedIndex].value + '';
+            var name = document.pageform.obvius_<% $name %>_heading.value;
+            document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].value = nr + '¤' + text;
+            document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].text = name;
+        } else {
+            // We shouldn't get here..
+            alert('Kunne ikke gemme ændringer - rod i sorteringsordenen');
+        }
+    }
+}
+
+function <% $name %>_empty_fields() {
+    document.pageform.obvius_<% $name %>_heading.value = '';
+    document.pageform.obvius_<% $name %>_description.value = '';
+    document.pageform.obvius_<% $name %>_data.value = '';
+}
+
+function <% $name %>_fields_to_text() {
+    var textstr = '';
+
+    var type = document.pageform.obvius_<% $name %>_type.options[document.pageform.obvius_<% $name %>_type.selectedIndex].value;
+    if(! type) {
+        alert("Ingen type defineret!");
+        return false;
+    }
+    textstr += type;
+    textstr += '¤';
+
+    var heading = document.pageform.obvius_<% $name %>_heading.value;
+    if(heading) {
+        textstr += heading;
+        textstr += '¤';
+    } else {
+        alert('Du skal skrive noget i overskrift feltet!');
+        return false;
+    }
+
+    var description = document.pageform.obvius_<% $name %>_description.value;
+    if(description) {
+         textstr += description;
+    }
+    textstr += '¤';
+
+    var data = document.pageform.obvius_<% $name %>_data.value;
+    if(data) {
+         textstr += data;
+    }
+
+    return textstr;
+}
+
+function <% $name %>_load_from_text(text) {
+    var splitted = text.split(/¤/);
+
+    var type = splitted[1];
+    var heading = splitted[2];
+    var description = splitted[3];
+    var data = splitted[4];
+    if(! type) {
+        alert('Something went wrong. Could not split text string: ' + text);
+    }
+
+    for(var i=0; i < document.pageform.obvius_<% $name %>_type.options.length; i++) {
+        var o = document.pageform.obvius_<% $name %>_type.options[i];
+        if(o.value == type) {
+            document.pageform.obvius_<% $name %>_type.selectedIndex = i;
+            break;
+        }
+    }
+
+    if(! heading) {
+        heading = '';
+    }
+    if(! description) {
+        description = '';
+    }
+    if(! data) {
+        data = '';
+    }
+    document.pageform.obvius_<% $name %>_heading.value = heading;
+    document.pageform.obvius_<% $name %>_description.value = description;
+    document.pageform.obvius_<% $name %>_data.value = data;
+}
+
+function <% $name %>_onchange_handler() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        <% $name %>_empty_fields();
+    } else {
+        <% $name %>_load_from_text(document.pageform.<% $name %>.options[sel].value);
+    }
+}
+
+function obvius_<% $name %>_type_onchange_handler() {
+    var sel = document.pageform.obvius_<% $name %>_type.selectedIndex;
+    if(sel != -1) {
+        document.pageform.obvius_<% $name %>_heading.value = '';
+        document.pageform.obvius_<% $name %>_description.value = '';
+        document.pageform.obvius_<% $name %>_data.value = '';
+    }
+}
+
+function <% $name %>_move_up() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert('Du skal vælge en fra listen først');
+        return;
+    }
+    if(sel == 0) {
+        alert('Du er allerede ved toppen af listen');
+        return;
+    }
+    <% $name %>_swap(document.pageform.<% $name %>.options[sel], document.pageform.<% $name %>.options[sel - 1]);
+    document.pageform.<% $name %>.selectedIndex = -1;
+    document.pageform.<% $name %>.selectedIndex = sel - 1;
+}
+
+function <% $name %>_move_down() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert('Du skal vælge en fra listen først');
+        return;
+    }
+    if(sel == document.pageform.<% $name %>.options.length - 1) {
+        alert('Du er allerede ved bunden af listen');
+        return;
+    }
+    <% $name %>_swap(document.pageform.<% $name %>.options[sel], document.pageform.<% $name %>.options[sel + 1]);
+    document.pageform.<% $name %>.selectedIndex = -1;
+    document.pageform.<% $name %>.selectedIndex = sel + 1;
+}
+
+function <% $name %>_swap(o1, o2) {
+    var text1 = o1.text;
+    var text2 = o2.text;
+    var val1 = o1.value;
+    var val2 = o2.value;
+
+
+    // Tricky part is to swap the numbers too
+    var nr1 = val1.match(/^\d+/);
+    var nr2 = val2.match(/^\d+/);
+
+    val1 = val1.replace(/^\d+/, nr2);
+    val2 = val2.replace(/^\d+/, nr1);
+
+    o1.text = text2;
+    o1.value = val2;
+    o2.text = text1;
+    o2.value = val1;
+}
+
+function <% $name %>_select_all() {
+    for(var i = 0; i < document.pageform.<% $name %>.options.length; i++) {
+        document.pageform.<% $name %>.options[i].selected = 1;
+    }
+}
+
+// Add to onsubmit list:
+
+onsubmit_array[onsubmit_array.length] = function() {
+    if(document.pageform.<% $name %>.selectedIndex != -1) {
+        <% $name %>_save_changes(); // Save what was last modified
+    }
+}
+onsubmit_array[onsubmit_array.length] = <% $name %>_select_all;
+</script>
+
+<table border="0">
+    <tr>
+        <td>
+            <select name="<% $name %>" MULTIPLE size="10" onchange="<% $name %>_onchange_handler()" tabindex="10">
+%for(@options) {
+                <option value="<% $_->{value} |h%>"><% $_->{name} |h %></option>
+%}
+            </select>
+        </td>
+        <td valign="top">
+            <input type="button" onclick="<% $name %>_move_up()" value=" Flyt op "><br>
+            <input type="button" onclick="<% $name %>_move_down()" value="Flyt ned">
+        </td>
+    </tr>
+</table>
+<br>
+<br>
+<table border="0">
+    <tr>
+        <td>
+            <input type="button" onclick="<% $name %>_add_to_list()" value="Tilføj til listen">
+            <input type="button" onclick="<% $name %>_delete_from_list()" value="Slet fra listen">
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <input type="button" onclick="<% $name %>_save_changes()" value="Gem ændringer til listen">
+        </td>
+    </tr>
+</table>
+<br>
+<strong>Vælg type</strong>
+<br>
+<select name="obvius_<% $name %>_type" onchange="obvius_<% $name %>_type_onchange_handler()" tabindex="10">
+    <option value="radio">Radiobuttons</option>
+    <option value="line">Tekstlinie</option>
+    <option value="text">Tekstfelt</option>
+</select><br>
+<br>
+<strong>Overskrift</strong>
+<input type="text" size="40" name="obvius_<% $name %>_heading" tabindex="10"><br>
+<br>
+<strong>Uddybende forklaring (valgfri)</strong>
+<br>
+<textarea name="obvius_<% $name %>_description" cols="50" rows="4" tabindex="10"></textarea><br>
+<br>
+<strong>Data (kun til radiobuttons)</strong>
+<br>
+<textarea name="obvius_<% $name %>_data" cols="50" rows="8" tabindex="10"></textarea><br>
+<br>
+%
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+return $value;
+</%perl>
+</%method>

@@ -1,0 +1,3 @@
+<%doc>
+This is here for websites to override locally. Called after the current document is shown.
+</%doc>

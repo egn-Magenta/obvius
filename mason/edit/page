@@ -1,0 +1,149 @@
+% # /edit/page
+%
+% # <form name="pageform" action="<% $prefix %><% $uri %>?obvius_session=<% $obvius_session %>" method="post" enctype="multipart/form-data">
+<input type="hidden" name="obvius_page" value="<% $obvius_nextpage %>" style="margin: 0; padding: 0">
+<input type="hidden" name="obvius_shownpage" value="<% $obvius_page %>" style="margin: 0; padding: 0">
+
+<& pagenav, dropdown=>\@dropdown, obvius_page=>$obvius_page, total=>$total, num=>1,
+    done_label=>$session->{done_label} &>
+
+<& /edit/page:show_invalid_fields, session=>$session, obvius_shownpage=>$obvius_shownpage,
+    invalid=>$invalid &>
+
+% if ($obvius_page eq 'A') {
+<h3>Alle felter<& /help, link=>'page/A' &></h3>
+% }
+
+% my %fields_in_edit;
+% foreach my $editpage (@show_editpages) {
+%    if ($editpage->{help}) {
+<h3 class="admin"><& SELF:msg, text=>$editpage->{title} &><& /help, link=>$editpage->{help} &></h3>
+%    } else {
+<h3 class="admin"><& SELF:msg, text=>$editpage->{title} &></h3>
+%    }
+
+<div class="description">
+<& SELF:msg, text=>$editpage->{description} &>
+</div>
+
+<table WIDTH="100%" BORDER="0" CELLPADDING="3" CELLSPACING="0">
+%     my $first=1;
+%     foreach (@{$editpage->{fieldlist}}) {
+%         next if $fields_in_edit{$_->{fieldspec}->Name}; # Only edit the same field once on each page
+%         $fields_in_edit{$_->{fieldspec}->Name}++;
+%         if ($_->{options}->{same_line}) {
+%             $_->{options}->{rows}=3; $_->{options}->{cols}=30; 
+<td class="data" valign="top">
+<& '/edit/fieldtypes/' . $_->{fieldspec}->{FIELDTYPE}->Edit . ':edit',
+    fieldspec=>$_->{fieldspec}, fieldtype=>$_->{fieldspec}->{FIELDTYPE},
+	name=>$_->{fieldspec}->Name, session=>$session, %{$_->{options}} &>
+</td>
+%         }
+%         else {
+%             if (!$first) {
+</tr>
+%             }
+%             else {
+%                 $first=0;
+%             }
+<tr>
+<td class="name">
+%             if ($_->{options}->{subtitle}) {
+%                 unless ($firstsubtitle or $_->{options}->{nopagenav}) {
+<& pagenav, dropdown=>\@dropdown, obvius_page=>$obvius_page, total=>$total, num=>1,
+    done_label=>$session->{done_label}, buttons=>1, next_prev=>0 &>
+%                 }
+<h4 class="admin"><& SELF:msg, text=>$_->{options}->{subtitle} &></h4>
+%                 $firstsubtitle=0;
+%             }
+%             if ($_->{title}) {
+<& SELF:msg, text=>$_->{title} &><& /help, link=>'field/' . $_->{fieldspec}->Name &>
+%             }
+</td>
+</tr>
+<tr>
+<td class="data" valign="top">
+<& '/edit/fieldtypes/' . $_->{fieldspec}->{FIELDTYPE}->Edit . ':edit',
+    fieldspec=>$_->{fieldspec}, fieldtype=>$_->{fieldspec}->{FIELDTYPE},
+	name=>$_->{fieldspec}->Name, session=>$session, %{$_->{options}} &>
+</td>
+%          }
+%      }
+</table>
+% }
+
+<& pagenav, dropdown=>\@dropdown, obvius_page=>$obvius_page, total=>$total, num=>2,
+    done_label=>$session->{done_label}, buttons=>1, tabindex=>20 &>
+
+% # </form>
+%
+<%args>
+$session
+$obvius_session
+$obvius_page
+$obvius_shownpage=>undef
+$invalid=>undef
+$help=>undef
+</%args>
+%
+<%method show_invalid_fields>
+<%args>
+$invalid
+$session
+$obvius_shownpage
+</%args>
+% if ($invalid and @$invalid) {
+<div class="error">
+%   map {
+<& SELF:msg, text=>$_ &> <& SELF:msg, text=>'not valid' &>.<br>
+%   } @invalid_titles;
+</div>
+% }
+<%init>
+my @invalid_titles=map {
+    my $title=lc($_);
+    my $field;
+    foreach $field (@{$session->{pages}->[$obvius_shownpage-1]->{fieldlist}}) {
+	if ($field->{fieldspec}->{NAME} eq lc($_)) {
+	    $title=$field->{title};
+	    last;
+	}
+    }
+    $title;
+} @$invalid;
+</%init>
+</%method>
+%
+<%init>
+print STDERR ">>> /edit/page (obvius_page: $obvius_page)\n";
+$r->notes('help_doctype'=>$session->{doctype}->Name);
+
+my $editpages=$session->{pages};
+my $total=@$editpages;
+my $editpage;
+my $obvius_nextpage;
+
+my @show_editpages;
+if ($obvius_page eq 'A') {
+    push @show_editpages, @$editpages;
+}
+else {
+    push @show_editpages, $editpages->[($obvius_page-1)];
+    $obvius_nextpage=($total == $obvius_page ? 'done' : $obvius_page+1);
+}
+
+$obvius_shownpage=$obvius_page unless ($obvius_shownpage);
+
+my @dropdown;
+my $i=1;
+map {
+    my %entry=(
+	       id=>$i,
+	       name=>$_->{title},
+	      );
+    push @dropdown, \%entry;
+    $i++;
+} @$editpages;
+
+my $firstsubtitle=1;
+</%init>

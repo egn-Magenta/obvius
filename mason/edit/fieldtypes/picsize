@@ -1,0 +1,43 @@
+<%once>
+my $image_doctype = $obvius->get_doctype_by_name('Image');
+</%once>
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$no_normal=>undef
+</%args>
+%
+<select name="<% $name %>" tabindex="10">
+%unless($no_normal) {
+    <option value="">Normal</option>
+%}
+%for my $size (sort { ($a=~/^(\d+)/)[0] <=> ($b=~/^(\d+)/)[0] } @sizes) {
+    <option value="<% $size %>" <% $size eq $value ? 'SELECTED': '' %>><% $size %></option>
+%}
+</select>
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+$value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$value = '' unless(defined($value));
+my @sizes;
+for(keys %{$image_doctype->{FIELDS}}) {
+    print STDERR "$_\n";
+    if(/^DATA_(\d+)x(\d+)$/i) {
+        push(@sizes, "$1x$2");
+    }
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$fieldspec
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

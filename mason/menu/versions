@@ -1,0 +1,105 @@
+<!-- versions: -->
+<& SELF:menu_box_begin, title=>'Versions' &>
+% map {
+<& SELF:menu_entry, %{$_}, msgify=>0 &>
+% } @$versions;
+<& SELF:menu_entry, title=>'The entire list ...', class=>"sublevelemph",
+    link=>"javascript:OpenWin('$prefix$uri?obvius_op=versions')" &>
+<!-- :versions -->
+<%init>
+my $versions=$m->comp('/menu/versions:get_versions_for_display', max=>6);
+</%init>
+%
+<%method get_versions_for_display>
+<%args>
+$max=>undef
+</%args>
+<%perl>
+my @versions=();
+my %markers=(
+	     public=>'&nbsp;<IMG SRC="/grafik/admin/blue.gif" WIDTH=9 HEIGHT=9 ALT="*">',
+	     hidden=>'what?!',
+	     latest=>'&nbsp;<IMG SRC="/grafik/admin/green.gif" WIDTH=9 HEIGHT=9 ALT="-">',
+	     active=>'&nbsp;<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">',
+	     expired=>'',
+	     );
+my $versions=$obvius->get_versions($doc, '$order'=>'version DESC');
+my $public_version=$obvius->get_public_version($doc);
+my $i=0;
+foreach (@$versions) {
+    last if (defined $max and $i>=$max);
+    $obvius->get_version_fields($_);
+    my %version = (
+		   title => ($m->comp('SELF:format_date', date=>$_->Version)),
+		   markerlast=>1,
+		   tooltip=>'(' . $_->Lang . ')',
+		  );
+    $version{marker}=$markers{latest} if $i==0;
+
+    if( $public_version and
+	$_->DocId eq $public_version->DocId and
+	$_->Version eq $public_version->Version ) {
+	$version{marker}=$version{marker} . $markers{public};
+    }
+
+    if( $_->DocId eq $vdoc->DocId and $_->Version eq $vdoc->Version ) {
+	$version{marker}=$version{marker} . $markers{active};
+    }
+
+    $version{link}="$prefix$uri?obvius_version=" . $_->Version;
+
+    push @versions, \%version;
+    $i++;
+}
+
+return \@versions;
+</%perl>
+</%method>
+%
+% ################################
+%
+% ## Show versions only if we can edit them
+% #ifdef can_edit
+% #<TR><TD colspan=2 HEIGHT=20></TD></TR>
+% #<TR><TD CLASS=subleveltitle>&nbsp;$[msg: Versions]</TD>
+% #<TD CLASS=subleveltitlehelp><a href="javascript:OpenWin('http://obviushelp.magenta-aps.dk/$(SERVER_NAME)/menu/versions.$(HELP_TEXT_LANGUAGE).html')"><img src="/grafik/admin/spm.gif" WIDTH=12 HEIGHT=16 border=0></a></TD></TR>
+% #ifdef versions
+% #loop versions
+% #import version_current
+% ##
+% #ifndef version_current
+% #set version_current=0
+% #endif
+% ##
+% #set marker=
+% #if $[equal _index 0]
+% # set marker=$(marker)&nbsp;<IMG SRC="/grafik/admin/green.gif" WIDTH=9 HEIGHT=9 ALT="-">
+% #endif _index == 0
+% ##
+% #if $(public)
+% # set marker=$(marker)&nbsp;<IMG SRC="/grafik/admin/blue.gif" WIDTH=9 HEIGHT=9 ALT="*">
+% #endif public
+% ##
+% #if $[vequal version version_current]
+% # set marker=$(marker)&nbsp;<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">
+% #endif vequal
+% ##
+% #<TR><TD colspan=2 CLASS=sublevel>
+% #<NOBR><A HREF="$(url)?version=$[urlencode,version]">$[time_format version]</A>$(marker)</NOBR>
+% #</TD></TR>
+% ##
+% #import menu_left_separator
+<& SELF:menu_left_separator &>
+% #endloop versions
+% ##
+% #<TR><TD colspan=2 CLASS=sublevel>
+% #<B><A HREF="javascript:OpenWin('$(PREFIX)$(URI)?op=siblings;versions=1')">$[msg: The entire list] ...</A></B>
+% #</TD></TR>
+% ##
+% #else versions
+% #<TR><TD colspan=2 CLASS=sublevel>$[msg: No versions]</TD></TR>
+% #endif versions
+% #endif can_edit
+%
+% # <& SELF:menubox_begin, title=>'Versions' &>
+% # <& SELF:menubox_end &>

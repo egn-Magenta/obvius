@@ -1,0 +1,242 @@
+<%args>
+$decoration=>'normal'
+$left_cell_width=>180
+$two_button_width=>80
+$logo_width=>83
+$logo_height=>50
+$session=>undef
+$ghosted=>0
+$obvius_page=>''
+$our_table_start=>'<table border="0" cellpadding="4" cellspacing="0" style="border-collapse: collapse"  bordercolor="#111111" width="100%" height="39">'
+$obvius_op=>undef
+$obvius_version=>undef
+$tabindex=>30
+</%args>
+%
+<!-- header: -->
+% if ($decoration eq 'normal') {
+<% $our_table_start %>
+    <tr>
+      <td valign="top" width="<% $left_cell_width-14 %>" nowrap class="megetlys" height="<% $logo_height %>">
+        <a href="<% $prefix %>/"><img border="0" src="/grafik/adminlogo.png" width="<% $logo_width %>" height="<% $logo_height %>" alt="Administration"></a>
+      </td>
+      <td valign="top" class="megetlys" nowrap height="38">
+        <table cellpadding="4" border="0" cellspacing="0" style="border-collapse: collapse" width="100%">
+        <tr>
+         <td class="megetlys">
+          Bruger: <% $user |h %>
+% #          <img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">
+         </td>
+        </tr>
+        <tr>
+         <td class="megetlys">
+          <& document_row, ghosted=>$ghosted &>
+         </td>
+        </tr>
+        </table>
+      </td>
+      <td valign="top" nowrap align="center" class="megetlys" height="38">
+       <p align="right">
+       <img border="0" src="/grafik/admin/spacer.gif" width="2" height="2"><br>
+       <b><a href="<% $prefix %>/admin/"><span class="megetlyslink">Administration</span></a><br>
+       <a href="<% $prefix %>/sitemap/"><span class="megetlyslink">Sitemap</span></a><br>
+       <a href="javascript:OpenWin('http://<% $r->notes('helpserver') %>/<% $sitename %>/general?orig=<% $sitename %>/general');"><span class="megetlyslink">Hjælp</span></a></b>
+       </p>
+      </td>
+    </tr>
+</table>
+<% $our_table_start %>
+    <tr>
+      <td colspan="4" height="1" style="border-top-style: solid; border-top-width: 1">
+        <& pathinfo, ghosted=>$ghosted &>
+      </td>
+    </tr>
+    <tr>
+      <td width="<% $left_cell_width+3 %>" class="lys" valign="top" nowrap height="18"
+          style="border-top: 1px solid #000000; border-right: 1px solid #000000; padding-right: 0; padding-left: 0">
+%if($r->notes('is_netscape')) {
+    <table border="0" width="<% $left_cell_width %>" cellpadding="0" cellspacing="0">
+        <tr>
+            <td colspan="3"><img src="/grafik/admin/spacer.gif" border="0" alt="" width="1" height="5"></td>
+        </tr>
+        <tr>
+%   if($ghosted) {
+            <td align="center" class="nsghostTekst" width="50%"><div class="nsghostTekst"><& SELF:msg, text=>'Navigate' &></div></td>
+            <td>&nbsp;</td>
+            <td align="center" class="nsghostTekst" width="50%"><div class="nsghostTekst"><& SELF:msg, text=>'Search' &></div></td>
+%   } else {
+            <td align="center" class="nsmenuTekst" width="50%"><a href="javascript:OpenWin('/admin/?obvius_op=navigator&path=<% $uri %>',750,550);" class="nsmenuTekst" acccesskey="G"><& SELF:msg, text=>'Navigate' &></div></td>
+            <td>&nbsp;</td>
+            <td align="center" class="nsmenuTekst" width="50%"><a href="/admin<& searchlink &>" class="nsmenuTekst" accesskey="F"><& SELF:msg, text=>'Search' &></div></td>
+%   }
+        </tr>
+    </table>
+%} else {
+        <p>
+          <img border="0" src="/grafik/admin/spacer.gif" alt="" width="3" height="3"><br>
+              &nbsp;<input type="button" value="<& SELF:msg, text=>'Navigate' &>" style="width:<% $two_button_width %>px"
+% if ($ghosted) {
+	       class="ghostedknap"
+	       onclick=""
+	       disabled
+% }
+% else {
+               class="venstreknap"
+	       accesskey="G"
+               onclick="javascript:OpenWin('/admin/?obvius_op=navigator&path=<% $uri %>',750,550);"
+% }
+              ><img border="0" src="/grafik/admin/spacer.gif" alt="" width="4" height="4"><& searchknap, ghosted => $ghosted, width => $two_button_width &></p>
+%}
+      </td>
+      <td class="lys" valign="top" style="border-top: 1px solid #000000">
+% foreach my $k (sort {$a <=> $b} grep { $_ =~ /^\d+$/ } keys %$editpages) {
+%     my $page=$editpages->{$k};
+%         my $currentpage=(defined $obvius_page and $k eq $obvius_page);
+%         my $ghosted=($currentpage or !$obvius->can_create_new_version($doc));
+          <& SELF:link,
+	      link=>"javascript:window.document.pageform.obvius_page.value=$k;submit_page();",
+	      title=>$m->scomp('SELF:msg', text=>'Edit') . ' ' . $m->scomp('SELF:msg', text=>$page->Title),
+	      ghosted=>$ghosted,
+	      bold=>$currentpage,
+              ghosted_class=>'normal',
+	      tabindex=>$tabindex,
+              accesskey=>($k<10 ? $k : undef),
+	      text=>$m->scomp('SELF:msg', text=>$page->Title) &>
+          <& divider &>
+% }
+	  <& SELF:link, link=>"javascript:window.document.pageform.obvius_page.value='A';submit_page();", text=>'Alle felter', ghosted=>((defined $obvius_page and $obvius_page eq 'A') or !$obvius->can_create_new_version($doc)), ghosted_class=>'normal', tabindex=>$tabindex, accesskey=>'A', bold=>(defined $obvius_page and $obvius_page eq 'A') &>
+          <& divider &>
+% if (defined $obvius_op and $obvius_op eq 'dview') {
+          <& SELF:link, tabindex=>$tabindex, accesskey=>"I", text=>'Til dokumentet', link=>"$prefix$uri?obvius_version=" . $version_url &>
+% }
+% else {
+          <& SELF:link, tabindex=>$tabindex, accesskey=>"I", text=>"Om dokumentet", link=>"$prefix$uri?obvius_op=dview&obvius_version=" . $version_url, ghosted=>($ghosted or (defined $obvius_op and $obvius_op eq 'dview')), ghosted_clas=>'normal', bold=>(defined $obvius_op and $obvius_op eq 'dview') &>
+% }
+% my $subscr = $obvius->get_version_field($vdoc, 'subscribeable');
+% if($subscr and $subscr eq 'manual') {
+          <& divider &>
+          <& SELF:link, tabindex=>$tabindex, text=>$m->scomp('SELF:msg', text=>"Manual subscription"), link=>"$prefix$uri?obvius_op=manual_subscription&obvius_version=" . $version_url, ghosted=>($ghosted or (defined $obvius_op and $obvius_op eq 'manual_subscription')), ghosted_clas=>'normal', bold=>(defined $obvius_op and $obvius_op eq 'manual_subscription') &>
+% }
+% if ($doctype->Name eq "TestRapport") {
+          <& divider &>
+          <& SELF:link, tabindex=>$tabindex, text=>"CSV-import", link=>"$prefix$uri?obvius_op=import_csv&obvius_defdest=" . $uri, ghosted=>($ghosted or (defined $obvius_op and $obvius_op eq 'import_csv')), ghosted_clas=>'normal', bold=>(defined $obvius_op and $obvius_op eq 'import_csv') &>
+% }
+% if ($doctype->Name =~ /^Etik/) {
+          <& divider &>
+          <& SELF:link, tabindex=>$tabindex, text=>"Print", link=>"javascript:OpenWinFull('$prefix$uri?obvius_op=print&stamdata=1')", ghosted=>($ghosted or (defined $obvius_op and $obvius_op eq 'print')), ghosted_clas=>'normal', bold=>(defined $obvius_op and $obvius_op eq 'print') &>
+% }
+          &nbsp;
+% #       <img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">
+      </td>
+      <td valign="top" class="lys" align="right" nowrap
+          style="border-right: 1px solid #000000; border-top: 1px solid #000000" width="132">
+%if($r->notes('is_netscape')) {
+    <table border="0" align="right" cellpadding="3" cellspacing="0">
+        <tr>
+%   if($ghosted) {
+            <td align="center" class="nsmenuTekst" width="50%"><a href="javascript:window.document.pageform.obvius_page.value='done'; submit_page();" class="nsmenuTekst" tabindex="40" accesskey="S"><& SELF:msg, text=>'Save' &></div></td>
+            <td>&nbsp;</td>
+            <td align="center" class="nsmenuTekst" width="50%"><a href="javascript:window.document.pageform.obvius_page.value='abort'; submit_page();" class="nsmenuTekst" tabindex="40" accesskey="Z"><& SELF:msg, text=>'Cancel' &></div></td>
+%   } else {
+            <td align="center" class="nsghostTekst"><div class="nsghostTekst"><& SELF:msg, text=>'Save' &></div></td>
+            <td>&nbsp;</td>
+            <td align="center" class="nsghostTekst" width="50%"><div class="nsghostTekst"><& SELF:msg, text=>'Cancel' &></div></td>
+%   }
+        </tr>
+    </table>
+%} else {
+        <p align="right">
+          <input type="button" value="<& SELF:msg, text=>'Save' &>"
+% if ($ghosted) {
+           class="okknap"
+	   tabindex="40"
+	   accesskey="S"
+           onclick="javascript:this.form.obvius_page.value='done'; submit_page();"
+% }
+% else {
+	   class="ghostedknap"
+	   onclick=""
+	   disabled
+% }
+          >
+          <input type="button" value="<& SELF:msg, text=>'Cancel' &>"
+% if ($ghosted) {
+           class="cancelknap"
+	   tabindex="40"
+	   accesskey="Z"
+           onclick="javascript:this.form.obvius_page.value='abort'; submit_page();"
+% }
+% else {
+	   class="ghostedknap"
+	   onclick=""
+	   disabled
+% }
+          >
+% # <img width="2" height="2" border="0" src="/grafik/admin/spacer.gif" alt=""><img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">
+%}
+     </p>
+    </td>
+  </tr>
+</table>
+%
+% # --><SPAN CLASS=maintenance><& SELF:msg, text=>'Administration' &></SPAN><!-- 
+% # --><A HREF="<% $prefix %>/"><SPAN CLASS=maintenance><& SELF:sitename &></SPAN></A><!--
+% # <& pathinfo &>
+% # <A HREF="<% $prefix %>?op=adminsearch"><B><& SELF:msg, text=>'Search' &></B></A>
+% # <A HREF="<% $prefix %>/sitemap/"><B><& SELF:msg, text=>'Sitemap' &></B></A>
+% # <A HREF="mailto:feedback@magenta-aps.dk?body=mhlp1%0A$[urlencode mhlp2]%0A%0A%0A%0A$[urlencode mhlpA]%0A$[urlencode mhlpB]%0A$[urlencode mhlpC]%0A" TITLE="$[msg: Please send your comments og questions to Magenta. You will receive an answer asap]"><B><& SELF:msg, text=>'Problems' &>?</B></A>
+<!-- :header -->
+% }
+% elsif ($decoration eq 'top') {
+<!-- top header: -->
+<% $our_table_start %>
+    <tr>
+      <td valign="top" width="<% $left_cell_width-14 %>" nowrap class="megetlys" height="<% $logo_height %>" style="border-bottom: 1px solid black">
+        <a href="<% $prefix %>/"><img border="0" src="/grafik/adminlogo.png" width="<% $logo_width %>" height="<% $logo_height %>" alt="Administration"></a>
+      </td>
+      <td valign="top" class="megetlys" nowrap height="38" style="border-bottom: 1px solid black">
+        <table cellpadding="4" border="0" cellspacing="0" style="border-collapse: collapse" width="100%">
+        <tr>
+         <td class="megetlys">
+          Bruger: <% $user |h %>
+% #          <img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">
+         </td>
+        </tr>
+        <tr>
+         <td class="megetlys">
+          <& document_row, ghosted=>$ghosted &>
+         </td>
+        </tr>
+        </table>
+      </td>
+      <td valign="top" nowrap align="center" class="megetlys" height="38" style="border-bottom: 1px solid black">
+       <p align="right">
+       <img border="0" src="/grafik/admin/spacer.gif" width="2" height="2"><br>
+       <b><a href="<% $prefix %>/admin/"><span class="megetlyslink">Administration</span></a><br>
+       <a href="<% $prefix %>/sitemap/"><span class="megetlyslink">Sitemap</span></a><br>
+       <a href="javascript:OpenWin('http://<% $r->notes('helpserver') %>/<% $sitename %>/general?orig=<% $sitename %>/general');"><span class="megetlyslink">Hjælp</span></a></b>
+       </p>
+      </td>
+    </tr>
+</table>
+<!-- :top header -->
+% }
+%
+<%init>
+my $title=$vdoc->Title || $vdoc->Short_title || '';
+my $version=$vdoc->Version;
+my $version_url = $_escape->($version, 'u');
+my $user=$obvius->{USERS}->{$obvius->User}->{name};
+
+my $editpages;
+
+if ($session) {
+    $editpages=$obvius->get_editpages($obvius->get_version_type($session->{version}));
+}
+else {
+    $editpages=$obvius->get_editpages($doctype);
+}
+
+$ghosted=1 if ($session);
+my $sitename=$r->pnotes('site')->Sitename;
+</%init>

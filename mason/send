@@ -1,0 +1,203 @@
+<input type="hidden" name="obvius_session" value="<% $obvius_session %>">
+
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+%
+<%args>
+$obvius_op
+$obvius_done=>undef
+$obvius_session=>undef
+$version=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /send\n";
+my $ok;
+my $session;
+
+if (!defined $obvius_session) {
+    $session=$r->pnotes('site')->get_session();
+    die "No session available - fatally wounded.\n" unless ($session);
+
+    my %page=(
+              title=>'Send document',
+	      help=>'operation/send',
+              description=>'',
+              comp=>'/edit/page',
+             );
+
+    my $to_fspec=new Obvius::FieldSpec({
+				      fieldtype=>$obvius->get_fieldtype_by_name('email'),
+				      default_value=>undef,
+				      name=>'to',
+				      optional=>0,
+				      searchable=>0,
+				      repeatable=>0,
+				     });
+    my $user=$obvius->{USERS}->{$obvius->User};
+    my $from_fspec=new Obvius::FieldSpec({
+					fieldtype=>$obvius->get_fieldtype_by_name('email'),
+					default_value=>undef,
+					name=>'from',
+					optional=>0,
+					searchable=>0,
+					repeatable=>0,
+				       });
+    my $subject_fspec=new Obvius::FieldSpec({
+					fieldtype=>$obvius->get_fieldtype_by_name('line'),
+					default_value=>undef,
+					name=>'subject',
+					optional=>0,
+					searchable=>0,
+					repeatable=>0,
+				       });
+    my $text_fspec=new Obvius::FieldSpec({
+					fieldtype=>$obvius->get_fieldtype_by_name('text'),
+					default_value=>undef,
+					name=>'text',
+					optional=>0,
+					searchable=>0,
+					repeatable=>0,
+				       });
+    my $cc_fspec=new Obvius::FieldSpec({
+				      fieldtype=>$obvius->get_fieldtype_by_name('line'),
+				      default_value=>undef,
+				      name=>'cc',
+				      optional=>0,
+				      searchable=>0,
+				      repeatable=>0,
+				     });
+    my $bcc_fspec=new Obvius::FieldSpec({
+				       fieldtype=>$obvius->get_fieldtype_by_name('line'),
+				       default_value=>undef,
+				       name=>'bcc',
+				       optional=>0,
+				       searchable=>0,
+				       repeatable=>0,
+				      });
+    my $linktype_fspec=new Obvius::FieldSpec({
+                                         fieldtype=>new Obvius::FieldType({
+                                           validate_args => '^(none|public|admin)$',
+                                           name=>'linktype',
+                                           value_field=>'text',
+                                           bin=>0,
+                                           validate=>'regexp',
+                                           edit=>'radio',
+                                           edit_args=>'none|public|admin',
+                                         }),
+                                         default_value=>undef,
+                                         name=>'linktype',
+                                         optional=>0,
+                                         searchable=>0,
+                                         repeatable=>0,
+                                        });
+    my @fieldlist=(
+                   {title=>'To',      fieldspec=>$to_fspec},
+                   {title=>'From',    fieldspec=>$from_fspec},
+                   {title=>'Subject', fieldspec=>$subject_fspec},
+                   {title=>'Text',    fieldspec=>$text_fspec, options=>{rows=>5, cols=>40}},
+                   {title=>'Cc',      fieldspec=>$cc_fspec},
+                   {title=>'Bcc',     fieldspec=>$bcc_fspec},
+                   {title=>'Vis dokument-adresse', fieldspec=>$linktype_fspec,
+                    options=>{
+                              label_none=>'Intet link',
+                              label_public=>'Link til den offentlige side',
+                              label_admin=>'Link til admin-side'}},
+                  );
+
+    $page{fieldlist}=\@fieldlist;
+
+    $session->{pages}=[ \%page ];
+
+    my $fields=new Obvius::Data;
+    $fields->param(from=>"$user->{name} <$user->{email}>"); #?!
+    $fields->param(linktype=>$obvius->is_public_document($doc) ? 'public' : 'admin');
+    my $send_vdoc=$obvius->get_version($doc, $version);
+    $obvius->get_version_fields($send_vdoc, [qw(title)]);
+    $fields->param(subject=>$send_vdoc->Title);
+
+    $session->{fields_in}=$fields;
+    $session->{fields_out}=new Obvius::Data;
+    $session->{document}=$doc;
+    $session->{version}=$send_vdoc;
+    $session->{doctype}=$doctype;
+    $session->{validate_comp}='/edit/validate/page_send';
+    $session->{done_comp}='/edit/validate/send';
+    $session->{done_label}='Send';
+
+    $obvius_session=$session->{_session_id};
+}
+</%init>
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+print STDERR ">>> /send:Do\n";
+use Apache::File;
+
+my $sitename=$r->pnotes('site')->Sitename;
+my $fields=$session->{fields_out};
+
+# Find text:
+my $admin  =$r->pnotes('site');
+my $common =$admin->Subsite;
+
+my $data = $common->generate_subsite($common, $r, $doc, $session->{version}, $doctype, $obvius, is_admin=>1);
+my ($tmpnam, $tmpfh) = Apache::File->tmpfile;
+print $tmpfh <<EOT;
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=iso-8859-1">
+<title> </title>
+</head>
+<body>
+
+$data
+
+</body>
+</html>
+EOT
+my $datatext=`/usr/bin/w3m -T text/html -dump '$tmpnam'`;
+$tmpfh->close();
+#
+
+my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug =>0);
+
+$smtp->mail($fields->param('from'));
+map { $smtp->to($_) } split /\s*,\s*/, $fields->param('to');
+if ($fields->param('cc')) {
+    map { $smtp->to($_) } split /\s*,\s*/, $fields->param('cc');
+}
+if ($fields->param('bcc')) {
+    map { $smtp->to($_) } split /\s*,\s*/, $fields->param('bcc');
+}
+
+$smtp->data();
+$smtp->datasend("From: " . $fields->param('from') . "\n");
+$smtp->datasend("To: " . $fields->param('to') . "\n");
+$smtp->datasend("Cc: " . $fields->param('cc') . "\n") if ($fields->param('cc'));
+$smtp->datasend("Subject: " . $fields->param('subject') . "\n");
+$smtp->datasend("MIME-Version: 1.0\n");
+$smtp->datasend("Content-Type: text/plain; charset=iso-8859-1\n");
+$smtp->datasend("Content-Transfer-Encoding: 8bit\n");
+$smtp->datasend("\n");
+$smtp->datasend($fields->param('text'));
+$smtp->datasend("\n\n");
+if ($fields->param('linktype') eq 'public') {
+    $smtp->datasend(" http://" . $sitename . "$uri\n");
+}
+elsif ($fields->param('linktype') eq 'admin') {
+    my $version_text=$session->{version}->Version;
+    $version_text =~ s/ /%20/g; # XXX use proper function
+    $smtp->datasend(" http://" . $sitename . "/admin$uri?obvius_version=$version_text\n");
+}
+$smtp->datasend("\n\n");
+$smtp->datasend($datatext);
+$smtp->datasend("\n");
+$smtp->dataend();
+$smtp->quit();
+
+</%perl>
+</%method>

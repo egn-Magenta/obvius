@@ -1,0 +1,168 @@
+      <table border="0" cellpadding="3" cellspacing="0" width="<% $simple ? '295' : '100%' %>">
+        <tr>
+          <td valign="top" class="navtop">
+%if($one_up) {
+            <b><font size="1"><a href="javascript:navigator_navigate('<% $one_up %>')"><img border="0" src="/grafik/navigator/op.png" alt="Et niveau op" width="11" height="7"></a></font></b>
+%} else {
+            <b><font size="1"><img border="0" src="/grafik/navigator/op.png" alt="Et niveau op" width="11" height="7"></font></b>
+%}
+          </td>
+          <td valign="top" class="navtop">Underdokumenter:</td>
+          <td valign="top" nowrap class="navtop">&nbsp;</td>
+%unless($simple) {
+          <td valign="top" nowrap class="navtop">&nbsp;</td>
+          <td valign="top" nowrap class="navtop">&nbsp;</td>
+          <td valign="top" nowrap class="navtop">Dato:</td>
+          <td valign="top" nowrap class="navtop">&nbsp;</td>
+          <td valign="top" nowrap class="navtop">Sprog:</td>
+          <td valign="top" nowrap class="navtop">&nbsp;</td>
+          <td valign="top" nowrap class="navtop">&nbsp;</td>
+%}
+        </tr>
+%for(sort {$a->Seq <=> $b->Seq} @special_docs) {
+        <tr>
+%        if($_->{icon}) {
+          <td valign="top"><img src="<% $_->{icon} %>" border="0" width="10" height="13"></td>
+%        } else {
+          <td valign="top">&nbsp;</td>
+%        }
+          <td valign="top" class="mellemstr">
+            <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><strong><% $_->Title %></strong></a>
+          </td>
+          <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[Vælg]</a></td>
+%unless($simple) {
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+          <td valign="top" nowrap class="mellemstr"><font size="1"><% $_->Date %></font></td>
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+          <td valign="top" nowrap class="mellemstr"><% $country_codes{$_->Lang} %></td>
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+%}
+%   if($_->Public) {
+          <td valign="top" nowrap class="mellemstr"><img border="0" src="/grafik/navigator/vis.png" width="12" height="7"></td>
+%   } else {
+          <td valign="top" nowrap class="mellemstr"><img border="0" src="/grafik/navigator/skjul.png" width="12" height="7"></td>
+%   }
+        </tr>
+%}
+%for(sort {$a->Seq <=> $b->Seq} @docs) {
+        <tr>
+%        if($_->{icon}) {
+          <td valign="top"><img src="<% $_->{icon} %>" border="0" width="10" height="13"></td>
+%        } else {
+          <td valign="top">&nbsp;</td>
+%        }
+          <td valign="top" class="mellemstr">
+            <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><% $_->Title %></a>
+          </td>
+%        if($_->{java_action}) {
+          <td valign="top" nowrap class="mellemstr"><a href="<% $_->{java_action} %>">[Vælg]</a></td>
+%        } else {
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+%        }
+%unless($simple) {
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+          <td valign="top" nowrap class="mellemstr"><font size="1"><% $_->Date %></font></td>
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+          <td valign="top" nowrap class="mellemstr"><% $country_codes{$_->Lang} %></td>
+          <td valign="top" nowrap class="mellemstr">&nbsp;</td>
+%}
+%   if($_->Public) {
+          <td valign="top" nowrap class="mellemstr"><img border="0" src="/grafik/navigator/vis.png" width="12" height="7"></td>
+%   } else {
+          <td valign="top" nowrap class="mellemstr"><img border="0" src="/grafik/navigator/skjul.png" width="12" height="7"></td>
+%   }
+        </tr>
+%}
+%unless($simple) {
+        <tr>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_picture('<% $path %>')"><strong>Opret nyt billede her</a></strong></td>
+          <td valign="top" align="center" class="mellemstr">-</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" align="center"  class="mellemstr">-</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" align="center"  class="mellemstr">-</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+        </tr>
+%}
+      </table>
+<%args>
+$path=>'/'
+$here_docs=>[]
+$doctype=>undef
+$public_only=>undef
+$fieldname=>undef
+$simple=>undef
+</%args>
+<%init>
+my $one_up;
+unless($path eq '/') {
+    $one_up = $path;
+    $one_up =~ s/[^\/]+\/$//;
+}
+
+my @docs;
+my @special_docs;
+
+my $doctypeid;
+if($doctype) {
+    my $doct = $obvius->get_doctype_by_name($doctype);
+    $doctypeid = $doct->Id if($doct);
+}
+
+use Time::HiRes qw( usleep ualarm gettimeofday tv_interval );
+
+my %url_hash;
+
+if(scalar(@$here_docs)){
+    #my $t0 = [gettimeofday];
+    for(@$here_docs) {
+        my $vdoc = $obvius->get_public_version($_);
+        $vdoc = $obvius->get_latest_version($_) if(!$vdoc and !$public_only);
+        next unless($vdoc);
+        $obvius->get_version_fields($vdoc, ['title', 'seq', 'docdate']);
+        $vdoc->param(url => $_->Url);
+
+        $url_hash{$_->Id} = $_->Url;
+
+        my $date = $vdoc->DocDate;
+        $date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*/$3\/$2 $1/;
+        $vdoc->param(date => $date);
+
+        # icon
+        my $doctype = $obvius->get_doctype_by_id($vdoc->Type);
+        my $icon = $icons{$doctype->Name};
+        $vdoc->{icon} = $icon if($icon);
+
+        if($doctypeid and $vdoc->Type == $doctypeid) {
+            $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "');";
+            push(@special_docs, $vdoc);
+        } else {
+            # Only add a choose action if where are not searching for special docs
+            $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "');" unless($doctypeid);
+            push(@docs, $vdoc);
+        }
+    }
+    #my $elapsed = tv_interval ( $t0, [gettimeofday]);
+    #print STDERR "Elapsed (navigator docs): $elapsed\n";
+}
+
+</%init>
+%
+<%once>
+my %country_codes = (
+                        da => 'Dansk',
+                        en => 'Engelsk',
+                        fr => 'Fransk'
+                    );
+my %icons = (
+                Image => '/grafik/admin/nav_ikoner/image.png',
+                Standard => '/grafik/admin/nav_ikoner/standard.png',
+                HTML => '/grafik/admin/nav_ikoner/html.png'
+            );
+</%once>
+

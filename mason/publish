@@ -1,0 +1,138 @@
+<!-- begin publish -->
+% if (defined $obvius_done) {
+%   if ($ok) {
+Version published.
+%   } else {
+Couldn't publish version. Problem.
+%   }
+% } else {
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+% }
+<!-- end publish -->
+%
+<%args>
+$obvius_op
+$obvius_version
+$obvius_done=>undef
+$obvius_session=>undef
+</%args>
+%
+<%init>
+use WebObvius qw(parse_editpage_fieldlist);
+
+print STDERR ">>> /publish\n";
+my $ok;
+my $session;
+
+if (!defined $obvius_session) {
+    $session=$r->pnotes('site')->get_session();
+    die "No session available - fatally wounded.\n" unless ($session);
+
+    my $editpages=$obvius->get_editpages($doctype);
+    my $editpage=$editpages->{P};
+
+    my %page=(
+              title=>$editpage->Title,
+              description=>$editpage->Description,
+              comp=>'/edit/page',
+             );
+    $page{fieldlist}=WebObvius::parse_editpage_fieldlist(undef, $editpage->Fieldlist, $doctype, $obvius);
+    my %fields=map { ($_->{fieldspec}->Name, 1) } @{$page{fieldlist}};
+    $session->{pages}=[ \%page ];
+
+    $obvius->get_version_fields($vdoc, $doctype->publish_fields_names(), 'PUBLISH_FIELDS');
+    $session->{fields_in}=$vdoc->{PUBLISH_FIELDS};
+    if (!$vdoc->publish_field('published')) {
+        # This version has not been published before, so we take the default publish-field-
+        # values from the currently published version, if we can:
+        if (my $public_vdoc=$obvius->get_public_version($doc) )
+        {
+            if (my $public_vdoctype=$obvius->get_doctype($public_vdoc->Type)) {
+                $obvius->get_version_fields($public_vdoc, $public_vdoctype->publish_fields_names(), 'PUBLISH_FIELDS');
+                $session->{fields_in}=$public_vdoc->{PUBLISH_FIELDS};
+            }
+        }
+    }
+    else {
+        $session->{version_has_been_published_before}=1;
+    }
+
+    # Default back to 0 for in_subscription always - quite
+    # setup-specific cruft to have here:
+    $session->{fields_in}->param('in_subscription'=>0) if (defined $session->{fields_in}->param('in_subscription'));
+
+    $session->{fields_out}=new Obvius::Data;
+    $session->{document}=$doc;
+    $session->{version}=$vdoc;
+    $session->{doctype}=$doctype;
+    $session->{validate_comp}='/edit/validate/page_publish';
+    $session->{done_comp}='/edit/validate/publish';
+    $session->{done_label}='Publish';
+
+    # Always set published to now:
+    $session->{fields_out}->param(published=>$r->notes('now'));
+
+    # Magically set 'sec' (if it's there) to the second-level parent.
+    if (defined $session->{fields_in}->param('sec')) {
+       my @path=$obvius->get_doc_path($doc);
+       if ($path[1]) {
+           $session->{fields_out}->param(sec=>$path[1]->Id);
+           print STDERR "1->Id: " . $path[1]->Id . " 1->Name: " . $path[1]->Name . "\n" if $obvius->{DEBUG};
+       }
+    }
+
+    # The fields that are not being edited, and have no value, get assigned
+    # by the supreme being to the default_value:
+    my @default_value_fields=grep {
+        !( $fields{lc($_)} or $session->{fields_out}->param($_) )
+    } @{$doctype->publish_fields_names()};
+    map {
+        my $fspec=$obvius->get_fieldspec($_);
+        my $v=$fspec->Default_value;
+        if (defined $v) {
+            print STDERR "def_val for $_ is $v\n";
+            $session->{fields_out}->param($_=>$v);
+        }
+    } @default_value_fields;
+
+    $obvius_session=$session->{_session_id};
+    $r->pnotes(session=>$session);
+    $r->notes(obvius_session=>$obvius_session);
+}
+</%init>
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+print STDERR ">>> /publish:Do\n";
+
+$session->{version}->{PUBLISH_FIELDS}=$session->{fields_out};
+
+# Handle publish_on
+my $publish_on = $session->{fields_out}->{PUBLISH_ON};
+
+# Check whether the user has actually typed in a date that is in the future.
+my $now = $r->notes('now');
+my $ret;
+if($publish_on and $publish_on gt $now) {
+    # XXX How would unpublishing the version first work here? XXX
+    $ret=$obvius->publish_version($session->{version}, undef, 1);
+} else {
+    # Unpublish the version first, to purge the old publish-fields, if
+    # it has been published previously:
+    $obvius->unpublish_version($session->{version}) if ($session->{version_has_been_published_before});
+    $ret=$obvius->publish_version($session->{version});
+}
+
+$m->comp(
+	 '/dirty_url_in_cache',
+	 url=>$uri,
+	 sec=>$session->{fields_out}->{SEC},
+	 front_prio=>$session->{fields_out}->{FRONT_PRIO},
+	 sec_prio=>$session->{fields_out}->{SEC_PRIO},
+	);
+return $ret;
+</%perl>
+</%method>

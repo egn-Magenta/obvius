@@ -1,0 +1,29 @@
+<& SELF:menu_box_begin, title=>'Sub documents' &>
+% if( scalar @$subdocs == 0 and $extra == 0 ) {
+%     $r->notes('SUBDOCS'=>0);
+<& SELF:menu_entry, title=>'No sub documents' &>
+% }
+% else {
+%     $r->notes('SUBDOCS'=>1);
+%     map {
+<& SELF:menu_entry, %{$_} &>
+%     } @$subdocs;
+% # Notice the added '...', change the translation as well!
+%     if ($extra>0) {
+<& SELF:menu_entry, title=>'The entire list ...', class=>$entirelistclass,
+    link=>$entirelistlink &>
+%     }
+% }
+<%args>
+$max=>6
+</%args>
+%
+<%init>
+my ($subdocs, $extra)=$m->comp('SELF:get_doc_subdocs', seq=>'TRUE', max=>$max);
+
+my ($entirelistlink, $entirelistclass)=(undef, "sublevelghosted");
+if ($extra>0) {
+    $entirelistlink="javascript:OpenWin('$prefix$uri?obvius_op=siblings')";
+    $entirelistclass="sublevelemph";
+}
+</%init>

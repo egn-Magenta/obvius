@@ -1,0 +1,63 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>50
+$cols=>49
+$rows=>22
+$doctype=>undef
+$navigate_start=>undef
+</%args>
+% if ($fieldspec->Repeatable) {
+<select name="<% $name %>" multiple size="8" tabindex="10">
+% } else {
+<select name="<% $name %> tabindex="10">
+% }
+% foreach (@subdocs) {
+%    my $selected=($selected{$_->{id}} ? ' SELECTED' : '');
+<option value="<% $_->{id} %>"<% $selected %>><% $_->{title} %></option>
+% }
+</select>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my %selected;
+map {
+    if (my $doc=$obvius->lookup_document($_)) {
+        $selected{$doc->Id}=1;
+    }
+ } @$value;
+
+my $doc=$session->{document};
+my @subdocs;
+my $subdocs=$obvius->get_docs_by_parent($doc->Id);
+if ($subdocs) {
+    foreach (@$subdocs) {
+        my $vdoc=$obvius->get_public_version($_) || $obvius->get_latest_version($_);
+        $obvius->get_version_fields($vdoc, [qw(title)]);
+        push @subdocs, { id=>$_->Id, title=>$vdoc->Title };
+    }
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$session
+$value=>undef
+</%args>
+<%perl>
+if (ref $value) {
+    return [ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value ];
+}
+else {
+    return [ $fieldtype->copy_in($obvius, $fieldspec, $value) ];
+}
+</%perl>
+</%method>

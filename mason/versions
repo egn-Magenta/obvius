@@ -1,0 +1,63 @@
+<div class="lys" style="padding: 0.5em; border-bottom: solid 1px black; margin-bottom: 0.5em">
+<strong>Version</strong>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="2">
+
+% if( scalar @$versions == 0 ) {
+    Ingen versioner
+% }
+% else {
+%    map {
+        <tr>
+            <td>&nbsp;</td>
+            <td><a href="javascript:gotopage('<% $_->{link} %>')"><% $_->{title} %></a></td>
+            <td>&nbsp;</td>
+            <td width="10">\
+% if (substr($_->{link}, -19) eq $obvius_current) {
+<img width="7" height="7" src="/grafik/admin/active.gif" alt="*">\
+% }
+</td>
+            <td width="14">\
+% if ($_->{marker}=~/blue.gif/) { # Ugly hachis
+<img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-">\
+% }
+</td>
+        </tr>
+%    } @$versions;
+% }
+
+<tr>
+<td></td>
+<td align="left" class="sublevel">&nbsp;<br>&nbsp;&nbsp;
+<form action="./"><input class="normalknap" type="button" onclick="window.close();" value="<& SELF:msg, text=>'Close window' &>"></form>
+</td>
+</tr>
+</table>
+%
+%
+<%args>
+$menu_width=>100
+$obvius_current=>undef
+</%args>
+%
+<%method title>
+<& SELF:msg, text=>'Document overview' &>
+</%method>
+%
+%
+<%method menu_left_separator>
+<& SELF:menu_separator, menu_width=>$menu_width &>
+</%method>
+%
+<%method menu_right_separator>
+<& SELF:menu_separator, menu_width=>$menu_width &>
+</%method>
+%
+<%shared>
+my $menu_width;
+</%shared>
+%
+<%init>
+my $versions=$m->comp('/menu/versions:get_versions_for_display');
+</%init>

@@ -1,0 +1,22 @@
+<%args>
+$date
+$month =>'long'
+</%args>
+%
+<%init>
+my $display_date = '';
+if ($month eq 'long') {
+  $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
+  $display_date = sprintf "%d. $month_desc[$2] $1", $3;
+} else {
+  $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
+  $display_date = sprintf "%d. $month_short[$2] $1", $3;
+}
+</%init>
+%
+<%once>
+my @month_desc = qw(none januar februar marts april maj juni juli august september oktober november december);
+my @month_short = qw (none jan feb mar apr maj jun jul aug sep okt nov dec);
+</%once>
+%
+<% $display_date %>

@@ -1,0 +1,21 @@
+<%args>
+$text
+$class=>undef
+$dont_wrap=>0
+</%args>
+<%init>
+# Getting to do_htmlize_hook:
+use WebObvius::Template::MCMS;
+
+my $tmpl=new WebObvius::Template::MCMS(PATH=>'');
+$tmpl->{VARS}={MASON_CONTENT=>$text};
+# Fake one:
+$tmpl->{PROVIDER}={
+		   request=>$r,
+		   obvius=>$obvius,
+		  };
+$text=$tmpl->do_htmlize_hook('MASON_CONTENT', $class, dont_wrap=>$dont_wrap);
+# Cleanup -  &amp;#xxxx; back to &#xxxx;
+$text =~ s/&amp;#(\d+);/&#$1;/ig;
+</%init>
+<% $text %>

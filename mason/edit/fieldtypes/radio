@@ -1,0 +1,54 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+% if ($fieldspec->Repeatable) {
+%     foreach (@choices) {
+%         my $selected=($selected{$_} ? ' CHECKED' : '');
+%         my $label=(defined $ARGS{'label_' . $_} ? $ARGS{'label_' . $_} : $_);
+%         $label =~ s/_/ /g;
+<label><input type="checkbox" name="<% $name %>" value="<% $_ %>"<% $selected %> tabindex="10"><& SELF:msg, text=>$label &></input></label>
+%         last if (defined $ARGS{last_displayed} and $_ eq $ARGS{last_displayed});
+%     }
+% } else {
+%     foreach (@choices) {
+%         # Perhaps the selected could be even more forgiving?
+%         my $selected=((defined $value and uc($value) eq uc($_)) ? ' CHECKED' : '');
+%         my $label=(defined $ARGS{'label_' . $_} ? $ARGS{'label_' . $_} : $_);
+%         $label =~ s/_/ /g;
+<label><input type="radio" class="obviusradio" name="<% $name %>" value="<% $_ %>"<% $selected %> tabindex="10"><& SELF:msg, text=>$label &></input></label>
+%         last if (defined $ARGS{last_displayed} and $_ eq $ARGS{last_displayed});
+%     }
+%     if ($fieldspec->Optional) {
+% # <input class="normalknap" type="button" onclick="javascript:var r; for(r=0; r<document.pageform.<% $name %>.length; r++) { document.pageform.<% $name %>[r].checked=0 }; document.pageform.<% $name %>.value=''" value="<& SELF:msg, text=>"None" &>">
+<label><input type="radio" class="obviusradio" name="<% $name %>" value="" tabindex="10"><em><& SELF:msg, text=>'None' &></em></input></label>
+%     }
+% }
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+my @choices=split /[\|]/, $fieldtype->Edit_args;
+@choices=reverse @choices if ($ARGS{'reverse_options'});
+
+# XXX This is old cruft to be removed, right?! Or what?!
+my %selected;
+if ($fieldspec->Repeatable) { # This is quite o/gperms specific:
+    map {
+	$selected{$_}++;
+    } split /,/, $value;
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

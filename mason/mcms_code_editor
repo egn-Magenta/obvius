@@ -1,0 +1,85 @@
+<script language="javascript">
+
+function Save() {
+    document.pageform.do_save.value = 1;
+    document.pageform.submit();
+}
+
+function onLoad() {
+
+% #if we don't have a html_value, get it from the opener..
+%if($get_html) {
+    document.pageform.html_value.value = window.opener.document.pageform.<% $fieldname %>.value;
+    document.pageform.submit();
+%}
+
+%if($do_save) {
+    window.opener.document.pageform.<% $fieldname %>.value = document.pageform.html_value.value;
+    window.close();
+%}
+
+}
+
+onload_array[onload_array.length] = onLoad;
+</script>
+
+<table border="0" align="center">
+<tr>
+    <td>
+        <h1><& SELF:msg, text=>'Rediger med MCMS koder' &></h1>
+    </td>
+    <td align="right">
+        <input type="button" value="Gem" onclick="Save()">
+        &nbsp;&nbsp;
+        <input type="button" value="Annuller" onclick="window.close()">
+    </td>
+</tr>
+<tr>
+    <td colspan="2">
+        <& helpbutton, file=>'links', name=>'Links'&>
+        <& helpbutton, file=>'billeder', name=>'Pictures'&>
+        <& helpbutton, file=>'overskrifter', name=>'Headlines'&>
+        &nbsp;&nbsp;&nbsp;
+        <& helpbutton, file=>'fed', name=>'Bold'&>
+        <& helpbutton, file=>'kursiv', name=>'Italic'&>
+        <& helpbutton, file=>'understregning', name=>'Underline'&>
+    </td>
+</tr>
+<tr>
+    <td colspan="2">
+        <input type="hidden" name="obvius_op" value="mcms_code_editor">
+        <input type="hidden" name="fieldname" value="<% $r->param('fieldname') %>">
+
+        <textarea name="mcms_value" cols="70" rows="19" wrap="1" style="width: 720px; height: 470"><% $mcms_value |h %></textarea>
+        <input type="hidden" name="html_value" value="<% ($do_save ? $html_value : '')  |h %>">
+        <input type="hidden" name="do_save" value="">
+    </td>
+</tr>
+</table>
+<%args>
+$fieldname
+$html_value=>''
+$mcms_value=>''
+$get_html=>0
+$do_save=>undef
+</%args>
+<%init>
+my $is_first = 1;
+if(! $mcms_value) {
+    if($html_value) {
+        $mcms_value = WebObvius::Template::MCMS::HTML2MCMS::html2mcms($html_value || '');
+    }
+} else {
+    if($do_save) {
+        $html_value = $m->scomp('/shared/htmlize', text=>$mcms_value, dont_wrap => 1);
+    }
+}
+</%init>
+<%once>
+use WebObvius::Template::MCMS::HTML2MCMS;
+my $mcms_help = 'http://mcmshelp.magenta-aps.dk/www.magenta-aps.dk/vedit/';
+</%once>
+<%def helpbutton><%args>
+$name
+$file
+</%args><INPUT CLASS=button TYPE=button VALUE="<& SELF:msg, text=>$name &>" onClick="javascript:OpenWin('<% $mcms_help . $file %><& SELF:msg, text =>'.da' &>.html?no_obs=1',0,250);"></%def>

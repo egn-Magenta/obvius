@@ -1,0 +1,9 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/send XXX\n";
+
+return (1, '/send:Do');
+</%init>

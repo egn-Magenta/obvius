@@ -1,0 +1,22 @@
+<%args>
+$session
+$k
+</%args>
+<%init>
+my $v=$session->{fields_in}->param($k);
+my $ref=ref $v;
+if ($ref and $ref=~/::/ and $v->UNIVERSAL::can('param')) {
+    $v=$v->param('ID');
+}
+# I'm not sure about this... if the fields_in was undef and
+# the field hasn't been edited, shouldn't it just not be
+# added to fields out? Let's try... (it also looks more
+# similar to document).
+#$session->{fields_out}->param($k=>(defined $v ? $v : ''));
+if (defined $v) {
+    $session->{fields_out}->param($k=>$v);
+}
+else { # Rather -> pass undefs
+    $session->{fields_out}->delete($k);
+}
+</%init>

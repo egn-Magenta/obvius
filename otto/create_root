@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+
+#
+# create_root - create the root document in a pristine Obvius-base
+#
+# $Id$
+#
+
+use lib '/home/httpd/root/perl';
+
+use strict;
+use warnings;
+
+use POSIX qw(strftime);
+
+use Obvius;
+use Obvius::Config;
+
+use Data::Dumper;
+
+my ($configname)=shift @ARGV;
+my ($titlename)=shift @ARGV;
+die "Usage: create_root <configname> <titlename>\n" unless ($configname and $titlename);
+
+my $conf = new Obvius::Config($configname);
+die "Couldn't get configuration for $configname." unless ($conf);
+
+my $obvius = new Obvius($conf, 'admin', 'admin');
+die "Couldn't get obvius for $configname." unless ($obvius);
+
+my $doc = new Obvius::Document({ id=>0, accessrules=>'', parent=>0, });
+
+my $fields = new Obvius::Data(
+			    title=>$titlename,
+			    short_title=>$titlename,
+			    source=>'Obvius',
+			    mimetype=>'',
+			    docref=>'',
+			    sortorder=>'+seq',
+			    expires=>'9999-01-01 00:00:00',
+			    content=>'This is the frontpage (root-document)',
+			    docdate=>strftime('%Y-%m-%d', localtime),
+			    author=>'create_root',
+			    url=>'',
+			    teaser=>'Frontpage',
+			    subscribeable=>'none',
+			    seq=>0.0,
+			    contributors=>'',
+			   );
+
+my $doctype=$obvius->get_doctype_by_name('Standard');
+
+my ($docid, $version) = $obvius->create_new_document($doc, 'dummy', $doctype->Id, 'da', $fields, 1,1);
+if (defined $docid) {
+    my $newdoc=$obvius->get_doc_by_id($docid);
+    $obvius->set_access_data($newdoc, 1, 1, 'admin=create,edit,delete,publish,modes,admin
+OWNER=create,edit,delete,publish,modes
+GROUP+create,edit,delete,publish
+ALL+view
+@Admin+admin');
+    print "New document $docid, version $version\n";
+} else {
+    print "ERROR: $obvius->{DB_Error}\n";
+    exit;
+}

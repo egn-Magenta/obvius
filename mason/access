@@ -1,0 +1,122 @@
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+%
+<%args>
+$obvius_op
+$obvius_done=>undef
+$obvius_session=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /access\n";
+my $ok;
+my $session;
+
+if (!defined $obvius_session) {
+    $session=$r->pnotes('site')->get_session();
+    die "No session available - fatally wounded.\n" unless ($session);
+
+    #my $editpages=$obvius->get_editpages($doctype);
+    #my $editpage=$editpages->{P};
+
+    my %page=(
+              title=>'Access control',
+              description=>'',
+              comp=>'/edit/page',
+             );
+
+    my $owner_fspec=new Obvius::FieldSpec({
+                                         fieldtype=>new Obvius::FieldType({
+                                           validate_args => 'users.id',
+                                           name=>'xref',
+                                           value_field=>'int',
+                                           bin=>0,
+                                           validate=>'xref',
+                                           edit=>'xref',
+                                           edit_args=>'users.id',
+                                         }),
+                                         default_value=>undef,
+                                         name=>'owner',
+                                         optional=>0,
+                                         searchable=>0,
+                                         repeatable=>0,
+                                        });
+    my $group_fspec=new Obvius::FieldSpec({
+                                         fieldtype=>new Obvius::FieldType({
+                                           validate_args => 'groups.id',
+                                           name=>'xref',
+                                           value_field=>'int',
+                                           bin=>0,
+                                           validate=>'xref',
+                                           edit=>'xref',
+                                           edit_args=>'groups.id',
+                                         }),
+                                         default_value=>undef,
+                                         name=>'grp',
+                                         optional=>0,
+                                         searchable=>0,
+                                         repeatable=>0,
+                                        });
+    my $accessrules_fspec=new Obvius::FieldSpec({
+                                         fieldtype=>new Obvius::FieldType({
+                                           validate_args => '',
+                                           name=>'text',
+                                           value_field=>'text',
+                                           bin=>0,
+                                           validate=>'none',
+                                           edit=>'text',
+                                           edit_args=>'',
+                                         }),
+                                         default_value=>undef,
+                                         name=>'accessrules',
+                                         optional=>0,
+                                         searchable=>0,
+                                         repeatable=>0,
+                                        });
+
+
+    my @fieldlist=(
+                   {title=>'Owner',        fieldspec=>$owner_fspec},
+                   {title=>'Group',        fieldspec=>$group_fspec},
+                   {title=>'Access rules', fieldspec=>$accessrules_fspec,
+                    options=>{rows=>5, cols=>40}},
+                  );
+
+    $page{fieldlist}=\@fieldlist;
+
+    $session->{pages}=[ \%page ];
+
+    my $fields=new Obvius::Data;
+    $fields->param(owner=>$doc->Owner);
+    $fields->param(grp=>$doc->Grp);
+    $fields->param(accessrules=>$doc->AccessRules);
+
+    $session->{fields_in}=$fields;
+    $session->{fields_out}=new Obvius::Data;
+    $session->{document}=$doc;
+    $session->{version}=$vdoc;
+    $session->{doctype}=$doctype;
+    $session->{validate_comp}='/edit/validate/page_access';
+    $session->{done_comp}='/edit/validate/access';
+    $session->{done_label}='Save';
+
+    $obvius_session=$session->{_session_id};
+    $r->pnotes(session=>$session);
+    $r->notes(obvius_session=>$obvius_session);
+}
+</%init>
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+print STDERR ">>> /access:Do\n";
+
+$obvius->set_access_data($doc,
+ $session->{fields_out}->param('owner'),
+ $session->{fields_out}->param('grp'),
+ $session->{fields_out}->param('accessrules'));
+
+$m->comp('/dirty_url_in_cache', url=>$uri);
+</%perl>
+</%method>

@@ -1,0 +1,55 @@
+<& teaser, no_date=>1 &>
+<& content &>
+% if ($kwdocs) {
+<& pager, output=>$output &>
+<ul>
+%     foreach my $kwdoc (@$kwdocs) {
+ <li> <a href="<% $kwdoc->{url} %>" title="<% $kwdoc->{short_title} %>"<% $target %>><% $kwdoc->{title} %></a>
+%       my $linkvdoc = undef;
+%	if ($show_teasers) {
+%       $linkvdoc = get_public_version($kwdoc->{id});
+%       my $linkteaser = $obvius->get_version_field($linkvdoc, 'teaser');
+        <br />
+	<% $linkteaser %>
+%	}
+%       if($show_urls) {
+%       $linkvdoc = get_public_version($kwdoc->{id}) unless defined $linkvdoc;
+%	    my $linkurl = $obvius->get_version_field($linkvdoc, 'url');
+%       if(! $linkurl) {
+%           my $d = $obvius->get_doc_by_id($kwdoc->{id});
+%           $linkurl = 'http://' . $r->pnotes('site')->Sitename . $obvius->get_doc_uri($d) if($d);
+%       }
+%	    if($linkurl and $linkurl !~ /^http:\/\//) {
+%             $linkurl = 'http://' . $linkurl;
+%       }
+     <br />
+     <% $linkurl ? $linkurl : '' %>
+%       }
+ </li>
+%     }
+</ul>
+% } else {
+No documents found.
+% }
+% #####################
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(teaser new_window show_urls show_teasers)]);
+
+my $target = '';
+$target = ' target="_blank"' if($vdoc->field('new_window'));
+my $show_urls = $vdoc->field('show_urls');
+my $show_teasers = $vdoc->field('show_teasers');
+
+my $kwdocs=$output->param('kwdocs');
+
+sub get_public_version {
+    my $id = shift;
+    my $linkdoc = $obvius->get_doc_by_id($id);
+    return $obvius->get_public_version($linkdoc);
+}
+</%init>

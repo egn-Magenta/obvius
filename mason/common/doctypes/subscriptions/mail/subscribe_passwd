@@ -1,0 +1,22 @@
+%# $Id$
+From: <% $from %>
+Subject: Ændring af abonnement
+To: <% $email %>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Kære abonnent
+
+Du kan ændre dit abonnement på nyhedsservices på
+<http://<% $r->pnotes('site')->Sitename %>/abonner/?mode=login;email=<% $email %>;password=<% $password %>>
+
+Med venlig hilsen
+Nyhedsservice
+<%args>
+$output
+</%args>
+<%init>
+my $from = $output->param('sender');
+my $email = $output->param('email');
+my $password = $output->param('password');
+</%init>

@@ -1,0 +1,42 @@
+<tr>
+<td><& SELF:msg, text=>'Document type' &><& /help, link=>'operation/new/doctype' &>:</td>
+<td>
+<select name="obvius_doctype" tabindex="10">
+% if ($add_empty) {
+<option value=""></option>
+% }
+% map {
+<option value="<% $_->{id} %>"<% (defined $_->{selected} ? ' SELECTED' : '') %>><% $_->{translated_name} %></option>
+% } @doctypes;
+</select>
+</td>
+</tr>
+%
+<%args>
+$limit=>undef
+$selected=>undef
+$add_empty=>0
+</%args>
+%
+<%init>
+my @doctypes;
+foreach (@{$obvius->{DOCTYPES}}) {
+    next unless $_;
+    if ($obvius->get_editpages($_)) {
+	next if (defined $limit and !($_->{NAME} =~ /$limit/));
+	my %doctype = (
+		       id=>$_->{ID},
+		       name=>$_->{NAME},
+               translated_name=> $m->scomp('SELF:msg', text=>$_->{NAME})
+		      );
+	if (defined $selected) {
+	    $doctype{selected}=1 if ($_->{ID} eq $selected);
+	}
+	else {
+	    $doctype{selected}=1 if ($_->{ID} eq $vdoc->Type);
+	}
+	push @doctypes, \%doctype if $doctype{id};
+    }
+}
+@doctypes = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
+</%init>

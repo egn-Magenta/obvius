@@ -1,0 +1,11 @@
+first
+#loop loop1
+loop1 before $(a) $(b) $(loop2)
+#ifdef loop2
+# loop $(loop2)
+loop2 $(a) $(b) $(c)
+# endloop loop2
+#endif
+loop1 after  $(a) $(b) $(loop2)
+#endloop loop1
+last

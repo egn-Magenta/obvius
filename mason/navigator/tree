@@ -1,0 +1,88 @@
+<table cellspacing="0" border="0" <% $simple ? 'width="250"' : '' %>>
+
+    <tr>
+        <td colspan="<% $path_levels + 1 %>">
+%if($simple) {
+            <a href="javascript:navigator_navigate('/')"><strong>Forside</strong></a>
+%} else {
+            <img src="/grafik/admin/1x1.gif" border="0" alt="" width="160" height="1"><br>
+            <a href="javascript:navigator_navigate('/')"><img border="0" src="/grafik/navigator/hjem.png" alt="Hjem" width="7" height="7"></a>
+%}
+        </td>
+    </tr>
+%for my $document (@$list) {
+% my $level = $document->param('level');
+% my $active = $document->param('active');
+%
+% my $is_current = ($active and defined($level) and $level == ($path_levels - 2));
+% if($class eq 'nav1') {
+%  $class = 'nav2' if($active and ! $level);
+% } else {
+%  unless($level) {
+%   $class = 'nav1' if($class ne 'nav1');
+%  }
+% }
+%
+    <tr>
+%     my $curclass;
+%     my $width = '100%';
+%     if ($is_current) {
+%       $curclass=$class;
+%       $class="navselected" if ($is_current);
+%     }
+%     if($simple) {
+%       $width = 250 - 7 * $level;
+%     }
+%     for(0..($level - 1)) {
+        <td class="<% $class %>"><img border="0" src="/grafik/admin/spacer.gif" width="7" height="7"></td>
+%     }
+%     if ($is_current) {
+        <td class="<% $class %>" align="right"><img width="4" height="7" src="/grafik/admin/navigator/valgt-hvid.png" alt="&gt;"></td>
+%     }
+%     else {
+        <td class="<% $class %>"><img border="0" src="/grafik/admin/spacer.gif" width="7" height="7"></td>
+%     }
+%       my $colspan = $path_levels - $level;
+        <td class="<% $simple ? '' : $class %>" colspan="<% $colspan %>" <% $colspan == 1 ? "width=\"$width\"" : '' %>>
+%unless($simple) {
+            <font size="1">
+%}
+                <% $active ? "<strong>" : '' %>
+                    <a href="javascript:navigator_navigate('<% $document->Url %>')">
+%       if ($is_current) {
+%         if($simple) {
+%                       $_out->('[' . $document->Name . '/]');
+%         } else {
+                        <font color="#ffffff"><% $document->Name %>/</font>
+%         }
+%       }
+%       else {
+%                       $_out->($document->Name . "/");
+%       }
+%                    $_out->('</a>');
+                <% $active ? "</strong>" : '' %>
+%unless($simple) {
+            </font>
+%}
+        </td>
+%     $class=$curclass if ($is_current);
+    </tr>
+%   }
+%   if($simple) {
+    <tr>
+%     for(0..($path_levels - 1)) {
+        <td width="7" height="1"><img border="0" src="/grafik/admin/spacer.gif" width="7" height="1"></td>
+%     }
+        <td width="<% 250 - $path_levels * 7 %>" height="1"><img border="0" src="/grafik/admin/spacer.gif" width="<% 250 - $path_levels * 7 %>" height="1"></td>
+    </tr>
+%   }
+</table>
+<%args>
+$list=>[]
+$path_levels=>0
+$simple=>undef
+</%args>
+<%init>
+my $class='nav1';
+</%init>
+

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!-- docid: <% $doc->Id %> -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<% $vdoc->Lang || 'da' %>">
+  <head>
+    <title><% $title %></title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+    <link rel="stylesheet" type="text/css" href="/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="/css/public.css" />
+    <link rel="shortcut icon" href="/grafik/siteicon.gif" type="image/gif" />
+<& metatags, format=>'text/xhtml' &>  </head>
+  <body>
+    <& path &>
+    <& subsite &>
+  </body>
+</html>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title lang)]);
+my $title = $vdoc->Title;
+</%init>

@@ -1,0 +1,39 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>19
+</%args>
+
+<script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
+
+<input type="text" size="<% $size %>" name="<% $name %>" value="<% $value %>" tabindex="10">
+
+<script language="javascript">
+add_date_separator();
+add_date_buttons('<% $name %>');
+add_date_separator();
+add_time_buttons('<% $name %>');
+add_date_separator(2);
+add_field_reset('<% $name %>');
+</SCRIPT>
+
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+$value =~ s/\:\d\d$// if $value =~ /\d\d\:\d\d\:\d\d$/;
+</%init>
+
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+return $value . ":00";
+</%perl>
+</%method>

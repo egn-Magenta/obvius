@@ -1,0 +1,184 @@
+# (write space as _, thank you)
+
+DocType: Base basis searchable sortorder_field_is=sortorder
+ title         title                        searchable sortable threshold=0
+ short_title   line                         searchable sortable threshold=0
+ category      category repeatable optional searchable sortable
+ keyword       keyword  repeatable optional searchable sortable
+ docdate       date                         searchable sortable threshold=0
+ seq           double                                  sortable threshold=0 default_value=10.00
+ pagesize      pagesize              optional
+ sortorder     sortorder                                        default_value=+seq,+title
+ subscribeable subscribeable                searchable          default_value=none
+ expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_00:00:00
+ published     datetime                     searchable sortable publish
+ publish_on    publish_on                   searchable sortable publish default_value=0000-00-00_00:00:00
+ in_subscription bool			    searchable sortable publish default_value=0
+ mimetype      line			    searchable sortable threshold=0
+ rel_category  category repeatable optional searchable sortable
+ rel_keyword   keyword  repeatable optional searchable sortable
+ front_prio    priority			    searchable sortable publish default_value=0
+ front_dura    int>=0			    searchable sortable publish default_value=0
+ sec_prio      priority			    searchable sortable publish default_value=0
+ sec_dura      int>=0			    searchable sortable publish default_value=0
+ sec	       int	           optional searchable sortable publish default_value=0
+
+DocType: Standard parent=Base basis searchable
+ author        line                         searchable sortable threshold=64
+ teaser        text                         searchable threshold=64
+ content       text                         searchable sortable threshold=128
+ url           line                         searchable sortable threshold=64
+ docref        line                         searchable sortable threshold=64
+ contributors  line                         searchable sortable threshold=64
+ source        line                         searchable sortable threshold=64
+ picture       path                         searchable sortable optional threshold=128
+ votebox       path                         searchable sortable optional threshold=128
+ section_news  bool                         default_value=0
+
+DocType: Search parent=Standard basis searchable
+ form          textwupload                  searchable sortable threshold=128
+ search_expression text
+ new_window    bool                         default_value=0
+ show_urls     bool                         default_value=0
+ show_teasers  bool                         default_value=0
+ show_new_titles bool			    default_value=0
+
+DocType: ComboSearch parent=Search basis searchable
+
+DocType: KeywordSearch parent=Search basis searchable
+ base          path
+ search_type   searchtype
+
+DocType: HTML parent=Base basis searchable
+ author        line                         searchable sortable threshold=64
+ teaser        text                         searchable threshold=64
+ url           line                         searchable sortable threshold=64
+ docref        line                         searchable sortable threshold=64
+ contributors  line                         searchable sortable threshold=64
+ source        line                         searchable sortable threshold=64
+ html_content       textwupload                  searchable sortable threshold=128
+ bare	       bool                              default_value=0
+ votebox       path                         searchable sortable optional threshold=128
+
+DocType: Upload parent=Base basis
+ author        line                         searchable sortable threshold=64
+ teaser        text                         searchable threshold=64
+ url           line                         searchable sortable threshold=64
+ docref        line                         searchable sortable threshold=64
+ contributors  line                         searchable sortable threshold=64
+ source        line                         searchable sortable threshold=64
+ uploaddata    appdata						threshold=192
+ size	       int>=0						threshold=192
+
+DocType: Quiz parent=Standard basis searchable
+ mailto            email
+ mailmsg           line
+ requireallanswers bool
+
+DocType: QuizQuestion parent=Base basis
+ question          text
+ answer		   text repeatable
+ correctanswer	   text
+ url		   line
+
+DocType: MultiChoice parent=Standard basis searchable
+ vote_option       line     repeatable
+ bar_width         int>0    default_value=65
+
+DocType: OrderForm parent=HTML basis searchable
+ mailto            email
+ mailmsg           line
+
+DocType: CreateDocument parent=Base basis searchable
+ doctype            line                    searchable sortable threshold=128
+ language           lang                    searchable sortable threshold=128 default_value=da
+ where              path                    searchable sortable threshold=128
+ name_prefix        line                    searchable sortable threshold=128
+ form               textwupload             searchable threshold=128
+ publish_mode       publishmode             searchable sortable threshold=128 default_value=moderator
+ subscribe_include  bool                    searchable sortable threshold=128 default_value=0
+ email              email                   searchable sortable optional threshold=128
+
+DocType: Sitemap parent=Standard basis searchable
+ levels            int>0    default_value=2
+
+DocType: Subscribe parent=Standard basis searchable
+ mailfrom          email
+ passwdmsg         line
+
+DocType: Image basis
+ title         title              searchable sortable threshold=0
+ short_title   line               searchable sortable threshold=0
+ docdate       date               searchable sortable threshold=0
+ expires       datetime           searchable sortable threshold=0 default_value=9999-01-01_00:00:00
+ published     datetime           searchable sortable threshold=0 publish
+ width	       int>=0				      threshold=0
+ height	       int>=0				      threshold=0
+ align	       halign				      threshold=0 default_value=center
+ data	       imagedata			      threshold=192
+ size	       int>=0				      threshold=0
+ mimetype      line		  searchable sortable threshold=0
+ seq           double                        sortable threshold=0 default_value=-10.00
+ category      category repeatable optional searchable sortable
+ keyword       keyword  repeatable optional searchable sortable
+
+DocType: Link parent=Base basis searchable
+ author        line                         searchable sortable threshold=64
+ teaser        text                         searchable threshold=64
+ url           line                         searchable sortable threshold=64
+ docref        line                         searchable sortable threshold=64
+ source        line                         searchable sortable threshold=64
+ contributors  line                         searchable sortable threshold=64
+
+DocType: DBSearch parent=Base basis searchable
+ teaser        text                         searchable sortable threshold=128
+ form          textwupload                  searchable sortable threshold=128
+
+DocType: MailData parent=Standard basis searchable
+ mailfrom          email
+
+DocType: TableList basis
+ title         title                        searchable sortable threshold=0
+ short_title   line                         searchable sortable threshold=0
+ teaser        text                         searchable threshold=64
+ docdate       date                         searchable sortable threshold=0
+ seq           double                                  sortable threshold=0 default_value=10.00
+ pagesize      pagesize              optional
+ sortorder     sortorder                                        default_value=+id
+ expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_00:00:00
+ published     datetime                     searchable sortable publish
+ table         line                                             threshold=64
+ fields	       text						threshold=64
+ editcomp      line						threshold=64
+ newcomp       line						threshold=64
+
+DocType: CalendarEvent parent=Base basis searchable
+ eventtype         line                     searchable sortable threshold=64
+ contactinfo       line                     searchable sortable threshold=64
+ eventtime         line                     searchable sortable threshold=64
+ eventplace        line                     searchable sortable threshold=64
+ eventinfo         text                     searchable sortable threshold=128
+
+DocType: Calendar parent=Base basis searchable
+ startdate          date
+ enddate            date
+ s_event_type       line
+ s_event_title      line
+ s_event_contact    line
+ s_event_place      line
+ s_event_info       line
+ s_event_order_by   orderevents             default_value=-docdate
+ s_event_path       path
+ show_as            showcal                 searchable default_value=2D
+
+DocType: SubDocuments parent=Base basis searchable
+ author        line                         searchable sortable threshold=64
+ teaser        text                         searchable threshold=64
+ url           line                         searchable sortable threshold=64
+ docref        line                         searchable sortable threshold=64
+ contributors  line                         searchable sortable threshold=64
+ source        line                         searchable sortable threshold=64
+ logo          path                         searchable sortable optional threshold=128
+ picture       path                         searchable sortable optional threshold=128
+ votebox       path                         searchable sortable optional threshold=128
+ show_teasers  bool                         searchable sortable threshold=128 default_value=0

@@ -1,0 +1,356 @@
+%
+<%method edit>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+   my @groups = map { $obvius->{GROUPS}->{$_}->{name} } keys %{$obvius->{GROUPS}};
+   my @users = grep { ! /^\d+$/ } keys %{ $obvius->{USERS} };
+</%init>
+%if($r->param('use_textarea')) {
+<textarea name="<% $name %>" COLS="40" ROWS="10" WRAP="0"><% $value |h %></textarea>
+%} else {
+<script language="javascript">
+var users = new Array(
+%for(@users) {
+                        '<% $_ %>',
+%}
+                        null
+                    );
+var groups = new Array(
+%for(@groups) {
+                        '<% $_ %>',
+%}
+                        null
+                    );
+
+var operators = new Array(
+                            { key:'Tilføj (+)', value:'+' },
+                            { key:'Nægt (-)', value:'-' },
+                            { key:'Sæt til (=)', value:'=' },
+                            { key:'Forcer til (=!)', value:'=!' }
+                        );
+function LoadFromIncoming() {
+    var form = document.pageform;
+
+    // Empty dropdowns
+    while(form.obvius_access_storage.options[0]) {
+        form.obvius_access_storage.options[0] = null;
+    }
+    while(form.obvius_access_name.options[0]) {
+        form.obvius_access_name.options[0] = null;
+    }
+    while(form.obvius_access_operator.options[0]) {
+        form.obvius_access_operator.options[0] = null;
+    }
+
+    var text = form.<% $name %>.value;
+    // Return unless we have something to load
+    if(! text)
+        return;
+
+    // Load the initial options
+    var lines = text.split("\n");
+    for(var i=0; i < lines.length; i++) {
+        var line = lines[i];
+        line = line.replace(/\r*$/, '');
+        if(line)
+            form.obvius_access_storage.options[form.obvius_access_storage.options.length] = new Option(line, line);
+    }
+    form.obvius_access_storage.options.selectedIndex = 0;
+    LoadFromLine(form.obvius_access_storage.options[0].value);
+}
+
+// call load from incoming on load:
+onload_array[onload_array.length] = LoadFromIncoming;
+
+function LoadFromLine(line) {
+    var linedata = line.match(/^([^!=+-]+)\s*([!=+-]*)\s*(.*)$/);
+    var name = linedata[1];
+    var operator = linedata[2];
+    var options = linedata[3];
+
+    var type_options = document.pageform.obvius_access_type.options;
+    if(name == 'INHERIT') {
+        type_options.selectedIndex = 2;
+    } else {
+        if(name.match(/^(@|GROUP|ALL)/)) {
+            type_options.selectedIndex = 1;
+        } else {
+            type_options.selectedIndex = 0;
+        }
+    }
+    OnChange_Type(type_options[type_options.selectedIndex].value);
+
+    var name_options = document.pageform.obvius_access_name.options;
+    var name_found = 0;
+    for(var i=0; i < name_options.length; i++) {
+        if(name_options[i].value == name) {
+            name_options.selectedIndex = i;
+            name_found = 1;
+            break;
+        }
+    }
+    if(! name_found) {
+        var readable_name = name.replace(/^@/, '');
+        name_options[name_options.length] = new Option(readable_name, name);
+        name_options.selectedIndex = (name_options.length - 1);
+    }
+
+    var op_options = document.pageform.obvius_access_operator.options;
+    var op_found = 0;
+    for(var i=0; i < op_options.length; i++) {
+        if(operator == op_options[i].value) {
+            op_options.selectedIndex = i;
+            op_found = 1;
+            break;
+        }
+    }
+    if(! op_found) {
+        var readable_op = 'Ukendt operator: (' + operator + ')';
+        op_options[op_options.length] = new Option(readable_op, operator);
+        op_options.selectedIndex = (name_options.length - 1);
+    }
+
+    var form = document.pageform;
+    var hash = {};
+    options = options.split(",");
+    for(var i=0; i<options.length; i++) {
+        hash[options[i]] = 1;
+    }
+    form.obvius_access_view.checked = hash['view'];
+    form.obvius_access_create.checked = hash['create'];
+    form.obvius_access_edit.checked = hash['edit'];
+    form.obvius_access_delete.checked = hash['delete'];
+    form.obvius_access_publish.checked = hash['publish'];
+    form.obvius_access_modes.checked = hash['modes'];
+}
+
+function OnChange_Type(val) {
+    var name_options = document.pageform.obvius_access_name.options;
+
+    // Empty name
+    while(name_options[0]) {
+        name_options[0] = null;
+    }
+
+    if(val == 'inherit') {
+        name_options[0] = new Option('INHERIT', 'INHERIT');
+    }
+    if(val == 'user') {
+        name_options[name_options.length] = new Option('Dokumentets ejer', 'OWNER');
+        for(var i=0; i < users.length && users[i]; i++) {
+            name_options[name_options.length] = new Option(users[i], users[i]);
+        }
+        name_options[name_options.length] = new Option('Alle brugere', 'ALL');
+        name_options[name_options.length] = new Option('"Den offentlige bruger"', 'PUBLIC');
+    }
+    if(val == 'group') {
+        name_options[name_options.length] = new Option('Dokumentets gruppe', 'GROUP');
+        for(var i=0; i < groups.length && groups[i]; i++) {
+            name_options[name_options.length] = new Option(groups[i], '@' +groups[i]);
+        }
+        name_options[name_options.length] = new Option('Alle brugere', 'ALL');
+    }
+
+    LoadOperators(val);
+}
+
+function LoadOperators(val) {
+    while(document.pageform.obvius_access_operator.options[0]) {
+        document.pageform.obvius_access_operator.options[0] = null;
+    }
+
+    if(val == 'inherit') {
+        document.pageform.obvius_access_operator.options[0] = new Option('Ingen', '');
+    } else {
+        for(var i=0; i < operators.length; i++) {
+            var data = operators[i];
+            document.pageform.obvius_access_operator.options[i] = new Option(data['key'], data['value']);
+        }
+    }
+}
+
+function FormToText() {
+    var form = document.pageform;
+    var line = '';
+    line += form.obvius_access_name.value;
+
+    if(line == 'INHERIT')
+        return line;
+
+    // Operator
+    line += form.obvius_access_operator.value;
+
+    // options
+    if(form.obvius_access_view.checked)
+        line += 'view,';
+    if(form.obvius_access_create.checked)
+        line += 'create,';
+    if(form.obvius_access_edit.checked)
+        line += 'edit,';
+    if(form.obvius_access_delete.checked)
+        line += 'delete,';
+    if(form.obvius_access_publish.checked)
+        line += 'publish,';
+    if(form.obvius_access_modes.checked)
+        line += 'modes,';
+
+    line = line.replace(/,$/, '');
+
+    return line;
+}
+
+function SaveChanges() {
+    var storage = document.pageform.obvius_access_storage.options;
+    if(storage.selectedIndex == -1 || storage.length == 0) {
+        alert('Du skal have valgt noget i listen');
+        return;
+    }
+    var line = FormToText();
+    if(line) {
+        if(line == 'INHERIT' && HasInherit()) {
+            alert('Du har allerede en INHERIT regel i dette sæt');
+            return;
+        }
+        storage[storage.selectedIndex].value = line;
+        storage[storage.selectedIndex].text = line;
+    }
+}
+
+function AddNew() {
+    var storage = document.pageform.obvius_access_storage.options;
+    var line = FormToText();
+    if(line) {
+        storage[storage.length] = new Option(line, line);
+        storage.selectedIndex = (storage.length - 1);
+    }
+}
+
+function HasInherit() {
+    var storage = document.pageform.obvius_access_storage.options;
+    for(var i=0; i < storage.length; i++) {
+        if(storage[i].value == 'INHERIT')
+            return 1;
+    }
+    return 0;
+}
+
+function DeleteEntry() {
+    var storage = document.pageform.obvius_access_storage.options;
+    if(storage.selectedIndex == -1) {
+        alert('Du skal have valgt noget i listen');
+        return;
+    }
+    storage[storage.selectedIndex] = null;
+}
+
+function GetSaveValue() {
+    var storage = document.pageform.obvius_access_storage.options;
+    if(storage.length == 0) {
+        return '';
+    }
+
+    if(! HasInherit()) {
+        if(confirm('Du har ingen INHERIT regel i dette sæt - vil du tilføje een?')) {
+            var count = storage.length;
+            var last_option = storage[storage.length - 1];
+            storage[storage.length] = new Option(last_option.text, last_option.value);
+            for(;count > 0; count--) {
+                var opt1 = storage[count];
+                var opt2 = storage[count - 1];
+                opt1.value = opt2.value;
+                opt1.text = opt2.text;
+            }
+            storage[0].value = 'INHERIT';
+            storage[0].text = 'INHERIT';
+        }
+    }
+
+    var text = '';
+    for(var i=0; i < storage.length; i++) {
+        text += storage[i].value + "\n";
+    }
+    return text;
+}
+
+// Set the resulting value when submitting:
+onsubmit_array[onsubmit_array.length] = function () {
+    document.pageform.<% $name %>.value = GetSaveValue();
+}
+</script>
+<input type="hidden" name="<% $name %>" value="<% $value | h %>">
+<table border="0">
+    <tr>
+        <td>
+            <select name="obvius_access_storage" size="8" onchange="LoadFromLine(this.options[this.options.selectedIndex].value)">
+                <option>MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM</option>
+            </select>
+        </td>
+        <td>
+            <input type="button" onclick="AddNew()" value="Tilføj ny regel">
+            <br>
+            <br>
+            <input type="button" onclick="DeleteEntry()" value="Slet fra listen">
+        </td>
+    </tr>
+</table>
+<br>
+<a href="<% $prefix . $uri %>?obvius_op=access&use_textarea=1">Rediger med alm. tekstfelt</a>
+<br>
+<br>
+<table border="0" cellspacing="5">
+    <tr>
+        <td>
+            Regeltype<br>
+            <select name="obvius_access_type" onchange="OnChange_Type(this.options[this.options.selectedIndex].value)">
+                <option value="user">Brugerregel</option>
+                <option value="group">Grupperegel</option>
+                <option value="inherit">INHERIT</option>
+            </select>
+        </td>
+        <td>
+            Bruger/gruppe<br>
+            <select name="obvius_access_name">
+                <option>MMMMMMMMMMMMMMM</option>
+            </select>
+        </td>
+        <td>
+            Operator<br>
+            <select name="obvius_access_operator">
+                <option>MMMMMMMMMMMMMMM</option>
+            </select>
+        </td>
+    </tr>
+</table>
+Rettigheder:<br>&nbsp;
+View    <input type="checkbox" name="obvius_access_view">
+Create  <input type="checkbox" name="obvius_access_create">
+Edit    <input type="checkbox" name="obvius_access_edit">
+Delete  <input type="checkbox" name="obvius_access_delete">
+Publish <input type="checkbox" name="obvius_access_publish">
+Modes   <input type="checkbox" name="obvius_access_modes">
+<br>
+<br>
+<input type="button" onclick="SaveChanges()" value="Gem til listen">
+%}
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

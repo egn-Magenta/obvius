@@ -1,0 +1,12 @@
+<img width="2" height="2" src="/grafik/admin/1x1.gif" alt=""><a href="javascript:OpenWin('http://<% $r->notes('helpserver') %>/<% $fulllink %>?orig=<% $fulllink %>',0,250);" title="<& SELF:msg, text=>'Click for help' &>"><img width="11" height="12" src="/grafik/admin/question.gif" alt="?" title="<& SELF:msg, text=>'Click for help' &> (<% $link %>.da)" border="0"></a>
+%
+<%args>
+$link
+</%args>
+%
+<%init>
+my $sitename=$r->pnotes('site')->Sitename;
+my $doctypename=($r->notes('help_doctype') || $doctype->Name);
+my $lang='da'; # XXX
+my $fulllink="$sitename/doctype/$doctypename/$link.$lang";
+</%init>

@@ -1,0 +1,40 @@
+<%init>
+my $disable_java_editor;
+my $new_state = 1;
+if (my $cookies=Apache::Cookie->fetch) {
+    if($cookies->{'disable_java_editor'} && $cookies->{'disable_java_editor'}->value) {
+        $new_state = 0;
+    } else {
+        $new_state = 1;
+    }
+}
+
+my $cookie=new Apache::Cookie(  $r,
+                                -name => 'disable_java_editor',
+                                -value => $new_state,
+                                -expires => '+3M',
+                                -path => '/',
+                                );
+$cookie->bake;
+</%init>
+<table border="0" cellspacing="10">
+    <tr>
+        <td>
+%if($new_state) {
+<p>
+    Du har nu valgt at slå java editoren fra.
+</p>
+%} else {
+<p>
+    Du har valgt at slå java editoren til.
+</p>
+%}
+<p>
+    Husk at det er nødvendigt at reloade vinduet med tekstfeltet for at ændringen kan tage effekt.
+</p>
+<p>
+    <a href="javascript:window.close()">Luk vindue</a>
+</p>
+        </td>
+    </tr>
+</table>

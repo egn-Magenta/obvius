@@ -1,0 +1,7 @@
+% # Placeholder:
+<& /new/user, %ARGS &>
+<%method ReallyDelete>
+<%perl>
+$m->comp('/new/user:ReallyDelete', %ARGS);
+</%perl>
+</%method>

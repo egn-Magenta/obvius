@@ -1,0 +1,2048 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>50
+$cols=>49
+$rows=>22
+$doctype=>undef
+$navigate_start=>undef
+$type_fieldnames=>0
+</%args>
+% if ($fieldspec->Repeatable) {
+<table>
+<tr>
+ <td align="right">
+  <p>
+  <input type="button" class="normalknap" value="Flyt op" onclick="javascript:move_field_up(this.form.<% $name %>_internaljsfieldlist, this.form.<% $name %>_internaljsfieldlist.selectedIndex, window.document.pageform.<% $name %>);"><br>
+  <input type="button" class="normalknap" value="Fjern" onclick="javascript:remove_field(this.form.<% $name %>_internaljsfieldlist, this.form.<% $name %>_internaljsfieldlist.selectedIndex, window.document.pageform.<% $name %>);"><br>
+  <input type="button" class="normalknap" value="Flyt ned" onclick="javascript:move_field_down(this.form.<% $name %>_internaljsfieldlist, this.form.<% $name %>_internaljsfieldlist.selectedIndex, window.document.pageform.<% $name %>);">
+  </p>
+  <p>
+  <input type="button" class="normalknap" value="Alle" onclick="javascript:insert_fields(this.form.<% $name %>_internaljsfieldlist, <% $name %>_internaljsfields_all, window.document.pageform.<% $name %>);"><br>
+  <input type="button" class="normalknap" value="Std. kort" onclick="javascript:insert_fields(this.form.<% $name %>_internaljsfieldlist, <% $name %>_internaljsfields_short, window.document.pageform.<% $name %>);"><br>
+  <input type="button" class="normalknap" value="Std. lang" onclick="javascript:insert_fields(this.form.<% $name %>_internaljsfieldlist, <% $name %>_internaljsfields_long, window.document.pageform.<% $name %>);">
+  </p>
+ </td>
+ <td>
+  <input type="hidden" name="<% $name %>">
+  <select name="<% $name %>_internaljsfieldlist" multiple size="10" tabindex="10">
+  </select>
+ </td>
+</tr>
+</table>
+
+<table>
+<tr>
+ <td>Felt</td>
+ <td>Tekst</td>
+</tr>
+ <td>
+% if ($type_fieldnames) {
+  <input type="text" name="<% $name %>_internaljsfields" tabindex="10">
+% }
+% else {
+  <& .fieldchooser, name=>$name . "_internaljsfields", fields=>\@fields &>
+% }
+ </td>
+ <td><input type="text" name="<% $name %>_internaljstext" tabindex="10"></td>
+ <td>
+% if ($type_fieldnames) {
+<input type="button" class="normalknap" value="Tilføj" onclick="javascript:add_field(this.form.<% $name %>_internaljsfieldlist, this.form.<% $name %>_internaljsfields.value, this.form.<% $name %>_internaljstext.value, window.document.pageform.<% $name %>);">
+% }
+% else {
+<input type="button" class="normalknap" value="Tilføj" onclick="javascript:add_field(this.form.<% $name %>_internaljsfieldlist, this.form.<% $name %>_internaljsfields.options[this.form.<% $name %>_internaljsfields.selectedIndex].value, this.form.<% $name %>_internaljstext.value, window.document.pageform.<% $name %>); this.form.<% $name %>_internaljsfields.selectedIndex++;">
+% }
+</td>
+</tr>
+</table>
+
+<script type="text/javascript" language="javascript">
+
+var <% $name %>_internaljsfields_all = [
+   { field: "title", name: "Titel" },
+% my %edittitle;
+% foreach (@$fieldlist) {
+%     next if $_->{fieldspec}->Name =~ /_comment$/;
+%     my $edittitle=$_->{title};
+%     $edittitle =~ s/"/\\"/g;
+%     $edittitle=$default_edittitle{$doctypename}->{$_->{fieldspec}->Name}
+%         if (defined $default_edittitle{$doctypename}->{$_->{fieldspec}->Name});
+%     $edittitle{$_->{fieldspec}->Name}=$edittitle;
+   { field: "<% $_->{fieldspec}->Name %>", name: "<% $edittitle %>" },
+% }
+% foreach (keys %{$default_edittitle{$doctypename}}) {
+%     next if $edittitle{$_};
+%     $edittitle{$_}=$default_edittitle{$doctypename}->{$_};
+   { field: "<% $_ %>", name: "<% $default_edittitle{$doctypename}->{$_} %>" },
+% }
+   null
+];
+
+var <% $name %>_internaljsfields_short = [
+% foreach (@{$default_short{$doctypename}}) {
+%     next if $_ =~ /_comment$/;
+   { field: "<% $_ %>", name: "<% $edittitle{$_} %>" },
+% }
+   null
+];
+
+var <% $name %>_internaljsfields_long = [
+% foreach (@{$default_long{$doctypename}}) {
+%     next if $_ =~ /_comment$/;
+   { field: "<% $_ %>", name: "<% $edittitle{$_} %>" },
+% }
+   null
+];
+
+function update_hidden_widget(widget, hidden_widget) {
+    var new_value="";
+    var i;
+
+    for(i=0; i<widget.options.length; i++) {
+        new_value=new_value + (i ? "\n" : "") + widget.options[i].value;
+    }
+
+    hidden_widget.value=new_value;
+}
+
+function insert_all(widget, fields, hidden_widget) {
+    var i;
+
+    widget.options.length=0;
+    for(i=0; i<fields.options.length; i++) {
+        add_field(widget, fields.options[i].value, fields.options[i].value, hidden_widget);
+    }
+    update_hidden_widget(widget, hidden_widget)
+}
+
+function insert_fields(widget, fields, hidden_widget) {
+    var i;
+    widget.options.length=0;
+    for(i=0; i<fields.length; i++) {
+        if (fields[i]) {
+            add_field(widget, fields[i].field, fields[i].name, hidden_widget);
+	}
+    }
+    update_hidden_widget(widget, hidden_widget)
+}
+
+function add_field(widget, field, text, hidden_widget) {
+    if (text==null || text=='') {
+        text=field;
+    }
+    var fieldvalue=field + ':' + text;
+    var newoption = new Option(text, fieldvalue);
+    widget.options[widget.options.length]=newoption;
+
+    update_hidden_widget(widget, hidden_widget);
+}
+
+function remove_field(widget, num, hidden_widget) {
+    widget.options[num]=null;
+    if (widget.options.length==num ) {
+        num--;
+    }
+    if (widget.options.length>num) {
+        widget.selectedIndex=num;
+    }
+    update_hidden_widget(widget, hidden_widget);
+}
+
+function move_field_up(widget, num, hidden_widget) {
+    if (num>=1) {
+        var curoption=widget.options[num];
+        var prevoption=widget.options[num-1];
+        widget.options[num-1]=new Option(curoption.text, curoption.value);
+        widget.options[num]=new Option(prevoption.text, prevoption.value);
+        widget.selectedIndex=num-1;
+	update_hidden_widget(widget, hidden_widget);
+    }
+}
+
+function move_field_down(widget, num, hidden_widget) {
+    if (num>=0 && num<(widget.options.length-1)) {
+        var curoption=widget.options[num];
+        var nextoption=widget.options[num+1];
+        widget.options[num+1]=new Option(curoption.text, curoption.value); 
+        widget.options[num]=new Option(nextoption.text, nextoption.value);
+        widget.selectedIndex=num+1;
+	update_hidden_widget(widget, hidden_widget);
+    }
+}
+
+function init_fields_<% $name %>() {
+% foreach (@values) {
+%     chomp;
+%     my($field, $text)=split /:/;
+    add_field(window.document.pageform.<% $name %>_internaljsfieldlist, "<% $field %>", "<% $text %>", window.document.pageform.<% $name %>);
+% }
+}
+
+init_fields_<% $name %>();
+</script>
+
+% } else {
+<& .fieldchooser, name=>$name, fields=>\@fields &>
+% }
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my @values;
+use Data::Dumper;
+#print STDERR " EDIT value $name: " . Dumper($value);
+#print STDERR " ref value  $name:  " . ref($value) . "\n";
+# Abusing the repeatable flag:
+if ($value and @$value == 1) {
+    $value->[0] =~ s/\r//g;
+    @values=split /\n/, $value->[0];
+}
+#print STDERR " EDITNOW value $name: " . Dumper(\@values);
+
+# Determine doctype of subdocuments:
+my $doc=$session->{document};
+my $vdoc=$session->{version};
+my $doctypeid;
+if (my  $selectdoctypename=($session->{fields_out}->param('SELECTDOCTYPE') ||
+			    $session->{fields_in}->param('SELECTDOCTYPE') ||
+			    $vdoc->field('selectdoctype'))) {
+    if (my $selectdoctype=$obvius->get_doctype_by_name($selectdoctypename)) {
+	$doctypeid=$selectdoctype->Id;
+    }
+}
+unless (defined $doctypeid) {
+    my $subdocs=$obvius->get_docs_by_parent($doc->Id);
+    if ($subdocs) {
+	foreach (@$subdocs) {
+	    my $subvdoc=$obvius->get_public_version($_) || $obvius->get_latest_version($_);
+	    if ($doctypeid) {
+		warn "Subdocuments of different types" if ($doctypeid != $subvdoc->Type);
+	    }
+	    else {
+		$doctypeid=$subvdoc->Type;
+	    }
+	}
+    }
+}
+
+my $subvdoctype;
+my $doctypename;
+my @fields;
+if (defined $doctypeid) {
+    $subvdoctype=$obvius->get_doctype($doctypeid);
+    $doctypename=$subvdoctype->Name;
+    print STDERR " doctypename: $doctypename\n";
+    foreach ($subvdoctype->{FIELDS}->param) {
+	push @fields, lc($_) unless $_ =~ /_comment$/i;
+    }
+}
+
+# Find editpage:
+my $editpage=(defined $subvdoctype ? $obvius->get_editpages($subvdoctype)->{ (scalar(keys %{$obvius->get_editpages($subvdoctype)})-1 ) } : undef);
+
+my $site=$r->pnotes('site');
+my $fieldlist=(defined $editpage ? $site->parse_editpage_fieldlist($editpage->Fieldlist, $subvdoctype, $obvius) : undef);
+</%init>
+</%method>
+%
+<%def .fieldchooser>
+<%args>
+$name
+$fields
+</%args>
+<select name="<% $name %>" tabindex="10">
+% foreach (sort @$fields) {
+<option value="<% $_ %>"><% $_ %></option>
+% }
+</select>
+</%def>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$session
+$value=>undef
+</%args>
+<%perl>
+if (ref $value) {
+    $value=join "\n", @$value;
+}
+if ($fieldspec->Repeatable) {
+    return [ $value ];
+}
+return $value;
+</%perl>
+</%method>
+%
+<%once>
+my %default_edittitle=(
+                       TestAfFirewallAntivir=>{
+                                               title=>'Produkt navn',
+                                               produkt_type=>'Type',
+                                               web=>'Webadresse',
+                                               testet_version=>'Testet version',
+                                               pris=>'Pris',
+                                               samlet_bedoemmelse=>'Samlet bedømmelse',
+                                               ydeevne_fw_bedoemmelse=>'Ydeevne som Firewall',
+                                               ydeevne_av_bedoemmelse=>'Ydeevne som Antivirus',
+                                               dokumentation_bedoemmelse=>'Dokumentation',
+                                               prod_information_bedoemmelse=>'Produkt information',
+                                               manual_bedoemmelse=>'Manual',
+                                               gennemfoerthed_bedoemmelse=>'Gennemførthed',
+                                               inst_afinst_bedoemmelse=>'Installation/Afinstallation',
+                                               opl_om_inst_bedoemmelse=>'Oplysninger om In/afinstallation',
+                                               opf_v_inst_bedoemmelse=>'Progr. Opførsel ved in/afinst.',
+                                               udf_af_inst_bedoemmelse=>'Udførelse af in/afinst.',
+                                               succes_bedoemmelse=>'succes',
+                                               muligh_for_aendring_bedoemmelse=>'Mulighed for ændringer',
+                                               afinst_bedoemmelse=>'Afinstallation',
+                                               vejledning_bedoemmelse=>'Vejledning til brugeren',
+                                               opstart_bedoemmelse=>'Opstart hjælp',
+                                               navigation_bedoemmelse=>'Navigations hjælp',
+                                               brugerhjaelp_bedoemmelse=>'Brugerhjælp',
+                                               password_bedoemmelse=>'Password vejledning',
+                                               advarsler_bedoemmelse=>'Advarsler',
+                                               ydeevne_bedoemmelse=>'Ydeevne',
+                                               ydeevne_start_bedoemmelse=>'Start af prog.',
+                                               ydeevne_luk_bedoemmelse=>'Lukning af prog.',
+                                               ydeevne_udnyttelse_bedoemmelse=>'Udnyttelse af resourser',
+                                               ydeevne_hastighed_bedoemmelse=>'Hastighed',
+                                               ydeevne_log_bedoemmelse=>'Log',
+                                               ydeevne_default_bedoemmelse=>'Default settings',
+                                               ydeevne_password_bedoemmelse=>'Password protection',
+                                               opf_ved_fejl_bedoemmelse=>'Opførsel ved fejl',
+                                               alsidighed_bedoemmelse=>'Alsidighed',
+                                               bemaerkninger_plus=>'+',
+                                               bemaerkninger_minus=>'-',
+                                              },
+		       TestAfOpvaskemaskiner=>{
+					       title=>'Titel (overskrift vises ikke)',
+					       docdate=>'Dato',
+					       pris=>'Pris',
+					       samlet_bedoemmelse=>'Samlet bedømmelse',
+					       opvaskeindex_karakter=>'Opvaskeevne',
+					       toerringsindex_karakter=>'Tørreevne',
+					       energiforbrug_karakter=>'Energiforbrug',
+					       energimaerkning_maalt=>'Energimærkning, målt',
+					       vandforbrug_karakter=>'Vandforbrug',
+					       programtid_maalt=>'Opvasketid (min)',
+					       lydeffektniveau_karakter=>'Støj',
+					       hoejde_oplyst=>'Højde (cm)',
+					       bredde_oplyst=>'Bredde (cm)',
+					       dybde_oplyst=>'Dybde (cm)',
+					       kapacitet_antal_kuverter=>'Antal kuverter',
+					       max_effekt=>'Max effekt (Watt)',
+					       opvaskeindex_angivet_kategori=>'Opvaskeevne, angivet energimærkn.',
+					       toerringsindex_angivet_kategori=>'Tørreevne, angivet energimærkn.',
+					       energiforbrug_kategori_angivet=>'Energiforbrug, angivet energimærkn.',
+					       vandforbrug_maalt=>'Vandforbrug, målt (liter)',
+					       programtid_maalt=>'Opvasketid (min)',
+					       lydeffektniveau_maalt_under_vask_eller_skyl=>'Støj, målt under vask dB(A)',
+					       lydeffektniveau_maalt_under_udpumpning=>'Støj, målt under udpumpn. db(A)',
+					       bedoemmelse_betjening=>'Betjening',
+					       bedoemmelse_brugsanvisning=>'Brugsanvisning',
+					      },
+		       TestAfVaskemaskinerOgToerretumblere=>{
+							     title=>'Titel (overskrift vises ikke)',
+							     docdate=>'Dato',
+							     pris=>'Pris',
+							     samlet_bedoemmelse=>'Samlet bedømmelse',
+							     vaskeevne_karakter=>'Vaskeevne',
+							     energiforbrug_karakter=>'Energiforbrug',
+							     energimaerkning_maalt=>'Energimærkning, målt',
+							     vandforbrug_karakter=>'Vandforbrug',
+							     centrifugering_karakter=>'Centrifugering',
+							     tidsforbrug_maalt=>'Vasketid (min.)',
+							     max_effekt_230v=>'Max. effekt ved 230V (Watt)',
+							     ekstra_skyl=>'Ekstra skyl',
+							     vaskeevne_angivet_klasse=>'Vaskeevne, energimærkning',
+							     energiforbrug_angivet=>'Energiforbrug, energimærkning',
+							     centrifugering_angivet_klasse=>'Centrifugering, energimærkning',
+							     vandforbrug_maalt=>'Vandforbrug pr. vask, målt (liter)',
+							     centrifugering_restfugtighed_maalt=>'Restfugtighed ved centrifugering, målt (%)',
+							     lyd_karakter_vask=>'Støj, vask',
+							     lyd_karakter_centrifugering=>'Støj, centrifugering',
+							     bedoemmelse_betjening=>'Betjening, bedømmelse',
+							     max_effekt_230v_400v=>'Max. effekt ved 230V/400V (Watt)',
+							     energiforbrug_angivet_klasse=>'Angivet energiforbrug',
+							     bedoemmelse_betjening=>'Betjening',
+							    },
+		       TestAfKoelOgFrys=>{
+					  title=>'Titel (overskrift vises ikke)',
+					  docdate=>'Dato',
+					  pris=>'Pris',
+					  samlet_bedoemmelse=>'Samlet bedømmelse',
+					  opgivet_af_fabrikant_h=>'Højde (mm)',
+					  netto_volumen_maalt_koel=>'Volumen køl (liter)',
+					  energiforbrug_bedoemmelse=>'Energiforbrug',
+					  energimaerkning_maalt=>'Energimærkning, målt',
+					  bedoemmelse_temperaturfordeling=>'Temperaturfordeling',
+					  indretning_og_betjening=>'Indretning',
+					  netto_volumen_maalt_frys=>'Volumen frys (liter)',
+					  indfrysningskapacitet_bedoemmelse=>'Indfrysningskapacitet',
+					  netto_volumen_maalt_sval=>'Volumen sval (liter)',
+					  energimaerkning_opgivet=>'Energimærkning',
+					  energiforbrug_maalt=>'Energiforbrug, målt (KWh/år)',
+					  koeleskab_min_til_max_bedoemmelse=>'Temperaturspænd (C)',
+					  energiforbrug_og_temperaturer_bedoemmelse=>'Temp. ved 16/32C rumtemp.',
+					  lydeffektniveau_maalt=>'Støj, målt (dB)',
+					  lydeffektniveau_bedoemmelse=>'Støj, bedømmelse (dB)',
+					  miljoe_bedoemmelse=>'Miljø',
+					  indfrysningskapacitet_bedoemmelse=>'Indfrysningskapacitet',
+					  tid_fra_minus_18_til_minus_9_opgivet=>'',
+					  indfrysningskapacitet_beregnet=>'Indfrysningskapacitet (kg/24h)',
+					  antal_termostater_kompressorer=>'Antal termostater',
+					  temperaturstigning_frys_bedoemmelse=>'Temperaturstigning',
+					  tid_fra_minus_18_til_minus_9_opgivet=>'Temperaturstigning (C)',
+					 },
+		       TestAfKemi=>{
+				    aeg_ls_karakter=>'Vaskeevne, æg',
+				    anbefalinger_virkningstid=>'Anbefalet virkningstid',
+				    antal_vaske_beregnet=>'Antal vaske, beregnet',
+				    antal_vaske_oplyst=>'Antal vaske, oplyst',
+				    blod_karakter=>'Vaskeevne, blod',
+				    blod_maelk_tusch_karakter=>'Vaskeevne, blod/mælk/tusch',
+				    boernesikret_kapsel=>'Børnesikring',
+				    cacao_karakter=>'Vaskeevne, kakao',
+				    docdate=>'Dato',
+				    faremaerkning=>'Faremærkning',
+				    farve=>'Farvestoffer',
+				    farveaendring_efter_5_vaske=>'Farveændring',
+				    farveafsmitning=>'Farveafsmitning',
+				    graes_karakter=>'Vaskeevne, græs',
+				    haandterbarhed_karakter=>'Håndterbarhed',
+				    hudfedt_karakter=>'Vaskeevne, hudfedt',
+				    kalkoploesende_evne=>'Kalkfjerning',
+				    karakter_efter_polering=>'Efterladt film (poleret overflade)',
+				    karakter_foer_polering=>'Efterladt film (upoleret overflade)',
+				    ketchup_ls_karakter=>'Vaskevne, ketchup',
+				    laebestift_karakter=>'Vaskeevne, læbestift',
+				    linoleum_glansaendring_karakter=>'Påvirkning af linoleum',
+				    miljoe_vurdering=>'Miljø',
+				    motorolie_ls_karakter=>'Vaskeevne, motorolie',
+				    panel_glansaendring_karakter=>'Glansændring på malet overflade',
+				    panel_misfarvning_karakter=>'Misfarvning af malet overflade',
+				    panel_ring_beskadigelse_karakter=>'Skade ved længere tids påvirkning af malet overflade',
+				    parfume=>'Parfume',
+				    pris_per_flaske=>'Pris pr. flaske',
+				    pris_per_g_fjernet_kalk=>'Pris pr. gram fjernet kalk',
+				    pris_per_pakke=>'Pris pr. pakke',
+				    pris_per_rengoering_af_vaskebare_flader=>'Pris pr. dosering',
+				    pris_per_standardvask=>'Pris pr. vask',
+				    roedvin_karakter=>'Vaskeevne, rødvin',
+				    rustfjernende_evne=>'Rustfjerning',
+				    samlet_vurdering=>'Samlet bedømmelse',
+				    smudsfjernende_evne=>'Smudsfjerning',
+				    sod_olie_karakter=>'Vaskeevne, sod/olie',
+				    spild=>'Spild',
+				    stivelse_karakter=>'Vaskeevne, stivelse',
+				    title=>'Titel (overskrift vises ikke)',
+				    visuel_bedoemmelse_karakter=>'Gråning',
+				   },
+		       TestAfKravlegaarde=>{
+					    title=>'Titel (overskrift vises ikke)',
+					    docdate=>'Dato',
+					    pris_ca=>'Pris',
+					    indvendig_laengde=>'Indvendig længde (mm)',
+					    sidehoejde_fra_fodfaeste_med_bunden_i_laveste_position=>'Fodfæste',
+					    afstand_mellem_tremmer_belastet=>'Tremmeafstand',
+					    v_formede_aabninger_mm=>'Farlige vinkler',
+					    bund=>'Holdbarhed, bund',
+					    sider_og_gavle=>'Holdbarhed, sider og gavle',
+					    aftagelige_dele=>'Sikkerhed, aftagelige dele',
+					    bide_test=>'Sidderhed, bidetest',
+					    hjul=>'Sikkerhed, hjul',
+					    samleskruer=>'Sikkerhed, samleskruer',
+					    fastholdelses_risici=>'Sikkerhed, fastholdelsesrisici',
+					    stabilitet=>'Holdbarhed, stabilitet',
+					   },
+		       TestAfVugger=>{
+				      title=>'Titel (overskrift vises ikke)',
+				      docdate=>'Dato',
+				      pris_ca=>'Pris',
+				      samlet_bedoemmelse=>'Samlet bedømmelse',
+				      krybbe_vugge=>'Type',
+				      indvendig_laengde=>'Liggemål (mm)',
+				      vedvarende_statisk_belastning_paa_bund=>'Bund, styrke',
+				      styrke_af_sidedele_boejningsproeve=>'Sider/gavle styrke',
+				      stabilitet=>'Stabilitet',
+				      vask=>'Vask',
+				      tid_for_en_person=>'Samlingstid',
+				      noedvendigt_vaerktoej=>'Nødvendigt værktøj',
+				      materialer_test=>'Materialer',
+				      konstruktion=>'Konstruktion',
+				      vuggebund=>'Vuggebund',
+				      sider_og_ender=>'Sider og ender',
+				      brugsanvisning=>'Brugsanvisning',
+				      maerkning=>'Mærkning',
+				     },
+		       TestAfPersonvaegte=>{
+		                            title=>'Titel (overskrift vises ikke)',
+					    vaegt_type=>'Vægttype',
+					    noejagtighed_bedoemmelse=>'Nøjagtighed',
+					    repeterbarhed_bedoemmelse=>'Repeterbarhed',
+					    betjening_bedoemmelse=>'Betjening',
+					    brugsanvisning_bedoemmelse=>'Brugsanvisning',
+					    samlede_bemaerkninger=>'Bemærkninger',
+					   },
+		       TestAfCamcorders=>{
+		                          title=>'Titel (overskrift vises ikke)',
+					  brugervenlighed_bedoemmelse=>'Betjening',
+					  vaegt=>'Vægt',
+					  zoom=>'Zoom (optisk/digital)',
+					  digital=>'Digital udgang/indgang',
+					 },
+		       TestAfCampingkoelebokse=>{
+		                                 title=>'Titel (overskrift vises ikke)',
+						 pris=>'Pris',
+						 samlet_bedoemmelse=>'Samlet bedømmelse',
+						 udvendige_maal_h_b_d_cm=>'Udvendige mål',
+						 maalt_volumen_l=>'Volumen',
+						 vaegt=>'Vægt',
+						 nedkoelingsevne_bedoemmelse=>'Nedkølingsevne',
+						 koeleevne_bedoemmelse=>'Køleevne',
+						 maalt_max=>'Energiforbrug',
+						 isoleringsevne_bedoemmelse=>'Isoleringsevne',
+						 stoej_bedoemmelse=>'Støj',
+						 rengoering_bedoemmelse=>'Rengøring',
+						 indretning_betjening_bedoemmelse=>'Indretning og betjening',
+						},
+		       TestAfTV=>{
+		                  title=>'Titel (overskrift vises ikke)',
+				  stoerrelse_format=>'Størelse',
+				 },
+		       TestAfBiler=>{
+				     title=>'Mærke (overskrift vises ikke)',
+				     motor=>'Motor',
+				     pris=>'Pris',
+				     samlet_bedoemmelse=>'Samlet bedømmelse',
+				     braendstof_forbrug_bedoemmelse=>'Brændstofforbrug',
+				     koereegenskaber_bedoemmelse=>'Køreegenskaber',
+				     komfort_bedoemmelse=>'Komfort',
+				     acc=>'Acceleration 0-100 km/t (sek.)',
+				     braendstof=>'Brændstoftype',
+				     braendstof_forbrug_bedoemmelse=>'Brændstofforbrug',
+				     benzin_gennemsnit=>'Brændstofforbrug (km/l)',
+				     motorstoerrelse=>'Motorstørrelse (ccm)',
+				     tophastighed=>'Topfart (km/t)',
+				     motoreffekt=>'Motoreffekt (HK)',
+				     gear=>'Gear',
+				     groen_afgift_pris=>'Grøn afgift',
+				     energiklasse=>'Energiklasse',
+				     koereegenskaber_bedoemmelse=>'Køreegenskaber',
+				     stoej_bedoemmelse=>'Støjniveau',
+				     komfort_bedoemmelse=>'Komfort',
+				     garanti_rust=>'Rustgaranti (år)',
+				     garanti_lak=>'Lakgaranti (år)',
+				     co2_tal=>'CO2 emission (g/km)',
+				    },
+                       TestAfHaandopvaskemidler=>{
+                                                 title=>'Produkt',
+                                                 fuldt_produktnavn=>'Fuldstændigt produktnavn',
+                                                 fabrikant=>'Fabrikant/importør',
+                                                 telefon=>'Telefon nr.',
+                                                 samlet_bedoemmelse=>'Samlet bedømmelse',
+                                                 miljoe_bedoemmelse=>'Miljø',
+                                                 pris=>'Pris (kr. per. 10 opvaske)',
+                                                 nettovaegt=>'Nettovægt (ml)',
+                                                 pris_flaske=>'Pris per flaske (kr)',
+                                                 dosering=>'Dosering, ml pr. 5 liter',
+                                                 antal_opvask=>'Antal opvaske pr. liter',
+                                                 opvaskeevne_bedoemmelse=>'Opvaskeevne',
+                                                 film_bedoemmelse=>'Film og striber',
+                                                 brugsvejledning_bedoemmelse=>'Brugsvejledning',
+                                                 parfume_p=>'Parfume',
+                                                 farve_p=>'Farve',
+                                                 kons_middel_p=>'Kons. middel',
+                                                 vand_pct=>'Vand % ',
+                                                 bemaerkninger=>'Bemærkninger',
+                                                },
+                       TestAfMikroboelgeovne=>{
+                                               title=>'MODEL',
+                                               fuldt_produktnavn=>'Fuldt produktnavn',
+                                               ovn_type=>'Type',
+                                               fabrikant=>'Fabrikant/importør',
+                                               produktionsland=>'Produktionsland',
+                                               telefon=>'Telefon',
+                                               samlet_bedoemmelse=>'Samlet bedømmelse',
+                                               pris=>'Pris, kr  (laveste)',
+                                               starteffekt_w=>'Starteffekt, W',
+                                               mikroboelgeeffekt_w=>'Mikrobølgeeffekt, W',
+                                               effektivitet=>'Virkningsgrad, %',
+                                               standby_forbrug_per_time_wh=>'Standby-forbrug per time, Wh',
+                                               standby_forbrug_per_aar=>'Standby-forbrug per år, kWh',
+                                               ydre_maal_b_h_d=>'Ydre mål, bredde x højde x dybde (mm)',
+                                               indre_maal_b_h_d=>'Indre mål, bredde x højde x dybde (mm)',
+                                               dybde=>'Dybde, åben låge (mm)',
+                                               volumen=>'Volumen, liter',
+                                               bundplade=>'Bundplade, glastallerken',
+                                               vaegt=>'Vægt, kg',
+                                               ledning=>'Ledningslængde, cm',
+                                               panel=>'Panel',
+                                               start_stop_indstilling=>'Start- og stopindstilling',
+                                               effekt_trin=>'Effekt-trin',
+                                               tidsindstilling=>'Tidsindstilling, min.',
+                                               program_afslutning=>'Ved programafslutning',
+                                               laage=>'Låge',
+                                               laageaabning=>'Lågeåbning',
+                                               belysning=>'Belysning',
+                                               indkig_bedoemmelse=>'Indkig',
+                                               stoej_bedoemmelse=>'Støj, bedømmelse',
+                                               stoej_dba=>'Støj, dB(A)',
+                                               opvarmning_bedoemmelse=>'Opvarmning',
+                                               baeger=>'Væske i bæger',
+                                               testdej=>'testdej',
+                                               madlavning_bedoemmelse=>'Madlavning',
+                                               aeggestand=>'Æggestand',
+                                               sukkerbroed=>'Sukkerbrødsdej',
+                                               forloren=>'Forloren hare',
+                                               optoening_manuelt_bedoemmelse=>'Optøning, manuelt',
+                                               fars_manuelt_tidsindstilling_bedoemmelse=>'Fars, manuel tidsindstilling',
+                                               fisk_manuel_tidsindstilling_bedoemmelse=>'Fisk, manuel indstilling',
+                                               test_gelekugler_manuel_tidsindstilling_bedoemmelse=>'Test-gelekugler, manuel tidsindstilling',
+                                               optoening_vaegtstyret_bedoemmelse=>'Optøning, vægtstyret',
+                                               fars_vaegtstyret_optoening_bedoemmelse=>'Fars, vægtstyret optøningstid',
+                                               fisk_vaegtstyret_optoening_bedoemmelse=>'Fisk, vægtstyret optøningstid',
+                                               ergonomi_bedoemmelse=>'Ergonomi',
+                                               brugsanvisning_bedoemmelse=>'Brugsanvisning',
+                                               index=>'Index',
+                                               tekst_format=>'Tekst, format',
+                                               angivet_effekt=>'Angivet effekt til de enkelte trin',
+                                               vejledning_opvarmning_barnemad=>'Vejledning i opvarmning af barnemad',
+                                               vejledning_tilberedning_mad=>'Vejledning om tilberedning af mad (+ effekt- og tidsindstilling)',
+                                               rengoering_bedoemmelse=>'Rengøring',
+                                              },
+                       TestAfFoodprocessorer=>{
+                                               title=>'Varemærke (vises ikke)',
+                                               samlet_bedoemmelse=>'Samlet bedømmelse ',
+                                               model=>'Model/type',
+                                               producent=>'Producent, produktionsland',
+                                               importoer=>'Importør',
+                                               telefon=>'Telefonnummer',
+                                               mail_hjemmeside=>'Mailadresse/hjemmeside',
+                                               forhandler=>'Forhandler',
+                                               pris=>'Pris, ca.',
+                                               hoejde=>'Højde, opgivet [cm]',
+                                               bredde=>'Bredde, opgivet [cm]',
+                                               dybde=>'Dybde, opgivet [cm]',
+                                               vaegt=>'Vægt af motordel [g]',
+                                               ledningslaengde=>'Ledningslængde [cm]',
+                                               oprulning_ledning=>'Oprulning til ledning',
+                                               skaalens_maks_kapacitet_dl=>'Skålens maks. kapacitet [dl] ',
+                                               opgivet_maks_dej_mel=>'Skålens maks. (g mel)',
+                                               opgivet_effekt=>'Opgivet effekt [W]',
+                                               antal_hastigheder=>'Antal hastigheder',
+                                               pulsfunktion=>'Pulsfunktion',
+                                               praktisk_brug_bedoemmelse=>'Praktisk brug',
+                                               hakning_koed_bedoemmelse=>'Hakning af kød',
+                                               hakning_persille_bedoemmelse=>'Hakning af småmængder persille',
+                                               hakning_mandler_bedoemmelse=>'Hakning af mandler',
+                                               hakning_loeg_bedoemmelse=>'Hakning af løg ',
+                                               hakning_hvidloeg_bedoemmelse=>'Hakning af hvidløg',
+                                               snitning_agurker_bedoemmelse=>'Snitning af agurker',
+                                               snitning_porrer_bedoemmelse=>'Snitning af porrer',
+                                               snitning_kartofler_bedoemmelse=>'Snitning af kartofler',
+                                               rivning_guleroedder_bedoemmelse=>'Rivning af gulerødder',
+                                               rivning_cheddarost_bedoemmelse=>'Rivning af hård cheddarost',
+                                               piskning_aeggehvider_bedoemmelse=>'Piskning af æggehvider',
+                                               aeltning_gaerdej_bedoemmelse=>'Æltning af gærdej',
+                                               roerdej_bedoemmelse=>'Rørdej (sandkage)',
+                                               moerdej_bedoemmelse=>'Mørdej',
+                                               mayonnaise=>'Mayonnaise',
+                                               isterninger=>'Isterninger',
+                                               haandtering_bedoemmelse=>'Håndtering',
+                                               brugsanvisning_bedoemmelse=>'Brugsanvisning',
+                                               montering_tilbehoer_bedoemmelse=>'Montering af tilbehør',
+                                               betjening_knapper_bedoemmelse=>'Betjening af knapper',
+                                               fyldning_toemning_skaale_bedoemmelse=>'Fyldning og tømning af skåle',
+                                               rengoering_bedoemmelse=>'Rengøring',
+                                               opbevaring_tilbehoer_bedoemmelse=>'Opbevaring af tilbehør',
+                                               sikkerhedsforanstaltning=>'Samlet sikkerhedsforanstaltninger',
+                                               stoej_bedoemmelse=>'Støj, samlet karakter',
+                                               lydeffektniveau=>'Lydeffektniveau, dB(A) ved rivning af gulerødder',
+                                               aeltning_dej_maks_hastighed=>'Æltning af dej ved maks. hastighed [w]',
+                                               nedstopper=>'Nedstopper ',
+                                               skaal=>'Skål',
+                                               laag_paafyldningstragt=>'Låg med påfyldningstragt',
+                                               beskytter_knivsblade=>'Beskytter til knivsblade',
+                                               universalkniv=>'Universalkniv',
+                                               aelteindsats=>'Ælteindsats',
+                                               dej_aeltekrog=>'Dej/æltekrog',
+                                               dejskraber_spatel=>'Dejskraber/spatel',
+                                               fin_snitteplade=>'Fin snitteplade',
+                                               medium_snitteplade=>'Medium snitteplade',
+                                               grov_snitteplade=>'Grov snitteplade',
+                                               fin_riveplade=>'Fin riveplade',
+                                               medium_riveplade=>'Medium riveplade',
+                                               grov_riveplade=>'Grov riveplade',
+                                               pommesfritesplade=>'Pommesfritesplade',
+                                               raspeindsats=>'Raspeindsats',
+                                               rive_parmesanost_kokosnoed=>'Rive parmasanost og kokosnød',
+                                               piskeplade_skive=>'Piskeplade/skive',
+                                               piskeris=>'Piskeris',
+                                               saftcentrifuge=>'Saftcentrifuge ',
+                                               citruspresser=>'Citruspresser ',
+                                               mikser=>'Mikser ',
+                                               opskriftsbog=>'Opskriftsbog ',
+                                               koedhakker=>'Kødhakker ',
+                                               moelle=>'Mølle ',
+                                               minihakker=>'Minihakker',
+                                               skaal_minihakker=>'Skål til minihakker',
+                                               laag_minihakker=>'Låg til minihakker',
+                                               blender=>'Blender',
+                                               blenderlaag=>'Blenderlåg',
+                                               blenderkniv=>'Blenderkniv',
+                                               beskyttelse_blender_knivsblade=>'Beskyttelse til blender knivsblade',
+                                               bemaerkninger=>'Bemærkninger',
+                                              },
+                       TestAfFedtIRugbroed=>{
+                                                  title=>'Produktnavn',
+                                                  samlet_bedoemmelse=>'Samlet bedømmelse (kerneindhold)',
+                                                  beskrivelse=>'Beskrivelse',
+                                                  producent=>'Producent',
+                                                  indkoebssted=>'Indkøbssted',
+                                                  netto_vaegt=>'Netto vægt (g)',
+                                                  deklareret_energi=>'Deklareret Energi (kj)',
+                                                  pris_kr=>'Pris i kr',
+                                                  pris_per_kg=>'Pris pr/kg',
+                                                  fedt_deklareret_g_100_g=>'Fedt deklareret i g/100g',
+                                                  total_maengde_fedt=>'Total mængde fedt i g/100g fra solsikke- og hørfrøkerner',
+                                                  total_maengde_fedt_kerner_pct=>'Total mængde fedt fra kerner i %',
+                                                  fedt_uden_kerner_g_100_g=>'Fedt uden kerner i g/100 g',
+                                                  fedt_uden_kerner_i_pct=>'Fedt uden kerner i %',
+                                                  solsikkekerner_g_100_g=>'Solsikkekerner i g/100g',
+                                                  hoerfroe_g_100_g=>'Hørfrø i g/100g',
+                                                  indhold_hoerfro_bedoemmelse=>'Indhold af hørfrø, bedømmelse',
+                                                  hoerfroe_solsikkefroe_g_100_g=>'Hørfrø + solsikkefrø i g/100g',
+                                                  indhold_totalfroe_bedoemmelse=>'Indhold af totalfrø, bedømmelse',
+                                                  ingredienser=>'Ingredienser',
+                                                 },
+                       TestAfMaelkedrikke=>{
+                                            title=>'Produktnavn',
+                                            samlet_bedoemmelse=>'Samlet bedømmelse',
+                                            producent=>'Producent',
+                                            ingredienser=>'Ingredienser',
+                                            netto_indhold_ml=>'Netto indhold (ml)',
+                                            pris_per_l=>'Pris per liter',
+                                            energi_kj_per_100_g=>'Energi (KJ) per 100g.',
+                                            kulhydrat_deklareret_g=>'Kulhydrat deklareret (g)',
+                                            sukker_per_enhed=>'Sukker per enhed',
+                                            tilsat_sukker_bedoemmelse=>'Tilsat sukker, bedømmelse',
+                                            sukker_g_100_g=>'Sukker g/100g',
+                                            fedtindhold_bedoemmelse=>'Fedtindhold, bedømmelse',
+                                            fedt_deklareret_g_100_g=>'Fedt deklareret g/100g',
+                                            emulgator=>'Emulgator',
+                                            stabilisator=>'Stabilisator',
+                                            antioxidanter=>'Antioxidanter',
+                                            farvestoffer=>'Farvestoffer',
+                                            aroma=>'Aroma',
+                                            bemaerkninger=>'Bemærkninger',
+                                           },
+                       TestAfSmykker=>{
+                                       title=>'Smykke',
+                                       forhandler=>'Forhandler',
+                                       adresse=>'Adresse',
+                                       telefon=>'Telefon',
+                                       hjemmeside=>'Hjemmeside',
+                                       pris=>'Pris i kr.',
+                                       nikkel_indhold=>'Nikkel-indhold i %',
+                                       nikkel_afvigelse=>'Nikkel-afgivelse i µg pr. cm2 pr. uge',
+                                       oplyst_materiale=>'Oplyst materiale',
+                                       oevrige_vaesentlige_bestanddele=>'Øvrige væsentlige bestanddele',
+                                      },
+                       TestAfAebleskiver=>{
+                                           title=>'Produktnavn',
+                                           samlet_bedoemmelse=>'Samlet vurdering',
+                                           producent=>'Producent',
+                                           ingredienser=>'ingredienser',
+                                           indkoebssted=>'Indkøbssted',
+                                           netto_indhold=>'Netto indhold (g)',
+                                           pris=>'Pris',
+                                           pris_pr_kg=>'Pris pr. kg',
+                                           antal_aebleskiver=>'Antal æbleskiver',
+                                           energi=>'Energi (KJ) pr 100g.',
+                                           protein_deklareret=>'Protein deklareret (g)',
+                                           kylhudrat_deklareret=>'Kulhydrat deklareret (g)',
+                                           fedt_deklareret=>'Fedt deklareret (g)',
+                                           fedt_energi=>'Fedt energi%',
+                                           fedtvurdering=>'Fedtvurdering',
+                                           fedt_pr_aebleskive=>'Fedt i g. pr æbleskive (1stk. 28g)',
+                                           fedt_analyseret=>'Fedt i g. analyseret (pr. 100g)',
+                                           maettede_fedtsyrer=>'Mættede fedtsyrer % (g)',
+                                           monoumaettede_fedtsyrer=>'Monoumættede fedtsyrer % (g)',
+                                           polyumaettede_fedtsyrer=>'Polyumættede fedtsyrer % (g)',
+                                           transfedtsyrer=>'Transfedtsyrer (C18:1-3t) % (g)',
+                                           sproedhed=>'Sprødhed',
+                                           smagen_af_fedt=>'Smagen af fedt',
+                                           krydring=>'Krydring',
+                                           lugt=>'Lugt',
+                                           konsistens=>'Konsistens (luftighed)',
+                                           voksen_helhedsindtryk=>'Samlet smagsindtryk (voksne)',
+                                           praeference_voksne=>'Præference (8 dommere)',
+                                           boern_helhedsindtryk=>'Samlet smagsindtryk (børn)',
+                                           praeference_boern=>'Præference (54 børn)',
+                                          },
+                       TestAfHoejeStole=>{
+                                          title=>'Varemærke og model',
+                                          samlet_bedoemmelse=>'Samlet bedømmelse ',
+                                          lab_id=>'Fi-Lab Id #',
+                                          producent=>'Producent, produktionsland',
+                                          impotoer=>'Importør',
+                                          telefonnummer=>'Telefonnummer',
+                                          hjemmeside=>'Mailadresse / hjemmeside',
+                                          model=>'Model / type',
+                                          beskrivelse=>'Beskrivelse',
+                                          pris=>'Pris, ca.',
+                                          tilbehoer=>'Tilbehør',
+                                          sikkerhedsgruppe=>'Sikkerhedsgruppe',
+                                          sikkerhedskrav=>'DS/ENV 1178, Del 1 og 2',
+                                          finish_bedoemmelse=>'Finish',
+                                          leveringstilstand=>'Leveringstilstand',
+                                          samlingstid=>'Samlingstid, 1 person',
+                                          kommentarer=>'Kommentarer',
+                                          forarbejdning=>'Forarbejdning',
+                                          materialer=>'Materialer',
+                                          vaegt_og_maal=>'Vægt og mål',
+                                          vaegt_stol=>'Vægt (stol)',
+                                          vaegt_stol_og_tilbehoer=>'Vægt (stol + tilbehør)',
+                                          pladskrav_samlet=>'Pladskrav, samlet (B x D x H)',
+                                          pladskrav_samlet_og_tilbehoer=>'Pladskrav, samlet + tilbehør (B x D x H)',
+                                          pladskrav_sammenklappet=>'Pladskrav, sammenklappet',
+                                          siddehoejde=>'Siddehøjde',
+                                          siddekomfort_bedoemmelse=>'Siddekomfort',
+                                          rygstoette_hoejde=>'Rygstøttens højde',
+                                          saede_dybde=>'Sædets dybde',
+                                          saede_bredde=>'Sædets bredde',
+                                          afstand_til_fodstoette=>'Afstand til fodstøtte',
+                                          fodstoette_dybde=>'Fodstøttens dybde',
+                                          polstring=>'Polstring, Ja / Nej',
+                                          konstruktion=>'Konstruktion',
+                                          roer_med_aabne_ender=>'Rør med åbne ender',
+                                          grater_og_kanter=>'Grater og skarpe kanter',
+                                          aabninger_mellem_7_og_25=>'Åbninger mell. 7 - 25 mm',
+                                          aabninger_mellem_5_og_12=>'Åbninger mell. 5 -12 mm',
+                                          bevaegelige_dele=>'Bevægelige dele',
+                                          laasemekanismer=>'Låsemekanismer',
+                                          aftagelige_dele=>'Aftagelige dele',
+                                          sele_og_fastgoerelse=>'Sele og fastgørelser',
+                                          boejle_skridtstop_armlaen=>'Bøjle, skridtstrop og armlæn',
+                                          saede=>'Sæde',
+                                          justerbart_ryglaens_styrke=>'Justerbart ryglæns styrke',
+                                          bakke=>'Bakke',
+                                          fodstoette=>'Fodstøtte',
+                                          ramme=>'Ramme',
+                                          hjul=>'Hjul',
+                                          sammenklapning=>'Sammenklapning',
+                                          stabilitet=>'Stabilitet',
+                                          sidelaens=>'Sidelæns',
+                                          baglaens=>'Baglæns',
+                                          forlaens=>'Forlæns',
+                                          stabilitet_bakke=>'Bakke',
+                                          istabilitet_fodstoette=>'Fodstøtte',
+                                          brugsvejledning_bedoemmelse=>'Brugsvejledning',
+                                          dansk_brugsvejledning=>'Dansk brugsvejledning',
+                                          overholdelse_af_standardkrav=>'Overholdelse af standardkrav',
+                                          maerkning_af_stol=>'Mærkning af stol',
+                                          emballering=>'Emballering',
+                                          bemaerkninger_plus=>'+',
+                                          bemaerkninger_minus=>'-',
+                                         },
+                       TestAfSki=>{
+                                   title=>'Mærke',
+                                   model=>'Model',
+                                   ski_type=>'Type',
+                                   samlet_bedoemmelse=>'Samlet bedømmelse',
+                                   importoer=>'Dansk importør',
+                                   telefon=>'Telefon',
+                                   web_site=>'WWW',
+                                   pris=>'Vejledende pris DKK',
+                                   udbudte_laengder=>'Udbudte længder cm.',
+                                   skilaengde=>'Skilængde cm / Side radius, test ski',
+                                   bredde=>'Bredde front/midte/bag',
+                                   vaegt=>'Vægt kg. Målt',
+                                   teknisk_proevning_bedoemmelse=>'Teknisk prøvning 40%',
+                                   kant_styrke=>'Kant befæstigelsestyrke',
+                                   kant_holdbarhed=>'Kant holbarhed',
+                                   stoed_front_bag=>'Stød test front / bag',
+                                   praktisk_proevning_bedoemmelse=>'Praktisk prøvning 60%',
+                                   loebeegenskaber=>'Løbsegenskaber, carving',
+                                   korte_sving=>'   Korte sving',
+                                   lange_sving=>'   Lange sving',
+                                   skidynamik=>'Skidynamik',
+                                   kantveksling=>'   Kantveksling',
+                                   kantgreb=>'   Kantgreb',
+                                   komfort=>'Komfort/ følsomhed',
+                                   glide_stabilitet_ligeud=>'   Glide stabilitet, ligeud',
+                                   glide_stabilitet_sving=>'   Glide stabilitet, klassisk sving',
+                                   maalgruppe=>'Målgruppe, oplyst fabrikant, www.',
+                                  },
+                       TestAfSkistovler=>{
+                                          title=>'Mærke',
+                                          model=>'Model',
+                                          produktgruppe=>'Produktgruppe',
+                                          samlet_bedoemmelse=>'Samlet bedømmelse',
+                                          importoer=>'Dansk importør',
+                                          telefon=>'Telefon',
+                                          hjemmeside=>'WWW',
+                                          pris=>'Pris',
+                                          vaegt_par=>'Vægt pr. par',
+                                          laeg_omkreds=>'Læg omkreds (mm)',
+                                          finindstilling_spaender=>'Finindstilling af spænder',
+                                          antal_spaender=>'Antal spænder',
+                                          staamekanisme=>'Gå/ ståmekanisme',
+                                          laest=>'Læst',
+                                          angivet_stoerrelse=>'Angivet størelse',
+                                          faktisk_stoerrelse=>'Faktisk størelse (Længde i mm)',
+                                          middel_vidde_skal=>'Middel vidde skal (mm)',
+                                          middel_vidde_indersko=>'Middel vidde Indersko (mm)',
+                                          skaft_hoejde_indre=>'Skaft højde indre (målt i mm)',
+                                          skaft_hoejde_ydre=>'Skaft højde ydre (målt i mm)',
+                                          skaftest_boejning_grader=>'Skaftets bøjning grader',
+                                          skaft_afslutning=>'Skaft afslutning',
+                                          antal_lukkere=>'Antal lukkere',
+                                          antal_baand=>'Antal bånd',
+                                          snoerring=>'Snørring',
+                                          hael_bredde_skal=>'Hæl bredde/Skal',
+                                          hael_bredde_indersko=>'Hæl bredde/ Indersko',
+                                          kategori=>'Kategori',
+                                          teknisk_proevning_bedoemmelse=>'Teknisk prøvning [50%]',
+                                          stoerrelsesangivelse=>'Størelsesangivelse',
+                                          forarbejdning=>'Forarbejdning Skal / indersko',
+                                          led_skal_skaft=>'Led Skal/Skaft',
+                                          lukke_mekanisme=>'Lukke mekanismer',
+                                          praktisk_proevning_bedoemmelse=>'Praktisk prøvning [50%]',
+                                          indstigning=>'Indstigning',
+                                          pasform=>'Pasform',
+                                          kraftoverfoersel=>'Kraftoverførsel',
+                                          komfort=>'Komfort',
+                                         },
+                       TestAfHaandklaeder=>{
+                                            title=>'Mærke',
+                                            samlet_bedoemmelse=>'Samlet bedømmelse',
+                                            produktionsland=>'Produktionsland',
+                                            indkoebssted=>'Indkøbssted',
+                                            pris=>'Pris pr stk.kr.',
+                                            stoerrelse=>'Størrelse, cm. Længde - bredde',
+                                            fibermateriale=>'Fibermateriale',
+                                            farve=>'Farver',
+                                            deklaration=>'Deklaration',
+                                            vask=>'Vask',
+                                            toerring=>'Tørring',
+                                            krympning_foerste_laengde=>'Krympning : 1 x vask længde',
+                                            krympning_foerste_bredde=>'Krympning : 1 x vask bredde',
+                                            krympning_femte_laengde=>'Krympning : 5 x vask længde',
+                                            krympning_femte_bredde=>'Krympning : 5 x vask bredde',
+                                            afsmitning_foerste_bomuld=>'Afsmitning i første vask, bomuld',
+                                            afsmitning_foerste_polyester=>'Afsmitning i første vask, polyester',
+                                            afsmitning_fjerde_bomuld=>'Afsmitning i fjerde vask, bomuld',
+                                            afsmitning_fjerde_polyester=>'Afsmitning i fjerde vask, polyester',
+                                            farveaendring_foerste=>'Efter 1 x vask',
+                                            farveaendring_femte=>'Efter 5 x vask',
+                                            sugeevne=>'Sugeevne ',
+                                            loekkefastholdelse=>'Løkkefastholdelse                      ',
+                                            svedaegthed_bomuld_sur=>'Bomuld',
+                                            svedaegthed_polyester_sur=>'Polyester',
+                                            svedaegthed_farveaendring_sur=>'Farveændring',
+                                            svedaegthed_bomuld_base=>'Bomuld',
+                                            svedaegthed_polyester_base=>'Polyester',
+                                            svedaegthed_farveaendring_base=>'Farveændring',
+                                            toer=>'Tør',
+                                            vaad=>'Våd',
+                                            vandaegthed_bomuld=>'Bomuld',
+                                            vandaegthed_polyester=>'Polyester',
+                                            vandaegthed_farveaendring=>'Farveændring',
+                                            chloraegthed_farveaendring=>'Farveændring',
+                                            stropfastholdelse=>'Stropfastholdelse               ',
+                                            soemrynkning=>'Sømrynkning ',
+                                            konfektionering=>'Konfektionering',
+                                            bemaerkninger=>'Bemærkninger ',
+                                           },
+                       TestAfNikkeliSmykker=>{
+                                               title=>'Smykkebeskrivelse',
+                                               producent_importoer=>'Producent/Importør',
+                                               adresse=>'Adresse',
+                                               telefon=>'Telefon',
+                                               web=>'Hjemmeside',
+                                               pris=>'Pris i kr.',
+                                               nikkelafgivelse_foer_slidbehandling=>'Analyseret, før slidbehandlingen, microgram/cm2/uge',
+                                               nikkelafgivelse_efter_slidbehandling=>'Analyseret, efter slidbehandlingen, microgram/cm2/uge',
+                                               nikkelafgivelse_hurtigtest=>'Apotekets hurtigtest > eller < end 0,5 microgram/cm2/uge',
+                                               bemaerkninger=>'Bemærkninger',
+                                              },
+                       TestAfHvidloegspressere=>{
+                                                 title=>'Mærke',
+                                                 samlet_bedoemmelse=>'Samlet bedømmelse',
+                                                 fi_lab=>'FI-lab Id \#',
+                                                 produktionsland=>'Produktionsland',
+                                                 importoer=>'Importør',
+                                                 adresse=>'Adresse',
+                                                 telefon=>'Telefonnummer',
+                                                 web=>'web-adresse',
+                                                 presser_type=>'Type',
+                                                 pris=>'Pris i kr.',
+                                                 materiale=>'Materiale',
+                                                 presning_3_bedoemmelse=>'Presning/skivning af 3 pillede fed hvidløg',
+                                                 presning_1_bedoemmelse=>'Presning af 1 pillet stort fed hvidløg',
+                                                 presning_kommentar=>'Kommentar',
+                                                 presning_egnet=>'Egnet / ikke egnet',
+                                                 betjening_bedoemmelse=>'Risiko for klemning af fingre (hvidløgspressere)',
+                                                 haandopvask_bedoemmelse=>'Håndopvask',
+                                                 maskinopvask_bedoemmelse=>':Maskinopvask',
+                                                },
+		      );
+my %default_short=(
+                   TestAfFirewallAntivir=>[qw(title
+                                             produkt_type
+                                             web
+                                             pris
+                                             samlet_bedoemmelse
+                                             dokumentation_bedoemmelse
+                                             ydeevne_bedoemmelse
+                                             alsidighed_bedoemmelse
+                                          )],
+
+		   TestAfOpvaskemaskiner=>[qw(title
+					      docdate
+					      pris
+					      samlet_bedoemmelse
+					      opvaskeindex_karakter
+					      toerringsindex_karakter
+					      energimaerkning_maalt
+					      vandforbrug_karakter
+					      programtid_maalt
+					      lydeffektniveau_karakter
+					     )],
+
+		   TestAfVaskemaskinerOgToerretumblere=>[qw(
+							    title
+							    pris
+							    samlet_bedoemmelse
+							    vaskeevne_karakter
+							    energimaerkning_maalt
+							    vandforbrug_karakter
+							    centrifugering_karakter
+							    tidsforbrug_maalt
+							    title
+							    docdate
+							    pris
+							    samlet_bedoemmelse
+							    energimaerkning_maalt
+							    tidsforbrug_maalt
+							   )],
+
+		   TestAfKoelOgFrys=>[qw(
+					 title
+					 docdate
+					 pris
+					 samlet_bedoemmelse
+					 opgivet_af_fabrikant_h
+					 netto_volumen_maalt_koel
+					 energimaerkning_maalt
+					 bedoemmelse_temperaturfordeling
+					 indretning_og_betjening
+					 title
+					 docdate
+					 pris
+					 samlet_bedoemmelse
+					 netto_volumen_maalt_frys
+					 indfrysningskapacitet_bedoemmelse
+					 energimaerkning_maalt
+					 bedoemmelse_temperaturfordeling
+					 indretning_og_betjening
+					 title
+					 docdate
+					 pris
+					 samlet_bedoemmelse
+					 netto_volumen_maalt_koel
+					 netto_volumen_maalt_frys
+					 energimaerkning_maalt
+					 bedoemmelse_temperaturfordeling
+					 indfrysningskapacitet_bedoemmelse
+					 indretning_og_betjening
+					 title
+					 docdate
+					 pris
+					 samlet_bedoemmelse
+					 netto_volumen_maalt_koel
+					 netto_volumen_maalt_sval
+					 energimaerkning_maalt
+					 bedoemmelse_temperaturfordeling
+					 indretning_og_betjening
+					)],
+
+		   TestAfKemi=>[qw(
+				   title
+				   docdate
+				   pris_per_standardvask
+				   samlet_vurdering
+				   miljoe_vurdering
+				   parfume
+				   farve
+				   farveafsmitning
+				   farveaendring_efter_5_vaske
+				   title
+				   docdate
+				   pris_per_standardvask
+				   samlet_vurdering
+				   miljoe_vurdering
+				   parfume
+				   farve
+				   visuel_bedoemmelse_karakter
+				   title
+				   pris_per_g_fjernet_kalk
+				   samlet_vurdering
+				   miljoe_vurdering
+				   kalkoploesende_evne
+				   rustfjernende_evne
+				   smudsfjernende_evne
+				   title
+				   pris_per_rengoering_af_vaskebare_flader
+				   samlet_vurdering
+				   miljoe_vurdering
+				   parfume
+				   farve
+				  )],
+
+		   TestAfKravlegaarde=>[qw(
+					   title
+					   docdate
+					   pris_ca
+					   indvendig_laengde
+					   sidehoejde_fra_fodfaeste_med_bunden_i_laveste_position
+					   afstand_mellem_tremmer_belastet
+					   v_formede_aabninger_mm
+					   bund
+					   sider_og_gavle
+					  )],
+
+		   TestAfVugger=>[qw(
+				     title
+				     docdate
+				     pris_ca
+				     samlet_bedoemmelse
+				     krybbe_vugge
+				     indvendig_laengde
+				     vedvarende_statisk_belastning_paa_bund
+				     styrke_af_sidedele_boejningsproeve
+				     stabilitet
+				     vask
+				    )],
+
+		   TestAfWeekendBarnesenge=>[qw(title
+						fodstoette
+						risiko_for_at_faa_hovedet_i_klemme
+						folde_og_laasemekanisme
+						bevaegelige_dele
+						sengesider_og_gavle
+						rammens_holdbarhed
+					       )],
+		   TestAfMobiltelefoner=>[qw(title
+		                             pris
+					     samlet_bedoemmelse
+					     batteri_standby_900
+					     batteri_tale_900
+					     lydkvalitet_total_bedoemmelse
+					     brugervenlighed_total_bedoemmelse
+					     batteri_batteritype
+					     diverse_sar
+					    )],
+		   TestAfStroempebukser=>[qw(title
+		                             pris
+					     samlet_bedoemmelse
+					     stoerrelse_angivet
+					     passer_fem_aarig
+					     pasform_samlet_bedoemmelse
+					     krympning_samlet_bedoemmelse
+					   )],
+		   TestAfSutteflasker=>[qw(title
+		                           pris
+					   samlet_bedoemmelse
+					   samlet_bedoemmelse_praktisk_proeve
+					   materialer
+					   ang_rumindhold_max_ml
+					 )],
+		   TestAfEnergidrikke=>[qw(title
+		                           pris_liter
+					   uegnet_egnet_sport
+					   energi_kj_ml
+					   kulhydrater_g_ml
+					   koffein
+					   lovlig_ulovlig
+				         )],
+		   TestAfPersonvaegte=>[qw(title
+		                           vaegt_type
+					   pris
+					   samlet_bedoemmelse
+					   noejagtighed_bedoemmelse
+					   repeterbarhed_bedoemmelse
+					   betjening_bedoemmelse
+					   brugsanvisning_bedoemmelse
+					)],
+		   TestAfCamcorders=>[qw(title
+					 pris
+		                         samlet_bedoemmelse
+					 billedkvalitet_bedoemmelse
+					 lydkvalitet_bedoemmelse
+					 brugervenlighed_bedoemmelse
+					 billedstabilisering_bedoemmelse
+					 alsidighed_bedoemmelse
+				      )],
+		   TestAfCampingkoelebokse=>[qw(title
+		                                pris
+						samlet_bedoemmelse
+						udvendige_maal_h_b_d_cm
+						koeleevne_bedoemmelse
+						isoleringsevne_bedoemmelse
+						stoej_bedoemmelse
+						indretning_betjening_bedoemmelse
+					    )],
+		   TestAfTV=>[qw(title
+		                 stoerrelse_format
+				 pris
+				 samlet_bedoemmelse
+				 billedkvalitet_bedoemmelse
+				 lydkvalitet_bedoemmelse
+				 betjening_bedoemmelse
+				 tekst_bedoemmelse
+				 miljoe_bedoemmelse
+				)],
+		   TestAfFiskeolie=>[qw(title
+		                        kosttilskud_naturlaegemiddel
+					pris_pr_100_gr_fiskeolie
+					samlet_bedoemmelse
+					voksne
+					ernaering_bedoemmelse
+					renhed_bedoemmelse
+				    )],
+		   TestAfBarnesenge=>[qw(title
+		                         samlet_bedoemmelse
+					 sikkerhedsgruppe
+					 pris
+					 aabning_mell_tremmer_konstruktion
+					 tremmer_styrke
+					 indvendig_hoejde
+					 bundens_styrke
+					 splinter_skarpe_kanter
+				   )],
+		   TestAfBiler=>[qw(title
+				    pris
+				    samlet_bedoemmelse
+				    motorstoerrelse
+				    motoreffekt
+				    acc
+				    braendstof_forbrug_bedoemmelse
+				    koereegenskaber_bedoemmelse
+				    komfort_bedoemmelse
+				   )],
+                   TestAfHaandopvaskemidler=>[qw(title
+                                               samlet_bedoemmelse
+                                               miljoe_bedoemmelse
+                                               pris
+                                               opvaskeevne_bedoemmelse
+                                               antal_opvask
+                                               parfume_p
+                                               farve_p
+                                            )],
+                   TestAfMikroboelgeovne=>[qw(title
+                                             samlet_bedoemmelse
+                                             pris
+                                             ydre_maal_b_h_d
+                                             opvarmning_bedoemmelse
+                                             optoening_manuelt_bedoemmelse
+                                             madlavning_bedoemmelse
+                                             brugsanvisning_bedoemmelse
+                                             stoej_bedoemmelse
+                                          )],
+                   TestAfFoodprocessorer=>[qw(title
+                                             samlet_bedoemmelse
+                                             pris
+                                             opgivet_maks_dej_mel
+                                             praktisk_brug_bedoemmelse
+                                             haandtering_bedoemmelse
+                                             rengoering_bedoemmelse
+                                             stoej_bedoemmelse
+                                          )],
+                   TestAfFedtIRugbroed=>[qw(title
+                                                samlet_bedoemmelse
+                                                pris_per_kg
+                                                fedt_deklareret_g_100_g
+                                                fedt_uden_kerner_g_100_g
+                                                solsikkekerner_g_100_g
+                                                hoerfroe_g_100_g
+                                                indhold_totalfroe_bedoemmelse
+                                             )],
+                   TestAfMaelkedrikke=>[qw(title
+                                          samlet_bedoemmelse
+                                          pris_per_l
+                                          netto_indhold_ml
+                                          tilsat_sukker_bedoemmelse
+                                          sukker_g_100_g
+                                          fedtindhold_bedoemmelse
+                                          fedt_deklareret_g_100_g
+                                       )],
+                   TestAfSmykker=>[qw(title
+                                     pris
+                                     nikkel_indhold
+                                     nikkel_afvigelse
+                                     oplyst_materiale
+                                  )],
+                   TestAfAebleskiver=>[qw(title
+                                         samlet_bedoemmelse
+                                         pris_pr_kg
+                                         energi
+                                         fedtvurdering
+                                         fedt_pr_aebleskive
+                                         transfedtsyrer
+                                         voksen_helhedsindtryk
+                                         boern_helhedsindtryk
+                                      )],
+                   TestAfHoejeStole=>[qw(title
+                                        samlet_bedoemmelse
+                                        pris
+					sikkerhedsgruppe
+                                        finish_bedoemmelse
+                                        siddekomfort_bedoemmelse
+                                        grater_og_kanter
+                                        bevaegelige_dele
+                                        stabilitet
+                                     )],
+                   TestAfSki=>[qw(title
+                                 samlet_bedoemmelse
+                                 pris
+                                 teknisk_proevning_bedoemmelse
+                                 praktisk_proevning_bedoemmelse
+                              )],
+                   TestAfSkistovler=>[qw(title
+                                        model
+                                        produktgruppe
+                                        samlet_bedoemmelse
+                                        pris
+                                        teknisk_proevning_bedoemmelse
+                                        praktisk_proevning_bedoemmelse
+                                     )],
+                   TestAfHaandklaeder=>[qw(title
+                                          samlet_bedoemmelse
+                                          pris
+                                          afsmitning_foerste_bomuld
+                                          farveaendring_femte
+                                          sugeevne
+                                          soemrynkning
+                                       )],
+                   TestAfNikkeliSmykker=>[qw(title
+                                             producent_importoer
+                                             adresse
+                                             telefon
+                                             web
+                                             pris
+                                             nikkelafgivelse_foer_slidbehandling
+                                             nikkelafgivelse_efter_slidbehandling
+                                             nikkelafgivelse_hurtigtest
+                                             bemaerkninger
+                                          )],
+                   TestAfHvidloegspressere=>[qw(title
+                                               samlet_bedoemmelse
+                                               fi_lab
+                                               produktionsland
+                                               importoer
+                                               adresse
+                                               telefon
+                                               web
+                                               presser_type
+                                               pris
+                                               materiale
+                                               presning_3_bedoemmelse
+                                               presning_1_bedoemmelse
+                                               presning_kommentar
+                                               presning_egnet
+                                               betjening_bedoemmelse
+                                               haandopvask_bedoemmelse
+                                               maskinopvask_bedoemmelse
+                                            )],
+
+		  );
+my %default_long=(
+                   TestAfFirewallAntivir=>[qw(
+                                             title
+                                             produkt_type
+                                             web
+                                             testet_version
+                                             pris
+                                             samlet_bedoemmelse
+                                             ydeevne_fw_bedoemmelse
+                                             ydeevne_av_bedoemmelse
+                                             dokumentation_bedoemmelse
+                                             prod_information_bedoemmelse
+                                             manual_bedoemmelse
+                                             gennemfoerthed_bedoemmelse
+                                             inst_afinst_bedoemmelse
+                                             opl_om_inst_bedoemmelse
+                                             opf_v_inst_bedoemmelse
+                                             udf_af_inst_bedoemmelse
+                                             succes_bedoemmelse
+                                             muligh_for_aendring_bedoemmelse
+                                             afinst_bedoemmelse
+                                             vejledning_bedoemmelse
+                                             opstart_bedoemmelse
+                                             navigation_bedoemmelse
+                                             brugerhjaelp_bedoemmelse
+                                             password_bedoemmelse
+                                             advarsler_bedoemmelse
+                                             ydeevne_bedoemmelse
+                                             ydeevne_start_bedoemmelse
+                                             ydeevne_luk_bedoemmelse
+                                             ydeevne_udnyttelse_bedoemmelse
+                                             ydeevne_hastighed_bedoemmelse
+                                             ydeevne_log_bedoemmelse
+                                             ydeevne_default_bedoemmelse
+                                             ydeevne_password_bedoemmelse
+                                             opf_ved_fejl_bedoemmelse
+                                             alsidighed_bedoemmelse
+                                             bemaerkninger_plus
+                                             bemaerkninger_minus
+                                          )],
+		  TestAfOpvaskemaskiner=>[qw(
+					     title
+					     pris
+					     samlet_bedoemmelse
+					     hoejde_oplyst
+					     bredde_oplyst
+					     dybde_oplyst
+					     kapacitet_antal_kuverter
+					     max_effekt
+					     opvaskeindex_karakter
+					     opvaskeindex_angivet_kategori
+					     toerringsindex_karakter
+					     toerringsindex_angivet_kategori
+					     energiforbrug_karakter
+					     energiforbrug_kategori_angivet
+					     vandforbrug_karakter
+					     vandforbrug_maalt
+					     programtid_maalt
+					     lydeffektniveau_karakter
+					     lydeffektniveau_maalt_under_vask_eller_skyl
+					     lydeffektniveau_maalt_under_udpumpning
+					     bedoemmelse_betjening
+					     bedoemmelse_brugsanvisning
+					    )],
+
+		  TestAfVaskemaskinerOgToerretumblere=>[qw(
+							   title
+							   pris
+							   samlet_bedoemmelse
+							   vaskeevne_karakter
+							   energiforbrug_karakter
+							   vandforbrug_karakter
+							   centrifugering_karakter
+							   tidsforbrug_maalt
+							   max_effekt_230v
+							   ekstra_skyl
+							   vaskeevne_angivet_klasse
+							   energiforbrug_angivet
+							   centrifugering_angivet_klasse
+							   vandforbrug_maalt
+							   centrifugering_restfugtighed_maalt
+							   lyd_karakter_vask
+							   lyd_karakter_centrifugering
+							   bedoemmelse_betjening
+							   title
+							   pris
+							   samlet_bedoemmelse
+							   energiforbrug_karakter
+							   tidsforbrug_maalt
+							   max_effekt_230v_400v
+							   energiforbrug_angivet_klasse
+							   bedoemmelse_betjening
+							  )],
+
+		   TestAfKoelOgFrys=>[qw(
+					 title
+					 pris
+					 samlet_bedoemmelse
+					 opgivet_af_fabrikant_h
+					 netto_volumen_maalt_koel
+					 energiforbrug_bedoemmelse
+					 energimaerkning_opgivet
+					 energiforbrug_maalt
+					 bedoemmelse_temperaturfordeling
+					 koeleskab_min_til_max_bedoemmelse
+					 energiforbrug_og_temperaturer_bedoemmelse
+					 lydeffektniveau_maalt
+					 lydeffektniveau_bedoemmelse
+					 indretning_og_betjening
+					 miljoe_bedoemmelse
+					 title
+					 pris
+					 samlet_bedoemmelse
+					 opgivet_af_fabrikant_h
+					 netto_volumen_maalt_frys
+					 indfrysningskapacitet_bedoemmelse
+					 energiforbrug_bedoemmelse
+					 energimaerkning_opgivet
+					 energiforbrug_maalt
+					 bedoemmelse_temperaturfordeling
+					 koeleskab_min_til_max_bedoemmelse
+					 tid_fra_minus_18_til_minus_9_opgivet
+					 indfrysningskapacitet_bedoemmelse
+					 indfrysningskapacitet_beregnet
+					 energiforbrug_og_temperaturer_bedoemmelse
+					 lydeffektniveau_maalt
+					 lydeffektniveau_bedoemmelse
+					 indretning_og_betjening
+					 miljoe_bedoemmelse
+					 title
+					 pris
+					 samlet_bedoemmelse
+					 opgivet_af_fabrikant_h
+					 netto_volumen_maalt_koel
+					 netto_volumen_maalt_frys
+					 energiforbrug_bedoemmelse
+					 antal_termostater_kompressorer
+					 energimaerkning_opgivet
+					 energiforbrug_maalt
+					 bedoemmelse_temperaturfordeling
+					 koeleskab_min_til_max_bedoemmelse
+					 temperaturstigning_frys_bedoemmelse
+					 indfrysningskapacitet_bedoemmelse
+					 indfrysningskapacitet_beregnet
+					 energiforbrug_og_temperaturer_bedoemmelse
+					 lydeffektniveau_maalt
+					 lydeffektniveau_bedoemmelse
+					 indretning_og_betjening
+					 miljoe_bedoemmelse
+					 title
+					 pris
+					 samlet_bedoemmelse
+					 opgivet_af_fabrikant_h
+					 netto_volumen_maalt_koel
+					 netto_volumen_maalt_sval
+					 energiforbrug_bedoemmelse
+					 energimaerkning_opgivet
+					 energiforbrug_maalt
+					 bedoemmelse_temperaturfordeling
+					 koeleskab_min_til_max_bedoemmelse
+					 energiforbrug_og_temperaturer_bedoemmelse
+					 lydeffektniveau_maalt
+					 lydeffektniveau_bedoemmelse
+					 indretning_og_betjening
+					 miljoe_bedoemmelse
+					)],
+
+		  TestAfKemi=>[qw(
+				  title
+				  pris_per_standardvask
+				  pris_per_pakke
+				  samlet_vurdering
+				  miljoe_vurdering
+				  parfume
+				  farve
+				  farveafsmitning
+				  farveaendring_efter_5_vaske
+				  antal_vaske_oplyst
+				  antal_vaske_beregnet
+				  sod_olie_karakter
+				  blod_karakter
+				  cacao_karakter
+				  roedvin_karakter
+				  stivelse_karakter
+				  graes_karakter
+				  blod_maelk_tusch_karakter
+				  hudfedt_karakter
+				  laebestift_karakter
+				  title
+				  pris_per_standardvask
+				  pris_per_pakke
+				  samlet_vurdering
+				  miljoe_vurdering
+				  parfume
+				  farve
+				  visuel_bedoemmelse_karakter
+				  antal_vaske_oplyst
+				  antal_vaske_beregnet
+				  sod_olie_karakter
+				  blod_karakter
+				  cacao_karakter
+				  roedvin_karakter
+				  graes_karakter
+				  hudfedt_karakter
+				  ketchup_ls_karakter
+				  motorolie_ls_karakter
+				  aeg_ls_karakter
+				  title
+				  pris_per_g_fjernet_kalk
+				  pris_per_flaske
+				  samlet_vurdering
+				  miljoe_vurdering
+				  kalkoploesende_evne
+				  rustfjernende_evne
+				  smudsfjernende_evne
+				  haandterbarhed_karakter
+				  spild
+				  anbefalinger_virkningstid
+				  boernesikret_kapsel
+				  faremaerkning
+				  title
+				  pris_per_rengoering_af_vaskebare_flader
+				  pris_per_flaske
+				  samlet_vurdering
+				  miljoe_vurdering
+				  parfume
+				  farve
+				  karakter_foer_polering
+				  karakter_efter_polering
+				  panel_glansaendring_karakter
+				  panel_misfarvning_karakter
+				  panel_ring_beskadigelse_karakter
+				  linoleum_glansaendring_karakter
+				 )],
+
+		  TestAfKravlegaarde=>[qw(
+					  title
+					  pris_ca
+					  indvendig_laengde
+					  sidehoejde_fra_fodfaeste_med_bunden_i_laveste_position
+					  afstand_mellem_tremmer_belastet
+					  v_formede_aabninger_mm
+					  bund
+					  sider_og_gavle
+					  aftagelige_dele
+					  bide_test
+					  hjul
+					  samleskruer
+					  fastholdelses_risici
+					  stabilitet
+					 )],
+
+		  TestAfVugger=>[qw(
+				    title
+				    pris_ca
+				    samlet_bedoemmelse
+				    krybbe_vugge
+				    indvendig_laengde
+				    vedvarende_statisk_belastning_paa_bund
+				    styrke_af_sidedele_boejningsproeve
+				    stabilitet
+				    vask
+				    tid_for_en_person
+				    noedvendigt_vaerktoej
+				    materialer_test
+				    konstruktion
+				    vuggebund
+				    sider_og_ender
+				    brugsanvisning
+				    maerkning
+				   )],
+
+		  TestAfWeekendBarnesenge=>[qw(title
+					       identifikationsnr
+					       afproevet_model
+					       pris_ca
+					       gennemsyn
+					       med_bunden_i_laveste_position
+					       maalt_med_et_10_kg
+					       aabninger_i_sengen_diam
+					       dele_som_kan_fastholde_loekke
+					       dele_som_kan_fastholde_sut
+					       smaadele_traekproeve
+					       sidernes_netstyrke
+					       rammens_holdbarhed_slaglod_60
+					       laasemekanismer
+					       brugsanvisning
+					       brugsanvisning_karakter
+					       fodstoette
+					       risiko_for_at_faa_hovedet_i_klemme
+					       folde_og_laasemekanisme
+					       bevaegelige_dele
+					       sengesider_og_gavle
+					       rammens_holdbarhed
+					      )],
+		  TestAfMobiltelefoner=>[qw(title
+		  			    pris
+					    samlet_bedoemmelse
+					    funktioner_gprs
+					    funktioner_wap
+					    batteri_standby_900
+					    batteri_tale_900
+					    batteri_vagt
+					    batteri_batteritype
+					    lydkvalitet_total_bedoemmelse
+					    brugervenlighed_total_bedoemmelse
+					    folsomhed_total_bedoemmelse
+					    diverse_holdbarhed_bedoemmelse
+					    ergonomi_total_bedoemmelse
+					    brugervenlighed_modtage_sms_bedoemmelse
+					    brugervenlighed_sende_sms_bedoemmelse
+					    brugsanvisning_total_bedoemmelse
+					    diverse_sar
+					   )],
+		   TestAfStroempebukser=>[qw(title
+		                             pris
+					     samlet_bedoemmelse
+					     stoerrelse_angivet
+					     passer_fem_aarig
+					     pasform_fod_bedoemmelse
+					     pasform_livstykke_bedoemmelse
+					     pasform_ben_bedoemmelse
+					     paatagning_bedoemmelse
+					     drejning_bedoemmelse
+					     pasform_samlet_bedoemmelse
+					     krympning_skridtlaengde_bedoemmelse
+					     krympning_sidelaengde_bedoemmelse
+					     krympning_samlet_bedoemmelse
+					   )],
+		   TestAfSutteflasker=>[qw(title
+		                           pris
+					   samlet_bedoemmelse
+					   samlet_bedoemmelse_praktisk_proeve
+					   materialer
+					   taethed_sut_laag
+					   ang_rumindhold_max_ml
+					   skalainddeling_afvigelser_bedoemmelse
+					   brugsanvisning_bedoemmelse
+					 )],
+		   TestAfEnergidrikke=>[qw(title
+		                           pris_liter
+					   uegnet_egnet_sport
+					   energi_kj_ml
+					   kulhydrater_g_ml
+					   koffein
+					   vurdering_kulhydratkoncentration
+					   lovlig_ulovlig
+					   farvestoffer
+					   aromastoffer
+					   vitaminer
+					   aminosyrer
+					   salte
+					   andre_aktive_stoffer
+					   kulsyrer
+				         )],
+		   TestAfPersonvaegte=>[qw(title
+		                           vaegt_type
+					   pris
+					   samlet_bedoemmelse
+					   justering_nulpunkt
+					   vaegt_omraade_kilo
+					   skala_inddeling_kilo
+					   fejlvisning_maksimalt_maalt_kilo
+					   noejagtighed_bedoemmelse
+					   maks_variation_ved_gentagelse_maalt_kilo
+					   repeterbarhed_bedoemmelse
+					   betjening_bedoemmelse
+					   brugsanvisning_bedoemmelse
+					)],
+		   TestAfCamcorders=>[qw(title
+					 pris
+		                         samlet_bedoemmelse
+					 vaegt
+					 zoom
+					 digital
+					 billedkvalitet_bedoemmelse
+					 skarphed_bedoemmelse
+					 optagelse_svagt_lys_bedoemmelse
+					 makrooptagelse_bedoemmelse
+					 fotooptagelse_bedoemmelse
+					 overspilning_til_pc_bedoemmelse
+					 lydkvalitet_bedoemmelse
+					 optagelse_indbygget_mikrofon_bedoemmelse
+					 stoej_motor_bedoemmelse
+					 optagetid_pr_opladning_bedoemmelse
+					 brugervenlighed_bedoemmelse
+					 billedstabilisering_bedoemmelse
+					 alsidighed_bedoemmelse
+				      )],
+		   TestAfCampingkoelebokse=>[qw(title
+		                                pris
+						samlet_bedoemmelse
+						udvendige_maal_h_b_d_cm
+						maalt_volumen_l
+						vaegt
+						nedkoelingsevne_bedoemmelse
+						koeleevne_bedoemmelse
+						maalt_max
+						isoleringsevne_bedoemmelse
+						stoej_bedoemmelse
+						rengoering_bedoemmelse
+						indretning_betjening_bedoemmelse
+					    )],
+		   TestAfTV=>[qw(title
+		                 stoerrelse_format
+				 pris
+				 samlet_bedoemmelse
+				 fladskaerm
+				 billedkvalitet_bedoemmelse
+				 lydkvalitet_bedoemmelse
+				 betjening_bedoemmelse
+				 tekst_bedoemmelse
+				 sider_hukommelse
+				 miljoe_bedoemmelse
+				 energiforbrug_bedoemmelse
+				 scart
+				 lyd_separat
+				 boernelaas
+				 ss
+				 vaegt
+				)],
+		   TestAfFiskeolie=>[qw(title
+		                        kosttilskud_naturlaegemiddel
+					pris_pr_100_gr_fiskeolie
+					pris_pr_anbefalet_daglig_dosis
+					samlet_bedoemmelse
+					indhold_pr_kapsel
+					voksne
+					omega_3_fedtsyre_g
+					ernaering_bedoemmelse
+					kviksoelv
+					dioxiner
+					pcb
+					renhed_bedoemmelse
+				    )],
+		   TestAfBarnesenge=>[qw(title
+		                         samlet_bedoemmelse
+					 sikkerhedsgruppe
+					 pris
+					 model
+					 beskrivelse
+					 l_b_h
+					 aabning_mell_tremmer_konstruktion
+					 tremmer_styrke
+					 indvendig_hoejde
+					 bundens_styrke
+					 splinter_skarpe_kanter
+					 aabninger_5_12_mm
+					 fremspringende_dele_huller_aabninger
+					 hjul
+					 brugsvejledning
+				   )],
+		  TestAfBiler=>[qw(title
+				   pris
+				   samlet_bedoemmelse
+				   braendstof
+				   braendstof_forbrug_bedoemmelse
+				   co2_tal
+				   benzin_gennemsnit
+				   motorstoerrelse
+				   tophastighed
+				   motoreffekt
+				   acc
+				   gear
+				   groen_afgift_pris
+				   energiklasse
+				   koereegenskaber_bedoemmelse
+				   stoej_bedoemmelse
+				   komfort_bedoemmelse
+				   garanti_rust
+				   garanti_lak
+				  )],
+                   TestAfHaandopvaskemidler=>[qw(title
+                                               samlet_bedoemmelse
+                                               miljoe_bedoemmelse
+                                               pris
+                                               nettovaegt
+                                               pris_flaske
+                                               dosering
+                                               antal_opvask
+                                               opvaskeevne_bedoemmelse
+                                               film_bedoemmelse
+                                               brugsvejledning_bedoemmelse
+                                               parfume_p
+                                               farve_p
+                                               kons_middel_p
+                                               vand_pct
+                                               bemaerkninger
+                                            )],
+                   TestAfMikroboelgeovne=>[qw(title
+                                             samlet_bedoemmelse
+                                             ovn_type
+                                             mikroboelgeeffekt_w
+                                             standby_forbrug_per_aar
+                                             ydre_maal_b_h_d
+                                             volumen
+                                             opvarmning_bedoemmelse
+                                             madlavning_bedoemmelse
+                                             optoening_manuelt_bedoemmelse
+                                             optoening_vaegtstyret_bedoemmelse
+                                             ergonomi_bedoemmelse
+                                             brugsanvisning_bedoemmelse
+                                             stoej_bedoemmelse
+                                             stoej_dba
+                                             indkig_bedoemmelse
+                                          )],
+                   TestAfFoodprocessorer=>[qw(title
+                                             samlet_bedoemmelse
+                                             pris
+                                             vaegt
+                                             opgivet_maks_dej_mel
+                                             opgivet_effekt
+                                             praktisk_brug_bedoemmelse
+                                             haandtering_bedoemmelse
+                                             rengoering_bedoemmelse
+                                             stoej_bedoemmelse
+                                             citruspresser
+                                             opskriftsbog
+                                             koedhakker
+                                             minihakker
+                                             blender
+                                          )],
+		   TestAfFedtIRugbroed=>[qw(title
+                                                samlet_bedoemmelse
+                                                beskrivelse
+                                                producent
+                                                indkoebssted
+                                                netto_vaegt
+                                                deklareret_energi
+                                                pris_kr
+                                                pris_per_kg
+                                                fedt_deklareret_g_100_g
+                                                total_maengde_fedt
+                                                total_maengde_fedt_kerner_pct
+                                                fedt_uden_kerner_g_100_g
+                                                fedt_uden_kerner_i_pct
+                                                solsikkekerner_g_100_g
+                                                hoerfroe_g_100_g
+                                                indhold_hoerfro_bedoemmelse
+                                                hoerfroe_solsikkefroe_g_100_g
+                                                indhold_totalfroe_bedoemmelse
+                                                ingredienser
+                                             )],
+                   TestAfMaelkedrikke=>[qw(title
+                                          samlet_bedoemmelse
+                                          producent
+                                          ingredienser
+                                          netto_indhold_ml
+                                          pris_per_l
+                                          energi_kj_per_100_g
+                                          kulhydrat_deklareret_g
+                                          sukker_per_enhed
+                                          tilsat_sukker_bedoemmelse
+                                          sukker_g_100_g
+                                          fedtindhold_bedoemmelse
+                                          fedt_deklareret_g_100_g
+                                          emulgator
+                                          stabilisator
+                                          antioxidanter
+                                          farvestoffer
+                                          aroma
+                                          bemaerkninger
+                                       )],
+                   TestAfSmykker=>[qw(title
+                                     pris
+                                     nikkel_indhold
+                                     nikkel_afvigelse
+                                     oplyst_materiale
+                                  )],
+                   TestAfAebleskiver=>[qw(title
+                                         samlet_bedoemmelse
+                                         netto_indhold
+                                         pris_pr_kg
+                                         energi
+                                         fedtvurdering
+                                         fedt_pr_aebleskive
+                                         maettede_fedtsyrer
+                                         transfedtsyrer
+                                         voksen_helhedsindtryk
+                                         praeference_voksne
+                                         boern_helhedsindtryk
+                                         praeference_boern
+                                      )],
+                   TestAfHoejeStole=>[qw(title
+                                        samlet_bedoemmelse
+                                        pris
+					sikkerhedsgruppe
+                                        sikkerhedskrav
+                                        finish_bedoemmelse
+                                        siddekomfort_bedoemmelse
+                                        konstruktion
+                                        grater_og_kanter
+                                        aabninger_mellem_7_og_25
+                                        bevaegelige_dele
+                                        laasemekanismer
+                                        boejle_skridtstop_armlaen
+                                        ramme
+                                        hjul
+                                        stabilitet
+                                        brugsvejledning_bedoemmelse
+                                     )],
+                   TestAfSki=>[qw(title
+                                 samlet_bedoemmelse
+                                 pris
+                                 udbudte_laengder
+                                 skilaengde
+                                 bredde
+                                 vaegt
+                                 teknisk_proevning_bedoemmelse
+                                 kant_styrke
+                                 kant_holdbarhed
+                                 stoed_front_bag
+                                 praktisk_proevning_bedoemmelse
+                                 loebeegenskaber
+                                 skidynamik
+                                 komfort
+                              )],
+                   TestAfSkistovler=>[qw(title
+                                        model
+                                        produktgruppe
+                                        samlet_bedoemmelse
+                                        pris
+                                        teknisk_proevning_bedoemmelse
+                                        forarbejdning
+                                        led_skal_skaft
+                                        lukke_mekanisme
+                                        praktisk_proevning_bedoemmelse
+                                        indstigning
+                                        pasform
+                                        kraftoverfoersel
+                                        komfort
+                                     )],
+                   TestAfHaandklaeder=>[qw(title
+                                          samlet_bedoemmelse
+                                          pris
+                                          afsmitning_foerste_bomuld
+                                          farveaendring_femte
+                                          sugeevne
+                                          soemrynkning
+                                          krympning_foerste_laengde
+                                          krympning_foerste_bredde
+                                          loekkefastholdelse
+                                          deklaration
+                                          toer
+                                          vandaegthed_bomuld
+                                          svedaegthed_bomuld_sur
+                                          svedaegthed_bomuld_base
+                                       )],
+                   TestAfNikkeliSmykker=>[qw(title
+                                             producent_importoer
+                                             adresse
+                                             telefon
+                                             web
+                                             pris
+                                             nikkelafgivelse_foer_slidbehandling
+                                             nikkelafgivelse_efter_slidbehandling
+                                             nikkelafgivelse_hurtigtest
+                                             bemaerkninger
+                                          )],
+                   TestAfHvidloegspressere=>[qw(title
+                                               samlet_bedoemmelse
+                                               fi_lab
+                                               produktionsland
+                                               importoer
+                                               adresse
+                                               telefon
+                                               web
+                                               presser_type
+                                               pris
+                                               materiale
+                                               presning_3_bedoemmelse
+                                               presning_1_bedoemmelse
+                                               presning_kommentar
+                                               presning_egnet
+                                               betjening_bedoemmelse
+                                               haandopvask_bedoemmelse
+                                               maskinopvask_bedoemmelse
+                                            )],
+
+               );
+</%once>

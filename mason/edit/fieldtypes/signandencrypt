@@ -1,0 +1,56 @@
+%# $Id$
+%
+%
+%##########################################
+%#    Edit Method
+%##########################################
+%
+<%method edit>
+<%args>
+$name=>undef
+</%args>
+<%perl>
+return;
+</%perl>
+</%method>
+%
+%##########################################
+%#    Cook Method
+%##########################################
+%
+<%method cook>
+<%args>
+  $session
+  $value=>undef
+</%args>
+<%perl>
+  my ($curr_md);
+  my %data;
+
+  foreach (sort keys %{$session->{doctype}->{FIELDS}}) {
+    my $val = $obvius->get_version_field($vdoc, $_);
+
+    # We don't want to include the current message digest
+    # in the calculation, but we can use it to compare that
+    # the data is the same as when it was entered on the web
+
+    $curr_md = $val if ($_ eq 'MSGDIGEST');
+
+    # XXX
+    # This is a problem, as it happens in three places: EtikEntry (where
+    # we exclude the SEQ) here, and also in the script running on the 
+    # Checksum machine. 
+    # XXX
+
+    next if (!defined($val) or $_ eq 'MSGDIGEST' or $_ eq 'SEQ');
+    $data{$_} = $val;
+  }
+
+	my @val = $m->comp('/edit/validate/msgdigest:cook', 
+                      password => $value, 
+                      data => \%data,
+                      curr_md => $curr_md);
+
+  return @val;
+</%perl>
+</%method>

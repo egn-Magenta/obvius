@@ -1,0 +1,66 @@
+% # /edit/validate/page
+<%args>
+$session
+$obvius_shownpage=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/page\n";
+
+# Validate and store input from previous page (number in $obvius_shownpage):
+my $editpages=$session->{pages};
+
+my @fieldlists;
+if ($obvius_shownpage eq "A") {
+    foreach my $editpage (@$editpages) {
+	push @fieldlists, $editpage->{fieldlist};
+    }
+}
+else {
+    my $editpage=$editpages->[($obvius_shownpage-1)];
+    push @fieldlists, $editpage->{fieldlist};
+}
+
+my $fields=new Obvius::Data;
+my %no_incoming;
+foreach my $fieldlist (@fieldlists) {
+    foreach (@$fieldlist) {
+	my $fieldspec=$_->{fieldspec};
+	my $name=$fieldspec->Name;
+	my $fieldtype=$fieldspec->{FIELDTYPE};
+	# I want to cook keywords (to register new), even if none are selected:
+	# (needs to be done way much better. Perhaps cook all, even if there is
+	#  no new value, and then... uhm). - Maybe repeatable is a decent clue?
+	if (defined $ARGS{$name} or $name =~ /keyword/) {
+	    my $value=$m->comp('/edit/fieldtypes/' . $fieldtype->Edit . ':cook',
+			       %ARGS,
+			       fieldspec=>$fieldspec, fieldtype=>$fieldtype, name=>$name,
+			       session=>$session, value=>$ARGS{$name}, fields=>$fields);
+	    $fields->param($name=>$value);
+	}
+	else {
+	    warn "Field $name has NO INCOMING VALUE\n";
+	    # But do check the old one?!
+	    $fields->param($name=>$session->{fields_in}->param($name));
+	    $no_incoming{$name}++;
+	}
+    }
+}
+
+my $new_doctype=$session->{doctype};
+my %status = $new_doctype->validate_fields($fields, $obvius);
+warn "Invalid fields: @{$status{invalid}}\n" if ($status{invalid});
+warn "Missing fields: @{$status{missing}}\n" if ($status{missing});
+warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+warn "Valid fields: @{$status{valid}}\n" if ($status{valid});
+map {
+    $session->{fields_out}->param($_=>$fields->{$_}) unless $no_incoming{$_};
+} @{$status{valid}}, @{$status{invalid}};
+$session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
+
+#use Data::Dumper;
+#print STDERR "fields_out: " . Dumper($session->{fields_out});
+#print STDERR "status{invalid}: " . Dumper($status{invalid});
+
+return $status{invalid};
+</%init>

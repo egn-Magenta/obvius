@@ -1,0 +1,46 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>11
+$default_from_today=>undef
+$add_days=>undef
+</%args>
+<script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
+
+<input type="text" size="<% $size %>" name="<% $name %>" value="<% $value %>" onChange="adjust_date(this); synchronise_field(this,this.form.<% $name %>)" tabindex="10">
+
+<script language="javascript">
+add_date_separator();
+add_date_buttons('<% $name %>');
+add_date_separator(2);
+add_field_reset('<% $name %>');
+</script>
+
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+if($default_from_today and ! defined($value)) {
+    my ($year, $month, $days) = Today();
+    if($add_days) {
+        ($year, $month, $days) = Add_Delta_Days($year, $month, $days, $add_days);
+    }
+    $value = sprintf("%04d-%02d-%02d", $year, $month, $days);
+}
+$value =~ s/\s00\:00\:00$//;
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>
+<%once>
+use Date::Calc qw(Add_Delta_Days Today);
+</%once>

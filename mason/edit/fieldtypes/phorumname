@@ -1,0 +1,35 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$restrict=>undef
+</%args>
+<select NAME="<% $name %>" tabindex="10">
+<option value="none">Intet forum tilknyttet</option>
+% map {
+%   my $selected=($value eq $_ ? ' SELECTED' : '');
+<option value="<% $_ %>"<% $selected %>><% $_ %></option>
+% } @$options;
+</select>
+
+<%init>
+my $options = $obvius->get_phorum_names($restrict);
+my $value=$session->{fields_out}->param($name);
+   $value=$session->{fields_in}->param($name) unless (defined $value);
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$value=>undef
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

@@ -1,0 +1,25 @@
+<table width="100%" style="border-bottom: 1px solid black; margin-bottom: 0.5em;">
+<tr>
+<td style="padding: 0.5em;"><% $vdoc->Version %></td>
+<td style="padding: 0.5em;" align="right"><% $uri %></td>
+</tr>
+</table>
+
+<div style="margin-left: 2em">
+<% $content_html %>
+</div>
+
+<table width="100%" style="border-top: 1px solid black; margin-top: 1em;">
+<tr>
+<td style="padding: 0.5em;"><% $vdoc->Version %></td>
+<td style="padding: 0.5em;" align="right"><% $uri %></td>
+</tr>
+</table>
+
+<%args>
+$content
+</%args>\
+%
+<%init>
+my $content_html=$m->scomp($content, %ARGS);
+</%init>

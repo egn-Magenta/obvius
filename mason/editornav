@@ -1,0 +1,58 @@
+<pre>
+#Start path
+%for(@path) {
+<% $_->{path} %>,0,<% $_->{title} %>
+%}
+#End path
+#Start subdocs
+%for(sort { lc($a->{title}) cmp lc($b->{title}) } @subdocs) {
+<% $_->{path} %>,<% $_->{doctypematch} %>,<% $_->{title} %>
+%}
+#End subdocs
+#This document
+%my $vdoc = $obvius->get_public_version($base_doc) || $obvius->get_latest_version($base_doc);
+Title: <% $obvius->get_version_field($vdoc, 'short_title') || $obvius->get_version_field($vdoc, 'title') %>
+Path: <% $path %>
+Doctype: <% $obvius->get_doctype_by_id($vdoc->Type)->Name %>
+Doctypematch: <% (! $doctypeid || $vdoc->Type == $doctypeid ? 1 : 0) %>
+#End this document
+</pre>
+<%args>
+$path=>'/'
+$doctype=>undef
+</%args>
+<%init>
+my @path_docs = $obvius->get_doc_by_path($path);
+my @path;
+for(@path_docs) {
+    my $vdoc = $obvius->get_public_version($_) || $obvius->get_latest_version($_);
+    $obvius->get_version_fields($vdoc, ['title', 'short_title']);
+    push(@path, {
+                    title => ($vdoc->field('short_title') || $vdoc->field('title')),
+                    path => $obvius->get_doc_uri($_)
+                }
+            );
+}
+
+
+my $doctypeid = 0;
+
+if($doctype) {
+    $doctype = $obvius->get_doctype_by_name($doctype);
+    $doctypeid = $doctype->Id if($doctype);
+}
+
+my $base_doc = $path_docs[-1];
+my $subdocs = $obvius->get_docs_by_parent($base_doc->Id) || [];
+my @subdocs;
+for(@$subdocs) {
+    my $vdoc = $obvius->get_public_version($_) || $obvius->get_latest_version($_);
+    $obvius->get_version_fields($vdoc, ['title', 'short_title']);
+    push(@subdocs, {
+                    title => ($vdoc->field('short_title') || $vdoc->field('title')),
+                    path => $obvius->get_doc_uri($_),
+                    doctypematch => (! $doctypeid || $vdoc->Type == $doctypeid ? 1 : 0)
+                }
+            );
+}
+</%init>

@@ -1,0 +1,66 @@
+<%args>
+$session
+$obvius_shownpage
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/page_synonyms\n";
+
+my $editpages=$session->{pages};
+my $editpage=$editpages->[($obvius_shownpage-1)];
+my $fieldlist=$editpage->{fieldlist};
+my @invalid=();
+foreach (@$fieldlist) {
+    my $fieldspec=$_->{fieldspec};
+    my $name=$fieldspec->Name;
+    my $fieldtype=$fieldspec->{FIELDTYPE};
+    if (defined $ARGS{$name}) {
+	my $value=$m->comp('/edit/fieldtypes/' . $fieldtype->Edit . ':cook',
+			   fieldspec=>$fieldspec, fieldtype=>$fieldtype, name=>$name,
+			   session=>$session, value=>$ARGS{$name});
+	$session->{fields_out}->param($name=>$value);
+    }
+    else {
+	# $session->{fields_out}->param($name=>[]); # ??!?!?!?
+	$session->{fields_out}->param($name=>[]) if ($fieldspec->Repeatable);
+    }
+
+    my $value=$session->{fields_out}->param($name);
+    #use Data::Dumper;
+    #print STDERR "$name: " . Dumper($value);
+    #print STDERR "$name (value: " . (ref $value ? Dumper($value) : $value) . "): " . Dumper($fieldspec);
+    my $ok=0;
+    if ($fieldspec->Repeatable) {
+	if (ref $value) {
+	    $ok = not scalar(grep {
+		not defined $fieldtype->validate($obvius, $fieldspec, $_)
+	    } @$value);
+	} else {
+	    $ok = defined $fieldtype->validate($obvius, $fieldspec, $value);
+	}
+    }
+    else {
+	$ok=defined $fieldtype->validate($obvius, $fieldspec, $value);
+    }
+
+    unless ($ok) {
+	print STDERR "$name does not validate\n";
+	push @invalid, $name;
+    }
+
+    #use Data::Dumper;
+    #print STDERR " --- $name = " .
+    #	(defined $session->{fields_out}->param($name) ?
+    #    Dumper($session->{fields_out}->param($name)) :
+    #	 'undef' )
+    #	    . "\n";
+}
+if (my $id=$session->{fields_in}->param('id')) {
+    $session->{fields_out}->param(id=>$id);
+}
+$session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
+
+# Check special fields:
+
+return (@invalid ? \@invalid : undef);
+</%init>

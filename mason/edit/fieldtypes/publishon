@@ -1,0 +1,70 @@
+<%once>
+use Date::Calc qw(Add_Delta_Days);
+</%once>
+%
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>20
+$add_days=>undef
+</%args>
+%
+%
+%
+<script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
+<script language="javascript">
+    var <% $name %>_incoming_value = '<% $value %>';
+
+    function <% $name %>_switch() {
+        if(document.pageform.obvius_<% $name %>_switch.checked) {
+            document.pageform.<% $name %>.value = <% $name %>_incoming_value;
+        } else {
+            document.pageform.<% $name %>.value = '0000-00-00 00:00';
+        }
+    }
+
+</script>
+    <input type="checkbox" name="obvius_<% $name %>_switch" onclick="<% $name %>_switch()" <% $active ? 'CHECKED' : '' %> tabindex="10">
+    <& SELF:msg, text=>'Publish the document delayed' &><br>
+    <input type="text" size="<% $size %>" name="<% $name %>" value="<% $active ? $value : '0000-00-00 00:00' %>" tabindex="10"><br>
+
+<script language="javascript">
+add_date_separator();
+add_date_buttons('<% $name %>');
+add_date_separator();
+add_time_buttons('<% $name %>');
+add_date_separator(2);
+add_field_reset('<% $name %>');
+</SCRIPT>
+
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my $now = $r->notes('now');
+my $active;
+if($value and $value gt $now) {
+    $active = 1;
+} else {
+    $value = $r->notes('now');
+    if($add_days) {
+        my ($year, $month, $day, $rest) = ($value =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(.*)$/);
+        ($year, $month, $day) = Add_Delta_Days($year, $month, $day, $add_days);
+        $value = sprintf("%04d-%02d-%02d%s", $year, $month, $day, $rest);
+    }
+}
+$value =~ s/\:\d\d$// if $value =~ /\d\d\:\d\d\:\d\d$/;
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+return $value . ":00";
+</%perl>
+</%method>

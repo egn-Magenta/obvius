@@ -1,0 +1,138 @@
+<!-- subdocs: -->
+  <table border="0" cellspacing="0" bordercolor="#111111" width="100%">
+    <!-- path: -->
+% my $indent=1;
+% foreach (@$outpath) {
+    <tr>
+      <td valign="top" nowrap width="100%">
+        <table border="0" cellpadding="0" cellspacing="0" width="177">
+          <tr>
+            <td valign="top" align="right"><img border="0" src="/grafik/admin/spacer.gif" alt="" width="<% $indent %>" height="10"></td>
+            <td valign="top" width="100%">
+             <b>
+%    if ($_->{not_public}) {
+              <a href="<% $_->{sofar} %>"><img border="0" src="/grafik/admin/navigator/skjul.png" width="12" height="7" alt="---"></a>
+%    }
+%    else {
+              <a href="<% $_->{sofar} %>"><img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-"></a>
+%    }
+             <& SELF:link, link=>$_->{sofar}, text=>$m->scomp('SELF:shorten', text=>$_->{title}, len=>20), ghosted=>$ghosted, tabindex=>$tabindex &> </b>
+           </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" nowrap>
+        <table border="0" cellpadding="0" cellspacing="0" bordercolor="#111111" width="177">
+          <tr>
+            <td width="100%" class="lys">
+              <img border="0" src="/grafik/admin/spacer.gif" alt="" width="1" height="1"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+%     $indent+=5;
+% }
+    <tr>
+      <td valign="top" nowrap>
+        <table border="0" cellpadding="0" cellspacing="0" width="177">
+          <tr>
+            <td valign="top" align="right" class="navselected"><img border="0" src="/grafik/admin/spacer.gif" alt="" width="<% $indent %>" height="10"></td>
+            <td valign="top" width="100%" class="navselected">
+% if ($obvius->get_public_version($doc)) {
+              <img border="0" src="/grafik/admin/navigator/vis-i.png" width="12" height="7" alt="---">
+% }
+% else {
+              <img border="0" src="/grafik/admin/navigator/skjul-i.png" width="12" height="7" alt="-O-">
+% }
+             <img width="10" height="10" src="/grafik/admin/navigator/hvid-valgt.png" alt="&gt;">
+             <b><font color="#ffffff"><& SELF:shorten, text=>($vdoc->field('short_title') ? $vdoc->Short_title : $vdoc->Title), len=>20 &> </font></b><& after_nav_selected &>
+           </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <!-- :path -->
+    <tr>
+      <td valign="top" nowrap>
+        <table border="0" cellpadding="0" cellspacing="0" bordercolor="#111111" width="177">
+          <tr>
+            <td width="100%" class="lys"><img border="0" src="/grafik/admin/spacer.gif" alt="" width="1" height="1"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <!-- subdocuments: -->
+      <td valign="top" nowrap>
+        <table border="0" cellpadding="0" cellspacing="0" width="177">
+          <tr>
+            <td valign="top" align="right"><img border="0" src="/grafik/admin/spacer.gif" alt="" width="20" height="10"></td>
+            <td valign="top" width="100%">
+% if( scalar @$subdocs == 0 and $extra == 0 ) {
+%     $r->notes('SUBDOCS'=>0);
+	      <span class="moredocuments"><& SELF:msg, text=>'No sub documents' &></span>
+% }
+% else {
+%     $r->notes('SUBDOCS'=>1);
+%     map {
+%         my $min='';
+%         if ($_->{seq}<0) { $min="÷"; }
+%         if ($_->{not_public}) {
+              <a href="<% $prefix . $uri_w_slash . $_->{link} %>"><img border="0" src="/grafik/admin/navigator/skjul.png" width="12" height="7" alt="---"></a>
+%         }
+%         else {
+              <a href="<% $prefix . $uri_w_slash . $_->{link} %>"><img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-"></a>
+%         }
+              <& SELF:link, link=>$prefix . $uri_w_slash . $_->{link}, text=>$min . $_->{title}, ghosted=>$ghosted, tabindex=>$tabindex &>
+              <br>
+%     } @$subdocs;
+%     if ($extra>0 or $obvius_show_hidden) {
+%         if ($obvius_show_hidden) {
+	      <& SELF:link, link=>"./?obvius_show_hidden=0", title=>"Show normal", text=>'... skjul skjulte', ghosted=>$ghosted, ghosted_class=>'ghostedmoredocuments', class=>'moredocuments', tabindex=>$tabindex &>
+%         }
+%         else {
+	      <& SELF:link, link=>"./?obvius_show_hidden=1", title=>"Show all", text=>'... vis alle', ghosted=>$ghosted, ghosted_class=>'ghostedmoredocuments', class=>'moredocuments', tabindex=>$tabindex &>
+%         }
+%     }
+% }
+            </td>
+          </tr>
+        </table>
+      </td>
+      <!-- :subdocuments -->
+    </tr>
+    <tr>
+      <td valign="top" nowrap>
+        <table border="0" cellpadding="0" cellspacing="0" bordercolor="#111111" width="100%">
+          <tr>
+            <td width="100%" class="lys">
+              <img border="0" src="/grafik/admin/spacer.gif" alt="" width="1" height="1"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+<!-- :subdocs -->
+%
+<%args>
+$max=>20
+$session=>undef
+$ghosted=>0
+$obvius_show_hidden=>0
+$tabindex=>20
+</%args>
+%
+<%init>
+$ghosted=1 if ($session);
+
+my ($subdocs, $extra)=$m->comp('SELF:get_doc_subdocs',
+			       seq=>($obvius_show_hidden ? undef : 'TRUE'),
+			       max=>($obvius_show_hidden ? undef : $max));
+
+$m->scomp('/header/pathinfo:find_outpath');
+my $outpath=$r->pnotes('outpath');
+my $uri_w_slash = $uri;
+$uri_w_slash =~ s!([^/])$!$1/!;
+</%init>

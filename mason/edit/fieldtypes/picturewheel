@@ -1,0 +1,312 @@
+%
+<%method edit>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+
+my @sorted_options =  sort {
+                                my ($_a) = ($a =~ /^(\d+)/);
+                                my ($_b) = ($b =~ /^(\d+)/);
+                                $_a <=> $_b;
+                            } @$value;
+my @options;
+my $i = 0;
+for(@sorted_options) {
+    my ($nr, $path, $title, $text) = /^(\d+);([^;]*);([^;]*);(.*)$/s;
+    push(@options, { name => "$title ($path)", value => $_ });
+    $i++;
+}
+
+</%init>
+%
+<!-- data format: nr;path;title;text -->
+<script language="javascript">
+
+function <% $name %>_add_to_list() {
+    var nr = document.pageform.<% $name %>.options.length;
+    if(nr == -1) {
+        nr = 0;
+    } else {
+        nr = nr * 10;
+    }
+
+    var text = <% $name %>_fields_to_text();
+    if(! text)
+        return;
+    var value = <% $name %>_fields_to_value();
+    if(! value)
+        return;
+    var o = new Option(text, nr + ';' + value)
+    document.pageform.<% $name %>.options[document.pageform.<% $name %>.options.length] = o;
+    document.pageform.<% $name %>.selectedIndex = -1;
+    <% $name %>_empty_fields();
+}
+
+function <% $name %>_delete_from_list() {
+    if(document.pageform.<% $name %>.selectedIndex == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den');
+    } else {
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex] = null;
+        <% $name %>_empty_fields();
+        document.pageform.<% $name %>.selectedIndex = -1;
+    }
+}
+
+function <% $name %>_save_changes() {
+    if(document.pageform.<% $name %>.selectedIndex == -1) {
+        alert('Du kan ikke gemme, når du ikke har valgt en option i listen');
+    } else {
+        var text = <% $name %>_fields_to_text();
+        if(! text) {
+            return;
+        }
+        var value = <% $name %>_fields_to_value();
+        if(! value) {
+            return;
+        }
+
+        // Get old numer
+        var oldval = document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].value;
+        var nr = oldval.match(/^\d+/);
+        if(nr != '') {
+            document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].value = nr + ';' + value;
+            document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].text = text;
+        } else {
+            // We shouldn't get here..
+            alert('Kunne ikke gemme ændringer - rod i sorteringsordenen');
+        }
+    }
+}
+
+function <% $name %>_empty_fields() {
+    document.pageform.obvius_<% $name %>_title.value = '';
+    document.pageform.obvius_<% $name %>_path.value = '';
+    document.pageform.obvius_<% $name %>_use_teaser.checked = false;
+    document.pageform.obvius_<% $name %>_text.value = '';
+    form.obvius_<% $name %>_use_teaser_backup.value = '';
+}
+
+function <% $name %>_fields_to_text() {
+    var title = document.pageform.obvius_<% $name %>_title.value;
+    if(! title) {
+        alert('Du skal angive en titel');
+        return '';
+    }
+
+    var path = document.pageform.obvius_<% $name %>_path.value;
+    if(! path) {
+        alert('Du skal angive en billedsti');
+        return '';
+    }
+
+    return title + " (" + path + ")";
+}
+
+function <% $name %>_fields_to_value() {
+    var title = document.pageform.obvius_<% $name %>_title.value;
+    if(! title) {
+        alert('Du skal angive en titel');
+        return '';
+    }
+
+    var path = document.pageform.obvius_<% $name %>_path.value;
+    if(! path) {
+        alert('Du skal angive en billedsti');
+        return '';
+    }
+
+    var text = document.pageform.obvius_<% $name %>_text.value;
+
+    if(document.pageform.obvius_<% $name %>_use_teaser.checked) {
+        text = 'use teaser';
+    }
+
+
+    return path + ";" + title + ";" + text;
+}
+
+function <% $name %>_load_from_value(text_in) {
+    var splitted = text_in.split(";");
+
+    var path = splitted[1];
+    var title = splitted[2];
+    var text = splitted[3] + '';
+
+    // Make sure we get the whole string...
+    var i = 4;
+    while(splitted[i] != null) {
+        text += ';' + splitted[i];
+        i++;
+    }
+
+    document.pageform.obvius_<% $name %>_path.value = path;
+    document.pageform.obvius_<% $name %>_title.value = title;
+    if(text == 'use teaser') {
+        document.pageform.obvius_<% $name %>_use_teaser.checked = true;
+        document.pageform.obvius_<% $name %>_text.value = '';
+    } else {
+        document.pageform.obvius_<% $name %>_use_teaser.checked = false;
+        document.pageform.obvius_<% $name %>_text.value = text;
+    }
+
+}
+
+function <% $name %>_onchange_handler() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        <% $name %>_empty_fields();
+    } else {
+        <% $name %>_load_from_value(document.pageform.<% $name %>.options[sel].value);
+    }
+}
+
+function obvius_<% $name %>_use_teaser_onchange_handler() {
+    var form = document.pageform;
+    if(form.obvius_<% $name %>_use_teaser.checked) {
+        form.obvius_<% $name %>_use_teaser_backup.value = form.obvius_<% $name %>_text.value;
+        form.obvius_<% $name %>_text.value = '';
+    } else {
+        form.obvius_<% $name %>_text.value = form.obvius_<% $name %>_use_teaser_backup.value;
+        form.obvius_<% $name %>_use_teaser_backup.value = '';
+    }
+}
+
+function <% $name %>_move_up() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert('Du skal vælge en fra listen først');
+        return;
+    }
+    if(sel == 0) {
+        alert('Du er allerede ved toppen af listen');
+        return;
+    }
+    <% $name %>_swap(document.pageform.<% $name %>.options[sel], document.pageform.<% $name %>.options[sel - 1]);
+    document.pageform.<% $name %>.selectedIndex = -1;
+    document.pageform.<% $name %>.selectedIndex = sel - 1;
+}
+
+function <% $name %>_move_down() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert('Du skal vælge en fra listen først');
+        return;
+    }
+    if(sel == document.pageform.<% $name %>.options.length - 1) {
+        alert('Du er allerede ved bunden af listen');
+        return;
+    }
+    <% $name %>_swap(document.pageform.<% $name %>.options[sel], document.pageform.<% $name %>.options[sel + 1]);
+    document.pageform.<% $name %>.selectedIndex = -1;
+    document.pageform.<% $name %>.selectedIndex = sel + 1;
+}
+
+function <% $name %>_swap(o1, o2) {
+    var text1 = o1.text;
+    var text2 = o2.text;
+    var val1 = o1.value;
+    var val2 = o2.value;
+
+
+    // Tricky part is to swap the numbers too
+    var nr1 = val1.match(/^\d+/);
+    var nr2 = val2.match(/^\d+/);
+
+    val1 = val1.replace(/^\d+/, nr2);
+    val2 = val2.replace(/^\d+/, nr1);
+
+    o1.text = text2;
+    o1.value = val2;
+    o2.text = text1;
+    o2.value = val1;
+}
+
+function <% $name %>_select_all() {
+    for(var i = 0; i < document.pageform.<% $name %>.options.length; i++) {
+        document.pageform.<% $name %>.options[i].selected = 1;
+    }
+}
+
+// Add to onsubmit list:
+
+onsubmit_array[onsubmit_array.length] = function() {
+    if(document.pageform.<% $name %>.selectedIndex != -1) {
+        <% $name %>_save_changes(); // Save what was last modified
+    }
+}
+onsubmit_array[onsubmit_array.length] = <% $name %>_select_all;
+</script>
+
+<table border="0">
+    <tr>
+        <td>
+            <select name="<% $name %>" multiple size="10" onchange="<% $name %>_onchange_handler()" tabindex="10">
+%for(@options) {
+                <option value="<% $_->{value} |h%>"><% $_->{name} |h %></option>
+%}
+            </select>
+        </td>
+        <td valign="top">
+            <input type="button" onclick="<% $name %>_move_up()" value=" Flyt op "><br>
+            <input type="button" onclick="<% $name %>_move_down()" value="Flyt ned">
+        </td>
+    </tr>
+</table>
+<br>
+<br>
+<table border="0">
+    <tr>
+        <td>
+            <input type="button" onclick="<% $name %>_add_to_list()" value="Tilføj til listen">
+            <input type="button" onclick="<% $name %>_delete_from_list()" value="Slet fra listen">
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <input type="button" onclick="<% $name %>_save_changes()" value="Gem ændringer til listen">
+        </td>
+    </tr>
+</table>
+<br>
+<strong>Titel</strong><br>
+<input type="text" size="40" name="obvius_<% $name %>_title" tabindex="10"><br>
+<br>
+<strong>Billede</strong><br>
+<input type="text" size="40" name="obvius_<% $name %>_path" tabindex="10">
+<input class="normalknap" type="button" value="Find..." onClick="javascript:OpenWin('/admin/?obvius_op=navigator&fieldname=obvius_<% $name %>_path&doctype=Image&path=/billeder/',750,550);"><br>
+<br>
+<input type="checkbox" name="obvius_<% $name %>_use_teaser" onchange="obvius_<% $name %>_use_teaser_onchange_handler()" tabindex="10"> Brug billeddokumentets teaser<br>
+<input type="hidden" name="obvius_<% $name %>_use_teaser_backup" value="">
+<textarea name="obvius_<% $name %>_text" cols="50" rows="8" tabindex="10"></textarea><br>
+<br>
+%
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+return $value;
+</%perl>
+</%method>

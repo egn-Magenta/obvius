@@ -1,0 +1,63 @@
+%if(@$weeks) {
+    <table border="0" cellpadding="2" cellspacing="1" width="410" bgcolor="#333333">
+        <tr>
+            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Mandag</span></font></td>
+            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Tirsdag</span></font></td>
+            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Onsdag</span></font></td>
+            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Torsdag</span></font></td>
+            <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Fredag</span></font></td>
+            <td width="15%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Lørdag</span></font></td>
+            <td width="15%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Søndag</span></font></td>
+        </tr>
+% for my $week (@$weeks) {
+%  my $weekdays = $week->{weekdays};
+%  $weekdays = [] unless($weekdays);
+        <tr>
+%  for my $day (@$weekdays) {
+%   my $color;
+%   my $colordark;
+%   if($day->{weekday} == 6 or $day->{weekday} == 7) {
+%    $color = '#E4E4E4';
+%    $colordark = '#CDCDCD';
+%   } else {
+%    $color = '#FFFFFF';
+%    $colordark = '#F0F0F0';
+%   }
+%   my $docs = $day->{docs};
+%   $docs = [] unless($docs);
+      <td width="14%" bgcolor="<% $color %>" valign="top" <% $day->{mday} == 1 ? 'background="/grafik/kalender1st_bag.gif"' : '' %>>
+	<table border="0" cellpadding="2" cellspacing="0" width="100%">
+	  <tr>
+	    <td align="left"><span class="tekstGraaLille"><% $day->{mday} %>.</span></td>
+	  </tr>
+	  <tr>
+	    <td bgcolor="<% scalar(@$docs) ? $colordark : $color %>" align="center">
+%   if(scalar(@$docs)) {
+%   for my $doc(@$docs) {
+	      <p align="left">
+		<a class="nounderline" href="<% $prefix .$doc->{url} %>" title="<% $doc->{title} %>">
+		  <span class="tekstLille"><% $doc->{eventtype} %></span>
+		</a>
+	      </p>
+%   }
+%   } else {
+	      <p align="left">&nbsp;</p>
+%   }
+	    </td>
+	  </tr>
+	</table>
+      </td>
+%  }
+    </tr>
+% }
+  </table>
+%} else {
+  Der er ingen arrangementer for denne periode.
+%}
+%
+<%args>
+$weeks=>undef
+</%args>
+<%init>
+$weeks = [] unless($weeks);
+</%init>

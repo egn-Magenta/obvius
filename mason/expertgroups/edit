@@ -1,0 +1,102 @@
+<br>
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="90%" align="center">
+<input type="hidden" name="obvius_op" value="expertgroups">
+<input type="hidden" name="mode" value="edit">
+<input type="hidden" name="edit" value="1">
+    <tr>
+        <td><img border="0" src="/grafik/hvidkasse/top_v.gif" width="6" height="6"></td>
+        <td width="100%" background="/grafik/hvidkasse/t.gif"><img border="0" src="/grafik/admin/1x1.gif" width="6" height="6"></td>
+        <td><img border="0" src="/grafik/hvidkasse/top_h.gif" width="6" height="6"></td>
+    </tr>
+    <tr>
+        <td background="/grafik/hvidkasse/v.gif">&nbsp;</td>
+        <td bgcolor="#FFFFFF" width="100%" align="center">
+%if($edited) {
+% if($edit_error) {
+    Der opstod en fejl redigeringen af din ekspertgruppe:<br>
+    <% $edit_error %>.<br>
+    <a href="/admin/?obvius_op=expertgroups">OK</a>
+% } else {
+    Gruppen "<% $name %>" redigeret.<br>
+    <a href="/admin/?obvius_op=expertgroups">OK</a>
+% }
+%} else {
+<%perl>
+my $error;
+my $existing;
+my $experts;
+$error = "Du har ikke angivet noget navn" unless($name);
+
+unless($error) {
+    $existing = $obvius->get_expertgroup($name) || [];
+    $error = 'Der findes ingen gruppe med navnet "'. $name . '"' unless(scalar(@$existing));
+}
+
+unless($error) {
+    my $expert_doctype = $obvius->get_doctype_by_name('Expert');
+    $experts = $obvius->search(
+                                ['title', 'email', 'ask_the_experts'],
+                                "type = " . $expert_doctype->Id . " AND ask_the_experts > 0",
+                                public => 1,
+                                notexpired => 1
+                            ) || [];
+    for my $exp (@$experts) {
+        $exp->{CHECKED} = 1 if(grep { $_ == $exp->DocId } @$existing);
+    }
+}
+</%perl>
+%if($error) {
+    Der opstod en fejl:<br>
+    <% $error %>.<br>
+    <a href="/admin/?obvius_op=expertgroups">OK</a>
+%} else {
+            <input type="hidden" name="group" value="<% $name %>">
+            <h2>Redigerer "<% $name %>"</h2>
+
+            <table border="1" width="80%" cellpadding="2">
+                <tr>
+                    <td>&nbsp;</td>
+                    <td width="100%"><strong>Navn</strong></td>
+                    <td><strong>Emailadresse</strong>
+                </tr>
+%for(@$experts) {
+                <tr>
+                    <td valign="middle"><input type="checkbox" name="expert_<% $_->DocId %>" <% $_->{CHECKED} ? 'CHECKED' : '' %>></td>
+                    <td valign="middle" width="100%"><% $_->Title %></td>
+                    <td valign="middle"><% $_->Email %></td>
+                </tr>
+%}
+            </table>
+            <br>
+            <input type="button" onclick="document.pageform.obvius_op.value='expertgroups';submit_page()" value="Gem ændringer"><br>
+            <br>
+%}
+%}
+        </td>
+        <td background="/grafik/hvidkasse/h.gif">&nbsp;</td>
+    </tr>
+    <tr>
+        <td><img border="0" src="/grafik/hvidkasse/bund_v.gif" width="6" height="6"></td>
+        <td width="100%" background="/grafik/hvidkasse/b.gif"><img border="0" src="/grafik/admin/1x1.gif" width="6" height="6"></td>
+        <td><img border="0" src="/grafik/hvidkasse/bund_h.gif" width="6" height="6"></td>
+    </tr>
+</table>
+<%init>
+my $edited;
+my $edit_error;
+my $name = $r->param('group');
+
+if($r->param('edit')) {
+    $edited = 1;
+    my @docids;
+
+    $edit_error = 'Ingen gruppe angivet?' unless($name);
+    unless($edit_error) {
+        @docids = map{ s/^expert_//; $_ } grep{ /^expert_\d+/ } $r->param;
+        $edit_error = 'Du har ikke angivet nogen eksperter' unless(scalar(@docids));
+    }
+    unless($edit_error) {
+        $obvius->modify_expertgroup($name, \@docids);
+    }
+}
+</%init>

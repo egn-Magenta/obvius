@@ -1,0 +1,14 @@
+<%args>
+$cookie
+$default_value=>undef
+</%args>
+%
+<%perl>
+my $value=$default_value;
+
+if (my $cookies=Apache::Cookie->fetch) {
+  $value=$cookies->{$cookie}->value if ($cookies->{$cookie});
+}
+
+return $value;
+</%perl>

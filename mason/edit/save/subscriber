@@ -1,0 +1,9 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/save/subscriber XXX\n";
+
+return (1, '/new/subscriber:Do');
+</%init>

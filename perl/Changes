@@ -1,0 +1,6 @@
+Revision history for Perl extension Obvius.
+
+0.01  Wed Jul 25 14:29:58 2001
+	- original version; created by h2xs 1.21 with options
+		-A -X -n Obvius
+

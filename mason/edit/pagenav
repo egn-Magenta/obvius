@@ -1,0 +1,61 @@
+% if ($buttons) {
+<div class="pagenavbuttons">
+% }
+% else {
+<div class="pagenav">
+% }
+% if ($next_prev and ($obvius_page ne "A")) {
+<% $previouspagebutton %>
+% }
+% if ($buttons) {
+          <input type="button" value="<& SELF:msg, text=>$done_label &>"
+           class="okknap"<% $tabindex %>
+           onclick="javascript:this.form.obvius_page.value='done'; submit_page();" accesskey="S">
+          <input type="button" value="<& SELF:msg, text=>'Cancel' &>"
+           class="cancelknap"<% $tabindex %>
+           onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" accesskey="Z">
+% }
+%
+% # <& SELF:msg, text=>'Page' &>: <& /shared/dropdown, name=>"obvius_page", options=>$dropdown, selected=>$obvius_page, onchange=>"javascript:this.form.obvius_page.value=this.form.obvius_pageselector_$num.options[this.form.obvius_pageselector_$num.selectedIndex].value; submit_page();" &>
+% # <% $obvius_page %>/<% $total %>
+% if ($next_prev and ($obvius_page ne "A")) {
+<% $nextpagebutton %>
+% }
+% # <input type="button" class="normalknap" onclick="javascript:this.form.obvius_page.value='done'; submit_page();" value="<& SELF:msg, text=>$done_label &>">
+% # <input type="button" class="normalknap" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
+</div>
+%
+<%args>
+$done_label
+$dropdown
+$obvius_page
+$total
+$num
+$buttons=>0
+$next_prev=>1
+$tabindex=>undef
+</%args>
+%
+<%init>
+#print STDERR ">>> /edit/pagenav\n";
+
+$done_label='Save' unless $done_label;
+$tabindex=(defined $tabindex ? (' tabindex="' . $tabindex . '"') : '');
+
+my ($previouspagebutton, $nextpagebutton);
+if ($total>1 and $obvius_page ne "A") {
+    if ($obvius_page>1) {
+	$previouspagebutton='<input type="button" class="normalknap" onclick="javascript:this.form.obvius_page.value=' . ($obvius_page-1) . ';submit_page();" value="&lt; ' . $m->scomp('SELF:msg', text=>'Previous page') . '"' . $tabindex  .'>';
+    }
+    else {
+	$previouspagebutton='<input type="button" class="normalknap ghosted" onclick="javascript:return(0);" value="&lt; ' . $m->scomp('SELF:msg', text=>'Previous page') . '" disabled>';
+    }
+
+    if ($obvius_page==$total) {
+	$nextpagebutton='<input type="button" class="normalknap ghosted" onclick="javascript:return(0);" value="' . $m->scomp('SELF:msg', text=>'Next page') . ' &gt;" disabled>';
+    }
+    else {
+	$nextpagebutton='<input type="button" class="normalknap" onclick="javascript:submit_page();" value="' . $m->scomp('SELF:msg', text=>'Next page') . ' &gt;"' . $tabindex . '>';
+    }
+}
+</%init>

@@ -1,0 +1,42 @@
+<h3 class="admin"><& SELF:msg, text=>($obvius_new eq 'language' ? 'New language' : 'Change documenttype') &><& /help, link=>'operation/new_version-' . $obvius_new &></h3>
+
+% # <form action="<% $prefix %><% $uri %>?obvius_op=edit_new_version" method="post">
+% 
+% if ($obvius_error) {
+<div class="error">
+<% $obvius_error %>
+</div>
+% }
+%
+<table>
+% if ($obvius_new eq 'language') {
+<& /shared/widgets/language &>
+% }
+% else {
+<& /shared/widgets/doctype &>
+% }
+</table>
+
+<p>
+% if ($obvius_new eq 'language') {
+<input type="hidden" name="obvius_doctype" value="<% $vdoc->Type %>">
+% }
+% else {
+<input type="hidden" name="obvius_lang" value="<% $vdoc->Lang %>">
+% }
+<input type="hidden" name="obvius_op" value="edit_new_version">
+<input type="hidden" name="obvius_page" value="1">
+
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Start editing' &>" accesskey="S">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
+</p>
+
+%
+<%args>
+$obvius_error=>undef
+$obvius_new=>'language'
+</%args>
+%
+<%init>
+print STDERR ">>> /new/version\n";
+</%init>

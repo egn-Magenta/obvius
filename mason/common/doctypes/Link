@@ -1,0 +1,25 @@
+<h1><% $title %></h1>
+
+<& /shared/htmlize, text=>$vdoc->field('teaser') &>
+<& /shared/htmlize, text=>$vdoc->field('content') &>
+% if ($url) {
+<p>
+Link: <a href="<% $url %>"><% $url |h %></a>
+</p>
+% }
+
+<p class="obviusnotice">
+<strong><& /shared/msg, text=>'Notice' &>:</strong>
+<& /shared/msg, text=>'ObviusLinkDocumentExplanation' &>
+<% $url |h %>.
+</p>
+
+%
+% #####################
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title teaser content url)]);
+
+my $title=$vdoc->Title;
+my $url=$vdoc->field('url');
+</%init>

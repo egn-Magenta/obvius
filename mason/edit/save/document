@@ -1,0 +1,17 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/save/document\n";
+
+return $obvius->create_new_document(
+				  $session->{document}->Parent,
+				  $session->{document}->Name,
+				  $session->{document}->Type,
+				  $session->{version}->Lang,
+				  $session->{fields_out},
+				  $session->{document}->Owner,
+				  $session->{document}->Grp,
+				 );
+</%init>

@@ -1,0 +1,16 @@
+<%args>
+$ghosted
+$width
+</%args>\
+<%init>
+my $value = $m->scomp('SELF:msg', text=>'Search');
+my $html = '<input type="button" value="' . $value . '" style="width:' . $width . 'px"';
+if ($ghosted) {
+    $html .= ' class="ghostedknap" disabled';
+} else {
+    my $searchlink = $m->scomp('searchlink');
+    $html .= ' class="venstreknap" onclick="javascript:document.location.href=\''. $prefix . $searchlink . '\';"';
+}
+$html .= ' accesskey="F">';
+</%init>\
+<% $html %>

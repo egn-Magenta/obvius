@@ -1,0 +1,51 @@
+<%method edit>
+  <select name="<% $name %>" tabindex="10">
+    <option value="">Vælg fra listen</option>
+    <option value="">---------------</option>
+% for (@values) {
+%   if ($_) {
+      <option value="<% $_ %>" <% $_ eq $value ? "SELECTED" : '' %>><% $_ %></option>
+%   }
+% }
+  </select>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+
+$value1=>undef
+$value2=>undef
+$value3=>undef
+$value4=>undef
+$value5=>undef
+$value6=>undef
+$value7=>undef
+$value8=>undef
+$value9=>undef
+$value10=>undef
+</%args>
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+$value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my @values;
+push @values, $value1, $value2, $value3, $value4, $value5, $value6, $value7, $value8, $value9, $value10;
+
+</%init>
+</%method>
+%
+<%method cook>
+  <%args>
+    $fieldspec
+    $fieldtype
+    $name
+    $session
+    $value=>undef
+    </%args>
+  
+  <%perl>
+    return $value;
+</%perl>
+</%method>

@@ -1,0 +1,81 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>50
+$cols=>49
+$rows=>22
+$doctype=>undef
+$navigate_start=>undef
+</%args>
+% if ($fieldspec->Repeatable) {
+<textarea cols="<% $cols %>" rows="<% $rows %>" name="<% $name %>" tabindex="10"><% $value %></textarea>
+% } else {
+<input type="<% $type %>" size="<% $size %>" name="<% $name %>" value="<% $value %>" tabindex="10">
+<input class="normalknap" type="button" value="<& SELF:msg, text=>'Browse' &>..." onClick="javascript:OpenWin('<% $navigator_url %>',750,550);">
+% }
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my $options=$fieldtype->param('edit_args');
+my $type=(defined $options ? $options : 'text');
+
+if (ref $value eq 'ARRAY' ) {
+    $value=join "\n", @$value;
+}
+
+my $navigator_url = "/admin/?obvius_op=navigator";
+$navigator_url .= "&fieldname=$name";
+$navigator_url .= "&doctype=$doctype" if($doctype);
+if($navigate_start) {
+    $navigator_url .= "&path=$navigate_start";
+} else {
+    $navigator_url .= "&path=$uri";
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$fieldspec
+$session
+</%args>
+<%perl>
+if ($fieldspec->Repeatable) {
+    my @value=map { $m->comp('handle_relative', value=>$_, session=>$session) }
+			split /\n/, $value;
+    return \@value;
+}
+else {
+    return $m->comp('handle_relative', value=>$value, session=>$session);
+}
+</%perl>
+</%method>
+%
+<%def handle_relative>
+<%args>
+$value
+$session
+</%args>
+<%perl>
+my $parent_uri="";
+if (my $parent=$session->{document}->Parent) {
+    $parent_uri=$obvius->get_doc_uri((ref $parent ? $parent : $obvius->get_doc_by_id($parent)));
+}
+
+if ($value =~ /^[^\/]/) { # relative
+    if ($value =~ s/^\.\.\///) {
+	$value=$parent_uri . $value;
+    }
+    else {
+	$value=$parent_uri . $session->{document}->Name . "/" . $value;
+    }
+}
+
+return $value;
+</%perl>
+</%def>

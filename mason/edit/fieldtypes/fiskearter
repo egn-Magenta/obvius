@@ -1,0 +1,54 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$multiple=>1
+</%args>
+<select class="dataclassificationmenu" name="<% $name %>" <% $mul %> size="8" tabindex="10">
+% map {
+%   my $selected=($selected{$_->{id}} ? ' SELECTED' : '');
+<option value="<% $_->{id} %>"<% $selected %>><% $_->{id} %> - <% $_->{name} %></option>
+% } @categories;
+</select>
+
+<%init>
+my @categories = sort{$a->{name} cmp $b->{name}} @{$obvius->get_table_data('fiskearter') || []};
+
+my $value=$session->{fields_out}->param($name);
+   $value=$session->{fields_in}->param($name) unless (defined $value);
+my %selected;
+map {
+    $selected{$_->Id}=1;
+} @$value;
+
+my $mul = "";
+if ($multiple) {
+$mul = "MULTIPLE";
+}
+</%init>
+
+</%method>
+%
+
+<%method cook>
+
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$value=>undef
+</%args>
+
+<%perl>
+if (ref $value) {
+    return [ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value ];
+}
+else {
+    return [ $fieldtype->copy_in($obvius, $fieldspec, $value) ];
+}
+</%perl>
+
+</%method>

@@ -1,0 +1,7 @@
+% # Placeholder:
+<& /new/group, %ARGS &>
+<%method ReallyDelete>
+<%perl>
+$m->comp('/new/group:ReallyDelete', %ARGS);
+</%perl>
+</%method>

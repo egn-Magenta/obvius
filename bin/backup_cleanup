@@ -1,0 +1,26 @@
+#!/bin/sh
+# $Id$
+
+hostname="$(hostname)"
+
+FORCE=
+while getopts f c; do
+    case $c in
+    f)        FORCE=1;;
+    ?)        echo "Usage $0 [-f] file ..." 2>&1; exit 1;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+
+then=$(date -d '6 weeks ago' '+%Y%m%d')
+
+orig_pwd=$(pwd)
+for dir; do
+    cd $orig_pwd
+    cd $dir || cd /home/httpd/$dir || continue
+    # test -e "SERVER_IS_$hostname" -o "$FORCE" || continue
+    test -d backup && cd backup || continue
+
+    ls | then=$then perl -nle 'if (/-(\d{8})\.sql/) { my $d = $1; if ($d !~ /(01|15)$/ and $d < $ENV{then}) { unlink $_; } }'
+done

@@ -1,0 +1,222 @@
+<h1><% $vdoc->Title %></h1>
+<% $teaser %>
+<h2>Søgning</h2>
+<table>
+% foreach my $field (@fields) {
+%     next if (defined $field->{options} and $field->{options} eq '(notinlist)');
+%     my $v=$output->param('_incoming_' . $field->{name}) || '';
+%     if ($field->{options} and $field->{options} ne '(emailhref)') {
+%         if ($field->{name} eq 'docid') { # XXX Specific for subscription. Not nice.
+%             my $subscriber_docs = $obvius->search( ['subscribeable', 'title'],
+%	                          '(subscribeable = \'automatic\' OR subscribeable = \'manual\')',
+%	                           notexpired=>1, public=>1, sortdoc=>$vdoc);
+<tr>
+<td><% $title{$field->{name}} %>:</td>
+<td>
+<select name="<% $field->{name} %>">
+<option value=""></option>
+%             foreach my $svdoc (@$subscriber_docs) {
+<option value="<% $svdoc->Docid %>"<% $v eq $svdoc->Docid ? ' SELECTED' : '' %>><% $svdoc->Title %></option>
+%             }
+</select>
+</td>
+</tr>
+%         }
+%     }
+%     else {
+<tr>
+<td><% $title{$field->{name}} %>:</td>
+<td>
+<input type="text" name="<% $field->{name} %>"<% $v ? 'value="' . $v . '"' : '' %>>
+</td>
+</tr>
+%     }
+% }
+<tr>
+<td></td>
+<td>
+<script type="text/javascript">
+   document.pageform.obvius_op.value='';
+   document.pageform.obvius_page.value='';
+</script>
+<input class="normalknap" type="submit" value="Søg" onclick="javascript:document.pageform.obvius_op.value='';document.pageform.obvius_page.value=''">
+<input type="hidden" name="mode" value="form">
+</td>
+</tr>
+</table>
+%
+% if ($mode and $mode ne 'showform') {
+<h2>Resultat</h2>
+<p>
+<% scalar @$records %> fundet
+</p>
+<table border="1">
+<tr valign="top">
+% foreach my $title (@titles) {
+ <th align="left"><% $title %></th>
+% }
+</tr>
+% foreach my $record (@$records) {
+<tr valign="top">
+%     foreach my $field (@fields) {
+%         next if (defined $field->{options} and ($field->{options} =~ /notinlist/i or $field->{options} =~ /text/i));
+%         if (defined $field->{options} and 
+%             $field->{options} =~ /emailhref/i) {
+%             if ($record->{$field->{name}}) {
+ <td class="tablelist"><a href="mailto:<% $record->{$field->{name}} %>"><% $record->{$field->{name}} %></a></td>
+%              } else {
+ <td class="tablelist">&nbsp;</td>
+%              }
+%         } elsif ($field->{options}) {
+ <td class="tablelist"><& show_xref_data, name=>$field->{name}, id=>$record->{$primary_key[0]}, options=>$field->{options} &></td>
+%         } else {
+ <td class="tablelist"><% $record->{$field->{name}} || '&nbsp;' %></td>
+%         }
+%     }
+%     my $key_info=join "&", map { 'obvius_' . $_ . '=' . $record->{$_} } @primary_key;
+ <td class="tablelist">
+%     if ($ghosted) {
+ <span class="ghosted">Redigér</span>
+%     }
+%     else {
+ <a href="./?obvius_op=tablelist&obvius_comp=<% $vdoc->Editcomp %>&<% $key_info %>">Redigér</a>
+%     }
+%     if ($vdoc->Editcomp) {
+%         if ($ghosted) {
+ <span class="ghosted">Slet</span>
+%         }
+%         else {
+ |
+ <a href="./?obvius_op=tablelist&obvius_comp=<% $vdoc->EditComp . ':ReallyDelete' %>&<% $key_info %>">Slet</a>
+%         }
+%     }
+
+ </td>
+</tr>
+% }
+</table>
+% }
+
+% if ($vdoc->Newcomp) {
+<p>
+%     if ($ghosted) {
+<span class="ghosted">Opret ny</span>
+%     }
+%     else {
+<a href="./?obvius_op=tablelist&obvius_comp=<% $vdoc->Newcomp %>">Opret ny</a>
+%     }
+</p>
+% }
+%
+<%def show_xref_data>
+<%args>
+$options
+$id
+$name
+</%args>
+% my $grpsstring=join "\n<br>", @grps;
+<% $grpsstring %>
+<%init>
+my @grps=();
+return if $options =~ /notinlist/;
+return if $options =~ /emailhref/;
+return if $options =~ /text/;
+if ($options =~ /^\(([^.]+)\.([^,.\s]+(\/\w+\s*=\s*\w+)?)\s*,\s*([^.]+)\.([^.,\)]+)/) {
+    my ($desc_table, $desc_key, $filter, $rel_table, $rel_key)=($1, $2, $3, $4, $5);
+
+    my $desc_data=$obvius->get_table_data_hash($desc_table, $desc_key);
+    my $rel_data=$obvius->get_table_data($rel_table);
+
+    if (defined $filter) {
+	if ($filter=~/^(\w+)\s*=\s*(\w+)$/) {
+	    my ($filter_key, $filter_value)=($1, $2);
+	    $rel_data=[ grep { $_->{filter_key} eq $filter_value } @$rel_data ];
+	}
+	else {
+	    warn "I don't grok this filter: $filter\n";
+	}
+    }
+
+    @grps=map { $desc_data->{$_->{$name}}->{name} } grep { $_->{$rel_key} == $id } @$rel_data;
+}
+else {
+    warn "I don't grok these options: $options\n";
+}
+</%init>
+</%def>
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(table fields editcomp newcomp)]);
+
+my @primary_key=qw(id);
+my $table=$vdoc->Table;
+if ($table =~ /^(\w+)\s+\(([^\)]+)\)$/) {
+    $table=$1;
+    my ($options)=$2;
+    @primary_key=split /\s*,\s*/, $options;
+}
+
+my @titles;
+my %title;
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    $title=~s/_/ /g;
+    push @titles, $title unless (defined $options and ($options =~ /notinlist/ or $options =~ /text/));
+    $title{$field}=$title;
+    { name=>$field, options=>$options }
+} split /\n/, $vdoc->Fields;
+
+my $mode=$output->param('_incoming_mode');
+
+my $records;
+if ($mode and $mode eq 'form') {
+    $records=$obvius->get_table_data($table);
+
+    my %narrow;
+    foreach my $field (@fields) {
+	my $narrow=$output->param('_incoming_' . $field->{name});
+	if ($narrow) {
+	    $narrow{$field->{name}}=$narrow;
+	}
+    }
+
+    $records=[
+	      grep {
+		  my $ret=1;
+		  foreach my $field (@fields) {
+		      if ($narrow{$field->{name}}) {
+			  if ($field->{name} eq 'docid') { # XXX Special case for subscription, not nice:
+			      my $ok=$obvius->get_subscriptions({ subscriber => $_->{id},  docid => $narrow{$field->{name}} } );
+			      unless (scalar @$ok) {
+				  $ret=0; last;
+			      }
+			  }
+			  else {
+			      if ($_->{$field->{name}} !~ m!$narrow{$field->{name}}!i) {
+				  $ret=0; last;
+			      }
+			  }
+		      }
+		  }
+		  $ret;
+	      }
+	      @$records
+	     ];
+}
+else {
+    $records=[];
+}
+
+
+my $teaser='';
+if ($obvius->get_version_field($vdoc, 'teaser')) {
+    $teaser="<p>" . $vdoc->Teaser . "</p>";
+}
+
+my $ghosted=!$obvius->user_has_capabilities($doc, 'admin'); # The admin capability determines access
+                                                          # to the tablelist
+</%init>

@@ -1,0 +1,182 @@
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+%
+<%args>
+$obvius_session=>undef
+$obvius_docid=>undef
+$obvius_date=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /new/comment\n";
+
+my $session;
+
+$session=$r->pnotes('site')->get_session();
+die "No session available - fatally wounded.\n" unless ($session);
+
+my %page=(
+	  title=>(defined $obvius_date ? 'Edit comment' : 'New comment'),
+	  description=>'',
+	  comp=>'/edit/page',
+	 );
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my @fieldlist;
+foreach my $field (@fields) {
+    next if $field->{name} eq 'text';
+    my $xref='';
+    if ($field->{options} =~ /^\((.*)\)$/) {
+	$xref=$1;
+    }
+    push @fieldlist, { title=>$field->{title},
+		       fieldspec=>new Obvius::FieldSpec({
+					fieldtype=>new Obvius::FieldType({
+						validate_args=>($xref eq '' ? '.' : $xref) ,
+						name=>($xref eq '' ? 'line' : 'xref'),
+						value_field=>'text',
+						bin=>0,
+						validate=>($xref eq '' ? 'regexp' : 'xref'),
+						edit=>($xref eq '' ? 'line' : 'xref'),
+						edit_args=>$xref,
+					       }),
+				        default_value=>undef,
+				        name=>$field->{name},
+				        optional=>0,
+				        searchable=>0,
+				        repeatable=>($xref eq '' ? 0 : 1),
+				       }),
+		     }
+}
+
+push @fieldlist, { title=>'Text',
+		   fieldspec=>new Obvius::FieldSpec({
+					   fieldtype=>new Obvius::FieldType({
+									   validate_args=>undef,
+									   name=>'text',
+									   value_field=>'text',
+									   bin=>0,
+									   validate=>'none',
+									   edit=>'text',
+									   edit_args=>undef,
+									  }),
+					   default_value=>undef,
+					   name=>'text',
+					   optional=>0,
+					   searchable=>0,
+					   repeatable=>0,
+					  }),
+		 };
+
+$page{fieldlist}=\@fieldlist;
+$session->{pages}=[ \%page ];
+
+my $fields=new Obvius::Data;
+if (defined $obvius_docid and defined $obvius_date) {
+    if (my $comment=$obvius->get_comment($obvius_docid, $obvius_date)) {
+	foreach (keys %$comment) {
+	    $fields->param($_=>$comment->{$_});
+	}
+    }
+    $fields->param(docid=>$obvius_docid);
+    $fields->param(date=>$obvius_date);
+    use Data::Dumper;
+    print STDERR "fields->in: " . Dumper($fields);
+    #$fields->param(id=>$obvius_id);
+    # Remember the groups:
+    #if (my $user_groups=$obvius->get_user_groups($obvius_id)) {
+    #	$fields->param(grp=>[map { new Obvius::Data(id=>$_) } @$user_groups]);
+    #}
+}
+$session->{fields_in}=$fields;
+$session->{fields_out}=new Obvius::Data;
+$session->{document}=$doc;
+$session->{version}=$vdoc;
+$session->{doctype}=$doctype;
+$session->{validate_comp}='/edit/validate/page_comment';
+$session->{done_comp}='/edit/save/comment';
+$session->{done_label}='Save';
+
+$obvius_session=$session->{_session_id};
+$r->pnotes(session=>$session);
+$r->notes(obvius_session=>$obvius_session);
+</%init>
+%
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+print STDERR ">>> /new/comment:Do\n";
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my $comment={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
+$comment->{docid}=$session->{fields_out}->param('docid');
+if (my $date=$session->{fields_out}->param('date')) {
+    print STDERR "call update_comment\n";
+    $comment->{date}=$date;
+    use Data::Dumper;
+    print STDERR "comment: " . Dumper($comment);
+    return $obvius->update_comment($doc, $comment);
+}
+#else {
+#    print STDERR "call create_new_comment\n";
+#    return $obvius->create_new_comment($comment);
+#}
+
+</%perl>
+</%method>
+%
+<%method ReallyDelete>
+<%args>
+$obvius_docid
+$obvius_date
+</%args>
+
+<& /header/header, decoration=>'reduced' &>
+<tr>
+<td></td>
+<td>
+
+<form action="<% $prefix %><% $uri %>" method="post" enctype="multipart/form-data">
+<input type="hidden" name="obvius_op" value="tablelist">
+<input type="hidden" name="obvius_comp" value="/new/comment:Delete">
+<input type="hidden" name="obvius_docid" value="<% $obvius_docid %>">
+<input type="hidden" name="obvius_date" value="<% $obvius_date %>">
+
+<h3 class="admin"><& SELF:msg, text=>'Confirm delete' &></h3>
+
+<p>
+<& SELF:msg, text=>'Really delete comment' &>?
+</p>
+
+<input type="submit" class="normalknap" value="<& SELF:msg, text=>'Delete' &>">
+<input type="button" class="normalknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
+
+</td>
+%
+<%init>
+print STDERR ">>> /new/comment:ReallyDelete\n";
+</%init>
+</%method>
+%
+<%method Delete>
+<%args>
+$obvius_docid
+$obvius_date
+</%args>
+<& /done &>
+<%init>
+$obvius->delete_comment($obvius_docid, $obvius_date);
+</%init>
+</%method>

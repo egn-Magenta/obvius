@@ -1,0 +1,52 @@
+<& /shared/doctype &>
+<& /shared/head &>
+<& /shared/body_start &>
+
+<& /header/header, decoration=>'top' &>
+
+<!-- begin done -->
+<p align="center">
+<& SELF:msg, text=>$message &>.
+</p>
+
+<p align="center">
+<a href="<% "$prefix$linkuri" %>"><& SELF:msg, text=>'Continue' &></a>
+</p>
+<!-- end done -->
+
+<& /shared/body_end &>
+%
+<%args>
+$message=>'Done'
+$postfix=>''
+$parent=>0
+$link_add_version=>0
+$return=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /done ($prefix$uri)\n";
+
+$uri.=$postfix if ($postfix);
+my $linkuri=$uri;
+
+if ($parent) {
+    $linkuri =~ s/[^\/]+[\/]?$//;
+}
+
+if ($link_add_version and defined $return) {
+    $linkuri.='?obvius_version=' . $return;
+}
+
+# From the Mason-faq: (mutilated)
+$m->clear_buffer;
+# The next two lines are necessary to stop Apache from re-reading
+# POSTed data.
+$r->method('GET');
+$r->headers_in->unset('Content-length');
+$r->content_type('text/html');
+#$r->header_out('Location' => "$prefix$linkuri");
+#$m->abort(301);
+$linkuri=~s/ /%20/g;
+$r->notes(redirect=>"$prefix$linkuri");
+</%init>

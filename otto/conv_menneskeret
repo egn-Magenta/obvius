@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Convert menneskeret to menneskeret_new
+#
+# $Id$
+
+./conv menneskeret menneskeret_new menneskeret /home/httpd/www.menneskeret.dk/docs

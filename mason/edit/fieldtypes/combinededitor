@@ -1,0 +1,145 @@
+%# This fieldtype is ment to combine all the avaiable editors in the Obvius system.
+%#
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>59
+$rows=>22
+$wrap=>1
+$onlylineif=>undef
+$no_msie_editor=>undef
+</%args>
+%
+% # Always use MSIE editor if possible..
+% if($use_msie) {
+    <& msie_text, value=>$value, name=>$name, cols=>$cols, rows=>$rows, pure_html => 1 &>
+% } else {
+% # Use standard textarea with added on buttons for more advanced editors.
+%  if($is_composite_compatible) {
+%   # Add javascript
+<script language="javascript" type="text/javascript" src="/admin_js/composite.js"></script>
+<script language="javascript" type="text/javascript">
+%my $hostname = $r->hostname;
+// Vars to tell the editor to use the navigator for finding files
+var choose_link_url_for_<% $name %> = 'http://<% $hostname %>/admin/?obvius_op=navigator&path=<% $uri %>';
+var choose_image_url_for_<% $name %> = 'http://<% $hostname %>/admin/?obvius_op=navigator&path=<% $uri %>&doctype=Image';
+var stylesheets_for_<% $name %> = 'http://<% $hostname %>/css/public.css,http://<% $hostname %>/css/common.css';
+var basehref_for_<% $name %> = 'http://<% $hostname . $uri %>';
+</script>
+%  }
+
+<table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td valign="top">
+            <a href="javascript:OpenWin('/admin/?obvius_op=obvius_code_editor&get_html=1&fieldname=<% $name %>', 750, 550)"><span style="font-size: 10px;">Rediger med MCMS koder</a><br><br></span></td>
+%  if($is_composite_compatible) {
+        <td valign="top" align="right"><a href="javascript:downloadObviusEd()" id="starteditor_button_for_<% $name %>"><span style="font-size: 10px;">Download/installer Obvius Ed editor</span></a></td>
+%  }
+    </tr>
+    <tr>
+        <td colspan="2">
+            <textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
+        </td>
+    </tr>
+</table>
+<& /shared/add_reset_field, name=>$name &>
+<input type="hidden" name="obvius_<% $name %>_compare" value="<% $value |h %>">
+% }
+%
+<%init>
+my $use_msie = 0;
+my $user_agent = $r->header_in('user-agent');
+my $is_composite_compatible = 0;
+print STDERR "User agent: " . $user_agent . "\n";
+unless($no_msie_editor) {
+    if($user_agent =~ /Win/ and $user_agent !~ /Win3.11/ and $user_agent =~ /MSIE [^1234]/) {
+        $use_msie = 1;
+    } else {
+        # Mozilla browser ?
+        if($user_agent =~ m#^Mozilla/5[.]0# and $user_agent =~ /Gecko/) {
+            # Composite compatible
+            if($user_agent =~ m#rv:1[.]\d([.]\d)?#) {
+                $is_composite_compatible = 1;
+            }
+        }
+    }
+}
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+$value = $m->scomp('/shared/printhtml', html => $value, noprefix => 1) if($value);
+if($is_composite_compatible) {
+    my $hostname = $r->hostname;
+    # Make sure the editor shows images correctly
+
+    $value =~ s#src=(["'])([^/:]+)/#src=$1$uri$2/#gi;
+
+    $value =~ s#src=(["'])/#src=$1http://$hostname/#gi;
+}
+
+$wrap=' WRAP="' . $wrap . '" ';
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name=>undef
+</%args>
+<%perl>
+if(defined($value)) {
+    $value =~ s/\r//g;
+    if($value =~ m#^\s*<P>&nbsp;</P>\s*$#i) {
+        $value = '';
+    } else {
+        my $hostname_from_req = $r->hostname;
+
+        # Make images relative to /
+        $value =~ s!src=(["'])http://$hostname_from_req/(admin/)?!src=$1/!g;
+
+        # Make images realtive to the document itself
+        $value =~ s!src=(["'])$uri!src=$1!g;
+
+        # Make links relative to /
+        $value =~ s!href=(["'])http://$hostname_from_req/(admin/)?!href=$1$2/!g;
+    }
+}
+$out = '';
+$p->parse($value);
+$p->eof;
+$value = $out;
+return $value;
+</%perl>
+</%method>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                if($tagname eq 'a' and $attr->{href} and $attr->{href} =~ m!^/! and not $attr->{href} =~ m!^/\d+\.docid!) {
+                                                    my $uri = $attr->{href};
+                                                    $uri =~ s!\?.*$!!;
+                                                    my $doc = $obvius->lookup_document($uri);
+                                                    my $docid;
+                                                    $docid = $doc->Id if($doc);
+                                                    $text =~ s!$uri!/$docid.docid! if($docid);
+                                                    $out.=$text;
+                                                } else {
+                                                    $out.=$text;
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=$text;
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+</%once>

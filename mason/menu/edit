@@ -1,0 +1,34 @@
+% #ifdef can_edit
+
+<& SELF:menu_box_begin, title=>'Edit' &>
+
+% if(! $versions) {
+% # XXX do we ever get here?
+<& SELF:menu_entry, title=>'Latest version', link=>"$prefix$uri?obvius_op=edit" &>
+% } else {
+<& SELF:menu_entry, title=>"$title", link=>"$prefix$uri?obvius_op=edit&obvius_version=".$vdoc->Version, marker=>"$marker" &>
+% # <& SELF:menu_entry, title=>'Edit from file', link=>"$prefix$uri?obvius_op=newversion&obvius_version=".$vdoc->Version, marker=>"$marker" &>
+% }
+% #endif can_edit
+
+<%init>
+my @versions=();
+my $versions=$obvius->get_versions($doc, '$order'=>'version');
+
+my $newest=@$versions[-1];
+my $public=$obvius->get_public_version($doc);
+
+my ($title, $marker, $link);
+
+if( $public and ($public->Version eq $vdoc->Version )) {
+	$title = 'Public Version';
+	$marker = '<IMG SRC="/grafik/admin/blue.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">';
+} elsif ($newest->Version eq $vdoc->Version) {
+	$title = 'Latest Version';
+	$marker = '<IMG SRC="/grafik/admin/green.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">';
+} else {
+	$title = 'This version';
+	$marker = '<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">';
+}
+
+</%init>

@@ -1,0 +1,123 @@
+%# $Id$
+<div class="lys" style="padding: 0.5em; border-bottom: solid 1px black; margin-bottom: 0.5em">
+<strong><% $this_doc->param('short_title') || $this_doc->Title %>: sekvensnummer</strong>
+</div>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <tr>
+        <td></td>
+        <td align="center">
+            <form name="seq_form" action="/admin<% $uri %>">
+                <input type="hidden" name="obvius_op" value="seqselect">
+                <input type="hidden" name="title" value="<% $title %>">
+                <input type="hidden" name="short_title" value="<% $short_title %>">
+                <input type="hidden" name="parentid" value="<% $parentid %>">
+                Indtast sekvensnummer:
+                <input name="seq" type="text" size="4" value="<% $seq %>">
+                <input class="normalknap" type="button" value="Gem" onclick="javascript:adjust_opener_field(window.opener.document.pageform.seq, this.form.seq.value);">, eller flyt herunder:
+            </form>
+        </td>
+    </tr>
+    <tr>
+    <td></td><td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            <img src="/grafik/admin/spacer.gif" alt="" border="0" width="4" height="1">
+        </td>
+        <td align="center">
+            <table border="0" cellspacing="0" cellpadding="0" width="300">
+%for(@docs) {
+                <tr>
+%   my $link = $_->{link};
+%   my $d = $_->{doc};
+%   my $value = defined($link) ? $link : $d->Seq;
+%   $value = sprintf("%.2f", $value);
+                    <td class="seqselectdoc<% (defined $d and $d->DocId == $this_doc->DocId) ? ' navselected' : ($value >= 0 ? '' : ' seqselecthidden') %>" align="right"">
+                        <% $value %><img src="/grafik/admin/spacer.gif" alt="" border="0" width="5" height="1">
+                    </td>
+%   if(defined($link)) {
+                    <td  class="seqselectdoc">
+                        &nbsp;<a class="normalknap" style="text-decoration: none" title="Klik her for at flytte dokumentet herned i sekvensrækkefølgen" href="<% $prefix . $uri . $url_opts %>&seq=<% $link %>">&nbsp;&gt;&gt; flyt hertil&nbsp;</a>
+                    </td>
+%   } else {
+%       if($d->DocId == $this_doc->DocId) {
+                    <td class="seqselectdoc navselected">
+                        &nbsp;<strong><span class="navselected"><% $this_doc->param('short_title') || $this_doc->Title %></span></strong>
+                    </td>
+%       } else {
+                    <td class="seqselectdoc">
+                        &nbsp;<% $d->Title %>
+                    </td>
+%       }
+%}
+                </tr>
+%}
+            </table>
+        </td>
+    </tr>
+</table>
+<%args>
+$seq=>'0'
+$parentid
+$title=>undef
+$short_title=>undef
+</%args>
+<%init>
+$title = "Dette dokument" unless($title);
+
+my $url_opts = "?obvius_op=seqselect";
+$url_opts .= "&parentid=" . $parentid;
+$url_opts .= "&title=" . $title;
+$url_opts .= "&short_title=" . $short_title if($short_title);
+
+my $parent = $obvius->get_doc_by_id($parentid);
+my $siblings;
+$siblings = $obvius->get_document_subdocs($parent) if($parent);
+$siblings = [] unless($siblings);
+
+my $this_doc;
+if($doc->Id == $parentid) {
+    #This document not created yet, faking one...
+    $this_doc = new Obvius::Data;
+    $this_doc->param(title => $title);
+    $this_doc->param(short_title => $short_title);
+    $this_doc->param(docid => -1); #XXX must be sure we don't have one of these
+    push(@$siblings, $this_doc);
+} else {
+    $obvius->get_version_fields($vdoc, ['title', 'short_title', 'seq']);
+    $this_doc = $vdoc;
+}
+for(@$siblings) {
+    $obvius->get_version_fields($_, ['title', 'short_title', 'seq']) unless($_->param('docid') == -1);
+    if($_->DocId == $this_doc->DocId) {
+        #XXX Had to force these...
+        $_->{FIELDS}->{SEQ} = $seq;
+        $_->{SEQ} = $seq;
+    }
+}
+
+my @siblings = sort { $a->Seq <=> $b->Seq } @$siblings;
+
+my @docs;
+my $count = scalar(@siblings);
+for(my $i=0;$i<$count;$i++) {
+    my $current = $siblings[$i];
+    if($i == 0) {
+        push(@docs, { link => ($current->Seq - 10) } );
+    }
+    # Here we _always_ push the current document on..
+    push(@docs, { doc => $current } );
+
+    my $next = $siblings[$i + 1];
+    if($next) {
+        unless($current->Docid == $this_doc->DocId
+                or $next->Docid == $this_doc->DocId
+                or $current->Seq == $next->Seq) {
+            push(@docs, { link => (($current->Seq / 2) + ($next->Seq / 2)) } );
+        }
+    } else {
+        push(@docs, { link => ($current->Seq + 10) } );
+    }
+}
+</%init>

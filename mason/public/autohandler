@@ -1,0 +1,18 @@
+<% $m->call_next %>\
+%
+<%init>
+$prefix=$r->notes('prefix');
+$uri=$r->notes('uri');
+$obvius=$r->pnotes('obvius');
+$doc=$r->pnotes('document');
+
+my @params=$r->param;
+$r->no_cache(1) unless scalar(@params)==0;
+
+$vdoc=$obvius->get_public_version($doc);
+$doctype=$obvius->get_version_type($vdoc);
+$r->pnotes('version' =>$vdoc);
+$r->pnotes('doctype' =>$doctype);
+
+$m->comp('/shared/path_section');
+</%init>

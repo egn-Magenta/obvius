@@ -1,0 +1,50 @@
+%# Handle image doctype when saving
+%# $Id$
+<%args>
+$session
+</%args>
+%
+<%once>
+use Image::Magick;
+my $image_doctype = $obvius->get_doctype_by_name('Image');
+</%once>
+<%init>
+my @image_data_fields = grep { $_ =~ /^DATA_\d+X\d+$/i } keys %{$image_doctype->{FIELDS}};
+for(@image_data_fields) {
+    print STDERR "Adding image data field: $_\n";
+    # Get width and height
+    my ($width, $height) = (/DATA_(\d+)X(\d+)/i);
+    my $data = $session->{fields_out}->{DATA};
+
+
+    # Generate image data
+    my $imagesize = $width . "x" . $height;
+
+    my $image = Image::Magick->new;
+
+    # Read picture from data blob
+    $image->BlobToImage($data);
+
+    # Resize picture
+    $image->Resize(geometry=>$imagesize, filter=>'Bessel', blur=> 0.01);
+
+    # Now we have a picture that fits inside a width x height frame and isn't stretched.
+
+    # Make a transparent image exactly width x height
+    my $new_img = Image::Magick->new();
+    $new_img->Set(size=>$imagesize);
+    $new_img->ReadImage('xc:white');
+    $new_img->Transparent(color=>'white');
+
+    # Add the old, resized image to the new one and center it
+    $new_img->CompositeImage(compose=>'Over', image=>$image, geometry=>$imagesize, gravity=>'Center', Opague=>1);
+
+    # Hmmm, there might be a better way :)
+    $new_img->Write(filename => '/dev/null/blah.gif', interlace => 'None');
+
+    # Return the new image
+    my @blobs = $new_img->ImageToBlob();
+
+    $session->{fields_out}->param($_ => $blobs[0]);
+}
+</%init>

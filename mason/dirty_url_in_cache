@@ -1,0 +1,7 @@
+<%args>
+$url=>undef
+</%args>
+%
+<%init>
+$r->pnotes('site')->dirty_url_in_cache($url);
+</%init>

@@ -1,0 +1,129 @@
+<!-- versions list: -->
+  <table border="0" cellpadding="4" cellspacing="0" style="border-collapse: collapse"
+	 bordercolor="#111111" width="<% $left_cell_width %>">
+    <tr>
+      <td class="lys" nowrap style="border-top: 1px black solid; border-bottom: 1px black solid">
+	<p><b>Version</b><!--<img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">--></td>
+      <td class="lys" align="right" style="border-top: 1px black solid; border-bottom: 1px black solid">
+	<p align="right">Sprog:</td>
+      <td class="lys" style="border-top: 1px black solid; border-bottom: 1px black solid">
+	<select size="1" name="obvius_versions_lang" class="lilleinput" onchange="javascript:this.form.obvius_op.value=''; submit_page();"<% $ghosted ? ' disabled' : '' %>>
+          <option value=""> </option>
+% foreach my $lang (sort keys %$langs) {
+	  <option value="<% $lang %>"<% ($obvius_versions_lang eq $lang ? ' SELECTED' : '') %>><% $lang %></option>
+% }
+	</select></td>
+    </tr>
+
+    <tr>
+      <td width="<% $left_cell_width %>" class="omkringversionslisten" colspan="3">
+	<table border="0" cellspacing="1" style="border-collapse: collapse" bordercolor="#111111" width="100%">
+	  <tr>
+	    <td nowrap align="center">Dato</td>
+	    <td align="center">Tid</td>
+	    <td>
+	      <p align="center">Aktiv</td>
+	    <td>
+	      <p align="center">Off.</td>
+	  </tr>
+% foreach (@$versions) {
+%     next if ($obvius_versions_lang and lc($_->{lang}) ne lc($obvius_versions_lang));
+%     if ($_->{apart}) {
+          <tr><td colspan="4"></td></tr>
+%     }
+	  <tr>
+% my $greyclass=($ghosted ? 'ghostedgraa' : 'graa');
+	    <td nowrap align="center" class="<% $greyclass %>"><% $_->{date} %></td>
+	    <td align="center" class="<% $greyclass %>"><% $_->{time} %></td>
+	    <td align="center" class="<% $greyclass %>">
+% if ($ghosted) {
+<% $_->{active} ? '<img width="7" height="7" src="/grafik/admin/active.gif" alt="*">' : '' %>
+% }
+% else {
+	      <input type="radio" class="obviusradio" value="<% $_->{version} %>" name="obvius_version"<% ($_->{active} ? ' CHECKED' : '') %> onclick="javascript:this.form.obvius_op.value=''; this.form.obvius_page.value=''; submit_page();">
+% }
+        </td>
+	    <td align="center" class="graa">
+% if ($_->{public}) {
+	      <img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-">
+% }
+% else {
+	      &nbsp;
+% }
+	    </td>
+	  </tr>
+% }
+% if ($i!=$total) {
+          <tr>
+            <td width="<% $left_cell_width %>" colspan="4"><& SELF:link, link=>"javascript:OpenWin('$prefix$uri?obvius_op=versions&obvius_current=" . $vdoc->Version . "', 250)", text=>$m->scomp('SELF:msg', text=>'The entire list ...'), ghosted=>$ghosted &></td>
+          </tr>
+% }
+	</table>
+      </td>
+    </tr>
+  </table>
+<!-- :versions list -->
+%
+<%args>
+$obvius_versions_lang=>''
+$session=>undef
+$ghosted=>0
+$left_cell_width
+</%args>
+%
+<%init>
+$ghosted=1 if ($session);
+
+my ($versions, $langs, $i, $total)=$m->comp('/versions_list:get_versions_for_display', max=>6);
+</%init>
+%
+<%method get_versions_for_display>
+<%args>
+$max=>undef
+</%args>
+<%perl>
+my %langs=();
+my @versions=();
+my $versions=$obvius->get_versions($doc, '$order'=>'version DESC');
+my $public_version=$obvius->get_public_version($doc);
+my $i=0; my $total=0; my $active_found=0;
+foreach (@$versions) {
+    $langs{$_->Lang}++;
+    $total++;
+    next if (defined $max and $i>=$max and $active_found);
+
+    $obvius->get_version_fields($_);
+    my %version = (
+		   version=>$_->Version,
+		   markerlast=>1,
+		   lang=>$_->Lang,
+		  );
+    ($version{date}, $version{time})=$m->comp('SELF:split_date_time', string=>$_->Version);
+
+    $version{latest}=1 if $i==0;
+
+#    if ($public_version and
+#	$_->DocId eq $public_version->DocId and
+#	$_->Version eq $public_version->Version) {
+    if ($_->Public) {
+	$version{public}=1;
+    }
+
+    $version{link}="$prefix$uri?obvius_version=" . $_->Version;
+
+    if( $_->DocId eq $vdoc->DocId and $_->Version eq $vdoc->Version ) {
+	$version{active}=1;
+	$active_found=1;
+	$version{apart}=1 if ($i>=$max);
+	push @versions, \%version;
+	$i++;
+    }
+    elsif (!defined $max or $i<$max) {
+	push @versions, \%version;
+	$i++;
+    }
+}
+
+return (\@versions, \%langs, $i, $total);
+</%perl>
+</%method>

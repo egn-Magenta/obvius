@@ -1,0 +1,43 @@
+TODO-list for Obvius::Shell development
+
+Search-command:
+
+A wrapper for the $obvius->search function.
+
+$obvius->search([qw(front_prio front_dura published)], 'front_prio=1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura', notexpired=>1, public=>1, order=>'published DESC');
+						     
+becomes
+
+obvius> search --notexpired --public --order "published DESC" "front_prio=1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura" front_prio front_dura published
+
+Arguments will be parsed by Getopt::Long.
+
+Results will be printed and saved in a DOCLIST-state
+
+Action-command:
+
+Generates the output-object
+
+Show-command:
+
+Should be able to print values from the version and from the output-object.
+
+Import-command
+
+Imports a list of Documents from the output-object to the DOCLIST-state
+
+cd-command:
+
+New syntax: 'cd %3' changes the document to the third entry in the present
+DOCLIST-state.
+
+cd should save a list of versions ind the VERSIONLIST-state
+
+lsver-command:
+
+Shows a list of versions of the present document.
+
+chver-command:
+
+Changes the actual version either by explicitly naming the version or by the
+VERSIONLIST-state.

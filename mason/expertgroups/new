@@ -1,0 +1,85 @@
+<br>
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="90%" align="center">
+<input type="hidden" name="obvius_op" value="expertgroups">
+<input type="hidden" name="mode" value="new">
+<input type="hidden" name="create" value="1">
+    <tr>
+        <td><img border="0" src="/grafik/hvidkasse/top_v.gif" width="6" height="6"></td>
+        <td width="100%" background="/grafik/hvidkasse/t.gif"><img border="0" src="/grafik/admin/1x1.gif" width="6" height="6"></td>
+        <td><img border="0" src="/grafik/hvidkasse/top_h.gif" width="6" height="6"></td>
+    </tr>
+    <tr>
+        <td background="/grafik/hvidkasse/v.gif">&nbsp;</td>
+        <td bgcolor="#FFFFFF" width="100%" align="center">
+%if($create) {
+% if($error) {
+            Der opstod en fejl vedoprettelsen af din ekspertgruppe:<br>
+            <% $error %>.<br>
+            <a href="/admin/?obvius_op=expertgroups">OK</a>
+% } else {
+            Gruppen "<% $name %>" er blevet oprettet.<br>
+            <a href="/admin/?obvius_op=expertgroups">OK</a>
+% }
+%} else {
+<%perl>
+my $expert_doctype = $obvius->get_doctype_by_name('Expert');
+my $experts = $obvius->search(
+                                ['title', 'email', 'ask_the_experts'],
+                                "type = " . $expert_doctype->Id . " AND ask_the_experts > 0",
+                                public => 1,
+                                notexpired => 1
+                            ) || [];
+</%perl>
+            <h2>Gruppens navn</h2>
+            <input type="text" name="name"><br>
+            <h2>Gruppens medlemmer</h2>
+            <table border="1" width="80%" cellpadding="2">
+                <tr>
+                    <td>&nbsp;</td>
+                    <td width="100%"><strong>Navn</strong></td>
+                    <td><strong>Emailadresse</strong>
+                </tr>
+%for(@$experts) {
+                <tr>
+                    <td valign="middle"><input type="checkbox" name="expert_<% $_->DocId %>"></td>
+                    <td valign="middle" width="100%"><% $_->Title %></td>
+                    <td valign="middle"><% $_->Email %></td>
+                </tr>
+%}
+            </table>
+            <br>
+            <input type="button" onclick="document.pageform.obvius_op.value='expertgroups';submit_page()" value="Opret gruppe">
+%}
+        </td>
+        <td background="/grafik/hvidkasse/h.gif">&nbsp;</td>
+    </tr>
+    <tr>
+        <td><img border="0" src="/grafik/hvidkasse/bund_v.gif" width="6" height="6"></td>
+        <td width="100%" background="/grafik/hvidkasse/b.gif"><img border="0" src="/grafik/admin/1x1.gif" width="6" height="6"></td>
+        <td><img border="0" src="/grafik/hvidkasse/bund_h.gif" width="6" height="6"></td>
+    </tr>
+</table>
+<%init>
+my $create;
+my $name;
+my $error;
+if($r->param('create')) {
+    $create = 1;
+    my @docids;
+
+    $name = $r->param('name');
+    $error = 'Du har ikke angivet noget navn' unless($name);
+    unless($error) {
+        my $namecheck = $obvius->get_expertgroup($name) || [];
+        $error = 'Det angivne gruppenavn eksisterer allerede' if(scalar(@$namecheck));
+    }
+    unless($error) {
+        @docids = map{ s/^expert_//; $_ } grep{ /^expert_\d+/ } $r->param;
+        $error = 'Du har ikke angivet nogen eksperter' unless(scalar(@docids));
+    }
+    unless($error) {
+        $obvius->create_expertgroup($name, \@docids);
+    }
+
+}
+</%init>

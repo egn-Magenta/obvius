@@ -1,0 +1,189 @@
+% # Determine what component to invoke and invoke it:
+<& /shared/doctype &>
+<& /shared/head &>
+<& /shared/body_start &>
+<& $op, %ARGS, obvius_page=>$obvius_page, invalid=>$invalid, session=>$session, content=>$content &>
+<& /shared/body_end &>
+%
+<%args>
+$obvius_op=>undef
+$obvius_comp=>undef
+$obvius_id=>undef
+$obvius_version=>undef
+$obvius_session=>undef
+$obvius_page=>undef
+$invalid=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /switch (obvius_page: " .
+    (defined $obvius_page ? $obvius_page : 'undef') . ")\n";
+print STDERR ">>> /switch (obvius_op: " .
+    (defined $obvius_op ? $obvius_op : 'undef') . ")\n";
+print STDERR ">>> /switch (obvius_session: " .
+    (defined $obvius_session ? $obvius_session : 'undef') . ")\n";
+
+if ($uri=~/[^\/]$/ or $uri eq '') { # Sneaky: Show the raw if there isn't a trailing slash:
+    my ($mime_type, $data) = $doctype->raw_document_data($doc, $vdoc, $obvius, $r);
+
+    if ($data) {
+	$mime_type ||= 'application/octet-stream';
+
+	$r->content_type($mime_type);
+	$r->set_content_length(length($data));
+	$r->send_http_header;
+	return 200 if $r->header_only;
+	# XXX should be \$data
+	$r->print($data);
+	$m->abort;
+    }
+    elsif ($uri !~ /[.]html$/) {
+	$m->clear_buffer;
+	$r->method('GET');
+	$r->headers_in->unset('Content-length');
+	$r->content_type('text/html');
+	$r->header_out('Location' => $prefix . $uri . '/');
+	$m->abort(301);
+    }
+}
+
+#$r->content_type('text/html') unless $r->content_type;
+#$r->content_type('text/html') if $r->content_type =~ /directory$/;
+#print STDERR " content_type: " . $r->content_type . "\n";
+#return -1 unless ($r->content_type eq 'text/html');
+
+# ... hmm, if we get here, it _is_ text/html (since binary stuff is
+# handled sneakily above).
+$r->content_type('text/html');
+
+my $op='in_portal';
+my $content="subsite";
+my $session=undef;
+$r->pnotes(capabilities=>$obvius->user_capabilities($doc));
+
+if (defined $obvius_page and $obvius_page eq 'abort') {
+    $content=$m->comp('/switch:abort');
+}
+elsif ($obvius_op and ($obvius_op eq 'edit')) {
+    $content='/edit/edit';
+}
+elsif ($obvius_op and ($obvius_op eq 'publish')) {
+    $content='/publish';
+}
+elsif ($obvius_op and ($obvius_op eq 'unpublish')) {
+    $content='/unpublish';
+}
+elsif ($obvius_op and ($obvius_op eq 'delete')) {
+    $content='/delete';
+}
+elsif ($obvius_op and ($obvius_op eq 'rename')) {
+    $content='/rename';
+}
+elsif ($obvius_op and ($obvius_op eq 'new')) {
+    $content='/new/new';
+}
+elsif ($obvius_op and ($obvius_op eq 'edit_new')) {
+    $content='/edit/new';
+}
+elsif ($obvius_op and ($obvius_op eq 'new_version')) {
+    $content='/new/version';
+}
+elsif ($obvius_op and ($obvius_op eq 'edit_new_version')) {
+    $content='/edit/new_version';
+}
+elsif ($obvius_op and ($obvius_op eq 'siblings')) {
+    $content='/siblings';
+}
+elsif ($obvius_op and ($obvius_op eq 'versions')) {
+    $op='/versions';
+}
+elsif ($obvius_op and ($obvius_op eq 'access')) {
+    $content='/access';
+}
+elsif ($obvius_op and ($obvius_op eq 'manual_subscription')) {
+    $content='/manual_subscription';
+}
+elsif ($obvius_op and ($obvius_op eq 'clear_cache')) {
+    $content='/clear_cache';
+}
+elsif ($obvius_op and ($obvius_op eq 'tablelist')) {
+    if (defined $obvius_comp) {
+	$content=$obvius_comp;
+    }
+}
+elsif ($obvius_op and ($obvius_op eq 'dview'))
+{
+    #$content='/in_portal';
+    #$alt_content= '/show_data';
+    $content='/show_data';
+}
+elsif ($obvius_op and ($obvius_op eq 'navigator')) {
+    $op='/navigator/main';
+}
+elsif ($obvius_op and ($obvius_op eq 'picturedlg')) {
+    $op='/picturedlg';
+}
+elsif ($obvius_op and ($obvius_op eq 'linkdlg')) {
+    $op='/linkdlg';
+}
+elsif ($obvius_op and ($obvius_op eq 'anchordlg')) {
+    $op='/anchordlg';
+}
+elsif ($obvius_op and ($obvius_op eq 'switchjava')) {
+    $op='/switchjava';
+}
+elsif ($obvius_op and ($obvius_op eq 'expertgroups')) {
+    $op='/expertgroups/main';
+}
+elsif ($obvius_op and ($obvius_op eq 'seqselect')) {
+    $op='/seqselect';
+}
+elsif ($obvius_op and ($obvius_op eq 'send')) {
+    $content='/send';
+}
+elsif ($obvius_op and ($obvius_op eq 'import_csv')) {
+    $content='/import_csv';
+}
+elsif ($obvius_op and ($obvius_op eq 'print')) {
+    $op='/print';
+}
+elsif ($obvius_op and ($obvius_op eq 'mcms_code_editor')) {
+    $op='/mcms_code_editor';
+}
+elsif ($obvius_session) {
+    my $admin=$r->pnotes('site');
+    $session=$admin->get_session($obvius_session);
+
+    my $validate_comp=$session->{validate_comp} || '/edit/validate/page';
+    $invalid=$m->comp($validate_comp, %ARGS, session=>$session);
+
+    if ($obvius_page eq 'done') {
+	print STDERR "||| $validate_comp returned: " . (defined $invalid ? @$invalid : 'undef') . "\n";
+	print STDERR "||| obvius_page: $obvius_page\n";
+	if (defined $invalid and @$invalid) {
+	    $content='/edit/really';
+	}
+	else {
+	    $content='/edit/done';
+	}
+    }
+    else {
+	$content='/edit/page';
+    }
+}
+#print STDERR "SWITCH: op: $op\n";
+#print STDERR "SWITCH: content: $content\n";
+
+# Are we running netscape?
+my $user_agent = $r->header_in('user-agent');
+if($user_agent =~ m!^Mozilla/4\.!i and $user_agent !~ m!compatible!i) {
+    $r->notes('is_netscape' => 1);
+}
+</%init>
+%
+<%method abort>
+<%perl>
+$r->notes(redirect=>"$prefix$uri");
+return '/edit/abort';
+</%perl>
+</%method>

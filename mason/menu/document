@@ -1,0 +1,38 @@
+<& SELF:menu_box_begin, title=>'Document' &>
+
+% #ifdef can_create
+<& SELF:menu_entry, title=>'New', link=>"$prefix$uri?obvius_op=new", ghosted=>$ghosted{new} &>
+% # <& SELF:menu_entry, title=>'New from file', link=>"$prefix$uri?obvius_op=newfile" &>
+% #endif can_create
+
+% #ifdef can_edit
+% # <& SELF:menu_entry, title=>'Relate picture', link=>"$prefix$uri?obvius_op=image_new" &>
+% # <& SELF:menu_entry, title=>'Classification', link=>"$prefix$uri?obvius_op=catedit" &>
+% #endif can_edit
+
+% #ifdef can_edit
+% #if $[equal URI / 0 1]
+<& SELF:menu_entry, title=>'Move/rename', link=>"$prefix$uri?obvius_op=rename", ghosted=>$ghosted{moverename} &>
+% #endif URI == /
+% #endif can_edit
+
+<& SELF:menu_entry, title=>'Delete', link=>"$prefix$uri?obvius_op=delete", ghosted=>$ghosted{delete} &>
+
+<& SELF:menu_entry, title=>'Access', link=>"$prefix$uri?obvius_op=access", ghosted=>$ghosted{access} &>
+
+<& SELF:menu_entry, title=>'Comments', link=>"$prefix/admin/comments/?docid=" . $doc->Id, ghosted=>$ghosted{comments} &>
+
+% #ifdef can_edit
+% # <& SELF:menu_entry, title=>'Advanced', link=>"$prefix$uri?obvius_op=edit" &>
+% #endif can_edit
+%
+<%init>
+my %ghosted=(
+	     delete=>(!$obvius->can_delete_document($doc)),
+	     moverename=>(!$obvius->can_rename_document($doc)),
+	     new=>(!$obvius->can_create_new_document($doc)),
+	     access=>(!$obvius->can_set_access_data($doc)),
+	     comments=>(!$obvius->can_update_comment($doc) or
+			$obvius->get_version_type($vdoc)->Name eq "TableList"),
+	    );
+</%init>

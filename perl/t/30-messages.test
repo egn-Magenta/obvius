@@ -1,0 +1,131 @@
+#!/usr/bin/perl -w
+print "1..4\n";
+
+use WebObvius::Template;
+
+my $tmpl = new WebObvius::Template(path=>'t', debug=>1, trace=>4, tracefile=>'test.out', warnings=>1);
+
+my $test;
+my $ok;
+
+my $text;
+my $res;
+my $expect;
+
+
+$test = 1;				# test1
+
+$tmpl->clear;
+$tmpl->param(test1=>'yes');
+
+$text = <<'EOF';
+beginning
+#include ifdefs.in
+ending
+EOF
+
+$expect = <<'EOF';
+first
+test1 = yes
+not test2
+last
+EOF
+
+$res = $tmpl->expand(\$text);
+$ok = ($res eq $expect);
+
+#print STDERR ">>\n$expect<<\n>>\n$res<<\n";
+
+print($ok ? "ok $test\n" : "not ok $test\n");
+
+
+
+
+
+
+
+$test = 2;				# "#loop var", "#loop $(var)"
+
+my @data = ();
+foreach my $loop1 (1..3) {
+    my @data2;
+    if ($loop1 % 2) {
+	foreach my $loop2 (10..10+$loop1) {
+	    push(@data2, { a=>$loop2, b=>$loop2+$loop1, c=>$loop2*$loop1 });
+	}
+    }
+    push(@data1, { a=>$loop1, b=>$loop1*$loop1, loop2=>\@data2});
+}
+
+$tmpl->param(loop1=>\@data1);
+
+$expect = <<'EOF';
+first
+loop1 before 1 1 2
+loop2 10 11 10
+loop2 11 12 11
+loop1 after  1 1 2
+loop1 before 2 4 0
+loop1 after  2 4 0
+loop1 before 3 9 4
+loop2 10 13 30
+loop2 11 14 33
+loop2 12 15 36
+loop2 13 16 39
+loop1 after  3 9 4
+last
+EOF
+
+$res = $tmpl->expand('loops.in');
+$ok = ($res eq $expect);
+
+# print STDERR ">>\n$expect<<\n>>\n$res<<\n";
+
+print($ok ? "ok $test\n" : "not ok $test\n");
+
+
+
+
+
+
+
+
+
+
+$test = 3;				# messages
+
+$tmpl->clear;
+
+$text = <<'EOF';
+start
+#ifdef test1
+#warn no message here
+#endif
+#warn message here
+this is an $(error)
+done
+messages
+#messages
+messages end
+EOF
+
+$expect = <<'EOF';
+first
+test1 = yes
+not test2
+last
+EOF
+
+$res = $tmpl->expand(\$text);
+$ok = ($res eq $expect);
+
+print STDERR ">>\n$expect<<\n>>\n$res<<\n";
+
+print($ok ? "ok $test\n" : "not ok $test\n");
+
+
+
+
+
+
+

@@ -1,0 +1,59 @@
+#!/usr/bin/perl -w
+print "1..4\n";
+
+use WebObvius::Template;
+
+tie %tmpl, WebObvius::Template, path=>'t', trace=>4;
+
+my $test;
+my $ok;
+
+my $text;
+my $res;
+my $expect;
+
+$text = <<'EOF';
+first
+#ifdef test1
+test1 = $(test1)
+# ifdef test2
+test2 = $(test2)
+# else !test2
+not test2
+# fi
+#else !test1
+not test1
+# ifdef test2
+test2 = $(test2)
+# else !test2
+not test2
+# fi
+#endif
+last
+EOF
+
+
+
+$test = 4;				# test1 and test2
+
+$tmpl = ();
+$tmpl{test1} = 'yes';
+$tmpl{test2} = 'yes yes';
+
+$expect = <<'EOF';
+first
+test1 = yes
+test2 = yes yes
+last
+EOF
+
+$res = tied(%tmpl)->expand (\$text);
+$ok = ($res eq $expect);
+
+while (my ($k, $v) = each %tmpl) {
+    print STDERR "ITERATE $k => $v\n";
+}
+
+#print STDERR ">>\n$expect<<\n>>\n$res<<\n";
+
+print($ok ? "ok $test\n" : "not ok $test\n");

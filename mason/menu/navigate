@@ -1,0 +1,3 @@
+<& SELF:menu_box_begin, title=>'Navigator' &>
+
+<& SELF:menu_entry, title=>'Navigate', link=>"javascript:OpenWin('/admin/?obvius_op=navigator&path=$uri',750,550);" &>

@@ -1,0 +1,33 @@
+	<font color="#666666"><& SELF:msg, text=>'Path' &>:</font>
+% map {
+        <a href="<% $_->{sofar} %>"><& SELF:shorten, text=>$_->{title}, len=>20 &></a> /
+% } @$outpath;
+        <strong><& SELF:shorten, text=>($vdoc->field('short_title') ? $vdoc->Short_title : $vdoc->Title), len=>20 &></strong>
+%
+<%method find_outpath>
+<%perl>
+unless ($r->pnotes('outpath')) {
+    $obvius->get_version_fields($vdoc);
+    my @path=$obvius->get_doc_path($doc);
+    pop @path;
+    my $sofar="/admin/";
+    my @outpath;
+    map {
+	my $vdoc=$obvius->get_public_version($_);
+	my $not_public=($vdoc ? 0 : 1);
+	$vdoc=$obvius->get_latest_version($_) unless ($vdoc);
+	$obvius->get_version_fields($vdoc);
+	my $title=$vdoc->field('short_title');
+	$title=$vdoc->Title unless ($title);
+	$sofar.=$_->Name . "/" unless $_->Id == 1;
+	push @outpath, { sofar=>$sofar, title=>$title, not_public=>$not_public };
+    } @path;
+    $r->pnotes(outpath=>\@outpath);
+}
+</%perl>
+</%method>
+%
+<%init>
+$m->scomp('/header/pathinfo:find_outpath');
+my $outpath=$r->pnotes('outpath');
+</%init>

@@ -1,0 +1,336 @@
+<script language="javascript">
+    // This function sets the obvius_op to 'dbsearch'.
+    // It is only usefull in the admin system.
+    function set_dbsearch_obvius_op() {
+        if(document.pageform && document.pageform.obvius_op) {
+            document.pageform.obvius_op.value='dbsearch';
+        }
+    }
+</script>
+
+%if($output->param('start')) {
+% my $teaser = $obvius->get_version_field($vdoc, 'teaser');
+<& /shared/htmlize, text => $teaser &>
+%}
+
+%if(@$docs) {
+<div align="center">
+<& pager, output=>$output, format=>$format &>
+<a href="<% $prefix . $uri %>">Ny søgning</a><br>
+<br>
+</div>
+<table border=0 width="100%">
+% my $counter=1;
+% for(@$docs) {
+    <tr>
+%if($output->param('page')) {
+            <td><% ($_->{doc_index} + 1) %>.</td>
+%} else {
+            <td><% $counter++ %>.</td>
+%}
+        <td width="100%">
+            <a href="<% $_->{url} %>"><% $_->{short_Title} ? $_->{short_Title} : $_->{title} %></a>
+        </td>
+    </tr>
+%   if($_->{teaser} and $_->{teaser} !~ /^\s+$/) {
+        <tr>
+            <td>&nbsp;</td>
+            <td><& /shared/htmlize, text=>$_->{teaser} &></td>
+        </tr>
+%   }
+%#  Hvis teaseren er defineret skal vi have docdate med
+%#  (Kan ikke checke på docdate, da de altid er der)
+%   if(defined($_->{teaser})) {
+        <tr>
+            <td> &nbsp;</td>
+            <td><& /shared/display_date, date=>$_->{docdate} &></td>
+        </tr>
+%   }
+% }
+</table>
+%} else {
+% if($no_results) {
+    <br>
+    <b>Der blev ikke fundet nogen dokumenter.</b><br>
+    Prøv at justere dine søgekriterier herunder.<br>
+    <br>
+% }
+
+%     if (my $form=$obvius->get_version_field($vdoc, 'form')) {
+<% $form %>
+%     }
+%     else {
+<form method="post" action="<% $prefix . $uri %>">
+<input type="hidden" name="op" value="dbsearch">
+
+<table border="0" cellpadding="0" cellspacing="0">
+
+<tr><td colspan="3" class="searchheader">Søg efter: </td></tr>
+
+<tr>
+<td><small><select name="field1">
+<option <% $field1 eq 'title'        ? 'selected' : '' %> value="title"        >Titel
+<option <% $field1 eq 'content'      ? 'selected' : '' %> value="content"      >Tekst
+<option <% $field1 eq 'author'       ? 'selected' : '' %> value="author"       >Forfatter
+<option <% $field1 eq 'docdate'      ? 'selected' : '' %> value="docdate"      >Dato (åååå-mm-dd)
+<option <% $field1 eq 'docref'       ? 'selected' : '' %> value="docref"       >Reference
+<option <% $field1 eq 'teaser'       ? 'selected' : '' %> value="teaser"       >Kort beskrivelse
+<option <% $field1 eq 'url'          ? 'selected' : '' %> value="url"          >Web-adresse
+<option <% $field1 eq 'source'       ? 'selected' : '' %> value="source"       >Kilde
+<option <% $field1 eq 'category'     ? 'selected' : '' %> value="category"     >Klassifikation
+</select></small>
+</td>
+
+<td><small><select name="how1">
+<option <% $how1 eq 'equal' ?   'selected' : '' %> value="equal"   >er lig
+<option <% $how1 eq 'prefix' ?  'selected' : '' %> value="prefix"  >begynder med
+<option <% $how1 eq 'contain' ? 'selected' : '' %> value="contain" >indeholder
+</select></small>
+</td>
+
+<td>
+<small><input name="data1" size="16" value="<% $data1 |h %>"></small>
+</td>
+
+</tr>
+
+<tr><td colspan="3" height="15"></td></tr>
+
+<tr>
+<td colspan="3" class="DBSearchText">
+<input type="radio" name="op2" value="and"     <% $op2 eq 'and'     ? 'checked' : '' %> >og
+<input type="radio" name="op2" value="or"      <% $op2 eq 'or'      ? 'checked' : '' %> >eller
+<input type="radio" name="op2" value="and not" <% $op2 eq 'and not' ? 'checked' : '' %> >ikke
+</td></small>
+</tr>
+
+<tr>
+<td><small><select name="field2">
+<option <% $field2 eq 'title'        ? 'selected' : '' %> value="title"        >Titel
+<option <% $field2 eq 'content'      ? 'selected' : '' %> value="content"      >Tekst
+<option <% $field2 eq 'author'       ? 'selected' : '' %> value="author"       >Forfatter
+<option <% $field2 eq 'docdate'      ? 'selected' : '' %> value="docdate"      >Dato (åååå-mm-dd)
+<option <% $field2 eq 'docref'       ? 'selected' : '' %> value="docref"       >Reference
+<option <% $field2 eq 'teaser'       ? 'selected' : '' %> value="teaser"       >Kort beskrivelse
+<option <% $field2 eq 'url'          ? 'selected' : '' %> value="url"          >Web-adresse
+<option <% $field2 eq 'source'       ? 'selected' : '' %> value="source"       >Kilde
+<option <% $field2 eq 'category'     ? 'selected' : '' %> value="category"     >Klassifikation
+</select></small>
+</td>
+
+<td><small><select name="how2">
+<option <% $how2 eq 'equal' ?   'selected' : '' %> value="equal"   >er lig
+<option <% $how2 eq 'prefix' ?  'selected' : '' %> value="prefix"  >begynder med
+<option <% $how2 eq 'contain' ? 'selected' : '' %> value="contain" >indeholder
+</select></small>
+</td>
+
+<td><small><input name="data2" size="16" value="<% $data2 |h %>"></small>
+</td>
+
+</tr>
+
+<tr><td colspan="3" height="15"></td></tr>
+
+<tr>
+<td colspan="3" class="DBSearchText">
+<input type="radio" name="op3" value="and"     <% $op3 eq 'and'     ? 'checked' : '' %> >og
+<input type="radio" NAME="op3" value="or"      <% $op3 eq 'or'      ? 'checked' : '' %> >eller
+<input type="radio" name="op3" value="and not" <% $op3 eq 'and not' ? 'checked' : '' %> >ikke
+</td></small>
+</tr>
+
+<tr>
+<td><small><select name="field3">
+<option <% $field3 eq 'title'        ? 'selected' : '' %> value="title"        >Titel
+<option <% $field3 eq 'content'      ? 'selected' : '' %> value="content"      >Tekst
+<option <% $field3 eq 'author'       ? 'selected' : '' %> value="author"       >Forfatter
+<option <% $field3 eq 'docdate'      ? 'selected' : '' %> value="docdate"      >Dato (åååå-mm-dd)
+<option <% $field3 eq 'docref'       ? 'selected' : '' %> value="docref"       >Reference
+<option <% $field3 eq 'teaser'       ? 'selected' : '' %> value="teaser"       >Kort beskrivelse
+<option <% $field3 eq 'url'          ? 'selected' : '' %> value="url"          >Web-adresse
+<option <% $field3 eq 'source'       ? 'selected' : '' %> value="source"       >Kilde
+<option <% $field3 eq 'category'     ? 'selected' : '' %> value="category"     >Klassifikation
+</select></small>
+</td>
+
+<td><small><select name="how3">
+<option <% $how3 eq 'equal' ?   'selected' : '' %> value="equal"   >er lig
+<option <% $how3 eq 'prefix' ?  'selected' : '' %> value="prefix"  >begynder med
+<option <% $how3 eq 'contain' ? 'selected' : '' %> value="contain" >indeholder
+</select></small>
+</td>
+
+<td><small><input name="data3" size="16" value="<% $data3 |h %>"></small>
+</td>
+
+</tr>
+
+<tr><td colspan="3" height="15"></td></tr>
+
+<input type="hidden" name="op4" value="and">
+<input type="hidden" name="how4" value="equal">
+<input type="hidden" name="field4" value="category">
+
+<tr>
+<td colspan="3" valign="middle">
+Vælg eventuel klassifikationskode:<br/>
+<select name="data4">
+    <option value="">Ingen</option>
+    <option value="">-------------------</option>
+%   my $old_nr = '01';
+%   for(@$categories) {
+%       my ($nr) = ($_->{id} =~ /^(\d+)/);
+%       if($nr != $old_nr) {
+            <option value="">-------------------</option>
+%           $old_nr = $nr;
+%       }
+    <option value="<% $_->{id} %>" <% $data4 eq $_->{id} ? 'selected' : '' %>><% $_->{id} . " " . $_->{name} %></option>
+%   }
+    <option value="">-------------------</option>
+</select>
+</td>
+</tr>
+
+<tr><td colspan="3" height="20"></td></tr>
+
+<tr><td colspan="3" class="searchheader">Begræns søgningen til dokumenter på følgende sprog:</td></tr>
+
+<tr>
+<td colspan="3">
+
+<input type="hidden" name="op8" value="and">
+<input type="hidden" name="field8" value="lang">
+<input type="hidden" name="how8" value="one-of">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td width="33%" class="DBSearchText"><nobr><input type="checkbox" name="data8" value=da <% (grep{ $_ eq 'da' } @$data8) ? 'checked' : '' %> >Dansk</nobr></td>
+<td width="33%" class="DBSearchText"><nobr><input type="checkbox" name="data8" value=en <% (grep{ $_ eq 'en' } @$data8) ? 'checked' : '' %> >Engelsk</nobr></td>
+<td width="33%" class="DBSearchText"><nobr><input type="checkbox" name="data8" value=fr <% (grep{ $_ eq 'fr' } @$data8) ? 'CHECKED' : '' %> >Fransk</nobr></td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+<tr><td colspan="3" height="20"></td></tr>
+
+<tr><td colspan="3" class="searchheader">Vælg antal dokumenter, der vises af gangen:</td></tr>
+
+<tr>
+<td colspan="3">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value=10  <% $pagesize eq '10'  ? 'checked' : '' %> >10</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value=20  <% $pagesize eq '20'  ? 'checked' : '' %> >20</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="50"  <% $pagesize eq '50'  ? 'checked' : '' %> >50</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="100" <% $pagesize eq '100' ? 'checked' : '' %> >100</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value=0   <% $pagesize eq '0'   ? 'checked' : '' %> >Alle</td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+<tr><td colspan="3" height="20"></td></tr>
+
+<tr><td colspan="3" class="searchheader">Vælg hvilken rækkefølge de fundne dokumenter skal vises i:</td></tr>
+
+<tr>
+<td colspan="3">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td class="DBSearchText"><input type="radio" name="sortorder" value="docdate" <% $sortorder eq 'docdate' ? 'checked' : '' %> >nyeste først</td>
+<td class="DBSearchText"><input type="radio" name="sortorder" value="version" <% $sortorder eq 'version' ? 'checked' : '' %> >sidst ændrede først</td>
+<td class="DBSearchText"><input type="radio" name="sortorder" value="title"   <% $sortorder eq 'title'   ? 'checked' : '' %> >alfabetisk ordnet</td>
+</tr>
+</table>
+
+
+</td>
+</tr>
+
+<tr><td colspan="3" height="20"></td></tr>
+
+<tr><td colspan="3" class="searchheader">Vælg fremvisningsformat for de fundne dokumenter:</td></tr>
+
+<tr>
+<td colspan="3" class="DBSearchText">
+<input type="radio" name="format" value="short" <% $format eq 'short' ? 'checked' : '' %> >kun titel
+&nbsp;&nbsp;&nbsp;
+<input type="radio" name="format" value="long"  <% $format eq 'long'  ? 'checked' : '' %> >med resumé og alder
+</td>
+</tr>
+
+
+<tr><td colspan="3" height="30"></td></tr>
+
+<tr>
+<td align="center" colspan="3">
+<input class="button" type="submit" value="  Start søgning  " onclick="javascript:set_dbsearch_obvius_op()">
+</td>
+</tr>
+
+</table>
+</form>
+%     }
+%}
+<%args>
+$output
+</%args>
+<%init>
+my $docs = $output->param('kwdocs');
+$docs = [] unless($docs);
+
+my $no_results = $output->param('no_results');
+
+#Set som reasonable defaults
+
+my $op1 = $output->param('op1');
+$op1 = $op1 ? $op1 : 'and';
+my $field1 = $output->param('field1');
+$field1 = $field1 ? $field1 : 'title';
+my $how1 = $output->param('how1');
+$how1 = $how1 ? $how1 : 'contain';
+my $data1 = $output->param('data1');
+$data1 = $data1 ? $data1 : '';
+
+my $op2 = $output->param('op2');
+$op2 = $op2 ? $op2 : 'and';
+my $field2 = $output->param('field2');
+$field2 = $field2 ? $field2 : 'teaser';
+my $how2 = $output->param('how2');
+$how2 = $how2 ? $how2 : 'contain';
+my $data2 = $output->param('data2');
+$data2 = $data2 ? $data2 : '';
+
+my $op3 = $output->param('op3');
+$op3 = $op3 ? $op3 : 'and';
+my $field3 = $output->param('field3');
+$field3 = $field3 ? $field3 : 'docdate';
+my $how3 = $output->param('how3');
+$how3 = $how3 ? $how3 : 'equal';
+my $data3 = $output->param('data3');
+$data3 = $data3 ? $data3 : '';
+
+my $data4 = $output->param('data4');
+$data4 = $data4 ? $data4 : '';
+
+my $data8 = $output->param('data8');
+$data8 = [ 'da', 'en' ] unless($data8 and ref($data8) eq 'ARRAY');
+
+my $pagesize = $output->param('pagesize');
+$pagesize = $pagesize ? $pagesize : 10;
+
+my $sortorder = $output->param('sortorder');
+$sortorder = $sortorder ? $sortorder : 'docdate';
+
+my $format = $output->param('format');
+$format = $format ? $format : 'long';
+
+my $categories=$obvius->get_table_data('categories');
+$categories = [] unless $categories;
+</%init>

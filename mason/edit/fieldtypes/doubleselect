@@ -1,0 +1,206 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+  <script language="javascript">
+    // build the array
+    var array<% $name %> = [
+% foreach (@categories) {
+    { id: "<% $_->{id} %>", amt: "<% $_->{amt} %>", name: "<& SELF:shorten, text=>$_->{name}, len=>50 &>", selected: <% $selected{$_->{id}} ? '1' : '0' %> },
+% }
+    null
+    ];
+
+  function update_<% $name %>_stored_value() {
+    var trove = document.pageform.sel<% $name %>;
+    var stored_value=document.pageform.<% $name %>;
+    var new_value="";
+    for (var i = 0; i < trove.options.length; i++) {
+	new_value=new_value+trove.options[i].value+'\n';
+    }
+    stored_value.value=new_value;
+
+    return true;
+  }
+
+
+  
+  function populate_submenu_<% $name %>() {
+    document.pageform.sub<% $name %>.options.length = 0;
+    var region = document.pageform.main<% $name %>.options[document.pageform.main<% $name %>.selectedIndex > 
+    0 ? document.pageform.main<% $name %>.selectedIndex : 0].value;
+
+    for (var i = 0; i < array<% $name %>.length; i++) {
+      if (array<% $name %>[i] != null) {
+        if (array<% $name %>[i].amt == region) {
+          var option = new Option(array<% $name %>[i].name, array<% $name %>[i].id);
+          document.pageform.sub<% $name %>.options[document.pageform.sub<% $name %>.options.length] = option;
+        }
+      }
+    }
+  }
+
+  function is_already_selected () {
+    for (var i = 0; i < document.pageform.sel<% $name %>.options.length; i++) {
+      var selectedValue = document.pageform.sub<% $name %>.options[document.pageform.sub<% $name %>.selectedIndex].value;
+      if (document.pageform.sel<% $name %>[i].value == selectedValue) {
+        return 1;
+      }
+    }
+     return 0;
+  }  
+
+  function add<% $name %>Item () {
+    if (document.pageform.sub<% $name %>.selectedIndex >= 0 && !is_already_selected()) {
+      var newtext = document.pageform.sub<% $name %>.options[document.pageform.sub<% $name %>.selectedIndex].value;
+      var newvalue = document.pageform.sub<% $name %>.options[document.pageform.sub<% $name %>.selectedIndex].text;
+      var option = new Option(newvalue, newtext);
+      document.pageform.sel<% $name %>.options[document.pageform.sel<% $name %>.options.length] = option;
+    }
+    update_<% $name %>_stored_value();
+  }
+
+  function remove<% $name %>Item() {
+    trove = document.pageform.sel<% $name %>;
+    var done;
+
+    do {
+	done = 1;
+	for (var i = 0; i < trove.options.length; i++) {
+	    if (trove.options[i].selected) {
+		trove.options[i] = null;
+		done = 0;
+		break;
+	    }
+	}
+    } while (!done);
+    update_<% $name %>_stored_value();
+  }
+
+  </script>
+
+  <select name="main<% $name %>" onchange="populate_submenu_<% $name %>()" tabindex="10">
+% for (@amter) {
+    <option value="<% $_->{kode} %>"><% $_->{fuldt_navn} %></option>
+% }
+  </select>
+  <br><br>
+
+  <select name="sub<% $name %>" tabindex="10"></select>&nbsp;&nbsp;<input type="button" onClick="add<% $name %>Item()" value="Tilføj">
+	<input type="button" onClick="remove<% $name %>Item()" value="Fjern">
+  <br><br>
+	      
+
+<select class="dataclassificationmenu" name="sel<% $name %>" multiple size="8" tabindex="10">
+% map {
+%   if ($selected{$_->{id}}) {
+<option value="<% $_->{id} %>"><% $_->{name} %></option>
+% } } @categories;
+</select>
+
+<input type="hidden" name="<% $name %>">
+
+<script language="javascript">
+    update_<% $name %>_stored_value();
+    populate_submenu_<% $name %>()
+</script>
+
+<%args>
+   $doctype=>"Fiskeforening"
+</%args>
+%
+<%init>
+my $lokalforening_doctype = $obvius->get_doctype_by_name($doctype);
+my $lokalforening_id = $lokalforening_doctype->Id;
+
+my %search_options =    (
+			 notexpired=>1,
+			 nothidden=>1,
+			 order => 'category, title',
+			 public=>1,
+                        );
+
+my $test_cat = $obvius->search(['category', 'title'], 
+			     " type=" . $lokalforening_id . " and category like \'02%\'",
+			      %search_options);
+
+my $categories_db = $obvius->get_table_data('categories');
+
+my @categories;
+my @amter;
+my $amtskode = "00";
+my $amtskode_org = "";
+
+for (@$test_cat) {
+    my $category = $_->Category;
+
+    if ($amtskode_org ne $category) {
+	$amtskode++;
+	$amtskode_org = $category;
+	push (@amter, {
+		       fuldt_navn=>get_amtsnavn($category, $categories_db),
+		       kode => $category
+		      }
+	     );
+    }
+    push (@categories, {
+			amtskode=>$amtskode,
+			amt=>$category,
+			id=>$_->Docid,
+			name=>escape_html($_->Title)
+		       }
+	 );
+}
+
+# finder de valgte
+my $value=$session->{fields_out}->param($name);
+   $value=$session->{fields_in}->param($name) unless (defined $value);
+
+my %selected;
+map {
+    $selected{$_}=1;
+} @$value;
+
+sub get_amtsnavn {
+    my ($amtskode, $categories_db) = (shift, shift);
+    for (@$categories_db) {
+       if ($_->{id} eq $amtskode) {
+         return $_->{name};
+       }
+    }
+    return "Undefined";
+}
+
+sub escape_html {
+    $_ = shift;
+    s/&/ og /g;
+    s/\"/\\"/g;
+    s/\n/<br>/g;
+    return $_;
+}
+</%init>
+
+</%method>
+%
+<%method cook>
+%# cook er metoden, der laver inputtet fra formen om til output til databasen
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$value=>undef
+</%args>
+
+<%perl>
+if (defined $value) {
+    $value=~s/\r//g;
+    my @values=map { $fieldtype->copy_in($obvius, $fieldspec, $_) } split /\n/, $value;
+    $value=\@values;
+}
+return $value;
+</%perl>
+</%method>

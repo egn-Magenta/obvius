@@ -1,0 +1,50 @@
+% foreach my $k (sort keys %metadata) {
+%     if ($metadata{$k}) {
+    <meta name="<% $k %>" content="<% $metadata{$k} |h %>"<% $endtag %>>
+%     }
+% }
+%
+% if (my $v=$vdoc->field('category')) {
+%     foreach my $cat (@$v) {
+    <meta name="DC.Subject" content="<% $cat->Name |h %>"<% $endtag %>>
+%     }
+% }
+% if (my $v=$vdoc->field('keyword')) {
+%     foreach my $kw (@$v) {
+    <meta name="DC.Subject" content="<% $kw->Name |h %>"<% $endtag %>>
+%     }
+% }
+% if (my $v=$vdoc->field('docdate')) {
+    <meta name="DC.Date" scheme="ISO8601" content="<% substr($v, 0, 10) %>"<% $endtag %>>
+% }
+% if (my $v=$vdoc->field('lang') || 'da') {
+    <meta name="DC.Language" scheme="ISO639-1" content="<% $v |h %>"<% $endtag %>>
+% }
+%
+<%args>
+$publisher=>undef
+$rights=>undef
+$format=>'text/html'
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title version author category keyword teaser
+				     docdate lang docref source expires)]);
+my %metadata=(
+	      'DC.Title'=>$vdoc->Title,
+	      'DC.Title.Release'=>$vdoc->Version,
+	      'DC.Creator'=>$vdoc->field('author'),
+	      'DC.Subject'=>$vdoc->field('subject'),
+	      'DC.Description'=>$m->scomp('/shared/htmlunmap', text=>$vdoc->field('teaser')),
+	      'DC.Publisher'=>$publisher,
+	      'DC.Format'=>$format,
+	      'DC.Identifier'=>$vdoc->field('docref'),
+	      'DC.Source'=>$vdoc->field('source'),
+	      'DC.Coverage'=>($vdoc->field('expires') eq '9999-01-01 00:00:00' ? undef : $vdoc->field('expires')),
+	      'DC.Rights'=>$rights,
+	     );
+
+# DC.Type?
+
+my $endtag=($format eq 'text/xhtml' ? ' /' : '');
+</%init>

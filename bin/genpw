@@ -1,0 +1,3 @@
+#!/bin/sh
+# $Id$	
+echo "$(date) $$ $(ls /tmp)" | md5sum | cut -c1-16

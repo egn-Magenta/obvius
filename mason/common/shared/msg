@@ -1,0 +1,21 @@
+<%args>
+$text
+</%args>\
+<% $text %>\
+%
+<%init>
+unless (defined $obvius->{TRANSLATIONS}) {
+    warn "admin/common/shared/msg: No message-catalogue ever read - no translation done";
+    return $text;
+}
+
+$text =~ s/\r//g;
+$text =~ s/\n/ /g;
+
+if (exists $obvius->{TRANSLATIONS}->{$text}) {
+    $text = $obvius->{TRANSLATIONS}->{$text}
+}
+else {
+    print STDERR "admin/common/shared/msg: No translation available for »$text«\n";
+}
+</%init>

@@ -1,0 +1,253 @@
+%
+<%method edit>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+
+my @sorted_options =  sort {
+                                my ($_a) = ($a =~ /^(\d+)/);
+                                my ($_b) = ($b =~ /^(\d+)/);
+                                $_a <=> $_b;
+                            } @$value;
+my @options;
+for(@sorted_options) {
+    my ($val1, $val2) = /(\d+);(\d+)/;
+    push(@options, {
+                        name => $val1 . ",- kr til " . $val2 . ",- kr",
+                        value => "$val1;$val2"
+                    });
+}
+
+</%init>
+%
+<!-- data format: sortorder¤type¤text1¤text2¤text3 -->
+<script language="javascript">
+
+function <% $name %>_add_to_list() {
+    var text = <% $name %>_fields_to_text();
+    if(! text) {
+        return;
+    }
+    var value = <% $name %>_fields_to_value();
+    if(! value) {
+        return;
+    }
+
+    var o = new Option(text, value);
+    document.pageform.<% $name %>.options[document.pageform.<% $name %>.options.length] = o;
+    document.pageform.<% $name %>.selectedIndex = -1;
+    document.pageform.<% $name %>.selectedIndex = document.pageform.<% $name %>.options.length - 1;
+
+    <% $name %>_sort_list();
+}
+
+function <% $name %>_delete_from_list() {
+    if(document.pageform.<% $name %>.selectedIndex == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den');
+    } else {
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex] = null;
+        <% $name %>_empty_fields();
+        document.pageform.<% $name %>.selectedIndex = -1;
+    }
+}
+
+function <% $name %>_save_changes() {
+    if(document.pageform.<% $name %>.selectedIndex == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den');
+    } else {
+        var text = <% $name %>_fields_to_text();
+        if(! text) {
+            return;
+        }
+        var value = <% $name %>_fields_to_value();
+        if(! value) {
+            return;
+        }
+
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].value = value;
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex].text = text;
+
+        <% $name %>_sort_list();
+    }
+}
+
+function <% $name %>_empty_fields() {
+    document.pageform.obvius_<% $name %>_low.value = '';
+    document.pageform.obvius_<% $name %>_high.value = '';
+}
+
+function <% $name %>_fields_to_text() {
+    var low = document.pageform.obvius_<% $name %>_low.value;
+    var high = document.pageform.obvius_<% $name %>_high.value;
+
+    if(! low) {
+        alert('Du skal angive en lav værdi');
+        return;
+    }
+    if(! low.match(/^\d+$/)) {
+        alert('Du skal angive et tal som den lave værdi');
+        return;
+    }
+    if(! high) {
+        alert('Du skal angive en høj værdi');
+        return;
+    }
+    if(! low.match(/^\d+$/)) {
+        alert('Du skal angive et tal som den høje værdi');
+        return;
+    }
+
+    return low + ",- kr til " + high + ",- kr";
+}
+
+function <% $name %>_fields_to_value() {
+    var textstr = '';
+
+    var low = document.pageform.obvius_<% $name %>_low.value;
+    var high = document.pageform.obvius_<% $name %>_high.value;
+
+    if(! low) {
+        alert('Du skal angive en lav værdi');
+        return;
+    }
+    if(! low.match(/^\d+$/)) {
+        alert('Du skal angive et tal som den lave værdi');
+        return;
+    }
+    if(! high) {
+        alert('Du skal angive en høj værdi');
+        return;
+    }
+    if(! low.match(/^\d+$/)) {
+        alert('Du skal angive et tal som den høje værdi');
+        return;
+    }
+
+    return low + ";" + high;
+}
+
+function <% $name %>_load_from_value(text) {
+    var splitted = text.split(";");
+
+    document.pageform.obvius_<% $name %>_low.value = splitted[0];
+    document.pageform.obvius_<% $name %>_high.value = splitted[1];
+}
+
+function <% $name %>_onchange_handler() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        <% $name %>_empty_fields();
+    } else {
+        <% $name %>_load_from_value(document.pageform.<% $name %>.options[sel].value);
+    }
+}
+
+function <% $name %>_swap(o1, o2) {
+    var tmptext = o1.text;
+    var tmpval = o1.value;
+
+    o1.text = o2.text;
+    o1.value = o2.value;
+
+    o2.text = tmptext;
+    o2.value = tmpval;
+}
+
+function <% $name %>_sort_list() {
+    var o_array = document.pageform.<% $name %>.options;
+    
+    var length = o_array.length;
+    
+    for(var i = 0; i < length - 1; i++) {
+        for(var j = i + 1; j < length; j++) {
+            var val1 = o_array[i].value.split(";")[0];
+            var val2 = o_array[j].value.split(";")[0];
+            // alert("Comparing (" + i + ") " + val1 + " with (" + j + ") " + val2);
+            if(parseInt(val1) > parseInt(val2)) {
+                <% $name %>_swap(o_array[i], o_array[j]);
+            }
+        }
+    }
+    
+    document.pageform.<% $name %>.selectedIndex = -1;
+    <% $name %>_empty_fields();
+}
+
+function <% $name %>_select_all() {
+    for(var i = 0; i < document.pageform.<% $name %>.options.length; i++) {
+        document.pageform.<% $name %>.options[i].selected = 1;
+    }
+}
+
+// Add to onsubmit list:
+
+onsubmit_array[onsubmit_array.length] = function() {
+    if(document.pageform.<% $name %>.selectedIndex != -1) {
+        <% $name %>_save_changes(); // Save what was last modified
+    }
+}
+onsubmit_array[onsubmit_array.length] = <% $name %>_select_all;
+</script>
+
+<table border="0">
+    <tr>
+        <td>
+            <select name="<% $name %>" multiple size="10" onchange="<% $name %>_onchange_handler()" tabindex="10">
+%for(@options) {
+                <option value="<% $_->{value} |h%>"><% $_->{name} |h %></option>
+%}
+            </select>
+        </td>
+        <td valign="top">
+            &nbsp;
+        </td>
+    </tr>
+</table>
+<br>
+<table border="0">
+    <tr>
+        <td>
+            <input type="button" onclick="<% $name %>_add_to_list()" value="Tilføj til listen">
+            <input type="button" onclick="<% $name %>_delete_from_list()" value="Slet fra listen">
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <input type="button" onclick="<% $name %>_save_changes()" value="Gem ændringer til listen">
+        </td>
+    </tr>
+</table>
+<br>
+Laveste pris <input type="text" size="12" name="obvius_<% $name %>_low" tabindex="10">
+Højeste pris <input type="text" size="12" name="obvius_<% $name %>_high" tabindex="10">
+%
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+return $value;
+</%perl>
+</%method>

@@ -1,0 +1,29 @@
+a:link { color: #91001d; background: transparent; }
+a:visited { color: #540010; background: transparent; }
+a:active { color: #f98752; background: transparent; }
+a:hover { color: #540010; background: #fff5ad; }
+
+h1 { font-size: 1.22em; }
+h2 { font-size: 1.2em;  }
+h3 { font-size: 1.1em;  }
+h4 { font-size: 1em;    }
+h5 { font-size: 0.9em;  }
+
+img { border: none }
+
+div.breadcrumbs {
+	font-size: 10px;
+}
+
+.enddate {
+	font-size: small;
+  color: gray;
+  background: transparent;
+}
+
+/*
+ Local Variables: ***
+ mode:c ***
+ tab-width:2 ***
+ End: ***
+*/

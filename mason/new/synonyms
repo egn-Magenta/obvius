@@ -1,0 +1,163 @@
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+%
+<%args>
+$obvius_session=>undef
+$obvius_id=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /new/synonyms\n";
+
+my $session;
+
+$session=$r->pnotes('site')->get_session();
+die "No session available - fatally wounded.\n" unless ($session);
+
+my %page=(
+	  title=>(defined $obvius_id ? 'Edit synonyms' : 'New synonyms'),
+	  description=>'',
+	  comp=>'/edit/page',
+	 );
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my @fieldlist;
+foreach my $field (@fields) {
+    my $xref='';
+    my $hidden;
+    if ($field->{options} =~ /^\((.*)\)$/) {
+	$xref=$1;
+	if ($field->{options} =~ /hidden/) {
+	    $xref=undef;
+	    $hidden=1;
+	    next unless (defined $obvius_id); # Don't show fields that are hidden when creating
+	}
+    }
+    push @fieldlist, { (defined $hidden ? '' : title=>$field->{title}),
+		       fieldspec=>new Obvius::FieldSpec({
+					fieldtype=>new Obvius::FieldType({
+						validate_args=>(defined $hidden ? '' : '\s') ,
+						name=>($xref eq '' ? (defined $hidden ? 'hidden' : 'line') : 'xref'),
+						value_field=>'text',
+						bin=>0,
+						validate=>($xref eq '' ? 'regexp' : 'xref'),
+						edit=>($xref eq '' ? (defined $hidden ? 'hidden' : 'line') : 'xref'),
+						edit_args=>$xref,
+					       }),
+				        default_value=>undef,
+				        name=>$field->{name},
+				        optional=>0,
+				        searchable=>0,
+				        repeatable=>($xref eq '' ? 0 : 1),
+				       }),
+		     }
+}
+
+$page{fieldlist}=\@fieldlist;
+$session->{pages}=[ \%page ];
+
+my $fields=new Obvius::Data;
+if (defined $obvius_id) {
+    if (my $synonyms=$obvius->get_synonyms($obvius_id)) {
+	foreach (keys %$synonyms) {
+	    $fields->param($_=>$synonyms->{$_});
+	}
+    }
+}
+$session->{fields_in}=$fields;
+$session->{fields_out}=new Obvius::Data;
+$session->{document}=$doc;
+$session->{version}=$vdoc;
+$session->{doctype}=$doctype;
+$session->{validate_comp}='/edit/validate/page_synonyms';
+$session->{done_comp}='/edit/save/synonyms';
+$session->{done_label}='Save';
+
+$obvius_session=$session->{_session_id};
+$r->pnotes(session=>$session);
+$r->notes(obvius_session=>$obvius_session);
+</%init>
+%
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+print STDERR ">>> /new/synonyms:Do\n";
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my $synonyms={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
+my $ret;
+if ($obvius->get_synonyms($session->{fields_out}->param('id'))) {
+    print STDERR "call update_synonyms\n";
+    $ret=$obvius->update_synonyms($synonyms);
+}
+else {
+    print STDERR "call create_synonyms\n";
+    $ret=$obvius->create_new_synonyms($synonyms);
+}
+
+$m->comp('update_synonyms_file');
+
+return $ret;
+</%perl>
+</%method>
+%
+<%method ReallyDelete>
+<%args>
+$obvius_id
+</%args>
+
+% # <form action="<% $prefix %><% $uri %>" method="post" enctype="multipart/form-data">
+
+<h3 class="admin"><& SELF:msg, text=>'Confirm remove' &></h3>
+
+<p>
+<input type="hidden" name="obvius_op" value="tablelist">
+<input type="hidden" name="obvius_comp" value="/new/synonyms:Delete">
+<input type="hidden" name="obvius_id" value="<% $obvius_id %>">
+<& SELF:msg, text=>'Really delete synonyms' &>?
+</p>
+
+<input type="submit" class="okknap" value="<& SELF:msg, text=>'Remove' &>" accesskey="S">
+<input type="button" class="cancelknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
+
+%
+<%init>
+print STDERR ">>> /new/synonyms:ReallyDelete\n";
+</%init>
+</%method>
+%
+<%method Delete>
+<%args>
+$obvius_id
+</%args>
+<& /done &>
+<%init>
+$obvius->delete_synonyms($obvius_id);
+$m->comp('update_synonyms_file');
+</%init>
+</%method>
+%
+<%def update_synonyms_file>
+<%perl>
+# Update the synonyms-file:
+if (my $syn_file=Apache::File->new(">" . $r->pnotes('site')->{SYNONYMS_FILE})) {
+    map { print $syn_file $_->{synonyms} . "\n"; } @{$obvius->get_table_data('synonyms')};
+    $syn_file->close();
+}
+else {
+    print STDERR " Couldn't update synonyms-file! (". ($r->pnotes('site')->{SYNONYMS_FILE}) .")\n";
+}
+</%perl>
+</%def>

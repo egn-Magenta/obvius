@@ -1,0 +1,57 @@
+% if ($page_max>1) {
+<!-- begin pager -->
+%if($page) {
+    <p class="pager">
+    Viser <% $doc_first %>-<% $doc_last %> af <% $doc_total %> dokumenter.
+    <BR>
+
+% if($page_prev) {
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=1&format=<% $format |u %>" title="Gå til første side"><img src="/grafik/pager/left-end.gif" width="18" height="12" border="0" alt="&lt;&lt;"></a>
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_prev %>&format=<% $format |u %>" title="Gå til forrige side"><img src="/grafik/pager/left.gif" width="12" height="12" border="0" alt="&lt;"></a>
+% } else {
+    <img src="/grafik/pager/left-grey-end.gif" width="18" height="12" border="0" alt="&lt;&lt;">
+    <img src="/grafik/pager/left-grey.gif" width="12" height="12" border="0" alt="&lt;">
+% }
+
+% if(@$page_list) {
+    &nbsp;&nbsp;&nbsp;
+%  for(@$page_list) {
+%   if($_->{active}) {
+        <b><% $page %></b>
+%   } else {
+        <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $_->{page} %>&format=<% $format |u %>" title="Gå til side <% $_->{page} %>"><% $_->{page} %></a>
+%   }
+%  }
+    &nbsp;&nbsp;&nbsp;
+% }
+
+% if($page_next) {
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_next %>&format=<% $format |u %>" title="Gå til næste side"><img src="/grafik/pager/right.gif" width="12" height="12" border="0" alt="&gt;"></a>
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_max %>&format=<% $format |u %>" title="Gå til sidste side"><img src="/grafik/pager/right-end.gif" width="18" height="12" border="0" alt="&gt;&gt;"></A>
+% } else {
+    <img src="/grafik/pager/right-grey.gif" width="12" height="12" border="0" alt="&gt;">
+    <img src="/grafik/pager/right-grey-end.gif" width="18" height="12" border="0" alt="&gt;&gt;">
+% }
+</P>
+
+%}
+<!-- end pager -->
+% }
+<%args>
+$output
+$format=>''
+</%args>
+<%init>
+my $session_id = $output->param('SESSION_ID');
+my $page = $output->param('page');
+my $doc_first = $output->param('doc_first');
+my $doc_last = $output->param('doc_last');
+my $doc_total = $output->param('doc_total');
+my $page_prev = $output->param('page_prev');
+my $page_next = $output->param('page_next');
+my $page_max = $output->param('page_max');
+
+my $page_list = $output->param('page_list');
+$page_list = [] unless($page_list);
+
+</%init>

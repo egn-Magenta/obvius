@@ -1,0 +1,56 @@
+%if($r->notes('is_netscape')) {
+<table border="0" cellspacing="1" cellpadding="4">
+    <tr>
+%}
+
+<!-- document_row: -->
+% #        <& divider &>
+        <& link, text=>'View public version', link=>"http://" . $r->hostname() . "$uri", ghosted=>$ghosted{view_public}||$ghosted, id=>"viewpublicversionbutton", accesskey=>'O' &>
+% #        <& divider &>
+        <& link, text=>'Publish', link=>"$prefix$uri?obvius_op=publish&obvius_version=".$docversion, ghosted=>$ghosted{publish}||$ghosted, id=>"publishbutton", accesskey=>'P' &>
+% #        <& divider &>
+        <& link, text=>'Hide', link=>"$prefix$uri?obvius_op=unpublish&obvius_version=" . $docversion . "&version=" . $docversion, ghosted=>$ghosted{unpublish}||$ghosted, id=>"hidebutton", accesskey=>'H' &>
+% #        <& divider &>
+        <& link, text=>'Send', link=>"$prefix$uri?obvius_op=send&obvius_version=" . $docversion . "&version=" . $docversion, ghosted=>$ghosted, id=>"sendbutton", accesskey=>'E' &>
+% #        <& divider &>
+        <& link, text=>'Move/rename', link=>"$prefix$uri?obvius_op=rename", ghosted=>$ghosted{moverename}||$ghosted, id=>"renamebutton", accesskey=>'R' &>
+% #        <& divider &>
+        <& link, text=>'New language', link=>"$prefix$uri?obvius_op=new_version&obvius_new=language&obvius_version=".$docversion, ghosted=>$ghosted{new_language}||$ghosted, id=>'newlanguagebutton' &>
+% #        <& divider &>
+        <& link, text=>"Change documenttype", link=>"$prefix$uri?obvius_op=new_version&obvius_new=doctype&obvius_version=".$docversion, ghosted=>$ghosted{change_doctype}||$ghosted, id=>"newdoctypebutton" &>
+% #        <& divider &>
+        <& link, text=>"Delete", link=>"$prefix$uri?obvius_op=delete", ghosted=>$ghosted{delete}||$ghosted, id=>"deletebutton", accesskey=>'D' &>
+% #       <& divider &>
+% #        <img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">
+<!-- :document_row -->
+
+%if($r->notes('is_netscape')) {
+    </tr>
+</table>
+%}
+<%args>
+$ghosted=>0
+</%args>
+%
+<%init>
+my $public=$obvius->get_public_version($doc);
+my $displayed_version_is_public=($public and $public->Version eq $vdoc->Version);
+
+my $docversion = $_escape->($vdoc->Version, 'u');
+
+my %ghosted=(
+	     view_public=>!$public,
+ 	     publish=>(($public and $displayed_version_is_public) or
+ 		       !$obvius->can_publish_version($vdoc) ? 1 : 0),
+	     unpublish=>(!$public or !$displayed_version_is_public or
+			 !$obvius->can_unpublish_version($vdoc) ? 1 : 0),
+             delete=>(!$obvius->can_delete_document($doc)),
+             moverename=>(!$obvius->can_rename_document($doc)),
+             new=>(!$obvius->can_create_new_document($doc)),
+             access=>(!$obvius->can_set_access_data($doc)),
+             comments=>(!$obvius->can_update_comment($doc) or
+                        $obvius->get_version_type($vdoc)->Name eq "TableList"),
+	     new_language=>!$obvius->can_create_new_version($doc),
+	     change_doctype=>!$obvius->can_create_new_version($doc),
+            );
+</%init>

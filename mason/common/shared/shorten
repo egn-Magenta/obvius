@@ -1,0 +1,20 @@
+<% $m->comp('/shared/shorten:shorten_q', text=>$text, len=>$len, post=>$post) %><%args>
+$text
+$len
+$post=>'...'
+</%args>
+%
+<%method shorten_q><%args>
+$text
+$len
+$post=>'...'
+</%args>
+<%perl>
+use locale;
+  unless( length($text) <= $len ) {
+    substr($text, $len) = '';
+    $text =~ s/\W+\w+$/$post/;
+  }
+  return $text;
+</%perl>
+</%method>

@@ -1,0 +1,9 @@
+%# $Id$
+<& $include, output=>$output &>
+<%args>
+$output
+</%args>
+<%init>
+my $mode = $output->param('mode');
+my $include = 'subscriptions/' . $mode;
+</%init>

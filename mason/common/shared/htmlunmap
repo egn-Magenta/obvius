@@ -1,0 +1,22 @@
+<%args>
+$text
+$class=>undef
+$dont_wrap=>0
+</%args>\
+<%once>
+use WebObvius::Template::MCMS;
+
+my $tmpl=new WebObvius::Template::MCMS(PATH=>'');
+</%once>\
+<%init>
+# Getting to do_htmlunmap_hook:
+$tmpl->{VARS}={MASON_CONTENT=>$text};
+# Fake one:
+$tmpl->{PROVIDER}={
+                   request=>$r,
+                   obvius=>$obvius,
+                  };
+$text=$tmpl->do_htmlunmap_hook('MASON_CONTENT', $class, dont_wrap=>$dont_wrap);
+$text=~s/[&]amp;#(\d+);/&#$1;/g;
+</%init>\
+<% $text %>

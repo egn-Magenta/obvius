@@ -1,0 +1,401 @@
+<% $m->call_next %>
+% print STDERR "\n\n";
+%
+<%args>
+$obvius_version=>undef
+</%args>
+%
+<%method link>
+<%args>
+$link=>undef
+$text=>undef
+$title=>''
+$ghosted=>0
+$bold=>0
+$ghosted_class=>'ghosted'
+$class=>undef
+$tabindex=>undef
+$accesskey=>undef
+</%args>
+% $title=' title="' . $title . '"' if ($title);
+% $class=(defined $class ? " class=\"$class\"" : '');
+% $tabindex=(defined $tabindex ? (' tabindex="' . $tabindex . '"') : '');
+% $accesskey=(defined $accesskey ? " accesskey='$accesskey'" : '');
+% if ($bold) {
+<strong>
+% }
+% if ($ghosted) {
+<span class="<% $ghosted_class %>"<% $title %>><% $text %></span>
+% }
+% else {
+<a href="<% $link %>"<% $title %><% $class %><% $tabindex %><% $accesskey %>><% $text %></a>
+% }
+% if ($bold) {
+</strong>
+% }
+</%method>
+%
+<%method redirect>
+% if ($r->notes('redirect')) {
+<META HTTP-EQUIV="Refresh" CONTENT="0;url=<% $r->notes('redirect') %>">
+% }
+</%method>
+%
+<%method javascript>
+// submithandler function
+var onsubmit_array = new Array();
+
+function submit_page() {
+    for(var i=0;i < onsubmit_array.length;i++) {
+        onsubmit_array[i]();
+    }
+    document.pageform.submit();
+}
+
+// onloadhandler function
+var onload_array = new Array();
+
+function onload_handler() {
+    for(var i=0;i < onload_array.length;i++) {
+        onload_array[i]();
+    }
+}
+
+
+function OpenWin(url, w, h) {
+    window.name="main";
+    if (w == null || w == 0) w = 350;
+    if (h == null || h == 0) h = 450;
+    features = ('toolbar=0,location=0,directories=0,status=0,'
+	+'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
+	+'width='+w+',height='+h);
+    window.open (url + '', '', features)
+}
+
+function OpenWinFull(url, w, h) {
+    window.name="main";
+    if (w == null || w == 0) w = 800;
+    if (h == null || h == 0) h = 600;
+    features = ('toolbar=1,location=1,directories=0,status=1,'
+	+'menubar=1,scrollbars=1,resizable=1,copyhistory=0,'
+	+'width='+w+',height='+h);
+    window.open (url + '', '', features)
+}
+
+function gotopage(link) {
+    window.opener.location.href=link;
+    close(1);
+}
+
+function adjust_opener_field(field, value) {
+    field.value = value;
+    close(1);
+}
+
+function reset_field(field) {
+    field.value = field.defaultValue;
+}
+
+function reset_checkbox(checkbox) {
+    checkbox.checked = checked.defaultChecked;
+}
+
+function reset_menu(menu) {
+    for (var i = 0; i < menu.length; i++) {
+	if (menu.options[i].defaultSelected == true) {
+	    menu.options[i].selected=true;
+	} else {
+	    menu.options[i].selected=false;
+	}
+    }
+}
+</%method>
+%
+<%method title>
+% my $title=$vdoc->Title;
+% $title=$vdoc->field('Short_title') unless ($title);
+% if ($title) {
+<% $title %>
+% } else {
+Admin
+% }
+</%method>
+%
+<%method id><% $r->pnotes('document')->Id %></%method>
+%
+% # <!-- #translations translations.xml da,en -->
+%
+<%method left_margin>28</%method>
+<%method right_margin>28</%method>
+<%method above_title_spacing>20</%method>
+<%method below_title_spacing>20</%method>
+<%method above_footer_spacing>25</%method>
+<%method left_menu_width>150</%method>
+<%method right_menu_width>150</%method>
+%
+<%method msg>
+<%args>
+$text
+</%args>
+<%init>
+unless (defined $obvius->{TRANSLATIONS}) {
+    warn "No message-catalogue ever read - no translation done";
+    return $text;
+}
+
+$text =~ s/\r//g;
+$text =~ s/\n/ /g;
+
+if (exists $obvius->{TRANSLATIONS}->{$text}) {
+    $text = $obvius->{TRANSLATIONS}->{$text}
+}
+else {
+    print STDERR "No translation available for »$text«\n";
+}
+
+$m->out($text);
+return $text;
+</%init>
+</%method>
+%
+<%method shorten><%args>
+$text
+$len
+$post=>' ...'
+</%args>
+<% $text %><%init>
+  unless( length($text) <= $len ) {
+    substr($text, $len) = '';
+    $text .= $post;
+  }
+</%init></%method>
+%
+<%method menu_left_separator>
+<& SELF:menu_separator, menu_width=>'SELF:left_menu_width' &>
+</%method>
+%
+<%method menu_right_separator>
+<& SELF:menu_separator, menu_width=>'SELF:right_menu_width' &>
+</%method>
+%
+<%method menu_separator>
+<%args>
+$menu_width
+</%args>
+<TR>
+ <TD COLSPAN="2" CLASS="sublevelsep" HEIGHT="1" WIDTH="<& $menu_width &>"
+  BACKGROUND="/grafik/admin/1x1black.gif"><IMG SRC="/grafik/admin/1x1.gif"
+  HEIGHT="1" width="<& $menu_width &>" ALT=""></TD>
+</TR>
+</%method>
+%
+<%method menu_box_spacer>
+<TR><TD colspan=2 HEIGHT=20></TD></TR>
+</%method>
+%
+<%method help_text_language>
+% # FIXME!
+da
+</%method>
+%
+<%method menu_box_begin>
+<%args>
+$title
+$no_obviushelp=>0
+</%args>
+<TR><TD CLASS="subleveltitle">&nbsp;<& SELF:msg, text=>$title &></TD>
+<TD CLASS="subleveltitlehelp">
+% if ($no_obviushelp) {
+ 
+% } else {
+<a href="javascript:OpenWin('http://obviushelp.magenta-aps.dk/<& SELF:sitename &>/menu/document_status.<& SELF:help_text_language &>.html')"><img src="/grafik/admin/spm.gif" WIDTH=12 HEIGHT=16 border=0></a>
+% }
+</TD></TR>
+</%method>
+%
+<%method menu_entry>
+<%args>
+$marker=>undef
+$markerlast=>undef
+$extra=>''
+$title
+$link=>undef
+$class=>'sublevel'
+$target=>undef
+$tooltip=>undef
+$msgify=>1
+$ghosted=>0
+</%args>
+%
+<%init>
+$link=~s/ /%20/g if (defined $link);
+</%init>
+%
+<TR><TD colspan=2 colspan=2 CLASS="<% $class %>">
+% if( $marker and !$markerlast) {
+<% $marker %>
+% }
+<% $extra %>
+% if( $link and !$ghosted ) {
+<A HREF="<% $link %>"
+%   if ($target) {
+ TARGET="$target"
+%   }
+%   if ($tooltip) {
+ TITLE="<% $tooltip %>"
+%   }
+>
+% } elsif ($ghosted) {
+<span class="ghosted">
+% }
+% if( $msgify ) {
+<& SELF:msg, text=>$title &>
+% }
+% else {
+<% $title %>
+% }
+% if( $link and !$ghosted ) {
+</A>
+% } elsif ($ghosted) {
+</span>
+% }
+% if( $marker and $markerlast) {
+<% $marker %>
+% }
+</TD></TR>
+<& SELF:menu_left_separator &>
+</%method>
+%
+<%method menu_box_end>
+</%method>
+%
+<%method htmlencode>
+<%args>
+$text
+</%args>
+% my $out=Apache::Util::escape_html($text);
+<% $out %>
+</%method>
+%
+<%method split_date_time>
+<%args>
+$string
+</%args>
+<%perl>
+if ($string =~ /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/) {
+    return ("$3.$2.$1", "$4:$5");
+}
+else {
+    return ("Malformed", "date/time");
+}
+</%perl>
+</%method>
+%
+<%method format_date>\
+<%args>
+$date
+</%args>
+<%perl>
+$date=~s/:\d\d$//;
+return $date;
+</%perl>
+</%method>
+%
+<%method get_doc_subdocs>
+<%args>
+$seq=>undef
+$max=>undef
+$docid=>undef
+$sortvdoc=>undef
+</%args>
+<%perl>
+my @subdocs=();
+my $extra=0;
+my $docsubdocs=$obvius->get_docs_by_parent($docid || $doc->Id);
+# Find only the public or the latest version of the subdocs...
+my @where;
+foreach my $dsd (@$docsubdocs) {
+    my $dsv=$obvius->get_public_version($dsd);
+    $dsv=$obvius->get_latest_version($dsd) unless ($dsv);
+    push @where, '(docid=' . $dsd->Id . ' and version="' . $dsv->Version . '")';
+}
+my $where = (@where ? '(' . join(' OR ', @where) . ')' : undef);
+# ... when searching:
+my $vdocsubdocs=(defined $where ? $obvius->search([], $where, sortvdoc=>($sortvdoc || $vdoc), public=>0) : []);
+foreach my $vdoc (@$vdocsubdocs) {
+    my $vdoc_seq=$obvius->get_version_field($vdoc, 'seq');
+    $obvius->get_version_fields($vdoc);
+    my %marker;
+    if( $vdoc->Public ) {
+	if( defined $vdoc->Expires and $vdoc->Expires lt $r->notes('now') ) { # Expired
+	    $marker{expired}=1;
+	}
+	else {
+	    if( defined $vdoc_seq and ($vdoc_seq <= -1) ) {
+		$marker{hidden}=1;
+	    }
+	}
+    }
+    else {
+	$marker{not_public}=1;
+    }
+    if ( (!defined $seq or (defined $vdoc_seq and ($vdoc_seq > -1)))) {
+	my $tooltip=$vdoc->Title;
+	$tooltip=$vdoc->field('short_title') if (!$tooltip);
+	my $title=$m->scomp('SELF:shorten', text=>($vdoc->field('short_title')
+						    or $vdoc->Title), len=>22);
+
+	my $extra;
+	my $vdoctype=$obvius->get_version_type($vdoc);
+	$extra='<IMG SRC="/grafik/admin/image.gif" WIDTH="9" HEIGHT="9" ALT="I" BORDER="0"> '
+	    if ($vdoctype->Name eq "Image");
+	my $doc=$obvius->get_doc_by_id($vdoc->Docid);
+	my %subdoc=(%marker, extra=>$extra, title=>$title, tooltip=>$tooltip,
+		    link=>$doc->Name . "/", msgify=>0, seq=>$vdoc_seq, docid=>$doc->Id);
+	push @subdocs, \%subdoc;
+    }
+    else {
+	$extra++;
+    }
+}
+my $i=0;
+$extra+=scalar @subdocs;
+@subdocs=grep { $i++; (!defined $max or ($max>$i)) } @subdocs;
+$extra -= scalar(@subdocs);
+return \@subdocs, $extra;
+</%perl>
+</%method>
+%
+<%init>
+$prefix=$r->notes('prefix');
+$uri=$r->notes('uri');
+$obvius=$r->pnotes('obvius');
+$doc=$r->pnotes('document');
+
+$obvius->log->debug(">>> /autohandler ($prefix$uri) [$doc]");
+$obvius->log->debug(">>> /autohandler (obvius_version: $obvius_version)") if ($obvius_version);
+
+$vdoc=undef; # Be sure to look up a vdoc
+if ($obvius_version) {
+    $vdoc=$obvius->get_version($doc, $obvius_version);
+}
+
+unless ($vdoc) {
+    $vdoc=$obvius->get_public_version($doc);
+    $vdoc=$obvius->get_latest_version($doc) unless ($vdoc);
+    $obvius_version = $vdoc->Version;
+}
+$obvius->get_version_fields($vdoc);
+
+$doctype=$obvius->get_version_type($vdoc);
+$r->pnotes('version' =>$vdoc);
+$r->pnotes('doctype' =>$doctype);
+
+# Default language 'da':
+$r->pnotes('site')->read_translations($r, 'translations', 'da', $obvius);
+
+# help-webserver:
+$r->notes('helpserver'=>'help.aparte-test.dk');
+# Don't cache this:
+$r->no_cache(1);
+</%init>

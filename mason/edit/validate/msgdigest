@@ -1,0 +1,139 @@
+%# $Id$
+%
+<%method cook>
+<%args>
+  $data => undef
+  $password => undef
+  $curr_md => undef
+</%args>
+<%perl>
+
+  return undef unless(defined($data) and defined($password));
+
+  use GnuPG::Interface;
+  use Digest::SHA1;
+  use IO::Handle;
+
+  my $gpg = _gpg_init();
+  die unless defined($gpg);
+
+  my $md = $obvius->create_msg_digest($data);
+  die unless defined($md);
+  # XXX : Perhaps we should abort here
+  warn "<B>OUCH!!!!! Message Digest</B> Calc ($md) not equal to saved ($curr_md)>\n" if ($md ne $curr_md);
+
+  my @encrypted = _encrypt($gpg, $md);
+  die unless @encrypted;
+
+  my @signed = _sign($gpg, $password, @encrypted);
+  die unless @signed;
+
+  return @signed;
+
+
+
+  ##############
+  #   Init GPG
+  ##############
+  sub _gpg_init {
+    my $gpg = new GnuPG::Interface;
+
+    eval {
+      $gpg->options->hash_init (armor => 1,
+                                recipients => [ 'Integrity Checker <ic@flagg>' ],
+                                homedir => '/var/www/.gnupg',
+                                options => '/var/www/.gnupg/options',
+                                meta_interactive => 0,
+                                batch => 1,
+        );
+    };
+
+
+    die "GnuPG> Error creating hash_init:\n$@\n" if ($@);
+
+    return $gpg;
+  }
+
+
+  ################
+  #   Encrypt 
+  ################
+
+  sub _encrypt {
+    my ($gpg, @text) = @_;
+
+    my ($input, $output) = (new IO::Handle,
+                            new IO::Handle,
+                           );
+
+    my $handles;
+    eval {
+      $handles = new GnuPG::Handles(stdin => $input,
+                                    stdout => $output,
+                                   );
+    };
+    die "GnuPG> Handles: $@\n" if ($@);
+
+    my $pid;
+    eval {
+      $pid = $gpg->encrypt(handles => $handles);
+    };
+    die "GnuPG> Encrypt: $@\n" if ($@);
+
+    print $input @text;
+    close $input;
+
+    my @ciphertext = <$output>;
+    close $output;
+
+    waitpid $pid, 0;
+
+    return @ciphertext;
+  }
+
+  ################
+  #   Sign 
+  ################
+
+  sub _sign {
+    my ($gpg, $pw, @text) = @_;
+
+    my ($input, $output, $error) = (new IO::Handle,
+                                    new IO::Handle,
+                                    new IO::Handle);
+
+
+    my $handles;
+    eval {
+      $handles = new GnuPG::Handles(stdin => $input, 
+                                    stdout => $output,
+                                    stderr => $error);
+    };
+    die "GnuPG> Handles: $@\n" if ($@);
+    
+    $gpg->passphrase($pw);
+    
+    my $pid;
+    eval { 
+      $pid = $gpg->sign(handles => $handles);
+    };
+    die "GnuPG> Sign: $@\n" if ($@);
+    
+    print $input @text;
+    close $input;
+    
+    my @ciphertext = <$output>;
+    close $output;
+
+    my @error_out = <$error>;
+    close $error;
+    
+    die "GnuPG> Sign_: @error_out<BR>\n" if (@error_out);
+    
+    waitpid $pid, 0;
+    
+    return @ciphertext;
+  }
+
+</%perl>
+</%method>

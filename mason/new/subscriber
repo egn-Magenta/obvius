@@ -1,0 +1,171 @@
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+%
+<%args>
+$obvius_session=>undef
+$obvius_id=>undef
+</%args>
+%
+<%init>
+$obvius->log->debug(">>> /new/subscriber");
+
+my $session;
+
+$session=$r->pnotes('site')->get_session();
+die "No session available - fatally wounded.\n" unless ($session);
+
+my %page=(
+	  title=>(defined $obvius_id ? 'Edit subscriber' : 'New subscriber'),
+	  description=>'',
+	  comp=>'/edit/page',
+	 );
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    $options='' if ($options and ($options eq '(notinlist)' or $options eq '(emailhref)'));
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my @fieldlist;
+foreach my $field (@fields) {
+    my $xref='';
+    if ($field->{options} =~ /^\((.*)\)$/) {
+	$xref=$1;
+    }
+    my $title=$field->{title};
+    $title=~s/_/ /g;
+    push @fieldlist, { title=>$title,
+		       fieldspec=>new Obvius::FieldSpec({
+					fieldtype=>new Obvius::FieldType({
+						validate_args=>($xref eq '' ? '' : $xref) ,
+						name=>($xref eq '' ? 'line' : 'xref'),
+						value_field=>'text',
+						bin=>0,
+						validate=>($xref eq '' ? 'none' : 'xref'),
+						edit=>($xref eq '' ? 'line' : 'xref'),
+						edit_args=>$xref,
+					       }),
+				        default_value=>undef,
+				        name=>$field->{name},
+				        optional=>0,
+				        searchable=>0,
+				        repeatable=>($xref eq '' ? 0 : 1),
+				       }),
+		     }
+}
+
+# Special edit for docid:
+foreach my $field (@fieldlist) {
+    if ($field->{fieldspec}->Name eq 'docid') {
+	$field->{fieldspec}->param('fieldtype')->param(edit=>'subscriptions');
+    }
+    if ($field->{fieldspec}->Name eq 'suspended') {
+	$field->{fieldspec}->param('fieldtype')->param(edit=>'radio');
+	$field->{fieldspec}->param('fieldtype')->param(edit_args=>'0|1');
+	$field->{fieldspec}->param('fieldtype')->param(validate=>'regexp');
+	$field->{fieldspec}->param('fieldtype')->param(validate=>'^[01]$');
+	$field->{options}={label_0=>'Nej', label_1=>'Ja', reverse_options=>1};
+    }
+}
+
+$page{fieldlist}=\@fieldlist;
+$session->{pages}=[ \%page ];
+
+my $fields=new Obvius::Data;
+if (defined $obvius_id) {
+    if (my $subscriber=$obvius->get_subscriber({id=>$obvius_id})) {
+	foreach (keys %$subscriber) {
+	    $fields->param($_=>$subscriber->{$_});
+	}
+    }
+    $fields->param(id=>$obvius_id);
+
+    my $user_subscriptions = $obvius->get_subscriptions( { subscriber => $obvius_id } );
+    $fields->param(docid=>$user_subscriptions);
+    my $user_categories=$obvius->get_subscriber_categories($obvius_id);
+    $fields->param(category=>$user_categories);
+}
+$session->{fields_in}=$fields;
+$session->{fields_out}=new Obvius::Data;
+$session->{document}=$doc;
+$session->{version}=$vdoc;
+$session->{doctype}=$doctype;
+$session->{validate_comp}='/edit/validate/page_subscriber';
+$session->{done_comp}='/edit/save/subscriber';
+$session->{done_label}='Save';
+
+$obvius_session=$session->{_session_id};
+$r->pnotes(session=>$session);
+$r->notes(obvius_session=>$obvius_session);
+</%init>
+%
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+$obvius->log->debug(">>> /new/subscriber:Do");
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my $subscriber={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
+if (my $id=$session->{fields_out}->param('id')) {
+    $subscriber->{id}=$id;
+    $obvius->update_subscriber($subscriber, categories=>$subscriber->{category});
+    $obvius->update_subscriptions($subscriber->{id},
+        (ref $subscriber->{docid} ? $subscriber->{docid} : [$subscriber->{docid}]) );
+    return;
+}
+else {
+    return $obvius->add_subscriber($subscriber);
+}
+
+</%perl>
+</%method>
+%
+%
+<%method ReallyDelete>
+<%args>
+$obvius_id
+</%args>
+
+<& /header/header, decoration=>'reduced' &>
+<tr>
+<td></td>
+<td>
+
+<form action="<% $prefix %><% $uri %>" method="post" enctype="multipart/form-data">
+<input type="hidden" name="obvius_op" value="tablelist">
+<input type="hidden" name="obvius_comp" value="/new/subscriber:Delete">
+<input type="hidden" name="obvius_id" value="<% $obvius_id %>">
+
+<h3 class="admin"><& SELF:msg, text=>'Confirm delete' &></h3>
+
+<p>
+<& SELF:msg, text=>'Really delete subscriber' &>?
+</p>
+
+<input type="submit" class="normalknap" value="<& SELF:msg, text=>'Delete' &>">
+<input type="button" class="normalknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
+
+</td>
+%
+<%init>
+$obvius->log->debug(">>> /new/subscriber:ReallyDelete");
+</%init>
+</%method>
+%
+<%method Delete>
+<%args>
+$obvius_id
+</%args>
+<& /done &>
+<%init>
+$obvius->delete_subscriber($obvius_id);
+</%init>
+</%method>

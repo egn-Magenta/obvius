@@ -1,0 +1,35 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/save/version\n";
+
+# Jason : We need to create a new msgdigest if the document 
+# is being edited via the admin interface.
+if ($session->{doctype}->{FIELDS}->Msgdigest) {
+
+  # Jason: This is here because fieldtypes/date takes it out ;(
+  # It needs to be exactly the same as it will be in the database, otherwise
+  # the msgdigest won't calculate correctly
+  
+  my $dd = $session->{fields_out}->Docdate;
+  my $newdd;
+  $newdd = $dd . ' 00:00:00' if not $dd =~ /\s00\:00\:00$/;
+  $session->{fields_out}->{DOCDATE} = $newdd;
+
+  # Calculate the message digest, excluding the msgdigest field itself and seq.
+  my $md = $obvius->create_msg_digest($session->{fields_out}, 'MSGDIGEST' => 1, 'SEQ' => 1);
+
+  # Put the msgdigest field into the session
+  $session->{fields_out}->{MSGDIGEST} = $md;
+
+  # Put things back in place with the docdate
+  $session->{fields_out}->{DOCDATE} = $dd;
+}
+
+return $obvius->create_new_version($session->{document},
+				 $session->{doctype}->Id,
+				 $session->{version}->Lang,
+				 $session->{fields_out});
+</%init>

@@ -1,0 +1,77 @@
+<input type="hidden" name="obvius_op" value="edit">
+<input type="hidden" name="obvius_page" value="1">
+
+<table border="0" cellspacing="0" cellpadding="0">
+<TR><td colspan='2' class="sublevel"><H4 class="admin"><% $title %></H4></td></tr>
+<TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
+% my $real_uri=$obvius->get_doc_uri($doc);
+<TR><td colspan='2'><a href="http://<% $sitename %><% $real_uri %>" title="<& SELF:msg, text=>'View public version' &>">http://<% $sitename %><% $real_uri %></a> (<% $doc->Id %>)</td></tr>
+<TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
+
+<TR><TD class="sublevel"><& SELF:msg, text=>'Document type' &></td>
+<td class="sublevel">: <span title="<% $obvius->get_version_type($vdoc)->param('name') %>"><& SELF:msg, text=>$obvius->get_version_type($vdoc)->param('name') &></span></TD></TR>
+
+%    if (defined $seq) {
+<TR><td class="sublevel"><& SELF:msg, text=>'Order of succession' &></TD><TD class="sublevel">: <% $seq %></td></tr>
+%    }
+
+%    if (my $comments=$obvius->get_comments($doc->Id)) {
+<tr><td class="sublevel"><& SELF:msg, text=>'Comments' &></td><td class="sublevel">: <a href="/admin/admin/comments/?docid=<% $doc->Id %>&mode=form"><% scalar(@$comments) %></a></td></tr>
+%    }
+
+<TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
+<TR><TD class="sublevel"><& SELF:msg, text=>'This version' &></td><TD class="sublevel">: <% $vdoc->Version %></TD</TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Latest version' &></td><TD class="sublevel">: <% $latest->Version %></TD</TR>
+% if ($public) {
+<TR><TD class="sublevel"><& SELF:msg, text=>'Public version' &></td><TD class="sublevel">: <% $public->Version %></TD</TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Expires' &><TD class="sublevel">: <% $expires %></TD</TR>
+% }
+% else {
+<TR><TD class="sublevel" colspan="2"><& SELF:msg, text=>'No public version' &></TD</TR>
+% }
+
+<TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
+
+<TR><TD class="sublevel"><& SELF:msg, text=>'Owner' &></td>
+<td class="sublevel">: <A HREF="mailto:<% $owner->{email} %> (<% $owner->{name} %>)"
+title="<& SELF:msg, text=>'Send email to' &> <% $owner->{name} %>"><% $owner->{name} %></A>
+</TD></TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Group' &></td><TD class="sublevel">: <% $group->{name} %></TD></TR>
+
+<tr><td class="sublevel"><& SELF:msg, text=>'Access' &></td><td class="sublevel">:
+<& SELF:link, text=>'Redigér', link=>"$prefix$uri?obvius_op=access", ghosted=>$ghosted{access} &></td></tr>
+% my @rules=$obvius->get_capability_rules($doc);
+<tr><td class="sublevel"><& SELF:msg, text=>'Applied rules' &></td><td class="sublevel">: <% shift @rules %></td></tr>
+<% map { '<tr><td class="sublevel"></td><td>&nbsp; ' . $_ . '</td></tr>' } @rules %>
+
+% my $caps=$obvius->user_capabilities($doc);
+% my @caps=sort keys %$caps;
+<tr><td class="sublevel"><& SELF:msg, text=>'Capabilities' &></td><td class="sublevel">: <% join ", ", @caps %></td></tr>
+</table>
+
+%
+<%args>
+$obvius_version=>undef
+</%args>
+%
+<%init>
+my $latest=$obvius->get_latest_version($doc);
+my $public=$obvius->get_public_version($doc);
+my $owner=$obvius->get_user($doc->Owner);
+my $group=$obvius->get_group($doc->Grp);
+my $site=$r->pnotes('site');
+my $sitename=$site->Sitename;
+my %ghosted=(
+             access=>!$obvius->can_set_access_data($doc),
+            );
+
+if ($public) {
+    $obvius->get_version_fields($public, [qw(seq title)]);
+}
+else {
+    $obvius->get_version_fields($latest, [qw(expires title seq)]);
+}
+my $title  =($public ? $public->Title   : $latest->Title);
+my $expires=($public ? $public->field('expires') : $latest->field('expires'));
+my $seq    =($public ? $public->Seq     : $latest->Seq);
+</%init>

@@ -1,0 +1,44 @@
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+
+<& SELF:menu_box_begin, title=>'Sub documents', no_obviushelp=>1 &>
+% if( scalar @$subdocs == 0 ) {
+<& SELF:menu_entry, title=>'No sub documents' &>
+% }
+% else {
+%    map {
+<& SELF:menu_entry, %{$_}, link=>"javascript:gotopage('$prefix$uri$_->{link}')" &>
+%    } @$subdocs;
+% }
+
+<TR>
+<TD ALIGN=left CLASS=sublevel>
+<INPUT CLASS=button TYPE=button onClick="window.close();"
+ VALUE="<& SELF:msg, text=>'Close window' &>">
+</TD>
+</TR>
+
+</TABLE>
+%
+%
+<%args>
+$menu_width=>100
+</%args>
+<%method title>
+<& SELF:msg, text=>'Document overview' &>
+</%method>
+%
+%
+<%method menu_left_separator>
+<& SELF:menu_separator, menu_width=>$menu_width &>
+</%method>
+%
+<%method menu_right_separator>
+<& SELF:menu_separator, menu_width=>$menu_width &>
+</%method>
+%
+<%shared>
+my $menu_width;
+</%shared>
+<%init>
+my ($subdocs, $extra)=$m->comp('SELF:get_doc_subdocs');
+</%init>

@@ -1,0 +1,149 @@
+<%args>
+$value
+$name
+$wrap=>1
+$cols=>59
+$rows=>22
+</%args>
+<%init>
+my $html_value = $m->scomp('/shared/htmlize', text=>$value, dont_wrap=>1);
+my $hostname_from_req = $r->hostname;
+$html_value =~ s!SRC="/admin/!SRC="http://$hostname_from_req/!g;
+$html_value =~ s!SRC="/!SRC="http://$hostname_from_req/!g;
+
+my $disabled = 0;
+
+if (my $cookies=Apache::Cookie->fetch) {
+    if($cookies->{'disable_java_editor'} && $cookies->{'disable_java_editor'}->value) {
+        $disabled = 1;
+    }
+}
+</%init>
+%if($disabled) {
+<a href="javascript:OpenWin('/admin/?obvius_op=switchjava',300,150);">Klik her for at slå java editoren til.</a><br>
+<br>
+<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
+%} else {
+<script language='javascript'>
+    function obvius_<% $name %>_insertImage()
+    {
+        OpenWin('/admin/?obvius_op=picturedlg&reply_function=obvius_<% $name %>_transferImage&doc_uri=<% $uri |u %>',450,280);
+        // alert('hep');
+        // window.open("/admin/?obvius_op=picturedlg&reply_function=obvius_<% $name %>_transfererImage&doc_uri=<% $uri |u %>", "vindue", "width=50,height=300,locationbar=no,menubar=no,resizable=no,status=no");
+    }
+
+    function obvius_<% $name %>_internalLink()
+    {
+        OpenWin('/admin/?obvius_op=linkdlg&reply_function=obvius_<% $name %>_transferLink&doc_uri=<% $uri |u %>',450,100);
+        // window.open("/admin/?obvius_op=linkdlg&reply_function=obvius_<% $name %>_transferLink&doc_uri=<% $uri |u %>", "vindue", "width=370,height=200,locationbar=no,menubar=no,resizable=no,status=no");
+    }
+
+    function obvius_<% $name %>_transferImage(tab)
+    {
+        // document.editor.insertImage(tab[0], tab[1], tab[2], tab[3], tab[4]);
+        document.pageform.obvius_<% $name %>_imageField.value = tab;
+    }
+
+    function obvius_<% $name %>_clearImage()
+    {
+        document.pageform.obvius_<% $name %>_imageField.value = "";
+    }
+
+    function obvius_<% $name %>_clearLink()
+    {
+        document.pageform.obvius_<% $name %>_linkField.value = "";
+    }
+
+    function obvius_<% $name %>_transferLink(txt)
+    {
+        //document.editor.insertLink(txt);
+        document.pageform.obvius_<% $name %>_linkField.value = txt;
+    }
+
+    function obvius_<% $name %>_vis()
+    {
+        var txt = document.pageform.obvius_<% $name %>_html.value;
+        alert(txt);
+    }
+
+    function obvius_<% $name %>_saveContent(txt)
+    {
+        document.pageform.obvius_<% $name %>_html.value = txt;
+    }
+</script>
+
+<input type="hidden" name="obvius_<% $name %>_imageField" ID="obvius_<% $name %>_imageField" value="">
+<input type="hidden" name="obvius_<% $name %>_linkField" ID="obvius_<% $name %>_linkField" value="">
+<input type="hidden" name="<% $name %>" ID="<% $name %>" value="<% $value |h %>">
+<input type="hidden" name="obvius_<% $name %>_html" ID="content" value="<% $html_value |h %>">
+
+<a href="javascript:OpenWin('/admin/?obvius_op=switchjava',300,150);">Klik her for at slå java editoren fra.</a><br>
+<br>
+%if($r->notes('is_netscape')) {
+<EMBED type="application/x-java-applet;version=1.3"
+CODE = "applets.Editor.class"
+CODEBASE = "/editor/"
+ARCHIVE = "sacms.jar"
+WIDTH = 550
+
+HEIGHT = 380
+
+MAYSCRIPT = true
+
+ID = editorID
+
+cols = "65"
+rows = "18"
+formName = "pageform"
+fieldName = "obvius_<% $name %>_html"
+saveName = "obvius_<% $name %>_saveContent"
+linkScript = "obvius_<% $name %>_internalLink"
+imageScript = "obvius_<% $name %>_insertImage"
+toolbar = "false"
+imageField = "obvius_<% $name %>_imageField"
+clearImage = "obvius_<% $name %>_clearImage"
+linkField = "obvius_<% $name %>_linkField"
+clearLink = "obvius_<% $name %>_clearLink"
+scriptable=false
+
+pluginspage="http://java.sun.com/products/plugin/1.3/plugin-install.html">
+<NOEMBED>
+<textarea COLS="<% $cols %>" ROWS="<% $rows %>"<% $wrap %>NAME="<% $name %>"><% $value |h %></textarea>
+</NOEMBED>
+</EMBED>
+%} else {
+<applet CODE = "applets.Editor.class" CODEBASE = "/editor/" ARCHIVE = "sacms.jar" WIDTH = "550" HEIGHT = "380" MAYSCRIPT="true" ID="editorID">
+    <noapplet>
+    <table border="0">
+        <tr>
+            <td>
+                Din browser understøtter ikke java applets.<br>
+                Ønsker du at redigere denne tekst med en java applet editor,<br>
+                skal du slå java til i din browser, eller andvende en browser,<br>
+                der understøtter java applets.<br>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <textarea COLS="<% $cols %>" ROWS="<% $rows %>"<% $wrap %>NAME="<% $name %>"><% $value |h %></textarea>
+    </noapplet>
+    <param name="cols" value="65">
+    <param name="rows" value="18">
+    <param name="formName" value="pageform">
+    <param name="fieldName" value="obvius_<% $name %>_html">
+    <param name="saveName" value="obvius_<% $name %>_saveContent">
+    <param name="linkScript" value="obvius_<% $name %>_internalLink">
+    <param name="imageScript" value="obvius_<% $name %>_insertImage">
+    <param name="toolbar" value="false">
+    <param name="imageField" value="obvius_<% $name %>_imageField">
+    <param name="clearImage" value="obvius_<% $name %>_clearImage">
+    <param name="linkField" value="obvius_<% $name %>_linkField">
+    <param name="clearLink" value="obvius_<% $name %>_clearLink">
+    <param name="scriptable" value="false">
+</applet>
+
+%}
+
+<p><input type="button" value="Vis indhold" onClick="obvius_<% $name %>_vis()"></p>
+
+%}

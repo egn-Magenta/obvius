@@ -1,0 +1,9 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/save/comment XXX\n";
+
+return (1, '/new/comment:Do');
+</%init>

@@ -1,0 +1,28 @@
+<%args>
+$session
+$k
+</%args>
+<%init>
+my $edited=0;
+if (defined $session->{fields_out}->param($k)) {
+    if (defined $session->{fields_in}->param($k)) {
+	if ($session->{fields_out}->param($k) ne $session->{fields_in}->param($k)) {
+	    $edited=1;
+	}
+    }
+    elsif ($session->{fields_out}->param($k) ne '') {
+	$edited=1;
+    }
+}
+
+# If the field is optional and has been edited to '' it is undef'ed:
+if ($edited and $session->{fields_out}->param($k) eq '') {
+    my $fspec=$obvius->get_fieldspec($k);
+    if ($fspec->Optional) {
+	#print STDERR " EDITED TO '' AND OPTIONAL $k : undef\n";
+	$session->{fields_out}->delete($k);
+    }
+}
+
+return($edited);
+</%init>

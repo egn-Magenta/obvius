@@ -1,0 +1,160 @@
+%
+<%method edit>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+
+my @options;
+for(@$value) {
+    my ($name) = /^(\d\d\d\d-\d\d)¤/;
+    push(@options, { name => $name, value => $_});
+}
+</%init>
+%
+<script language="javascript">
+function mdres_values_to_text() {
+    var textstr = '';
+    var month = document.pageform.obvius_<% $name %>_md.value + '';
+    if(! month.match(/^\d\d\d\d-\d\d/) ) {
+        alert('Måned skal angives som "YYYY-MM".');
+        return false;
+    }
+
+    textstr += month + '¤';
+    textstr += document.pageform.obvius_<% $name %>_text.value;
+
+    return(textstr);
+}
+
+function mdres_empty_fields() {
+    document.pageform.obvius_<% $name %>_md.value = '';
+    document.pageform.obvius_<% $name %>_text.value = '';
+}
+
+function mdres_list_onchange() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        mdres_empty_fields();
+    } else {
+        var text = document.pageform.<% $name %>.options[sel].value;
+        alert(text);
+        mdres_load_from_text(text);
+    }
+}
+
+function mdres_load_from_text(text) {
+    var textarray = new Array();
+
+    var str = text + '';
+
+    var month = str.match(/^\d\d\d\d-\d\d/);
+    var value = str.replace(/^(\d\d\d\d-\d\d)¤/, '');
+
+    document.pageform.obvius_<% $name %>_md.value = month;
+    document.pageform.obvius_<% $name %>_text.value = value;
+}
+
+function mdres_add_to_list() {
+    var text = mdres_values_to_text();
+    if(text) {
+        var new_option = new Option(document.pageform.obvius_<% $name %>_md.value, text);
+        document.pageform.<% $name %>.options[document.pageform.<% $name %>.options.length] = new_option;
+        document.pageform.<% $name %>.selectedIndex = -1;
+        document.pageform.<% $name %>.selectedIndex = (document.pageform.<% $name %>.options.length - 1);
+    }
+}
+
+function mdres_delete_from_list() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den!');
+        return;
+    } else {
+        document.pageform.<% $name %>.options[sel] = null;
+        document.pageform.<% $name %>.selectedIndex = -1;
+    }
+    document.pageform.<% $name %>.selectedIndex = -1;
+    mdres_empty_fields();
+}
+
+
+function mdres_save_changes() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert("Kan ikke gemme, når der ikke er valgt nogen option i listen\nBrug 'Tilføj til listen' i stedet.")
+        return;
+    } else {
+        var text = mdres_values_to_text();
+        if(text) {
+            document.pageform.<% $name %>.options[sel].value = text;
+            document.pageform.<% $name %>.options[sel].text = document.pageform.obvius_<% $name %>_md.value;
+        }
+    }
+}
+
+function mdres_select_all() {
+    for(var i=0; i < document.pageform.<% $name %>.options.length; i++) {
+        document.pageform.<% $name %>.options[i].selected = true;
+    }
+}
+
+// Add to onsubmit list:
+    onsubmit_array[onsubmit_array.length] = mdres_select_all;
+</script>
+<select name="<% $name %>" MULTIPLE size="6" onchange="mdres_list_onchange()" tabindex="10">
+%for(@options) {
+    <option value="<% $_->{value} %>"><% $_->{name} %></option>
+%}
+</select><br>
+<br>
+<input type="button" value="Slet fra listen" onclick="mdres_delete_from_list()">&nbsp;
+<input type="button" value="Tilføj til listen" onclick="mdres_add_to_list()">&nbsp;
+<input type="button" value="Gem ændringer" onclick="mdres_save_changes()"><br>
+<br>
+<table>
+    <tr>
+        <td class="name" valign="top">
+            Måned<span class="mini"> (YYYY-MM)</span>:<br>
+            <input type="" size="40" name="obvius_<% $name %>_md" tabindex="10">
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Resume:<br>
+            <textarea name="obvius_<% $name %>_text" cols="56" rows="16" tabindex="10"></textarea>
+        </td>
+    </tr>
+</table>
+%
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+use Data::Dumper;
+print STDERR Dumper($value);
+return $value;
+</%perl>
+</%method>

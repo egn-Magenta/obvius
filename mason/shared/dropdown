@@ -1,0 +1,22 @@
+% # name    : name of variable
+% # options : array of hashrefs with id and name
+% # selected: id
+% #
+<%args>
+$name
+$options
+$selected=>undef
+$onchange=>undef
+</%args>
+<select name="<% $name %>"<% $onchange %> tabindex="10">
+% map {
+%   my $s=(defined $selected and $selected eq $_->{id} ? ' selected' : '');
+    <option value="<% $_->{id} %>"<% $s %>><& SELF:msg, text=>$_->{name} &></option>
+% } @$options;
+</select>
+%
+<%init>
+if (defined $onchange) {
+  $onchange=' onchange="' . $onchange . '"';
+}
+</%init>

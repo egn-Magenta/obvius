@@ -1,0 +1,9 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/save/group XXX\n";
+
+return (1, '/new/group:Do');
+</%init>

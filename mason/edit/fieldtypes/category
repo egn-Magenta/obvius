@@ -1,0 +1,241 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+
+<script language="Javascript1.2">
+<!--
+document.write('<tr><td>');
+document.write('<select class="dataclassificationmenu" name="top<% $name %>" onChange="populate_subcategories(this, this.form.sub<% $name %>);" tabindex="10">');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('</select>');
+document.write('<br><br><& SELF:msg, text=>'You\'re able to choose sub category below' &>');
+document.write('<br><br>');
+document.write('<select class="dataclassificationmenu" name="sub<% $name %>" tabindex="10">');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
+document.write('</select>&nbsp;&nbsp;');
+document.write('<input type="button" class="normalknap" name="plus" value=" <& SELF:msg, text=>'Add' &> " onclick="add_selected_categories(this.form.sub<% $name %>, this.form.sel<% $name %>)" tabindex="10">');
+document.write('<br><br>');
+
+document.write('<br>');
+document.write('<select class="dataclassificationmenu" name="sel<% $name %>" multiple size="6" tabindex="10"><option>MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM</option></select>');
+document.write('<input type="hidden" name="<% $name %>">');
+
+% # add_help('sel<% $name %>');
+document.write('<BR><BR>');
+document.write('<input type="button" class="normalknap" name="minus" value=" <& SELF:msg, text=>'Remove' &> " onclick="remove_selected_categories(this.form.sel<% $name %>)">');
+document.write('&nbsp;&nbsp;');
+document.write('<input class="normalknap" type="button" value="<& SELF:msg, text=>'Regret' &>" onclick="populate_categories(this.form.sel<% $name %>)">');
+
+document.write('</td></tr>');
+// -->
+</script>
+
+<script language="Javascript1.2">
+<!--
+
+var sel<% $name %> = [
+% foreach (@categories) {
+    { id: "<% $_->{id} %>", name: "<% $_->{id} %> - <& SELF:shorten, text=>$_->{name}, len=>50 &>", selected: <% $selected{$_->{id}} ? '1' : '0' %> },
+% }
+    null
+    ];
+update_<% $name %>_stored_value();
+
+function update_<% $name %>_stored_value() {
+    var trove = document.pageform.sel<% $name %>;
+    var stored_value=document.pageform.<% $name %>;
+    var new_value="";
+    for (var i = 0; i < trove.options.length; i++) {
+	new_value=new_value+trove.options[i].value+'\n';
+    }
+    stored_value.value=new_value;
+
+    return true;
+}
+
+function find_shortest_category_id(c) {
+    var l = 999999;
+    for (var i = c.length-1; --i >= 0; ) {
+	if (c[i].id.length < l) {
+	    l = c[i].id.length;
+	}
+    }
+    return l;
+}
+
+function build_top_menu(menu) {
+    menu.options.length = 0;
+
+    var l = find_shortest_category_id(sel<% $name %>);
+
+    for (var i = 0; i < sel<% $name %>.length; i++) {
+        if (sel<% $name %>[i] != null && sel<% $name %>[i].id.length == l) {
+            var option = new Option(sel<% $name %>[i].name, sel<% $name %>[i].id);
+            option.className = menu.className;
+            menu.options[menu.options.length] = option;
+        }
+    }
+    menu.selectedIndex = 0;
+}
+
+function populate_subcategories(master, slave) {
+    var id = master.options[master.selectedIndex > 0 ? master.selectedIndex : 0].value;
+
+    slave.options.length = 0;
+
+    var l = id.length;
+    for (var i = 0; i < sel<% $name %>.length; i++) {
+	if (sel<% $name %>[i] != null && sel<% $name %>[i].id.substr(0,l) == id) {
+	    var option = new Option(sel<% $name %>[i].name, sel<% $name %>[i].id);
+	    option.className = slave.className;
+	    slave.options[slave.options.length] = option;
+	}
+    }
+    slave.selectedIndex = 0;
+}
+
+function populate_categories(trove) {
+    trove.options.length = 0;
+
+    for (var i = 0; i < sel<% $name %>.length; i++) {
+	if (sel<% $name %>[i] != null && sel<% $name %>[i].selected) {
+	    var option = new Option(sel<% $name %>[i].name, sel<% $name %>[i].id);
+	    option.className = trove.className;
+	    trove.options[trove.options.length] = option;
+	}
+    }
+    trove.selectedIndex = -1;
+
+    update_<% $name %>_stored_value();
+}
+
+function is_already_selected(trove, value) {
+    for (var i = 0; i < trove.options.length; i++) {
+	if (trove.options[i].value == value)
+	    return 1;
+    }
+    return 0;
+}
+
+function add_selected_categories(menu, trove) {
+    if (menu.selectedIndex >= 0
+	&& !is_already_selected(trove, menu.options[menu.selectedIndex].value)) {
+	var old = menu.options[menu.selectedIndex];
+
+	var option = new Option(old.text, old.value);
+	option.className = trove.className;
+
+	trove.options[trove.options.length] = option;
+    }
+
+    update_<% $name %>_stored_value();
+}
+
+function remove_selected_categories(trove) {
+    var done;
+
+    do {
+	done = 1;
+	for (var i = 0; i < trove.options.length; i++) {
+	    if (trove.options[i].selected) {
+		trove.options[i] = null;
+		done = 0;
+		break;
+	    }
+	}
+    } while (!done);
+
+    update_<% $name %>_stored_value();
+}
+
+build_top_menu(document.pageform.top<% $name %>);
+%if($top_menu_selected) {
+for(var i=0; i<document.pageform.top<% $name %>.length;i++) {
+    if(document.pageform.top<% $name %>.options[i].value == '<% $top_menu_selected %>') {
+        document.pageform.top<% $name %>.selectedIndex = i;
+        break;
+    }
+}
+%}
+populate_subcategories(document.pageform.top<% $name %>, document.pageform.sub<% $name %>);
+populate_categories(document.pageform.sel<% $name %>);
+
+/*
+document.pageform.onsubmit = function() {
+    var trove = this.sel<% $name %>;
+    for (var i = 0; i < trove.options.length; i++) {
+	trove.options[i].selected = 1;
+    }
+
+    this.top<% $name %>.selectedIndex = -1;
+    this.sub<% $name %>.selectedIndex = -1;
+
+    return true;
+};
+*/
+// -->
+</SCRIPT>
+
+<noscript>
+<select class="dataclassificationmenu" name="<% $name %>" multiple size="8" tabindex="10">
+% map {
+%   my $selected=($selected{$_->{id}} ? ' selected' : '');
+<option value="<% $_->{id} %>"<% $selected %>><% $_->{id} %> - <% $_->{name} %></option>
+% } @categories;
+</select>
+</noscript>
+
+<%init>
+my @categories = sort{$a->{id} cmp $b->{id}} @{$obvius->get_table_data('categories') || []};
+
+my $value=$session->{fields_out}->param($name);
+   $value=$session->{fields_in}->param($name) unless (defined $value);
+
+my %selected;
+map {
+    $selected{$_->Id}=1;
+} @$value;
+
+my $top_menu_selected = $m->scomp('/defaults/category_top_selected', %ARGS);
+$top_menu_selected =~ s/\n//g if($top_menu_selected);
+</%init>
+
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$value=>undef
+$fields=>undef
+</%args>
+<%perl>
+if (defined $value) {
+    $value=~s/\r//g;
+    $value='' unless($value =~ /\w/);
+    my @values=map { $fieldtype->copy_in($obvius, $fieldspec, $_) } split /\n/, $value;
+    $value=\@values;
+}
+return $value;
+</%perl>
+
+</%method>

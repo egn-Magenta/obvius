@@ -1,0 +1,45 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>100
+$rows=>22
+$wrap=>1
+$onlylineif=>undef
+</%args>
+%
+%if($line) {
+<input type="text" size="60" name="<% $name %>" value="<% $value |h %>" tabindex="10"></input>
+<& /shared/add_reset_field, name=>$name &>
+%} else {
+<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
+<& /shared/add_reset_field, name=>$name &>
+%}
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$wrap=' WRAP="' . $wrap . '" ';
+my $line;
+if($onlylineif) {
+    my ($if_field, $if_value) = split(/_is_/, $onlylineif);
+    if($if_field and $if_value) {
+        my $if_match = $session->{fields_out}->param(uc($if_field));
+        $if_match = $session->{fields_in}->param(uc($if_field)) unless defined($if_match);
+        $line = ($if_match eq $if_value);
+    }
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+$value =~ s/\r//g if defined ($value);
+return $value;
+</%perl>
+</%method>

@@ -1,0 +1,105 @@
+<h3 class="admin"><& SELF:msg, text=>'New document' &><& /help, link=>'operation/new' &></h3>
+
+% # <form action="<% $prefix %><% $uri %>?obvius_op=edit_new" method="post">
+<input type="hidden" name="obvius_op" value="edit_new">
+<input type="hidden" name="obvius_page" value="1">
+<input type="hidden" name="obvius_owner" value="<% $userid %>">
+%
+% if ($obvius_error) {
+<div class="error">
+<& SELF:msg, text=>$obvius_error &>
+</div>
+% }
+%
+
+<table>
+<tr>
+<td><& SELF:msg, text=>'Name' &><& /help, link=>'operation/new/name' &>: <% $uri %></td>
+<td><input type="text" size="35" name="obvius_name" value="<% $obvius_name %>" tabindex="10"></td>
+</tr>
+
+<& /shared/widgets/doctype, selected => $selected_doctype &>
+
+<tr>
+<td><& SELF:msg, text=>'Group' &><& /help, link=>'operation/new/group' &>:</td>
+<td><& /shared/dropdown, name=>"obvius_grp", options=>$groups, selected=>$selected &></td>
+</tr>
+
+<& /shared/widgets/language &>
+
+</table>
+
+<p>
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Start editing' &>" tabindex="10" accesskey="S">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" tabindex="10" accesskey="Z">
+</p>
+
+% # </form>
+%
+<%args>
+$obvius_error=>undef
+$obvius_name=>undef
+</%args>
+%
+<%init>
+my $userid=$obvius->get_userid($obvius->{USER});
+
+my $groups;
+if ($r->pnotes('capabilities')->{modes})
+{
+    $groups=[ map { $obvius->{GROUPS}->{$_} } sort keys %{$obvius->{GROUPS}} ];
+}
+else {
+    $groups=[ map { $obvius->get_group($_) } @{$obvius->get_user_groups($userid)} ];
+}
+
+if(! (ref $groups) or ! scalar(@$groups)) {
+    $groups= [ { id => 'admin', 'name' => 'Administration' } ];
+}
+
+my $selected='';
+if (grep { $_->{id} == $doc->Grp } @$groups) {
+    $selected=$doc->Grp;
+}
+
+my %doctypes;
+unless ($obvius_name) {
+    # No name was given, so let's try to be clever about one:
+    $obvius_name='doc';
+
+    my @names=map {
+        $doctypes{$_->{TYPE}}++;
+        $obvius->get_doc_by_id($_->{DOCID})->Name
+    } @{($obvius->get_document_subdocs($doc, sortvdoc=>$vdoc, public=>0) || [])};
+    my @with_numbers=sort { (length($b->{num}) <=> length($a->{num})) ||
+				($b->{num} <=> $a->{num}) ||
+				    ($a->{base} cmp $b->{base}) }
+	grep { $_ }
+	    map {
+		if (m!^([^\d]*)(\d+)$!) {
+		    { base=>$1, num=>$2, }
+		}
+		else {
+		    ''
+		}
+	    } @names;
+
+    if (scalar(@with_numbers)>1 or (@with_numbers and scalar(@with_numbers)==scalar(@names))) {
+	my $width=length($with_numbers[0]->{num});
+	$obvius_name=sprintf "%s%*.*d", $with_numbers[0]->{base}, $width, $width, $with_numbers[0]->{num}+1;
+    }
+    else {
+	$obvius_name='doc';
+    }
+}
+
+
+my $selected_doctype = $m->scomp('/defaults/doctype_during_new', %ARGS);
+$selected_doctype =~ s/\n//g if($selected_doctype);
+$selected_doctype = undef unless($selected_doctype);
+
+unless ($selected_doctype) { # If there is no default, go with the flow:
+    my @sorted_keys=sort { $doctypes{$b} <=> $doctypes{$a} } keys %doctypes;
+    $selected_doctype=$sorted_keys[0] if (@sorted_keys);
+}
+</%init>

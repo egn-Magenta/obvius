@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Convert an old database to a new
+#
+# $Id$
+
+OLDDB=$1
+NEWDB=$2
+CONF=$3
+DOCS=$4
+
+mysqladmin drop $NEWDB
+mysqladmin create $NEWDB
+mysql $NEWDB < structure_new.sql
+echo "FIELDTYPES:"
+./add_fieldtypes.pl $NEWDB fieldtypes.txt
+echo ""
+echo "DOCUMENT CLASSES:"
+./add_doctypes.pl $NEWDB doctypes.txt
+echo ""
+echo "EDIT PAGES:"
+./add_editpages.pl $NEWDB editpages.txt
+echo ""
+echo "DATABASE:"
+./import_new.pl $OLDDB $NEWDB $DOCS
+echo ""
+echo "IMAGES"
+PERL5LIB=/home/httpd/root/perl:/usr/lib/perl/5.6.0/ perl -w ./import_images.pl $OLDDB $CONF $DOCS 2> /dev/null
+echo ""
+echo "SPECIAL"
+PERL5LIB=/home/httpd/root/perl:/usr/lib/perl/5.6.0/ ./fix_special.pl $CONF

@@ -1,0 +1,21 @@
+<!-- legend: -->
+<& SELF:menu_box_begin, title=>'Legend' &>
+
+<& SELF:menu_entry, marker=>'<IMG SRC="/grafik/admin/blue.gif" WIDTH=9 HEIGHT=9 ALT="*">',
+    title=>'Public version' &>
+
+<& SELF:menu_entry, marker=>'<IMG SRC="/grafik/admin/red.gif" WIDTH=9 HEIGHT=9 ALT="_">',
+    title=>'Hidden document' &>
+
+<& SELF:menu_entry, marker=>'<IMG SRC="/grafik/admin/green.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">',
+    title=>'Latest version' &>
+
+<& SELF:menu_entry, marker=>'<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">',
+    title=>'Active version' &>
+
+<& SELF:menu_entry, marker=>'<IMG SRC="/grafik/admin/white.gif" WIDTH=9 HEIGHT=9 ALT="_">',
+    title=>'Expired document' &>
+
+<& SELF:menu_entry, marker=>'<IMG SRC="/grafik/admin/image.gif" WIDTH=9 HEIGHT=9 ALT="I">',
+    title=>'Image document' &>
+<!-- :legend -->

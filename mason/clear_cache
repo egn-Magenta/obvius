@@ -1,0 +1,42 @@
+<%method ask>
+<h3 class="admin"><& SELF:msg, text=>'Clear server cache' &>?</h3>
+
+<p>
+<input type="hidden" name="obvius_op" value="clear_cache">
+<input type="hidden" name="obvius_page" value="done">
+<& SELF:msg, text=>'Click to clear server cache' &>.
+</p>
+
+<p>
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Clear server cache' &>" accesskey="S">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
+</p>
+
+</%method>
+%
+%
+%
+<%method do>
+<%perl>
+my $site=$r->pnotes('site');
+my $ok=$site->clear_cache();
+$m->comp('/dirty_url_in_cache', url=>undef);
+my $message="Server cache cleared";
+</%perl>
+<& /done, message=>$message, parent=>$ok &>
+</%method>
+%
+<%args>
+$obvius_page=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /clear_cache\n";
+
+if (defined $obvius_page and $obvius_page eq 'done') {
+  $m->comp('/clear_cache:do');
+}
+else {
+  $m->comp('/clear_cache:ask');
+}
+</%init>

@@ -1,0 +1,31 @@
+<%args>
+$text=>undef
+$link=>undef
+$ghosted=>0
+$reason=>undef
+$width=>0
+$id=>undef
+$tabindex=>5
+$accesskey=>''
+</%args>
+%if($r->notes('is_netscape')) {
+%   if($ghosted) {
+        <td align="center" class="nsghostTekst"><div class="nsghostTekst"><% $text |h %></td>
+%   } else {
+        <td align="center" class="nsmenuTekst"><a href="javascript:document.location.href='<% $link %>'" class="nsmenuTekst"<% $title %><% $tabindex_html %><% $accesskey_html %>><% $text |h %></a></td>
+%   }
+%} else {
+<input type="button" value="<% $text | h %>"<% $id %> class="<% $class %>" <% $title %><% $javascript %><% $w %><% $tabindex_html %><% $disabled %><% $accesskey_html %>>\
+%}
+<%init>
+$text=$m->scomp('SELF:msg', text=>$text);
+
+my $class=($ghosted ? 'ghostedtopknap' : 'topknap');
+my $javascript=($ghosted ? '' : "onclick=\"document.location.href='$link'\"");
+my $title=(defined $reason ? ' title="$reason"' : '');
+my $w=($width ? ' style="width: ' . $width . 'px"' : '');
+$id=(defined $id ? ' id="' . $id . '"' : '');
+my $tabindex_html=((defined $tabindex and !$ghosted) ? ' tabindex="' . $tabindex . '"' : '');
+my $disabled=($ghosted ? ' disabled' : '');
+my $accesskey_html=((defined $accesskey and !$ghosted) ? ' accesskey="' . $accesskey . '"' : '');
+</%init>

@@ -1,0 +1,79 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$new=>1
+</%args>
+<div style="margin-left: 1em">
+<& SELF:msg, text=>'Der er i forvejen valgt' &> <% scalar(@$value)  %>
+<& SELF:msg, text=>'keyword(s)' &>
+<div style="margin-left: 1em; margin-top: 0">
+% foreach (@$value) {
+<% $_->Name %><br>
+% }
+</div>
+</div>
+
+<p>
+<select class="dataclassificationmenu" name="<% $name %>" multiple size="8" tabindex="10">
+% map {
+%   my $selected=($selected{$_->{id}} ? ' SELECTED' : '');
+<option value="<% $_->{id} %>"<% $selected %>><% $_->{name} %></option>
+% } @keywords;
+</select>
+</p>
+
+% if ($new) {
+<p>
+<h3 class="admin"><& SELF:msg, text=>'New keywords' &></h3>
+<textarea name="obvius_new_keywords" rows="6" cols="60" tabindex="10"></textarea>
+</p>
+% }
+%
+<%init>
+my @keywords = sort { lc($a->{name}) cmp lc($b->{name}) } @{ $obvius->get_table_data('keywords') || [] };
+
+my $value=$session->{fields_out}->param($name);
+   $value=$session->{fields_in}->param($name) unless (defined $value);
+   $value=[] unless(defined($value));
+my %selected;
+map {
+    $selected{$_->Id}=1;
+} sort { lc($a->Name) cmp lc($b->Name) } @$value;
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$value=>undef
+$obvius_new_keywords=>undef
+</%args>
+<%perl>
+$value=[] unless (defined $value);
+$value=[ $value ] unless (ref $value);
+
+if ($obvius_new_keywords) {
+    # Add new keywords:
+    my @new_keywords=split /\n/, $obvius_new_keywords;
+    foreach (@new_keywords) {
+	next if ($_ =~ /^\s*$/);
+	s/^\s*//; # Remove leading space
+	s/\s*$//; # Remove trailing space
+	# Try to insert (if it fails due to a duplicate, well, were happy):
+	eval {
+	    $obvius->insert_table_record('keywords', {name=>$_});
+	};
+	my $rec=$obvius->get_table_record('keywords', {name=>$_});
+	push @$value, $rec->{id};
+    }
+}
+
+return [ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value ];
+</%perl>
+</%method>

@@ -1,0 +1,23 @@
+% # /edit/done
+% #  - Kør session->{done_comp}
+% #  - Hvis OK, redirect til admin-siden
+% #  - Ellers - spørg om edit eller gem alligevel
+% if ($ok) {
+<& /done, message=>'OK', %extra &>
+% } else {
+% # <& /edit/page, %ARGS, obvius_page=>$obvius_shownpage, invalid=>$info &>
+<& /done, message=>'An error occurred' &>
+% }
+<%args>
+$session
+$obvius_shownpage
+$obvius_session
+</%args>
+<%init>
+print STDERR ">>> /edit/done\n";
+
+my ($ok, $info, %extra)=$m->comp($session->{done_comp}, session=>$session);
+if ($ok) {
+    $extra{return}=$m->comp($info, obvius_session=>$obvius_session, session=>$session) if ($info);
+}
+</%init>

@@ -1,0 +1,105 @@
+<%once>
+use WebObvius::Template::MCMS::HTML2MCMS;
+</%once>
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>59
+$rows=>22
+$wrap=>1
+$onlylineif=>undef
+$no_msie_editor=>undef
+</%args>
+%
+%if($line) {
+<input type="text" size="60" name="<% $name %>" value="<% $value |h %>" tabindex="10"></input>
+<& /shared/add_reset_field, name=>$name &>
+%} else {
+% if($use_msie) {
+    <& msie_text, value=>$value, name=>$name, cols=>$cols, rows=>$rows &>
+% } elsif($use_java) {
+    <& javaeditor, value=>$value, name=>$name, cols=>$cols, rows=>$rows, wrap=>$wrap &>
+% } else {
+<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
+<& /shared/add_reset_field, name=>$name &>
+% }
+%}
+%
+<%init>
+my $use_msie = 0;
+my $use_java = 0;
+my $user_agent = $r->header_in('user-agent');
+print STDERR "$user_agent\n";
+unless($no_msie_editor) {
+    if($user_agent =~ /Win/ and $user_agent !~ /Win3.11/) {
+        if($user_agent =~ /MSIE/) {
+            $use_msie = 1;
+        } else {
+            $use_java = 0; # For now noone should use java
+        }
+    } else {
+        unless($user_agent =~ /Mac/) {
+            $use_java = 0; # For now noone should use java
+        }
+    }
+}
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$wrap=' WRAP="' . $wrap . '" ';
+my $line;
+if($onlylineif) {
+    my ($if_field, $if_value) = split(/_is_/, $onlylineif);
+    if($if_field and $if_value) {
+        my $if_match = $session->{fields_out}->param(uc($if_field));
+        $if_match = $session->{fields_in}->param(uc($if_field)) unless defined($if_match);
+        $line = ($if_match eq $if_value);
+    }
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name=>undef
+</%args>
+<%perl>
+$value =~ s/\r//g if defined ($value);
+my $html = $r->param('obvius_' . $name . '_html');
+if(defined($html)) {
+    if($html =~ m#^\s*<P>&nbsp;</P>\s*$#i) {
+        $value = '';
+    } else {
+        my $mcmsval = WebObvius::Template::MCMS::HTML2MCMS::html2mcms($html);
+        my $hostname_from_req = $r->hostname;
+
+        # Make images relative to /
+        $mcmsval =~ s!IMG<http://$hostname_from_req/(admin/)?!IMG</!g;
+
+        # Make images realtive to the document itself
+        $mcmsval =~ s!IMG<$uri!IMG<!g;
+
+        # Make links relative to /
+        $mcmsval =~ s!L<([^;]*);http://$hostname_from_req/(admin/)?!L<$1;/!g;
+
+        # Make links realtive to the document itself
+        # This is not a good idea. You'll have problems if you use the markup
+        # in a newsbox on another document.
+        # $mcmsval =~ s!L<([^;]*);$uri!L<$1;!g;
+
+        print STDERR "Fancy HTML:\n'$html'\n\n";
+        print STDERR "Fancy MCMS:\n'" . $mcmsval . "'\n\n";
+        open(FH, '>/tmp/obviusorig'); print FH $value; close(FH);
+        open(FH, '>/tmp/obviusnew'); print FH $mcmsval; close(FH);
+        my $cmdoutput = `diff /tmp/obviusorig /tmp/obviusnew`;
+        print STDERR "Diffing:\n$cmdoutput\nEnd diffing\n";
+
+        $value = $mcmsval if(defined($mcmsval));
+    }
+}
+return $value;
+</%perl>
+</%method>

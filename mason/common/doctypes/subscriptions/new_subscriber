@@ -1,0 +1,137 @@
+%# $Id$
+%#
+% if ($teaser) {
+<& /shared/htmlize, text=>$teaser &>
+% }
+% else {
+<p>Er du allerede abonnent, <a href='/abonner/?mode=login'><b>tryk her</b></a>.</p>
+
+<p>Her kan du tilmelde dig udvalgte elektroniske nyheder.</p>
+% }
+
+<form method="get" action="./">
+<input type="hidden" name="op" value="subscribe">
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+<input type="hidden" name="mode" value="new_subscriber_submit">
+%if($add_one) {
+<input type="hidden" name="add_one" value="<% $add_one %>">
+%}
+%if($add_one_url) {
+<input type="hidden" name="add_one_url" value="<% $add_one_url %>">
+%}
+
+<tr>
+<td colspan='2' align='left'>
+% if ($content) {
+<& /shared/htmlize, text=>$content &>
+% }
+% else {
+<p>Klik med musen i boksen foran de områder, du ønsker at tilmelde dig.</p>
+% }
+</td>
+</tr>
+
+<tr>
+<td height='15' align='left' colspan='2'>
+&nbsp;
+</td>
+</tr>
+
+<tr>
+ <td colspan="2">
+  <h2>Områder</h2>
+ </td>
+</tr>
+% my $i;
+% foreach (@subscribe_list) {
+<tr>
+<td colspan='2' align='left'><input id="subcheck<% $i %>" class="checkbox" type="checkbox"
+name="subscription" value="<% $_->{id} %>" <% $pre_chosen{$_->{id}} ? 'checked' : '' %> >
+<label for="subcheck<% $i %>">&nbsp;
+<% $_->{title} %></label><br>
+</td>
+</tr>
+%     $i++;
+% }
+
+% if ($categories_list) {
+<tr>
+<td height='15' align='left' colspan='2'>
+&nbsp;
+</td>
+</tr>
+<tr>
+ <td colspan="2">
+  <h2>Emner</h2>
+ </td>
+</tr>
+%     my $i;
+%     foreach (@$categories_list) {
+<tr>
+<td colspan='2' align='left'><input id="catcheck<% $i %>" class="checkbox" type="checkbox"
+name="categories" value="<% $_->{id} %>">
+<label for="catcheck<% $i %>">&nbsp;
+<% $_->{name} %></label><br>
+</td>
+</tr>
+%         $i++;
+%     }
+% }
+
+<tr>
+<td height='25' align='left' colspan='2'>
+&nbsp;
+</td>
+</tr>
+
+<tr>
+<td colspan='2' align='left'>
+
+<p>Skriv navn og email. Til slut trykker du på <b>Opret</b>.</p>
+
+Navn.<br>
+<input class="INPUT" type="text" size="32" name="name">
+
+<br><br>
+Email.<br>
+<input class="INPUT" type="text" size="32" name='new_email' <% $email ? qq{value="$email"} : '' %>>
+
+%# <br><br>
+%# Kodeord.<br>
+%# <input class="INPUT" type='passwd' size="32" name='passwd'>
+
+</td>
+</tr>
+
+<tr>
+<td>
+<br>
+<input type="SUBMIT" value=" Opret ">
+</td>
+</tr>
+</table>
+</form>
+<%args>
+$output
+</%args>
+<%init>
+my $add_one = $output->param('add_one');
+my $add_one_url = $output->param('add_one_url');
+my @subscribe_list = @{$output->param('subscribe_list')};
+my $categories_list=$m->comp('filter_categories', categories=>$output->param('subscriber_categories'));
+
+my $email = $output->param('_incoming_email');
+my $pre_chosen = $output->param('_incoming_subscription') || [];
+my %pre_chosen;
+
+$pre_chosen = [ $pre_chosen ] unless(ref($pre_chosen) eq 'ARRAY');
+foreach (@$pre_chosen) {
+    $pre_chosen{$_} = 1;
+}
+
+$obvius->get_version_fields($vdoc, [qw(teaser content)]);
+my $teaser=$vdoc->field('teaser');
+my $content=$vdoc->field('content');
+</%init>

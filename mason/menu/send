@@ -1,0 +1,27 @@
+% # XXX Ghosted; not implemented yet
+<%args>
+$originator_email => undef
+</%args>
+
+<& SELF:menu_box_begin, title=>'Send document' &>
+
+<& SELF:menu_entry,
+	title=>'Send this version',
+	link=>"$prefix$uri?obvius_op=send&version=" . $vdoc->Version,
+	marker=>'<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">'
+&>
+
+<& SELF:menu_entry,
+	title=>'Send link only',
+	link=>"$prefix$uri?obvius_op=send&version=" . $vdoc->Version . "&link_only=1",
+	marker=>'<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">'
+&>
+
+% if (defined($originator_email)) {
+
+<& SELF:menu_entry,
+	title=>'Respond sender',
+	link=>"$prefix$uri?obvius_op=mail_document&to=".$originator_email."&version=".$vdoc->Version,
+	marker=>'<IMG SRC="/grafik/admin/blue.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">'
+&>
+% }

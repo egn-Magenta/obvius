@@ -1,0 +1,14 @@
+% if ($htmlize) {
+<& /shared/htmlize, text=>$content &>
+% } else {
+<% $content %>
+% }
+%
+<%args>
+$htmlize=>1
+$prefix=>''
+</%args>
+%
+<%init>
+my $content=$obvius->get_version_field($vdoc, $prefix . 'content');
+</%init>

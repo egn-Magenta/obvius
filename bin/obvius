@@ -1,0 +1,548 @@
+#!/usr/bin/perl -w
+
+use lib '/home/httpd/root/perl';
+
+########################################################################
+#
+# obvius - do various operations on an obvius database
+#
+# Copyright (C) 2000 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#
+# Author: René Seindal (rene@magenta-aps.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+#
+########################################################################
+
+use Data::Dumper;
+use XML::Simple;
+use Getopt::Simple;
+use Unicode::String qw(utf8 latin1);
+use POSIX qw(strftime);
+
+$Data::Dumper::Indent = 1;
+
+# Usage: obvius operation database args ...
+
+my %ops = (
+	   'export'
+	   => {
+	       rw=>0, 
+	       func=>\&export_document
+	      },
+
+	   'export-tree'
+	   => {
+	       rw=>0,
+	       func=>\&export_document_tree
+	      },
+	   'import'
+	   => {
+	       rw=>1,
+	       func=>\&import_document,
+	       options=>{
+			 'template' =>
+			 { type=>'=s',
+			   env=>'-',
+			   default=>'id',
+			   verbose=>'Import template info by id,name,file,value',
+			   values=>'id|name|file|\d+',
+			 },
+			 'owner' =>
+			 { type=>'=s',
+			   env=>'-',
+			   default=>'id',
+			   verbose=>'Import owner info by id,name,file,value',
+			   values=>'id|login|name|\d+',
+			 },
+			 'group' =>
+			 { type=>'=s',
+			   env=>'-',
+			   default=>'id',
+			   verbose=>'Import owner info by id,name,file,value',
+			   values=>'id|name|\d+',
+			 },
+			 'image' =>
+			 { type=>'=s',
+			   env=>'-',
+			   default=>'id',
+			   verbose=>'Import image info by id,name,file,value',
+			   values=>'id|name|link|\d+',
+			 },
+			}
+	      },
+	   'publish'
+	   => {
+	       rw=>1,
+	       func=>\&publish_document,
+	       options=>{
+			 'gprio' =>
+			 { type=>'=i',
+			   env=>'-',
+			   default=>'0',
+			   verbose=>'Priority on global news list',
+			 },
+			 'gduration' =>
+			 { type=>'=i',
+			   env=>'-',
+			   default=>'0',
+			   verbose=>'Duration on global news list',
+			 },
+			 'lprio' =>
+			 { type=>'=i',
+			   env=>'-',
+			   default=>'0',
+			   verbose=>'Priority on local news list',
+			 },
+			 'lduration' =>
+			 { type=>'=i',
+			   env=>'-',
+			   default=>'0',
+			   verbose=>'Duration on local news list',
+			 },
+			 'subdocs' =>
+			 { type=>'',
+			   env=>'-',
+			   default=>'0',
+			   verbose=>'Publish all immediate subdocuments',
+			 },
+			}
+	      },
+	  );
+
+sub usage {
+    print STDERR <<'EOF';
+Usage: obvius operation database args ...
+
+Operations and arguments
+	export database path
+	export-tree database path
+	import database <options> file.xml path
+	publish database <options> (docid|path) ...
+
+	Possible import options are:
+	  --template id|name|file|N
+	  --owner id|login|name|N
+	  --group id|name|N
+	  --image id|name|link|N
+
+	Possible publish options are:
+	  --gprio 0|1|2|3
+	  --gduration number-of-days
+	  --lprio 0|1|2|3
+	  --lduration number-of-days
+	  --subdocs
+EOF
+    exit(1);
+}
+
+my $op = shift;
+my $db = shift;
+
+usage unless ($op and $db);
+
+eval "use ${db}::ContentMgr;";
+die "Cannot load $db: $@\n" if $@;
+
+my $opt = new Getopt::Simple;
+if (my $options = $ops{$op}->{options}) {
+    if ($opt->getOptions($options, 'Usage error')) {
+	for (keys %{$opt->{switch}}) {
+	    usage if ($opt->{default}->{$_}->{values}
+		      and $opt->{switch}->{$_} !~ m!^$opt->{default}->{$_}->{values}$!);
+	}
+    } else {
+	usage;
+    }
+}
+
+my $func = *{"${db}::ContentMgr::configuration"}{CODE};
+my %conf;
+
+if ($ops{$op}->{rw}) {
+    %conf = $func->(database=>'dsn',
+		    privileged_db_login=>'user',
+		    privileged_db_passwd=>'password',
+		    document_type=>'doctype',
+		    version_type=>'versiontype',
+		    cache_timestamp=>'cache_timestamp',
+		   );
+} else {
+    %conf = $func->(database=>'dsn',
+		    normal_db_login=>'user',
+		    normal_db_passwd=>'password',
+		    document_type=>'doctype',
+		    version_type=>'versiontype',
+		   );
+}
+
+print Dumper(\%conf);
+
+eval "use $conf{doctype};";
+die "Cannot load $conf{doctype}: $@\n" if $@;
+
+eval "use $conf{versiontype};";
+die "Cannot load $conf{versiontype}: $@\n" if $@;
+
+use Magenta::NormalMgr::Keyword;
+use Magenta::NormalMgr::Category;
+
+use Magenta::NormalMgr::Image;
+
+use Magenta::ContentMgr::Template;
+use Magenta::ContentMgr::User;
+use Magenta::ContentMgr::Group;
+
+print "Modules OK\n";
+
+
+my $mgr = new Magenta::ContentMgr(%conf, debug=>1);
+$mgr->connect || die "Cannot connect: $!\n";
+
+$func = $ops{$op}->{func};
+die "No action defined for $op" unless ($func);
+
+$func->($mgr, $opt, @ARGV);
+
+exit(0);
+
+
+
+
+sub do_publish_document {
+    my ($mgr, $opt, $doc) = @_;
+
+    my $version = $doc->latest_version;
+    if (not $version) {
+	warn "Document ", $doc->id, " has no versions.\n";
+	return undef
+    }
+
+    my $vdoc = $doc->get_version($mgr->{VERSIONTYPE}, $version);
+    if (not $vdoc) {
+	warn "Latest version $version of document ", $doc->id, " not found!!!!!!\n";
+	return undef;
+    }
+
+    $doc->public(1);
+    $doc->published(strftime('%Y-%m-%d %H:%M:%S', localtime));
+
+    $doc->gprio($opt->{switch}{gprio});
+    $doc->gduration($opt->{switch}{gduration});
+    $doc->lprio($opt->{switch}{lprio});
+    $doc->lduration($opt->{switch}{lduration});
+
+    foreach (qw(version docdate expires template seq)) {
+	$doc->param($_ => $vdoc->param($_));
+    }
+    $doc->title($vdoc->short_title);
+
+    my @path = ( $mgr->get_doc_path($doc), $doc);
+    if (defined $path[1]) {
+	$doc->lsection($path[1]->id);
+    }
+
+    #print Dumper($doc);
+
+    my @fields = qw(public published gprio lprio gduration lduration lsection
+		    version docdate expires seq title);
+    unless ($mgr->update_document($doc, \@fields)) {
+	warn "Failed to update ", $doc->id, "\n";
+	return undef;
+    }
+
+    return 1;
+}
+
+
+sub publish_document {
+    my ($mgr, $opt, @docs) = @_;
+
+    for (@docs) {
+	my $doc;
+	if (/^\d+$/) {
+	    $doc = $mgr->fetch_doc_id($_);
+	} else {
+	    my @path = $mgr->get_doc_by_path($_);
+	    die "Cannot locate $_ in document database\n" unless (@path);
+	    $doc = $path[-1];
+	}
+
+	if (not $doc) {
+	    warn "Document $_ not found.\n";
+	    next;
+	}
+
+	if ($opt->{switch}{subdocs}) {
+	    my @subdocs = $doc->get_subdocs(1);
+
+	    for (@subdocs) {
+		my $subdoc = $mgr->fetch_doc_id($_);
+
+		if (not $subdoc) {
+		    warn "Document $_ not found.\n";
+		    next;
+		}
+		do_publish_document($mgr, $opt, $subdoc);
+	    }
+	} else {
+	    do_publish_document($mgr, $opt, $doc);
+	}
+    }
+}
+
+
+
+
+sub build_document {
+    my ($mgr, $doc) = @_;
+
+    my %data;
+
+    %data = map { $_ => $doc->param($_) } $doc->param;
+    $data{owner} = get_user_data($mgr, $data{owner});
+    $data{grp} = get_group_data($mgr, $data{grp});
+    $data{template} = get_template_data($mgr, $data{template});
+
+
+    my $versions = $mgr->{DB}->select(sprintf('SELECT * FROM vdocs where id=%d ORDER BY version',
+					      $doc->id));
+
+    for (@$versions) {
+	$_->{template} = get_template_data($mgr, $_->{template});
+	$_->{image} = get_image_data($mgr, $_->{image});
+    }
+
+    $data{versions}{version_data} = $versions;
+
+    #print STDERR Dumper(\%data);
+
+    return \%data;
+}
+
+sub export_document {
+    my ($mgr, $opt, $path) = @_;
+
+    my @path = $mgr->get_doc_by_path($path);
+    die "Cannot locate $path in document database\n" unless (@path);
+    my $doc = $path[-1];
+
+    my $data = build_document($mgr, $doc);
+    my $file = $data->{name};
+    XMLout({document=>$data},
+	   noattr=>1,
+	   rootname=>'documents',
+	   outputfile=>"doc-$file.xml"
+	   );
+}
+
+
+sub export_document_tree {
+    my ($mgr, $opt, $path) = @_;
+
+    my @path = $mgr->get_doc_by_path($path);
+    die "Cannot locate $path in document database\n" unless (@path);
+    my $top = $path[-1];
+
+    my $file = $top->name;
+
+    my @docs;
+    my %idmap;
+    my @ids = ($top->id);
+
+    while (my $id = pop @ids) {
+	my $doc = $mgr->fetch_doc_id($id);
+	next unless ($doc);
+
+	my $data = build_document($mgr, $doc);
+	push(@docs, $data);
+	$idmap{$doc->id} = $data;
+
+	push(@ids, $doc->get_subdocs(1));
+    }
+
+    XMLout({document=>\@docs},
+	   noattr=>1,
+	   rootname=>'documents',
+	   outputfile=>"doctree-$file.xml"
+	   );
+}
+
+sub import_document {
+    my ($mgr, $opt, $file, $path) = @_;
+
+    my @path = $mgr->get_doc_by_path($path);
+    die "Cannot locate $path in document database\n" unless (@path);
+    my $parent = $path[-1];
+
+    my $data = XMLin($file, 
+		     searchpath=>['.'],
+		     keyattr=>[],
+		     forcearray=>['document', 'version_data'],
+		     noattr=>1,
+		     suppressempty=>'',
+		     parseropts=>[ProtocolEncoding=>'ISO-8859-1']
+		     );
+
+    traverse(\$data, \&map_utf8_to_latin1);
+
+    my $docs = $data->{document};
+    return unless defined $docs;
+
+    my %idmap;
+
+    for my $d (@$docs) {
+	if (ref $d->{owner}) {
+	    if (exists $d->{owner}->{$opt->{switch}{owner}}) {
+		$d->{owner} = $d->{owner}->{$opt->{switch}{owner}};
+	    }
+	}
+	if (ref $d->{grp}) {
+	    if (exists $d->{grp}->{$opt->{switch}{group}}) {
+		$d->{grp} = $d->{grp}->{$opt->{switch}{group}};
+	    }
+	}
+	if (ref $d->{template}) {
+	    if (exists $d->{template}->{$opt->{switch}{template}}) {
+		$d->{template} = $d->{template}->{$opt->{switch}{template}};
+	    }
+	}
+	print Dumper($d);
+
+	my $versions = $d->{versions}->{version_data};
+	for my $v (@$versions) {
+	    if (ref $v->{image}) {
+		if (exists $v->{image}->{$opt->{switch}{image}}) {
+		    $v->{image} = $v->{image}->{$opt->{switch}{image}};
+		}
+	    }
+	    if (ref $v->{template}) {
+		if (exists $v->{template}->{$opt->{switch}{template}}) {
+		    $v->{template} = $v->{template}->{$opt->{switch}{template}};
+		}
+	    }
+	}
+
+	$d->{versions} = $versions;
+	print Dumper($d);
+
+
+	my $old_id = $d->{id};
+	my $doc = $mgr->{DOCTYPE}->new({id=>0}, $mgr->{DB});
+	$doc->set_default_values;
+	for ($doc->param) {
+	    $doc->param($_, $d->{$_}) if defined $d->{$_};
+	}
+	$doc->id(0);
+	$doc->parent($idmap{$d->{parent}} || $parent->id);
+
+
+	my $first_version = shift(@$versions);
+	my $vdoc = $mgr->{VERSIONTYPE}->new({id=>0}, $mgr->{DB});
+	$vdoc->set_default_values;
+	$vdoc->param($first_version);
+	$vdoc->id(0);
+
+	if ($mgr->create_document($doc, $vdoc)) {
+	    $idmap{$old_id} = $doc->id;
+
+	    while (my $v = shift(@$versions)) {
+	    	$vdoc->param($v);
+		$vdoc->id($doc->id);
+
+		$mgr->create_version($vdoc);
+	    }
+	}
+    }
+}
+
+
+
+sub map_utf8_to_latin1 {
+    return utf8(shift)->latin1;
+}
+
+sub traverse {
+    my ($ref, $func) = @_;
+
+    my $data = $$ref;
+    my $type = ref $data;
+    if ($type) {
+	if ($type eq 'HASH') {
+	    traverse(\$data->{$_}, $func) for (keys %$data);
+	}
+	elsif ($type eq 'ARRAY') {
+	    traverse(\$_, $func) for (@$data);
+	}
+    } else {
+	$$ref = $func->($data);
+    }
+}
+
+
+sub get_user_data {
+    my ($mgr, $id) = @_;
+
+    my $user = fetch_new Magenta::ContentMgr::User({id=>$id}, $mgr->{DB});
+
+    my %data = (id=>$id);
+    if ($user) {
+	$data{login} = $user->login;
+	$data{name} = $user->name;
+    }
+
+    return \%data;
+}
+
+sub get_group_data {
+    my ($mgr, $id) = @_;
+
+    my $group = fetch_new Magenta::ContentMgr::Group({id=>$id}, $mgr->{DB});
+
+    my %data = (id=>$id);
+    if ($group) {
+	$data{name} = $group->name;
+    }
+
+    return \%data;
+}
+
+sub get_template_data {
+    my ($mgr, $id) = @_;
+
+    my $template = fetch_new Magenta::ContentMgr::Template({id=>$id}, $mgr->{DB});
+
+    my %data = (id=>$id);
+    if ($template) {
+	$data{name} = $template->name;
+	$data{file} = $template->file;
+    }
+
+    return \%data;
+}
+
+sub get_image_data {
+    my ($mgr, $id) = @_;
+
+    my $image = fetch_new Magenta::NormalMgr::Image({id=>$id}, $mgr->{DB});
+
+    my %data = (id=>$id);
+    if ($image) {
+	$data{name} = $image->name;
+	$data{link} = $image->link;
+    }
+
+    return \%data;
+}

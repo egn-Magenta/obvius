@@ -1,0 +1,167 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>50
+$cols=>49
+$rows=>22
+$doctype=>undef
+$navigate_start=>undef
+</%args>
+% if ($fieldspec->Repeatable) {
+<table>
+<tr>
+ <td>
+  <input type="hidden" name="<% $name %>">
+  <select name="<% $name %>_internaljslist" multiple size="10" onchange="javascript:field_selected(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, this.form.<% $name %>_internaljsindex, this.form.<% $name %>_internaljstext);" tabindex="10">
+  </select>
+ </td>
+ <td>
+  <p>
+  <input type="button" class="normalknap" value="Flyt op" onclick="javascript:move_field_up(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, window.document.pageform.<% $name %>); field_selected(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, this.form.<% $name %>_internaljsindex, this.form.<% $name %>_internaljstext);"><br>
+  <input type="button" class="normalknap" value="Flyt ned" onclick="javascript:move_field_down(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, window.document.pageform.<% $name %>); field_selected(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, this.form.<% $name %>_internaljsindex, this.form.<% $name %>_internaljstext);">
+  </p>
+  <p>
+  <input type="button" class="normalknap" value="Fjern" onclick="javascript:remove_field(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, window.document.pageform.<% $name %>); field_selected(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljslist.selectedIndex, this.form.<% $name %>_internaljsindex, this.form.<% $name %>_internaljstext);"><br>
+  </p>
+ </td>
+</tr>
+</table>
+
+<table>
+ <td><input type="hidden" name="<% $name %>_internaljsindex" value=""><input type="text" name="<% $name %>_internaljstext" tabindex="10"></td>
+ <td><input type="button" class="normalknap" name="<% $name %>_internaljsaddbutton" value="Tilføj" onclick="javascript:add_field(this.form.<% $name %>_internaljslist, this.form.<% $name %>_internaljstext.value, window.document.pageform.<% $name %>, window.document.pageform.<% $name %>_internaljsindex); this.form.<% $name %>_internaljstext.value=''; this.form.<% $name %>_internaljsindex.value=''; this.form.<% $name %>_internaljsaddbutton.value='Tilføj'"></td>
+</tr>
+</table>
+
+<script type="text/javascript" language="javascript">
+
+window.document.pageform.onsubmit=function() {
+    add_field(window.document.pageform.<% $name %>_internaljslist, window.document.pageform.<% $name %>_internaljstext.value, window.document.pageform.<% $name %>, window.document.pageform.<% $name %>_internaljsindex);
+    window.document.pageform.<% $name %>_internaljstext.value=''
+    window.document.pageform.<% $name %>_internaljsindex.value=''
+    window.document.pageform.<% $name %>_internaljsaddbutton.value="Tilføj";
+    return false;
+};
+
+function field_selected(widget, index, indexwidget, textwidget) {
+    if (index<0) {
+        if (indexwidget.value>=0) {
+            textwidget.value='';
+	    indexwidget.value='';
+        }
+        window.document.pageform.<% $name %>_internaljsaddbutton.value="Tilføj";
+    }
+    else {
+	indexwidget.value=index;
+        textwidget.value=widget.options[index].value;
+        window.document.pageform.<% $name %>_internaljsaddbutton.value="Opdater";
+    }
+}
+
+function update_hidden_widget(widget, hidden_widget) {
+    var new_value="";
+    var i;
+
+    for(i=0; i<widget.options.length; i++) {
+        new_value=new_value + (i ? "\n" : "") + widget.options[i].value;
+    }
+
+    hidden_widget.value=new_value;
+}
+
+function add_field(widget, text, hidden_widget, index_widget) {
+    var newoption = new Option(text, text);
+    if (index_widget.value != '' && index_widget.value>=0) {
+        widget.options[index_widget.value]=newoption;
+    }
+    else {
+        widget.options[widget.options.length]=newoption;
+    }
+    update_hidden_widget(widget, hidden_widget);
+}
+
+function remove_field(widget, num, hidden_widget) {
+    widget.options[num]=null;
+    if (widget.options.length==num ) {
+        num--;
+    }
+    if (widget.options.length>num) {
+        widget.selectedIndex=num;
+    }
+    update_hidden_widget(widget, hidden_widget);
+}
+
+function move_field_up(widget, num, hidden_widget) {
+    if (num>=1) {
+        var curoption=widget.options[num];
+        var prevoption=widget.options[num-1];
+        widget.options[num-1]=new Option(curoption.text, curoption.value);
+        widget.options[num]=new Option(prevoption.text, prevoption.value);
+        widget.selectedIndex=num-1;
+	update_hidden_widget(widget, hidden_widget);
+    }
+}
+
+function move_field_down(widget, num, hidden_widget) {
+    if (num>=0 && num<(widget.options.length-1)) {
+        var curoption=widget.options[num];
+        var nextoption=widget.options[num+1];
+        widget.options[num+1]=new Option(curoption.text, curoption.value); 
+        widget.options[num]=new Option(nextoption.text, nextoption.value);
+        widget.selectedIndex=num+1;
+	update_hidden_widget(widget, hidden_widget);
+    }
+}
+
+function init_fields_<% $name %>() {
+% foreach (@values) {
+%     chomp;
+    add_field(window.document.pageform.<% $name %>_internaljslist, "<% $_ %>", window.document.pageform.<% $name %>, window.document.pageform.<% $name %>_internaljsindex);
+% }
+}
+
+init_fields_<% $name %>();
+</script>
+
+% } else {
+<input type="text" name="<% $name %>" value="$value" tabindex="10">
+% }
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my @values;
+use Data::Dumper;
+#print STDERR " EDIT value $name: " . Dumper($value);
+#print STDERR " ref value  $name:  " . ref($value) . "\n";
+# Abusing the repeatable flag:
+if ($value and @$value == 1) {
+    $value->[0] =~ s/\r//g;
+    @values=split /\n/, $value->[0];
+}
+#print STDERR " EDITNOW value $name: " . Dumper(\@values);
+
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$session
+$value=>undef
+</%args>
+<%perl>
+if (ref $value) {
+    $value=join "\n", @$value;
+}
+if ($fieldspec->Repeatable) {
+    return [ $value ];
+}
+return $value;
+</%perl>
+</%method>

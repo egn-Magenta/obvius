@@ -1,0 +1,21 @@
+<%args>
+$categories
+</%args>
+%
+<%init>
+return undef unless ($categories);
+
+return $categories;
+</%init>
+%
+<%doc>
+This component is used by the subscription-system to filter unwanted
+categories from the list.
+
+Usually this would entail keeping "top level" categories only, as
+matching is done with right-truncation, when checking whether a
+document is legible for sending.
+
+Having this component means that each website only has to have a local
+one of these to filter; less copying of code. Hopefully.
+</%doc>

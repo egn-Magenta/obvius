@@ -1,0 +1,7 @@
+% # Placeholder:
+<& /new/comment, %ARGS &>
+<%method ReallyDelete>
+<%perl>
+$m->comp('/new/comment:ReallyDelete', %ARGS);
+</%perl>
+</%method>

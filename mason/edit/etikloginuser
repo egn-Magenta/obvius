@@ -1,0 +1,7 @@
+% # Placeholder:
+<& /new/etikloginuser, %ARGS &>
+<%method ReallyDelete>
+<%perl>
+$m->comp('/new/etikloginuser:ReallyDelete', %ARGS);
+</%perl>
+</%method>

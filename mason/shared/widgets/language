@@ -1,0 +1,17 @@
+<tr>
+<td><& SELF:msg, text=>'Language' &><& /help, link=>'operation/new/language' &>:</td>
+<td>
+<select name="obvius_lang" tabindex="10">
+% foreach (@langs) {
+<option value="<% $_ %>"<% ($vdoc->Lang eq $_ ? ' selected' : '') %>><& SELF:msg, text=>$long{$_} &></option>
+% }
+</select>
+</td>
+</tr>
+%
+<%init>
+my @langs=qw(da en fi fr gr nl it pt es se de);
+my %long=qw(da Danish en English fi Finnish fr French gr Greek nl Dutch it Italian pt Portuguese
+            es Spanish se Swedish de German);
+
+</%init>

@@ -1,0 +1,63 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/version\n";
+
+# Transfer fields that have not been modified from fields_in to fields_out:
+map {
+    my $k=lc($_);
+    if ($m->comp('shared/field_edited', session=>$session, k=>$k)) {
+	print STDERR "asjo: field $k edited";
+	# If an optional field that has been edited to '' it is turned
+	# into undef by field_edited!
+    }
+    else {
+	print STDERR "asjo: field $k unchanged";
+	$m->comp('shared/field_unedited', session=>$session, k=>$k);
+    }
+    $m->comp('shared/field_print_debug', session=>$session, k=>$k);
+} sort keys %{$session->{doctype}->{FIELDS}};
+
+my $new_doctype=$session->{doctype};
+my %status = $new_doctype->validate_fields($session->{fields_out}, $obvius);
+#warn "Invalid fields, not stored: @{$status{invalid}}\n" if ($status{invalid});
+#warn "Missing fields not stored: @{$status{missing}}\n" if ($status{missing});
+#warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+#warn "Valid fields: @{$status{valid}}\n" if ($status{valid});
+
+# Patch up fields that are empty, therefore invalid and for which a default_value
+# exists:
+if ($status{invalid}) {
+    foreach (@{$status{invalid}}) {
+	my $k=lc($_);
+	print STDERR "--- invalid field: $k\n";
+	my $v=$session->{fields_out}->param($k);
+	print STDERR "--- value: [$v]\n";
+	if ($v eq '') {
+	    my $fspec=$obvius->get_fieldspec($k);
+	    if (defined $fspec->Default_value) {
+		$session->{fields_out}->param($k=>$fspec->Default_value);
+		print STDERR "asjo: setting invalid empty field $k to default value "
+		    . $fspec->Default_value . "\n";
+	    }
+	}
+    }
+    %status = ();
+    %status = $new_doctype->validate_fields($session->{fields_out}, $obvius);
+    warn "2 Invalid fields, not stored: @{$status{invalid}}\n" if ($status{invalid});
+    warn "2 Missing fields not stored: @{$status{missing}}\n" if ($status{missing});
+    warn "2 Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+    warn "2 Valid fields: @{$status{valid}}\n" if ($status{valid});
+}
+
+$session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
+
+if ($status{invalid}) {
+    return (0, $status{invalid});
+}
+else {
+    return (1, '/edit/save/version', link_add_version=>1);
+}
+</%init>

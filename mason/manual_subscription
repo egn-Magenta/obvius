@@ -1,0 +1,219 @@
+<script language="javascript">
+    var m_s_incoming_value = '<% $four_days_from_now %>';
+
+    function m_s_submit() {
+        document.pageform.obvius_op.value = 'manual_subscription';
+        submit_page();
+    }
+
+    function do_switch() {
+        if(document.pageform.m_s_switch.checked) {
+            document.pageform.delayed.value = m_s_incoming_value;
+            document.pageform.go.value = '';
+            document.pageform.submitknap.value = 'Send senere';
+        } else {
+            document.pageform.delayed.value = '0000-00-00 00:00:00';
+            document.pageform.go.value = 'yes';
+            document.pageform.submitknap.value = 'Send nu';
+        }
+    }
+</script>
+
+<table border="0" width="100%">
+%if($delayed) {
+% if($go) {
+%  my ($d_year, $d_month, $d_day, $d_hour, $d_min) = $delayed =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
+%  my $command = "echo perl -w /home/httpd/obvius/bin/subscription.pl";
+%  $command .= " --sender=$sender";
+%  $command .= " --site=$site";
+%  $command .= " --sitename=$sitename";
+%  $command .= "  --manual --docid=" . $doc->Id;
+%  $command .= " | at '$d_hour:$d_min $d_month/$d_day/$d_year'";
+%  my $retval = system($command);
+    <tr>
+      <td>
+        Forsinket abonnementudsendelse afsendt.
+      </td>
+    </tr>
+% } else {
+    <tr>
+      <td colspan="2">
+        Følgende dokumenter bliver offentliggjort mellem <% $now %> og <% $delayed %>
+        og er dermed kandidater til at komme med i abonnementudsendelsen:
+      </td>
+    </tr>
+%   my $counter = 1;
+%   for(@$subscriber_docs) {
+    <tr>
+      <td valign="top">&nbsp;<% $counter %>&nbsp;</td>
+      <td>
+        <% $_->{title} %><br>
+        (<a href="<% $prefix . $_->{url} %>"><% $_->{url} %></a>)<br>
+        Offentliggøres <% $_->{publish_on} %>.
+      </td>
+    </tr>
+%   $counter++;
+%   }
+    <tr>
+      <td valign="top" colspan="2">
+            <input type="hidden" name="obvius_op" value="manual_subscription">
+            <input type="hidden" name="go" value="yes">
+            <input type="hidden" name="delayed" value="<% $delayed %>">
+            <input type="button" name="submitknap" value="Send" onclick="submit_page()">
+      </td>
+    </tr>
+% }
+%} else {
+% if($go) {
+%  my $command = "perl -w /home/httpd/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
+%  my $retval = system($command);
+    <tr>
+      <td>
+        Abonnement udsendt.
+      </td>
+    </tr>
+% } else {
+    <tr>
+      <td colspan="2">
+        Følgende dokumenter vil blive sendt ud til en abonnent, der ikke har modtaget abonnementmail i 7 dage:
+      </td>
+    </tr>
+%   my $counter = 1;
+%   for(@$subscriber_docs) {
+    <tr>
+      <td valign="top" align="right">&nbsp;<% $counter %>&nbsp;</td>
+      <td width="100%">
+        <% $_->{title} %><br>
+        (<a href="<% $prefix . $_->{url} %>"><% $_->{url} %></a>)
+      </td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+%   $counter++;
+%   }
+    <tr>
+      <td valign="top">
+            <input type="checkbox" name="m_s_switch" onclick="do_switch()">
+      </td>
+      <td valign="top">
+            Klik her hvis du vil sende abonnementmail forskudt.<br>
+            <br>
+            <input type="hidden" name="obvius_op" value="manual_subscription">
+            <input type="hidden" name="go" value="yes">
+            <input type="text" name="delayed" value="0000-00-00 00:00:00">
+            <input type="button" name="submitknap" value="Send nu" onclick="m_s_submit()">
+
+      </td>
+    </tr>
+% }
+%}
+</table>
+%
+<%args>
+$delayed=>undef
+$accept=>undef
+$go=>undef
+</%args>
+<%init>
+use Date::Calc qw(Today_and_Now Add_Delta_DHMS);
+use Data::Dumper;
+my $subscriber_docs;
+
+my $sender = 'jubk@magenta-aps.dk';
+
+my $site = $obvius->{OBVIUS_CONFIG}->{NAME};
+my $sitename = $obvius->{OBVIUS_CONFIG}->{SITENAME}
+
+my ($year, $month, $day, $hour, $min, $sec) = Today_and_Now();
+my $now = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year, $month, $day, $hour, $min, $sec);
+
+my ($year2, $month2, $day2, $hour2, $min2, $sec2) = Add_Delta_DHMS($year, $month, $day, $hour, $min, $sec, 4, 0, 0, 0);
+my $four_days_from_now = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year2, $month2, $day2, $hour2, $min2, $sec2);
+
+if($delayed and $delayed gt $now) {
+    $subscriber_docs = get_future_docs_recursive($doc, $now, $delayed);
+} else {
+    $delayed = 0;
+
+    # Subtract seven days
+    ($year, $month, $day, $hour, $min, $sec) = Add_Delta_DHMS($year, $month, $day, $hour, $min, $sec, -7, 0, 0, 0);
+    my $seven_days_ago = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year, $month, $day, $hour, $min, $sec);
+
+    $subscriber_docs = get_subdocs_recursive($vdoc, $seven_days_ago);
+}
+</%init>
+%
+<%perl>
+sub get_subdocs_recursive {
+    my ($vdoc, $date_limit) = @_;
+
+    my @worklist;
+    my @result;
+    push(@worklist, $vdoc);
+
+    while ($vdoc = shift @worklist) {
+        my $doc = $obvius->get_doc_by_id($vdoc->DocId);
+        my $subdocs = $obvius->get_document_subdocs($doc);
+        if($subdocs) {
+            unshift(@worklist, @$subdocs);
+        }
+        $obvius->get_version_fields($vdoc, [ 'published', 'in_subscription' ], 'PUBLISH_FIELDS');
+        $obvius->get_version_fields($vdoc, [ 'title', 'teaser' ]);
+
+        push(@result, {
+                        published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
+                        title => $vdoc->Title,
+                        teaser => $vdoc->field('teaser'),
+                        url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
+                    }
+                ) if(
+                        $vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION}
+                        and
+                        $vdoc->{PUBLISH_FIELDS}->{PUBLISHED}
+                        and
+                        $vdoc->{PUBLISH_FIELDS}->{PUBLISHED} gt $date_limit
+                    );
+    }
+
+    return \@result;
+}
+
+sub get_future_docs_recursive {
+    my ($doc, $now, $future) = @_;
+
+    my @worklist;
+    my @result;
+    push(@worklist, $doc);
+
+    while ($doc = shift @worklist) {
+        my $subdocs = $obvius->get_docs_by_parent($doc->Id);
+        if($subdocs) {
+            unshift(@worklist, @$subdocs);
+        }
+        my $vdocs = $obvius->search(
+                                    ['publish_on', 'in_subscription'],
+                                    "docid = " . $doc->Id .
+                                    " and in_subscription > 0" .
+                                    " and publish_on > '$now'" .
+                                    " and publish_on < '$future'",
+                                    order => 'publish_on DESC',
+                                    append => 'limit 1'
+                                );
+        for(@$vdocs) {
+            print STDERR Dumper($_);
+            $obvius->get_version_fields($_, ['title', 'teaser']);
+            push(@result, {
+                            publish_on => $_->Publish_on,
+                            title => $_->Title,
+                            teaser => $_->field('teaser'),
+                            url => $obvius->get_doc_uri($obvius->get_doc_by_id($_->DocId)),
+                        }
+                    );
+        }
+    }
+
+    return \@result;
+}
+
+</%perl>

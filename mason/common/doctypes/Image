@@ -1,0 +1,45 @@
+<h1><% $title %></h1>
+
+<table>
+% foreach my $field (@fields) {
+%    my $value=$vdoc->field($field->{name});
+%    if (defined $value) {
+<tr>
+<td><% $field->{title} %>:</td>
+<td><% $value %><% (defined $field->{unit} ? ' ' . $field->{unit} : '') %></td>
+</tr>
+%    }
+% }
+</table>
+
+<p>
+<img width="<% $vdoc->Width %>" height="<% $vdoc->Height %>" src="<% $linkuri %>"
+ alt="Picture: <% $vdoc->Short_title %>"><br>
+</p>
+%
+% #####################
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title short_title width height size mimetype)]);
+my $title = $vdoc->Title;
+
+my $obvius_version=$output->param('_incoming_obvius_version');
+
+my $linkuri=$prefix . $uri;
+$linkuri =~ s/[\/]$//;
+$linkuri .= "?obvius_version=$obvius_version" if (defined $obvius_version);
+</%init>
+%
+<%once>
+my @fields=(
+	    { name=>'mimetype', title=>'MIME-type', },
+	    { name=>'width',    title=>'Bredde',    unit=>'pixels'},
+	    { name=>'height',   title=>'Højde',     unit=>'pixels'},
+	    { name=>'size',     title=>'Størrelse', unit=>'b' },
+	    { name=>'align',    title=>'Placering', },
+	   );
+</%once>

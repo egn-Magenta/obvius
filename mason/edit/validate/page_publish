@@ -1,0 +1,59 @@
+% # /edit/validate/page_publish
+<%args>
+$session
+$obvius_shownpage=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/page_publish\n";
+
+# Validate and store input from previous page (number in $obvius_shownpage):
+my $editpages=$session->{pages};
+my $editpage=$editpages->[($obvius_shownpage-1)];
+my $fieldlist=$editpage->{fieldlist};
+my $fields=new Obvius::Data;
+foreach (@$fieldlist) {
+    my $fieldspec=$_->{fieldspec};
+    my $name=$fieldspec->Name;
+    my $fieldtype=$fieldspec->{FIELDTYPE};
+    if (defined $ARGS{$name}) {
+
+      # Well, here we need to put a value into a field (signdigest) based on the value
+      # of another field (publish_password) ... so it's hardcoded, sorry!
+      
+      if ($name eq 'publish_password') {
+
+        $fields->param($name => undef);
+          my @vl = $m->comp('/edit/fieldtypes/signandencrypt:cook',
+                            session => $session, value => $ARGS{$name});
+
+        my $sc;
+        $sc .= $_ foreach (@vl);
+
+        die "<B>No Signed Digest!!</B>\n" if not defined $sc or not $sc;
+
+        $fields->param(signdigest => $sc);
+      } else {
+	my $value=$m->comp('/edit/fieldtypes/' . $fieldtype->Edit . ':cook',
+			   fieldspec=>$fieldspec, fieldtype=>$fieldtype, name=>$name,
+			   session=>$session, value=>$ARGS{$name});
+        $fields->param($name=>$value);
+      }
+    }
+    else {
+	warn "Field $name has NO INCOMING VALUE\n";
+    }
+}
+
+my %status = $doctype->validate_publish_fields($fields, $obvius);
+warn "Invalid fields, not stored: @{$status{invalid}}\n" if ($status{invalid});
+warn "Missing fields not stored: @{$status{missing}}\n" if ($status{missing});
+warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+warn "Valid fields: @{$status{valid}}\n" if ($status{valid});
+map {
+    $session->{fields_out}->param($_=>$fields->{$_});
+} @{$status{valid}};
+$session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
+
+return $status{invalid};
+</%init>

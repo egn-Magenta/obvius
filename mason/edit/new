@@ -1,0 +1,82 @@
+% # Set up an editing session based on the choices made on the
+% # /new/new -page:
+<%args>
+$obvius_name
+$obvius_doctype
+$obvius_owner
+$obvius_grp
+$obvius_lang
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/new\n";
+
+# change danish chars and spaces
+if($obvius_name) {
+    $obvius_name =~ s/æ/ae/g;
+    $obvius_name =~ s/ø/oe/g;
+    $obvius_name =~ s/å/aa/g;
+    $obvius_name =~ s/Æ/AE/g;
+    $obvius_name =~ s/Ø/OE/g;
+    $obvius_name =~ s/Å/AA/g;
+    $obvius_name =~ s/ /_/g;
+}
+
+# Validate incoming data:
+unless ($obvius_name =~ /^[a-zA-Z0-9._-]+$/) {
+    $m->comp(
+	     '/new/new',
+	     obvius_error=>'Malformed name (letters, numbers, ., _ and - are valid); try again',
+	     obvius_name=>$obvius_name,
+	    );
+    return;
+}
+if ($obvius->get_doc_by_name_parent($obvius_name, $doc->Id)) {
+    $m->comp('/new/new',
+	     obvius_error=>"A document of that name already exists here. Please choose another name",
+	     obvius_name=>$obvius_name,
+	    );
+    return;
+}
+
+my $new_doctype=$obvius->get_doctype_by_id($obvius_doctype);
+
+my $new_name=$obvius_name;
+my $new_doc=new Obvius::Document(
+			       {
+				parent=>$doc,
+				name=>$new_name,
+				owner=>$obvius_owner,
+				grp=>$obvius_grp,
+				type=>$obvius_doctype,
+				}
+			      );
+
+my $new_vdoc=new Obvius::Version({}); # Skumt att man måste ha en tom hash!
+$new_vdoc->{VERSION}=$r->notes('now');
+$new_vdoc->{TYPE}=$obvius_doctype;
+$new_vdoc->{LANG}=$obvius_lang;
+my $fields=$new_doctype->default_fields;
+# Insert default values:
+my @fieldnames=($fields->param);
+foreach (@fieldnames) {
+    my $fspec=$obvius->get_fieldspec($_, $new_doctype);
+    my $v=$fspec->Default_value;
+    if (defined $v) {
+	print STDERR "def_val for $_ is $v\n";
+	$fields->param($_=>$v);
+    }
+}
+
+$fields->param(lang=>$obvius_lang);
+$fields->param(docdate=>substr($r->notes('now'), 0, 10));
+$new_vdoc->{FIELDS}=$fields;
+
+my $sessionid=$r->pnotes('site')->prepare_edit($r, $new_doc, $new_vdoc, $new_doctype, $obvius);
+my $session=$r->pnotes('site')->get_session($sessionid);
+$r->pnotes(session=>$session);
+$r->notes(obvius_session=>$sessionid);
+$session->{done_comp}='/edit/validate/document';
+
+$m->comp('/edit/page', obvius_session=>$sessionid, obvius_page=>1, session=>$session);
+</%init>

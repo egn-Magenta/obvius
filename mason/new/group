@@ -1,0 +1,144 @@
+<& /edit/page, obvius_session=>$obvius_session, obvius_page=>'1', session=>$session &>
+%
+<%args>
+$obvius_session=>undef
+$obvius_id=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /new/group\n";
+
+my $session;
+
+$session=$r->pnotes('site')->get_session();
+die "No session available - fatally wounded.\n" unless ($session);
+
+my %page=(
+	  title=>(defined $obvius_id ? 'Edit group' : 'New group'),
+	  description=>'',
+	  comp=>'/edit/page',
+	 );
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my @fieldlist;
+foreach my $field (@fields) {
+    my $xref='';
+    if ($field->{options} =~ /^\((.*)\)$/) {
+	$xref=$1;
+    }
+    push @fieldlist, { title=>$field->{title},
+		       fieldspec=>new Obvius::FieldSpec({
+					fieldtype=>new Obvius::FieldType({
+						validate_args=>($xref eq '' ? '.' : $xref) ,
+						name=>($xref eq '' ? 'line' : 'xref'),
+						value_field=>'text',
+						bin=>0,
+						validate=>($xref eq '' ? 'regexp' : 'xref'),
+						edit=>($xref eq '' ? 'line' : 'xref'),
+						edit_args=>$xref,
+					       }),
+				        default_value=>undef,
+				        name=>$field->{name},
+				        optional=>0,
+				        searchable=>0,
+				        repeatable=>($xref eq '' ? 0 : 1),
+				       }),
+		     }
+}
+
+$page{fieldlist}=\@fieldlist;
+$session->{pages}=[ \%page ];
+
+my $fields=new Obvius::Data;
+if (defined $obvius_id) {
+    if (my $group=$obvius->get_group($obvius_id)) {
+	foreach (keys %$group) {
+	    $fields->param($_=>$group->{$_});
+	}
+    }
+    $fields->param(id=>$obvius_id);
+    # Remember the users:
+    if (my $group_users=$obvius->get_group_users($obvius_id)) {
+    	$fields->param(user=>[map { new Obvius::Data(id=>$_) } @$group_users]);
+    }
+}
+$session->{fields_in}=$fields;
+$session->{fields_out}=new Obvius::Data;
+$session->{document}=$doc;
+$session->{version}=$vdoc;
+$session->{doctype}=$doctype;
+$session->{validate_comp}='/edit/validate/page_group';
+$session->{done_comp}='/edit/save/group';
+$session->{done_label}='Save';
+
+$obvius_session=$session->{_session_id};
+$r->pnotes(session=>$session);
+$r->notes(obvius_session=>$obvius_session);
+</%init>
+%
+%
+<%method Do>
+<%args>
+$session
+</%args>
+<%perl>
+print STDERR ">>> /new/group:Do\n";
+
+$obvius->get_version_field($vdoc, 'fields');
+my @fields=map {
+    my ($field, $title, $options)=split /\s+/;
+    { title=>$title, name=>$field, options=>$options || '' }
+} split /\n/, $vdoc->Fields;
+
+my $group={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
+if (my $id=$session->{fields_out}->param('id')) {
+    print STDERR "call update_group\n";
+    $group->{id}=$id;
+    return $obvius->update_group($group);
+}
+else {
+    print STDERR "call create_group\n";
+    return $obvius->create_new_group($group);
+}
+
+</%perl>
+</%method>
+%
+<%method ReallyDelete>
+<%args>
+$obvius_id
+</%args>
+
+% # <form action="<% $prefix %><% $uri %>" method="post" enctype="multipart/form-data">
+<h3 class="admin"><& SELF:msg, text=>'Confirm delete' &></h3>
+
+<p>
+<input type="hidden" name="obvius_op" value="tablelist">
+<input type="hidden" name="obvius_comp" value="/new/group:Delete">
+<input type="hidden" name="obvius_id" value="<% $obvius_id %>">
+<& SELF:msg, text=>'Really delete group' &>?
+</p>
+
+<input type="submit" class="okknap" value="<& SELF:msg, text=>'Delete' &>" accesskey="S">
+<input type="button" class="cancelknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
+
+%
+<%init>
+print STDERR ">>> /new/group:ReallyDelete\n";
+</%init>
+</%method>
+%
+<%method Delete>
+<%args>
+$obvius_id
+</%args>
+<& /done &>
+<%init>
+$obvius->delete_group($obvius_id);
+</%init>
+</%method>

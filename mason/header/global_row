@@ -1,0 +1,22 @@
+<!-- global_row: -->
+        <& divider &>
+        <& link, text=>'Rettigheder', link=>"$prefix$uri?obvius_op=access",
+           ghosted=>$ghosted{access} &>
+        <& divider &>
+        <& link, text=>'Administration', link=>"/admin/admin/", ghosted=>$ghosted &>
+        <& divider &>
+        <& link, text=>'Om Dokumentet', link=>"$prefix$uri?obvius_op=dview", ghosted=>$ghosted &>
+        <& divider &>
+        <& link, text=>'Hjælp', link=>"", ghosted=>$ghosted &>
+        <& divider &>
+        <& questionmark &></td>
+<!-- :global_row -->
+<%args>
+$ghosted=>0
+</%args>
+%
+<%init>
+my %ghosted=(
+             access=>(!$obvius->can_set_access_data($doc) or $ghosted),
+            );
+</%init>

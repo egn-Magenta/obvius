@@ -1,0 +1,42 @@
+<& SELF:menu_box_begin, title=>'Doc. information' &>
+
+<& SELF:menu_entry, title=>$document_status, class=>$document_status_class &>
+
+% ###ifdef error_message
+% ##<TR><TD colspan=2 colspan=2 CLASS=emph>$[htmlize error_message]</TD></TR>
+% ##<& SELF:menu_left_separator &>
+% ###endif error_message
+
+<& SELF:menu_entry, title=>'Data', link=>"$prefix$uri?obvius_op=dview" &>
+
+% # <& SELF:menu_entry, title=>'Picture data', link=>"$prefix$uri?op=image_status" &>
+
+<& SELF:menu_entry, title=>'View public version', target=>'_blank',
+  link=>"$uri", ghosted=>!$public &>
+
+<%init>
+# Status:
+my $document_status='Identical to public version';
+my $document_status_class='sublevel';
+my $public=$obvius->is_public_document($doc);
+if( $public ) {
+    my $public_vdoc=$obvius->get_public_version($doc);
+    if ($public_vdoc->Version ne $vdoc->Version) {
+	$document_status="Diff. from public version";
+    }
+    # $document_status_class='emph';
+    # More
+    #  ifdef versions_newest
+    #    if $[vequal version_public versions_current 0 1]
+    #      set document_status=$[msg: Diff. from public]
+    #    else
+    #      if $[is_expired expires]
+    #        set document_status=$[msg: Expired]
+    #      endif is_expired
+    #    endif vequal
+    #  endif versions_newest
+}
+else {
+    $document_status='Not public';
+}
+</%init>

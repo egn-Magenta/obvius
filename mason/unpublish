@@ -1,0 +1,43 @@
+<%method ask>
+<h3 class="admin"><& SELF:msg, text=>'Hide document' &><& /help, link=>'operation/unpublish' &>?</h3>
+
+% # <form action="./" method="post">
+
+<p>
+<input type="hidden" name="obvius_op" value="unpublish">
+<input type="hidden" name="obvius_page" value="done">
+
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Hide document' &>" accesskey="S">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
+</p>
+
+% # </form>
+</%method>
+%
+%
+%
+<%method do>
+<%perl>
+my $message="Couldn't hide version";
+if ($obvius->unpublish_version($vdoc)) {
+    $message="Version hidden";
+    $m->comp('/dirty_url_in_cache', url=>$uri, unpublish=>1);
+}
+</%perl>
+<& /done, message=>$message &>
+</%method>
+%
+<%args>
+$obvius_page=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /unpublish\n";
+
+if (defined $obvius_page and $obvius_page eq 'done') {
+  $m->comp('/unpublish:do');
+}
+else {
+  $m->comp('/unpublish:ask');
+}
+</%init>

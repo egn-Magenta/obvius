@@ -1,0 +1,16 @@
+<p>
+% if ($output->param('activate_failed')) {
+Vi beklager - men der er desværre sket en fejl, da du 
+forsøgte at aktivere dit abonnement. 
+Send en mail til <a href='mailto:webmaster@<% $r->pnotes('site')->Sitename %>'>webmaster@<% $r->pnotes('site')->Sitename %></a>. Så
+sørger vi for, at dit abonnement bliver aktiveret. 
+% } else {
+Du har nu aktiveret dit abonnement. Fremover vil du modtage 
+en e-mail, når der offentliggøres nyheder indenfor 
+de områder, du har valgt.
+% }
+</p>
+
+<%args>
+$output
+</%args>

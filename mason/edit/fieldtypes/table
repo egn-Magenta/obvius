@@ -1,0 +1,282 @@
+<%method edit>
+<script language="JavaScript">
+function moveOptionUp(obj) {
+    // If > 1 option selected, do nothing
+    var selectedCount=0;
+    for (i=0; i<obj.options.length; i++) {
+      if (obj.options[i].selected) {
+      selectedCount++;
+      }
+      }
+      if (selectedCount > 1) {
+      return;
+      }
+
+      // If this is the first item in the list, do nothing
+      var i = obj.selectedIndex;
+      
+      if (i == 0) {
+      return;
+      }
+      
+      swapOptions(obj,i,i-1);
+      obj.options[i-1].selected = true;
+      }
+      
+      function moveOptionDown(obj)
+      {
+      // If > 1 option selected, do nothing
+      var selectedCount=0;
+      for (i=0; i<obj.options.length; i++) {
+        if (obj.options[i].selected) {
+	selectedCount++;
+        }
+    }
+    if (selectedCount > 1) {
+        return;
+    }
+
+    // If this is the last item in the list, do nothing
+    var i = obj.selectedIndex;
+    if (i == (obj.options.length-1)) {
+        return;
+    }
+    swapOptions(obj,i,i+1);
+    obj.options[i+1].selected = true;
+}
+
+// internal used by moveOptionUp() and moveOptionDown()
+function swapOptions(obj,i,j)
+{
+    var o = obj.options;
+    var i_selected = o[i].selected;
+    var j_selected = o[j].selected;
+    var temp = new Option(o[i].text, o[i].value, o[i].defaultSelected, o[i].selected);
+    var temp2= new Option(o[j].text, o[j].value, o[j].defaultSelected, o[j].selected);
+    o[i] = temp2;
+    o[j] = temp;
+    o[i].selected = j_selected;
+    o[j].selected = i_selected;
+    rebuildHidden_<% $name %>();
+}
+
+function add_dropdown_element_<% $name %>(id)
+{
+    // find number of elements
+    var noElements = document.pageform.selectbox_<% $name %>.options.length;
+
+    // add to dropdownboks
+    var newOption = new Option(format_string_<% $name %>(id),id);
+    document.pageform.selectbox_<% $name %>.options[noElements] = newOption;
+
+    // add to hidden-menu
+    rebuildHidden_<% $name %>();
+}
+
+function edit_element_<% $name %>(selected)
+{
+    var array = selected.split("//");
+%   my $i = 0;
+%   for my $name (@names) {
+%	if ($name =~ /^table:(\w+)/) {
+    for (var i = 0; i < document.pageform.art.options.length; i++) {
+	var number = 0;
+	if (array[<% $i %>] ==
+	    document.pageform.art.options[i].value) {
+	    number = i;
+	    break;
+	}
+    }
+	document.pageform.art.options[number].selected = true;
+%	}
+%	else {
+	document.pageform.<% $name %>.value = array[<% $i %>];
+%	}
+%      $i++;
+%   }
+}
+
+function delete_element_<% $name %>(index)
+{
+    document.pageform.selectbox_<% $name %>.options[index] = null;
+
+    rebuildHidden_<% $name %>();
+}
+
+function rebuildHidden_<% $name %> ()
+{
+    var hidden = "";
+
+    for (var i = 0; i < document.pageform.selectbox_<% $name %>.options.length; i++)  {
+        hidden = hidden + document.pageform.selectbox_<% $name %>.options[i].value + "##";
+    }
+
+    document.pageform.<% $name %>.value = hidden;
+}
+
+function format_string_<% $name %>(id)
+{
+
+    var array = id.split("//");
+    var returnString = "";
+    for (var i = 0; i < array.length; i++)
+    {
+        if (array[i] != "")
+            returnString = returnString + "  " + array[i];
+    }
+    return returnString;
+}
+</script>
+
+<table cellspacing="0" cellpadding="5" border="0">
+<tr>
+% # boksen
+    <td colspan="<% $no_columns + 1 %>">
+        <table border="0">
+        <tr>
+        <td>
+            <select size="4" name="selectbox_<% $name %>" onChange="edit_element_<% $name %>(document.pageform.selectbox_<% $name %>.options[selectedIndex].value)" tabindex="10"></select>
+        </td>
+        <td>
+            <table border="0">
+            <tr><td><input type="button" value="Flyt op" onClick="moveOptionUp(document.pageform.selectbox_<% $name %>)"></td></tr>
+            <tr><td><input type="button" value="Slet" onClick="delete_element_<% $name %>(document.pageform.selectbox_<% $name %>.selectedIndex)"></td></tr>
+            <tr><td><input type="button" value="Flyt ned" onClick="moveOptionDown(document.pageform.selectbox_<% $name %>)"></td></tr>
+            </table>
+        </td>
+        </table>
+    <input type="hidden" name="<% $name %>" value="">
+    </td>
+
+</tr>
+
+% # overskrifterne på tabellen
+<tr>
+%   for (my $i = 0; $i < $no_columns; $i++) {
+%       $columns[$i] =~ /(.*)\|(.*)\|(.*)/;
+        <td><% $2 %></td>
+%   }
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+</tr>
+
+% # felterne til tabellen (inkl. databaseopslag)
+<tr>
+<%perl>
+    for (my $i = 0; $i < $no_columns; $i++) {
+	$columns[$i] =~ /(.*)\|(.*)\|(.*)/;
+	my $table = $3;
+	my $name = $1;
+	# if we need to make a pulldown with values from a table
+	if ($table =~ /^table:\w+/) {
+	    $table =~ s/^table://;
+            my $dbh = DBI->connect('dbi:mysql:sportsfiskeren','rene', 'myindal') || die "Error connecting: $DBI::errstr\n";
+            my $sth = $dbh->prepare("select name from categories where id like \'$table%\' order by name");
+            $sth->execute();
+            my $categories = $sth->fetchall_arrayref({});
+
+</%perl>
+      <td>
+        <select name="<% $name %>" tabindex="10">
+%         for (@$categories) {
+	  <option value="<% $_->{name} %>"><% $_->{name} %></option>
+%         }
+	</select>
+      </td>
+
+%       } 
+%       else {
+        <td><input type="text" size="<% $3 %>" name="<% $1 %>" tabindex="10"></td>
+%       }
+%   }
+
+%   # opbyg java-script parameter
+%   my $parameter = "";
+%   for my $name (@names) {
+%     if ($name =~ /^table:(\w+)/) {
+%         $parameter .= "document.pageform.$1.options[document.pageform.$1.selectedIndex].value+\'//\'+";
+%     }
+%     else {
+%	  $parameter .= "document.pageform.$name.value+\'//\'+";
+%     }
+%   }
+%   $parameter =~ s/\+\'\/\/\'\+$//;
+    <td><input type="button" value="Tilføj" onClick="add_dropdown_element_<% $name %>(<% $parameter %>)"></td>
+</tr>
+</table>
+
+% # tilføj de eksisterende punkter
+<script language="javascript">
+% if ($value) {
+%   my @elements = split /##/, $value;
+%   for (@elements) {
+        add_dropdown_element_<% $name %>("<% $_ %>");
+%   }
+% }
+</script>
+
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+
+$column1=>undef
+$column2=>undef
+$column3=>undef
+$column4=>undef
+$column5=>undef
+$column6=>undef
+$column7=>undef
+$column8=>undef
+$column9=>undef
+$column10=>undef
+</%args>
+
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+$value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my @names; # holds the names of all the columns
+my @columns; # holds all the columns
+my $no_columns = 0; # holds the number of columns defined
+
+push @columns, $column1, $column2, $column3, $column4, $column5, $column6, $column7, $column8, $column9, $column10;
+
+# find the number of columns
+for my $column(@columns) {
+    last unless $column;
+    $no_columns++;
+}
+
+# find the names
+for (my $i = 0; $i < $no_columns; $i++) {
+    $columns[$i] =~ /(.*)\|(.*)\|(.*)/;
+    my $name = $1;
+
+    if ($3 =~ /^table:\w+/) {
+	push @names, "table:" . "$name";
+    }
+    else {
+	push @names, "$name";
+    }
+}
+
+</%init>
+</%method>
+%
+%
+<%method cook>
+  <%args>
+    $fieldspec
+    $fieldtype
+    $name
+    $session
+    $value=>undef
+    </%args>
+  
+  <%perl>
+    return $value;
+</%perl>
+</%method>
+  

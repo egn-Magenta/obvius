@@ -1,0 +1,15 @@
+<!-- Calendar: -->
+%if($show_as eq 'list') {
+%   my $events = $output->param('events');
+    <& calendar/list, events=>$events &>
+%} else {
+%   my $weeks = $output->param('weeks');
+    <& calendar/2D, weeks=>$weeks &>
+%}
+<!-- :Calendar -->
+<%args>
+$output
+</%args>
+<%init>
+my $show_as = $output->param('show_as');
+</%init>

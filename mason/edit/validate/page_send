@@ -1,0 +1,35 @@
+<%args>
+$session
+$obvius_shownpage
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/page_send\n";
+
+my $editpages=$session->{pages};
+my $editpage=$editpages->[($obvius_shownpage-1)];
+my $fieldlist=$editpage->{fieldlist};
+foreach (@$fieldlist) {
+    my $fieldspec=$_->{fieldspec};
+    my $name=$fieldspec->Name;
+    my $fieldtype=$fieldspec->{FIELDTYPE};
+    if (defined $ARGS{$name}) {
+	my $value=$m->comp('/edit/fieldtypes/' . $fieldtype->Edit . ':cook',
+			   fieldspec=>$fieldspec, fieldtype=>$fieldtype, name=>$name,
+			   session=>$session, value=>$ARGS{$name});
+	$session->{fields_out}->param($name=>$value);
+    }
+    else {
+	$session->{fields_out}->param($name=>[]);
+    }
+    #use Data::Dumper;
+    #print STDERR " --- $name = " .
+    #	(defined $session->{fields_out}->param($name) ?
+    #    Dumper($session->{fields_out}->param($name)) :
+    #	 'undef' )
+    #	    . "\n";
+}
+$session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
+
+return undef;
+</%init>

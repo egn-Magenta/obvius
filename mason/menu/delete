@@ -1,0 +1,10 @@
+% #ifndef subdocs
+% #ifdef can_admin
+<& SELF:menu_box_begin, title=>'Delete' &>
+<& SELF:menu_entry, title=>'Delete document', link=>"$prefix$uri?obvius_op=delete", ghosted=>$ghosted &>
+% #endif can_admin
+% #endif subdocs
+%
+<%init>
+my $ghosted=$r->notes('SUBDOCS');
+</%init>

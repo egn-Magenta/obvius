@@ -1,0 +1,37 @@
+<br>
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="90%" align="center">
+<input type="hidden" name="obvius_op" value="expertgroups">
+    <tr>
+        <td><img border="0" src="/grafik/hvidkasse/top_v.gif" width="6" height="6"></td>
+        <td width="100%" background="/grafik/hvidkasse/t.gif"><img border="0" src="/grafik/admin/1x1.gif" width="6" height="6"></td>
+        <td><img border="0" src="/grafik/hvidkasse/top_h.gif" width="6" height="6"></td>
+    </tr>
+    <tr>
+        <td background="/grafik/hvidkasse/v.gif">&nbsp;</td>
+        <td bgcolor="#FFFFFF" width="100%" align="center">
+%if($deleted) {
+            Gruppen "<% $group %>" er blevet slettet.<br>
+            <a href="/admin/?obvius_op=expertgroups">OK</a>
+%} else {
+            Er du sikker på du vil slette gruppen "<% $group %>"?<br>
+            <a href="/admin/?obvius_op=expertgroups&mode=delete&group=<% $group | u%>&confirm=1">Ja</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/admin/?obvius_op=expertgroups">Nej</a>
+%}
+        </td>
+        <td background="/grafik/hvidkasse/h.gif">&nbsp;</td>
+    </tr>
+    <tr>
+        <td><img border="0" src="/grafik/hvidkasse/bund_v.gif" width="6" height="6"></td>
+        <td width="100%" background="/grafik/hvidkasse/b.gif"><img border="0" src="/grafik/admin/1x1.gif" width="6" height="6"></td>
+        <td><img border="0" src="/grafik/hvidkasse/bund_h.gif" width="6" height="6"></td>
+    </tr>
+</table>
+<%init>
+my $deleted;
+my $group = $r->param('group');
+if($r->param('confirm')) {
+    $obvius->delete_expertgroup($group);
+    $deleted = 1;
+}
+</%init>

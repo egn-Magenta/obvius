@@ -1,0 +1,28 @@
+<TABLE BORDER="<& SELF:table_debug &>" WIDTH="100%" CELLPADDING="0" CELLSPACING="0">
+
+% #include menu-local.html
+
+<& document &>
+<& SELF:menu_box_spacer &>
+
+% # <& delete &>
+% #<& SELF:menu_box_spacer &>
+
+% # <& edit &>
+% # <& SELF:menu_box_spacer &>
+
+% #<& publish &>
+% #<& SELF:menu_box_spacer &>
+
+<& version &>
+<& SELF:menu_box_spacer &>
+
+<& manual_subscription &>
+<& SELF:menu_box_spacer &>
+
+<& send &>
+<& SELF:menu_box_spacer &>
+
+<& user &>
+
+</TABLE>

@@ -1,0 +1,57 @@
+<%method ask>
+% # <form action="./" method="post">
+<h3 class="admin"><& SELF:msg, text=>'Move/rename document' &><& /help, link=>'operation/rename' &></h3>
+
+<p>
+<input type="hidden" name="obvius_op" value="rename">
+<input type="hidden" name="obvius_page" value="done">
+
+<& SELF:msg, text=>'To' &>: <input type="text" name="new_name" value="<% $showuri %>" size="55" style="width: 80%">
+<input class="normalknap" type="button" value="<& SELF:msg, text=>'Browse' &>..." onClick="javascript:OpenWin('/admin/?obvius_op=navigator&fieldname=new_name&path=<% $uri %>',750,550);">
+</p>
+
+<p>
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Move/rename document' &>" accesskey="S">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
+</p>
+
+% # </form>
+<%init>
+my $showuri=$uri;
+$showuri =~ s/\/$//;
+</%init>
+</%method>
+%
+%
+%
+<%method do>
+<%args>
+$new_name
+</%args>
+<%perl>
+my $message="Couldn't rename document";
+my $ok=0;
+if ($obvius->rename_document($doc, $new_name)) {
+    $message="Document renamed";
+    $uri=$new_name . '/';
+    $ok=1;
+    $m->comp('/dirty_url_in_cache', url=>$uri);
+}
+</%perl>
+<& /done, message=>$message &>
+</%method>
+%
+<%args>
+$obvius_page=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /rename\n";
+
+if (defined $obvius_page and $obvius_page eq 'done') {
+  $m->comp('/rename:do', %ARGS);
+}
+else {
+  $m->comp('/rename:ask');
+}
+</%init>

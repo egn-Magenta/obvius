@@ -1,0 +1,62 @@
+<input type="hidden" name="simple" value="1">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="2">
+    <tr>
+        <td>
+            <table border="0">
+                <tr>
+                    <td nowrap>Nuværende dokument:&nbsp;&nbsp;</td>
+                    <td><strong><% $vdoc->field('title') %></strong></td>
+                </tr>
+                <tr>
+                    <td nowrap>Kort titel:</td>
+                    <td><% ($vdoc->field('short_title') || 'Ingen kort titel') %></td>
+                </tr>
+                <tr>
+                    <td nowrap>Dokumenttype:</td>
+                    <td><% $doctypename %></td>
+                </tr>
+                <tr>
+%if(! $doctype_in or $doctype_in eq $doctypename ) {
+                    <td colspan="2" valign="top"><a href="javascript:navigator_choose('<% $path %>')">Vælg dette dokument</a><img src="/grafik/admin/1x1.gif" align="top" border="0" alt="" width="1" height="12"></td>
+%} else {
+                    <td>&nbsp;</td>
+%}
+                </tr>
+            </table>
+        </td>
+        <td valign="top" align="right">
+            [<a href="javascript:window.close()">Luk vindue</a>]<br>
+%if($doctypename eq 'Image') {
+%           my $imgpath = $path;
+%           $imgpath =~ s!/$!!;
+            <img src="/admin<% $imgpath %>?size=50x62" width="50" height="62" border="0"><img src="/grafik/admin/1x1.gif" align="top" border="0" alt="" width="7" height="62" align="right">
+%}
+        </td>
+    </tr>
+</table>
+
+
+<table border="1" width="100%">
+    <tr>
+        <td width="250" valign="top">
+            <& tree, list=>$list, path_levels=>$path_levels, simple=>1, %ARGS &>
+        </td>
+        <td width="400" valign="top">
+            <& docs, here_docs=>$here_docs, simple=>1, %ARGS &>
+        </td>
+    </tr>
+</table>
+<%args>
+$here_docs=>[]
+$list=>[]
+$path_levels
+$vdoc
+$path
+</%args>
+<%init>
+$obvius->get_version_fields($vdoc, ['short_title']);
+my $doctype_in = $r->param('doctype');
+my $doctype = $obvius->get_doctype_by_id($vdoc->Type);
+my $doctypename = $doctype->Name;
+</%init>

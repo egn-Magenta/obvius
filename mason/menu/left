@@ -1,0 +1,17 @@
+<TABLE WIDTH="100%" BORDER="<& SELF:table_debug &>" CELLPADDING="0" CELLSPACING="0">
+
+<& navigate &>
+<& SELF:menu_box_spacer &>
+
+<& status &>
+<& SELF:menu_box_spacer &>
+
+<& subdocs, max=>12 &>
+<& SELF:menu_box_spacer &>
+
+<& versions &>
+<& SELF:menu_box_spacer &>
+
+<& legend &>
+
+</TABLE>

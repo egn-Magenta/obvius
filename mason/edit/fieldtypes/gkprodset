@@ -1,0 +1,294 @@
+%
+<%method edit>
+%
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+
+my @options;
+for(@$value) {
+    my ($name) = /type:([^¤]*)¤/;
+    push(@options, { name => $name, value => $_});
+}
+</%init>
+%
+<script language="javascript">
+function gkprod_load_from_text(text) {
+    var textarray = new Array();
+
+    textarray = text.split(/¤/);
+    for(var i=0; i < textarray.length; i++) {
+        var str = textarray[i] + '';
+
+        var key = str.match(/^[^:]+/) + '';
+        var value = str.replace(/^[^:]+:/, '');
+
+        if(key.match(/(type|anvendelse|produkt|godkendelsesnr|ansoeger|land|ansoegningsdato|godkendelsesdato)/)) {
+            var field = document.pageform['obvius_<% $name %>_' + key];
+            field.value = value;
+        } else {
+            if(key.match(/(indsigelse|status)/)) {
+                var field = document.pageform['obvius_<% $name %>_' + key];
+                for(var j=0; j < field.length ;j++) {
+                    if(field[j].value == value) {
+                        field[j].checked = true;
+                    } else {
+                        field[j].checked = false;
+                    }
+                }
+            } else {
+                alert('Something is wrong, key "' + key + '" unknown' );
+            }
+        }
+    }
+}
+
+function gkprod_values_to_text() {
+    var textstr = 'type:';
+    textstr += document.pageform.obvius_<% $name %>_type.value;
+    textstr += '¤anvendelse:';
+    textstr += document.pageform.obvius_<% $name %>_anvendelse.value;
+    textstr += '¤produkt:';
+    textstr += document.pageform.obvius_<% $name %>_produkt.value;
+    textstr += '¤godkendelsesnr:';
+    textstr += document.pageform.obvius_<% $name %>_godkendelsesnr.value;
+    textstr += '¤ansoeger:';
+    textstr += document.pageform.obvius_<% $name %>_ansoeger.value;
+    textstr += '¤land:';
+    textstr += document.pageform.obvius_<% $name %>_land.value;
+    textstr += '¤ansoegningsdato:';
+    textstr += document.pageform.obvius_<% $name %>_ansoegningsdato.value;
+    textstr += '¤godkendelsesdato:';
+    textstr += document.pageform.obvius_<% $name %>_godkendelsesdato.value;
+    textstr += '¤indsigelse:';
+
+    var indsigelse_set = false;
+    for(var i=0; i < document.pageform.obvius_<% $name %>_indsigelse.length; i++) {
+        if(document.pageform.obvius_<% $name %>_indsigelse[i].checked) {
+            textstr += document.pageform.obvius_<% $name %>_indsigelse[i].value;
+            indsigelse_set = true;
+        }
+    }
+    if(! indsigelse_set) {
+        textstr += '0';
+    }
+
+    var status_set = false;
+    textstr += '¤status:';
+    for(var i=0; i < document.pageform.obvius_<% $name %>_status.length; i++) {
+        if(document.pageform.obvius_<% $name %>_status[i].checked) {
+            textstr += document.pageform.obvius_<% $name %>_status[i].value;
+            status_set = true;
+        }
+    }
+    if(! status_set) {
+        textstr += 'none';
+    }
+    return(textstr);
+}
+
+function gkprod_empty_fields() {
+    document.pageform.obvius_<% $name %>_type.value = '';
+    document.pageform.obvius_<% $name %>_anvendelse.value = '';
+    document.pageform.obvius_<% $name %>_produkt.value = '';
+    document.pageform.obvius_<% $name %>_godkendelsesnr.value = '';
+    document.pageform.obvius_<% $name %>_ansoeger.value = '';
+    document.pageform.obvius_<% $name %>_land.value = '';
+    document.pageform.obvius_<% $name %>_ansoegningsdato.value = '0000-00-00';
+    document.pageform.obvius_<% $name %>_godkendelsesdato.value = '0000-00-00';
+    document.pageform.obvius_<% $name %>_indsigelse.value = '0';
+    document.pageform.obvius_<% $name %>_status.value = 'none';
+}
+
+function gkprod_list_onchange() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        gkprod_empty_fields();
+        return;
+    } else {
+        var text = document.pageform.<% $name %>.options[sel].value;
+        gkprod_load_from_text(text);
+    }
+}
+
+function gkprod_add_to_list() {
+    var new_option = new Option(document.pageform.obvius_<% $name %>_type.value, gkprod_values_to_text());
+    document.pageform.<% $name %>.options[document.pageform.<% $name %>.options.length] = new_option;
+    document.pageform.<% $name %>.selectedIndex = -1;
+    document.pageform.<% $name %>.selectedIndex = (document.pageform.<% $name %>.options.length - 1);
+}
+
+function gkprod_delete_from_list() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert('Du skal vælge en fra listen for at kunne slette den!');
+        return;
+    } else {
+        document.pageform.<% $name %>.options[sel] = null;
+        document.pageform.<% $name %>.selectedIndex = -1;
+    }
+    document.pageform.<% $name %>.selectedIndex = -1;
+    gkprod_empty_fields();
+}
+
+
+function gkprod_save_changes() {
+    var sel = document.pageform.<% $name %>.selectedIndex;
+    if(sel == -1) {
+        alert("Kan ikke gemme, når der ikke er valgt nogen option i listen\nBrug 'Tilføj til listen' i stedet.")
+        return;
+    } else {
+        document.pageform.<% $name %>.options[sel].value = gkprod_values_to_text();
+        document.pageform.<% $name %>.options[sel].text = document.pageform.obvius_<% $name %>_type.value;
+    }
+}
+
+function gkprod_select_all() {
+    for(var i=0; i < document.pageform.<% $name %>.options.length; i++) {
+        document.pageform.<% $name %>.options[i].selected = true;
+    }
+}
+
+// Add to onsubmit list:
+    onsubmit_array[onsubmit_array.length] = gkprod_select_all;
+</script>
+<select name="<% $name %>" multiple size="6" onchange="gkprod_list_onchange()" tabindex="10">
+%for(@options) {
+    <option value="<% $_->{value} %>"><% $_->{name} %></option>
+%}
+</select><br>
+<br>
+<input type="button" value="Slet fra listen" onclick="gkprod_delete_from_list()">&nbsp;
+<input type="button" value="Tilføj til listen" onclick="gkprod_add_to_list()">&nbsp;
+<input type="button" value="Gem ændringer" onclick="gkprod_save_changes()"><br>
+<br>
+<table>
+    <tr>
+        <td class="name" valign="top">
+            Type af godkendelse:
+        </td>
+        <td>
+            <input type="" size="40" name="obvius_<% $name %>_type" tabindex="10">
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Anvendelse:
+        </td>
+        <td>
+            <textarea name="obvius_<% $name %>_anvendelse" cols="49" rows="4" tabindex="10"></textarea>
+        </td>
+    <tr>
+        <td class="name" valign="top">
+            Produkt:
+        </td>
+        <td>
+            <input type="" size="40" name="obvius_<% $name %>_produkt" tabindex="10">
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Ansøgningsnummer:
+        </td>
+        <td>
+            <input type="" size="40" name="obvius_<% $name %>_godkendelsesnr" tabindex="10">
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Ansøger:
+        </td>
+        <td>
+            <input type="" size="40" name="obvius_<% $name %>_ansoeger" tabindex="10">
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Land:
+        </td>
+        <td>
+            <input type="" size="40" name="obvius_<% $name %>_land" tabindex="10">
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Ansøgningsdato
+        </td>
+        <td>
+            <script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
+
+            <input type="text" size="11" name="obvius_<% $name %>_ansoegningsdato" value="0000-00-00" onChange="adjust_date(this); synchronise_field(this,this.form.ansoegningsdato)" tabindex="10">
+
+            <script language="javascript">
+                add_date_separator();
+                add_date_buttons('obvius_<% $name %>_ansoegningsdato');
+                add_date_separator(2);
+                add_field_reset('obvius_<% $name %>_ansoegningsdato');
+            </script>
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Godkendelsesdato
+        </td>
+        <td class="data" valign="top">
+            <script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
+            <input type="text" size="11" name="obvius_<% $name %>_godkendelsesdato" value="0000-00-00" onChange="adjust_date(this); synchronise_field(this,this.form.godkendelsesdato)" tabindex="10">
+            <script language="javascript">
+                add_date_separator();
+                add_date_buttons('obvius_<% $name %>_godkendelsesdato');
+                add_date_separator(2);
+                add_field_reset('obvius_<% $name %>_godkendelsesdato');
+            </script>
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Dansk indsigelse:
+        </td>
+        <td class="data" valign="top">
+            <input type="radio" name="obvius_<% $name %>_indsigelse" value="1" tabindex="10"> Ja
+            <input type="radio" name="obvius_<% $name %>_indsigelse" value="0" tabindex="10"> Nej
+        </td>
+    </tr>
+    <tr>
+        <td class="name" valign="top">
+            Status:
+        </td>
+        <td class="data" valign="top">
+            <input type="radio" name="obvius_<% $name %>_status" value="none" tabindex="10"> Ikke godkendt
+            <input type="radio" name="obvius_<% $name %>_status" value="underbehandling" tabindex="10"> Under behandling
+            <input type="radio" name="obvius_<% $name %>_status" value="godkendt" tabindex="10"> Godkendt
+        </td>
+    </tr>
+</table>
+%
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+if($value) {
+    $value = [ $value ] unless(ref($value) eq 'ARRAY');
+} else {
+    $value = [];
+}
+return $value;
+</%perl>
+</%method>

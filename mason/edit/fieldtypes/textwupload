@@ -1,0 +1,41 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>59
+$rows=>20
+$wrap=>1
+$size=>60
+</%args>
+%
+<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea><br>
+<input type="file" size="<% $size %>" name="<% $name %>_upload" tabindex="10">
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$wrap=' WRAP="' . $wrap . '" ';
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name
+$fields
+</%args>
+<%perl>
+if (my $upload=$r->upload($name . '_upload')) {
+    # These checks are a little suspect; I hope they help (Moz 0.9.7+, MSIE 5.5)
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
+	local $/ = undef;
+	$value=<$fh>;
+    }
+}
+
+$value =~ s/\r//g if defined ($value);
+return $value;
+</%perl>
+</%method>

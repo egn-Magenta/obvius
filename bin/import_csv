@@ -1,0 +1,355 @@
+#!/usr/bin/perl
+
+# $Id$
+
+# import_csv - import uploaded csv-files to obvius
+# Copyright (C), 2001-2002 by Adam Sjøgren <asjo@aparte-test.dk>
+# Under the GPL.
+
+use strict;
+use warnings;
+
+use POSIX qw(strftime);
+
+# use Spreadsheet::ParseExcel;
+use Text::CSV_XS;
+
+use lib qw(/home/httpd/root/perl);
+use Obvius;
+use Obvius::Config;
+use Obvius::Data;
+
+################
+#
+
+my $sitename=shift @ARGV; # "fi";
+my $parenturl=shift @ARGV; # '/test/adam/';
+my $doctypename=shift @ARGV; # "TestAfVaskemaskinerOgToerretumblere";
+my $lang=shift @ARGV; # 'da';
+my $owner=shift @ARGV; # 4
+my $grp=shift @ARGV; # 2
+my $publish=shift @ARGV;
+my $seq=-1;
+
+#
+################
+
+my $pretend=shift @ARGV;
+
+my $DEBUG=0;
+
+my $csv=new Text::CSV_XS({
+			  'sep_char'=>';',
+			  'binary'=>1
+			 });
+
+# The first line is expected to define the correct number of columns (and no data):
+my $line = <>;
+my $status=$csv->parse($line);
+die " $status " . $csv->error_input() . " ($line)" unless ($status);
+
+my @fields=$csv->fields(); shift @fields;
+my $field = shift @fields;
+my @docs = map { new Obvius::Data () } @fields;
+
+my $fieldnum=0;
+my $docsnum=scalar @docs;
+print STDERR " Number of docs: $docsnum\n" if ($DEBUG);
+my $linenum=1;
+while(<>) {
+    my $status=$csv->parse($_);
+    $linenum++;
+    unless ($status) {
+	my $error=$csv->error_input();
+	print "Syntaksfejl: $status: $error";
+	print "  på linje#: $linenum\n";
+	print "           : $line\n";
+	die " [$status]\n[" . $csv->error_input() . "]\n($line)";
+    }
+    my @fields = $csv->fields(); shift @fields;
+    map { s/$\s*^// } @fields;
+    my $field = shift @fields;
+    # $field=$fieldnum if ($field eq '');
+
+    if ($field ne '') {
+	if ($_ ne '') {
+	    print "Felt: [$field]\n" if ($DEBUG);
+	    warn "More columns in field $fieldnum (" . scalar(@fields) .
+		") than in field 0 ($docsnum)!" if (scalar(@fields)>$docsnum);
+	    for(my $j=0; $j<$docsnum; $j++) {
+		my $v=$fields[$j];
+		if (defined $v and $v ne '') {
+		    # print " $field ${j}s værdi: " . (defined $v ? $v : 'undef') . "\n";
+		    $v =~ s/\\n/\n/g if (defined $v);
+		    $docs[$j]->param($field=>$v);
+		}
+	    }
+	}
+	$fieldnum++;
+    }
+    else {
+	if (grep { $_ ne '' } @fields) {
+	    print STDERR " Bad field ($fieldnum): [$_]\n";
+	}
+    }
+}
+
+my $obvius_config=new Obvius::Config($sitename);
+die "No configuration for site $sitename found." unless ($obvius_config);
+
+my $obvius=new Obvius($obvius_config);
+$obvius->{USER} = 'admin'; # XXX This is not nice
+
+my $parent=$obvius->lookup_document($parenturl);
+die "Couldn't locate parent document $parenturl." unless ($parent);
+
+my $doctype=$obvius->get_doctype_by_name($doctypename);
+die "No such doctype $doctypename." unless ($doctype);
+
+# Get last editpage...:
+my $editpage=$obvius->get_editpages($doctype)->{ (scalar(keys %{$obvius->get_editpages($doctype)})-1 )};
+
+use WebObvius qw(parse_editpage_fieldlist);
+my $fieldlist=WebObvius::parse_editpage_fieldlist(undef, $editpage->Fieldlist, $doctype, $obvius);
+my %editpageinfo;
+foreach (@$fieldlist) {
+    $editpageinfo{uc($_->{fieldspec}->Name)}=$_;
+}
+
+my $k=1;
+my ($fine, $failed, $versions, $publish_failed)=(0,0,0,0);
+foreach (@docs) {
+    next unless ($_->param('title')); # No title, no doc!
+
+    # Find good name:
+    my $name;
+    # 1) Does the document already exist?
+    my $create_version_instead=0;
+    my $alreadydoc;
+    if ($alreadydoc=$obvius->search(
+				  [qw(title)],
+				  'title="' . $_->param('title') . '" AND parent=' . $parent->Id,
+				  needs_document_fields=>[qw(parent)]
+				 )) {
+	$alreadydoc=$obvius->get_doc_by_id($alreadydoc->[0]->Docid);
+	$name=$alreadydoc->Name;
+	$create_version_instead=1;
+    }
+    else {
+	# 2) No, put it after the others:
+	$name=sprintf "%3.3d", $k;
+	while (my $alreadydoc=$obvius->lookup_document($parenturl . $name)) {
+	    $k++;
+	    $name=sprintf "%3.3d", $k;
+	}
+	$k++;
+    }
+    print " Titel: " . $_->param('title') . " ($parenturl$name)\n\n";
+
+    $_->param(seq=>$seq);
+    $_->param(docdate=>strftime('%Y-%m-%d 00:00:00', localtime));
+    $_->param(sortorder=>'+seq,+title');
+    $_->param(expires => '9999-01-01 00:00:00');
+    $_->param(subscribeable => 'none');
+
+    # Fix up fields:
+    foreach my $field ($_->param) {
+	my $fspec=$obvius->get_fieldspec($field, $doctype);
+	next unless ($fspec);
+	my $ftype=$fspec->Fieldtype;
+	print "Felt: $field    Felttype: ", $ftype->Name, "   Valuefield: ", $ftype->Value_field," \n" if ($DEBUG);
+	next unless ($ftype);
+	if ($ftype->Name eq 'a_g') { # A-G
+	    if ( $_->param($field) =~ /^([a-gA-G])(.+)$/ ) { # Value and comment
+		$_->param($field=>$1);
+		my $comment=$2;
+		$comment =~ s/^[,\/]?\s*//;
+		$_->param($field . '_comment'=>$comment) unless ($comment eq '');
+	    }
+	    elsif ($_->param($field) !~ /^[a-gA-G]$/) { # No value
+		print "  Advarsel: Felt '" . lc($field) . "' har en uforståelig værdi:\n";
+		print "   '" . $_->param($field) . "'\n";
+		print "  feltet burde indeholde A-G. Hele værdien er flyttet til kommentarfeltet.\n\n";
+		$_->param($field . '_comment' => $_->param($field));
+		$_->delete($field);
+	    }
+	    #print " fixing field $field\n";
+	    #print "  value a_g : [" . $_->param($field) . "]\n";
+	    #print "  value comm: [" . $_->param($field . '_comment') . "]\n"
+	    #	if (defined $_->param($field . '_comment'));
+	}
+	elsif ($ftype->Name eq 'bool') { # Bool
+	    #print " fixing field $field\n";
+	    #print "  value bool: [" . $_->param($field) . "]\n";
+	    my %map=(
+		     'ja'=>1,
+		     'bestået'=>1,
+		     'nej'=>0,
+		     'ikke bestået'=>0,
+		     );
+	    if (my $editpagefieldinfo=$editpageinfo{$field}) {
+		$map{lc($editpagefieldinfo->{options}->{label_0})}=0
+		    if (defined $editpagefieldinfo->{options}->{label_0});
+		$map{lc($editpagefieldinfo->{options}->{label_1})}=1
+		    if (defined $editpagefieldinfo->{options}->{label_1});
+	    }
+	    my $matched=0;
+	    if ($_->param($field) =~ /^([^,.?\-\/\n\r]+)\n?\r?(.*)$/m) {
+		#print " 1: [$1]\n";
+		#print " 2: [$2]\n";
+		my $one=$1;
+		my $comment=$2;
+		$one =~ s/\s*$//; # Remove trailing whitespace.
+		if (defined $map{lc($one)}) {
+		    $_->param($field=>$map{lc($one)});
+		    if (defined $comment and $comment ne '') {
+			$comment =~ s/^[,.?\-\/]?\s*//m;
+			$_->param($field . '_comment'=>$comment) unless ($comment eq '');
+			#print " COMMENT: [$comment]\n";
+		    }
+		    $matched=1;
+		}
+	    }
+
+	    if (!$matched) {
+		print "  Advarsel: Felt '" . lc($field) . "' har en uforståelig værdi:\n";
+		print "   '" . $_->param($field) . "'\n";
+		print "  feltet burde indeholde en boolsk værdi.";
+		print " Hele værdien er flyttet til kommentarfeltet.\n\n";
+		$_->param($field . '_comment' => $_->param($field));
+		$_->delete($field);
+	    }
+	    #print "  value bool: " . $_->param($field) . "\n";
+	    #print "  value comm: [" . $_->param($field . '_comment') . "]\n"
+	    #	if (defined $_->param($field . '_comment'));
+	}
+	elsif ($ftype->Value_field eq 'int') {
+	    my $v=$_->param($field);
+	    #print " $field (" . $ftype->Value_field . ")\n";
+	    #print " i: $v\n";
+	    if ($v =~ /^([-]?\d+)([^\d]*)/) {
+		$_->param($field=>$1);
+		if (my $comment=$2) {
+		    $comment =~ s/^[,.?\-\/]?\s*//m;
+		    $_->param($field . '_comment' => $comment);
+		}
+	    }
+	    else {
+		print "  Advarsel: Felt '" . lc($field) . "' har en uforståelig værdi:\n";
+		print "   '" . $_->param($field) . "'\n";
+		print "  feltet burde indeholde et heltal.";
+		print " Hele værdien er flyttet til kommentarfeltet.\n\n";
+		$_->param($field . '_comment' => $_->param($field));
+		$_->delete($field);
+	    }
+	    #print " v: " . $_->param($field) . "\n";
+	    #print " c: " . (defined $_->param($field . '_comment') ? $_->param($field . '_comment') : 'undef') . "\n";
+	    #print "\n";
+	}
+	elsif ($ftype->Value_field eq 'double') {
+	    # Any commas are really decimal-separators:
+	    my $v=$_->param($field);
+	    #print " $field (" . $ftype->Value_field . ")\n";
+	    #print " i: $v\n";
+	    $v =~ s/[.]//; # Remove thousand-separators
+	    $v =~ s/(\d),(\d)/$1.$2/;
+	    if ($v =~ /^([-]?\d+[.]?\d*)(.*)$/) {
+		$_->param($field=>$1);
+		if (my $comment=$2) {
+		    $comment =~ s/^[,.?\-\/]?\s*//m;
+		    $_->param($field . '_comment' => $comment);
+		}
+	    }
+	    else {
+		print "  Advarsel: Felt '" . lc($field) . "' har en uforståelig værdi:\n";
+		print "   '" . $_->param($field) . "'\n";
+		print "  feltet burde indeholde et kommatal.";
+		print " Hele værdien er flyttet til kommentarfeltet.\n\n";
+		$_->param($field . '_comment' => $_->param($field));
+		$_->delete($field);
+	    }
+	    #print " v: " . $_->param($field) . "\n";
+	    #print " c: " . (defined $_->param($field . '_comment') ? $_->param($field . '_comment') : 'undef') . "\n";
+	    #print " \n";
+	}
+	else { # Assume that the field doesn't need mutation:
+	}
+    }
+
+    print STDERR " Opretter " . ($create_version_instead ? 'version' : 'dokument' ) . ":\n";
+    print STDERR "   parent : ". $parent->Id ."\n";
+    print STDERR "  navn: $name\n";
+    print STDERR "  type: ". $doctype->Name ."\n";
+    print STDERR "   lang   : $lang\n";
+    print STDERR "   fields : $_\n";
+    print STDERR "   owner  : $owner\n";
+    print STDERR "   grp    : $grp\n";
+    print STDERR "  dato: ". $_->param('docdate') . "\n";
+
+    my $error;
+    if ($pretend) {
+	print " Lader som om\n";
+    }
+    else {
+	my ($new_docid, $new_version);
+	if ($create_version_instead) {
+	    if (($new_docid, $new_version) = ($alreadydoc->Id, $obvius->create_new_version($alreadydoc, $doctype->Id, $lang, $_))) {
+		print " Ny version af eksisterende dokument oprettet.\n";
+		$versions++;
+	    }
+	    else {
+		print " Advarsel: Ny version IKKE oprettet.\n";
+		$failed++;
+	    }
+	}
+	else {
+	    if (($new_docid, $new_version) = $obvius->create_new_document($parent, $name, $doctype->Id, $lang, $_, $owner, $grp, \$error)) {
+		print " Nyt dokument oprettet.\n";
+		$fine++;
+	    }
+	    else {
+		print " Advarsel: Nyt dokument IKKE oprettet.\n";
+		print " Fejl: " . $error . "\n";
+		$failed++;
+	    }
+	}
+	if ($publish) {
+	    my $new_doc = $obvius->get_doc_by_id($new_docid);
+	    my $new_vdoc = $obvius->get_version($new_doc, $new_version);
+
+	    $obvius->get_version_fields($new_vdoc, 255, 'PUBLISH_FIELDS');
+
+	    # Set published
+	    my $publish_fields = $new_vdoc->publish_fields;
+	    $publish_fields->param(PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
+
+	    $publish_fields->param(in_subscription => 0);
+
+	    my $publish_error;
+	    $obvius->publish_version($new_vdoc, \$publish_error);
+
+	    if($publish_error) {
+		print " Ej offentliggjort: $publish_error\n";
+		$publish_failed++;
+	    }
+	    else {
+		print " Offentliggjort.\n";
+	    }
+	}
+    }
+    print "</pre><hr><pre>";
+}
+
+my $pb_conc=($publish ? "Ej offentliggjort            : $publish_failed" : '');
+print <<EOT;
+
+Oversigt:
+
+Nye dokumenter               : $fine
+Nye versioner af eksisterende: $versions
+Ej oprettet                  : $failed
+$pb_conc
+</pre>
+<a href="/admin$parenturl">/admin$parenturl</a>
+<pre>
+EOT

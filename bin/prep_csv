@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+
+# $Id$
+
+# Filter incoming .csv-files a bit
+# Copyright (C), 2001 Adam Sjøgren <asjo@aparte-test.dk>
+# Under the GPL.
+
+use strict;
+use warnings;
+
+my @slurp=<>;
+
+my @slurpee;
+my $line='';
+foreach (@slurp) {
+    chomp;
+    if (/[^\r]$/ or /^$/) { # No \r? Glue lines together.
+	$line.=$_ . '\n';
+    }
+    else {
+	push @slurpee, $line . $_;
+	$line='';
+    }
+
+    # Lines that do not end in \r aren't really new lines!
+    #s/([^\r])$/$1\\n/g;
+    #s/\r$/\r\n/g;
+}
+
+map {
+    s/\r//g;
+
+    s/([^";][^;]+[^";])(;|$)/\"$1\"$2/g;
+
+    print;
+    print "\n";
+    } @slurpee;

@@ -1,0 +1,48 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>60
+</%args>
+% if ($fieldspec->Repeatable) {
+<select name="<% $name %>" multiple size="8" tabindex="10">
+% map {
+%   my $selected=($selected{$_->{id}} ? ' selected' : '');
+<option value="<% $_->{id} %>"<% $selected %>><% $_->{name} %></option>
+% } @$choices;
+</select>
+% } else {
+<& /shared/dropdown, name=>$name, options=>$choices, selected=>$value &>
+% }
+<%init>
+print STDERR ">>> /edit/fieldtypes/subscriptions\n";
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my($table, $idfield)=split /[.]/, $fieldtype->param('edit_args');
+
+my $subscriber_docs = $obvius->search( ['subscribeable', 'title'],
+				     '(subscribeable = \'automatic\' OR subscribeable = \'manual\')',
+				     notexpired=>1, public=>1);
+
+my $choices=[ map { {id=>$_->Docid, name=>$_->Title} } @$subscriber_docs ];
+
+my %selected;
+if ($fieldspec->Repeatable) {
+    map {
+	$selected{$_->{docid}}=1;
+    } @$value;
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

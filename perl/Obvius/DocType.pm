@@ -1,0 +1,495 @@
+package Obvius::DocType;
+
+########################################################################
+#
+# DocType.pm - Document Types
+#
+# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#
+# Author: Adam Sjøgren (asjo@magenta-aps.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
+# $Id$
+
+use strict;
+use warnings;
+
+use Obvius;
+use Obvius::Data;
+
+
+our @ISA = qw( Obvius::Data );
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
+sub new {
+    my ($class, $rec) = @_;
+
+    my $this = $class->SUPER::new($rec);
+
+    $this->{FIELDS} = new Obvius::Data;
+    $this->{PUBLISH_FIELDS} = new Obvius::Data;
+
+    return $this;
+}
+
+sub action {
+    my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
+
+    $this->tracer($input, $output, $doc, $vdoc, $obvius) if ($this->{DEBUG});
+
+    return 1;
+}
+
+sub is_cacheable { return 1; }
+
+sub alternate_location { return undef; }
+sub raw_document_data { return undef; }
+
+
+#########################################################################
+#
+# Utility: map doctypename to number, for use in searches (Combo and DB):
+#
+#########################################################################
+
+sub doctypemap {
+    my ($this, $a, $b, $c, $d, $doctypename, $obvius)=@_;
+
+    my $doctypeid;
+    # XXX Should check translations as well...
+    if (my $doctype=$obvius->get_doctype_by_name($doctypename)) {
+	$doctypeid=$doctype->Id;
+	warn "DOCTYPE $doctypename has id $doctypeid!";
+    }
+    else {
+	warn "Couldn't determine id for doctype $doctypename. Defaulting to 1.";
+	$doctypeid=1;
+    }
+
+    return $a . 'type' . $b . $c . $d . "'" . $doctypeid . "'";
+}
+
+########################################################################
+#
+#	Export lists of documents (modified from WebObvius::Site::Magenta)
+#
+########################################################################
+
+use constant REQUIRE_THRESHOLDS => {
+				    default => 32,
+				    teaser => 64,
+				    fullinfo => 128,
+				    'full-info' => 128,
+				    content => 128,
+				    binary => 192,
+				   };
+
+
+use POSIX qw(strftime);
+
+# Return document list to an Output object
+# vdoclist is really an array of Obvius::Version objects
+sub export_doclist {
+    my ($this, $vdoclist, $output, $obvius, %options) = @_;
+
+    $this->tracer($vdoclist, $output, %options) if ($this->{DEBUG});
+
+    return undef unless (@$vdoclist);
+
+    # Ok, we have a vdoclist, declare depencies:
+    $output->param(Obvius_DEPENCIES => 1);
+
+    # my $req = $output->request;
+    # my $obvius = $output->obvius;
+
+    my $active = $options{active};
+    # $req->notes('prefix') ||
+    my $prefix = $options{prefix} || '';
+    my $require = ($options{require} and REQUIRE_THRESHOLDS->{$options{require}})
+	|| REQUIRE_THRESHOLDS->{default}
+	    || 0;
+    # $req->notes('now') ||
+    my $now = $options{now} || strftime('%Y-%m-%d %H:%M:%S', localtime);
+
+    my $last_date = '**';
+    my $last_title = '**';
+
+    my @docdata;
+
+    for (@$vdoclist) {
+	my $fields = $obvius->get_version_fields($_, $require);
+	my $doc = $obvius->get_doc_by_id($_->Docid);
+
+	unless ($options{include_images}) {
+	    # Elide images
+	    my $vdoctype=$obvius->get_version_type($_);
+	    next if ($vdoctype->Name eq "Image");
+	}
+
+	my $new_date = ($last_date ne $fields->Docdate);
+	$last_date = $fields->Docdate;
+
+	my $first_letter = uc(substr($fields->Title, 0, 1));
+	my $new_title = ($last_title ne $first_letter) ? $first_letter : '';
+	$last_title = $first_letter;
+
+        my $data;
+
+        if($options{use_vdoc_data}) {
+            $data = $_;
+            $data->param('id' => $doc->Id);
+            $data->param('name' => $doc->Name);
+            $data->param('url' => $prefix . $obvius->get_doc_uri($doc));
+            $data->param('new_date' => $new_date);
+            $data->param('new_title' => $new_title);
+        } else {
+	    $data = {
+			id		=> $doc->Id,
+			name	=> $doc->Name,
+			url		=> $prefix . $obvius->get_doc_uri($doc),
+
+			version	=> $_->Version,
+			public	=> ($_->Public > 0),
+
+			active	=> (defined($active) and $_->Docid == $active->param('id')),
+
+			expires	=> $fields->Expires,
+			expired	=> ($fields->Expires lt $now),
+
+			new_date	=> $new_date,
+			new_title	=> $new_title,
+
+			# Compat
+			extern_url	=> $fields->param('url'),
+		   };
+        }
+
+	for my $f ($fields->param) {
+	    $data->{lc $f} ||= $fields->param($f);
+	}
+	push(@docdata, $data);
+    }
+
+    $output->param($options{name} || 'subdocs', \@docdata);
+    return (@docdata ? \@docdata : undef);
+}
+
+
+
+########################################################################
+#
+#	Export paged lists of documents
+#
+########################################################################
+
+# Return pages of subdocs to a Output object
+sub export_paged_doclist {
+    my ($this, $pagesize, $doclist, $output, $obvius, %options) = @_;
+
+    $this->tracer($pagesize, $doclist, $output, $obvius, %options) if ($this->{DEBUG});
+
+    # default is first page
+    my $page = $options{page} || 1;
+    return undef unless (defined($page) and $page > 0);
+
+    # map from 1 based to zero based
+    $page--;
+    # print STDERR ("PAGE SIZE $pagesize PAGE $page\n");
+
+    # max number of pages available
+    my $page_max = int(($#$doclist+$pagesize)/$pagesize);
+    # print STDERR ("PAGE MAX $page_max\n");
+    return undef if ($page >= $page_max); # out of range
+
+    # calculate document range to use
+    my $doc_total = $#$doclist+1;
+    my $doc_first = $page * $pagesize;
+    my $doc_last = ($page+1) * $pagesize - 1;
+    $doc_last = $#$doclist if ($doc_last > $#$doclist);
+    # print STDERR ("DOCS $doc_first..$doc_last TOTAL $doc_total\n");
+
+    # slice out the relevant parts of the document list
+    my @subdocs = @$doclist[$doc_first .. $doc_last];
+
+    my $doc_index = $doc_first;
+    my $docdata = $this->export_doclist(\@subdocs, $output, $obvius, %options);
+    map { $_->{doc_index} = $doc_index++ } @$docdata;
+
+
+    my $page_first = $page - 5;
+    $page_first = 0 if ($page_first < 0);
+
+    my $page_last = $page_first + 10;
+    $page_last = $page_max-1 if ($page_last >= $page_max);
+
+    $page_first = $page_last - 10;
+    $page_first = 0 if ($page_first < 0);
+
+    $output->param(page=>$page+1);
+    $output->param(page_next=>$page+2) if ($page_max-$page > 1);
+    $output->param(page_prev=>$page) if ($page != 0);
+    $output->param(page_max=>$page_max);
+
+    $output->param(page_list=> [ map { ({
+				       page=>$_+1,
+				       active=>($page == $_),
+				      })
+				 } ($page_first .. $page_last)
+			     ]);
+
+    $output->param(doc_first=>$doc_first+1);
+    $output->param(doc_last=>$doc_last+1);
+    $output->param(doc_total=>$doc_total);
+
+    return $docdata;
+}
+
+
+########################################################################
+#
+#	Convenience
+#
+########################################################################
+
+sub fields_names {
+    my ($this, $type) = @_;
+    $type=$type || 'FIELDS';
+    return [keys %{$this->fields($type)}];
+}
+
+sub fields {
+    my ($this, $type) = @_;
+    $type=$type || 'FIELDS';
+    return $this->{$type};
+}
+
+sub field {
+    my ($this, $name, $value, $type) = @_;
+    $type=$type || 'FIELDS';
+    return $this->{$type}->param($name => $value);
+}
+
+sub publish_fields_names {
+    my ($this) = @_;
+    return $this->fields_names('PUBLISH_FIELDS');
+}
+
+sub publish_fields {
+    my ($this) = @_;
+    return $this->fields('PUBLISH_FIELDS');
+}
+
+sub publish_field {
+    my ($this, $name, $value) = @_;
+    return $this->field($name => $value, 'PUBLISH_FIELDS');
+}
+
+sub default_fields_common {
+    my ($this, $fields) = @_;
+    return new Obvius::Data(map { $_ => $fields->param($_)->param('default_value'); } $fields->param);
+}
+
+sub default_fields {
+    my ($this) = @_;
+    return $this->default_fields_common($this->{FIELDS});
+}
+
+sub default_publish_fields {
+    my ($this) = @_;
+    return $this->default_fields_common($this->{PUBLISH_FIELDS});
+}
+
+sub type_map {
+    my ($this, $fields) = @_;
+    return { map { $_ => $fields->param($_)->param('fieldtype'); } $fields->param };
+}
+
+sub field_type_map {
+    my ($this) = @_;
+    return $this->type_map($this->{FIELDS});
+}
+
+sub publish_type_map {
+    my ($this) = @_;
+    return $this->type_map($this->{PUBLISH_FIELDS});
+}
+
+
+########################################################################
+#
+#	Validation methods
+#
+########################################################################
+
+sub validate {
+    my ($this, $vdoc, $obvius) = @_;
+    return 1;
+}
+
+sub validate_data {
+    my ($this, $type_fields, $fields, $obvius) = @_;
+
+    $this->tracer($fields, $obvius) if ($this->{DEBUG});
+
+    $fields = new Obvius::DocType::HashParam($fields) if ((ref $fields || '') eq 'HASH');
+
+    my @valid = ();
+    my @invalid = ();
+
+    for ($type_fields->param) {
+	next unless (defined $fields->param($_));
+
+	my $fspec = $type_fields->param($_);
+	my $ftype = $fspec->FieldType;
+
+	my $value = $fields->param($_);
+
+        # An empty array for a repeatable field which is not optional,
+        # is set to "missing"/not defined:
+        #
+        # Note: This could be slightly problematic; how do you empty
+        # such a field? I.e. if you're put some entries in it, you
+        # can't remove all of them! But if it's optional, it can't be
+        # empty. In reality our definition of non-optional is lax, so
+        # it could actually be a problem, even though it shouldn't. Be.
+        #
+        if ($fspec->Repeatable and !$fspec->Optional and ref $value and scalar(@$value)==0) {
+            $fields->delete($_); # undef it, so it's picked up in the missing-array below
+            next;
+        }
+
+	my $ok;
+
+	if ($fspec->Repeatable) {
+	    if (ref $value) {
+		$ok = not scalar(grep {
+		    not defined $ftype->validate($obvius, $fspec, $_, $fields)
+		} @$value);
+	    } else {
+		$ok = defined $ftype->validate($obvius, $fspec, $value, $fields);
+	    }
+	} else {
+	    $ok = defined $ftype->validate($obvius, $fspec, $value, $fields);
+	}
+
+	if ($fspec->Optional) {
+	    $ok = ($ok || ($value eq ''));
+	}
+
+	if ($ok) {
+	    #print STDERR "VALID $_ = «$value»\n";
+	    push(@valid, $_);
+	} else {
+	    #print STDERR "INVALID $_ = «$value»\n";
+	    push(@invalid, $_);
+	}
+    }
+
+    my @excess  = grep { not defined $type_fields->param($_) } $fields->param
+	if (wantarray);
+    my @missing = grep { not ( defined $fields->param($_)
+			       or $type_fields->param($_)->Optional) } $type_fields->param;
+
+    #local $, = ', ';
+    #print STDERR "VALIDATE: valid: @valid\n";
+    #print STDERR "VALIDATE: invalid: @invalid\n";
+    #print STDERR "VALIDATE: excess: @excess\n";
+    #print STDERR "VALIDATE: missing: @missing\n";
+
+    return (wantarray
+	    ? ( valid	 => (scalar(@valid)   ? \@valid   : undef),
+		invalid	 => (scalar(@invalid) ? \@invalid : undef),
+		missing	 => (scalar(@missing) ? \@missing : undef),
+		excess	 => (scalar(@excess)  ? \@excess  : undef),
+		dummy    => 0
+	      )
+	    : (scalar(@invalid) == 0 and scalar(@missing) == 0)
+	   );
+}
+
+sub validate_fields {
+    my $this = shift;
+    $this->tracer(@_) if ($this->{DEBUG});
+    return $this->validate_data($this->fields, @_);
+}
+
+sub validate_publish_fields {
+    my $this = shift;
+    $this->tracer(@_) if ($this->{DEBUG});
+    return $this->validate_data($this->publish_fields, @_);
+}
+
+
+package Obvius::DocType::HashParam;
+
+sub new {
+    my ($class, $hashref) = @_;
+    bless { PARAMS => $hashref }, $class;
+}
+
+sub param {
+    my $this = shift;
+    my $name = shift;
+
+    return keys %{ $this->{PARAMS} } unless (defined $name);
+
+    my $value = shift;
+    return $this->{PARAMS}->{$name} unless (defined $value);
+    return $this->{PARAMS}->{$name} = $value;
+}
+
+sub delete {
+    my ($this, $name)=@_;
+    delete $this->{PARAMS}->{$name};
+}
+
+1;
+__END__
+# Below is stub documentation for your module. You better edit it!
+
+=head1 NAME
+
+Obvius::DocType - Perl extension for blah blah blah
+
+=head1 SYNOPSIS
+
+  use Obvius::DocType;
+  blah blah blah
+
+=head1 DESCRIPTION
+
+Stub documentation for Obvius::DocType, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
+
+Blah blah blah.
+
+=head2 EXPORT
+
+None by default.
+
+
+=head1 AUTHOR
+
+A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+
+=head1 SEE ALSO
+
+L<perl>.
+
+=cut

@@ -1,0 +1,12 @@
+<& /header/header, decoration=>'top' &>
+
+<!-- begin abort -->
+<p align="center">
+<& SELF:msg, text=>'Cancelled' &>
+</p>
+<!-- end abort -->
+
+%
+<%init>
+print STDERR ">>> /edit/abort ($prefix$uri)\n";
+</%init>

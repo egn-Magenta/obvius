@@ -1,0 +1,18 @@
+<%perl>
+unless (defined $r->pnotes('path')) {
+    my @path = $obvius->get_doc_by_path($uri);
+    $r->pnotes('path' => \@path);
+}
+
+my $path=$r->pnotes('path');
+
+unless (defined $r->pnotes('section')) {
+    my $section = $path->[1] ? $path->[1] : [$obvius->get_doc_by_path('/')]->[0];
+    $r->pnotes('section' => $section);
+    if (my $section_vdoc = $obvius->get_public_version($section) ) {
+	$obvius->get_version_fields($section_vdoc, [qw(short_title title)]);
+	my $section_name = $section_vdoc->field('short_title') || $section_vdoc->Title;
+	$r->notes('section_name' => $section_name);
+    }
+}
+</%perl>

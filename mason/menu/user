@@ -1,0 +1,20 @@
+% # XXX mangler brugerinformation
+
+<& SELF:menu_box_begin, title=>'User' &>
+<& SELF:menu_entry, title=>$user, msgify=>0 &>
+
+<TR><TD colspan=2 class=sublevel><& SELF:msg, text=>'Owner' &>: <A HREF="mailto:<% $owner->{email} %> (<% $owner->{name} %>)" title="<& SELF:msg, text=>'Send email to' &> <% $owner->{name} %>"><% $owner->{name} %></A></TD></TR>
+<& SELF:menu_right_separator &>
+
+<TR><TD colspan=2 class=sublevel><& SELF:msg, text=>'Group' &>: <% $group->{name} %></TD></TR>
+<& SELF:menu_right_separator &>
+
+% #ifdef can_admin
+% #<& SELF:menu_entry, title=>'Clear server cache', link=>"$prefix$uri?obvius_op=flush_cache" &>
+% #endif
+%
+<%init>
+my $user=$obvius->{USERS}->{$obvius->User}->{name};
+my $owner=$obvius->get_user($doc->Owner);
+my $group=$obvius->get_group($doc->Grp);
+</%init>

@@ -1,0 +1,234 @@
+# $Id$
+
+# Fields are interpreted like this:
+#  <fieldname> [description][;extra options]
+# Where extra options are of the form: var=val, var2=val2 etc.
+
+DocType: Base
+ Page: 1
+  Title: Document main data
+  Desc: Line 1.1
+  Desc: Line 1.2
+  Fields: title Title
+  Fields: short_title Short Title
+  Fields: teaser Teaser;rows=4
+  Fields: docdate Date (yyyy-mm-dd)
+ End
+ Page: 2
+  Title: Keywords
+  Desc: Choose the appropriate keywords
+#  Fields: category Choose classification
+  Fields: keyword Choose keywords
+ End
+ Page: 3
+  Title: Display
+  Desc: How subdocuments are displayed
+  Fields: seq Order of succession
+  Fields: pagesize Number of subdocuments on one page
+  Fields: sortorder Sort order of sub documents - according to
+  Fields: subscribeable Subscription possibility?
+  Fields: template
+ End
+ Page: P
+  Title: Publishing
+  Desc: Publish-relevant data
+  Fields: expires Expiring
+  Fields: published Published
+  Fields: gprio GPrio
+  Fields: gduration GDuration
+  Fields: lprio LPrio
+  Fields: lduration LDuration
+  Fields: lsection LSection
+  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes
+ End
+
+DocType: Standard
+ Page: 1
+  Title: Document main data
+  Desc: Line 1.1
+  Desc: Line 1.2
+  Fields: title Title
+  Fields: short_title Short title
+  Fields: teaser Teaser;rows=4
+  Fields: content Text
+  Fields: url Web address
+  Fields: author Author
+  Fields: docdate Date (yyyy-mm-dd)
+  Fields: expires Expiring
+ End
+ Page: 2
+  Title: Keywords
+  Desc: Choose the appropriate keywords:
+#  Fields: category Choose classification
+  Fields: keyword Choose keywords
+ End
+ Page: 3
+  Title: Meta
+  Desc: The fields below are important if you want your web pages to be easily found by search machines and users of the Internet
+  Fields: docref Reference
+  Fields: doctype Document type
+  Fields: contributors Contributors
+  Fields: source Source
+#  Fields: image
+ End
+ Page: 4
+  Title: Display
+  Desc: How subdocuments are displayed
+  Fields: seq Order of Succession
+  Fields: pagesize Number of subdocuments on one page
+  Fields: sortorder Sort order of sub documents - according to
+  Fields: subscribeable Subscription possibility?
+  Fields: template Template (standard: 5)
+  Fields: require Require
+ End
+ Page: P
+  Title: Publishing
+  Desc: Publish-relevant data
+#  Fields: published
+  Fields: gduration Frontpage news duration
+  Fields: gprio Frontpage news priority
+  Fields: lsection Section
+  Fields: lduration Section news duration
+  Fields: lprio Section news priority
+  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes
+ End
+
+DocType: HTML
+ Page: 1
+  Title: Document main data
+  Desc: Line 1.1
+  Desc: Line 1.2
+  Fields: title Title
+  Fields: short_title Short title
+  Fields: teaser Teaser;rows=4
+  Fields: content Text
+  Fields: bare Show title and teaser?
+  Fields: docdate Date (yyyy-mm-dd)
+ End
+ Page: 2
+  Title: Keywords
+  Desc: Choose the appropriate keywords:
+#  Fields: category Choose classification
+  Fields: keyword Choose keywords
+ End
+ Page: 3
+  Title: Display
+  Desc: How subdocuments are displayed
+  Fields: seq Order of succession
+  Fields: pagesize Number of subdocuments on one page
+  Fields: sortorder Sort order of sub documents - according to
+  Fields: subscribeable Subscription possibility?
+  Fields: template
+ End
+ Page: P
+  Title: Publishing
+  Desc: Publish-relevant data
+  Fields: expires Expiring
+#  Fields: published
+  Fields: gprio
+  Fields: gduration
+  Fields: lprio
+  Fields: lduration
+  Fields: lsection
+  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes
+ End
+
+DocType: Image
+ Page: 1
+  Title: Image
+  Desc: Line 1.1
+  Desc: Line 1.2
+  Fields: title Title
+  Fields: short_title Short Title
+  Fields: docdate Date (yyyy-mm-dd)
+  Fields: expires Expiring
+  Fields: width Width
+  Fields: height Height
+  Fields: align Alignment
+  Fields: scale Scaling
+ End
+ Page: P
+  Title: Publish
+  Desc: This will make the picture visible on the public part
+  Desc: of the website.
+ End
+
+DocType: Sitemap
+ Page: 1
+  Title: Document main data
+  Desc: Line 1.1
+  Desc: Line 1.2
+  Fields: title Title
+  Fields: short_title Short title
+  Fields: content Text;rows=4
+#  Fields: teaser Teaser;rows=4
+  Fields: levels Levels
+  Fields: docdate Date (yyyy-mm-dd)
+ End
+ Page: 2
+  Title: Keywords
+  Desc: Choose the appropriate keywords:
+#  Fields: category Choose classification
+  Fields: keyword Choose keywords
+ End
+ Page: P
+  Title: Publishing
+  Desc: Publish now?
+#  Fields: published
+#  Fields: gduration Frontpage news duration
+#  Fields: gprio Frontpage news priority
+#  Fields: lsection Section
+#  Fields: lduration Section news duration
+#  Fields: lprio Section news priority
+ End
+
+DocType: Search
+ Page: 1
+  Title: Document main data
+  Desc: Line 1.1
+  Desc: Line 1.2
+  Fields: title Title
+  Fields: short_title Short title
+  Fields: teaser Teaser;rows=4
+  Fields: content Text
+  Fields: url Web address
+  Fields: author Author
+  Fields: docdate Date (yyyy-mm-dd)
+  Fields: expires Expiring
+ End
+ Page: 2
+  Title: Keywords
+  Desc: Choose the appropriate keywords:
+#  Fields: category Choose classification
+  Fields: keyword Choose keywords
+ End
+ Page: 3
+  Title: Meta
+  Desc: The fields below are important if you want your web pages to be easily found by search machines and users of the Internet
+  Fields: docref Reference
+  Fields: doctype Document type
+  Fields: contributors Contributors
+  Fields: source Source
+#  Fields: image
+ End
+ Page: 4
+  Title: Display
+  Desc: How subdocuments are displayed
+  Fields: seq Order of Succession
+  Fields: pagesize Number of subdocuments on one page
+  Fields: sortorder Sort order of sub documents - according to
+  Fields: subscribeable Subscription possibility?
+  Fields: template Template (standard: 5)
+  Fields: require Require
+ End
+ Page: P
+  Title: Publishing
+  Desc: Publish-relevant data
+#  Fields: published
+  Fields: gduration Frontpage news duration
+  Fields: gprio Frontpage news priority
+  Fields: lsection Section
+  Fields: lduration Section news duration
+  Fields: lprio Section news priority
+  Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes
+ End

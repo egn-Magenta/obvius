@@ -1,0 +1,62 @@
+<h3 class="admin"><& SELF:msg, text=>'New doctype' &></h3>
+
+<input type="hidden" name="obvius_op" value="edit_new_doctype">
+
+%
+% if ($obvius_error) {
+<div class="error">
+<& SELF:msg, text=>$obvius_error &>
+</div>
+% }
+%
+
+<table border="0">
+ <tr>
+  <td>
+   <& SELF:msg, text=>'New doctype name' &>:
+  </td>
+  <td>
+   <input type="text" name="obvius_new_doctype_name" value="<% $obvius_new_doctype_name %>">
+  </td>
+ </tr>
+ <tr>
+  <td>
+   <& SELF:msg, text=>'Parent doctype' &>:
+  </td>
+  <td>
+   <select name="obvius_parent_doctype">
+%   for(@doctypes) {
+     <option value="<% $_->{id} %>"<% $_->{id} == $obvius_parent_doctype ? ' SELECTED' : '' %>><% $_->{name} %></option>
+%   }
+   </select>
+  </td>
+ </tr>
+</table>
+<br>
+<br>
+<p>
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Start editing' &>">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
+</p>
+
+%
+<%args>
+$obvius_error=>undef
+$obvius_new_doctype_name => ''
+$obvius_parent_doctype => 1
+</%args>
+%
+<%init>
+# Lookup list of doctype names
+
+
+my @doctypes;
+my $doctypes = $obvius->{DOCTYPES};
+
+for(@$doctypes) {
+    if($_) {
+        push(@doctypes, {id => $_->Id, name => $m->scomp('SELF:msg', text => $_->Name) });
+    }
+}
+@doctypes = sort { lc($a->{name}) cmp lc($b->{name}) } @doctypes;
+</%init>

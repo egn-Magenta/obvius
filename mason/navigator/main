@@ -1,0 +1,250 @@
+%# $Id$
+<!-- Navigator start -->
+<script language="javascript">
+<!--
+
+var obviused_callback;
+var obviused_ready = 1;
+
+function navigator_choose(path) {
+    if(obviused_callback) {
+	obviused_callback('http://<% $r->hostname %>' + path)
+	this.close();
+    }
+    var fieldname = document.pageform.fieldname.value;
+    if(fieldname) {
+        window.opener.document.pageform[fieldname].value = path;
+        this.close();
+    } else {
+        window.opener.location.href='/admin' + path;
+        this.close();
+    }
+}
+
+function navigator_navigate(path) {
+    document.pageform.path.value=path;
+    document.pageform.submit();
+}
+
+function navigator_add_picture(path) {
+    document.pageform.path.value=path;
+    document.pageform.quick_picture.value = 1;
+    document.pageform.submit();
+}
+
+%unless($r->param('quick_picture')) {
+// For better reload:
+document.pageform.method = 'GET';
+%}
+
+//-->
+</script>
+
+
+
+<!-- These input fields control the navigator -->
+<input type="hidden" name="obvius_op" value="navigator">
+
+<input type="hidden" name="doctype" value="<% $r->param('doctype') %>">
+<input type="hidden" name="doctypeid" value="<% $doctypeid %>">
+
+<input type="hidden" name="fieldname" value="<% $r->param('fieldname') %>">
+<input type="hidden" name="public_only" value="<% $r->param('public_only') %>">
+
+<input type="hidden" name="path" value="<% $r->param('path') %>">
+
+<input type="hidden" name="quick_picture" value="0">
+
+
+
+%if($simple) {
+    <& add_list_to_list_recursive, path=>$last_path->{docs}, list=>$list &>
+    <& simplenavigator, here_docs=>\@here_docs, list => $list, path_levels => $path_levels, vdoc => $vdoc, %ARGS &>
+%} else {
+<table border="1" cellspacing="5">
+    <tr>
+        <td>
+<table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
+  <tr>
+    <td width="100%" class="navheader"><font color="#FFFFFF"><b><font size="1">Navigér</font></b></font><& /help, link=>'operation/navigate' &></td>
+    <td class="navheader"><font size="1">
+    <font color="#FFFFFF"><a href="javascript:window.close()"><font color="#FFFFFF">[Luk]</font></a></td>
+  </tr>
+</table>
+<table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
+  <tr>
+    <td class="navheader"><font color="#FFFFFF" size="1">Dokument:</font></td>
+    <td width="100%" bgColor="white"><font size="1">&nbsp;<% $path %></font></td>
+    <td bgColor="white">&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="navheader" colspan="3"><img border="0" src="/grafik/admin/spacer.gif" width="1" height="1"></td>
+  </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td vAlign="top" width="300">
+        <& add_list_to_list_recursive, path=>$last_path->{docs}, list=>$list &>
+        <& tree, list=>$list, path_levels=>$path_levels, %ARGS &>
+    </td>
+    <td bgcolor="#000000" width="1"><img src="/grafik/admin/spacer.gif" border="0" alt="" width="1" height="1"></td>
+    <td vAlign="top" width="100%">
+    <table border="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber1" cellpadding="2">
+      <tr>
+%      if($dtype->Name eq 'Image') {
+        <td width="100%" colspan="5"><span class="over"><% $title %></span></td>
+%      } else {
+        <td width="100%" colspan="4"><span class="over"><% $title %></span></td>
+%      }
+        </tr>
+        <tr>
+%      if($dtype->Name eq 'Image') {
+%      my $imgpath = $path;
+%      $imgpath =~ s!/$!!;
+          <td valign="top"  bgcolor="#CCCCCC" nowrap><img src="/admin<% $imgpath %>?size=50x62" width="50" height="62" border="0"></td>
+%      }
+          <td valign="top" bgcolor="#CCCCCC" nowrap>
+            <font size="1">
+                <font color="#666666">Dato:</font>
+                <% $date %><br>
+                <font color="#666666">Forfatter: </font>
+                <% $author %>
+            </font>
+          </td>
+          <td valign="top"  bgcolor="#CCCCCC" nowrap>
+            <font size="1">&nbsp;</font>
+          </td>
+          <td valign="top"  bgcolor="#CCCCCC" width="100%" nowrap>
+            <font size="1">
+                <font color="#666666">Dokumenttype: </font>
+                <% $vdoc_doctype %><br>
+            </font>
+            <font size="1" color="#666666">Sprog</font>
+                <font size="1"><font color="#666666">:</font>
+                <% $language %>
+            </font>
+          </td>
+%if($showbutton) {
+          <td valign="top" bgcolor="#CCCCCC" align="right"><input type="button" onclick="<% $java_action %>" value="<& SELF:msg, text=>$buttontext &>" class="normalknap">&nbsp;</td>
+%} else {
+          <td valign="top" bgcolor="#CCCCCC" align="right"><input type="button" class="ghostedknap" value="<& SELF:msg, text=>$buttontext &>">&nbsp;</td>
+%}
+        </tr>
+      </table>
+%if($r->param('quick_picture')) {
+      <& quick_picture, %ARGS &>
+%} else {
+      <& docs, here_docs=>\@here_docs, %ARGS &>
+%}
+    </td>
+  </tr>
+</table>
+<!-- Navigator end -->
+<table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
+  <tr>
+    <td bgColor="#666666"><img border="0" src="/grafik/admin/spacer.gif" width="1" height="1"></td>
+  </tr>
+</table>
+        </td>
+    </tr>
+</table>
+
+<!-- Navigator end -->
+
+%}
+<%args>
+$path=>'/'
+$public_only=>undef
+$doctype=>undef
+$fieldname=>undef
+$simple=>undef
+</%args>
+<%init>
+my $doctypeid = $r->param('doctypeid');
+if(! $doctypeid and $doctype) {
+    my $doct = $obvius->get_doctype_by_name($doctype);
+    $doctypeid = $doct->Id if($doct);
+}
+
+my @path = $obvius->get_doc_by_path($path);
+
+my $vdoc = $obvius->get_public_version($path[-1]) || $obvius->get_latest_version($path[-1]);
+$obvius->get_version_fields($vdoc, [ 'title', 'author', 'docdate' ]);
+my $title = $vdoc->Title;
+
+my $dtype = $obvius->get_doctype_by_id($vdoc->Type);
+
+my $date = $vdoc->DocDate;
+$date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*/$3\/$2 $1/;
+
+my $author = $vdoc->field('author') || $m->scomp('SELF:msg', text=>'Ingen forfatter');
+
+my $vdoc_doctype = $obvius->get_doctype_by_id($vdoc->Type);
+$vdoc_doctype = $m->scomp('SELF:msg', text=>$vdoc_doctype->Name);
+
+my $language = $country_codes{$vdoc->Lang} || $vdoc->Lang;
+
+my $last_path;
+my @here_docs;
+
+my $path_levels = scalar(@path);
+for(my $path_index = $path_levels - 1; $path_index >= 0;$path_index--) {
+
+    my $url_prefix = '/';
+    for(my $i = 1; $i <= $path_index; $i++) {
+        my $doc = $path[$i];
+        $url_prefix .= $doc->Name . "/";
+    }
+    my $path_doc=$path[$path_index];
+    my $documents = $obvius->get_docs_by_parent($path_doc->Id);
+    $documents = [] unless($documents);
+    for(@$documents) {
+        if($path_index == $path_levels - 1) { # Only first time
+            push(@here_docs, $_);
+        }
+        $_->param(level => $path_index);
+        $_->param(subdocs => $last_path->{docs}) if($last_path and $_->Id == $last_path->{id});
+        my $name = $_->Name;
+        my $url = $url_prefix . $name . "/";
+        $_->param(name => $name);
+        $_->param(url => $url);
+    }
+    $last_path = {
+                    id => $path_doc->Id,
+                    docs => $documents,
+                };
+}
+
+my $list = [];
+my $showbutton = 1;
+my $java_action = "javascript:navigator_choose('$path')";
+my $buttontext = 'Choose this document';
+
+$showbutton = 0 if($fieldname and $doctypeid and $vdoc->Type != $doctypeid);
+</%init>
+%
+%
+%
+<%def add_list_to_list_recursive>
+%for(sort {uc($a->Name) gt uc($b->Name)} @$path) {
+%   push(@$list, $_);
+%   if($_->param('subdocs')) {
+        <& add_list_to_list_recursive, path=>$_->Subdocs, list=>$list &>
+%       $_->param(active => 1);
+%   }
+%}
+<%args>
+$path=>[]
+$list
+</%args>
+<%init>
+die "List not an array in add_path_to_list\n" unless(ref($list) eq 'ARRAY');
+</%init>
+</%def>
+%
+<%once>
+my %country_codes = (
+                        da => 'Dansk',
+                        en => 'Engelsk',
+                    );
+</%once>

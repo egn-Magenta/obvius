@@ -1,0 +1,117 @@
+<%once>
+use WebObvius::Template::MCMS::HTML2MCMS;
+</%once>
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>59
+$rows=>22
+$wrap=>1
+$onlylineif=>undef
+$no_msie_editor=>undef
+$docidify_links=>1
+</%args>
+%
+% if($use_msie) {
+    <& msie_text, value=>$value, name=>$name, cols=>$cols, rows=>$rows, pure_html => 1 &>
+% } else {
+<input type="hidden" name="<% $name %>" value="<% $value |h %>">
+<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="obvius_<% $name %>_mcmsencoded" tabindex="10"><% $mcms_value |h %></textarea>
+<& /shared/add_reset_field, name=>$name &>
+<input type="hidden" name="obvius_<% $name %>_compare" value="<% $mcms_value |h %>">
+% }
+% # For both:
+<input type="hidden" name="obvius_<% $name %>_docidify_links" value="<% $docidify_links |h %>">
+%
+<%init>
+my $use_msie = 0;
+my $user_agent = $r->header_in('user-agent');
+unless($no_msie_editor) {
+    if($user_agent =~ /Win/ and $user_agent !~ /Win3.11/) {
+        if($user_agent =~ /MSIE/) {
+            $use_msie = 1;
+        }
+    }
+}
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+$value = $m->scomp('/shared/printhtml', html => $value, noprefix => 1) if($value);
+
+$wrap=' WRAP="' . $wrap . '" ';
+
+my $mcms_value = WebObvius::Template::MCMS::HTML2MCMS::html2mcms($value || '');
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name=>undef
+</%args>
+<%perl>
+$value =~ s/\r//g if defined ($value);
+my $mcms_value = $r->param('obvius_' . $name . '_mcmsencoded') || '';
+my $obvius_compare = $r->param('obvius_' . $name . '_compare') || '';
+my $docidify_links = $r->param('obvius_' . $name . '_docidify_links') || '';
+
+if($mcms_value ne $obvius_compare) {
+    $value = $m->scomp('/shared/htmlize', text=>$mcms_value, dont_wrap=>1);
+}
+if(defined($value)) {
+    if($value =~ m#^\s*<P>&nbsp;</P>\s*$#i) {
+        $value = '';
+    } else {
+        my $hostname_from_req = $r->hostname;
+
+        # Make images relative to /
+        $value =~ s!IMG<http://$hostname_from_req/(admin/)?!IMG</!g;
+
+        # Make images realtive to the document itself
+        $value =~ s!IMG<$uri!IMG<!g;
+
+        # Make links relative to /
+        $value =~ s!L<([^;]*);http://$hostname_from_req/(admin/)?!L<$1;/!g;
+    }
+}
+if ($docidify_links) {
+    $out = '';
+    $p->parse($value);
+    $p->eof;
+    $value = $out;
+}
+return $value;
+</%perl>
+</%method>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                if($tagname eq 'a' and $attr->{href} and $attr->{href} =~ m!^/! and not $attr->{href} =~ m!^/\d+\.docid!) {
+                                                    my $uri = $attr->{href};
+                                                    $uri =~ s!\?.*$!!;
+                                                    my $doc = $obvius->lookup_document($uri);
+                                                    my $docid;
+                                                    $docid = $doc->Id if($doc);
+                                                    $text =~ s!$uri!/$docid.docid! if($docid);
+                                                    $out.=$text;
+                                                } else {
+                                                    $out.=$text;
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=$text;
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+</%once>

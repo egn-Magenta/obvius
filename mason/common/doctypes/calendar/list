@@ -1,0 +1,35 @@
+%for(@$events) {
+	<table>
+	  <tr>
+	    <th><% $_->{eventtype} %></th>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="right">Titel:</td>
+	    <td valign="top"><a href="<% $_->{url} %>"><% $_->{title} %></a></td>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="right">Dato:</td>
+	    <td valign="top"><& /shared/display_date, date=>$_->{date} &> <% $_->{time} %></td>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="right">Sted:</td>
+	    <td valign="top"><% $_->{place} %></td>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="right">Kontaktperson:</td>
+	    <td valign="top"><& /shared/htmlize, text=>$_->{contactinfo} &></td>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="right">Anden information:</td>
+	    <td valign="top"><& /shared/htmlize, text=>$_->{eventinfo} &></td>
+          </tr>
+        </table>
+%}
+%unless(scalar(@$events)) {
+    <br>
+      Der er ingen arrangementer i denne periode.
+%}
+  </table>
+<%args>
+$events=>[]
+</%args>

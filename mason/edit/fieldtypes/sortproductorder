@@ -1,0 +1,71 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>50
+$cols=>49
+$rows=>22
+$doctype=>undef
+$navigate_start=>undef
+$data
+</%args>
+%
+<& .fieldchooser, name=>$name, value=>$value, data=>$data &>
+%
+<%init>
+
+
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+</%init>
+</%method>
+%
+%
+<%def .fieldchooser>
+<%args>
+    $name
+    $value
+    $data
+</%args>
+    <select name="<% $name %>" tabindex="10">
+        <option value="">Vælg fra listen</option>
+        <option value="">---------------</option>
+
+        <script language="javascript">
+            var array = new Array();
+            array = document.pageform.<% $data %>.value.split ("\n");
+            var selected = <% '"' . $value . '"' %>;
+
+            for (var i = 0; i < array.length ; i++ ) {
+                namecode = array[i].split(/:/);
+                code=namecode[0];
+                name=namecode[1];
+                if (code == selected)
+                    document.write("<option value=\"" + code + "\" SELECTED>" + name + "</option>");
+                else
+                    document.write("<option value=\"" + code + "\">" + name + "</option>");
+            }
+        </script>
+</select>
+</%def>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$session
+$value=>undef
+</%args>
+<%perl>
+if (ref $value) {
+    $value=join "\n", @$value;
+}
+if ($fieldspec->Repeatable) {
+    return [ $value ];
+}
+return $value;
+</%perl>
+</%method>

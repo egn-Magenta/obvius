@@ -1,0 +1,10 @@
+<%args>
+$obvius_session
+$fieldname
+$value
+</%args>
+<%init>
+my $session = $r->pnotes('site')->get_session($obvius_session);
+$session->{texteditor_saves}->{uc($fieldname)} = $value;
+$session->{texteditor_saves} = $session->{texteditor_saves};
+</%init>

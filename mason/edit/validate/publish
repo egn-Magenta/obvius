@@ -1,0 +1,35 @@
+<%args>
+$session
+</%args>
+%
+<%init>
+print STDERR ">>> /edit/validate/publish\n";
+
+# Transfer fields that have not been modified from fields_in to fields_out:
+map {
+    my $k=lc($_);
+    if (defined $session->{fields_out}->param($k)) {
+	print STDERR "asjo: field $k edited";
+    }
+    else {
+	print STDERR "asjo: field $k unchanged";
+	$m->comp('shared/field_unedited', session=>$session, k=>$k);
+    }
+    $m->comp('shared/field_print_debug', session=>$session, k=>$k);
+} sort keys %{$session->{doctype}->{PUBLISH_FIELDS}};
+
+my %status = $doctype->validate_publish_fields($session->{fields_out}, $obvius);
+warn "Invalid fields, not stored: @{$status{invalid}}\n" if ($status{invalid});
+warn "Missing fields not stored: @{$status{missing}}\n" if ($status{missing});
+warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+warn "Valid fields: @{$status{valid}}\n" if ($status{valid});
+
+$session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
+
+if ($status{invalid}) {
+    return (0, $status{invalid});
+}
+else {
+    return (1, '/publish:Do');
+}
+</%init>

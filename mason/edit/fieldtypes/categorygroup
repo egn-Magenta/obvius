@@ -1,0 +1,72 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$restrict=>undef
+$none=>undef
+</%args>
+<script type="text/javascript" language="JavaScript">
+    function adjust_<% $name %>_categorygroup() {
+        var selected = document.pageform.<% $name %>.options[document.pageform.<% $name %>.selectedIndex];
+        if(! selected)
+            return;
+
+        // We have nothing to do unless there's a select category tag
+        var trove = document.pageform.selcategory;
+        if(! trove)
+            return;
+
+        // empty the trove
+        while(trove.options[0]) {
+            trove.options[0] = null;
+        }
+
+        var nyheder = new Option('09 - Nyheder', '09');
+        nyheder.className = trove.className;
+        trove.options[trove.options.length] = nyheder;
+
+
+        var option = new Option(selected.text, selected.value);
+        option.className = trove.className;
+        trove.options[trove.options.length] = option;
+
+        update_category_stored_value();
+    }
+</script>
+
+<select name="<% $name %>" onchange="adjust_<% $name %>_categorygroup()" tabindex="10">
+% if($none) {
+<option value=""><& SELF:msg, text=>'None' &></option>
+% }
+% map {
+%   my $selected=( (defined $value and $value eq $_->{id}) ? ' SELECTED' : '' );
+<option value="<% $_->{id} %>"<% $selected %>><% $_->{id} %> - <% $_->{name} %></option>
+% } @options;
+</select>
+
+<%init>
+my @options;
+if($restrict) {
+    @options = grep {$_->{id} =~ /^$restrict/} @{ $obvius->get_table_data('categories') || [] };
+} else {
+    @options = @{ $obvius->get_table_data('categories') || [] };
+}
+my $value=$session->{fields_out}->param($name);
+   $value=$session->{fields_in}->param($name) unless (defined $value);
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$value=>undef
+</%args>
+<%perl>
+return $value;
+</%perl>
+</%method>

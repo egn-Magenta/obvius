@@ -1,0 +1,46 @@
+<!--@COUNT=$(MATCHES) -->
+
+  <TABLE BORDER="0" WIDTH="100%" CELLSPACING="0" CELLPADDING="0">
+
+    <tr>
+      <TD ALIGN="left" CLASS="search@TITLE@" colspan="2" height="8">
+        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td CLASS="search@TITLE@" align="left" nowrap>
+                    <b>@TITLE@</b>
+                </td>
+                <td CLASS="search@TITLE@" align="right" nowrap>
+                    Fundne sider i alt: $(MATCHES)
+                    <!--@NEXTPAGE $(NEXTPAGE) -->
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
+      </TD>
+    </TR>
+
+    <tr>
+      <td colspan="2">
+        <img src="/grafik/spacer.gif" height="5" width="1" border="0" alt="">
+      </td>
+    </tr>
+
+    <!--@PAGELIST  -->
+    <TR>
+      <TD COLSPAN=2 ALIGN=center>
+        $(PREVPAGE)&nbsp;&nbsp;&nbsp;$(PAGELIST)&nbsp;&nbsp;&nbsp;$(NEXTPAGE)
+      </TD>
+    </TR>
+    <!--/@PAGELIST  -->
+
+    <tr>
+      <td colspan="2">
+        <img src="/grafik/spacer.gif" height="5" width="1" border="0" alt="">
+      </td>
+    </tr>
+
+
+    $(HTSEARCH_RESULTS)
+  
+  </TABLE>
+

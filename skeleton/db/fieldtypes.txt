@@ -1,0 +1,33 @@
+#		field	edit				validate				      search
+
+halign		text	radio (right|left|center)	regexp (^(right|left|center)$)		        none
+category	text	category (categories.id)	xref (categories.id)				none
+keyword		int	keyword (keywords.id)		xref (keywords.id)		   matchColumn (name)
+imagedata[B]	text	imageupload			none						none
+date		date	date				regexp (^\d\d\d\d-\d\d-\d\d(_00:00:00)?$)	none
+datetime	date	datetime			regexp (^\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d$)	none
+time		date	time				regexp (^\d\d:\d\d:\d\d$)			none
+title		text	line				regexp (.)					none
+line		text	line				none						none
+text		text	texteditor			none						none
+textwupload	text	textwupload			none						none
+double		double	line				regexp (^-?\d+(\.\d+)?)				none
+lang		text	line				regexp (^\w\w$)					none
+require		text	radio (normal|teaser|fullinfo)	regexp (^(teaser|fullinfo|normal)$)		none
+bool		int	radio (0|1)			regexp (^[01]$)					none
+int>0		int	line				regexp (^[1-9]\d*$)				none
+int>=0		int	line				regexp (^\d+$)					none
+int		int	line				regexp (^-?\d+$)				none
+appdata[B]	text	fileupload			none						none
+sortorder	text	sortorder			regexp (.)					none
+template	int	xref (templates.id)		xref (templates.id)				none
+path		int	path				special (DocumentPathCheck)			none
+searchtype	text	radio (keyword|category|month|weeks) regexp (^(keyword|category|month|weeks)$)	none
+email		text	line				regexp (^[^@]+@[^@]+\.\w+$)			none
+priority	int	radio (0|1|2|3)			regexp (^[0123]$)				none
+subscribeable	text	radio (none|automatic|manual)	regexp (^(none|automatic|manual)$)		none
+showcal         text    radio (2D|list)			regexp (^(2D|list)$)            none
+publishmode    text    radio (immediate|moderator)      regexp (^(immediate|moderator)$) none
+publish_on	date	publishon			regexp (^\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d$)	none
+orderevents     text    radio (+title|-docdate|+docdate|+eventtype|+contactinfo)    regexp (^(+title|-docdate|+docdate|+eventtype|+contactinfo)$)   none
+pagesize	int     pagesize			regexp (^\d+$)					none

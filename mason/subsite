@@ -1,0 +1,8 @@
+<% $data %>
+%
+<%init>
+my $admin  =$r->pnotes('site');
+my $common =$admin->Subsite;
+
+my $data = $common->generate_subsite($common, $r, $doc, $vdoc, $doctype, $obvius, is_admin=>1);
+</%init>

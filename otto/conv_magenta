@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Convert magenta_aps to magenta_aps_new
+#
+# $Id$
+
+./conv magenta_aps magenta_aps_new magenta /home/httpd/www.magenta-aps.dk/docs

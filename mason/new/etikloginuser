@@ -1,0 +1,23 @@
+<& /new/loginuser, %ARGS, prefix=>'etik' &>
+%
+<%method Do>
+<%perl>
+return $m->comp('/new/loginuser:Do', %ARGS, prefix=>'etik');
+</%perl>
+</%method>
+%
+<%method ReallyDelete>
+<%perl>
+return $m->comp('/new/loginuser:ReallyDelete', %ARGS, prefix=>'etik');
+</%perl>
+</%method>
+%
+<%method Delete>
+<%perl>
+return $m->comp('/new/loginuser:Delete', %ARGS, prefix=>'etik');
+</%perl>
+</%method>
+%
+<%init>
+print STDERR ">>> new/etikloginuser\n";
+</%init>

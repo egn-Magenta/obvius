@@ -1,0 +1,28 @@
+% my $level=0;
+% foreach (@$sitemap) {
+%     if ($level < $_->{level}) {
+%         for($i=$level; $i<$_->{level}; $i++) {
+<ul>
+%         }
+%     }
+%     elsif ($level > $_->{level}) {
+%         for($i=$level; $i>$_->{level}; $i--) {
+</ul>
+%         }
+%     }
+%     $level=$_->{level};
+<li><a href="<% $_->{url} %>"><% $_->{title} |h %></a></li>
+% }
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [ 'title' ]);
+my $title = $vdoc->Title;
+
+my $i=undef;
+my $sitemap=$output->param('sitemap') || [];
+my $depth=$output->param('depth');
+</%init>

@@ -1,0 +1,98 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$size=>50
+$cols=>49
+$rows=>22
+$distinct=>undef
+$choose=>undef
+$no_distinct_doctype=>undef
+$javabutton=>undef
+$noreset=>undef
+</%args>
+% if ($fieldspec->Repeatable) {
+<textarea cols="<% $cols %>" rows="<% $rows %>" name="<% $name %>" tabindex="10"><% $value %></textarea>
+<& /shared/add_reset_field, name=>$name &>
+% } else {
+%
+<input type="<% $type %>" size="<% $size %>" name="<% $name %>" value="<% $value %>" tabindex="10">
+% if($choose) {
+%  my $navigator_url = "/admin/?obvius_op=navigator&fieldname=$name&path=$uri";
+<input class="normalknap" type="button" value="<& SELF:msg, text=>'Browse' &>..." onClick="javascript:OpenWin('<% $navigator_url %>',750,550);">
+% } elsif(! $noreset) {
+<& /shared/add_reset_field, name=>$name &>
+% }
+%        if($name eq 'seq') {
+<input type="button" class="normalknap" value="<& SELF:msg, text=>'Select' &>..." onClick="javascript:OpenWin('/admin<% $uri . $seq_opts %>&title=<% $title |u %>&short_title=<% $short_title |u %>', 356, 550)">
+%        }
+%if($javabutton) {
+%   my ($label, $action) = split(/\|/, $javabutton);
+<input type="button" class="normalknap" value="<& SELF:msg, text=> $label &>" onClick="<% $action %>">
+%}
+%  if($distinct) {
+<br>
+ <& SELF:msg, text=>'Previously used values' &>:
+ <select name="_distinct_<% $name %>" onChange="document.pageform.<% $name %>.value = document.pageform._distinct_<% $name %>[document.pageform._distinct_<% $name %>.selectedIndex].value" tabindex="10">
+   <option value=""><& SELF:msg, text=>'empty field' &></option>
+%           for(@options) {
+   <option value="<% $_ | h %>"><% ( (length($_) > 50) ?  substr($_, 0, 50) . "..." : $_ ) %></option>
+%           }
+ </select>
+%  }
+% }
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+my $options=$fieldtype->param('edit_args');
+my $type=(defined $options and $options ? $options : 'text');
+
+if (ref $value eq 'ARRAY' ) {
+    $value=join "\n", @$value;
+}
+
+my ($seq_opts, $title, $short_title);
+if ($name eq 'seq') {
+    #Build URL til seqselect
+    $seq_opts = "?obvius_op=seqselect";
+
+    my $parent = $session->{document}->{PARENT};
+    my $parentid = ref($parent) ? $parent->{ID} : $parent;
+    my $seq = $value;
+
+    $title = $session->{fields_in}->{TITLE};
+    $short_title = $session->{fields_in}->{SHORT_TITLE};
+    if($session->{fields_out}) {
+	$title = $session->{fields_out}->{TITLE} if($session->{fields_out}->{TITLE});
+	$short_title = $session->{fields_out}->{SHORT_TITLE} if($session->{fields_out}->{SHORT_TITLE});
+    }
+    $seq_opts .= "&parentid=" . $parentid;
+    $seq_opts .= "&seq=" . $seq;
+}
+
+my @options;
+if($distinct) {
+    @options = @{$obvius->get_distinct_vfields($name, $fieldtype->Value_Field, doctypeid => ($no_distinct_doctype ? undef : $session->{doctype}->Id) ) || []};
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$fieldspec
+</%args>
+<%perl>
+if ($fieldspec->Repeatable) {
+    my @value=split /\n/, $value;
+    return \@value;
+}
+else {
+    return $value;
+}
+</%perl>
+</%method>

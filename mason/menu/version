@@ -1,0 +1,13 @@
+<& SELF:menu_box_begin, title=>'This version' &>
+
+<& SELF:menu_entry, title=>"Edit", link=>"$prefix$uri?obvius_op=edit&obvius_version=".$vdoc->Version, ghosted=>$ghosted &>
+
+<& publish &>
+
+<& SELF:menu_entry, title=>"Change documenttype", link=>"$prefix$uri?obvius_op=new_version&obvius_version=".$vdoc->Version, ghosted=>$ghosted &>
+
+<& SELF:menu_entry, title=>"New language", link=>"$prefix$uri?obvius_op=new_version&obvius_version=".$vdoc->Version, ghosted=>$ghosted &>
+%
+<%init>
+my $ghosted=(!$obvius->can_create_new_version($doc));
+</%init>

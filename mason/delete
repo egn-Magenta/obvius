@@ -1,0 +1,59 @@
+<%method ask>
+<h3 class="admin"><& SELF:msg, text=>'Delete document' &><& /help, link=>'operation/delete' &>?</h3>
+
+% # <form action="./" method="post">
+
+<p>
+<input type="hidden" name="obvius_op" value="delete">
+<input type="hidden" name="obvius_page" value="done">
+<& SELF:msg, text=>'Click to delete document' &>.
+</p>
+
+<p>
+<& SELF:msg, text=>'A deleted document cannot be re-established' &>.
+</p>
+
+% if ($obvius->is_public_document($doc)) {
+<p>
+<& SELF:msg, text=>'You can hide the document instead of deleting it' &>.
+</p>
+% }
+
+<p>
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Delete document' &>">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
+</p>
+
+% # </form>
+
+</%method>
+%
+%
+%
+<%method do>
+<%perl>
+my $message="Couldn't delete document";
+my $ok=0;
+if ($obvius->delete_document($doc)) {
+    $message="Document deleted";
+    $ok=1;
+    $m->comp('/dirty_url_in_cache', url=>$uri);
+}
+</%perl>
+<& /done, message=>$message, parent=>$ok &>
+</%method>
+%
+<%args>
+$obvius_page=>undef
+</%args>
+%
+<%init>
+print STDERR ">>> /delete\n";
+
+if (defined $obvius_page and $obvius_page eq 'done') {
+  $m->comp('/delete:do');
+}
+else {
+  $m->comp('/delete:ask');
+}
+</%init>

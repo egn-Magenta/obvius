@@ -1,0 +1,16 @@
+<& SELF:menu_box_begin, title=>'Manual subscription' &>
+<& SELF:menu_entry, title=>'Send manually',
+  link=>"$prefix$uri?obvius_op=mail_send_manual",
+  marker=>'<IMG SRC="/grafik/admin/yellow.gif" WIDTH=9 HEIGHT=9 ALT="&lt;">',
+  ghosted=>$ghosted,
+  tooltip=>'Ej implementeret endnu',
+&>
+%
+<%init>
+my $ghosted=1;
+if ($obvius->get_version_field($vdoc, 'subscribeable') and ($vdoc->Subscribeable eq 'manual')) {
+    $ghosted=0;
+}
+
+$ghosted=1; # XXX Not implemented yet
+</%init>

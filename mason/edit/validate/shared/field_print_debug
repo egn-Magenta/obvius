@@ -1,0 +1,16 @@
+<%args>
+$session
+$k
+</%args>
+<%init>
+my $fspec=$obvius->get_fieldspec($k);
+my $ftype = $fspec->param('fieldtype');
+print STDERR " [" .	($ftype->Bin ? 'BINARY' :
+			 (defined $session->{fields_in}->param($k) ?
+			  $session->{fields_in}->param($k) : 'undef')
+			) . "]->";
+print STDERR "[" .	($ftype->Bin ? 'BINARY' :
+			 (defined $session->{fields_out}->param($k) ?
+			  $session->{fields_out}->param($k) : 'undef')
+			) . "]\n";
+</%init>

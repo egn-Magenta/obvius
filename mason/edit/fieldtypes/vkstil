@@ -1,0 +1,53 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+%
+%for(@$choises) {
+<input type="checkbox" name="<% $name %>" value="<% $_ %>"<% $selected{$_} ? ' CHECKED' : '' %>><% $_ |h %></input><br>
+%}
+Eventuel ny stil:<br>
+<input type="text" size="50" name="<% $name %>" value="" tabindex="10">
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+$value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$value ||= [];
+
+$value = [ $value ] unless(ref($value) eq 'ARRAY');
+
+my $produkt_doctype = $obvius->get_doctype_by_name('VKProdukt');
+
+my $kat_value = $session->{fields_out}->param('KATEGORI');
+$kat_value = $session->{fields_in}->param('KATEGORI') unless defined($kat_value);
+
+my $choises = $obvius->get_distinct_vfields(
+                                            "stil",
+                                            "text",
+                                            doctypeid => $produkt_doctype->Id,
+                                            vfields_match => $kat_value ? { name => 'kategori', type => 'text', value => $kat_value } : undef
+                                    ) || [];
+
+# XXX This is old cruft to be removed, right?! Or what?!
+my %selected;
+for(@$value) {
+    $selected{$_} = 1;
+}
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>[]
+</%args>
+<%perl>
+$value = [ $value ] unless(ref($value) eq 'ARRAY');
+my @value;
+for(@$value) {
+    push(@value, $_) if($_);
+}
+return \@value;
+</%perl>
+</%method>

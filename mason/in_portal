@@ -1,0 +1,127 @@
+<%args>
+$content
+$obvius_session=>undef
+$obvius_page=>undef
+$obvius_version=>undef
+$obvius_versions_lang=>''
+$session=>undef
+$obvius_op=>undef
+$ghosted=>0
+$new_doc_width=>172
+$left_cell_width=>180
+$obvius_show_hidden=>undef
+</%args>
+%
+% if ($r->notes('redirect')) {
+<% $content_html %>
+%     $m->abort();
+% }
+
+<tr>
+<td colspan="2">
+<& /header/header, decoration=>'normal', session=>$session, obvius_page=>$obvius_page, obvius_op=>$obvius_op,
+      obvius_version=>$obvius_version, left_cell_width=>$left_cell_width &>
+%
+% if($obvius_session) {
+% #    print STDERR "obvius_session: yes, obvius_page: $obvius_page, nextpage: $obvius_nextpage.\n";
+<input type="hidden" name="obvius_session" value="<% $obvius_session %>" style="margin: 0; padding: 0">
+% }
+% elsif (!$obvius_op) {
+% #    print STDERR "no obvius_session and no obvius_op, no.\n";
+<input type="hidden" name="obvius_op" value="edit" style="margin: 0; padding: 0">
+<input type="hidden" name="obvius_page" value="1" style="margin: 0; padding: 0">
+% }
+</td>
+</tr>
+<tr>
+<td valign="top" width="<% $left_cell_width %>">
+<!-- left column: -->
+      <table cellpadding="0" cellspacing="0" width="<% $left_cell_width %>">
+	<tr>
+	  <td width="<% $left_cell_width %>" style="border-right: 1px black solid">
+	    <& subdocs, session=>$session, obvius_show_hidden=>$obvius_show_hidden &>
+	  </td>
+	</tr>
+	<tr>
+	  <td width="<% $left_cell_width %>" style="border-right: 1px black solid">
+	    <p align="center"><img border="0" src="/grafik/admin/spacer.gif" width="4" height="4"><br>
+		  <input type="button" value="<& SELF:msg, text=>'MakeNewDocument' &>"
+			 style="width:<% $new_doc_width %>px; font-weight:bold; margin-bottom: 5px"
+% if ($ghosted) {
+			 class="ghostedknap"
+			 onclick=""
+			 disabled
+% }
+% else {
+                         tabindex="20"
+			 accesskey="N"
+			 class="venstreknap"
+			 onclick="javascript:window.document.pageform.obvius_op.value='new';submit_page();"
+% }
+			  ></p>
+	  </td>
+	</tr>
+	<tr>
+	  <td style="border-bottom: 1px black solid; border-right: 1px black solid" width="<% $left_cell_width %>">
+	    <& versions_list, obvius_versions_lang=>$obvius_versions_lang, session=>$session, left_cell_width=>$left_cell_width &>
+	  </td>
+	</tr>
+      </table>
+<!-- :left column -->
+</td>
+<td valign="top" width="99%" style="border-top: 1px black solid">
+<!-- content column: -->
+      <table cellpadding="7" cellspacing="0" width="100%">
+	<tr>
+	  <td>
+	    <% $content_html %>
+	  </td>
+	</tr>
+      </table>
+<!-- :content column -->
+</td>
+</tr>
+%
+<%init>
+$obvius->log->debug(">>> /in_portal (obvius_page: " .
+    (defined $obvius_page ? $obvius_page : 'undef') . ")");
+$obvius->log->debug(">>> /in_portal (obvius_op: " .
+    (defined $obvius_op ? $obvius_op : 'undef') . ")");
+
+# Die if no view access (subdocs should be modified as well):
+if (!$obvius->user_has_any_capability($doc, 'view', 'modes')) {
+    $m->clear_buffer;
+    $r->method('GET');
+    $r->headers_in->unset('Content-length');
+    $r->content_type('text/html');
+    $m->abort(403); # FORBIDDEN
+}
+
+my ($date, $time)=$m->comp('SELF:split_date_time', string=>$vdoc->Version);
+my $author='';
+if ($obvius->get_version_field($vdoc, 'author')) {
+    $author=$vdoc->Author;
+}
+
+# Handle obvius_show_hidden (this _has_ to be before $content is found,
+# side-effects (I guess $r?)):
+if (defined $obvius_show_hidden) {
+    $m->comp('/shared/set_cookie', cookie=>'obvius_show_hidden', value=>$obvius_show_hidden);
+}
+else {
+    $obvius_show_hidden=$m->comp('/shared/get_cookie', cookie=>'obvius_show_hidden');
+}
+
+my $content_html=$m->scomp($content, %ARGS); # This has side-effects, which we use.
+$session=$r->pnotes('session') unless ($session);
+$obvius_session=$r->notes('obvius_session') unless ($obvius_session);
+my $obvius_nextpage=-1;
+if ($session) {
+    my $editpages=$session->{pages};
+    my $total=@$editpages;
+    my $editpage=$editpages->[($obvius_page-1)];
+    $obvius_nextpage=($total == $obvius_page ? 'done' : $obvius_page+1);
+}
+
+$ghosted=1 if ($session or !$obvius->can_create_new_document($doc));
+</%init>

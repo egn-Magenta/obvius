@@ -1,0 +1,6 @@
+<%args>
+$name
+</%args>
+%
+<input class="normalknap" type="button" value="<& SELF:msg, text=>'Fortryd' &>"
+ onclick="javascript:reset_field(this.form.<% $name %>)">
