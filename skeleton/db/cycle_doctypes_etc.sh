@@ -11,6 +11,6 @@ else
 fi
 
 
-$WWWROOT/obvius/otto/add_fieldtypes.pl $DBNAME fieldtypes.txt
-$WWWROOT/obvius/otto/add_doctypes.pl $DBNAME doctypes.txt
-$WWWROOT/obvius/otto/add_editpages.pl $DBNAME editpages.txt
+$WWWROOT/obvius/otto/add_fieldtypes.pl $DBNAME fieldtypes.txt $DBUSER $DBPASSWD
+$WWWROOT/obvius/otto/add_doctypes.pl $DBNAME doctypes.txt $DBUSER $DBPASSWD
+$WWWROOT/obvius/otto/add_editpages.pl $DBNAME editpages.txt $DBUSER $DBPASSWD
