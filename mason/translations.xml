@@ -4159,9 +4159,246 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Dette er et RSS feed. Du kan ikke læse et RSS feed i din browser, men skal istedet bruge en speciel klient.</translation>
   </text>
 
+  <text key="formdata_yes_if">
+    <translation lang="en">Yes, if the field</translation>
+    <translation lang="da">Ja, hvis feltet</translation>
+  </text>
+
+  <text key="formdata_has_been_filled">
+    <translation lang="en">has been filled</translation>
+    <translation lang="da">er udfyldt</translation>
+  </text>
+
+  <text key="formdata_has_not_been_filled">
+    <translation lang="en">has not been filled</translation>
+    <translation lang="da">ikke er udfyldt</translation>
+  </text>
+
+  <text key="Cannot find type selection dropdown">
+    <translation lang="en">Cannot find type selection dropdown</translation>
+    <translation lang="da">Kan ikke finde dropdown'en med typer</translation>
+  </text>
+
+  <text key="You must chose the type of field to add">
+    <translation lang="en">You must chose the type of field to add</translation>
+    <translation lang="da">Du skal vælge hvilken type felt du vil tilføje</translation>
+  </text>
+
+  <text key="Seems to have lost connection with the main edit page">
+    <translation lang="en">Seems to have lost connection with the main edit page</translation>
+    <translation lang="da">Det ser ud til at forbindelsen til hovedredigeringssiden er forsvundet</translation>
+  </text>
+
+  <text key="Couldn't find a node with name">
+    <translation lang="en">Couldn't find a node with name</translation>
+    <translation lang="da">Kunne ikke finde en node med navnet</translation>
+  </text>
+
+  <text key="Couldn't get parent fieldNode">
+    <translation lang="en">Couldn't get parent fieldNode</translation>
+    <translation lang="da">Kunne ikke finde parent fieldNode'en</translation>
+  </text>
+
+  <text key="You must specify a name">
+    <translation lang="en">You must specify a name</translation>
+    <translation lang="da">Du skal angive et navn</translation>
+  </text>
+
+  <text key="You must specify whether the field is mandatory">
+    <translation lang="en">You must specify whether the field is mandatory</translation>
+    <translation lang="da">Du skal angive om feltet skal udfyldes</translation>
+  </text>
+
+  <text key="You must specify which other field makes this field mandatory">
+    <translation lang="en">You must specify which other field makes this field mandatory</translation>
+    <translation lang="da">Du skal angive hvilket felt dette felt afhænger af</translation>
+  </text>
+
+  <text key="You must specify a value">
+    <translation lang="en">You must specify a value</translation>
+    <translation lang="da">Du skal angive en værdi</translation>
+  </text>
+
+  <text key="You must specify a validation type">
+    <translation lang="en">You must specify a validation type</translation>
+    <translation lang="da">Du skal angive en valideringstype</translation>
+  </text>
+
+  <text key="You must specify an argument for regexp validation type">
+    <translation lang="en">You must specify an argument for regexp validation type</translation>
+    <translation lang="da">Du skal angive et argument til regexp valideringstypen</translation>
+  </text>
+
+  <text key="You must specify a number as argument for min_checked validationtype">
+    <translation lang="en">You must specify a number as argument for min_checked validationtype</translation>
+    <translation lang="da">Du skal angive et nummer som argument til min_checked valideringstypen</translation>
+  </text>
+
+  <text key="You must specify an errormessage">
+    <translation lang="en">You must specify an errormessage</translation>
+    <translation lang="da">Du skal angive en fejlmeddelelse</translation>
+  </text>
+
+  <text key="A field can't depend on itself">
+    <translation lang="en">A field can't depend on itself</translation>
+    <translation lang="da">Et felt kan ikke afhænge af sig selv</translation>
+  </text>
+
+  <text key="Couldn't delete option with nr.">
+    <translation lang="en">Couldn't delete option with nr.</translation>
+    <translation lang="da">Kunne ikke slette valgmuligheden med nummer</translation>
+  </text>
+
+  <text key="Couldn't delete validaterule with nr.">
+    <translation lang="en">Couldn't delete validaterule with nr.</translation>
+    <translation lang="da">Kunne ikke slette valideringsreglen med nummer</translation>
+  </text>
+
+  <text key="can't edit option">
+    <translation lang="en">can't edit option</translation>
+    <translation lang="da">kan ikke redigere valgmulighed</translation>
+  </text>
+
+  <text key="can't save option">
+    <translation lang="en">can't save option</translation>
+    <translation lang="da">kan ikke slette valgmulighed</translation>
+  </text>
+
+  <text key="can't edit validaterule">
+    <translation lang="en">can't edit validaterule</translation>
+    <translation lang="da">kan ikke redigere valideringsregel</translation>
+  </text>
+
+  <text key="can't save validaterule">
+    <translation lang="en">can't save validaterule</translation>
+    <translation lang="da">kan ikke gemme valideringsregel</translation>
+  </text>
+
+  <text key="Unkown validation type">
+    <translation lang="en">Unkown validation type</translation>
+    <translation lang="da">Ukendt valideringstype</translation>
+  </text>
+
+  <text key="formdata_name">
+    <translation lang="en">Name</translation>
+    <translation lang="da">Navn</translation>
+  </text>
+
+  <text key="Mandatory">
+    <translation lang="en">Mandatory</translation>
+    <translation lang="da">Skal udfyldes</translation>
+  </text>
+
+  <text key="Add new field">
+    <translation lang="en">Add new field</translation>
+    <translation lang="da">Tilføj nyt felt</translation>
+  </text>
+
+  <text key="Textarea">
+    <translation lang="en">Textarea</translation>
+    <translation lang="da">Textarea</translation>
+  </text>
+
+  <text key="Radiobuttons">
+    <translation lang="en">Radiobuttons</translation>
+    <translation lang="da">Radioknapper</translation>
+  </text>
+
+  <text key="Checkboxes">
+    <translation lang="en">Checkboxes</translation>
+    <translation lang="da">Afkrydsningsbokse</translation>
+  </text>
+
+  <text key="Dropdown">
+    <translation lang="en">Dropdown</translation>
+    <translation lang="da">Dropdown</translation>
+  </text>
+
+  <text key="Select multiple">
+    <translation lang="en">Select multiple</translation>
+    <translation lang="da">Select multiple</translation>
+  </text>
+
+  <text key="Create">
+    <translation lang="en">Create</translation>
+    <translation lang="da">Opret</translation>
+  </text>
+
+  <text key="Edit field">
+    <translation lang="en">Edit field</translation>
+    <translation lang="da">Rediger felt</translation>
+  </text>
+
+  <text key="formdata_type">
+    <translation lang="en">Type</translation>
+    <translation lang="da">Type</translation>
+  </text>
+
+  <text key="If..">
+    <translation lang="en">If..</translation>
+    <translation lang="da">Hvis..</translation>
+  </text>
+
+  <text key="The field">
+    <translation lang="en">The field</translation>
+    <translation lang="da">Feltet</translation>
+  </text>
+
+  <text key="has been filled">
+    <translation lang="en">has been filled</translation>
+    <translation lang="da">er udfyldt</translation>
+  </text>
+
+  <text key="has not been filled">
+    <translation lang="en">has not been filled</translation>
+    <translation lang="da">ikke er udfyldt</translation>
+  </text>
+
+  <text key="Options">
+    <translation lang="en">Options</translation>
+    <translation lang="da">Valgmuligheder</translation>
+  </text>
+
+  <text key="Value">
+    <translation lang="en">Value</translation>
+    <translation lang="da">Værdi</translation>
+  </text>
+
+  <text key="Add new">
+    <translation lang="en">Add new</translation>
+    <translation lang="da">Tilføj ny</translation>
+  </text>
+
+  <text key="Validaterules">
+    <translation lang="en">Validaterules</translation>
+    <translation lang="da">Valideringsregler</translation>
+  </text>
+
+  <text key="Argument">
+    <translation lang="en">Argument</translation>
+    <translation lang="da">Argument</translation>
+  </text>
+
+  <text key="Error message">
+    <translation lang="en">Error message</translation>
+    <translation lang="da">Fejlmeddelelse</translation>
+  </text>
+
+  <text key="Edit validaterule">
+    <translation lang="en">Edit validaterule</translation>
+    <translation lang="da">Rediger valideringsregel</translation>
+  </text>
+
+  <text key="Edit option">
+    <translation lang="en">Edit option</translation>
+    <translation lang="da">Rediger valgmulighed</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
   </text>
+
+
 
 </messages>
