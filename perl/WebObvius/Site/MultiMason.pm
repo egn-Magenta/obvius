@@ -6,6 +6,10 @@ use warnings;
 use WebObvius::Site::Mason;
 use Obvius::MultiSite;
 
+use Apache::Constants qw(:common :methods :response);
+
+use Digest::MD5 qw(md5_hex);
+
 use Fcntl ':flock';
 
 
@@ -48,22 +52,52 @@ sub obvius_connect {
         $this->{SITEROOTS}->{$siteroot} = $obvius->{ROOTID};
     }
 
-    if($obvius->{SITEROOT}) {
-        $req->notes('siteroot' => $obvius->{SITEROOT})
-    }
-
     $obvius->cache(1);
     $req->register_cleanup(sub { $obvius->cache(0); $obvius->{DB}=undef; 1; } );
 
     $req->pnotes(obvius => $obvius);
+
     return $obvius;
 }
+
+sub can_use_cache {
+    my ($this, $req, $output) = @_;
+
+    my $obvius=$req->pnotes('obvius');
+    $output ||= $req->pnotes('OBVIUS_OUTPUT');
+
+    return '' if ($output && $output->param('OBVIUS_SIDE_EFFECTS'));
+    return '' if ($req->no_cache);
+    return '' unless ($req->method_number == M_GET);
+    return '' unless ($this->{WEBOBVIUS_CACHE_INDEX} and
+                        $this->{WEBOBVIUS_CACHE_DIRECTORY});
+    return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
+
+    my $content_type = $req->content_type;
+    return '' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
+                                            # Not really the RFC2045 definition but should work most of the time
+    $req->content_type($content_type);
+
+    my $siteroot = $obvius->{SITEROOT} || '';
+
+    my $id = md5_hex($siteroot . $req->the_request);
+    $id .= '.gz' if ($req->notes('gzipped_output'));
+
+    $req->notes('cache_id' => $id);
+    $req->notes('cache_dir' => join '/', $this->{WEBOBVIUS_CACHE_DIRECTORY}, $req->content_type, substr($id, 0, 2));
+    $req->notes('cache_file' => $req->notes('cache_dir') .  '/' . $id);
+    $req->notes('cache_url' => join '/', '/cache', $req->content_type, substr($id, 0, 2), $id);
+
+    Obvius::log->debug("Cache file name %s\n", $req->notes('cache_file'));
+    return 1;
+}
+
 
 
 sub save_in_cache {
     my ($this, $req, $s) = @_;
 
-    my $obvius=$req->notes('obvius');
+    my $obvius=$req->pnotes('obvius');
 
     my $log;
     if (defined $obvius) {
@@ -116,7 +150,7 @@ sub save_in_cache {
             $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
             if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
                 if (flock FH, LOCK_EX|LOCK_NB) {
-                    my $siteroot = $req->notes('siteroot') || '';
+                    my $siteroot = $obvius->{SITEROOT} || '';
                     print $fh $siteroot, $req->uri, $extra, "\t", $req->notes('cache_url'), "\n";
                     $log->debug(" ADDED TO CACHE: " . $req->uri);
                 } else {
