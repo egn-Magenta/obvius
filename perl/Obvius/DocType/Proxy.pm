@@ -40,6 +40,8 @@ use URI::Escape;
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+# action - retrieves and handles the url to be proxied. Returns
+#          OBVIUS_OK when done.
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
@@ -97,6 +99,9 @@ sub action {
     return OBVIUS_OK;
 }
 
+# check_via_ok - given the input-object and our own via-line, checks
+#                whether the via-line is included in the incoming
+#                Via-hader. Returns true if it isn't, false if it is.
 sub check_via_ok {
     my ($input, $via)=@_;
 
@@ -159,6 +164,10 @@ sub filter_content {
     return $filtered_content;
 }
 
+# start_element - called by HTML::Parser everytime a new element is
+#                 encountered. Attributes are filtered and the,
+#                 possibly changed, text is stored - if we are inside
+#                 the (/a) body-element.
 sub start_element {
     my ($self, $tagname, $attr, $attrseq)=@_;
 
@@ -200,6 +209,10 @@ my %filter_attributes_elements=(
                                 usemap  =>{ img=>2, input=>2 },
                                );
 
+# filter_attribute - given an element-name, attribute-name and -value
+#                    and the urls and prefixes in play changes the
+#                    attribute according to the table
+#                    filter_attribute_elements.
 sub filter_attribute {
     my ($tagname, $name, $value, $fetch_url, $base_url, $prefixes)=@_;
 
@@ -222,6 +235,8 @@ sub filter_attribute {
     return $value;
 }
 
+# absolutify - given a (full, absolute, relative) url and the url of
+#              the fetched page, returns the full url.
 sub absolutify {
     my ($url, $fetch_url)=@_;
 
@@ -231,6 +246,12 @@ sub absolutify {
     return $abs;
 }
 
+# absolutify_and_proxy - given a (full, absolute, relative) url, the
+#                        url of the fetched page and information about
+#                        base_url and prefixes, returns the absolute
+#                        url, perhaps rewritten to a proxy-argument,
+#                        if it matches the base_url or one or more of
+#                        the prefixes.
 sub absolutify_and_proxy {
     my ($url, $fetch_url, $base_url, $prefixes)=@_;
 
@@ -245,6 +266,10 @@ sub absolutify_and_proxy {
     return $url;
 }
 
+# check_url_against_prefixes - given a full url and an array-ref to
+#                              prefixes, checks whether the url
+#                              matches at least one prefix. Returns
+#                              true if so, otherwise false.
 sub check_url_against_prefixes {
     my ($url, $prefixes)=@_;
 
@@ -255,6 +280,9 @@ sub check_url_against_prefixes {
     return 0;
 }
 
+# end_element - called by HTML::Parser whenever the end of an element
+#               is reached. Keeps track of whether we are inside the
+#               (a) body element.
 sub end_element {
     my ($self, $tagname)=@_;
 
@@ -267,6 +295,9 @@ sub end_element {
     $self->{OBVIUS_OUTPUT}.='</' . $tagname . '>';
 }
 
+# catch_all - called by HTML::Parser for everything that isn't covered
+#             by other handlers (start_element, end_element). Outputs
+#             the (decoded) text if inside the body element.
 sub catch_all {
     my ($self, $dtext)=@_;
 
@@ -275,6 +306,8 @@ sub catch_all {
     $self->{OBVIUS_OUTPUT}.=$dtext if (defined $dtext);
 }
 
+# These are the headers that are passed from the client on to the
+# server (everything else is stripped):
 my %client_to_proxy_headers=(
                              'user-agent'=>1,       # Lowercase for simple comparison
                              'accept'=>1,
@@ -286,7 +319,9 @@ my %client_to_proxy_headers=(
                              );
 
 # This is a bit of a mess, these things get added to input, and there
-# is no way to tell them apart from incoming variables:
+# is no way to tell them apart from incoming variables, so we strip
+# them, but we don't know if we strip enough, when more stuff gets
+# added to the input-object:
 my %incoming_variables_prune=(
                               NOW=>1,
                               IS_ADMIN=>1,
@@ -296,6 +331,11 @@ my %incoming_variables_prune=(
                               OBVIUS_COOKIES=>1,
                              );
 
+# make_request - given a url, a via-line and the input- and
+#                output-objects, constructs and sends the request to
+#                the url. POST and GET methods are handled. Returns a
+#                response-object if successful, otherwise returns
+#                undef.
 sub make_request {
     my ($url, $via, $input, $output)=@_;
 
@@ -343,6 +383,8 @@ sub make_request {
     return $response;
 }
 
+# These are the headers that are removed from the response from the
+# url, when passing them back to the client:
 my %proxy_to_client_headers_prune=(
                                    'content-length'=>1,
                                    'connection'=>1,
@@ -352,6 +394,12 @@ my %proxy_to_client_headers_prune=(
                                                     #     special handling will be required
                                   );
 
+# handle_response - given a response-object and information about
+#                   urls, via and the output-object, checks the status
+#                   of the request - handles the headers to be
+#                   returned, redirects if need be or returns an
+#                   error-code if relevant. Doesn't return anything
+#                   directly, but put things on the output-object.
 sub handle_response {
     my ($response, $url, $base_url, $prefixes, $via, $output)=@_;
 
@@ -414,12 +462,55 @@ Obvius::DocType::Proxy - Perl module implementing a proxy document type.
 
 =head1 DESCRIPTION
 
+A document of this type has two important fields used for the
+functionality implemented:
+
+ url      - one line
+ prefixes - zero or more lines
+
+When the document is displayed, it tries to fetch the page pointed to
+by url.
+
+If successful, the content is filtered, links that either match url or
+one or more of the prefixes are rewritten to point to the
+Proxy-document with the real url as an argument.
+
+If there is an argument pointing to a real url, and that url matches
+url or one or more of the prefixes, that url is fetched instead.
+
+If the url to be fetched returns a redirect instruction, that new url
+is handled as well (if it is within etc. etc.).
+
+Relevant headers are proxied forth and back, and a Via-header is used
+to detect, and break, proxying of Proxy-documents.
+
+=head1 CAVEATS
+
+Cookies are stripped, both ways. This is to prevent cross-pollenation
+- cookies are set based on hostname (and, optionally, path), but if
+you have multiple Proxy-documents on the same website, the hostname is
+the same and you potentially send cookies from one site to another;
+not good at all.
+
+Filtering is performed only if the content-type is one that the
+Proxy-documenttype feels it can handle. If it can't, Proxy.pm
+redirects to the real url instead. (This is probably always desired
+behaviour; when we don't know how to filter a, say, PDF-document, it
+is better to let the client retrieve it for themself).
+
+Filtering does not handle frames. Don't use frames, please. It is not
+1995 any more.
+
+=head1 BUGS
+
+The Via-header has HTTP/1.1 hardcoded into it.
+
 =head1 AUTHOR
 
 Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<Obvius::DocType>.
+L<Obvius::DocType>, L<RFC 2616 - HTTP>, L<RFC 2109 - Cookies>.
 
 =cut
