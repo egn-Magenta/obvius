@@ -10,6 +10,7 @@ use Obvius::DocType;
 use Data::Dumper;
 
 use locale; # Danish letters
+use Unicode::String qw(utf8 latin1);
 
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
