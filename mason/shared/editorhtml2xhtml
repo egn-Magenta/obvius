@@ -14,44 +14,55 @@ my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
                                                 my($this, $tagname, $attr, $attrseq)=@_;
-                                                  my @new_attrseq = grep {! /^(align|hspace|vspace)$/} @$attrseq;
+
+                                                  # Remove align on images and hspace and vspace on all other:
+                                                  my $alignmatch = '';
+                                                  if($tagname eq 'img') {
+                                                    $alignmatch = 'align|';
+                                                  }
+
+                                                  my @new_attrseq = grep {! /^(${alignmatch}hspace|vspace)$/} @$attrseq;
                                                   $attrseq = \@new_attrseq;
+
+
 
                                                   my $endtag = "";
                                                   $endtag = " /" if($tagname =~ /^(br|img|input)$/);
 
-                                                  # Some things should be handled by styles instead of attributes:
-                                                  $attr->{style} ||= '';
+                                                  if($tagname eq 'img') {
+                                                    # Some things should be handled by styles instead of attributes:
+                                                    $attr->{style} ||= '';
 
-                                                  # Add a ; to the end of existing styles if it's not already there:
-                                                  if($attr->{style} and $attr->{style} !~ m!;$!) {
-                                                    $attr->{style} .= ";";
-                                                  }
+                                                    # Add a ; to the end of existing styles if it's not already there:
+                                                    if($attr->{style} and $attr->{style} !~ m!;$!) {
+                                                        $attr->{style} .= ";";
+                                                    }
 
-                                                  if(my $align = $attr->{align}) {
-                                                    $attr->{style} =~ s/float:[^;]+;//;
-                                                    $attr->{style} .= "float: $align;";
-                                                  }
+                                                    if(my $align = $attr->{align}) {
+                                                        $attr->{style} =~ s/float:[^;]+;//;
+                                                        $attr->{style} .= "float: $align;";
+                                                    }
 
-                                                  if(my $vspace = $attr->{vspace}) {
-                                                    $attr->{style} =~ s/margin-top:[^;]+;//;
-                                                    $attr->{style} =~ s/margin-bottom:[^;]+;//;
+                                                    if(my $vspace = $attr->{vspace}) {
+                                                        $attr->{style} =~ s/margin-top:[^;]+;//;
+                                                        $attr->{style} =~ s/margin-bottom:[^;]+;//;
 
-                                                    $attr->{style} .= "margin-top: ${vspace}px;";
-                                                    $attr->{style} .= "margin-bottom: ${vspace}px;";
-                                                  }
+                                                        $attr->{style} .= "margin-top: ${vspace}px;";
+                                                        $attr->{style} .= "margin-bottom: ${vspace}px;";
+                                                    }
 
-                                                  if(my $hspace = $attr->{hspace}) {
-                                                    $attr->{style} =~ s/margin-left:[^;]+;//;
-                                                    $attr->{style} =~ s/margin-right:[^;]+;//;
+                                                    if(my $hspace = $attr->{hspace}) {
+                                                        $attr->{style} =~ s/margin-left:[^;]+;//;
+                                                        $attr->{style} =~ s/margin-right:[^;]+;//;
 
-                                                    $attr->{style} .= "margin-left: ${hspace}px;";
-                                                    $attr->{style} .= "margin-right: ${hspace}px;";
-                                                  }
+                                                        $attr->{style} .= "margin-left: ${hspace}px;";
+                                                        $attr->{style} .= "margin-right: ${hspace}px;";
+                                                    }
 
-                                                  # Add style to attrseq if it isn't already there:
-                                                  if($attr->{style} and not grep { $_ eq 'style' } @$attrseq) {
-                                                    push(@$attrseq, "style");
+                                                    # Add style to attrseq if it isn't already there:
+                                                    if($attr->{style} and not grep { $_ eq 'style' } @$attrseq) {
+                                                        push(@$attrseq, "style");
+                                                    }
                                                   }
 
 
