@@ -1,12 +1,14 @@
 <%args>
 $text
 $length
+$post=>'...'
 </%args>\
 <%init>
 $text = $m->scomp('/shared/printhtml', html=>$text);
 $textlength = 0;
 $max_length = $length;
 $stop = 0;
+$_post = $post;
 $out='';
 $r->notes('shortened' => 0);
 $p->parse($text);
@@ -26,6 +28,7 @@ my $textlength = 0;
 my $max_length = 0;
 my %open_tags;
 my $stop = 0;
+my $_post = '...';
 my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
@@ -56,7 +59,7 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 my $currentlength = length($text);
                                                 if($textlength + $currentlength > $max_length) {
                                                     my $partialtext = substr($text, 0, $max_length - $currentlength);
-                                                    $out .= $partialtext . '...';
+                                                    $out .= $partialtext . $_post;
                                                     $stop = 1;
                                                 } else {
                                                     $out.=$text;
