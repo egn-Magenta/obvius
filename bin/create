@@ -128,14 +128,49 @@ sub create_obvius_document {
                                  bare=>1,
                                 );
 
+    my $doctype=$obvius->get_doctype_by_name($version->{obvius_dump_type_name}) || $default_doctype;
+    print " (", $doctype->Name, ")";
+
     # Fill out fields:
-    map { $fields->param($_=>$version->{fields}->{$_}); } keys (%{$version->{fields}});
+    #  XXX This really should look up the fieldtype and do a copy_in!
+    foreach my $fieldname (keys (%{$version->{fields}})) {
+        my $value=$version->{fields}->{$fieldname};
+
+        my $fieldspec=$obvius->get_fieldspec($fieldname, $doctype);
+        my $fieldtype;
+        $fieldtype=$fieldspec->{FIELDTYPE} if ($fieldspec); # XXX Should be a method...
+
+        if ($fieldname eq 'keyword') { # XXX Xref-handling in general?!
+            my @new_values=();
+            foreach my $keyword (@$value) {
+                if (my $rec=$obvius->get_table_record('keywords', { name=>$keyword })) {
+                    push @new_values, $rec->{id};
+                }
+                else {
+                    eval {
+                        $obvius->insert_table_record('keywords', { name=>$keyword });
+                    };
+                    my $rec=$obvius->get_table_record('keywords', { name=>$keyword });
+                    push @new_values, $rec->{id};
+                }
+            }
+            $value=\@new_values;
+        }
+
+        if ($fieldtype) {
+            if (ref $value) {
+                $value=[ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value ];
+            }
+            else {
+                $value=$fieldtype->copy_in($obvius, $fieldspec, $value);
+            }
+        }
+        $fields->param($fieldname=>$value);
+    }
 
     my @ret=();
     my $document_already_exists=$obvius->lookup_document($new_uri);
     if ($document_already_exists) {
-        my $doctype=$obvius->get_doctype_by_name($version->{obvius_dump_type_name}) || $default_doctype;
-        print " (", $doctype->Name, ")";
 
         # XXX Only one version per second, so wait for the next one to come up:
         sleep 1;
@@ -146,10 +181,6 @@ sub create_obvius_document {
         pop @parent_uri;
         my $parent_uri=join '/', @parent_uri;
         my $parent=$obvius->lookup_document($parent_uri);
-
-        my $doctype=$obvius->get_doctype_by_name($document->{obvius_dump_type_name}) || $default_doctype;
-        print " (", $doctype->Name, ")";
-
         my $owner=$obvius->get_userid($document->{obvius_dump_owner_login});
         my $grp=$obvius->get_grpid($document->{obvius_dump_grp_name});
 

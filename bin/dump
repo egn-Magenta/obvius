@@ -100,7 +100,7 @@ sub dump_doc {
         map {
             $obvius->get_version_fields($_, 255);
             $_->param(obvius_dump_type_name=>$obvius->get_version_type($_)->Name);
-            $_->param(obvius_dump_user_login=>$obvius->get_user($_->User)->{login});
+            $_->param(obvius_dump_user_login=>$obvius->get_user($_->User)->{login}) if ($_->User);
         } @$vdocs;
     }
 
