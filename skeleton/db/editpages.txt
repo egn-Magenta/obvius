@@ -277,7 +277,7 @@ DocType: Link
   Fields: title Title
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
-  Fields: url Web address
+  Fields: url Web address;choose=1
   Fields: author Author;distinct=1
   Fields: seq Order of succession
   Fields: docdate Date (YYYY-MM-DD)
