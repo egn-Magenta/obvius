@@ -16,7 +16,7 @@
 %    else {
               <a href="<% $_->{sofar} %>"><img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-"></a>
 %    }
-             <& SELF:link, link=>$_->{sofar}, text=>$m->scomp('SELF:shorten', text=>$_->{title}, len=>20), ghosted=>$ghosted, tabindex=>$tabindex &> </b>
+             <& SELF:link, no_translation=>1, link=>$_->{sofar}, text=>$m->scomp('SELF:shorten', text=>$_->{title}, len=>20), ghosted=>$ghosted, tabindex=>$tabindex &> </b>
            </td>
           </tr>
         </table>
@@ -85,7 +85,7 @@
 %         else {
               <a href="<% $prefix . $uri_w_slash . $_->{link} %>"><img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-"></a>
 %         }
-              <& SELF:link, link=>$prefix . $uri_w_slash . $_->{link}, text=>$min . $_->{title}, ghosted=>$ghosted, tabindex=>$tabindex &>
+              <& SELF:link, link=>$prefix . $uri_w_slash . $_->{link}, no_translation=>1, text=>$min . $_->{title}, ghosted=>$ghosted, tabindex=>$tabindex &>
               <br>
 %     } @$subdocs;
 %     if ($extra>0 or $obvius_show_hidden) {

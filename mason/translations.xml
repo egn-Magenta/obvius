@@ -2038,6 +2038,11 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Visning og abonnement</translation>
   </text>
 
+  <text key="Display and subscription">
+    <translation lang="en">Display and subscription</translation>
+    <translation lang="da">Visning og abonnement</translation>
+  </text>
+
   <text key="Display-only">
     <translation lang="en">Display</translation>
     <translation lang="da">Visning</translation>
@@ -3120,7 +3125,7 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">OK</translation>
   </text>
 
-  <text key="Om Dokumentet">
+  <text key="Om dokumentet">
     <translation lang="en">About the document</translation>
     <translation lang="da">Om dokumentet</translation>
   </text>
@@ -3525,7 +3530,7 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Alle felter</translation>
   </text>
 
-  <text key="Om dokumentet">
+  <text key="Om Dokumentet">
     <translation lang="en">About</translation>
     <translation lang="da">Om dokumentet</translation>
   </text>
@@ -3533,6 +3538,11 @@ abonnement på samme email-adresse.</translation>
   <text key="Rediger med Obvius Ed">
     <translation lang="en">Edit with Obvius Ed</translation>
     <translation lang="da">Rediger med Obvius Ed</translation>
+  </text>
+
+  <text key="Download/installer Obvius Ed editor">
+    <translation lang="en">Download/install Obvius Ed editor</translation>
+    <translation lang="da">Download/installer Obvius Ed editor</translation>
   </text>
 
   <text key="Der er i forvejen valgt">
@@ -3649,6 +3659,56 @@ abonnement på samme email-adresse.</translation>
   <text key="Sduforside">
     <translation lang="en">SDU front page</translation>
     <translation lang="da">SDU Forside</translation>
+  </text>
+
+  <text key="danske">
+    <translation lang="en">danish</translation>
+    <translation lang="da">danske</translation>
+  </text>
+
+  <text key="engelske">
+    <translation lang="en">english</translation>
+    <translation lang="da">engelske</translation>
+  </text>
+
+  <text key="lang_notification:msg1">
+    <translation lang="en">The path to the</translation>
+    <translation lang="da">Stien til den</translation>
+  </text>
+
+  <text key="lang_notification:msg2">
+    <translation lang="en">version of this document has not yet been created</translation>
+    <translation lang="da">version af dette dokument er endnu ikke blevet oprettet</translation>
+  </text>
+
+  <text key="lang_notification:msg3">
+    <translation lang="en">Click here to create the first missing part</translation>
+    <translation lang="da">Klik her for at oprette den første manglende del</translation>
+  </text>
+
+  <text key="lang_notification:msg4">
+    <translation lang="en">A</translation>
+    <translation lang="da">Den</translation>
+  </text>
+
+  <text key="lang_notification:msg5">
+    <translation lang="en">version of this document has not yet been created</translation>
+    <translation lang="da">version af dette dokumment er endnu ikke oprettet</translation>
+  </text>
+
+  <text key="lang_notification:msg6">
+    <translation lang="en">Click here to create it</translation>
+    <translation lang="da">Klik her for at oprette den</translation>
+  </text>
+
+  <text key="... vis alle">
+    <translation lang="en">... show all</translation>
+    <translation lang="da">... vis alle</translation>
+  </text>
+
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
   </text>
 
 </messages>

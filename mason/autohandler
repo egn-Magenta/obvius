@@ -16,7 +16,9 @@ $ghosted_class=>'ghosted'
 $class=>undef
 $tabindex=>undef
 $accesskey=>undef
+$no_translation=>undef
 </%args>
+% $text = $m->scomp('SELF:msg', text=>$text) unless($no_translation);
 % $title=' title="' . $title . '"' if ($title);
 % $class=(defined $class ? " class=\"$class\"" : '');
 % $tabindex=(defined $tabindex ? (' tabindex="' . $tabindex . '"') : '');

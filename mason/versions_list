@@ -5,7 +5,7 @@
       <td class="lys" nowrap style="border-top: 1px black solid; border-bottom: 1px black solid">
 	<p><b>Version</b><!--<img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">--></td>
       <td class="lys" align="right" style="border-top: 1px black solid; border-bottom: 1px black solid">
-	<p align="right">Sprog:</td>
+	<p align="right"><& SELF:msg, text=>'Sprog' &>:</td>
       <td class="lys" style="border-top: 1px black solid; border-bottom: 1px black solid">
 	<select size="1" name="obvius_versions_lang" class="lilleinput" onchange="javascript:this.form.obvius_op.value=''; submit_page();"<% $ghosted ? ' disabled' : '' %>>
           <option value=""> </option>
@@ -19,12 +19,10 @@
       <td width="<% $left_cell_width %>" class="omkringversionslisten" colspan="3">
 	<table border="0" cellspacing="1" style="border-collapse: collapse" bordercolor="#111111" width="100%">
 	  <tr>
-	    <td nowrap align="center">Dato</td>
-	    <td align="center">Tid</td>
-	    <td>
-	      <p align="center">Aktiv</td>
-	    <td>
-	      <p align="center">Off.</td>
+	    <td><& SELF:msg, text=>'Dato' &></td>
+	    <td align="center"><& SELF:msg, text=>'Tid' &></td>
+	    <td><& SELF:msg, text=>'Aktiv' &></td>
+	    <td><& SELF:msg, text=>'Off.' &></td>
 	  </tr>
 % foreach (@$versions) {
 %     next if ($obvius_versions_lang and lc($_->{lang}) ne lc($obvius_versions_lang));

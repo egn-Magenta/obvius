@@ -66,9 +66,9 @@ document.pageform.method = 'GET';
         <td>
 <table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
   <tr>
-    <td width="100%" class="navheader"><font color="#FFFFFF"><b><font size="1">Navigér</font></b></font><& /help, link=>'operation/navigate' &></td>
+    <td width="100%" class="navheader"><font color="#FFFFFF"><b><font size="1"><& SELF:msg, text=>'Navigér' &></font></b></font><& /help, link=>'operation/navigate' &></td>
     <td class="navheader"><font size="1">
-    <font color="#FFFFFF"><a href="javascript:window.close()"><font color="#FFFFFF">[Luk]</font></a></td>
+    <font color="#FFFFFF"><a href="javascript:window.close()"><font color="#FFFFFF">[<& SELF:msg, text=>'Luk' &>]</font></a></td>
   </tr>
 </table>
 <table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
@@ -105,9 +105,9 @@ document.pageform.method = 'GET';
 %      }
           <td valign="top" bgcolor="#CCCCCC" nowrap>
             <font size="1">
-                <font color="#666666">Dato:</font>
+                <font color="#666666"><& SELF:msg, text=>'Dato' &>:</font>
                 <% $date %><br>
-                <font color="#666666">Forfatter: </font>
+                <font color="#666666"><& SELF:msg, text=>'Forfatter' &>: </font>
                 <% $author %>
             </font>
           </td>
@@ -116,10 +116,10 @@ document.pageform.method = 'GET';
           </td>
           <td valign="top"  bgcolor="#CCCCCC" width="100%" nowrap>
             <font size="1">
-                <font color="#666666">Dokumenttype: </font>
+                <font color="#666666"><& SELF:msg, text=>'Dokumenttype' &>: </font>
                 <% $vdoc_doctype %><br>
             </font>
-            <font size="1" color="#666666">Sprog</font>
+            <font size="1" color="#666666"><& SELF:msg, text=>'Sprog' &></font>
                 <font size="1"><font color="#666666">:</font>
                 <% $language %>
             </font>

@@ -15,7 +15,13 @@
 <table>
 <tr>
 <td><& SELF:msg, text=>'Name' &><& /help, link=>'operation/new/name' &>: <% $uri %></td>
-<td><input type="text" size="35" name="obvius_name" value="<% $obvius_name %>" tabindex="10"></td>
+<td>
+%if(my $name = $r->param('force_name')) {
+<input type="hidden" name="obvius_name" value="<% $name %>"> <% $name %>
+%} else {
+<input type="text" size="35" name="obvius_name" value="<% $obvius_name %>" tabindex="10">
+%}
+</td>
 </tr>
 
 <& /shared/widgets/doctype, selected => $selected_doctype &>

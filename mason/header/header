@@ -38,9 +38,9 @@ $tabindex=>30
       <td valign="top" nowrap align="center" class="megetlys" height="38">
        <p align="right">
        <img border="0" src="/grafik/admin/spacer.gif" width="2" height="2"><br>
-       <b><a href="<% $prefix %>/admin/"><span class="megetlyslink">Administration</span></a><br>
-       <a href="<% $prefix %>/sitemap/"><span class="megetlyslink">Sitemap</span></a><br>
-       <a href="javascript:OpenWin('http://<% $r->notes('helpserver') %>/<% $sitename %>/general?orig=<% $sitename %>/general');"><span class="megetlyslink">Hjælp</span></a></b>
+       <b><a href="<% $prefix %>/admin/"><span class="megetlyslink"><& SELF:msg, text=>'Administration' &></span></a><br>
+       <a href="<% $prefix %>/sitemap/"><span class="megetlyslink"><& SELF:msg, text=>'Sitemap' &></span></a><br>
+       <a href="javascript:OpenWin('http://<% $r->notes('helpserver') %>/<% $sitename %>/general?orig=<% $sitename %>/general');"><span class="megetlyslink"><& SELF:msg, text=>'Hjælp' &></span></a></b>
        </p>
       </td>
     </tr>
@@ -101,7 +101,7 @@ $tabindex=>30
               ghosted_class=>'normal',
 	      tabindex=>$tabindex,
               accesskey=>($k<10 ? $k : undef),
-	      text=>$m->scomp('SELF:msg', text=>$page->Title) &>
+	      text=>$page->Title &>
           <& divider &>
 % }
 	  <& SELF:link, link=>"javascript:window.document.pageform.obvius_page.value='A';submit_page();", text=>'Alle felter', ghosted=>((defined $obvius_page and $obvius_page eq 'A') or !$obvius->can_create_new_version($doc)), ghosted_class=>'normal', tabindex=>$tabindex, accesskey=>'A', bold=>(defined $obvius_page and $obvius_page eq 'A') &>

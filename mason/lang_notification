@@ -1,0 +1,52 @@
+%# This assumes that $r->notes('english') is true when on an english page
+%if($missing_levels) {
+<div style="border: 2px solid black; padding: 5px;">
+%if($missing_levels > 1) {
+<& SELF:msg, text =>'lang_notification:msg1' &> <& SELF:msg, text=>$missing_type &> <& SELF:msg, text=>'lang_notification:msg2' &>.<br>
+<a href="/admin<% $good_path %>?obvius_op=new&force_name=<% $missing_name %>&force_lang=<% $missing_lang %>"><& SELF:msg, text=>'lang_notification:msg3' &>, <% $good_path . $missing_name %>/</a>
+%} else {
+<& SELF:msg, text=>'lang_notification:msg4' &> <& SELF:msg, text=>$missing_type &> <& SELF:msg, text=>'lang_notification:msg5' &>.<br>
+<a href="/admin<% $good_path %>?obvius_op=new&force_name=<% $missing_name %>&force_lang=<% $missing_lang %>"><& SELF:msg, text=>'lang_notification:msg6' &></a>.
+%}
+</div>
+<br>
+%}
+<%init>
+my $needs_path = 1;
+my $missing_type = '';
+my $missing_type2 = '';
+my $missing_lang = '';
+
+my $check_uri = $uri;
+
+if($uri =~ m#^/[^/]*_en/#) {
+    $missing_type = 'danske';
+    $missing_lang = 'da';
+    $check_uri =~ s#^/([^/]*)_en/#/$1/#;
+} else {
+    $missing_type = 'engelske';
+    $missing_lang = 'en';
+    $check_uri =~ s#^/([^/]*)/#/$1_en/#;
+}
+
+my @check_path = split(/\//, $check_uri);
+shift(@check_path);
+my $missing_levels = scalar(@check_path);
+
+my $parent = $obvius->lookup_document('/');
+my $missing_name ='';
+
+my $good_path = '/';
+
+for(@check_path) {
+    $missing_name = $_;
+    my $next_doc = $obvius->get_doc_by_name_parent($_, $parent->Id);
+    if($next_doc) {
+        $parent = $next_doc;
+        $good_path .= $_ . '/';
+        $missing_levels -= 1;
+    } else {
+        last;
+    }
+}
+</%init>

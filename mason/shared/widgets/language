@@ -1,11 +1,15 @@
 <tr>
 <td><& SELF:msg, text=>'Language' &><& /help, link=>'operation/new/language' &>:</td>
 <td>
+%if(my $lang = $r->param('force_lang')) {
+<input type="hidden" name="obvius_lang" value="<% $lang %>"> <% $long{$lang} %>
+%} else {
 <select name="obvius_lang" tabindex="10">
 % foreach (@langs) {
 <option value="<% $_ %>"<% ($vdoc->Lang eq $_ ? ' selected' : '') %>><& SELF:msg, text=>$long{$_} &></option>
 % }
 </select>
+%}
 </td>
 </tr>
 %
