@@ -87,12 +87,13 @@ sub action {
 		 notexpired=>!$is_admin,
 		 public=>!$is_admin,
 		);
-    if ($args{keyword}) {
-	$kwdocs = $obvius->search(
-				[ 'keyword' ],
-				"keyword LIKE '$args{keyword}' and parent = ". $baseid,
-				%options,
-			       );
+    if (my $kw = $args{keyword}) {
+        $kw =~ s/'/\\'/g;
+        $kwdocs = $obvius->search(
+                                    [ 'keyword' ],
+                                    "keyword LIKE '$kw' and parent = ". $baseid,
+                                    %options,
+                                );
     }
     elsif ($args{category}) {
 	$kwdocs = $obvius->search(
