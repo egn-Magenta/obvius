@@ -181,10 +181,11 @@ sub start_element {
     $self->{OBVIUS_OUTPUT}.='<' . $tagname;
 
     my @out_attrs=();
+    my $add_last=undef;
     foreach my $name (@$attrseq) {
         if ($name eq '/') { # Special case, apparantly HTML::Parser don't know short elements!
-            $self->{OBVIUS_OUTPUT}.=' /';
-            next; # This should/must also be last
+            $add_last=' /';
+            next;
         }
 
         my $value=filter_attribute($tagname, $name, $attr->{$name}, $self->{OBVIUS_FETCH_URL}, $self->{OBVIUS_BASE_URL}, $self->{OBVIUS_PREFIXES});
@@ -193,7 +194,7 @@ sub start_element {
         push @out_attrs, $name . '=' . $delim . $value . $delim;
     }
     $self->{OBVIUS_OUTPUT}.=' ' . (join ' ', @out_attrs) if (scalar(@out_attrs));
-
+    $self->{OBVIUS_OUTPUT}.=$add_last if (defined $add_last);
     $self->{OBVIUS_OUTPUT}.='>';
 }
 
@@ -367,7 +368,9 @@ sub make_request {
         my %formdata;
         foreach my $key ($input->param()) {
             next if ($incoming_variables_prune{$key});
-            $formdata{$key}=$input->param($key);
+            $formdata{lc($key)}=$input->param($key); # XXX lowercasing the key here, because we do
+                                                     #     not have the original "casing" available!
+                                                     #     Potential hard-to-figure-out problem!!
         }
 
         $response=$ua->post($url, \%formdata, %headers);
