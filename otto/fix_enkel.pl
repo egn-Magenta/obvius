@@ -223,7 +223,7 @@ sub process_document {
       my $lang = $obvius_vdoc->Lang;
 
       my $fields = $obvius->get_version_fields($obvius_vdoc, 255);
-      $fields->param('hide_subdocs' => 1);
+      $fields->param('show_subdocs' => 1);
 
 
       $obvius_vdoc = $obvius->create_new_version($obvius_doc, $doctype, $lang, $fields);
