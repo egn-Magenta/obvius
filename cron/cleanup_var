@@ -26,7 +26,7 @@ for d in /var/www/*/; do
     HOSTNAME="$(hostname)"
     echo "#Cleaning up in var under ${site} on ${HOSTNAME}"
 
-    # Handle document_cache
+    # Handle document_cache for Obvius
     if [ -f ${d}var/document_cache.txt ]; then
         first_entry=$(head -n 1 ${d}var/document_cache.txt | awk '{print $2}')
         first_entry="${d}var/document_${first_entry/\//}"
@@ -37,9 +37,13 @@ for d in /var/www/*/; do
         fi
     fi
 
+	#Handle document_cache for MCMS
+    if [ -f ${d}var/document_cache.time ]; then
+		find ${d}var/document_cache/ -type f -atime +${DOCUMENT_CACHE_RETAIN} -and -not -anewer ${d}var/document_cache.time | xargs rm -f
+	fi
 
     # Handle edit_sessions and user_sessions; delete files older than
-    # ${SESSIONS_RETAIN} days:
+    # ${SESSIONS_RETAIN} days. The same for Obvius and MCMS
     if [ -d ${d}var/edit_sessions ]; then
         find ${d}var/edit_sessions/ -type f -atime +${SESSIONS_RETAIN} | xargs rm -f
     fi
