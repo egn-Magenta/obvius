@@ -1,4 +1,5 @@
 %# $Id$
+<& headline &>
 <& $include, output=>$output &>
 <%args>
 $output
