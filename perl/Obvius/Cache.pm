@@ -1,3 +1,31 @@
+########################################################################
+#
+# Cache.pm - Content Manager, database handling
+#
+# Copyright (C) 2003 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                    aparte A/S, Denmark (http://www.aparte.dk/),
+#                    FI, Denmark (http://www.fi.dk/)
+#
+# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
+#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          Peter Makholm (pma@fi.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
 # $Id$
 
 package Obvius::Cache;
@@ -44,7 +72,9 @@ sub add {
     }
     return $obj;
 }
-
+# find ($domain, $key) - Returns a cache entry based on domain and key.
+#                        $key must be a reference. 
+#
 sub find {
     my ($this, $domain, $key) = @_;
 
@@ -81,15 +111,11 @@ Obvius::Cache - Perl extension for blah blah blah
 =head1 SYNOPSIS
 
   use Obvius::Cache;
-  blah blah blah
+  $entry=find($domain, $reftokey);
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Cache, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+Functions for accessing the Obvius cache.
 
 =head2 EXPORT
 
@@ -98,7 +124,8 @@ None by default.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Adam Sjøgren <lt>asjo@magenta-aps.dk<gt>
+Jørgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 
