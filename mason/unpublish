@@ -21,7 +21,7 @@
 my $message="Couldn't hide version";
 if ($obvius->unpublish_version($vdoc)) {
     $message="Version hidden";
-    $m->comp('/dirty_url_in_cache', url=>$uri, unpublish=>1);
+    $m->comp('/dirty_url_in_cache', url=>$uri, vdoc=>$vdoc, unpublish=>1);
 }
 </%perl>
 <& /done, message=>$message &>
