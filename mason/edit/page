@@ -66,9 +66,15 @@
 <& '/edit/fieldtypes/' . $_->{fieldspec}->{FIELDTYPE}->Edit . ':edit',
     fieldspec=>$_->{fieldspec}, fieldtype=>$_->{fieldspec}->{FIELDTYPE},
 	name=>$_->{fieldspec}->Name, session=>$session, %{$_->{options}} &>
+%if(my $width = $_->{options}->{add_hr}) {
+<div><img src="/grafik/admin/1x1.gif" alt="" width="1" height="20"></div>
+<div style="width: <% $width %>px"><img src="/grafik/admin/1x1black.gif" alt="" width="100%" height="1"></div>
+<div><img src="/grafik/admin/1x1.gif" alt="" width="1" height="15"></div>
+%}
 %if($_->{options}->{extra_linebreak}) {
 <div><img src="/grafik/admin/1x1.gif" alt="" width="1" height="20"></div>
 %}
+
 </td>
 %          }
 %      }
