@@ -6,6 +6,9 @@ use warnings;
 use WebObvius::Site::Mason;
 use Obvius::MultiSite;
 
+use Fcntl ':flock';
+
+
 our @ISA = qw( WebObvius::Site::Mason );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -45,12 +48,87 @@ sub obvius_connect {
         $this->{SITEROOTS}->{$siteroot} = $obvius->{ROOTID};
     }
 
+    if($obvius->{SITEROOT}) {
+        $req->notes('siteroot' => $obvius->{SITEROOT})
+    }
 
     $obvius->cache(1);
     $req->register_cleanup(sub { $obvius->cache(0); $obvius->{DB}=undef; 1; } );
 
     $req->pnotes(obvius => $obvius);
     return $obvius;
+}
+
+
+sub save_in_cache {
+    my ($this, $req, $s) = @_;
+
+    my $obvius=$req->notes('obvius');
+
+    my $log;
+    if (defined $obvius) {
+        $log = $obvius->log;
+    } else {
+        $log = Obvius::log();
+    }
+
+    my $id = $req->notes('cache_id');
+    return unless ($id);
+    return unless ($this->{WEBOBVIUS_CACHE_INDEX} and $this->{WEBOBVIUS_CACHE_DIRECTORY});
+
+    my $dir = $req->notes('cache_dir');
+    unless (-d $dir) {
+        my $d;
+        my @dirs = split '/', $dir;
+        if ($dirs[0] eq '') {
+            $dir = '/'; shift @dirs;
+        } else {
+            $dir = ''
+        }
+        while ($d = shift @dirs) {
+            $dir .= $d . '/';
+            unless (-d $dir) {
+                mkdir($dir, 0775) or do{$log->debug("Couldn't make dir: $dir"); return};
+                chmod(0775, $dir);
+            }
+        }
+    }
+
+    my $file = $req->notes('cache_file');
+
+    $log->debug("Cache file name $file");
+    unlink($file);
+
+    my $fh = new Apache::File('>'.$file);
+    if ($fh) {
+        $log->debug("Cache file open ok");
+        print $fh (ref($s) ? $$s : $s);
+        $fh->close;
+
+        my $extra = '';
+        my $qstring = $req->args;
+        if($qstring and $qstring =~ /^size=\d+x\d+$/) {
+            $extra = $qstring;
+        }
+
+        if (! -e $this->{WEBOBVIUS_CACHE_INDEX} . "-off") {
+            # Add to cache-db
+            $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
+            if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
+                if (flock FH, LOCK_EX|LOCK_NB) {
+                    my $siteroot = $req->notes('siteroot') || '';
+                    print $fh $siteroot, $req->uri, $extra, "\t", $req->notes('cache_url'), "\n";
+                    $log->debug(" ADDED TO CACHE: " . $req->uri);
+                } else {
+                    $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
+                }
+                close FH;
+            } else {
+                $log->debug("Couldn't write to WEBOBVIUS_CACHE_INDEX-file ($this->{WEBOBVIUS_CACHE_INDEX})");
+            }
+        }
+    }
+    $log->debug("Cache file done");
 }
 
 
