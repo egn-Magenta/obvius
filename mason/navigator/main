@@ -207,7 +207,8 @@ for(my $path_index = $path_levels - 1; $path_index >= 0;$path_index--) {
     my $path_doc=$path[$path_index];
     my $documents = $obvius->get_docs_by_parent($path_doc->Id);
     $documents = [] unless($documents);
-    for(sort {lc($a->Name) cmp lc($b->Name)} @$documents) {
+    @$documents = sort {lc($a->Name) cmp lc($b->Name)} @$documents;
+    for(@$documents) {
         if($path_index == $path_levels - 1) { # Only first time
             push(@here_docs, $_);
         }
@@ -235,7 +236,7 @@ $showbutton = 0 if($fieldname and $doctypeid and $vdoc->Type != $doctypeid);
 %
 %
 <%def add_list_to_list_recursive>
-%for(sort {uc($a->Name) gt uc($b->Name)} @$path) {
+%for(@$path) {
 %   push(@$list, $_);
 %   if($_->param('subdocs')) {
         <& add_list_to_list_recursive, path=>$_->Subdocs, list=>$list &>
