@@ -15,8 +15,8 @@
                     <td width="100%" align="center" valign="top">
                       <table border="0" cellspacing="0" cellpadding="0" width="100%">
                           <tr>
-                            <td height="100" bgcolor="#cdcdcd">
-                                  <div align="center">Insert top gif here</div>
+                            <td height="80" bgcolor="#ffffff">
+                                  <div align="right" style="border: 1px solid #cdcdcd;"><a href="<% $language eq 'da' ? '/' : /$english_frontpage/%>"><img src="/grafik/logo.jpg" alt="Obvius logo"><img src="/grafik/1x1.gif" width="24" alt=""></a><img src="/grafik/topimage.jpg" width="63%" alt="top image"></div>
                             </td>
                           </tr>
                       </table>
