@@ -150,6 +150,9 @@ elsif ($obvius_op and ($obvius_op eq 'print')) {
 elsif ($obvius_op and ($obvius_op eq 'mcms_code_editor')) {
     $op='/mcms_code_editor';
 }
+elsif ($obvius_op and ($obvius_op eq 'html_code_editor')) {
+    $op='/html_code_editor';
+}
 elsif ($obvius_session) {
     my $admin=$r->pnotes('site');
     $session=$admin->get_session($obvius_session);

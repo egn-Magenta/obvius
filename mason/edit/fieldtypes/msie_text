@@ -148,6 +148,12 @@ function obvius_<% $name %>_load()
     }
 }
 
+function obvius_<% $name %>_replace_html(html_value) {
+    var tmpFrame;
+    tmpFrame = eval("obvius_<% $name %>_editor");
+    tmpFrame.document.body.innerHTML = html_value;
+}
+
 function obvius_<% $name %>_save()
 {
     tmpFrame = eval("obvius_<% $name %>_editor");
@@ -489,4 +495,4 @@ function obvius_<% $name %>_selection_change() {
     obvius_<% $name %>_editor.document.onselectionchange = obvius_<% $name %>_selection_change;
 </script>
 <br><a href="javascript:traverseDom('<% $name %>')">Fix MS Word html</a><br>
-<br><a href="javascript:obvius_<% $name %>_show_html()">Vis HTML</a><br>
+<br><a href="javascript:obvius_<% $name %>_save(); OpenWin('/admin/?obvius_op=html_code_editor&fieldname=<% $name %>', 750, 550)"><& SELF:msg, text=>'Vis/Rediger HTML' &></a><br>

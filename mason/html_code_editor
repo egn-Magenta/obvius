@@ -1,0 +1,35 @@
+<script language="javascript">
+
+function Save() {
+    window.opener.obvius_<% $fieldname %>_replace_html(document.pageform.html_value.value);
+    window.close();
+}
+
+function onLoad() {
+    document.pageform.html_value.value = window.opener.document.pageform.<% $fieldname %>.value;
+}
+
+onload_array[onload_array.length] = onLoad;
+</script>
+
+<table border="0" align="center">
+<tr>
+    <td>
+        <h1><& SELF:msg, text=>'Rediger HTML' &></h1>
+    </td>
+    <td align="right">
+        <input type="button" value="Gem" onclick="Save()">
+        &nbsp;&nbsp;
+        <input type="button" value="Annuller" onclick="window.close()">
+    </td>
+</tr>
+<tr>
+    <td colspan="2">
+        <input type="hidden" name="fieldname" value="<% $fieldname %>">
+        <textarea name="html_value" cols="70" rows="19" wrap="1" style="width: 720px; height: 470"></textarea>
+    </td>
+</tr>
+</table>
+<%args>
+$fieldname
+</%args>
