@@ -244,7 +244,7 @@ sub access_handler ($$) {
     $req->uri($uri) unless ($req->dir_config('AddPrefix')); # I'm unsure about this... but I'm guessing it's okay to put here.
 
     return $this->redirect($req, $req->notes('prefix') . $uri . '/', 'force-external')
-	if ($uri !~ m!/$! and $uri !~ /[.]/ and !$this->param('is_admin')); # ... and we auto-slash 
+	if ($uri !~ m!/$! and $uri !~ /[.]/ and !$this->param('is_admin')); # ... and we auto-slash
                                                                             # any uri without .'s in it
                                                                             # except on admin where it's
                                                                             # handled in Mason ...
@@ -262,6 +262,16 @@ sub access_handler ($$) {
 
     my $doc    =$this->obvius_document($req, $uri);
     return NOT_FOUND unless ($doc);
+
+    if($obvius->config->param('use_public_authentication')) {
+        my $cookies=Apache::Cookie->fetch || {};
+        if(my $cookie = $cookies->{obvius_public_login}) {
+            my $users = $obvius->get_public_users({cookie => $cookie->value});
+            if($users) {
+                $obvius->param('public_user' => $users->[0]);
+            }
+        }
+    }
 
     $req->pnotes('document'=>$doc);
     $req->pnotes('site'    =>$this);

@@ -46,6 +46,7 @@ our @ISA = qw(  Obvius::Data
                 Obvius::VoteSystem
                 Obvius::Comments
                 Obvius::Utils
+                Obvius::Pubauth
                 Exporter
             );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -84,6 +85,7 @@ use Obvius::Tables;
 use Obvius::VoteSystem;
 use Obvius::Comments;
 use Obvius::Utils;
+use Obvius::Pubauth;
 
 
 use Data::Dumper;
