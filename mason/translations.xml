@@ -686,6 +686,10 @@
     <translation lang="en">Move/rename</translation>
     <translation lang="da">Flyt/omdøb</translation>
   </text>
+  <text key="Copy">
+    <translation lang="en">Copy</translation>
+    <translation lang="da">Kopier</translation>
+  </text>
   <text key="Close">
     <translation lang="en">Close</translation>
     <translation lang="da">Luk</translation>
@@ -4098,6 +4102,11 @@ abonnement på samme email-adresse.</translation>
   <text key="Show inline in browser">
     <translation lang="en">Show inline in browser</translation>
     <translation lang="da">Vis i browseren</translation>
+  </text>
+
+  <text key="The content below was fetched from">
+    <translation lang="en">The content below was fetched from</translation>
+    <translation lang="da">Indholdet herunder er hentet fra</translation>
   </text>
 
   <text key="">
