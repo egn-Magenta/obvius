@@ -1,0 +1,9 @@
+%if ($show_title == 1) {
+<h1 class="title"><% $title %></h1>
+%}
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title show_title)]);
+my $title = $vdoc->Title;
+my $show_title = $vdoc->Show_title;
+</%init>
