@@ -6,9 +6,11 @@ package WebObvius::Template::MCMS;
 #
 # MCMS.pm - Template class with Obvius-specific callbacks
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: René Seindal (rene@magenta-aps.dk)
+# Author: René Seindal (rene@magenta-aps.dk),
+#         Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#         Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -433,7 +435,7 @@ sub do_js_image_size_hook {		# RS 20010806 - ej testet
 sub html_make_named_anchor {
     my ($tag, $name, $options) = @_;
 
-    return "<A name=\"$name\"></A>";
+    return "<a name=\"$name\"></a>";
 }
 
 sub ignore {
@@ -494,12 +496,12 @@ sub html_make_link {			# RS 20010806 - ej testet
     }
 
     if (defined $target) {
-	$target = " TARGET=$target";
+	$target = " target=$target";
     } else {
 	$target = '';
     }
 
-    return "<A HREF=\"$link\"$target>$text</A>";
+    return "<a href=\"$link\"$target>$text</a>";
 
 }
 
@@ -547,14 +549,14 @@ sub html_make_image {
 
 	    ($default{width}, $default{height})=($w, $h);
 	    my @attr = map {
-		sprintf('%s="%s"', uc $_, escape_html($default{$_}))
+		sprintf('%s="%s"', lc $_, escape_html($default{$_}))
 	    } sort {
 		$a cmp $b
 	    } grep {
 		defined $default{$_}
 	    } keys %default;
 
-	    return sprintf('<IMG SRC="%s" ' . join(' ', @attr)  . '>', $img, $alt);
+	    return sprintf('<img src="%s" ' . join(' ', @attr)  . '>', $img, $alt);
 	}
     }
 
@@ -620,7 +622,7 @@ sub html_make_image {
 		$attr{align} = undef;
 
 		my @attr = map {
-		    sprintf('%s="%s"', uc $_, escape_html($attr{$_}))
+		    sprintf('%s="%s"', lc $_, escape_html($attr{$_}))
 		} sort {
 		    $a cmp $b
 		} grep {
@@ -628,15 +630,15 @@ sub html_make_image {
 		} keys %attr;
 
 		#print STDERR "DYNAMIC IMAGE WITH TABLE/PICTURETEXT: $img\n";
-		return '<TABLE BORDER="0" ALIGN="' . $align . '" WIDTH="' . $attr{width} . '" CELLPADDING="' . $spacing . '" CELLSPACING="0">' .
-		        '<TR><TD><IMG ' . join(' ', @attr) . '></TD></TR>' .
-		        '<TR><TD><SPAN class="pictext">' . $default{PICTURETEXT} . '</SPAN></TD></TR>' .
-		       '</TABLE>';
+		return '<table border="0" align="' . $align . '" width="' . $attr{width} . '" cellpadding="' . $spacing . '" cellspacing="0">' .
+		        '<tr><td><img ' . join(' ', @attr) . '></td></tr>' .
+		        '<tr><td><span class="pictext">' . $default{PICTURETEXT} . '</span></td></tr>' .
+		       '</table>';
 
 	    } else {
 
 		my @attr = map {
-		    sprintf('%s="%s"', uc $_, escape_html($attr{$_}))
+		    sprintf('%s="%s"', lc $_, escape_html($attr{$_}))
 		} sort {
 		    $a cmp $b
 		} grep {
@@ -644,7 +646,7 @@ sub html_make_image {
 		} keys %attr;
 
 		# print STDERR "DYNAMIC IMAGE $img\n";
-		return '<IMG ' . join(' ', @attr) . '>';
+		return '<img ' . join(' ', @attr) . '>';
 	    }
 	}
     }
@@ -669,28 +671,28 @@ sub html_make_image {
 
 	print STDERR "FALL THRU IMAGE WITH TABLE/PICTURETEXT $img\n";
 	my @attr = map {
-	    sprintf('%s="%s"', uc $_, escape_html($default{$_}))
+	    sprintf('%s="%s"', lc $_, escape_html($default{$_}))
 	} sort {
 	    $a cmp $b
 	} grep {
 	    defined $default{$_}
 	} keys %default;
-	return '<TABLE BORDER="0" ALIGN="' . $align . '" WIDTH="' . ($default{WIDTH} || 1) . '" CELLPADDING="' . $spacing . '" CELLSPACING="0">' .
-	        '<TR><TD>' . sprintf('<IMG SRC="%s" ' . join(' ', @attr)  . '>', $img, $alt) . '</TD></TR>' .
-		'<TR><TD><SPAN CLASS="pictext">' . $picturetext . '</SPAN></TD></TR>' .
-		'</TABLE>';
+	return '<table border="0" align="' . $align . '" width="' . ($default{WIDTH} || 1) . '" cellpadding="' . $spacing . '" cellspacing="0">' .
+	        '<tr><td>' . sprintf('<img src="%s" ' . join(' ', @attr)  . '>', $img, $alt) . '</td></tr>' .
+		'<tr><td><span class="pictext">' . $picturetext . '</span></td></tr>' .
+		'</table>';
 
 
     } else {
 	print STDERR "FALL THRU IMAGE $img\n";
 	my @attr = map {
-	    sprintf('%s="%s"', uc $_, escape_html($default{$_}))
+	    sprintf('%s="%s"', lc $_, escape_html($default{$_}))
 	} sort {
 	    $a cmp $b
 	} grep {
 	    defined $default{$_}
 	} keys %default;
-	return sprintf('<IMG SRC="%s" ' . join(' ', @attr)  . '>', $img, $alt);
+	return sprintf('<img src="%s" ' . join(' ', @attr)  . '>', $img, $alt);
     }
 }
 
@@ -707,6 +709,7 @@ sub text_make_image {
 sub html_make_simple {
     my ($tag, $text) = @_;
 
+    $tag=lc($tag);
     return $text ? "<$tag>$text</$tag>" : '';
 }
 
@@ -719,10 +722,10 @@ sub text_make_simple {
 sub html_make_break {
     my ($tag, $text, $options) = @_;
 
-    return "\n<BR>" unless $text;
+    return "\n<br>" unless $text;
     $text = lc($text);
 
-    return (($text =~ /^(all|left|right)$/i) ? "\n<BR CLEAR=$text>" : "\n<BR>");
+    return (($text =~ /^(all|left|right)$/i) ? "\n<br clear=\"$text\">" : "\n<br>");
 }
 
 sub text_make_break {
@@ -733,11 +736,31 @@ sub text_make_break {
 sub html_make_header {
     my ($tag, $text, $options) = @_;
 
+    $tag=lc($tag);
     return $text ? "\n<$tag>$text</$tag>\n\n" : '';
 }
 
+# add_anchor(anchor, text, tag, options) - adds anchor-name to the
+#     hash anchors on pnotes, and anchor-name and text to the list
+#     anchorslist on pnotes, for later retrieval by
+#     do_make_anchors_hook and do_make_anchors_html_hook. Returns the
+#     name of the added anchor.
+#
+#     add_anchor() is called when an anchor is added or encountered by
+#     the HTML-parser run in create_anchorized_content(), triggered by
+#     the using one of the related hooks, do_htmlanchorize_hook or
+#     do_anchorizehtml_hook.
+#
+#     If the option FORCE is given, anchors with the same name
+#     overwrite eachother (otherwise a number is added to the end of
+#     the anchor). (This is used for anchors that aren't added
+#     automatically, but are specified by the user in the MCMS-codes).
+#
+#     Used internally by the module.
+#
 sub add_anchor {
     my ($req, $anchor, $text, $tag, %options) = @_;
+    $tag=lc($tag);
 
     my $anchors=$req->pnotes('anchors');
     unless ($anchors) { # Make it if it doesn't exist
@@ -769,6 +792,7 @@ sub add_anchor {
 
 sub create_anchor_from_text {
     my ($req, $tag, $text) = @_;
+    $tag=lc($tag);
 
     my $anchor=lc($text);
     my %translit=qw(æ ae ø oe å aa); # Others? General function somewhere?
@@ -783,17 +807,18 @@ sub html_make_header_with_anchor {
 
     my $anchor = create_anchor_from_text($options->{provider}->request, $tag, $text);
 
-    return $text ? "\n<$tag><A NAME=\"$anchor\">$text</A></$tag>\n\n" : '';
+    return $text ? "\n<$tag><a name=\"$anchor\">$text</a></$tag>\n\n" : '';
 }
 
 sub text_make_header {
     my ($tag, $text, $options) = @_;
 
+    $tag=lc($tag);
     return '' unless $text;
 
-    my $uline = ($tag eq 'H1'
+    my $uline = ($tag eq 'h1'
 		 ? '=' x length($text)
-		 : ( $tag eq 'H2'
+		 : ( $tag eq 'h2'
 		    ? '-' x length($text)
 		    : ''
 		   )
@@ -806,9 +831,10 @@ sub text_make_header {
 sub html_make_paragraph {
     my ($tag, $text, $options) = @_;
 
+    $tag=lc($tag);
     return '' unless ($text and $text !~ /^\s*$/);
 
-    my $c = $options->{pclass} ? " CLASS=$options->{pclass}" : '';
+    my $c = $options->{pclass} ? " class=$options->{pclass}" : '';
     $text = "<$tag$c>$text</$tag>\n\n";
     $text =~ s/(.{62}.*?) +/$1\n/g unless ($options->{dont_wrap});
     return $text;
@@ -828,13 +854,13 @@ sub html_make_indent {
 
     return '' unless ($text and $text !~ /^\s*$/);
 
-    my $c = $options->{pclass} ? " CLASS=$options->{pclass}" : '';
+    my $c = $options->{pclass} ? " class=$options->{pclass}" : '';
     if ($tag eq 'BULLET') {
-	$text = "<UL$c COMPACT><LI>$text</LI></UL>\n\n";
+	$text = "<ul$c compact=\"compact\"><li>$text</li></ul>\n\n";
     } elsif ($tag eq 'SQUARE') {
-	$text = "<UL$c TYPE=square COMPACT><LI>$text</LI></UL>\n\n";
+	$text = "<ul$c type=\"square\" compact=\"compact\"><li>$text</li></ul>\n\n";
     } elsif ($tag eq 'CIRCLE') {
-	$text = "<UL$c TYPE=circle COMPACT><LI>$text</LI></UL>\n\n";
+	$text = "<ul$c type=\"circle\" compact=\"compact\"><li>$text</li></ul>\n\n";
     } elsif ($tag eq 'EXDENT' or $tag eq 'HANG') {
 	my $hang;
 	if ($text =~ /^([^:]+)\s*:\s/s) {
@@ -843,7 +869,7 @@ sub html_make_indent {
 	} else {
 	    ($hang, $text) = split(/\s+/, $text, 2);
 	}
-	$text = "<DL$c><DT>$hang<DD>$text</DL>\n\n";
+	$text = "<dl$c><dt>$hang<dd>$text</dl>\n\n";
     } else {
 	my $type;
 	my $start;
@@ -862,9 +888,9 @@ sub html_make_indent {
 	    $text =~ s/^.\.\s+//;
 	}
 	if (defined $start and defined $type) {
-	    $text = "<OL$c TYPE=$type START=$start COMPACT><LI>$text</LI></OL>\n\n";
+	    $text = "<ol$c type=\"$type\" start=\"$start\" compact=\"compact\"><li>$text</li></ol>\n\n";
 	} else {
-	    $text = "<DL$c><DT><DD>$text</DL>\n\n";
+	    $text = "<dl$c><dt><dd>$text</dl>\n\n";
 	}
     }
     $text =~ s/(.{62}.*?) +/$1\n/g;
@@ -912,13 +938,13 @@ sub html_make_iframe {
     $default{WIDTH}=$width if $width;
     $default{HEIGHT}=$height if $height;
 
-    my $text='<IFRAME SRC="' . $src . '"';
-    map { $text.=" $_=\"$default{$_}\"" } keys %default;
+    my $text='<iframe src="' . $src . '"';
+    map { $text.=" " . lc($_) . "=\"$default{$_}\"" } keys %default;
     $text.=">";
     # This, or something similar, could be used for browsers that do not grok <IFRAME>:
     # $text.='<A HREF="javascript:OpenWin(\'' . $src . '\');">IFRAME</A>';
-    $text.='<A HREF="' . $src . '">[LINK]</A>';
-    $text.="</IFRAME>\n\n";
+    $text.='<a href="' . $src . '">[LINK]</a>';
+    $text.="</iframe>\n\n";
 
     return $text;
 }
@@ -1227,7 +1253,7 @@ sub add_anchor_to_html_end {
 
     if( $tagname eq "h2" ) {
 	if( ($self->{'NEW_ANCHOR'}) ) {
-	    $text="<a NAME=\"$self->{'NEW_ANCHOR'}\">$self->{'ANCHOR_TEXT'}</a>" . $text;
+	    $text="<a name=\"$self->{'NEW_ANCHOR'}\">$self->{'ANCHOR_TEXT'}</a>" . $text;
 	    delete $self->{'NEW_ANCHOR'};
 	}
 	delete $self->{'IN_H2'};
@@ -1519,79 +1545,30 @@ sub text_make_insert_html_doc {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Magenta::NormalMgr::Template - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Magenta::NormalMgr::Template;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Magenta::NormalMgr::Template, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
-
-A. U. Thor, a.u.thor@a.galaxy.far.far.away
-
-=head1 SEE ALSO
-
-perl(1).
-
-=cut
-
-
-
-
-
-
-
-
-
-
-
-1;
-__END__
-# Below is stub documentation for your module. You better edit it!
-
-=head1 NAME
-
-WebObvius::Template::MCMS - Perl extension for blah blah blah
+WebObvius::Template::MCMS - Methods that convert MCMS-encoded text to
+                            HTML and plain text
 
 =head1 SYNOPSIS
 
   use WebObvius::Template::MCMS;
-  blah blah blah
+
+  # Used internally:
+  $newanchor=add_anchor($req, $anchor, $text, $tag, OPTION=>'value', ...);
 
 =head1 DESCRIPTION
-
-Stub documentation for WebObvius::Template::MCMS, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
 
 =head2 EXPORT
 
 None by default.
 
+=head1 AUTHORS
 
-=head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+René Seindal,
+Jørgen Ulrik Balslev Krag,
+Adam Sjøgren.
 
 =head1 SEE ALSO
 
