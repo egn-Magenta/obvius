@@ -1,0 +1,16 @@
+<%args>
+$content_type=>'text/html'
+$location=>$prefix . $uri . '/'
+$http_status=>301
+</%args>
+%
+<%init>
+$r->notes('http_return_code'=>$http_status); # Pass back to where generate_subsite is called.
+
+$m->clear_buffer;
+$r->method('GET');
+$r->headers_in->unset('Content-length');
+$r->content_type($content_type);
+$r->header_out('Location'=>$location);
+$m->abort($http_status);
+</%init>
