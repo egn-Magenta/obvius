@@ -76,6 +76,8 @@ sub new {
     return bless \%self, $class;
 }
 
+# clear () - deletes all parameters of the object
+#
 sub clear {
     my ($this) = @_;
 
@@ -244,13 +246,16 @@ Obvius::Data - Perl extension for blah blah blah
 
   use Obvius::Data;
 
+  # Usages of new:
   %hash = {
     param1 => value1,
     param2 => value2,
   };
   my $obj = Obvius::Data->new(\%hash);
-
   my $obj = Obvius::Data->new( param1 => value1, param2 => value2 );
+
+  # Usage of clear:
+  $obj->clear();
 
 =head1 DESCRIPTION
 
