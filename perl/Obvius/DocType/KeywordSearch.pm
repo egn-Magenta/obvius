@@ -59,7 +59,7 @@ sub action {
     if ($args{keyword}) {
 	$kwdocs = $obvius->search(
 				[ 'keyword' ],
-				"keyword = '$args{keyword}' and parent = ". $baseid,
+				"keyword LIKE '$args{keyword}' and parent = ". $baseid,
 				%options,
 			       );
     }
