@@ -48,7 +48,19 @@ use Apache::Constants qw(:common :methods :response);
 use Apache::File;
 
 use HTML::Mason;
-use HTML::Mason::ApacheHandler (args_method=>'mod_perl');
+# Support Mason before version 1.10 and after simultaneously:
+my $new_mason;
+BEGIN {
+    # The way to specify args_method was changed from version 1.10 and onwards:
+    if ($HTML::Mason::VERSION < 1.10) {
+        eval "use HTML::Mason::ApacheHandler (args_method=>'mod_perl');";
+        $new_mason=0;
+    }
+    else {
+        eval "use HTML::Mason::ApacheHandler;";
+        $new_mason=1;
+    }
+}
 
 use Digest::MD5 qw(md5_hex);
 
@@ -60,43 +72,69 @@ sub new {
 
     my $new = $class->SUPER::new(%options);
 
-    my $httpd_user = scalar(getpwnam 'www-data');
-    my $httpd_group = scalar(getgrnam 'www-data');
-
     my $basedir=$options{base};
-    $new->{parser}=new HTML::Mason::Parser(
-					   in_package=>$class,
-                       # XXX have both $mcms and $obvius here!
-					   allow_globals=>[qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
-					  );
+
+    if (!$new_mason) {
+        $new->{parser}=new HTML::Mason::Parser(
+                                               in_package=>$class,
+                                               # XXX have both $mcms and $obvius here!
+                                               allow_globals=>[qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
+                                              );
+    }
 
     my %interp_conf=(
-		     parser=>$new->{parser},
 		     comp_root=>$options{comp_root},
 		     data_dir=>"$basedir/var/$options{site}/",
-		     static_file_root=>"$basedir/docs",
-		     out_mode=>'batch',
 		    );
+
+    if ($new_mason) {
+        $interp_conf{autoflush}=0;
+    } else {
+        $interp_conf{parser}=$new->{parser};
+        $interp_conf{static_file_root}="$basedir/docs";
+        $interp_conf{out_mode}='batch';
+    }
+
 
     if (defined $options{out_method}) {
 	$interp_conf{out_method}=$options{out_method};
 	$new->param('SITE_SCALAR_REF'=>$options{out_method});
     }
-    $new->{interp}=new HTML::Mason::Interp(%interp_conf);
+
+    if (!$new_mason) {
+        # Interp was a Mason<1.10 thing. In later Masonae all options
+        # are passed to ApacheHandler instead.
+        $new->{interp}=new HTML::Mason::Interp(%interp_conf);
+    }
 
     # If $class ends in ::Common or ::Public, set auto_send_headers to
     # false (we still want headers sent automatically in admin,
     # because less of the handler() is used there (and more is handled
     # in Mason in admin):
-    $new->{handler}=new HTML::Mason::ApacheHandler(
-						   interp=>$new->{interp},
-						   apache_status_title=>'HTML::Mason: ' . $class,
-#						   error_mode=> $options{debug} ? 'html' : 'fatal',
-						   decline_dirs=>0,
-                                                   auto_send_headers=>(scalar($class)=~/::(Common|Public)$/) ? 0 : 1,
-						  );
+    my %apachehandler_options=(
+                               apache_status_title=>'HTML::Mason: ' . $class,
+                               # error_mode=> $options{debug} ? 'html' : 'fatal',
+                               decline_dirs=>0,
+                               auto_send_headers=>(scalar($class)=~/::(Common|Public)$/) ? 0 : 1,
+                              );
 
-    chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
+    if ($new_mason) {
+        map { $apachehandler_options{$_}=$interp_conf{$_} } keys %interp_conf;
+        $apachehandler_options{allow_globals}=[qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)];
+        $apachehandler_options{args_method}='mod_perl';
+    }
+    else {
+        $apachehandler_options{interp}=$new->{interp};
+    }
+
+    $new->{handler}=new HTML::Mason::ApacheHandler(%apachehandler_options);
+
+    if (!$new_mason) {
+        # In Mason<1.10 this has to be done "manually":
+        my $httpd_user = scalar(getpwnam 'www-data');
+        my $httpd_group = scalar(getgrnam 'www-data');
+        chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
+    }
 
     $new->{is_admin}=$options{is_admin};
 
@@ -507,7 +545,8 @@ sub expand_output {
     # Måske lidt a la dette:
 
     $req->notes('is_admin'=>$output->param('IS_ADMIN')) if ($output->param('IS_ADMIN'));
-    $req->filename($this->{interp}->{comp_root}->[0]->[1] . "/switch");
+    my $filename=$site->param('comp_root')->[0]->[1] . '/switch'; # Grab the docroot from the setup.pl
+    $req->filename($filename);
     $req->pnotes('OBVIUS_OUTPUT'=>$output);
 
     my $status = $this->{handler}->handle_request($req);
@@ -543,6 +582,9 @@ WebObvius::Site::Mason - use Mason as the template system for a site.
 
 Connects WebObvius with Mason, so Mason can be used as the template
 system for an Obvius-site.
+
+Supports Mason before version 1.10 and after - tested on 1.04 (before,
+Debian woody) and 1.26 (after, Debian sarge).
 
 =head1 AUTHOR
 
