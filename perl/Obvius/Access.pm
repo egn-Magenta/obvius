@@ -226,6 +226,12 @@ sub can_delete_document {
 	   );
 }
 
+sub can_delete_single_version {
+    my ($this, $doc) = @_;
+
+    return $this->user_has_capabilities($doc, qw(delete));
+}
+
 sub can_rename_document {
     my ($this, $doc) = @_;
 

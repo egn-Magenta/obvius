@@ -133,12 +133,44 @@ sub db_delete_versions {
 
     $this->tracer($docid||'NULL') if ($this->{DEBUG});
 
-    $this->{LOG}->info("====> Delete versionss (docid $docid) ...");
+    $this->{LOG}->info("====> Delete versions (docid $docid) ...");
 
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
 					     '!Table'      => 'versions',
 					    });
     $set->Delete({docid=>$docid});
+    $set->Disconnect;
+
+    return;
+}
+
+sub db_delete_single_version {
+    my ($this, $docid, $version, $lang) = @_;
+
+    $this->tracer($docid||'NULL', $version||'NULL', $lang||'NULL') if ($this->{DEBUG});
+
+    $this->{LOG}->info("====> Delete single version (docid $docid, version $version, lang $lang) ...");
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'versions',
+                                            });
+    $set->Delete({docid=>$docid, version=>$version, lang=>$lang});
+    $set->Disconnect;
+
+    return;
+}
+
+sub db_delete_single_version_vfields {
+    my ($this, $docid, $version) = @_;
+
+    $this->tracer($docid||'NULL', $version||'NULL') if ($this->{DEBUG});
+
+    $this->{LOG}->info("====> Delete single version vfields (docid $docid, version $version) ...");
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'vfields',
+                                            });
+    $set->Delete({docid=>$docid, version=>$version});
     $set->Disconnect;
 
     return;

@@ -1903,6 +1903,62 @@ sub unpublish_version {
 
 
 ########################################################################
+#
+#                       Deleting a single version
+#
+########################################################################
+
+sub delete_single_version {
+    my ($this, $vdoc, $errorref) = @_;
+
+    my $doc = $this->get_doc_by_id($vdoc->DocId);
+
+    unless($this->can_delete_single_version($doc)) {
+        $$errorref = "User $this->{USER} does not have access to delete versions" if($errorref);
+        return undef;
+    }
+
+    my $public_version = $this->get_public_version($doc);
+    if($public_version) {
+        if($public_version->Version eq $vdoc->Version) {
+            $$errorref = "Cannot delete public versions" if($errorref);
+            return undef;
+        }
+    } else {
+        my $latest_version = $this->get_latest_version($doc);
+        if($latest_version and $latest_version->Version eq $vdoc->Version) {
+            $$errorref = "Cannot delete latest version when there is no public version" if($errorref);
+            return undef;
+        }
+    }
+
+
+    $this->db_begin;
+    eval {
+        $this->{LOG}->info("====> Deleting single version fields ... delete from vfields");
+        $this->db_delete_single_version_vfields($vdoc->DocId, $vdoc->Version);
+        $this->{LOG}->info("====> Deleting single version ... delete from versions");
+        $this->db_delete_single_version($vdoc->DocId, $vdoc->Version, $vdoc->Lang);
+
+        $this->{LOG}->info("====> Deleting single version ... COMMIT");
+        $this->db_commit;
+    };
+
+    if ($@) {			# handle error
+        $this->{DB_Error} = $@;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Deleting single version ... failed ($@)");
+        return undef;
+    }
+
+    undef $this->{DB_Error};
+    $this->{LOG}->info("====> Deleting single version ... done");
+    return 1;
+}
+
+
+
+########################################################################
 ########################################################################
 #
 #	Currently unused code.
