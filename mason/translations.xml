@@ -1947,13 +1947,7 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Størrelse</translation>
   </text>
 
-
-  <text key="Document type">
-    <translation lang="en">Document type</translation>
-    <translation lang="da">Dokumenttype</translation>
-  </text>
-
-
+  
   <text key="ComboSearch">
     <translation lang="en">ComboSearch</translation>
     <translation lang="da">Global søgning</translation>
@@ -2114,8 +2108,8 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="Change documenttype">
-    <translation lang="en">Documenttype</translation>
-    <translation lang="da">Dokumenttype</translation>
+    <translation lang="en">Change document type</translation>
+    <translation lang="da">Skift dokumenttype</translation>
   </text>
 
   <text key="New language">
@@ -2562,221 +2556,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Dokument omdøbt/flyttet</translation>
   </text>
 
-  <text key="Expert">
-    <translation lang="en">Expert</translation>
-    <translation lang="da">Ekspert</translation>
-  </text>
-
-  <text key="Lecture">
-    <translation lang="en">Lecture</translation>
-    <translation lang="da">Foredrag</translation>
-  </text>
-
-  <text key="Road">
-    <translation lang="en">Road</translation>
-    <translation lang="da">Vej</translation>
-  </text>
-
-  <text key="Zipcode">
-    <translation lang="en">Zipcode</translation>
-    <translation lang="da">Postnummer</translation>
-  </text>
-
-  <text key="Town">
-    <translation lang="en">Town</translation>
-    <translation lang="da">By</translation>
-  </text>
-
-  <text key="Phone">
-    <translation lang="en">Phone</translation>
-    <translation lang="da">Telefon</translation>
-  </text>
-
-  <text key="Photo">
-    <translation lang="en">Photo</translation>
-    <translation lang="da">Billede</translation>
-  </text>
-
-  <text key="Personal data">
-    <translation lang="en">Personal data</translation>
-    <translation lang="da">Person data</translation>
-  </text>
-
-  <text key="Areas of expertise">
-    <translation lang="en">Areas of expertise</translation>
-    <translation lang="da">Ekspertise</translation>
-  </text>
-
-  <text key="Research area">
-    <translation lang="en">Research area</translation>
-    <translation lang="da">Forskningsområde</translation>
-  </text>
-
-  <text key="Research related links">
-    <translation lang="en">Research related links</translation>
-    <translation lang="da">Relaterede links</translation>
-  </text>
-
-  <text key="Ask the experts">
-    <translation lang="en">Ask BioTIK</translation>
-    <translation lang="da">Spørg BioTIK</translation>
-  </text>
-
-  <text key="Lectures database">
-    <translation lang="en">Lectures database</translation>
-    <translation lang="da">Foredragsdatabase</translation>
-  </text>
-
-  <text key="Expertise, science">
-    <translation lang="en">Expertise, science</translation>
-    <translation lang="da">Ekspertise, naturvidenskab</translation>
-  </text>
-
-  <text key="Other (science)">
-    <translation lang="en">Other (science)</translation>
-    <translation lang="da">Andet (naturvidenskab)</translation>
-  </text>
-
-  <text key="Expertise, law">
-    <translation lang="en">Expertise, law</translation>
-    <translation lang="da">Ekspertise, jura</translation>
-  </text>
-
-  <text key="Other (law)">
-    <translation lang="en">Other (law)</translation>
-    <translation lang="da">Andet (jura)</translation>
-  </text>
-
-  <text key="Expertise, ethics and philosophy">
-    <translation lang="en">Expertise, ethics and philosophy</translation>
-    <translation lang="da">Ekspertise, etik og filosofi</translation>
-  </text>
-
-  <text key="Other (ethics and philosophy)">
-    <translation lang="en">Other (ethics and philosophy)</translation>
-    <translation lang="da">Andet (etik og filosofi)</translation>
-  </text>
-
-  <text key="Sign up">
-    <translation lang="en">Sign up</translation>
-    <translation lang="da">Tilmelding</translation>
-  </text>
-
-  <text key="Expert database">
-    <translation lang="en">Expert database</translation>
-    <translation lang="da">Ekspert database</translation>
-  </text>
-
-  <text key="Level of lecture">
-    <translation lang="en">Level of lecture</translation>
-    <translation lang="da">Hvem er målgruppen for foredraget? [sæt evt. flere krydser]</translation>
-  </text>
-
-  <text key="Part of country">
-    <translation lang="en">Part of country</translation>
-    <translation lang="da">Hvor vil du holde dit foredrag [sæt evt. flere krydser]</translation>
-  </text>
-
-  <text key="From">
-    <translation lang="en">From</translation>
-    <translation lang="da">Fra</translation>
-  </text>
-
-  <text key="Subject">
-    <translation lang="en">Subject</translation>
-    <translation lang="da">Emne</translation>
-  </text>
-
-  <text key="Profile 1">
-    <translation lang="en">Profile 1</translation>
-    <translation lang="da">Profil 1</translation>
-  </text>
-
-  <text key="Profile 1 name">
-    <translation lang="en">Name of profile 1</translation>
-    <translation lang="da">Navn på profil 1</translation>
-  </text>
-
-  <text key="Profile 1 text">
-    <translation lang="en">Text of profile 1</translation>
-    <translation lang="da">Profil 1 tekst</translation>
-  </text>
-
-  <text key="Profile 1 link 1">
-    <translation lang="en">Profile 1 link 1</translation>
-    <translation lang="da">Profil 1 link 1</translation>
-  </text>
-
-  <text key="Profile 1 link 2">
-    <translation lang="en">Profile 1 link 2</translation>
-    <translation lang="da">Profil 1 link 2</translation>
-  </text>
-
-  <text key="Profile 1 link 3">
-    <translation lang="en">Profile 1 link 3</translation>
-    <translation lang="da">Profil 1 link 3</translation>
-  </text>
-
-  <text key="Profile 2">
-    <translation lang="en">Profile 2</translation>
-    <translation lang="da">Profil 2</translation>
-  </text>
-
-  <text key="Profile 2 name">
-    <translation lang="en">Name of profile 2</translation>
-    <translation lang="da">Navn på profil 2</translation>
-  </text>
-
-  <text key="Profile 2 text">
-    <translation lang="en">Text of profile 2</translation>
-    <translation lang="da">Profil 2 tekst</translation>
-  </text>
-
-  <text key="Profile 2 link 1">
-    <translation lang="en">Profile 2 link 1</translation>
-    <translation lang="da">Profil 2 link 1</translation>
-  </text>
-
-  <text key="Profile 2 link 2">
-    <translation lang="en">Profile 2 link 2</translation>
-    <translation lang="da">Profil 2 link 2</translation>
-  </text>
-
-  <text key="Profile 2 link 3">
-    <translation lang="en">Profile 2 link 3</translation>
-    <translation lang="da">Profil 2 link 3</translation>
-  </text>
-
-  <text key="Profile 3">
-    <translation lang="en">Profile 3</translation>
-    <translation lang="da">Profil 3</translation>
-  </text>
-
-  <text key="Profile 3 name">
-    <translation lang="en">Name of profile 3</translation>
-    <translation lang="da">Navn på profil 3</translation>
-  </text>
-
-  <text key="Profile 3 text">
-    <translation lang="en">Text of profile 3</translation>
-    <translation lang="da">Profil 3 tekst</translation>
-  </text>
-
-  <text key="Profile 3 link 1">
-    <translation lang="en">Profile 3 link 1</translation>
-    <translation lang="da">Profil 3 link 1</translation>
-  </text>
-
-  <text key="Profile 3 link 2">
-    <translation lang="en">Profile 3 link 2</translation>
-    <translation lang="da">Profil 3 link 2</translation>
-  </text>
-
-  <text key="Profile 3 link 3">
-    <translation lang="en">Profile 3 link 3</translation>
-    <translation lang="da">Profil 3 link 3</translation>
-  </text>
-
   <text key="Document deleted">
     <translation lang="en">Document deleted</translation>
     <translation lang="da">Dokument slettet</translation>
@@ -2787,105 +2566,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Opret dokument</translation>
   </text>
 
-  <text key="TestAfVaskemaskinerOgToerretumblere">
-    <translation lang="en">Test: Washers and dryers</translation>
-    <translation lang="da">Test: Vaskemaskiner og tørretumblere</translation>
-  </text>
-
-  <text key="TestRapport">
-    <translation lang="en">Test: Report</translation>
-    <translation lang="da">Test: Rapport</translation>
-  </text>
-
-  <text key="TestAfOpvaskemaskiner">
-    <translation lang="en">Test: Dishwashers</translation>
-    <translation lang="da">Test: Opvaskemaskiner</translation>
-  </text>
-
-  <text key="TestAfKoelOgFrys">
-    <translation lang="en">Test: Refridgerators</translation>
-    <translation lang="da">Test: Køle/Frys</translation>
-  </text>
-
-  <text key="TestAfKemi">
-    <translation lang="en">Test: Washing/cleaning products</translation>
-    <translation lang="da">Test: Kemi</translation>
-  </text>
-
-  <text key="TestAfKravlegaarde">
-    <translation lang="en">Test: Kravlegårde</translation>
-    <translation lang="da">Test: Kravlegårde</translation>
-  </text>
-
-  <text key="TestAfVugger">
-    <translation lang="en">Test: Cradles</translation>
-    <translation lang="da">Test: Vugger</translation>
-  </text>
-
-  <text key="TestAfWeekendBarnesenge">
-    <translation lang="en">Test: Weekend childbeds</translation>
-    <translation lang="da">Test: Weekend-barnesenge</translation>
-  </text>
-
-  <text key="TestAfMobiltelefoner">
-    <translation lang='en'>Test: Mobile phones</translation>
-    <translation lang='da'>Test: Mobiltelefoner</translation>
-  </text>
-
-  <text key="TestAfEnergidrikke">
-    <translation lang="en">Test: Energy drinks</translation>
-    <translation lang="da">Test: Energidrikke</translation>
-  </text>
-
-  <text key="TestAfSutteflasker">
-    <translation lang="en">Test: Baby Bottles</translation>
-    <translation lang="da">Test: Sutteflasker</translation>
-  </text>
-
-  <text key="TestAfPersonvaegte">
-    <translation lang="en">Test: Scales</translation>
-    <translation lang="da">Test: Personvægte</translation>
-  </text>
-
-  <text key="TestAfStroempebukser">
-    <translation lang="en">Test: Tights</translation>
-    <translation lang="da">Test: Strømpebukser</translation>
-  </text>
-
-  <text key="TestAfCamcorders">
-    <translation lang="en">Test: Camcorders</translation>
-    <translation lang='da'>Test: Videokameraer</translation>
-  </text>
-
-  <text key="TestAfTV">
-    <translation lang="en">Test: TV</translation>
-    <translation lang='da'>Test: Fjernsyn</translation>
-  </text>
-
-  <text key="TestAfHaandopvaskemidler">
-    <translation lang="en">Test: Dish washing liquid</translation> 
-    <translation lang='da'>Test: Håndopvaskemidler</translation>
-  </text>
-
-  <text key="TestAfMikroboelgeovne">
-    <translation lang="en">Test: Microwave ovens</translation> 
-    <translation lang='da'>Test: Mikrobølgeovne</translation>
-  </text>
-
-  <text key="TestAfFoodprocessorer">
-    <translation lang="en">Test: Food processors</translation> 
-    <translation lang='da'>Test: Foodprocessorer</translation>
-  </text>
-
-  <text key="TestAfSmykker">
-    <translation lang="en">Test: Jewelry</translation> 
-    <translation lang='da'>Test: Smykker</translation>
-  </text>
-  
-  <text key="TestAfAebleskiver">
-    <translation lang="en">Test: "Æbleskiver"</translation> 
-    <translation lang='da'>Test: Æbleskiver</translation>
-  </text>
   
   <text key="Navigate">
     <translation lang="en">Navigate</translation>
@@ -3062,149 +2742,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Intet</translation>
   </text>
 
-  <text key="EtikSubthemeIkkeDiskrimination">
-    <translation lang="en">EtikSubthemeIkkeDiskrimination</translation>
-    <translation lang="da">Etik: Ikke diskrimination</translation>
-  </text>
-
-  <text key="EtikSubthemeArbejdsMiljo">
-    <translation lang="en">EtikSubthemeArbejdsMiljo</translation>
-    <translation lang="da">Etik: Arbejdsmiljø</translation>
-  </text>
-
-  <text key="EtikSubthemeOrganisationsFrihed">
-    <translation lang="en">EtikSubthemeOrganisationsFrihed</translation>
-    <translation lang="da">Etik: Organisationsfrihed</translation>
-  </text>
-
-  <text key="EtikSubthemeBorneArbejde">
-    <translation lang="en">EtikSubthemeBorneArbejde</translation>
-    <translation lang="da">Etik: Børnearbejde</translation>
-  </text>
-
-  <text key="EtikSubthemeTvangsArbejde">
-    <translation lang="en">EtikSubthemeTvangsArbejde</translation>
-    <translation lang="da">Etik: Tvangsarbejde</translation>
-  </text>
-
-  <text key="EtikSubthemeArbejdsTagerRettigheder">
-    <translation lang="en">EtikSubthemeArbejdsTagerRettigheder</translation>
-    <translation lang="da">Etik: Arbejdstagerrettigheder</translation>
-  </text>
-
-  <text key="EtikSubthemePersonOplysninger">
-    <translation lang="en">EtikSubthemePersonOplysninger</translation>
-    <translation lang="da">Etik: Personoplysninger</translation>
-  </text>
-
-  <text key="EtikSubthemePersonOplysninger">
-    <translation lang="en">EtikSubthemePersonOplysninger</translation>
-    <translation lang="da">Etik: Personoplysninger</translation>
-  </text>
-
-  <text key="EtikSubthemeInstallationsVejledninger">
-    <translation lang="en">EtikSubthemeInstallationsVejledninger</translation>
-    <translation lang="da">Etik: Installationsvejledninger</translation>
-  </text>
-
-  <text key="EtikSubthemeOpbevaring">
-    <translation lang="en">EtikSubthemeOpbevaring</translation>
-    <translation lang="da">Etik: Opbevaring</translation>
-  </text>
-
-  <text key="EtikSubthemeKvalitet">
-    <translation lang="en">EtikSubthemeKvalitet</translation>
-    <translation lang="da">Etik: Kvalitet</translation>
-  </text>
-
-  <text key="EtikSubthemeObjektivInformation">
-    <translation lang="en">EtikSubthemeObjektivInformation</translation>
-    <translation lang="da">Etik: Objektiv information</translation>
-  </text>
-
-  <text key="EtikSubthemePersonSikkerhed">
-    <translation lang="en">EtikSubthemePersonSikkerhed</translation>
-    <translation lang="da">Etik: Personsikkerhed</translation>
-  </text>
-
-  <text key="EtikSubthemeVareDeklarationer">
-    <translation lang="en">EtikSubthemeVareDeklarationer</translation>
-    <translation lang="da">Etik: Varedeklarationer</translation>
-  </text>
-
- <text key="EtikSubthemeForsigtighedsPrincip">
-    <translation lang="en">EtikSubthemeForsigtighedsPrincip</translation>
-    <translation lang="da">Etik: Forsigtighedsprincip</translation>
-  </text>
-
-  <text key="EtikSubthemeProduktNytten">
-    <translation lang="en">EtikSubthemeProduktNytten</translation>
-    <translation lang="da">Etik: Produktnytten</translation>
-  </text>
-
-  <text key="EtikSubthemeBrevHemmeligheden">
-    <translation lang="en">EtikSubthemeBrevHemmeligheden</translation>
-    <translation lang="da">Etik: Brevhemmeligheden</translation>
-  </text>
-
-  <text key="EtikSubthemeBeslutningsProcesser">
-    <translation lang="en">EtikSubthemeBeslutningsProcesser</translation>
-    <translation lang="da">Etik: Beslutningsprocesser</translation>
-  </text>
-
-  <text key="EtikSubthemeKokkenHygiejne">
-    <translation lang="en">EtikSubthemeKokkenHygiejne</translation>
-    <translation lang="da">Etik: Køkkenhygiejne</translation>
-  </text>
-
-  <text key="EtikCompany">
-    <translation lang="en">EtikCompany</translation>
-    <translation lang="da">Etik: Virksomhed</translation>
-  </text>
-
-  <text key="EtikEntry">
-    <translation lang="en">EtikEntry</translation>
-    <translation lang="da">Etik: Indtastning</translation>
-  </text>
-
   <text key="Questions">
     <translation lang="en">Questions</translation>
     <translation lang="da">Spørgsmål</translation>
-  </text>
-
-  <text key="EkspertseminarForside">
-    <translation lang="en">Phorumdebate Frontpage</translation>
-    <translation lang="da">Phorumdebat Forside</translation>
-  </text>
-
-  <text key="Ekspertseminar">
-    <translation lang="en">Phorumdebate</translation>
-    <translation lang="da">Phorumdebat</translation>
-  </text>
-
-  <text key="MyndighedshoeringForside">
-    <translation lang="en">Forløbsforside</translation>
-    <translation lang="da">Forløbsforside</translation>
-  </text>
-
-  <text key="MyndighedshoeringSag">
-    <translation lang="en">Forløbssag</translation>
-    <translation lang="da">Forløbssag</translation>
-  </text>
-
-  <text key="MyndighedshoeringPunkt">
-    <translation lang="en">Forløbspunkt</translation>
-    <translation lang="da">Forløbspunkt</translation>
-  </text>
-
-  <text key="FT_Dokument">
-    <translation lang="en">FT: Dokument</translation>
-    <translation lang="da">FT: Dokument</translation>
-  </text>
-
-  <text key="FT_Sagsforloeb">
-    <translation lang="en">FT: Sagsforløb</translation>
-    <translation lang="da">FT: Sagsforløb</translation>
   </text>
 
   <text key="The document already has">
@@ -3272,11 +2812,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Der opstod en fejl</translation>
   </text>
 
-  <text key="Andre ekspertiseområde">
-    <translation lang="en">Other field of expertise</translation>
-    <translation lang="da">Andre ekspertiseområder</translation>
-  </text>
-
   <text key="Andet">
     <translation lang="en">Other</translation>
     <translation lang="da">Andet   </translation>
@@ -3302,229 +2837,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Areal </translation>
   </text>
 
-  <text key="Article 1 teaser">
-    <translation lang="en">Article 1 - teaser</translation>
-    <translation lang="da">Artikel 1 - teaser</translation>
-  </text>
-
-  <text key="Article 1 text">
-    <translation lang="en">Article 1 - text</translation>
-    <translation lang="da">Artikel 1 - tekst</translation>
-  </text>
-
-  <text key="Article 1 title">
-    <translation lang="en">Article 1 - title</translation>
-    <translation lang="da">Artikel 1 - titel</translation>
-  </text>
-
-  <text key="Article 1">
-    <translation lang="en">Article 1</translation>
-    <translation lang="da">Artikel 1</translation>
-  </text>
-
-  <text key="Article 2">
-    <translation lang="en">Article 2</translation>
-    <translation lang="da">Artikel 2</translation>
-  </text>
-
-  <text key="Article 2 teaser">
-    <translation lang="en">Article 2 - teaser</translation>
-    <translation lang="da">Artikel 2 - teaser</translation>
-  </text>
-
-  <text key="Article 2 text">
-    <translation lang="en">Article 2 - text</translation>
-    <translation lang="da">Artikel 2 - tekst</translation>
-  </text>
-
-  <text key="Article 2 title">
-    <translation lang="en">Article 2 - title</translation>
-    <translation lang="da">Artikel 2 - titel</translation>
-  </text>
-
-  <text key="Article 2">
-    <translation lang="en">Article 2</translation>
-    <translation lang="da">Artikel 2</translation>
-  </text>
-
-  <text key="Article 3">
-    <translation lang="en">Article 3</translation>
-    <translation lang="da">Artikel 3</translation>
-  </text>
-
-  <text key="Article 3 teaser">
-    <translation lang="en">Article 3 - teaser</translation>
-    <translation lang="da">Artikel 3 - teaser</translation>
-  </text>
-
-  <text key="Article 3 text">
-    <translation lang="en">Article 3 - text</translation>
-    <translation lang="da">Artikel 3 - tekst</translation>
-  </text>
-
-  <text key="Article 3 title">
-    <translation lang="en">Article 3 - title</translation>
-    <translation lang="da">Artikel 3 - titel</translation>
-  </text>
-
-  <text key="As column headings">
-    <translation lang="en">As column headings</translation>
-    <translation lang="da">Som søjleoverskrifter</translation>
-  </text>
-
-  <text key="As fields">
-    <translation lang="en">As text fields</translation>
-    <translation lang="da">Som almindelig tekst</translation>
-  </text>
-
-  <text key="As scheme heading">
-    <translation lang="en">As scheme heading</translation>
-    <translation lang="da">Som skemaoverskrift</translation>
-  </text>
-
-  <text key="As sub heading">
-    <translation lang="en">As sub heading</translation>
-    <translation lang="da">Som underoverskrift</translation>
-  </text>
-
-  <text key="Background information">
-    <translation lang="en">Background information</translation>
-    <translation lang="da">Baggrundsinformation</translation>
-  </text>
-
-  <text key="Banner 1 billede">
-    <translation lang="en">1. Banner - picture</translation>
-    <translation lang="da">1. Banner - billede</translation>
-  </text>
-
-  <text key="Banner 1 link">
-    <translation lang="en">1. Banner - link</translation>
-    <translation lang="da">1. Banner - link</translation>
-  </text>
-
-  <text key="Banner 1 tekst">
-    <translation lang="en">1. Banner - description</translation>
-    <translation lang="da">1. Banner - beskrivelse</translation>
-  </text>
-
-  <text key="Banner 2 billede">
-    <translation lang="en">2. Banner - picture</translation>
-    <translation lang="da">2. Banner - billede</translation>
-  </text>
-
-  <text key="Banner 2 link">
-    <translation lang="en">2. Banner - link</translation>
-    <translation lang="da">2. Banner - link</translation>
-  </text>
-
-  <text key="Banner 2 tekst">
-    <translation lang="en">2. Banner - description</translation>
-    <translation lang="da">2. Banner - beskrivelse</translation>
-  </text>
-
-  <text key="Banner 3 billede">
-    <translation lang="en">3. Banner - picture</translation>
-    <translation lang="da">3. Banner - billede</translation>
-  </text>
-
-  <text key="Banner 3 link">
-    <translation lang="en">3. Banner - link</translation>
-    <translation lang="da">3. Banner - link</translation>
-  </text>
-
-  <text key="Banner 3 tekst">
-    <translation lang="en">3. Banner - description</translation>
-    <translation lang="da">3. Banner - beskrivelse</translation>
-  </text>
-
-  <text key="Bannere til borgerprofil">
-    <translation lang="en">Banners for frontpage</translation>
-    <translation lang="da">Bannere til forsiden</translation>
-  </text>
-
-  <text key="Bannere">
-    <translation lang="en">Banners</translation>
-    <translation lang="da">Bannere </translation>
-  </text>
-
-  <text key="Basic information">
-    <translation lang="en">Basic information</translation>
-    <translation lang="da">Grundlæggende information</translation>
-  </text>
-
-  <text key="Basisinformation">
-    <translation lang="en">Basic information</translation>
-    <translation lang="da">Grundlæggende information</translation>
-  </text>
-
-  <text key="Beskrivelse af begivenhed">
-    <translation lang="en">Description of event</translation>
-    <translation lang="da">Beskrivelse af begivenhed</translation>
-  </text>
-
-  <text key="Beskrivelse af emne">
-    <translation lang="en">Description of subject</translation>
-    <translation lang="da">Beskrivelse af emne</translation>
-  </text>
-
-  <text key="Betegnelse">
-    <translation lang="en">Indication</translation>
-    <translation lang="da">Betegnelse</translation>
-  </text>
-
   <text key="Billede">
     <translation lang="en">Picture</translation>
     <translation lang="da">Billede</translation>
   </text>
 
-  <text key="Billedfelt 1">
-    <translation lang="en">1. Picture</translation>
-    <translation lang="da">1. Billede</translation>
-  </text>
-
   <text key="Billedstørrelse">
     <translation lang="en">Picture size</translation>
     <translation lang="da">Billedstørrelse</translation>
-  </text>
-
-  <text key="Billedtekst til artikkel 1 billede">
-    <translation lang="en">Article 1 - picture description</translation>
-    <translation lang="da">Artikel 1 - billedtekst </translation>
-  </text>
-
-  <text key="Billedtekst til artikkel 2 billede">
-    <translation lang="en">Article 2 - picture description</translation>
-    <translation lang="da">Artikel 2 - billedtekst </translation>
-  </text>
-
-  <text key="Billedtekst til artikkel 3 billede">
-    <translation lang="en">Article 3 - picture description</translation>
-    <translation lang="da">Artikel 3 - billedtekst </translation>
-  </text>
-
-  <text key="Billedtekst til fjerde billede">
-    <translation lang="en">4. Picture - description</translation>
-    <translation lang="da">4. Billede - tekst</translation>
-  </text>
-
-  <text key="Billedtekst til tredie billede">
-    <translation lang="en">3. Picture - description</translation>
-    <translation lang="da">3. Billede - tekst</translation>
-  </text>
-
-  <text key="Billedtekst">
-    <translation lang="en">Picture</translation>
-    <translation lang="da">Billedtekst</translation>
-  </text>
-
-  <text key="BiotikQuizQuestion">
-    <translation lang="en">Quiz questions</translation>
-    <translation lang="da">Quiz spørgsmål</translation>
-  </text>
-
-  <text key="BiotikQuiz">
-    <translation lang="en">Quiz</translation>
-    <translation lang="da">Quiz</translation>
   </text>
 
   <text key="Bjælkeoverskrift">
@@ -3557,44 +2877,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Formular til oprettelse (HTML)</translation>
   </text>
 
-  <text key="DanmarksKort">
-    <translation lang="en">Map of Denmark</translation>
-    <translation lang="da">Danmarkskort</translation>
-  </text>
-
-  <text key="Dansk holdning">
-    <translation lang="en">Danish standpoint</translation>
-    <translation lang="da">Dansk holdning</translation>
-  </text>
-
-  <text key="Debatdeltager">
-    <translation lang="en">Particicipant in the debate</translation>
-    <translation lang="da">Debatdeltager</translation>
-  </text>
-
-  <text key="Debatleder">
-    <translation lang="en">Conveyer of debate</translation>
-    <translation lang="da">Debatleder</translation>
-  </text>
-
   <text key="Debat">
     <translation lang="en">Debate</translation>
     <translation lang="da">Debat</translation>
   </text>
 
-  <text key="Default år">
-    <translation lang="en">Default year</translation>
-    <translation lang="da">År, der skal stå som default</translation>
-  </text>
-
   <text key="Diff. from public version">
     <translation lang="en">Different from public version</translation>
     <translation lang="da">Forskellig fra den offentlige version</translation>
-  </text>
-
-  <text key="Dilemmaspil">
-    <translation lang="en">Dilemma game</translation>
-    <translation lang="da">Dilemmaspil</translation>
   </text>
 
   <text key="Disse felter bliver ikke længere brugt">
@@ -3622,64 +2912,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Dokumentets størrelse</translation>
   </text>
 
-  <text key="Dyrkning">
-    <translation lang="en">Cultivation</translation>
-    <translation lang="da">Dyrkning</translation>
-  </text>
-
   <text key="Edit document">
     <translation lang="en">Edit document</translation>
     <translation lang="da">Rediger dokumentet</translation>
   </text>
 
-  <text key="Egenskaber for produktet">
-    <translation lang="en">Qualities of the product</translation>
-    <translation lang="da">Egenskaber for produktet</translation>
-  </text>
-
   <text key="Egenskaber">
     <translation lang="en">Qualities</translation>
     <translation lang="da">Egenskaber </translation>
-  </text>
-
-  <text key="Ekspertinfo">
-    <translation lang="en">Expertinfomation</translation>
-    <translation lang="da">Ekspertinformation</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Erhvervsøkonomi">
-    <translation lang="en">Level of expertise: Economy of trade</translation>
-    <translation lang="da">Ekspertiseniveau: Erhvervsøkonomi</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Etik og filosofi">
-    <translation lang="en">Level of expertise: Ethics and philosophy</translation>
-    <translation lang="da">Ekspertiseniveau: Etik og filosofi</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Etik">
-    <translation lang="en">Level of expertise: Ethics</translation>
-    <translation lang="da">Ekspertiseniveau: Etik</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Folkeskole">
-    <translation lang="en">Level of expertise: Primary school</translation>
-    <translation lang="da">Ekspertiseniveau: Folkeskole</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Fremtid">
-    <translation lang="en">Level of expertise: Prospects of future</translation>
-    <translation lang="da">Ekspertiseniveau: Fremtid</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Fødevarer">
-    <translation lang="en">Level of expertise: Food</translation>
-    <translation lang="da">Ekspertiseniveau: Fødevarer</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Gymnasium">
-    <translation lang="en">Level of expertise: High Scool</translation>
-    <translation lang="da">Ekspertiseniveau: Gymnasium</translation>
   </text>
 
   <text key="Address">
@@ -3702,109 +2942,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Spørgsmål</translation>
   </text>
 
-  <text key="Reason why these questions aren't relevant, if so">
-    <translation lang="en">Reason why these questions aren't relevant, if so</translation>
-    <translation lang="da">Evt. begrundelse for at disse spørgsmål ikke er relevante</translation>
-  </text>
-
-  <text key="Case story">
-    <translation lang="en">Case story</translation>
-    <translation lang="da">Den gode historie</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Industri">
-    <translation lang="en">Level of expertise: Industry</translation>
-    <translation lang="da">Ekspertiseniveau: Industri</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Jura">
-    <translation lang="en">Level of expertise: Law</translation>
-    <translation lang="da">Ekspertiseniveau: Jura</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Landbrug">
-    <translation lang="en">Level of expertise: Agriculture</translation>
-    <translation lang="da">Ekspertiseniveau: Landbrug</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Miljø">
-    <translation lang="en">Level of expertise: Environment</translation>
-    <translation lang="da">Ekspertiseniveau: Miljø</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Naturvidenskab">
-    <translation lang="en">Level of expertise: Natural science</translation>
-    <translation lang="da">Ekspertiseniveau: Naturvidenskab</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Samfundsvidenskab">
-    <translation lang="en">Level of expertise: Political science</translation>
-    <translation lang="da">Ekspertiseniveau: Samfundsvidenskab</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Samfundsøkonomi">
-    <translation lang="en">Level of expertise: Economy of society</translation>
-    <translation lang="da">Ekspertiseniveau: Samfundsøkonomi</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Sociologi">
-    <translation lang="en">Level of expertise: Sociology</translation>
-    <translation lang="da">Ekspertiseniveau: Sociologi</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Sundhed">
-    <translation lang="en">Level of expertise: Health</translation>
-    <translation lang="da">Ekspertiseniveau: Sundhed</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Teologi">
-    <translation lang="en">Level of expertise: Theology</translation>
-    <translation lang="da">Ekspertiseniveau: Teologi</translation>
-  </text>
-
-  <text key="Ekspertiseniveau: Universitet">
-    <translation lang="en">Level of expertise: University</translation>
-    <translation lang="da">Ekspertiseniveau: Universitet</translation>
-  </text>
-
   <text key="Emailadresse">
     <translation lang="en">Email address</translation>
     <translation lang="da">E-mail adresse</translation>
   </text>
 
-  <text key="Expiration, frontpage">
-    <translation lang="en">Expiration - frontpage</translation>
-    <translation lang="da">Forældelse - forside</translation>
-  </text>
-
-  <text key="Expiration, list">
-    <translation lang="en">Expiration - list</translation>
-    <translation lang="da">Forældelse - listen</translation>
-  </text>
-
-  <text key="Expiration, this article">
-    <translation lang="en">Expiration - this article</translation>
-    <translation lang="da">Forældelse - denne artikel</translation>
-  </text>
-
   <text key="Expiration">
     <translation lang="en">Expiration</translation>
     <translation lang="da">Forældelse</translation>
-  </text>
-
-  <text key="Expiring (global)">
-    <translation lang="en">Expiration - Global</translation>
-    <translation lang="da">Forældelse - global</translation>
-  </text>
-
-  <text key="Extra box(leave empty to disable)">
-    <translation lang="en">Box - if empty, it wil not be displayed.</translation>
-    <translation lang="da">Boks - hvis tom, vises den ikke. </translation>
-  </text>
-
-  <text key="FT information">
-    <translation lang="en">Danish parliament information</translation>
-    <translation lang="da">Folketingsinformation</translation>
   </text>
 
   <text key="Fax">
@@ -3817,94 +2962,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Kvinde</translation>
   </text>
 
-  <text key="Field 1 text">
-    <translation lang="en">Field 1 text</translation>
-    <translation lang="da">Tekst til felt 1</translation>
-  </text>
-
-  <text key="Field 1 title (optional)">
-    <translation lang="en">Field 1 title (optional)</translation>
-    <translation lang="da">Titel til felt 1 (valgfri)</translation>
-  </text>
-
-  <text key="Field 1">
-    <translation lang="en">Field 1</translation>
-    <translation lang="da">Felt 1</translation>
-  </text>
-
-  <text key="Field 2 text">
-    <translation lang="en">Field 2 text</translation>
-    <translation lang="da">Tekst til felt 2</translation>
-  </text>
-
-  <text key="Field 2 title (optional)">
-    <translation lang="en">Field 2 title (optional)</translation>
-    <translation lang="da">Titel til felt 2 (valgfri)</translation>
-  </text>
-
-  <text key="Field 2">
-    <translation lang="en">Field 2</translation>
-    <translation lang="da">Felt 2</translation>
-  </text>
-
-  <text key="Field 3 text">
-    <translation lang="en">Field 3 text</translation>
-    <translation lang="da">Tekst til felt 3</translation>
-  </text>
-
-  <text key="Field 3 title (optional)">
-    <translation lang="en">Field 3 title (optional)</translation>
-    <translation lang="da">Titel til felt 3 (valgfri)</translation>
-  </text>
-
-  <text key="Field 3">
-    <translation lang="en">Field 3</translation>
-    <translation lang="da">Felt 3</translation>
-  </text>
-
-  <text key="Foder">
-    <translation lang="en">Fodder</translation>
-    <translation lang="da">Foder</translation>
-  </text>
-
-  <text key="Folkeskole 7.-10. klasse">
-    <translation lang="en">Primary School 7.th - 10th grade</translation>
-    <translation lang="da">Folkeskole 7. - 10. Klasse</translation>
-  </text>
-
-  <text key="Foredragstitel ">
-    <translation lang="en">Title of talk</translation>
-    <translation lang="da">Foredragstitel </translation>
-  </text>
-
-  <text key="Formål">
-    <translation lang="en">Objective</translation>
-    <translation lang="da">Formål</translation>
-  </text>
-
-  <text key="Forsinket modning">
-    <translation lang="en">Delayed ripening</translation>
-    <translation lang="da">Forsinket modning</translation>
-  </text>
-
-  <text key="ForsoegsGodkendelse">
-    <translation lang="en">Application of experiment</translation>
-    <translation lang="da">Forsøgsgodkendelse</translation>
-  </text>
-
   <text key="Fortryd">
     <translation lang="en">Regret</translation>
     <translation lang="da">Fortryd</translation>
-  </text>
-
-  <text key="Forumnavn - skal stemme overens med det fra phorum">
-    <translation lang="en">Phorum-name</translation>
-    <translation lang="da">Navn på debatforum - </translation>
-  </text>
-
-  <text key="Frontpage and listing picture (thumbnail)">
-    <translation lang="en">Frontpage and listing picture</translation>
-    <translation lang="da">Billede til forsiden og oversigten</translation>
   </text>
 
   <text key="Frontpage news duration">
@@ -3917,34 +2977,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Prioritering af artikler til forsiden</translation>
   </text>
 
-  <text key="Fyn">
-    <translation lang="en">Fyen</translation>
-    <translation lang="da">Fyn</translation>
-  </text>
-
-  <text key="Fødevare">
-    <translation lang="en">Food</translation>
-    <translation lang="da">Fødevarer</translation>
-  </text>
-
-  <text key="Gender">
-    <translation lang="en">Gender</translation>
-    <translation lang="da">Køn</translation>
-  </text>
-
-  <text key="Generer thumbnails fra">
-    <translation lang="en">Generate thumbnails from</translation>
-    <translation lang="da">Opret thumbnail fra</translation>
-  </text>
-
   <text key="Gruppe">
     <translation lang="en">Group</translation>
     <translation lang="da">Gruppe</translation>
-  </text>
-
-  <text key="Gymnasier">
-    <translation lang="en">High Schools</translation>
-    <translation lang="da">Gymnasier</translation>
   </text>
 
   <text key="HTML">
@@ -3952,44 +2987,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">HTML </translation>
   </text>
 
-  <text key="H_og_M_Artikel">
-    <translation lang="en">Newsarticle</translation>
-    <translation lang="da">Nyhedsartikel </translation>
-  </text>
-
-  <text key="H_og_M_Emneforside">
-    <translation lang="en">Frontpage for newscategory</translation>
-    <translation lang="da">Nyhedsemneforside</translation>
-  </text>
-
-  <text key="H_og_M_Forside">
-    <translation lang="en">Newsfrontpage</translation>
-    <translation lang="da">Nyhedsforside</translation>
-  </text>
-
   <text key="Hjælp">
     <translation lang="en">Help</translation>
     <translation lang="da">Hjælp</translation>
   </text>
 
-  <text key="How to publish create documents">
-    <translation lang="en">How to publish arguments?</translation>
-    <translation lang="da">Hvordan skal argumenter offentliggøres?</translation>
-  </text>
-
   <text key="How your calendar will be displayed">
     <translation lang="en">How should the calendar be displayed?</translation>
     <translation lang="da">Hvordan skal kalenderen vises?</translation>
-  </text>
-
-  <text key="Human medicin">
-    <translation lang="en">Human medicine</translation>
-    <translation lang="da">Human medicin </translation>
-  </text>
-
-  <text key="HvadMenerDe">
-    <translation lang="en">&quot;Summary of &quot;&quot;partispørgsmål&quot;&quot;&quot;</translation>
-    <translation lang="da">Oversigtsdokument til partispørgsmål</translation>
   </text>
 
   <text key="Ikke godkendt">
@@ -4000,11 +3005,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Immediate">
     <translation lang="en">Without moderator</translation>
     <translation lang="da">Uden moderator</translation>
-  </text>
-
-  <text key="Industri">
-    <translation lang="en">Industry</translation>
-    <translation lang="da">Industri</translation>
   </text>
 
   <text key="InfopaqNyhed">
@@ -4037,21 +3037,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Intet link</translation>
   </text>
 
-  <text key="Is this document an archive?">
-    <translation lang="en">Is this document an archive?</translation>
-    <translation lang="da">Er dette dokument et arkiv?</translation>
-  </text>
-
-  <text key="Ja bund">
-    <translation lang="en">Yes bottom text</translation>
-    <translation lang="da">Ja bundtekst</translation>
-  </text>
-
-  <text key="Ja top">
-    <translation lang="en">Yes top text</translation>
-    <translation lang="da">Ja toptekst</translation>
-  </text>
-
   <text key="Ja">
     <translation lang="en">Yes</translation>
     <translation lang="da">Ja</translation>
@@ -4067,44 +3052,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Justering fra venstre</translation>
   </text>
 
-  <text key="Jylland">
-    <translation lang="en">Jutland</translation>
-    <translation lang="da">Jylland</translation>
-  </text>
-
-  <text key="Kartoffel">
-    <translation lang="en">Potato</translation>
-    <translation lang="da">Kartoffel</translation>
-  </text>
-
   <text key="Kommentar">
     <translation lang="en">Comment</translation>
     <translation lang="da">Kommentar</translation>
   </text>
 
-  <text key="Kort [max 500 tegn] beskrivelse af foredragets indhold">
-    <translation lang="en">Short description of the talk [max 500 characters]</translation>
-    <translation lang="da">Kort beskrivelse af foredraget [max 500 tegn]</translation>
-  </text>
-
   <text key="Kort beskrivelse">
     <translation lang="en">Short description</translation>
     <translation lang="da">Kort beskrivelse  </translation>
-  </text>
-
-  <text key="Kun debatdeltagere">
-    <translation lang="en">Only parcipants in the debate</translation>
-    <translation lang="da">Kun debatdeltagere</translation>
-  </text>
-
-  <text key="Land/lokation">
-    <translation lang="en">Country/location</translation>
-    <translation lang="da">Land/lokation</translation>
-  </text>
-
-  <text key="Landbrug og fødevarer">
-    <translation lang="en">Agriculture and victuals</translation>
-    <translation lang="da">Landbrug og fødevarer</translation>
   </text>
 
   <text key="Land">
@@ -4115,36 +3070,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Langt resume">
     <translation lang="en">Long summary</translation>
     <translation lang="da">Langt resume</translation>
-  </text>
-
-  <text key="Link 1 beskrivelse">
-    <translation lang="en">Description of link 1</translation>
-    <translation lang="da">Beskrivelse af link 1</translation>
-  </text>
-
-  <text key="Link 1">
-    <translation lang="en">Link 1</translation>
-    <translation lang="da">Link 1</translation>
-  </text>
-
-  <text key="Link 2 beskrivelse">
-    <translation lang="en">Description of link 2</translation>
-    <translation lang="da">Beskrivelse af link 2</translation>
-  </text>
-
-  <text key="Link 2">
-    <translation lang="en">Link 2</translation>
-    <translation lang="da">Link 2</translation>
-  </text>
-
-  <text key="Link 4 beskrivelse">
-    <translation lang="en">Description of link 4</translation>
-    <translation lang="da">Beskrivelse af link 4</translation>
-  </text>
-
-  <text key="Link 4">
-    <translation lang="en">Link 4</translation>
-    <translation lang="da">Link 4</translation>
   </text>
 
   <text key="Link data">
@@ -4162,16 +3087,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Link til den offentlige side</translation>
   </text>
 
-  <text key="Links til gå direkte til for profil 2">
-    <translation lang="en">Links in box for subject 2</translation>
-    <translation lang="da">Links i Gå direkte til boksen for emne 2</translation>
-  </text>
-
-  <text key="Links til gå direkte til for profil 3">
-    <translation lang="en">Links in box for subject 3</translation>
-    <translation lang="da">Links i Gå direkte til boksen for emne 3</translation>
-  </text>
-
   <text key="Link">
     <translation lang="en">Link</translation>
     <translation lang="da">Link</translation>
@@ -4182,69 +3097,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Logo</translation>
   </text>
 
-  <text key="Lokalitetsnavn">
-    <translation lang="en">Name of location</translation>
-    <translation lang="da">Navn på lokalitet</translation>
-  </text>
-
-  <text key="Lovgivning og Etik">
-    <translation lang="en">Law and ethics</translation>
-    <translation lang="da">Lovgivning og etik</translation>
-  </text>
-
-  <text key="Main title (optional)">
-    <translation lang="en">Main title (optional)</translation>
-    <translation lang="da">Hovedtitel (valgfri)</translation>
-  </text>
-
-  <text key="Main title">
-    <translation lang="en">Main title</translation>
-    <translation lang="da">Hovedtitel  </translation>
-  </text>
-
-  <text key="Majs">
-    <translation lang="en">Corn</translation>
-    <translation lang="da">Majs</translation>
-  </text>
-
-  <text key="Male">
-    <translation lang="en">Male</translation>
-    <translation lang="da">Mand</translation>
-  </text>
-
-  <text key="Meget">
-    <translation lang="en">A lot</translation>
-    <translation lang="da">Meget</translation>
-  </text>
-
   <text key="Meta data">
     <translation lang="en">Metadata</translation>
     <translation lang="da">Metadata</translation>
-  </text>
-
-  <text key="Miljø">
-    <translation lang="en">Environment</translation>
-    <translation lang="da">Miljø</translation>
-  </text>
-
-  <text key="Moderator email(s)">
-    <translation lang="en">Moderator email(s)</translation>
-    <translation lang="da">Moderator email(s)</translation>
-  </text>
-
-  <text key="Moderator email">
-    <translation lang="en">Moderator email</translation>
-    <translation lang="da">Moderator email</translation>
-  </text>
-
-  <text key="Myndighedsoversigt">
-    <translation lang="en">List of authorities</translation>
-    <translation lang="da">Myndighedsoversigt</translation>
-  </text>
-
-  <text key="Myndighedsskema">
-    <translation lang="en">Scheme of authorities</translation>
-    <translation lang="da">Myndighedskema</translation>
   </text>
 
   <text key="Navigator">
@@ -4252,39 +3107,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Navigator</translation>
   </text>
 
-  <text key="Nej Bund">
-    <translation lang="en">No bottomtext</translation>
-    <translation lang="da">Nej bundtekst</translation>
-  </text>
-
-  <text key="Nej top">
-    <translation lang="en">No toptext</translation>
-    <translation lang="da">Nej toptekst</translation>
-  </text>
-
   <text key="Nej">
     <translation lang="en">No</translation>
     <translation lang="da">Nej</translation>
-  </text>
-
-  <text key="Niveau for andet ekspertiseområde">
-    <translation lang="en">Level of alternative area of expertise</translation>
-    <translation lang="da">Niveau for alternativt ekspertiseområde</translation>
-  </text>
-
-  <text key="No bottom">
-    <translation lang="en">No bottomtext</translation>
-    <translation lang="da">Nej bundtekst</translation>
-  </text>
-
-  <text key="No top">
-    <translation lang="en">No toptext</translation>
-    <translation lang="da">Nej toptekst</translation>
-  </text>
-
-  <text key="Noget">
-    <translation lang="en">Some</translation>
-    <translation lang="da">Noget</translation>
   </text>
 
   <text key="Number of reasons on one page">
@@ -4300,11 +3125,6 @@ abonnement på samme email-adresse.</translation>
   <text key="OK">
     <translation lang="en">OK</translation>
     <translation lang="da">OK</translation>
-  </text>
-
-  <text key="Occupation">
-    <translation lang="en">Occupation</translation>
-    <translation lang="da">Stilling</translation>
   </text>
 
   <text key="Om Dokumentet">
@@ -4327,29 +3147,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Ordbog</translation>
   </text>
 
-  <text key="Organismeinformation">
-    <translation lang="en">Organism information</translation>
-    <translation lang="da">Organismeinformation</translation>
-  </text>
-
   <text key="Outdated">
     <translation lang="en">Outdated</translation>
     <translation lang="da">Forældet</translation>
-  </text>
-
-  <text key="Overfladisk">
-    <translation lang="en">Superficial</translation>
-    <translation lang="da">Overfladisk</translation>
-  </text>
-
-  <text key="OversigtMedThumbnail">
-    <translation lang="en">List with thumbnail</translation>
-    <translation lang="da">Oversigt med thumbnail</translation>
-  </text>
-
-  <text key="Password til spørg eksperten">
-    <translation lang="en">Password for Ask BioTIK</translation>
-    <translation lang="da">Kodeord til Spørg BioTIK</translation>
   </text>
 
   <text key="Password">
@@ -4357,89 +3157,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Kodeord  </translation>
   </text>
 
-  <text key="Picture for article 1">
-    <translation lang="en">Article 1 - picture</translation>
-    <translation lang="da">Artikel 1 - billede</translation>
-  </text>
-
-  <text key="Picture for article 2">
-    <translation lang="en">Article 2 - picture</translation>
-    <translation lang="da">Artikel 2 - billede</translation>
-  </text>
-
-  <text key="Picture for article 3">
-    <translation lang="en">Article 3 - picture</translation>
-    <translation lang="da">Artikel 3 - billede</translation>
-  </text>
-
   <text key="Picture size">
     <translation lang="en">Picture size</translation>
     <translation lang="da">Billedstørrelse</translation>
-  </text>
-
-  <text key="Politik og økonomi">
-    <translation lang="en">Politics and economy</translation>
-    <translation lang="da">Politik og økonomi</translation>
-  </text>
-
-  <text key="Prefix for names of the created documents">
-    <translation lang="en">URL for arguments related to this question</translation>
-    <translation lang="da">Fil-navn for argumenter til dette spørgsmål</translation>
-  </text>
-
-  <text key="ProduktOversigt">
-    <translation lang="en">List of products</translation>
-    <translation lang="da">Produktoversigt</translation>
-  </text>
-
-  <text key="Produkter">
-    <translation lang="en">Products</translation>
-    <translation lang="da">Produkter </translation>
-  </text>
-
-  <text key="Produktinformation 2">
-    <translation lang="en">Productinformation 2</translation>
-    <translation lang="da">Produktinformation 2</translation>
-  </text>
-
-  <text key="Produktinformation">
-    <translation lang="en">Productinformation</translation>
-    <translation lang="da">Produktinformation  </translation>
-  </text>
-
-  <text key="Produkt">
-    <translation lang="en">Product</translation>
-    <translation lang="da">Produkt</translation>
-  </text>
-
-  <text key="Profil 1 bannere">
-    <translation lang="en">1. Subject - banners</translation>
-    <translation lang="da">1. Emne - bannere</translation>
-  </text>
-
-  <text key="Profil 2 links">
-    <translation lang="en">2. Subject - links</translation>
-    <translation lang="da">2. Emne - links</translation>
-  </text>
-
-  <text key="Profil 3 links">
-    <translation lang="en">3. Subject - links</translation>
-    <translation lang="da">3. Emne - links</translation>
-  </text>
-
-  <text key="Profile 1 title">
-    <translation lang="en">1. Subject - main title</translation>
-    <translation lang="da">1. Emne - titel på siden</translation>
-  </text>
-
-  <text key="Profile 2 title">
-    <translation lang="en">2. Subject - main title</translation>
-    <translation lang="da">2. Emne - titel på siden</translation>
-  </text>
-
-  <text key="Profile 3 title">
-    <translation lang="en">3. Subject - main title</translation>
-    <translation lang="da">3. Emne - titel på siden</translation>
   </text>
 
   <text key="Publishing the picture will make it visible on the public part of the website.">
@@ -4462,11 +3182,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Argument</translation>
   </text>
 
-  <text key="Resume af debatten">
-    <translation lang="en">Summary of debate</translation>
-    <translation lang="da">Resume af debatten</translation>
-  </text>
-
   <text key="Resume">
     <translation lang="en">Summary</translation>
     <translation lang="da">Resume   </translation>
@@ -4475,21 +3190,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Rettigheder">
     <translation lang="en">Rights</translation>
     <translation lang="da">Rettigheder</translation>
-  </text>
-
-  <text key="Roe">
-    <translation lang="en">Beet</translation>
-    <translation lang="da">Roe</translation>
-  </text>
-
-  <text key="Samlet data">
-    <translation lang="en">Total data</translation>
-    <translation lang="da">Samlet data</translation>
-  </text>
-
-  <text key="Samling">
-    <translation lang="en">Collection</translation>
-    <translation lang="da">Samling</translation>
   </text>
 
   <text key="SearchExpertDb">
@@ -4532,11 +3232,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Skal titlen vises som overskrift?</translation>
   </text>
 
-  <text key="Sjælland">
-    <translation lang="en">Sealand</translation>
-    <translation lang="da">Sjælland</translation>
-  </text>
-
   <text key="Slutdato for debatten">
     <translation lang="en">End date of the debate</translation>
     <translation lang="da">Slutdato for debatten</translation>
@@ -4550,11 +3245,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Source links">
     <translation lang="en">Source links</translation>
     <translation lang="da">Kilde links</translation>
-  </text>
-
-  <text key="SpoergBioTIK">
-    <translation lang="en">Ask BioTIK</translation>
-    <translation lang="da">Spørg BioTIK</translation>
   </text>
 
   <text key="Spoergsmaal">
@@ -4572,149 +3262,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Standard</translation>
   </text>
 
-  <text key="Startdato for debatten">
-    <translation lang="en">Date of the start of the debate</translation>
-    <translation lang="da">Startdato for debatten </translation>
-  </text>
-
-  <text key="Sti til fjerde billede ">
-    <translation lang="en">4. Picture (left alignment)  - Choose URL</translation>
-    <translation lang="da">4. Billede (Venstrestillet) - Vælg sti </translation>
-  </text>
-
-  <text key="Sti til tredie billede ">
-    <translation lang="en">3. Picture (left alignment) - Choose URL</translation>
-    <translation lang="da">3. Billede (Venstrestillet) - Vælg sti </translation>
-  </text>
-
   <text key="Stilling">
     <translation lang="en">Position</translation>
     <translation lang="da">Stilling</translation>
   </text>
 
-  <text key="Størrelse på artikkel 1 billede">
-    <translation lang="en">1. Billede - choose size</translation>
-    <translation lang="da">1. Billede - vælg størrelse</translation>
-  </text>
-
-  <text key="Størrelse på artikkel 2 billede">
-    <translation lang="en">2. Billede - choose size</translation>
-    <translation lang="da">2. Billede - vælg størrelse</translation>
-  </text>
-
-  <text key="Størrelse på artikkel 3 billede">
-    <translation lang="en">3. Billede - choose size</translation>
-    <translation lang="da">3. Billede - vælg størrelse</translation>
-  </text>
-
-  <text key="Størrelse på fjerde billede">
-    <translation lang="en">4. Picture -  choose size</translation>
-    <translation lang="da">4. Billede - vælg størrelse</translation>
-  </text>
-
-  <text key="Størrelse på tredie billede">
-    <translation lang="en">3. Picture - choose size</translation>
-    <translation lang="da">3. Billede - vælg størrelse</translation>
-  </text>
-
-  <text key="Subject 1 link 1">
-    <translation lang="en">1. Subject - link to teaser1</translation>
-    <translation lang="da">1. Emne - link til teaser1</translation>
-  </text>
-
-  <text key="Subject 1 link 2">
-    <translation lang="en">1. Subject - link to teaser2</translation>
-    <translation lang="da">1. Emne - link til teaser 2</translation>
-  </text>
-
-  <text key="Subject 1 link 3">
-    <translation lang="en">1. Subject - link to teaser3</translation>
-    <translation lang="da">1. Emne - link til teaser 3</translation>
-  </text>
-
-  <text key="Subject 1 name">
-    <translation lang="en">1. Subject - title for left menu</translation>
-    <translation lang="da">1. Emne - titel til venstremenu</translation>
-  </text>
-
-  <text key="Subject 1 text">
-    <translation lang="en">1. Subject - text</translation>
-    <translation lang="da">1. Emne - tekst</translation>
-  </text>
-
-  <text key="Subject 2 link 1">
-    <translation lang="en">2. Subject - link to teaser1</translation>
-    <translation lang="da">2. Emne - link til teaser1</translation>
-  </text>
-
-  <text key="Subject 2 link 2">
-    <translation lang="en">2. Subject - link to teaser2</translation>
-    <translation lang="da">2. Emne - link til teaser2</translation>
-  </text>
-
-  <text key="Subject 2 link 3">
-    <translation lang="en">2. Subject - link to teaser3</translation>
-    <translation lang="da">2. Emne - link til teaser3</translation>
-  </text>
-
-  <text key="Subject 2 name">
-    <translation lang="en">2. Subject - title for left menu</translation>
-    <translation lang="da">2. Emne - titel til venstremenu</translation>
-  </text>
-
-  <text key="Subject 2 text">
-    <translation lang="en">2. Subject - text</translation>
-    <translation lang="da">2. Emne - tekst</translation>
-  </text>
-
-  <text key="Subject 2">
-    <translation lang="en">2. Subject</translation>
-    <translation lang="da">2. Emne</translation>
-  </text>
-
-  <text key="Subject 3 link 1">
-    <translation lang="en">3. Subject - link to teaser1</translation>
-    <translation lang="da">3. Emne - link til teaser1</translation>
-  </text>
-
-  <text key="Subject 3 link 2">
-    <translation lang="en">3. Subject - link to teaser2</translation>
-    <translation lang="da">3. Emne - link til teaser2</translation>
-  </text>
-
-  <text key="Subject 3 link 3">
-    <translation lang="en">3. Subject - link to teaser3</translation>
-    <translation lang="da">3. Emne - link til teaser3</translation>
-  </text>
-
-  <text key="Subject 3 name">
-    <translation lang="en">3. Subject - title for left menu</translation>
-    <translation lang="da">3. Emne - titel til venstremenu</translation>
-  </text>
-
-  <text key="Subject 3 text">
-    <translation lang="en">3. Subject - text</translation>
-    <translation lang="da">3. Emne - tekst</translation>
-  </text>
-
-  <text key="Subject 3">
-    <translation lang="en">3. Subject</translation>
-    <translation lang="da">3. Emne</translation>
-  </text>
-
-  <text key="Sundhed">
-    <translation lang="en">Health</translation>
-    <translation lang="da">Sundhed</translation>
-  </text>
-
   <text key="Svar">
     <translation lang="en">Answer</translation>
     <translation lang="da">Svar</translation>
-  </text>
-
-  <text key="Synspunkt">
-    <translation lang="en">Point of view</translation>
-    <translation lang="da">Synspunkt</translation>
   </text>
 
   <text key="Testbruger">
@@ -4737,69 +3292,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Thumbnail størrelse</translation>
   </text>
 
-  <text key="TidslinieBegivenhed">
-    <translation lang="en">Event in the chronology of time</translation>
-    <translation lang="da">Begivenhed på tidslinien</translation>
-  </text>
-
-  <text key="Tidslinie">
-    <translation lang="en">Chronology of time</translation>
-    <translation lang="da">Tidslinie</translation>
-  </text>
-
-  <text key="Tidsmærke">
-    <translation lang="en">Mark of time</translation>
-    <translation lang="da">Tidsmærke</translation>
-  </text>
-
-  <text key="Titel (ekspertens, ikke dokumentets)">
-    <translation lang="en">Title of the expert</translation>
-    <translation lang="da">Ekspertens titel</translation>
-  </text>
-
-  <text key="Type af produkt">
-    <translation lang="en">Type of product</translation>
-    <translation lang="da">Type af produkt</translation>
-  </text>
-
-  <text key="Type">
-    <translation lang="en">Type</translation>
-    <translation lang="da">Type</translation>
-  </text>
-
-  <text key="Under behandling">
-    <translation lang="en">In the process of treatment</translation>
-    <translation lang="da">Under behandling</translation>
-  </text>
-
   <text key="Upload">
     <translation lang="en">Upload</translation>
     <translation lang="da">Upload</translation>
-  </text>
-
-  <text key="Using a moderator">
-    <translation lang="en">Use a moderator</translation>
-    <translation lang="da">Brug en moderator</translation>
-  </text>
-
-  <text key="Virksomhedsforside">
-    <translation lang="en">Frontpage of the company</translation>
-    <translation lang="da">Virksomhedsforside</translation>
-  </text>
-
-  <text key="Virksomhed">
-    <translation lang="en">Company</translation>
-    <translation lang="da">Virksomhed</translation>
-  </text>
-
-  <text key="VirtueltRundbord">
-    <translation lang="en">Virtual roundtable</translation>
-    <translation lang="da">Virtuelt rundbord</translation>
-  </text>
-
-  <text key="Virusresistens">
-    <translation lang="en">Virusresistence</translation>
-    <translation lang="da">Virusresistens</translation>
   </text>
 
   <text key="Vis dokument-adresse">
@@ -4810,11 +3305,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Vis links">
     <translation lang="en">Show links</translation>
     <translation lang="da">Vis links</translation>
-  </text>
-
-  <text key="Voksne">
-    <translation lang="en">Adults</translation>
-    <translation lang="da">Voksne</translation>
   </text>
 
   <text key="What doctype the created documents should have">
@@ -4832,31 +3322,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Hvor dokumenterne skal oprettes</translation>
   </text>
 
-  <text key="X-position på danmarkskort">
-    <translation lang="en">X-position on map of Denmark</translation>
-    <translation lang="da">X-position på Danmarkskort</translation>
-  </text>
-
-  <text key="Y-position på danmarkskort">
-    <translation lang="en">Y-position on map of Denmark</translation>
-    <translation lang="da">Y-position på Danmarkskort</translation>
-  </text>
-
-  <text key="Yes bottom">
-    <translation lang="en">Yes bottumtext</translation>
-    <translation lang="da">Ja bundtekst</translation>
-  </text>
-
-  <text key="Yes top">
-    <translation lang="en">Yes toptext</translation>
-    <translation lang="da">Ja toptekst</translation>
-  </text>
-
-  <text key="Yes/No">
-    <translation lang="en">Yes/No</translation>
-    <translation lang="da">Ja/nej</translation>
-  </text>
-
   <text key="You are trying to store invalid information.">
     <translation lang="en">You are trying to store invalid data</translation>
     <translation lang="da">Du forsøger at gemme ugyldig data</translation>
@@ -4867,94 +3332,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Administration</translation>
   </text>
 
-  <text key="automatic">
-    <translation lang="en">Automatic</translation>
-    <translation lang="da">Automatisk</translation>
-  </text>
-
   <text key="email">
     <translation lang="en">Email</translation>
     <translation lang="da">E-mail</translation>
   </text>
 
-  <text key="godkendt">
-    <translation lang="en">Approved</translation>
-    <translation lang="da">Godkendt</translation>
-  </text>
-
-  <text key="kartoffel">
-    <translation lang="en">Potato</translation>
-    <translation lang="da">Kartoffel</translation>
-  </text>
-
-  <text key="landbrug fodevarer">
-    <translation lang="en">Agriculture Victuals</translation>
-    <translation lang="da">Landbrug Fødevarer</translation>
-  </text>
-
-  <text key="lov etik">
-    <translation lang="en">Law Ethics</translation>
-    <translation lang="da">Lov Etik</translation>
-  </text>
-
-  <text key="majs">
-    <translation lang="en">Corn</translation>
-    <translation lang="da">Majs</translation>
-  </text>
-
-  <text key="manual">
-    <translation lang="en">Manuel</translation>
-    <translation lang="da">Manuel</translation>
-  </text>
-
-  <text key="none">
-    <translation lang="en">None</translation>
-    <translation lang="da">Ingen</translation>
-  </text>
-
-  <text key="politik okonomi">
-    <translation lang="en">Politics economy</translation>
-    <translation lang="da">Politik økonomi</translation>
-  </text>
-
-  <text key="raps">
-    <translation lang="en">Rasp</translation>
-    <translation lang="da">Rasp</translation>
-  </text>
-
-  <text key="roe">
-    <translation lang="en">Beet</translation>
-    <translation lang="da">Roe</translation>
-  </text>
-
-  <text key="under behandling">
-    <translation lang="en">In process of treatment</translation>
-    <translation lang="da">Under behandling</translation>
-  </text>
-
-  <text key="underbehandling">
-    <translation lang="en">In process of treatment</translation>
-    <translation lang="da">Under behandling</translation>
-  </text>
-
   <text key="år">
     <translation lang="en">Year</translation>
     <translation lang="da">år</translation>
-  </text>
-
-  <text key="ændre farve">
-    <translation lang="en">Changed colour</translation>
-    <translation lang="da">ændret farve</translation>
-  </text>
-
-  <text key="ændret olie">
-    <translation lang="en">Changed oil</translation>
-    <translation lang="da">ændret olie</translation>
-  </text>
-
-  <text key="Hvem skal have email med forslag til nye ord?">
-    <translation lang="en">Who should recieve suggestions for new words?</translation>
-    <translation lang="da">Hvem skal have email med forslag til nye ord?</translation>
   </text>
 
   <text key="Show teasers?">
@@ -4965,11 +3350,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Click for help">
     <translation lang="en">Click for help</translation>
     <translation lang="da">Klik for hjælp</translation>
-  </text>
-
-  <text key="Oversigtsdokument fra FT-web (sagsforløb forside)">
-    <translation lang="en">Summary document from FT-web (sagsforløb frontpage)</translation>
-    <translation lang="da">Oversigtsdokument fra FT-web (sagsforløb forside)</translation>
   </text>
 
   <text key="Section news inclusion">
@@ -4987,11 +3367,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Multimediafil, der skal vises</translation>
   </text>
 
-  <text key="Link til plugin">
-    <translation lang="en">Link for downloading plugin</translation>
-    <translation lang="da">Link til plugin download</translation>
-  </text>
-
   <text key="Bredde">
     <translation lang="en">Width</translation>
     <translation lang="da">Bredde</translation>
@@ -5002,54 +3377,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Højde</translation>
   </text>
 
-  <text key="Vis afspillerens kontroller (frem, tilbage, stop etc.)?">
-    <translation lang="en">Show player controls?</translation>
-    <translation lang="da">Vis afspillerens kontroller (frem, tilbage, stop etc.)?</translation>
-  </text>
-
-  <text key="Afspil automatisk?">
-    <translation lang="en">Play automatically?</translation>
-    <translation lang="da">Afspil automatisk?</translation>
-  </text>
-
-  <text key="Really delete passwordprotectedurl">
-    <translation lang="en">Really delete password protection of URL</translation>
-    <translation lang="da">Fjern kodeordsbeskyttelse af URL</translation>
-  </text>
-
   <text key="Confirm remove">
     <translation lang="en">Confirm remove</translation>
     <translation lang="da">Bekræft fjernelse</translation>
-  </text>
-
-  <text key="Edit passwordprotectedurl">
-    <translation lang="en">Edit password protected URL</translation>
-    <translation lang="da">Redigér kodeordsbeskyttelse</translation>
-  </text>
-
-  <text key="New passwordprotectedurl">
-    <translation lang="en">New passwordprotectedurl</translation>
-    <translation lang="da">Opret kodeordsbeskyttelse</translation>
-  </text>
-
-  <text key="New synonyms">
-    <translation lang="en">New synonyms</translation>
-    <translation lang="da">Nye synonymer</translation>
-  </text>
-
-  <text key="Edit synonyms">
-    <translation lang="en">Edit synonyms</translation>
-    <translation lang="da">Redigér synonymer</translation>
-  </text>
-
-  <text key="Really delete synonyms">
-    <translation lang="en">Really delete synonyms</translation>
-    <translation lang="da">Skal indgangen i synonymlisten fjernes</translation>
-  </text>
-
-  <text key="Company">
-    <translation lang="en">Company</translation>
-    <translation lang="da">Virksomhedsdatabase: Stamkort</translation>
   </text>
 
   <text key="Address">
@@ -5063,7 +3393,7 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="This is an administrative documenttype only.">
-    <translation lang="en">This is an administrative documenttype only.</translation>
+    <translation lang="en">This is an administrative document type only.</translation>
     <translation lang="da">Denne dokumenttype er alene beregnet til administrationsformål.</translation>
   </text>
 
@@ -5122,262 +3452,6 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Forfatterens baggrund</translation>
   </text>
 
-  <text key="Direkte link 1">
-    <translation lang="en">Direct link 1</translation>
-    <translation lang="da">Direkte link 1</translation>
-  </text>
-
-  <text key="Direkte link 2">
-    <translation lang="en">Direct link 2</translation>
-    <translation lang="da">Direkte link 2</translation>
-  </text>
-
-  <text key="Direkte link 3">
-    <translation lang="en">Direct link 3</translation>
-    <translation lang="da">Direkte link 3</translation>
-  </text>
-
-  <text key="CreateExpert">
-    <translation lang="en">Create Expert</translation>
-    <translation lang="da">Opret ekspert</translation>
-  </text>
-
-  <text key="HandlingsplansSkema">
-    <translation lang="en">Handlingsplan Table</translation>
-    <translation lang="da">HandlingsplansSkema</translation>
-  </text>
-
-  <text key="SpoergBiotikKommentar">
-    <translation lang="en">Ask BioTIK comment document</translation>
-    <translation lang="da">Spørg BioTIK kommentardokument</translation>
-  </text>
-
-  <text key="ForsoegsSearch">
-    <translation lang="en">ForsoegsSearch</translation>
-    <translation lang="da">Forsøgsudsætninger</translation>
-  </text>
-
-  <text key="Spoergeskema">
-    <translation lang="en">Survey</translation>
-    <translation lang="da">Spørgeskema</translation>
-  </text>
-
-
-
-
-
-
-
-  <text key="EmneForside">
-    <translation lang="en">Subject frontpage</translation>
-    <translation lang="da">Emneforside</translation>
-  </text>
-
-  <text key="FiskeKalender">
-    <translation lang="en">Calendar</translation>
-    <translation lang="da">Kalender</translation>
-  </text>
-
-  <text key="FiskeKalenderArrangement">
-    <translation lang="en">Calendar: Event</translation>
-    <translation lang="da">Kalender: Arrangement</translation>
-  </text>
-
-  <text key="FiskeKalenderOpret">
-    <translation lang="en">Calendar: Frontpage</translation>
-    <translation lang="da">Kalender: Forside</translation>
-  </text>
-
-  <text key="FiskeListSubdocs">
-    <translation lang="en">List subdocs</translation>
-    <translation lang="da">Vis underdokumenter</translation>
-  </text>
-
-  <text key="FiskeRekord">
-    <translation lang="en">Record</translation>
-    <translation lang="da">Rekord</translation>
-  </text>
-
-  <text key="FiskeSagsbehandling">
-    <translation lang="en">Case</translation>
-    <translation lang="da">Sagsbehandling</translation>
-  </text>
-
-  <text key="Fiskeforening">
-    <translation lang="en">Fishing club</translation>
-    <translation lang="da">Lokalforening</translation>
-  </text>
-
-  <text key="Fiskeforening">
-    <translation lang="en">Fishing club</translation>
-    <translation lang="da">Lokalforening</translation>
-  </text>
-
-  <text key="FiskeforeningArrangement">
-    <translation lang="en">Fishing club: Event</translation>
-    <translation lang="da">Lokalforening: Arrangement</translation>
-  </text>
-
-  <text key="FiskeforeningNyhed">
-    <translation lang="en">Fishing club: News</translation>
-    <translation lang="da">Lokalforening: Nyhed</translation>
-  </text>
-
-  <text key="FiskeforeningRediger">
-    <translation lang="en">Fishing club: Edit</translation>
-    <translation lang="da">Lokalforening: Rediger</translation>
-  </text>
-
-  <text key="Fiskevand">
-    <translation lang="en">Fishing place</translation>
-    <translation lang="da">Fiskested</translation>
-  </text>
-
-  <text key="FiskevandAmtForside">
-    <translation lang="en">Fishing place: Region</translation>
-    <translation lang="da">Fiskested: Amtsforside</translation>
-  </text>
-
-  <text key="Fiskevand_forside">
-    <translation lang="en">Fishing place: Frontpage</translation>
-    <translation lang="da">Fiskested: Forside</translation>
-  </text>
-
-  <text key="LokalforeningForside">
-    <translation lang="en">Fishing club: Forside</translation>
-    <translation lang="da">Lokalforening: Forside</translation>
-  </text>
-
-  <text key="ab_ekspertseminar">
-    <translation lang="en">"Ekspertseminar"</translation>
-    <translation lang="da">Ekspertseminar</translation>
-  </text>
-
-  <text key="EtikCompare">
-    <translation lang="en">Etik: Compare</translation>
-    <translation lang="da">Etik: Sammenligning</translation>
-  </text>
-
-  <text key="TestAfBiler">
-    <translation lang="en">Test: Cars</translation>
-    <translation lang="da">Test: Biler</translation>
-  </text>
-
-  <text key="UFOForside">
-    <translation lang="en">UFO: Frontpage</translation>
-    <translation lang="da">UFO: Forside</translation>
-  </text>
-
-  <text key="UFOStandard">
-    <translation lang="en">UFO: Standard</translation>
-    <translation lang="da">UFO: Standard</translation>
-  </text>
-
-  <text key="UFOQuiz">
-    <translation lang="en">UFO: Quiz</translation>
-    <translation lang="da">UFO: Quiz</translation>
-  </text>
-
-  <text key="UFOForm">
-    <translation lang="en">UFO: Form</translation>
-    <translation lang="da">UFO: Form</translation>
-  </text>
-
-  <text key="UFOArkiv">
-    <translation lang="en">UFO: Archive</translation>
-    <translation lang="da">UFO: Arkiv</translation>
-  </text>
-
-  <text key="Image One">
-    <translation lang="en">Image One</translation>
-    <translation lang="da">Billede Et</translation>
-  </text>
-
-  <text key="Image Two">
-    <translation lang="en">Image Two</translation>
-    <translation lang="da">Billede To</translation>
-  </text>
-
-  <text key="Image Three">
-    <translation lang="en">Image Three</translation>
-    <translation lang="da">Billede Tre</translation>
-  </text>
-
-  <text key="Image Three">
-    <translation lang="en">Image Three</translation>
-    <translation lang="da">Billede Tre</translation>
-  </text>
-
-  <text key="Image Four">
-    <translation lang="en">Image Four</translation>
-    <translation lang="da">Billede Fire</translation>
-  </text>
-
-  <text key="Image Five">
-    <translation lang="en">Image Five</translation>
-    <translation lang="da">Billede Fem</translation>
-  </text>
-
-  <text key="Image Six">
-    <translation lang="en">Image Six</translation>
-    <translation lang="da">Billede Seks</translation>
-  </text>
-
-  <text key="Link One">
-    <translation lang="en">Link One</translation>
-    <translation lang="da">Link En</translation>
-  </text>
-
-  <text key="Link Two">
-    <translation lang="en">Link Two</translation>
-    <translation lang="da">Link To</translation>
-  </text>
-
-  <text key="Link Three">
-    <translation lang="en">Link Three</translation>
-    <translation lang="da">Link Tre</translation>
-  </text>
-
-  <text key="Link Four">
-    <translation lang="en">Link Four</translation>
-    <translation lang="da">Link Fire</translation>
-  </text>
-
-  <text key="Link Five">
-    <translation lang="en">Link Five</translation>
-    <translation lang="da">Link Fem</translation>
-  </text>
-
-  <text key="Link Six">
-    <translation lang="en">Link Six</translation>
-    <translation lang="da">Link Seks</translation>
-  </text>
-
-  <text key="How many images to show">
-    <translation lang="en">How many images to show</translation>
-    <translation lang="da">Antal billeder, der vises ad gangen</translation>
-  </text>
-
-  <text key="How many images before starting a new line">
-    <translation lang="en">How many images before starting a new line</translation>
-    <translation lang="da">Antal billeder per linie</translation>
-  </text>
-
-  <text key="Image to use in menu (bottom link)">
-    <translation lang="en">Image to use in menu (bottom link)</translation>
-    <translation lang="da">Vælg menu-billede (bundlink)</translation>
-  </text>
-
-  <text key="URL to link in menu">
-    <translation lang="en">URL to link in menu</translation>
-    <translation lang="da">Vælg menu-link</translation>
-  </text>
-
-  <text key="Footer to use on this page">
-    <translation lang="en">Footer to use on this page</translation>
-    <translation lang="da">Vælg footer på denne side</translation>
-  </text>
-
   <text key="Show date of subdocuments">
     <translation lang="en">Show date of subdocuments</translation>
     <translation lang="da">Vis underdokumenters dato i listen</translation>
@@ -5386,15 +3460,6 @@ abonnement på samme email-adresse.</translation>
   <text key="Show hidden">
     <translation lang="en">Show hidden</translation>
     <translation lang="da">Vis gemte</translation>
-  </text>
-
-  <text key="ObviusLinkDocumentExplanation">
-    <translation lang="en">This linkdocument isn't shown as a document on
-the public website as such; if you click on it, you will be automatically
-transferred to</translation>
-    <translation lang="da">Dette linkdokument ses ikke som et dokument på
-det offentlige website; hvis man klikker sig ind på det, kommer man
-automatisk direkte til adressen</translation>
   </text>
 
   <text key="Notice">
@@ -5412,9 +3477,161 @@ automatisk direkte til adressen</translation>
     <translation lang="da">Rediger med MCMS koder</translation>
   </text>
 
-  <text key="">
-    <translation lang="en"></translation>
-    <translation lang="da"></translation>
+  <text key="+title">
+    <translation lang="en">Title</translation>
+    <translation lang="da">Efter titel</translation>
   </text>
+
+  <text key="+docdate">
+    <translation lang="en">Date</translation>
+    <translation lang="da">Efter dato (faldende)</translation>
+  </text>
+
+  <text key="+eventtype">
+    <translation lang="en">Event</translation>
+    <translation lang="da">Efter type</translation>
+  </text>
+
+  <text key="+contactinfo">
+    <translation lang="en">Contact</translation>
+    <translation lang="da">Efter kontaktinfo</translation>
+  </text>
+
+  <text key="Dato">
+    <translation lang="en">Date</translation>
+    <translation lang="da">Dato</translation>
+  </text>
+
+  <text key="Sprog">
+    <translation lang="en">Language</translation>
+    <translation lang="da">Sprog</translation>
+  </text>
+
+  <text key="Tid">
+    <translation lang="en">Time</translation>
+    <translation lang="da">Tid</translation>
+  </text>
+
+  <text key="Aktiv">
+    <translation lang="en">Active</translation>
+    <translation lang="da">Aktiv</translation>
+  </text>
+
+  <text key="Off.">
+    <translation lang="en">Pub.</translation>
+    <translation lang="da">Off.</translation>
+  </text>
+
+  <text key="Hjælp">
+    <translation lang="en">Help</translation>
+    <translation lang="da">Hjælp</translation>
+  </text>
+
+  <text key="Alle felter">
+    <translation lang="en">All fields</translation>
+    <translation lang="da">Alle felter</translation>
+  </text>
+
+  <text key="Om dokumentet">
+    <translation lang="en">About</translation>
+    <translation lang="da">Om dokumentet</translation>
+  </text>
+
+  <text key="Rediger med Obvius Ed">
+    <translation lang="en">Edit with Obvius Ed</translation>
+    <translation lang="da">Rediger med Obvius Ed</translation>
+  </text>
+
+  <text key="Der er i forvejen valgt">
+    <translation lang="en">Already chosen</translation>
+    <translation lang="da">Der er i forvejen valgt</translation>
+  </text>
+
+  <text key="Skjul titel">
+    <translation lang="en">Hide title</translation>
+    <translation lang="da">Skjul titel</translation>
+  </text>
+
+  <text key="Ingen begrænsning">
+    <translation lang="en">No limitations</translation>
+    <translation lang="da">Ingen begrænsning</translation>
+  </text>
+
+  <text key="underdokumenter">
+    <translation lang="en">sub docs</translation>
+    <translation lang="da">underdokumenter</translation>
+  </text>
+
+  <text key="Navigér">
+    <translation lang="en">Navigate</translation>
+    <translation lang="da">Navigér</translation>
+  </text>
+
+  <text key="Dokument">
+    <translation lang="en">Document</translation>
+    <translation lang="da">Dokument</translation>
+  </text>
+
+  <text key="Forfatter">
+    <translation lang="en">Author</translation>
+    <translation lang="da">Forfatter</translation>
+  </text>
+
+  <text key="Dokumenttype">
+    <translation lang="en">Document type</translation>
+    <translation lang="da">Dokumenttype</translation>
+  </text>
+
+  <text key="Opret nyt billede her">
+    <translation lang="en">Upload new picture</translation>
+    <translation lang="da">Opret nyt billede her</translation>
+  </text>
+
+  <text key="Luk">
+    <translation lang="en">Close</translation>
+    <translation lang="da">Luk</translation>
+  </text>
+
+  <text key=" Højreklik på AdminJump-linket nedenfor og vælg "Føj til foretrukne...". Hvis værktøjslinien "Hyperlinks" ikke er slået til, så gør det i menuen "Vis/Værktøjslinier/Hyperlinks" - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen "AdminJump" i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).">
+    <translation lang="en"> </translation>
+    <translation lang="da"> Højreklik på AdminJump-linket nedenfor og vælg "Føj til foretrukne...". Hvis værktøjslinien "Hyperlinks" ikke er slået til, så gør det i menuen "Vis/Værktøjslinier/Hyperlinks" - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen "AdminJump" i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).</translation>
+  </text>
+
+  <text key="Administration af brugere, grupper, abonnenter og login-adgang:">
+    <translation lang="en">Administration of users, groups, subscribers and login:</translation>
+    <translation lang="da">Administration af brugere, grupper, abonnenter og login-adgang:</translation>
+  </text>
+
+  <text key="Brugere">
+    <translation lang="en">Users</translation>
+    <translation lang="da">Brugere</translation>
+  </text>
+
+  <text key="Grupper">
+    <translation lang="en">Groups</translation>
+    <translation lang="da">Grupper</translation>
+  </text>
+
+  <text key="Abonnenter">
+    <translation lang="en">Subscribers</translation>
+    <translation lang="da">Abonnenter</translation>
+  </text>
+
+  <text key="Ryd server-cahce">
+    <translation lang="en">Clear server cahce</translation>
+    <translation lang="da">Ryd server-cahce</translation>
+  </text>
+
+  <text key="Forside nyt">
+    <translation lang="en">Front page news</translation>
+    <translation lang="da">Forside nyt</translation>
+  </text>
+
+  <text key="Afsnit nyt">
+    <translation lang="en">Section news</translation>
+    <translation lang="da">Afsnit nyt</translation>
+  </text>
+
+
 
 </messages>
