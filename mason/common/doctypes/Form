@@ -1,0 +1,84 @@
+<!-- Standard doctype: -->
+
+<& headline &>
+%
+<& teaser &>
+
+<div class="obviusform">
+
+%if(scalar(@$invalid)) {
+<div class="error">
+Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette feltet i formularen nedenfor.
+<ul>
+%for(@$invalid) {
+    <li><a href="#<% $_ %>"><% $fields_by_name{$_}->{title} %></a></li>
+%}
+</ul>
+</div>
+<br />
+%}
+
+%unless($prefix) {
+<form name="pageform" action="<% $uri %>" method="get">
+%}
+<input type="hidden" name="obvius_form_submitted" value="1" />
+%for(@$fields) {
+<a name="<% $_->{name} %>"></a>
+<h2><% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %></h2>
+%if($_->{invalid}) {
+<p class="error">
+Fejl: <% $_->{invalid} %>
+</p>
+%}
+%if($_->{mandatory_failed}) {
+<& Form:show_mandatory_error, field=>$_, fields_by_name=>\%fields_by_name &>
+%}
+%   if($m->comp_exists('form_files/fieldtypes/' . $_->{type})) {
+    <& 'form_files/fieldtypes/' . $_->{type}, fielddata=>$_ &>
+%   } else {
+    <& 'form_files/fieldtypes/default', fielddata=>$_ &>
+%   }
+%}
+<br />
+<div>
+<input type="submit" value="Submit" />
+</div>
+%unless($prefix) {
+</form>
+%}
+
+</div>
+%
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+my $formdata = $output->param('formdata');
+my $fields = $formdata->{field} || [];
+
+my $invalid = $output->param('invalid') || [];
+
+my %fields_by_name = map { $_->{name} => $_ } @$fields;
+</%init>
+%
+%
+%
+<%method show_mandatory_error>
+<%args>
+$field
+$fields_by_name
+</%args>
+<p class="error">
+%if($field->{mandatory} eq "1") {
+    Fejl: feltet skal udfyldes.
+%} else {
+%    if($field->{mandatory} =~ s/^!//) {
+        Fejl: feltet skal udfyldes hvis feltet "<% $fields_by_name->{$field->{mandatory}}->{title} %>" ikke er udfyldt.
+%    } else {
+        Fejl: feltet skal udfyldes hvis feltet "<% $fields_by_name->{$field->{mandatory}}->{title} %>" er udfyldt.
+%    }
+%}
+</p>
+</%method>

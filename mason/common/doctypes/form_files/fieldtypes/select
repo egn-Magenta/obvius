@@ -1,0 +1,19 @@
+<div>
+<select name="<% $fielddata->{name} %>">
+<option value=""></option>
+%for(@$options) {
+<option value="<% $_->{optionvalue} %>"<% $_->{optionvalue} eq $value ? ' selected="selected"': '' %>>
+    <% $_->{optiontitle} %>
+</option>
+%}
+</select>
+</div>
+%
+%
+<%args>
+$fielddata
+</%args>
+<%init>
+my $options = $fielddata->{options}->{option} || [];
+my $value = $fielddata->{_submitted_value} || $fielddata->{defaultvalue} || '';
+</%init>

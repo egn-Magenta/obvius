@@ -1,0 +1,11 @@
+<div>
+<textarea name="<% $fielddata->{name} %>" wrap="wrap" cols="40" rows="6"><% $value |h %></textarea>
+</div>
+%
+%
+<%args>
+$fielddata
+</%args>
+<%init>
+my $value = $fielddata->{_submitted_value} || $fielddata->{defaultvalue} || '';
+</%init>

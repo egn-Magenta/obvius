@@ -1,0 +1,21 @@
+<div>
+%for(@$options) {
+<div>
+<input type="checkbox" name="<% $fielddata->{name} %>" value="<% $_->{optionvalue} %>"<% $selected{$_->{optionvalue}} ? ' checked="checked"': '' %> />
+<% $_->{optiontitle} %>
+</div>
+%}
+</div>
+%
+%
+<%args>
+$fielddata
+</%args>
+<%init>
+my $options = $fielddata->{options}->{option} || [];
+my $value = $fielddata->{_submitted_value} || $fielddata->{defaultvalue} || [];
+unless(ref($value)) {
+    $value = [ $value ];
+}
+my %selected = map { $_ => 1 } @$value;
+</%init>
