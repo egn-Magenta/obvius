@@ -48,7 +48,7 @@
                             </td>
                             <td width="10"><img src="/grafik/1x1.gif" width="10" alt=""></td>
                             <td width="100%" class="content" valign="top">
-                             <span class="path"><& path &><span>
+                             <& path &>
                               <br>
                               <& subsite &>
                             </td>

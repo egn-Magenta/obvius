@@ -22,6 +22,7 @@ img { border: none }
 
 div.breadcrumbs {
 	font-size: 10px;
+  padding: 7px; 
 }
 
 .enddate {
@@ -71,6 +72,10 @@ div.breadcrumbs {
 
 /* CALENDAR CLASSES - END */
 
+td {
+  font-family: Arial,Verdana,Helvetica,sans-serif;
+  font-size: 12px;
+}
 
 /* FORM FONTS */
 
