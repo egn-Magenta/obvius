@@ -25,7 +25,7 @@ tinyMCELang['lang_table_row_title'] = 'Egenskaber for r&#230;kke';
 tinyMCELang['lang_table_cell_title'] = 'Egenskaber for celle';
 tinyMCELang['lang_table_row_desc'] = 'Egenskaber for r&#230;kke';
 tinyMCELang['lang_table_cell_desc'] = 'Egenskaber for celle';
-tinyMCELang['lang_insert_table_valign'] = 'Vertical alignment';
+tinyMCELang['lang_insert_table_valign'] = 'Lodret justering';
 tinyMCELang['lang_insert_table_align_top'] = 'Top';
 tinyMCELang['lang_insert_table_align_bottom'] = 'Bund';
 
