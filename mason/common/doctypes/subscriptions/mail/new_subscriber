@@ -9,10 +9,11 @@ Content-Transfer-Encoding: 8bit
 Kære abonnent
 
 Du har tilmeldt dig den elektroniske nyhedsservice og vil modtage
-nyheder, når du har aktiveret dit abonnement.
-
-Du kan aktivere dit abonnement ved at klikke på det følgende link,
+nyheder, når du har aktiveret dit abonnement. Det gør du ved at klikke 
+på dette link:
 <http://<% $r->pnotes('site')->Sitename %>/abonner/?mode=activate;e=<% $email %>;p=<% $password %>>
+
+Bemærk: Du skal _ikke_ besvare denne mail.
 
 Med venlig hilsen
 
