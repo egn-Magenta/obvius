@@ -129,22 +129,47 @@ sub obvius_document {
 
     $this->tracer($req, $path||'NULL') if ($this->{DEBUG});
 
-    # Specific path lookup
-    return scalar($obvius->lookup_document($path)) if ($path);
+    if ($path) { # Specific path lookup
+        my $found_doc=$obvius->lookup_document($path);
+        #print STDERR "found_doc $found_doc\n" if (defined $found_doc);
+        return $found_doc if (defined $found_doc); # Document found - return it.
 
-    # Need some comment about when path isn't defined here...
+        # Otherwise, check if the last document found in the path
+        # can handle the request:
+        my ($doc, $path_info)=$obvius->lookup_document($path);
 
-    my $doc = $req->pnotes('document');
-    return $doc if ($doc);
+        my $doctype=$obvius->get_document_type($doc); # XXX Should look at the public version?
 
-    # Lookup from request with path_info and prefix removal
-    $path = $req->uri;
-    my $remove = $req->dir_config('RemovePrefix');
-    $path =~ s/^\Q$remove\E// if ($remove);
-    $path =~ s/\.html?$//;
-    $req->uri($path);
+        print STDERR "doc: ", $obvius->get_doc_uri($doc), "\npath_info: $path_info\n";
+        print STDERR "doctype: ", $doctype->Name, "\n";
 
-    return scalar($obvius->lookup_document($path));
+        # It can:
+        if ($doctype->handle_path_info()) {
+            print STDERR "HANDLED BY: ", $obvius->get_doc_uri($doc), "\n";
+            $req->notes('obvius_path_info'=>$path_info);
+            $req->uri($obvius->get_doc_uri($doc));
+            return $doc;
+        }
+
+        # It couldn't:
+        print STDERR "UNHANDLED, not found\n";
+        return undef;
+    }
+    else {
+        # Need some comment about when path isn't defined here...
+
+        my $doc = $req->pnotes('document');
+        return $doc if ($doc);
+
+        # Lookup from request with path_info and prefix removal
+        $path = $req->uri;
+        my $remove = $req->dir_config('RemovePrefix');
+        $path =~ s/^\Q$remove\E// if ($remove);
+        $path =~ s/\.html?$//;
+        $req->uri($path);
+
+        return scalar($obvius->lookup_document($path));
+    }
 }
 
 sub obvius_document_version {
@@ -317,8 +342,7 @@ sub create_input_object {
             $input->param("_incoming_" . $_->name => $data);
         }
     }
-
-
+    $input->param('OBVIUS_PATH_INFO'=>$req->notes('obvius_path_info')) if (defined $req->notes('obvius_path_info'));
 
     return $input;
 }
