@@ -102,7 +102,7 @@ my %ghosted=(
             );
 
 if ($public) {
-    $obvius->get_version_fields($public, [qw(seq title)]);
+    $obvius->get_version_fields($public, [qw(expires title seq)]);
 }
 else {
     $obvius->get_version_fields($latest, [qw(expires title seq)]);
