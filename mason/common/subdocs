@@ -12,7 +12,7 @@
 %  }
 %  }
 %}
-      <% $date ? '<br>'.$date .'<br><br>' : '<br><br>' %></li>
+      <% $date != 0 ? '<br>'.$date .'<br><br>' : '<br><br>' %></li>
 %     }
     </ul>
 % }
