@@ -9,7 +9,7 @@ datetime	date	datetime			regexp (^\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d$)	none
 time		date	time				regexp (^\d\d:\d\d:\d\d$)			none
 title		text	line				regexp (.)					none
 line		text	line				none						none
-text		text	texteditor			none						none
+text		text	combinededitor			none						none
 textwupload	text	textwupload			none						none
 double		double	line				regexp (^-?\d+(\.\d+)?)				none
 lang		text	line				regexp (^\w\w$)					none
