@@ -32,22 +32,295 @@ use warnings;
 use Obvius;
 use Obvius::DocType;
 
+use LWP::UserAgent;
+use HTML::Parser;
+use URI;
+use URI::Escape;
+
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-    print STDERR __PACKAGE__, "->action\n";
-
     $obvius->get_version_fields($vdoc, [qw(url prefixes)]);
-    my ($url, $prefixes)=($vdoc->field('url'), $vdoc->field('prefixes'));
-
-    $output->param(url=>$url);
+    my $base_url=$vdoc->field('url');
+    my $prefixes=[
+                  grep { defined $_ and length $_ > 0 }
+                  map { s/^\s*//; s/\s*$//; $_ }
+                  split /\n/, ($vdoc->field('prefixes') || '')
+                 ];
     $output->param(prefixes=>$prefixes);
 
+    # Check for loop; return immediately if detected:
+    my $via='HTTP/1.1 ' . $obvius->config->Sitename . ' (Obvius::DocType::Proxy ' . $VERSION . ')';
+    if (!check_via_ok($input, $via)) {
+        $output->param('via_loop_detected'=>1);
+        return OBVIUS_OK;
+    }
+
+    # Get fetch_url:
+    my $fetch_url=$input->param('obvius_proxy_url') || $base_url;
+    $output->param(url=>$fetch_url);
+
+    # Check whether fetch_url is within what we are allowed to proxy:
+    if (!check_url_against_prefixes($fetch_url, [ $base_url, @$prefixes ])) {
+        $output->param('error'=>'URL to be fetched is outside the allowed range for this proxy-document. Nothing fetched.');
+        return OBVIUS_OK;
+    }
+
+    # Do request:
+    my $response=make_request($fetch_url, $via, $input);
+
+    # Filter content:
+    $output->param(proxy_content=>filter_content($response->content, $fetch_url, $base_url, $prefixes));
+
+    # Take care of the result of the request:
+    handle_response($response, $fetch_url, $via, $output);
 
     return OBVIUS_OK;
+}
+
+sub check_via_ok {
+    my ($input, $via)=@_;
+
+    my $header_via=$input->param('OBVIUS_HEADERS_IN')->{Via};
+
+    # XXX This is an odd way of (an attempt at) finding a substring
+    # within a string:
+    my $pattern='[' . (join "][", split '', $via) . ']';
+    return (defined $header_via ? $header_via!~m/$pattern/i : 1);
+}
+
+# filter_content - given the url-string, prefixes linefeed-delimited
+#                  string and content-string, filters the HTML, and
+#                  changes the attributes to have links function as
+#                  they should.
+#
+#                  Only the HTML inside the body-element is returned
+#                  (and considered).
+#
+#                  The actual filtering of attributes is done in
+#                  start_element() below.
+#
+#                  The rest of the stuff is basically just putting the
+#                  split-up back together again.
+#
+#                  The filtered content is collected inside the
+#                  parser-object, also that is where state is kept
+#                  (whether inside body or not).
+sub filter_content {
+    my ($content, $fetch_url, $base_url, $prefixes)=@_;
+
+    my $parser=HTML::Parser->new(
+                                 api_version=>3,
+                                 start_h=>[ \&start_element, 'self, tagname, attr, attrseq' ],
+                                 end_h=>[ \&end_element, 'self, tagname' ],
+                                 default_h=>[ \&catch_all, 'self, dtext' ],
+                                 unbroken_text=>1,
+                                );
+
+
+    $parser->{OBVIUS_OUTPUT}='';
+    $parser->{OBVIUS_IN_BODY}=0;
+    $parser->{OBVIUS_FETCH_URL}=$fetch_url;
+    $parser->{OBVIUS_BASE_URL}=$base_url;
+    $parser->{OBVIUS_PREFIXES}=$prefixes;
+
+    my $ret=$parser->parse($content);
+    $parser->eof;
+
+    my $filtered_content;
+    if ($ret) {
+        $filtered_content=$parser->{OBVIUS_OUTPUT};
+    }
+    else {
+        my $warning=__PACKAGE__ . ' HTML-parser failed, returning unfiltered output.';
+        warn $warning;
+        $filtered_content='<!-- ' . $warning . ' -->' . $content;
+    }
+
+    return $filtered_content;
+}
+
+sub start_element {
+    my ($self, $tagname, $attr, $attrseq)=@_;
+
+    if ($tagname eq 'body') {
+        $self->{OBVIUS_IN_BODY}=1;
+        return;
+    }
+
+    return unless $self->{OBVIUS_IN_BODY};
+
+    $self->{OBVIUS_OUTPUT}.='<' . $tagname;
+
+    my @out_attrs=();
+    foreach my $name (@$attrseq) {
+        if ($name eq '/') { # Special case, apparantly HTML::Parser don't know short elements!
+            $self->{OBVIUS_OUTPUT}.=' /';
+            next; # This should/must also be last
+        }
+
+        my $value=filter_attribute($tagname, $name, $attr->{$name}, $self->{OBVIUS_FETCH_URL}, $self->{OBVIUS_BASE_URL}, $self->{OBVIUS_PREFIXES});
+
+        my $delim=($value=~/[\"]/ ? "'" : '"');
+        push @out_attrs, $name . '=' . $delim . $value . $delim;
+    }
+    $self->{OBVIUS_OUTPUT}.=' ' . (join ' ', @out_attrs) if (scalar(@out_attrs));
+
+    $self->{OBVIUS_OUTPUT}.='>';
+}
+
+# These attributes on these elements contain links that should be
+# absolutified (1) and absolutified+proxied (2):
+my %filter_attributes_elements=(
+                                href    =>{ a=>2, area=>2 },
+                                src     =>{ img=>1, input=>1 },
+                                longdesc=>{ img=>2 },
+                                action  =>{ form=>2 },
+                                usemap  =>{ img=>2, input=>2 },
+                               );
+
+sub filter_attribute {
+    my ($tagname, $name, $value, $fetch_url, $base_url, $prefixes)=@_;
+
+    my $elements=$filter_attributes_elements{$name};
+    if ($elements and $elements->{$tagname}) {
+        my $orig=$value;
+
+        # Absolutify:
+        my $uri=URI->new_abs($value, $fetch_url);
+        my $abs=$uri->as_string;
+        $value=$abs;
+
+        if ($elements->{$tagname}>1) { # Rewrite:
+            # Now, if the $uri matches $base_url or one of the prefixes,
+            # change it to ./?obvius_proxy_url=$uri
+            if (check_url_against_prefixes($uri, [$base_url, @$prefixes])) {
+                $value='./?obvius_proxy_url=' . uri_escape($uri);
+            }
+        }
+
+        #print STDERR "$tagname $name = ( $orig -> $value )\n" if ($orig ne $value);
+    }
+    else {
+        # No filtering
+    }
+
+    return $value;
+}
+
+sub check_url_against_prefixes {
+    my ($url, $prefixes)=@_;
+
+    foreach my $prefix (@$prefixes) {
+        return 1 if (lc(substr($url, 0, length($prefix))) eq lc($prefix));
+    }
+
+    return 0;
+}
+
+sub end_element {
+    my ($self, $tagname)=@_;
+
+    if ($tagname eq 'body') {
+        $self->{OBVIUS_IN_BODY}=0;
+    }
+
+    return unless $self->{OBVIUS_IN_BODY};
+
+    $self->{OBVIUS_OUTPUT}.='</' . $tagname . '>';
+}
+
+sub catch_all {
+    my ($self, $dtext)=@_;
+
+    return unless $self->{OBVIUS_IN_BODY};
+
+    $self->{OBVIUS_OUTPUT}.=$dtext if (defined $dtext);
+}
+
+my %client_to_proxy_headers=(
+                             'user-agent'=>1,       # Lowercase for simple comparison
+                             'accept'=>1,
+                             'accept-language'=>1,
+                             'accept-charset'=>1,
+                             'cookie'=>1,
+                             'cache-control'=>1,
+                             'via'=>1,
+                             );
+
+# XXX handle methods:
+sub make_request {
+    my ($url, $via, $input)=@_;
+
+    # Read headers from the hashref $input->param('OBVIUS_HEADERS_IN');
+    #  XXX Set protocol/version automatically from $proxy_request below?
+    my %headers_to_external_server=();
+    foreach my $header (keys %{$input->param('OBVIUS_HEADERS_IN')}) {
+        $headers_to_external_server{$header}=$input->param('OBVIUS_HEADERS_IN')->{$header} if ($client_to_proxy_headers{lc($header)});
+    }
+    # Add to via:
+    $headers_to_external_server{Via}=(exists $headers_to_external_server{Via} ? $headers_to_external_server{Via} . ', ' . $via : $via);
+
+    my $method='GET';
+
+    # User-Agent, Request, Response:
+    my $ua=LWP::UserAgent->new;
+    $ua->agent('Obvius::DocType::Proxy ' . $VERSION);
+    $ua->parse_head(0);
+
+    my $proxy_request=HTTP::Request->new($method=>$url); # XXX Make sure $url does not
+                                                         # refer til file: or mailto:!
+
+    map { $proxy_request->header($_=>$headers_to_external_server{$_}) } keys %headers_to_external_server;
+
+    # POST:
+    #  content_type application/x-www-form-urlencoded
+    #  content
+
+    return $ua->request($proxy_request);
+}
+
+my %proxy_to_client_headers_prune=(
+                                   'content-length'=>1,
+                                   'connection'=>1,
+                                   'accept-ranges'=>1,
+                                   'date'=>1,
+                                  );
+
+# XXX handle response-codes:
+sub handle_response {
+    my ($response, $url, $via, $output)=@_;
+
+    if ($response->is_success) {
+        # Set resulting headers by creating the hashref
+        # $output->param('OBVIUS_HEADERS_OUT');
+
+        my %headers_to_client=();
+        $response->headers->scan( sub { my ($h, $v)=@_; $headers_to_client{$h}=$v unless ($h=~/^Client/ or $proxy_to_client_headers_prune{lc($h)}); } );
+
+        if (exists $headers_to_client{Server}) {
+            $headers_to_client{'X-Original-Server'}=$headers_to_client{Server};
+            delete $headers_to_client{Server};
+        }
+        $headers_to_client{Via}=(exists $headers_to_client{Via} ? $headers_to_client{Via} . ', ' . $via : $via);
+
+        $headers_to_client{Warning}='Includes part of ' . $url;
+        $output->param('OBVIUS_HEADERS_OUT'=>\%headers_to_client);
+
+
+    }
+    else {
+        # Should perhaps signal that no caching should be done?
+        if ($response->code() == 403) {
+            $output->param(error=>'403 Forbidden; possible loop');
+        }
+        else {
+            $output->param(error=>$response->code() . ' Unhandled error');
+        }
+    }
 }
 
 1;
