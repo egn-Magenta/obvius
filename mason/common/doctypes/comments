@@ -85,7 +85,7 @@ my @fields=(
 </%once>
 %
 <%init>
-return unless ($obvius->get_docparam_value_recursive($doc, 'comments') eq 'yes');
+return unless (($obvius->get_docparam_value_recursive($doc, 'comments') || '') eq 'yes');
 $r->no_cache(1);
 
 my $show_email=$output->param('_incoming_show_email') || 0;
