@@ -11,7 +11,7 @@
 %         }
 %     }
 %     $level=$_->{level};
-<li><a href="<% $_->{url} %>"><% $_->{title} |h %></a></li>
+<li><a href="<% $prefix %><% $_->{url} %>"><% $_->{title} |h %></a></li>
 % }
 %
 <%args>
