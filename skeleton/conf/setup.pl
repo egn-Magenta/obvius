@@ -20,6 +20,7 @@ package ${perlname}::Site::Admin;
 our @ISA = qw( WebObvius::Site::Mason WebObvius::Admin );
 
 package ${perlname}::Site::Admin::CacheHandling;
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 package ${perlname}::Site;
 
