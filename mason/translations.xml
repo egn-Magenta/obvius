@@ -2142,7 +2142,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Section news priority">
     <translation lang="en">Section news priority</translation>
-    <translation lang="da">Prioritet</translation>
+    <translation lang="da">Prioritering af afsnit-nyt</translation>
   </text>
 
   <text key="Always last">
@@ -2152,7 +2152,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Section news duration">
     <translation lang="en">Section news duration</translation>
-    <translation lang="da">Varighed (antal dage)</translation>
+    <translation lang="da">Varighed på afsnit-nyt</translation>
   </text>
 
   <text key="Include in subscription">
@@ -2989,7 +2989,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Frontpage news priority">
     <translation lang="en">Frontpage news priority</translation>
-    <translation lang="da">Prioritering af artikler til forsiden</translation>
+    <translation lang="da">Prioritering af forside-nyt</translation>
   </text>
 
   <text key="Gruppe">
