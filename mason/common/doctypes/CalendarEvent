@@ -1,36 +1,24 @@
 <& headline &>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr>
-<td width="100" valign="top">
-Tidspunkt :
-</td>
-<td><& /shared/display_date, date=>$date &> kl. <% $time %></td>
+<td width="100" valign="top" class="event">Tidspunkt :</td>
+<td class="event"><& /shared/display_date, date=>$date &> kl. <% $time %></td>
 </tr>
 <tr>
-<td width="100" valign="top">
-Sted :
-</td>
-<td> <% $place %></td>
+<td width="100" valign="top" class="event">Sted :</td>
+<td class="event"> <% $place %></td>
 </tr>
 <tr>
-<td width="100" valign="top">
-Kontakt :
-</td>
-<td><% $contactinfo %></td>
+<td width="100" valign="top" class="event">Kontakt :</td>
+<td class="event"><% $contactinfo %></td>
 </tr>
 <tr>
-<td width="100" valign="top">
-Type :
-</td>
-<td> <% $eventtype %>
-</td>
+<td width="100" valign="top" class="event">Type :</td>
+<td class="event"> <% $eventtype %></td>
 </tr>
 <tr>
-<td width="100" valign="top">
-Information :
-</td>
-<td><& /shared/htmlize, text=>$eventinfo &>
-</td>
+<td width="100" valign="top" class="event">Information :</td>
+<td class="event"><& /shared/htmlize, text=>$eventinfo &></td>
 </tr>
 </table>
 
