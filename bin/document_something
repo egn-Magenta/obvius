@@ -52,7 +52,7 @@ foreach my $file (@files) {
             $commented=1;
             next;
         }
-        elsif ($line=~/sub\s+(\w+)/) {
+        elsif ($line=~/^sub\s+(\w+)/) {
             if ($commented) {
                 push @documented, { file=>$file, sub=>$1, linenum=>$i };
             }
