@@ -32,12 +32,17 @@ use warnings;
 use Obvius;
 use Obvius::DocType;
 
-use Data::Dumper;
-
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-
+# action - given the usual band of objects, either presents a
+#          search-form by consulting the editpage and the field
+#          "exclude_fields" OR performs a search with the values
+#          submitted from the form - limited to only return documents
+#          of the document type given by the field
+#          "doctype_2_search". Results and information for the
+#          template system are placed on the $output-object.
+#          Always returns OBVIUS_OK.
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
@@ -261,36 +266,37 @@ sub action {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::DocTypeSearch - Perl extension for blah blah blah
+Obvius::DocType::DocTypeSearch - search within one document type only.
 
 =head1 SYNOPSIS
 
   use Obvius::DocType::DocTypeSearch;
-  blah blah blah
+
+  # Use'd automatically by Obvius.
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::DocTypeSearch, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+The purpose of this document type is to provide a page that can be
+used to search for documents that are of one, by the webmaster
+defined, document type.
 
-Blah blah blah.
+It either presents a search-form displaying the relevant fields that
+the user can use to narrow down the search, or it displays the results
+of such a search.
 
 =head2 EXPORT
 
 None by default.
 
-
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::DocType>.
 
 =cut
