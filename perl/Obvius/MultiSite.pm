@@ -319,9 +319,9 @@ sub create_new_document {		# RS 20010819 - ok
             unless (ref $fields and $fields->UNIVERSAL::can('param'));
 
         my %status = $doctype->validate_fields($fields, $this);
-        warn "Invalid fields stored anyway: @{$status{invalid}}\n" if ($status{invalid});
-        warn "Missing fields stored undef: @{$status{missing}}\n" if ($status{missing});
-        warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+        $this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}") if ($status{invalid});
+        $this->{LOG}->info("Missing fields stored undef: @{$status{missing}}") if ($status{missing});
+        $this->{LOG}->info("Excess fields not stored: @{$status{excess}}") if ($status{excess});
 
         my @fields = @{$status{valid}};
         # Same as new_version:
