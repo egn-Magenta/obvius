@@ -282,8 +282,15 @@ sub create_input_object {
     return $input;
 }
 
+# expand_output - given a site, an output object and the request
+#                 object, runs the template system and returns a
+#                 string of HTML.
+#                 Notice that this method must be defined in the
+#                 subclasses that implement interfaces to template
+#                 systems, if not the one here is run, and dies with
+#                 an error.
 sub expand_output {
-    my ($this, $site, $output) = @_;
+    my ($this, $site, $output, $r) = @_;
 
     $this->tracer($site, $output) if ($this->{DEBUG});
 
