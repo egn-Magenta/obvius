@@ -1,0 +1,47 @@
+<%method edit>
+<select name="<% $name %>">
+%if($allow_none) {
+    <option value=""<% $_ eq '' ? ' SELECTED' : '' %>></option>
+%}
+%for(@options) {
+    <option value="<% $_ %>"<% $_ eq $value ? ' SELECTED' : '' %>><% $_ %></option>
+%}
+</select>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$comp_dir
+$allow_none=>0
+</%args>
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$value ||= '';
+
+my @options;
+
+if(-d $comp_dir) {
+    opendir(DH, $comp_dir);
+    for(readdir(DH)) {
+        if(-f "$comp_dir/$_") {
+            push(@options, $_);
+        }
+    }
+    closedir(DH);
+}
+
+</%init>
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+    return $value;
+</%perl>
+</%method>
