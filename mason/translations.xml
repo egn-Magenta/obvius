@@ -2155,6 +2155,11 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Varighed på afsnit-nyt</translation>
   </text>
 
+  <text key="News duration">
+    <translation lang="en">News duration</translation>
+    <translation lang="da">Nyhedens varighed</translation>
+  </text>
+
   <text key="Include in subscription">
     <translation lang="en">Include in subscription</translation>
     <translation lang="da">Inkludér i abonnementsudsendelse</translation>

@@ -3,7 +3,7 @@
 <tr>
 <td height="50" class="news">
 <br>
-<strong>Nyheder</strong>
+<strong><% $language eq 'en' ? 'NEWS' : 'NYHEDER' %></strong>
 <br><br>
 %my $newsnumber = 1;
 % if (@newsitems) {
