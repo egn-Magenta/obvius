@@ -91,7 +91,7 @@ DocType: MultiChoice parent=Standard basis searchable
 
 DocType: OrderForm parent=HTML basis searchable
  mailto            email
- mailmsg           line
+ mailmsg           line                     
 
 DocType: CreateDocument parent=Base basis searchable
  doctype            line                    searchable sortable threshold=128
@@ -108,7 +108,7 @@ DocType: Sitemap parent=Standard basis searchable
 
 DocType: Subscribe parent=Standard basis searchable
  mailfrom          email
- passwdmsg         line
+ passwdmsg         line                      default_value=mail/subscribe\_passwd
  show_title        bool                      default_value=0
  show_teaser       bool                      default_value=0
 
@@ -168,7 +168,7 @@ DocType: CalendarEvent parent=Base basis searchable
 
 DocType: Calendar parent=Base basis searchable
  startdate          date
- enddate            date
+ enddate            date                    
  s_event_type       line
  s_event_title      line
  s_event_contact    line
