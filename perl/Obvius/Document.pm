@@ -4,9 +4,11 @@ package Obvius::Document;
 #
 # Document.pm - Document
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: Adam Sjøgren (asjo@magenta-aps.dk)
+# Authors: Jørgen Ulrik Balslev Krag (jubk@magenta-aps.dk),
+#          René Seindal,
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +22,7 @@ package Obvius::Document;
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 ########################################################################
 
@@ -47,6 +49,10 @@ our %validate =
      },
     );
 
+# new - creates a new Obvius::Document instance. $rec is used to fill
+#       in values, if present. It can be a hash, a hash-ref or an
+#       object with a param-method. Returns the new object on success,
+#       undef on failure.
 sub new {
     my ($class, $rec) = @_;
 
@@ -57,6 +63,8 @@ sub new {
     return bless $self, $class;
 }
 
+# list_valid_keys - returns an array-ref to hash-refs representing
+#                   unique ways to identify an Obvius::Document object.
 sub list_valid_keys {
     my ($this) = @_;
 
@@ -67,15 +75,18 @@ sub list_valid_keys {
 }
 
 
-#
-# Niceness
-#
+
+# versions - returns the versions stored in the document object in an
+#            Obvius::Data object.
 sub versions {
     my($this) = @_;
 
     return $this->{VERSIONS};
 }
 
+# version - given a string for an identifier (field-name) and a string
+#           with a version, returns that version from the versions
+#           stored in the document.
 sub version {
     my($this, $id, $version) = @_;
 
@@ -84,36 +95,28 @@ sub version {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::Document - Perl extension for blah blah blah
+Obvius::Document - class for document objects in Obvius.
 
 =head1 SYNOPSIS
 
   use Obvius::Document;
-  blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Document, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+This is a simple container-class for documents in Obvius. The
+definitions of keys and such are used by the built in object-cache.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik Balslev Krag, E<lt>jubk@magenta-aps.dkE<gt>,
+René Seindal,
+Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius>.
 
 =cut
