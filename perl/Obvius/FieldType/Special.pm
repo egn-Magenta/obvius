@@ -94,15 +94,15 @@ sub copy_out {
         }
     }
 
-    if ($this->{VALIDATE_ARGS} eq 'ValidXhtml') {
-        return $this->check_xhtml($value, $obvius, $fspec);
-    }
-
     return $value;
 }
 
 sub validate {
     my ($this, $obvius, $fspec, $value, $input) = @_;
+
+    if ($this->{VALIDATE_ARGS} eq 'ValidXhtml') {
+        return $this->check_xhtml($value, $obvius, $fspec);
+    }
 
     return undef unless (defined $value);
     $value = $this->copy_out($obvius, $fspec, $value);
