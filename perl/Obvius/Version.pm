@@ -4,9 +4,12 @@ package Obvius::Version;
 #
 # Version.pm - Version of a Document
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S (http://www.aparte.dk/)
 #
-# Author: Adam Sjøgren (asjo@magenta-aps.dk)
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#          René Seindal,
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -99,6 +102,13 @@ sub fields {
     return $this->{$type};
 }
 
+# field - takes a fieldname, an optional value and an optional
+#         type. If value is defined, the field is set to value in the
+#         relevant type of fields (either 'FIELDS' or
+#         'PUBLISH_FIELDS') and the old value is returned. If value
+#         isn't defined, the current value is returned.  Note that the
+#         type-argument shouldn't be used by any other method than
+#         Obvius::Version->publish_field(s). Thank you.
 sub field {
     my ($this, $name, $value, $type) = @_;
     $type=(defined $type ? $type : 'FIELDS');
@@ -121,36 +131,31 @@ sub publish_field {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::Version - Perl extension for blah blah blah
+Obvius::Version - Perl object for a version (vdoc).
 
 =head1 SYNOPSIS
 
-  use Obvius::Version;
-  blah blah blah
+  my $cur_value=$vdoc->field('title');
+  my $old_value=$vdoc->field(title=>'New text');
+  $vdoc->publish_field(lprio=>3);
+  my $p_value=$vdoc->publish_field('ldura');
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Version, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+This implements the version-object for Obvius by extending the generic
+Obvius::Data with specialized AUTOLOAD and field-methods..
 
-Blah blah blah.
+=head1 AUTHORS
 
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>,
+René Seindal,
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::Document>, L<Obvius::Data>.
 
 =cut
