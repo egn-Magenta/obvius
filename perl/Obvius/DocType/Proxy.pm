@@ -68,17 +68,22 @@ sub action {
     # Check whether fetch_url is within what we are allowed to proxy:
     if (!check_url_against_prefixes($fetch_url, [ $base_url, @$prefixes ])) {
         $output->param('error'=>'URL to be fetched is outside the allowed range for this proxy-document. Nothing fetched.');
+        warn "URL $fetch_url to be fetched is outside the allowed range $base_url @$prefixes. Nothing fetched.";
         return OBVIUS_OK;
     }
 
     # Do request:
-    my $response=make_request($fetch_url, $via, $input);
+    my $response=make_request($fetch_url, $via, $input, $output);
+    unless ($response) {
+        $output->param(error=>'Can not handle request');
+        return OBVIUS_OK;
+    }
 
     # Filter content:
     $output->param(proxy_content=>filter_content($response->content, $fetch_url, $base_url, $prefixes));
 
     # Take care of the result of the request:
-    handle_response($response, $fetch_url, $via, $output);
+    handle_response($response, $fetch_url, $base_url, $prefixes, $via, $output);
 
     return OBVIUS_OK;
 }
@@ -180,7 +185,9 @@ my %filter_attributes_elements=(
                                 href    =>{ a=>2, area=>2 },
                                 src     =>{ img=>1, input=>1 },
                                 longdesc=>{ img=>2 },
-                                action  =>{ form=>2 },
+                                action =>{ form=>2 },  # May need extra handling
+                                                       # (if params in action, when
+                                                       # method is post, is a problem)
                                 usemap  =>{ img=>2, input=>2 },
                                );
 
@@ -190,20 +197,13 @@ sub filter_attribute {
     my $elements=$filter_attributes_elements{$name};
     if ($elements and $elements->{$tagname}) {
         my $orig=$value;
-
-        # Absolutify:
-        my $uri=URI->new_abs($value, $fetch_url);
-        my $abs=$uri->as_string;
-        $value=$abs;
-
-        if ($elements->{$tagname}>1) { # Rewrite:
-            # Now, if the $uri matches $base_url or one of the prefixes,
-            # change it to ./?obvius_proxy_url=$uri
-            if (check_url_against_prefixes($uri, [$base_url, @$prefixes])) {
-                $value='./?obvius_proxy_url=' . uri_escape($uri);
-            }
+        if ($elements->{$tagname}>1) { # Proxy:
+            $value=absolutify_and_proxy($value, $fetch_url, $base_url, $prefixes);
         }
-
+        else {
+            # Only absolutify:
+            $value=absolutify($value, $fetch_url);
+        }
         #print STDERR "$tagname $name = ( $orig -> $value )\n" if ($orig ne $value);
     }
     else {
@@ -211,6 +211,29 @@ sub filter_attribute {
     }
 
     return $value;
+}
+
+sub absolutify {
+    my ($url, $fetch_url)=@_;
+
+    my $uri=URI->new_abs($url, $fetch_url);
+    my $abs=$uri->as_string;
+
+    return $abs;
+}
+
+sub absolutify_and_proxy {
+    my ($url, $fetch_url, $base_url, $prefixes)=@_;
+
+    $url=absolutify($url, $fetch_url);
+
+    # Now, if the uri matches $base_url or one of the prefixes,
+    # change it to ./?obvius_proxy_url=$uri
+    if (check_url_against_prefixes($url, [$base_url, @$prefixes])) {
+        $url='./?obvius_proxy_url=' . uri_escape($url);
+    }
+
+    return $url;
 }
 
 sub check_url_against_prefixes {
@@ -248,14 +271,24 @@ my %client_to_proxy_headers=(
                              'accept'=>1,
                              'accept-language'=>1,
                              'accept-charset'=>1,
-                             'cookie'=>1,
+                             # 'cookie'=>1, # XXX For cookies not to bleed, handling is necessary!
                              'cache-control'=>1,
                              'via'=>1,
                              );
 
-# XXX handle methods:
+# This is a bit of a mess, these things get added to input, and there
+# is no way to tell them apart from incoming variables:
+my %incoming_variables_prune=(
+                              NOW=>1,
+                              IS_ADMIN=>1,
+                              THE_REQUEST=>1,
+                              REMOTE_IP=>1,
+                              OBVIUS_HEADERS_IN=>1,
+                              OBVIUS_COOKIES=>1,
+                             );
+
 sub make_request {
-    my ($url, $via, $input)=@_;
+    my ($url, $via, $input, $output)=@_;
 
     # Read headers from the hashref $input->param('OBVIUS_HEADERS_IN');
     my %headers_to_external_server=();
@@ -265,7 +298,6 @@ sub make_request {
     # Add to via:
     $headers_to_external_server{Via}=(exists $headers_to_external_server{Via} ? $headers_to_external_server{Via} . ', ' . $via : $via);
 
-    my $method='GET';
 
     # User-Agent, Request, Response:
     my $ua=LWP::UserAgent->new(
@@ -276,18 +308,30 @@ sub make_request {
                                max_size=>4*1024*1024,
                               );
 
-    my $proxy_request=HTTP::Request->new($method=>$url); # XXX Make sure $url does not
-                                                         # refer til file: or mailto:!
-
-    map { $proxy_request->header($_=>$headers_to_external_server{$_}) } keys %headers_to_external_server;
-
-    # POST:
-    #  content_type application/x-www-form-urlencoded
-    #  content
+    my %headers=map { $_=>$headers_to_external_server{$_} } keys %headers_to_external_server;
 
     # XXX Check ua->is_protocol_supported
 
-    return $ua->request($proxy_request);
+    my $response;
+    my $request_method=$ENV{REQUEST_METHOD};
+    if ($request_method eq 'POST') { # Transfer incoming formdata
+        my %formdata;
+        foreach my $key ($input->param()) {
+            next if ($incoming_variables_prune{$key});
+            $formdata{$key}=$input->param($key);
+        }
+
+        $response=$ua->post($url, \%formdata, %headers);
+    }
+    elsif ($request_method eq 'GET') { # It's all in the URL, so it will be passed
+        $response=$ua->get($url, %headers);
+    }
+    else {
+        warn "Unknown request method \"$request_method\", aborting";
+        return undef;
+    }
+
+    return $response;
 }
 
 my %proxy_to_client_headers_prune=(
@@ -295,11 +339,12 @@ my %proxy_to_client_headers_prune=(
                                    'connection'=>1,
                                    'accept-ranges'=>1,
                                    'date'=>1,
+                                   'set-cookie'=>1, # XXX For cookies not to cross-pollenate
+                                                    #     special handling will be required
                                   );
 
-# XXX handle response-codes:
 sub handle_response {
-    my ($response, $url, $via, $output)=@_;
+    my ($response, $url, $base_url, $prefixes, $via, $output)=@_;
 
     # XXX Check "Client-Aborted" (if size is too big)
 
@@ -318,14 +363,13 @@ sub handle_response {
 
         $headers_to_client{Warning}='Includes part of ' . $url;
         $output->param('OBVIUS_HEADERS_OUT'=>\%headers_to_client);
-
-
     }
     else {
-        # Should perhaps signal that no caching should be done?
+        # XXX Should perhaps signal that no caching should be done?
         my $status=$response->code();
         if ($status==403) { # Forbidden
             if ($response->headers->header('via')) {
+                # If there is a Via-header, it's probably why we got a Forbidden; loop:
                 $output->param(error=>'403 Proxying of a proxy-document detected');
             }
             else {
@@ -335,10 +379,11 @@ sub handle_response {
         elsif ($status==404) { # Not found
             $output->param(error=>'404 Not Found');
         }
-        elsif ($status==301 or $status==302 or $status==303 or $status==307) { # Moved permanently, Found, See other, Temporary Redirect
-            # XXX Read rfc to check semantics.
-            my $location=$response->headers->header('location');
-            $output->param(redirect=>'./?obvius_proxy_url=' . uri_escape($location));
+        elsif ($status==301 or $status==302 or $status==303 or $status==307) {
+            # Moved permanently, Found, See other, Temporary Redirect
+            #  XXX Read rfc to check semantics.
+            my $location=absolutify_and_proxy($response->headers->header('location'), $url, $base_url, $prefixes);
+            $output->param(redirect=>$location);
             $output->param(status=>$response->code);
         }
         else {
