@@ -200,7 +200,8 @@ sub get_public_user_areas {
     my ($obvius, $user)=@_;
     return undef unless ($obvius->get_public_user({ id=>$user->{id} }));
 
-    my @areas=$obvius->get_table_record('public_users_areas', { public_userid=>$user->{id} });
+    my @areas=$obvius->get_table_record('public_users_areas', { public_userid=>$user->{id} }); # array context
+    return \@areas;
 }
 
 # get_public_user_area - returns a hash-refs of the area for the
@@ -262,7 +263,15 @@ sub get_public_user_area_docs {
 
     # XXX Find all documents that denote an area...
 
-    return [ $obvius->get_root_document() ];
+    my @list=($obvius->get_root_document());
+
+    my $doc;
+    $doc=$obvius->lookup_document('/test/');
+    push @list, $doc if ($doc);
+    $doc=$obvius->lookup_document('/laboratorium/');
+    push @list, $doc if ($doc);
+
+    return \@list;
 }
 
 # delete_public_user_area - remove the supplied user from the given
