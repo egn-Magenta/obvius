@@ -716,25 +716,28 @@ sub calc_order_for_query {
     }
 
     foreach (@sort_fields) {
-	if (/([+-])(.*)/) {
-	    my ($order, $fieldname) = ($1, $2);
-	    my $fspec=$this->get_fieldspec($fieldname, $sortdoctype);
-	    unless ($fspec) {
-		warn "Invalid fieldname (no fieldspec found): $fieldname";
-		next;
-	    }
+        if (/([+-])(.*)/) {
+            my ($order, $fieldname) = ($1, $2);
+            # Allow fields from the version table
+            unless($fieldname =~ /(docid|version|type|lang)/) {
+                my $fspec=$this->get_fieldspec($fieldname, $sortdoctype);
+                unless ($fspec) {
+                    warn "Invalid fieldname (no fieldspec found): $fieldname";
+                    next;
+                }
 
-	    unless ($fspec->Sortable) {
-		warn "Can't sort on field $_";
-		next;
-	    }
-		
-	    $sort_fields{$fieldname}++;
-	    push @order, $fieldname . ($order eq '-' ? ' DESC' : '');
-	}
-	else {
-	    $this->log->warn("Don't understand sort-field: $_");
-	}
+                unless ($fspec->Sortable) {
+                    warn "Can't sort on field $_";
+                    next;
+                }
+
+                $sort_fields{$fieldname}++;
+            }
+            push @order, $fieldname . ($order eq '-' ? ' DESC' : '');
+        }
+        else {
+            $this->log->warn("Don't understand sort-field: $_");
+        }
     }
 
     return(\%sort_fields, \@order);
