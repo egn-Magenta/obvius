@@ -37,4 +37,8 @@ $output
 %
 <%init>
 my $url=$output->param('url');
+
+if ($output->param('redirect')) {
+    $m->comp('/shared/redirect', location=>$output->param('redirect'), http_status=>$output->param('status'));
+}
 </%init>
