@@ -972,7 +972,14 @@ sub get_distinct_vfields {
         }
     }
 
-    my $order = ($options{sortrecent} ? 'versions.version DESC' : "vfields." . $value_field);
+    my $order;
+    if($options{sortrecent}) {
+        $order = 'versions.version DESC';
+    } elsif($options{sortreverse}) {
+        $order = 'vfields.' . $value_field . " DESC";
+    } else {
+        $order = "vfields." . $value_field;
+    }
 
     my $set=DBIx::Recordset->SetupObject( {'!DataSource'=>$this->{DB},
                                             '!Table'     =>$tables,
