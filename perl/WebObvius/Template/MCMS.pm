@@ -4,7 +4,7 @@ package WebObvius::Template::MCMS;
 
 ########################################################################
 #
-# Obvius.pm - Template class with Obvius-specific callbacks
+# MCMS.pm - Template class with Obvius-specific callbacks
 #
 # Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #

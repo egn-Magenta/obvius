@@ -190,16 +190,16 @@ __END__
 
 =head1 NAME
 
-WebObvius::Template::Obvius::HTML2Obvius - Perl extension for blah blah blah
+WebObvius::Template::Obvius::HTML2MCMS - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use WebObvius::Template::Obvius::HTML2Obvius;
+  use WebObvius::Template::Obvius::HTML2MCMS;
   blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for WebObvius::Template::Obvius::HTML2Obvius, created by h2xs. It looks like the
+Stub documentation for WebObvius::Template::Obvius::HTML2MCMS, created by h2xs. It looks like the
 author of the extension was negligent enough to leave the stub
 unedited.
 
