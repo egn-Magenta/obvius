@@ -25,7 +25,7 @@ function set_default(name) {
 
 </script>
 
-<table border="1">
+<table class="docparammatrix">
     <tr>
         <th><% $vdoc->field('short_title') || $vdoc->field('title') %></th>
 %   for(@$docparam_options) {
@@ -33,8 +33,9 @@ function set_default(name) {
 %   }
         <th>&nbsp</th>
     <tr>
+%my $class='a';
 %for my $d (@$first_level_docs) {
-    <tr>
+    <tr class="<% $class %>">
         <td>
             <strong><% '/' . $d->{name} . '/' %></strong>
             <input type="hidden" name="<% $d->{docid} %>_submitted" value="1" />
@@ -44,14 +45,11 @@ function set_default(name) {
 %  }
         <td><input type="button" onclick="set_default('selection_<% $d->{docid} %>');" value="Set default" <% $form_disabled ? 'disabled="disabled" ' : '' %>/></td>
     </tr>
+%  $class = ($class eq 'b' ? 'a' : 'b');
 %}
-    <tr>
-        <td colspan="<% scalar(@$docparam_options) + 2 %>">
-            <input type="hidden" name="mode" value="save" />
-            <input type="submit" value="Update" <% $form_disabled ? 'disabled="disabled" ' : '' %>/>
-        </td>
-    </tr>
 </table>
+<input type="hidden" name="mode" value="save" />
+<input type="submit" value="Update" <% $form_disabled ? 'disabled="disabled" ' : '' %>/>
 <br />
 <br />
 <%args>
