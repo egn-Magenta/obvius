@@ -17,7 +17,7 @@ add_date_buttons('<% $name %>');
 add_date_separator();
 add_time_buttons('<% $name %>');
 add_date_separator(2);
-add_date_now('<% $name %>', '<& /shared/msg, text=>'Now' &>');
+add_date_now('<% $name %>', '<& SELF:msg, text=>'Now' &>');
 add_date_separator(2);
 add_field_reset('<% $name %>');
 </SCRIPT>
