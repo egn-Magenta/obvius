@@ -66,6 +66,9 @@
 <& '/edit/fieldtypes/' . $_->{fieldspec}->{FIELDTYPE}->Edit . ':edit',
     fieldspec=>$_->{fieldspec}, fieldtype=>$_->{fieldspec}->{FIELDTYPE},
 	name=>$_->{fieldspec}->Name, session=>$session, %{$_->{options}} &>
+%if($_->{options}->{extra_linebreak}) {
+<div><img src="/grafik/admin/1x1.gif" alt="" width="1" height="20"></div>
+%}
 </td>
 %          }
 %      }
