@@ -363,10 +363,17 @@ sub send_mail {
                                         out_method => \$mailmsg
                                     );
     $mailtemplate = '/automatic' unless($mailtemplate and -f $base_dir . '/mason/mail' . $mailtemplate);
-    my $retval = $interp->exec($mailtemplate, obvius => $obvius, subscriber => $subscriber, mailfrom => $sender, hostname=>$sitename);
+    # Note that setting mailfrom to --sender doesn't make sense
+    # (envelope return path and From: are two different things):
+    my $retval = $interp->exec($mailtemplate, obvius => $obvius, subscriber => $subscriber, mailfrom => $from, hostname=>$sitename);
+
+    # Create Postfix-compatible Variable Envelope Return Path:
+    my ($from_user, $from_domain)=split /@/, $mailto, 2;
+    my ($sender_user, $sender_domain)=split /@/, $from, 2;
+    my $sender=$sender_user . '+' . $from_user . '=' . $from_domain . '@' . $sender_domain;
 
     if($debug) {
-        print STDERR "Not sending this mail (because of DEBUG): \n";
+        print STDERR "Not sending this mail (because of DEBUG), sender: $sender\n";
         print STDERR $mailmsg ."\n";
     } else {
 
@@ -374,7 +381,7 @@ sub send_mail {
             print STDERR "Warning: failed to create mail message\n";
         } else {
             my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => $debug);
-            $mail_error = "Failed to specify a sender [$from]\n"        unless ($smtp->mail($from));
+            $mail_error = "Failed to specify a sender [$sender]\n"        unless ($smtp->mail($sender));
             $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
             $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailmsg]));
             $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
