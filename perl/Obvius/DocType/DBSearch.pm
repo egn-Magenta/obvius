@@ -150,7 +150,7 @@ sub action {
             #Maintain form state
             my @params = $input->param;
             @params = [] unless(@params);
-            for(grep { $_ !~ /^obvius/ } @params) {
+            for(grep { $_ !~ /^obvius/i } @params) {
                 $output->param($_ => $input->param($_));
             }
             return OBVIUS_OK;
