@@ -104,7 +104,8 @@ function traverseDom(editNbr){
 	removeUnusedAttribute(editNbr,"FONT","style")
 	removeUnusedAttribute(editNbr,"FONT","size")
 	removeUnusedAttribute(editNbr,"SPAN","style")
-	
+
+	replaceWordParagraphs(editNbr);
 	
 	parseFrameInnerHTML(editNbr)
 
@@ -205,4 +206,39 @@ function fix_ul(editNbr){
             ul_tag.outerHTML=new_html;
         }
     }
+}
+
+function replaceWordParagraphs(editNbr)
+{
+  /* Word has a nasty habit of using <P> of some class instead of the correct 
+	 HTML tag. This method tries to do something about it.
+   */
+  var tmpFrame, tmpFmElement, tmpArray; 
+
+  var classMap = new Object();
+  classMap["Hoved1"] = "h1";//Headings
+  classMap["Hoved2"] = "h2";
+  classMap["Hoved3"] = "h3";
+  classMap["Hoved4"] = "h4";
+  classMap["Citat"] = "cite";
+  
+  tmpFrame = eval("obvius_"+editNbr+"_editor");
+  root = tmpFrame.document.documentElement.lastChild;
+  
+  tmpArray = root.getElementsByTagName("P");
+
+  //Walk backwards through the array since we are modifying it as we go along
+  for(i=tmpArray.length-1;i>=0;i--) {
+	if (classMap[tmpArray[i].className] != null) {
+	  var newElem = root.document.createElement(classMap[tmpArray[i].className]);
+	  
+	  //Add all descendants of the old node to the new node
+	  var children = tmpArray[i].childNodes;
+	  for (n=0;n<children.length;n++) {
+		newElem.appendChild(children[n]);
+	  }
+
+	  tmpArray[i].parentNode.replaceChild(newElem, tmpArray[i]);
+	}
+  }
 }
