@@ -11,7 +11,7 @@ use WebObvius::Site;
 our @ISA = qw( WebObvius::Site );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-use WebObvius::Template::Obvius;
+use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;
 
 sub make_provider {
@@ -21,7 +21,7 @@ sub make_provider {
 
 sub make_template {
     my $this = shift;
-    return new WebObvius::Template::Obvius(@_);
+    return new WebObvius::Template::MCMS(@_);
 }
 
 our %doctype_to_legacy_operation = ( Standard => 'view',
@@ -59,10 +59,10 @@ sub create_output_object {
     }
     $op = lc $op;
 
-    $output->param("Obvius_\U$op\E" => 1);
-    $output->param(Obvius_OPERATION => $op);
+    $output->param("MCMS_\U$op\E" => 1);
+    $output->param(MCMS_OPERATION => $op);
     $op =~ tr/_/-/;
-    $output->param(Obvius_OPERATION_HYPHEN => $op);
+    $output->param(MCMS_OPERATION_HYPHEN => $op);
 
     $output->{PROVIDER} = $this->make_provider(site => $this,
 					       request => $req,
