@@ -191,3 +191,5 @@ DocType: SubDocuments parent=Base basis searchable
  logo          path                         searchable sortable optional threshold=128
  picture       path                         searchable sortable optional threshold=128
  show_teasers  bool                         searchable sortable threshold=128 default_value=0
+
+DocType: RSSFeed parent=ComboSearch basis

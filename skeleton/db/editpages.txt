@@ -464,3 +464,16 @@ DocType: Calendar
   Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
  End
 
+DocType: RSSFeed
+ Page: 1
+  Copy: ComboSearch (1)
+ End
+ Page: 2
+  Title: Display
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
+  Fields: sortorder Sort order of search results - sort according to;subtitle=Search results, nopagenav=1,disabled=1
+  Fields: pagesize Number of search results on one page
+ End
+ Page: P
+  Copy: ComboSearch (P)
+ End
