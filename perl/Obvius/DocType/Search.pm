@@ -16,11 +16,12 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub htdig_config_name {
     my ($this, $obvius) = @_;
+
     return $obvius->{OBVIUS_CONFIG}->HTDIG_CONFIG || 'htdig';
 }
 
 sub htdig_htsearch_path {
-    for (qw( /usr/local/htdig/cgi-bin/htsearch /usr/lib/cgi-bin/htsearch )) { # / GRRR
+    for (qw( /usr/local/htdig/cgi-bin/htsearch /usr/lib/cgi-bin/htsearch /usr/bin/htsearch )) { # / GRRR
 	return $_ if ( -x $_ );
     }
     return undef;
