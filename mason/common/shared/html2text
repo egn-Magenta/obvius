@@ -1,0 +1,20 @@
+<%args>
+$html
+$rightmargin => 72
+$leftmargin => 0
+</%args>
+<%once>
+use HTML::TreeBuilder;
+use HTML::FormatText;
+</%once>
+<%init>
+# Build a HTML tree
+my $htmltree = HTML::TreeBuilder->new;
+$htmltree->parse($html);
+$htmltree->eof;
+
+#Format the tree as text
+my $formatter = HTML::FormatText->new(leftmargin=>$leftmargin, rightmargin=>$rightmargin);
+my $text = $formatter->format($htmltree);
+</%init>
+<% $text %>
