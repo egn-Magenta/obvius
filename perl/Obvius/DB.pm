@@ -363,7 +363,8 @@ sub db_update_user {
 
     return;
 }
-
+# db_delete_user ($userid) - Removes a user from the system.
+#
 sub db_delete_user {
     my ($this, $userid) = @_;
 
@@ -380,6 +381,8 @@ sub db_delete_user {
     return;
 }
 
+# db_delete_user_grp ($userid) - Removes a users membership of all groups.
+#                                $userid must be a numeric user id.
 sub db_delete_user_grp {
     my ($this, $userid) = @_;
 
