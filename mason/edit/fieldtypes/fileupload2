@@ -6,6 +6,7 @@ $name
 $session
 $size=>60
 </%args>
+<& SELF:msg, text=>'Current value' &>: <% $value |h %><br>
 <input type="file" size="<% $size %>" name="<% $name %>" tabindex="10">
 <%init>
 my $value=$session->{fields_out}->param(uc($name));
