@@ -7,6 +7,7 @@
 </script>
 %} else {
 <script language="javascript">
+<!--
 function pictureform_submit() {
     if(! document.pageform.title.value) {
         alert('Du skal angive en titel');
@@ -24,6 +25,81 @@ function pictureform_submit() {
     document.pageform.enctype='multipart/form-data';
     document.pageform.submit();
 }
+
+var quality_list = [
+                    [ 0, '0: Laveste kvalitet' ],
+                    [ 25, '25' ],
+                    [ 50, '50' ],
+                    [ 75, '75: Standard kvalitet', 1 ],
+                    [ 100, '100: Højeste kvalitet' ]
+                ];
+
+function change_scaleby() {
+    var scaleby = document.pageform.scaleby;
+    var new_value = scaleby.options[scaleby.selectedIndex].value;
+    if(new_value.match(/\d+%/) && new_value != '100%') {
+        document.pageform.new_width.value = new_value;
+        document.pageform.new_height.value = new_value;
+    } else {
+        document.pageform.new_width.value = '';
+        document.pageform.new_height.value = '';
+        document.pageform.new_width.focus();
+    }
+}
+
+function change_format() {
+    var format = document.pageform.new_format;
+    var quality = document.pageform.quality;
+
+    var new_value = format.options[format.selectedIndex].value;
+    if(new_value == 'jpeg' || new_value == 'png') {
+        if(quality.options.length <= 1) {
+            fill_select(quality, quality_list);
+        }
+    } else {
+        empty_select(quality);
+    }
+
+}
+
+function fill_select(select_obj, items) {
+    for(var i=0;i < items.length; i++) {
+        select_obj.options[select_obj.options.length] = new Option(items[i][1], items[i][0]);
+        if(items[i][2])
+            select_obj.selectedIndex = i;
+    }
+}
+
+function empty_select(select_obj) {
+    while(select_obj.options[0]) {
+        select_obj.options[0] = null;
+    }
+}
+
+function adjust_bredde() {
+    var new_value = document.pageform.new_width.value;
+    var test = new_value.match(/^(\d+)(%?)$/)
+    if(test && test[2] && document.pageform.new_height.value == '') {
+        document.pageform.new_height.value = new_value;
+    } else {
+        if(new_value == '')
+            adjust_hoejde();
+    }
+    document.pageform.scaleby.selectedIndex = 8;
+}
+
+function adjust_hoejde() {
+    var new_value = document.pageform.new_height.value;
+    var test = new_value.match(/^(\d+)(%?)$/)
+    if(test && test[2] && document.pageform.new_width.value == '') {
+        document.pageform.new_width.value = new_value;
+    } else {
+        if(new_value == '')
+            adjust_bredde();
+    }
+    document.pageform.scaleby.selectedIndex = 8;
+}
+// -->
 </script>
 
 <table border="0" cellpadding="5" align="left">
@@ -68,6 +144,50 @@ Gruppe:
 
 </td>
 </tr>
+<tr>
+    <td><img src="/grafik/admin/1x1black.gif" alt="" width="100%" height="1"></td>
+</tr>
+<tr>
+    <td>
+        Skaler billede til:<br>
+        <select name="scaleby" onchange="change_scaleby()">
+            <option value="200%">200%</option>
+            <option value="175%">175%</option>
+            <option value="150%">150%</option>
+            <option value="125%">125%</option>
+            <option value="100%" SELECTED>Oprindelig størrelse</option>
+            <option value="75%">75%</option>
+            <option value="50%">50%</option>
+            <option value="25%">25%</option>
+            <option value="">Manuelt angivet nedenfor</option>
+        </select>
+    </td>
+</tr>
+<tr>
+    <td>
+        Bredde: <input type="text" name="new_width" size="6" onchange="adjust_bredde()">
+        &nbsp;
+        Højde: <input type="text" name="new_height" size="6" onchange="adjust_hoejde()">
+    </td>
+</tr>
+<tr>
+    <td>
+        Upload i format:<br>
+        <select name="new_format" onchange="change_format()">
+            <option value="" SELECTED>Oprindeligt format</option>
+            <option value="jpeg">JPEG</option>
+            <option value="gif">GIF</option>
+            <option value="png">PNG</option>
+        </select>
+    </td>
+</tr>
+<tr>
+    <td>
+        Vælg eventuel kvalitet (kun JPEG og PNG):<br>
+        <select name="quality">
+        </select>
+    </td>
+</tr>
 </table>
 %}
 <%args>
@@ -97,10 +217,15 @@ my $error;
 if(my $name = $r->param('image_data')) {
     if (my $upload=$r->upload('image_data')) {
         if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
-            local $/ = undef;
-            my $value=<$fh>;
+            my ($value, $mimetype) = $image_doctype->transform_image_at_upload(
+                                                            \$fh,
+                                                            $r->param('new_width'),
+                                                            $r->param('new_height'),
+                                                            $r->param('new_format'),
+                                                            $r->param('quality')
+                                                        );
+            my $fields = new MCMS::Data;
 
-            my $fields = new Obvius::Data;
 
             # Set default values
             for(keys %{$image_doctype->{FIELDS}}) {
@@ -108,8 +233,8 @@ if(my $name = $r->param('image_data')) {
             }
 
             $fields->param('data' => $value);
-            $fields->param('mimetype' => $upload->type);
-            $fields->param('size' => $upload->size);
+            $fields->param('mimetype' => $mimetype ? $mimetype : $upload->type);
+            $fields->param('size' => length($value));
 
             my ($width, $height)=imgsize(\$value);
             $fields->param('width' => $width);
@@ -134,6 +259,11 @@ if(my $name = $r->param('image_data')) {
             $name =~ s/Ø/OE/g;
             $name =~ s/Å/AA/g;
             $name =~ s/[^a-zA-Z0-9._-]/_/g;
+
+            if($mimetype) {
+                my ($extension) = ($mimetype =~ m#/(\w+)$#); # Part of mimetype after /
+                $name =~ s/\.[^\.]+$/.$extension/;
+            }
 
             if($obvius->get_doc_by_name_parent($name, $parent->Id)) {
                 $error="Der findes allerede et dokument med det navn";
