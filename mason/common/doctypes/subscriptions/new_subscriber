@@ -4,7 +4,7 @@
 <& /shared/htmlize, text=>$teaser &>
 % }
 % else {
-<p>Er du allerede abonnent, <a href='/abonner/?mode=login'><b>tryk her</b></a>.</p>
+<p>Er du allerede abonnent, <a href='?mode=login'><b>tryk her</b></a>.</p>
 
 <p>Her kan du tilmelde dig udvalgte elektroniske nyheder.</p>
 % }

@@ -8,8 +8,8 @@ betyder at du fremover ikke vil få tilsendt nyheder.
 
 <p>Hvis du senere ønsker at modtage nyheder skal du tilmelde dig påny.</p>
 
-<p><a href='/abonner/?mode=delete_subscriber;confirm=1'>Fortsæt med at slette dit abonnement</a></p>
-<p><a href='/abonner/?mode=choose'>Fortryd</a></p>
+<p><a href='?mode=delete_subscriber;confirm=1'>Fortsæt med at slette dit abonnement</a></p>
+<p><a href='?mode=choose'>Fortryd</a></p>
 % }
 
 <%args>
