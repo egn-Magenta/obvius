@@ -17,7 +17,7 @@ $r->pnotes('doctype' =>$doctype);
 $m->comp('/shared/path_section');
 
 
-
+unless ($r->notes('siteflag')) {
 my @path = $obvius->get_doc_path($doc);
 
 my $siteflag = @path->[1]->{NAME} || '';
@@ -33,5 +33,6 @@ $language = 'da';
 }
 
 $r->notes('language' =>$language);
+}
 
 </%init>
