@@ -245,6 +245,8 @@ help_server = help.obvius.org
 
 design=3columns
 
+english_frontpage=frontpage_en
+
 EOT
     }
 }
