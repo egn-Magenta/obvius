@@ -1,19 +1,41 @@
 <& headline &>
-% my $level=0;
+<ul>
+% my $level=1;
+% my $in=0;
 % foreach (@$sitemap) {
+%     next if ($_->{url} eq '/sitemap/');
 %     if ($level < $_->{level}) {
 %         for($i=$level; $i<$_->{level}; $i++) {
-<ul>
+
+<% '  ' x ($level+1) %><ul>
+<% '  ' x ($level+2) %><li>\
 %         }
 %     }
 %     elsif ($level > $_->{level}) {
+</li>
 %         for($i=$level; $i>$_->{level}; $i--) {
-</ul>
+<% '  ' x $level %></ul>
+<% '  ' x ($level-1) %></li>
 %         }
+<% '  ' x ($level-1) %><li>\
+%     }
+%     else { # equal
+%         if ($in) {
+</li>
+%         }
+<% '  ' x (2*$level-1) %><li>\
 %     }
 %     $level=$_->{level};
-%next if ($_->{url} eq '/sitemap/');
-<li><a href="<% $prefix %><% $_->{url} %>"><% $_->{title} |h %></a></li>
+%     $in++;
+<a href="<% $prefix %><% $_->{url} %>"><% $_->{title} |h %></a>\
+% }
+%
+</li>
+<% '  ' x $level %></ul>
+% # Close up:
+% for($i=$level-1; $i>0; $i--) {
+<% '  ' x ($i) %></li>
+<% '  ' x ($i-1) %></ul>
 % }
 %
 <%args>
@@ -25,3 +47,14 @@ my $i=undef;
 my $sitemap=$output->param('sitemap') || [];
 my $depth=$output->param('depth');
 </%init>
+%
+<%doc>
+
+This component is horribly complicated by the fact that the
+sitemap-information comes as a flat array, instead of a tree.
+
+That is probably a left-over from a world where recursion wasn't
+possible in the template system, but it is here, and the readability
+would gain immensely from such an approach.
+
+</%doc>
