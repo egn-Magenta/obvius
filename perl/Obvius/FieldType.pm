@@ -17,6 +17,14 @@ use Obvius::FieldType::Xref;
 use Obvius::FieldType::Regexp;
 use Obvius::FieldType::Special;
 
+
+# new(%hash) - Constructs an object of class Obvius::FieldType.
+#
+#              The object inherits from Obvius::Data.  If VALIDATE
+#              (None|Xref|Regexp|Special) is in the %hash the object
+#              is constructed as the corresponding subtype,
+#              ie. Obvius::FieldType::Regexp
+#
 sub new {
     my $class = shift;
 
@@ -66,8 +74,7 @@ Obvius::FieldType - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use Obvius::FieldType;
-  blah blah blah
+     $obj = Obvius::FieldType->new(%data);
 
 =head1 DESCRIPTION
 
