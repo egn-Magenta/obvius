@@ -58,6 +58,20 @@ function obvius_tinymce_navigator_callback(field_name, url, type) {
 
 }
 
+function obvius_tinymce_unhide_textarea_buttons() {
+    var textareas = document.getElementsByTagName('textarea') || new Array();
+    for(var i=0;i<textareas.length;i++) {
+        var ta = textareas[i];
+        if(ta.getAttribute('mce_editable')) {
+            var button_elem = document.getElementById("obvius_" + ta.name + '_buttons');
+            if(button_elem) {
+                button_elem.style.display = 'block';
+            }
+        }
+    }
+}
+
+
 function obvius_tinymce_html_cleanup(type, content) {
 
     if(type != "insert_to_editor") {
@@ -86,6 +100,10 @@ function obvius_tinymce_html_cleanup(type, content) {
     obvius_tinymce_removeEmptyTags(tmpContainer);
 
     obvius_tinymce_removeMutipleNBSP(tmpContainer);
+
+    // Fixup wrong placement of strong and b tags:
+    obvius_tinymce_remove_wrong_span_type_tags(tmpContainer, 'b');
+    obvius_tinymce_remove_wrong_span_type_tags(tmpContainer, 'strong');
 
     content = tmpContainer.innerHTML;
 
@@ -199,4 +217,60 @@ function obvius_tinymce_removeEmptyTags(rootElem){
 
 function obvius_tinymce_removeMutipleNBSP(rootElem){
     rootElem.innerHTML = rootElem.innerHTML.replace(/&nbsp;&nbsp;/g,"")
+}
+
+// Fixes spans being placed around block and table tags
+function obvius_tinymce_remove_wrong_span_type_tags(rootElem, tagName) {
+    var keepGoing = 1;
+    var last_run = 0;
+    while(keepGoing) {
+        var tags = rootElem.getElementsByTagName(tagName);
+
+        // Do a check to avoid endless loops
+        // If the number of tags from last run doesn't differ from this one
+        // break out:
+        var this_run = tags.length || 0;
+        if(this_run == last_run) {
+            break;
+        } else {
+            last_run = this_run;
+        }
+
+        var fixNode;
+        for(var i=0;i<tags.length;i++) {
+            var tagElem = tags[i];
+
+            if(tagElem.childNodes.length) {
+                for(var j=0;j<tagElem.childNodes.length;j++) {
+                    var childNode = tagElem.childNodes[j];
+                    if(childNode.tagName && childNode.tagName.match(/^p|h\d|table$/i)) {
+                        fixNode = tagElem;
+                        break;
+                    }
+                }
+            } else {
+                // Element have no childnodes, so just remove it:
+                tagElem.parentNode.removeChild(tagElem);
+                break;
+            }
+
+            // If we get here, we're done
+            keepGoing = 0;
+        }
+
+        if(fixNode) {
+            // If the parent is not set on the node it must be the rootelem
+            var parent = fixNode.parentNode;
+            if(parent) {
+                for(var j=0;j<fixNode.childNodes.length;j++) {
+                    // Insert a clone of the current node before the tag we want to remove
+                    parent.insertBefore(fixNode.childNodes[j].cloneNode(true), fixNode);
+                }
+                // Remove the tag and all it's children
+                parent.removeChild(fixNode);
+            } else {
+                alert(oldNode.tagName + ": " + oldNode.innerHTML + " has no parent");
+            }
+        }
+    }
 }
