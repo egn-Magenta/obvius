@@ -4108,6 +4108,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="en">The content below was fetched from</translation>
     <translation lang="da">Indholdet herunder er hentet fra</translation>
   </text>
+  <text key="Prefixes">
+    <translation lang="en">Prefixes</translation>
+    <translation lang="da">Præfixer</translation>
+  </text>
+  <text key="Text and links">
+    <translation lang="en">Text and links</translation>
+    <translation lang="da">Tekst og links</translation>
+  </text>
 
   <text key="">
     <translation lang="en"></translation>
