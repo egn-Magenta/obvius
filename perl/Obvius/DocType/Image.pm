@@ -1,5 +1,34 @@
 package Obvius::DocType::Image;
 
+########################################################################
+#
+# Image.pm - document type representing an Image; includes thumbnailing.
+#
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
+#
+# Authors: Jason Armstrong,
+#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          René Seindal,
+#          Adam Sjøgren (asjo@magenta-aps.dk),
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
 # $Id$
 
 use strict;
@@ -163,6 +192,8 @@ sub get_resized_data {
     }
 }
 
+# create_new_version_handler - doesn't do anything. Why it is still
+#                              here is hard to tell.
 sub create_new_version_handler {
     my ($this, $fields, $obvius) = @_;
 
@@ -272,36 +303,44 @@ sub transform_image_at_upload() {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::Image - Perl extension for blah blah blah
+Obvius::DocType::Image - Perl module handling images in Obvius.
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::Image;
-  blah blah blah
+  use'd automatically by Obvius
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::Image, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+The Image document type provides a raw_document_data()-method instead
+of an action, because an Image document doesn't return a piece of
+(X)HTML to be included in a page, but rather provides an image-file.
 
-Blah blah blah.
+If the parameter "size" is given, a scaled version - "thumbnail" - of
+the image is returned.
+
+META: Document how the scaled versions are stored, maintained and
+      retrieved.
+
+=head2 DEPENDS
+
+L<Image::Magick>
 
 =head2 EXPORT
 
 None by default.
 
-
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jason Armstrong
+Jørgen Ulrik B. Krag <gt>jubk@magenta-aps.dk<lt>
+René Seindal
+Adam Sjøgren <gt>asjo@magenta-aps.dk<lt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::DocType>, L<Image::Magick>.
 
 =cut
