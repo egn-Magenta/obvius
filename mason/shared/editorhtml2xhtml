@@ -73,6 +73,8 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 }, "self, tagname, attr, attrseq" ],
                             end_h=> [sub {
                                             my($this, $tagname, $text, $attr)=@_;
+                                            # Make the HTML look nice:
+                                            $text .= "\n" if($tagname =~ m!(p|h\d|pre|address|div)!);
                                             $out.=lc($text);
                                         }, "self, tagname, text, attr" ],
                             text_h=> [ sub {
