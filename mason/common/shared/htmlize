@@ -2,19 +2,29 @@
 $text
 $class=>undef
 $dont_wrap=>0
+$old_htmlize=>undef
+$no_first_paragraph=>0
 </%args>
 <%init>
-# Getting to do_htmlize_hook:
-use WebObvius::Template::MCMS;
+if($old_htmlize) {
+  # Getting to do_htmlize_hook:
+  use WebObvius::Template::MCMS;
 
-my $tmpl=new WebObvius::Template::MCMS(PATH=>'');
-$tmpl->{VARS}={MASON_CONTENT=>$text};
-# Fake one:
-$tmpl->{PROVIDER}={
-		   request=>$r,
-		   obvius=>$obvius,
+  my $tmpl=new WebObvius::Template::MCMS(PATH=>'');
+  $tmpl->{VARS}={MASON_CONTENT=>$text};
+  # Fake one:
+  $tmpl->{PROVIDER}={
+		    request=>$r,
+		    mcms=>$mcms,
 		  };
-$text=$tmpl->do_htmlize_hook('MASON_CONTENT', $class, dont_wrap=>$dont_wrap);
-$text=~s/[&]amp;#(\d+);/&#$1;/g;
+  $text=$tmpl->do_htmlize_hook('MASON_CONTENT', $class, dont_wrap=>$dont_wrap);
+  $text=~s/[&]amp;#(\d+);/&#$1;/g;
+} else {
+  $text=$m->scomp('printhtml', html=>$text, no_first_paragraph=>$no_first_paragraph, class=>$class);
+}
+if($no_first_paragraph) {
+    $text =~ s/<P[^>]*>//;
+    $text =~ s/<\/P>//;
+}
 </%init>
 <% $text %>
