@@ -288,8 +288,7 @@ sub retrieve_real_title {
         $title =~ s/\s+$//;
 
         # Convert utf8
-        #$title = utf8(narrow_unicode_utf8($title))->latin1;
-        $title = utf8($title)->latin1;
+        $title = utf8(narrow_unicode_utf8($title))->latin1;
 
         return $title;
     }
@@ -297,15 +296,17 @@ sub retrieve_real_title {
     return undef;
 }
 
-# narrow_unicode_utf8 - convert commonly used unicode-sequences to the
-#                       similar ones in latin1.
+# narrow_unicode_utf8 - convert commonly used unicode characters in
+#                       utf8 to the similar ones in latin1.
+#                       Note that the utf8-encoding of a single
+#                       character can be up to 6 bytes long.
 sub narrow_unicode_utf8 {
     my ($text)=@_;
 
-    $text=~s/Äô/\'/g;
-    $text=~s/Ç¨/euro/g;
-    $text=~s/Äú/\"/g;
-    $text=~s/Äù/\"/g;
+    $text=~s/‚Äô/\'/g;
+    $text=~s/‚Ç¨/euro/g;
+    $text=~s/‚Äú/\"/g;
+    $text=~s/‚Äù/\"/g;
 
     return $text;
 }
