@@ -19,7 +19,7 @@
 %}
 %}
 %} else {
-<p><% $teaser %></p>
+<div><% $teaser %></div>
 <& /shared/printhtml, html=>$obvius->get_version_field($vdoc, 'html_content') &>
 %}
 %
