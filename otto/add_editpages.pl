@@ -60,36 +60,44 @@ while( <FH> ) {
     s/^\s*//;
 
     if( /^DocType: (\w+)/ ) {
-	$doctype=$1;
-	%options=();
-	my @line=split /\s+/;
-	shift @line;
-	shift @line;
-	while( my $opt=shift @line) {
-	    my($k, $v)=split /=/, $opt;
-	    $v=1 unless $v;
-	    $v=~s/_/ /g;
-	    $options{$k}=$v;
-	}
-	die "No such DocType: $doctype" unless $editpage{doctypeid}=$doctypes->{$doctype}->{id};
+        $doctype=$1;
+        %options=();
+        my @line=split /\s+/;
+        shift @line;
+        shift @line;
+        while( my $opt=shift @line) {
+            my($k, $v)=split /=/, $opt;
+            $v=1 unless $v;
+            $v=~s/_/ /g;
+            $options{$k}=$v;
+        }
+        die "No such DocType: $doctype" unless $editpage{doctypeid}=$doctypes->{$doctype}->{id};
     }
     elsif( /^(\w+): (.*)/ ) {
-	my($key, $value)=(lc($1), $2);
+        my($key, $value)=(lc($1), $2);
 
-	die "$doctype, $editpage{page}: No End-line for page" if $key eq 'page' and defined $editpage{page};
+        die "$doctype, $editpage{page}: No End-line for page" if $key eq 'page' and defined $editpage{page};
 
-	if ($options{add_comment_fields} and $key eq 'fields' and !($value =~ /no_comment_field/ )) {
-	    my $fieldname=(split /\s+/, $value)[0];
-	    $value.="\n" . $fieldname . "_comment Comment;same_line=1";
-	}
-	$value="\n" . $value if defined $editpage{$key};
-	$editpage{$key}.=$value;
+        if ($options{add_comment_fields} and $key eq 'fields' and !($value =~ /no_comment_field/ )) {
+            my $fieldname=(split /\s+/, $value)[0];
+            $value.="\n" . $fieldname . "_comment Comment;same_line=1";
+        }
+        $value="\n" . $value if defined $editpage{$key};
+        $editpage{$key}.=$value;
     }
     elsif( /^End/ ) {
-	add_editpage($new_editpage, \%editpage, $doctype);
-	my $doctypeid=$editpage{doctypeid}; # Preserve doctypeid from page to page
-	undef %editpage;
-	%editpage=(doctypeid=>$doctypeid);
+        # Check for copy
+        if(my $copypage = $editpage{copy}) {
+            copy_editpage($copypage, $editpage{doctypeid}, $editpage{page});
+            my $doctypeid=$editpage{doctypeid}; # Preserve doctypeid from page to page
+            undef %editpage;
+            %editpage=(doctypeid=>$doctypeid);
+        } else {
+            add_editpage($new_editpage, \%editpage, $doctype);
+            my $doctypeid=$editpage{doctypeid}; # Preserve doctypeid from page to page
+            undef %editpage;
+            %editpage=(doctypeid=>$doctypeid);
+        }
     }
 }
 
@@ -97,6 +105,32 @@ while( <FH> ) {
 exit 0;
 
 ##
+
+sub copy_editpage {
+    my ($copypage, $doctypeid, $pagenr) = @_;
+
+    die "No copypage in copy_editpage" unless($copypage);
+    die "No doctypeid in copy_editpage" unless($doctypeid);
+    die "No pagenr in copy_editpage" unless($pagenr);
+
+    my ($source_doctype, $source_page) = split(/\s*[\(\)]\s*/, $copypage);
+
+    my $sourceid = $doctypes->{$source_doctype}->{id};
+
+    die "DocType $source_doctype have no id" unless($sourceid);
+
+    $new_editpage->Search( { doctypeid => $sourceid, page => $source_page } );
+    if(my $rec = $new_editpage->Next) {
+        $rec->{doctypeid} = $doctypeid;
+        $rec->{page} = $pagenr;
+
+        print " $doctype ($rec->{page}) - Copy of $source_doctype ($source_page)\n";
+
+        $new_editpage->Insert($rec);
+    } else {
+        die "Couldn't find the page you wanted to copy: $copypage\n";
+    }
+}
 
 sub add_editpage {
     my($new_editpage, $editpage, $doctype)=@_;
