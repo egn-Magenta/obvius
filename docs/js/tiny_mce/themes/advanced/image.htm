@@ -10,7 +10,20 @@ if (url != null)
 <script language="javascript">
 	function insertImage() {
 		if (window.opener) {
-			var src = document.forms[0].src.value;
+			var src = document.forms[0].src.value + "";
+            if(src.charAt(0) == '/') {
+                // Add /admin prefix:
+                if(! src.match(/^\/admin/)) {
+                    src = "/admin" + src;
+                }
+
+                // Remove last / of image urls:
+                if(src.indexOf("/?") != -1){
+                    src = src.replace(/\/\?/, "?");
+                } else {
+                    src = src.replace(/\/$/, "");
+                }
+            }
 			var alt = document.forms[0].alt.value;
 			var border = document.forms[0].border.value;
 			var vspace = document.forms[0].vspace.value;
@@ -32,7 +45,10 @@ if (url != null)
 				document.forms[0].align.options.selectedIndex = i;
 		}
 
-		formObj.src.value = tinyMCE.getWindowArg('src');
+        var src = tinyMCE.getWindowArg('src') + "";
+        src = src.replace(/^\/admin/, "");
+		formObj.src.value = src;
+
 		formObj.alt.value = tinyMCE.getWindowArg('alt');
 		formObj.border.value = tinyMCE.getWindowArg('border');
 		formObj.vspace.value = tinyMCE.getWindowArg('vspace');
