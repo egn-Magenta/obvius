@@ -3,7 +3,7 @@
 <div style="border: 2px solid black; padding: 5px;">
 %if($missing_levels > 1) {
 <& SELF:msg, text =>'lang_notification:msg1' &> <& SELF:msg, text=>$missing_type &> <& SELF:msg, text=>'lang_notification:msg2' &>.<br>
-<a href="/admin<% $good_path %>?obvius_op=new&force_name=<% $missing_name %>&force_lang=<% $missing_lang %>"><& SELF:msg, text=>'lang_notification:msg3' &>, <% $good_path . $missing_name %>/</a>
+<a href="/admin<% $good_path %>?obvius_op=new&force_name=<% $missing_name %>&force_lang=<% $missing_lang %>"><& SELF:msg, text=>'lang_notification:msg3' &>&nbsp;&nbsp;<% $good_path . $missing_name %>/</a>
 %} else {
 <& SELF:msg, text=>'lang_notification:msg4' &> <& SELF:msg, text=>$missing_type &> <& SELF:msg, text=>'lang_notification:msg5' &>.<br>
 <a href="/admin<% $good_path %>?obvius_op=new&force_name=<% $missing_name %>&force_lang=<% $missing_lang %>"><& SELF:msg, text=>'lang_notification:msg6' &></a>.
