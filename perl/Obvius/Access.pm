@@ -2,15 +2,15 @@ package Obvius::Access;
 
 ########################################################################
 #
-# Obvius.pm - Content Manager, database handling
+# Access.pm - access to functionality; capability-handling
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
-#                    aparte A/S, Denmark (http://www.aparte.dk/),
-#                    FI, Denmark (http://www.fi.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
-#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #          Peter Makholm (pma@fi.dk)
+#          Adam Sjøgren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -217,6 +217,11 @@ sub can_create_new_version {
     return $this->user_has_capabilities($doc, qw(edit));
 }
 
+# can_delete_document - given a document-object, checks whether the
+#                       current user has access to delete the
+#                       document. Please note that this function
+#                       returns false if the document has
+#                       subdocuments, which is questionable.
 sub can_delete_document {
     my ($this, $doc) = @_;
 
@@ -299,7 +304,6 @@ sub can_set_docparams {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -315,22 +319,18 @@ Obvius::Access - Access related functions for L<Obvius>.
 
   $obvius->user_capabilities($doc);
 
-  etc.
+  $ret=$obvius->can_delete_document($doc);
 
 =head1 DESCRIPTION
 
 This module contains access related functions for L<Obvius>.
 It is not intended for use as a standalone module.
 
-=head2 EXPORT
-
-None.
-
 =head1 AUTHORS
 
-Adam Sjøgren E<lt>adam@aparte.dkE<gt>
-
-Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+Peter Makholm E<lt>pma@fi.dkE<gt>
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
