@@ -12,7 +12,7 @@ $left_cell_width=>180
 $obvius_show_hidden=>undef
 </%args>
 %
-% if ($r->notes('redirect')) {
+% if ($r->notes('redirect') or $r->notes('skip_in_portal')) {
 <% $content_html %>
 %     $m->abort();
 % }
