@@ -4,7 +4,7 @@
 <& /shared/htmlize, text=>$vdoc->field('content') &>
 % if ($url) {
 <p>
-Link: <a href="<% $url %>"><% $url |h %></a>
+Link: <a href="<% $url %>" title="<% $title %>"><% $url |h %></a>
 </p>
 % }
 
