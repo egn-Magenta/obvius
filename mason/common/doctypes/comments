@@ -1,0 +1,121 @@
+<div class="comments">
+%
+% if ($show_comments) {
+%     if (defined $comments) {
+<h2><a name="comments">Kommentarer</a></h2>
+%         foreach my $comment (@$comments) {
+      <div>
+        <p>
+        <& .display_text, text=>$comment->{text} &>
+        </p>
+        <p class="author">
+          - <% $comment->{name} |h %>\
+%             if ($comment->{show_email}) {
+ (<a title="Send email til <% $comment->{name} |h %>." href="mailto:<% $comment->{email} |h %>"><% $comment->{email} |h %></a>)
+%             }
+, <& /shared/display_date, date=>$comment->{date} &>.
+        </p>
+      </div>
+%         }
+%     }
+% }
+%
+  <h2>Tilføj kommentar</h2>
+
+% if ($missing) {
+    <p><strong>Du mangler at udfylde: <% $missing %></strong></p>
+% }
+
+  <form action="./#comments" method="post">
+    <input type="hidden" name="docid" value="<% $doc->Id %>">
+    <input type="hidden" name="show_comments" value="1">
+% foreach my $field (@fields) {
+%     my $id='comments-' . $field->{name};
+    <p>
+      <label for="<% $id |h %>"><% $field->{label} |h %>:</label>
+%     if (defined $field->{type} and $field->{type} eq 'textarea') {
+      <textarea id="<% $id |h %>" name="<% $field->{name} |h %>" cols="70" rows="15"><% $default{$field->{name}} |h %></textarea>
+%     }
+%     else {
+      <input id="<% $id |h %>" type="text" name="<% $field->{name} |h %>" value="<% $default{$field->{name}} |h %>" size="35">
+%     }
+    </p>
+% }
+    <p>
+        <input id="comments-show_email" type="checkbox" name="show_email" /><label class="after" for="comments-show_email">Vis email-adresse</label>
+    </p>
+    <p>
+      <input type="submit" value="Send" />
+    </p>
+  </form>
+
+</div>
+%
+%
+<%def .display_text>
+%
+<% $text %>
+%
+<%args>
+$text
+</%args>
+%
+<%init>
+$text=~s!&!&amp;!g;
+$text=~s!<!&lt;!g;
+$text=~s!>!&gt;!g;
+$text=~s!\r?\n\r?\n!\n</p>\n\n<p>\n!g;
+$text=~s!(^|\s)(http://[^\s,]+)!$1<a href="$2">$2</a>!ig;
+$text=~s!(\s*[*\-]\s+.*?)\r?\n!$1<br/>\n!g;
+</%init>
+%
+</%def>
+%
+<%args>
+$output
+$show_comments=>1
+</%args>
+%
+<%once>
+my @fields=(
+            { name=>'name', label=>'Navn', },
+            { name=>'email', label=>'email', },
+            { name=>'text', label=>'Tekst', type=>'textarea' },
+           );
+</%once>
+%
+<%init>
+return unless ($obvius->get_docparam_value_recursive($doc, 'comments') eq 'yes');
+
+my $show_email=$output->param('_incoming_show_email') || 0;
+my $docid=$output->param('_incoming_docid') || undef;
+my $name=$output->param('_incoming_name') || undef;
+my $email=$output->param('_incoming_email') || undef;
+my $text=$output->param('_incoming_text') || undef;
+
+my %default=(name=>'', email=>'', text=>'');
+my $missing = '';
+
+my %missing=(name=>0, text=>0);
+if (defined $docid) {
+    $missing{name}=1 && $missing="navnefeltet, " unless (defined $name and !($name=~/^\s*$/));
+    $missing{email}=1 && $missing.="e-mail-feltet, " unless (defined $email and ($email=~/^[^@]+@[^@]+\.\w+$/));
+    $missing{text}=1 && $missing.="tekstfeltet, " unless (defined $text and !($text=~/^\s*$/));
+
+    $missing=~s/,.$/\./;
+    $missing=~s/,([^,]+)$/ og$1/;
+
+    if (!$missing) {
+        my $data={docid=>$docid, name=>$name, email=>$email, text=>$text, show_email=>($show_email eq 'on' ? 1 : 0)};
+	$obvius->create_new_comment($data);
+    }
+    else {
+	%default=(name=>$name, email=>$email, text=>$text);
+    }
+}
+
+my $comments;
+if ($show_comments) {
+    $comments=$obvius->get_comments($doc->Id, '$order' => 'date');
+}
+</%init>
