@@ -82,7 +82,7 @@ sub pdf_head {
     }
 
     print "<HTML>\n<HEAD>\n";
-    print "<TITLE>$title</TITLE>\n";
+    print "<TITLE>PDF Document: $title</TITLE>\n";
     if (length $subject) {
       print '<META NAME="DESCRIPTION" CONTENT="' . $subject. "\">\n";
     }
