@@ -34,6 +34,19 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 use Carp;
 
+# new (\%hash)
+# new ($param1, $value1, $param2, $value2, ... )
+#    - creates a new Data object.
+#      new can be called with different types of arguments:
+#
+#        1) new can be called with a reference to a hash or to an
+#           object that has a "param" method.  If new is called with a
+#           reference to an object, the object's param method is used
+#           to construct a hash of its parameters and values
+#
+#       2n) new can be called with a list of pairs of parameter name
+#           with corresponding value
+#
 sub new {
     my $class = shift;
 
@@ -230,7 +243,14 @@ Obvius::Data - Perl extension for blah blah blah
 =head1 SYNOPSIS
 
   use Obvius::Data;
-  blah blah blah
+
+  %hash = {
+    param1 => value1,
+    param2 => value2,
+  };
+  my $obj = Obvius::Data->new(\%hash);
+
+  my $obj = Obvius::Data->new( param1 => value1, param2 => value2 );
 
 =head1 DESCRIPTION
 
