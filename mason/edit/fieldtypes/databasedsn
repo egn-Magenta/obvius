@@ -1,0 +1,36 @@
+<%method edit>
+<select name="<% $name %>">
+%for(@options) {
+    <option value="<% $_ %>"><% $_ %></option>
+%}
+</select>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+</%args>
+<%init>
+my $DSNs = $obvius->{OBVIUS_CONFIG}->param('database_dsns') || '';
+
+my @DSNs = split(/\s*,\s*/, $DSNs);
+
+my @options;
+
+for(@DSNs) {
+    my ($name, $rest) = (m#^(.*?)\s*=>\s*(.*)$#);
+    push(@options, $name) if($name);
+}
+</%init>
+</%method>
+%
+%
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+    return $value;
+</%perl>
+</%method>
