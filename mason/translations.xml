@@ -4119,9 +4119,9 @@ abonnement på samme email-adresse.</translation>
 
   <text key="admin_doctypes_available:admin_doctypes_notice">
     <translation lang="en">Doctypes marked with (*) are normally resticted in this area,
-    but are visible to the admin user.</translation>
+    but are visible to users with admin-rights.</translation>
     <translation lang="da">Dokumenttyper markeret med (*) er normalt begrænset i dette område,
-    men er synlige for admin-brugeren.</translation>
+    men er synlige for brugere med admin-rettighed.</translation>
   </text>
 
   <text key="Text and data">
