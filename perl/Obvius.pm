@@ -8,10 +8,10 @@ package Obvius;
 #                    aparte A/S, Denmark (http://www.aparte.dk/),
 #                    FI, Denmark (http://www.fi.dk/)
 #
-# Authors: René Seindal (rene@magenta-aps.dk),
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#          Peter Makholm (pma@fi.dk),
 #          Adam Sjøgren (asjo@magenta-aps.dk),
-#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
-#          Peter Makholm (pma@fi.dk)
+#          René Seindal.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -593,7 +593,15 @@ sub get_version {
     return $versions->[0];
 }
 
-sub get_public_versions {  # XXX TODO: Handle Expires, Published?
+# get_public_versions - given a document-object, returns an array-ref
+#                       containing version-objects for all the public
+#                       version of the document.
+#                       Note that a document can have multiple public
+#                       versions, at most one per language.
+#                       The array-ref is cached on the document-object
+#                       for quick retrieval.
+#                       XXX TODO: Handle Expires, Published?
+sub get_public_versions {
     my($this, $doc) = @_;
 
     $this->tracer($doc) if ($this->{DEBUG});
@@ -2254,6 +2262,8 @@ Obvius - Content Manager, database handling.
 
     $obvius->sanity_check($config); # Obsolete, not used.
 
+    my $aref=$obvius->get_public_version($doc);
+
 =head1 DESCRIPTION
 
 Obvius is the main object for accessing the content manager.
@@ -2264,9 +2274,10 @@ None by default.
 
 =head1 AUTHOR
 
+Jørgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
+Peter Makholm <lt>pma@fi.dk<gt>
 René Seindal
 Adam Sjøgren <lt>asjo@magenta-aps.dk<gt>
-Jørgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 
