@@ -817,7 +817,7 @@ sub search {
 	    #set the name of the field
 	    push (@fields, "xref$xrefs.$search_arg as $_$xrefs");
 
-	    $where =~ s/$_[^\d]/$_$xrefs/;
+	    $where =~ s/$_([^\d])/$_$xrefs$1/;
 
 	    # map all occurrences of $_ to xrefX.xref_column
 	    $map{$_ . $xrefs} = "xref$xrefs.$search_arg";
@@ -1055,7 +1055,6 @@ sub get_version_field {
 }
 
 
-
 ########################################################################
 #
 #	Look up document and field types
