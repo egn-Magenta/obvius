@@ -92,7 +92,7 @@ our $Admin = ${perlname}::Site::Admin->new(
 				      comp_root=>[
 						  [docroot  =>"$base/docs"],
 						  [sitecomp =>"$base/mason/admin"],
-						  [admincomp=>"$globalbase/obvius/mason/admin"],
+						  [admincomp=>"$globalbase/obvius/mason"],
 						  [commoncomp => "$base/mason/common"],
 						  [globalcommoncomp =>"$globalbase/obvius/mason/common"],
 						 ],
