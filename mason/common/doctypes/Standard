@@ -1,6 +1,6 @@
 <!-- Standard doctype: -->
 
-<h1><% $title %></h1>
+<& headline &>
 %
 <& teaser &>
 %
@@ -19,8 +19,9 @@ $output
 </%args>
 %
 <%init>
-$obvius->get_version_fields($vdoc, [qw(title url  teaser  docdate hide_subdocs)]);
-my $title = $vdoc->Title;
+$obvius->get_version_fields($vdoc, [qw(url teaser docdate show_subdocs show_subdoc_teaser show_subdoc_date)]);
+my $teaser = $vdoc->Teaser;
+my $docdate = $vdoc->Docdate;
 
-$r->notes('hide_subdocs'=>$vdoc->Hide_subdocs) if (defined $vdoc->field('hide_subdocs'));
+$r->notes('show_subdocs'=>$vdoc->Show_subdocs) if (defined $vdoc->field('show_subdocs'));
 </%init>
