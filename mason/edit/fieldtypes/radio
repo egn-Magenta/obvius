@@ -11,7 +11,8 @@ $session
 %         my $selected=($selected{$_} ? ' CHECKED' : '');
 %         my $label=(defined $ARGS{'label_' . $_} ? $ARGS{'label_' . $_} : $_);
 %         $label =~ s/_/ /g;
-<label><input type="checkbox" name="<% $name %>" value="<% $_ %>"<% $selected %> tabindex="10"><& SELF:msg, text=>$label &></input></label>
+%         my $disabled=(defined $ARGS{'disabled'} ? $ARGS{'disabled'} : 0);
+<label><input <% $disabled == 1 ? 'disabled' : '' %>  type="checkbox" name="<% $name %>" value="<% $_ %>"<% $selected %> tabindex="10"><& SELF:msg, text=>$label &></input></label>
 %         last if (defined $ARGS{last_displayed} and $_ eq $ARGS{last_displayed});
 %     }
 % } else {
@@ -20,7 +21,8 @@ $session
 %         my $selected=((defined $value and uc($value) eq uc($_)) ? ' CHECKED' : '');
 %         my $label=(defined $ARGS{'label_' . $_} ? $ARGS{'label_' . $_} : $_);
 %         $label =~ s/_/ /g;
-<label><input type="radio" class="obviusradio" name="<% $name %>" value="<% $_ %>"<% $selected %> tabindex="10"><& SELF:msg, text=>$label &></input></label>
+%         my $disabled=(defined $ARGS{'disabled'} ? $ARGS{'disabled'} : 0);
+<label><input <% $disabled == 1 ? 'disabled' : '' %> type="radio" class="obviusradio" name="<% $name %>" value="<% $_ %>"<% $selected %> tabindex="10"><& SELF:msg, text=>$label &></input></label>
 %         last if (defined $ARGS{last_displayed} and $_ eq $ARGS{last_displayed});
 %     }
 %     if ($fieldspec->Optional) {
