@@ -22,7 +22,6 @@ $session
 $value=>undef
 </%args>
 <%perl>
-print STDERR "HER ER VALUE I RATES:".$value."\n";
 return $value;
 </%perl>
 </%method>
