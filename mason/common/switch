@@ -1,7 +1,7 @@
 <div class="content">
 <% $content %>
     </div>
-% unless ($hide_subdocs) {
+% if ($show_subdocs) {
 <& subdocs, output=>$output &>\
 % }
 <%init>
@@ -12,10 +12,10 @@ if ( (ref $doctype) =~ /::([^:]+)$/ ) {
     $doctypename = $1;
 }
 
-$obvius->get_version_fields($vdoc, [qw(title)]);
+$obvius->get_version_fields($vdoc, [qw(title show_subdocs)]);
 my $title = $vdoc->Title;
 
 my $content=$m->scomp("/doctypes/$doctypename", output=>$output);
 
-my $hide_subdocs=$r->notes('hide_subdocs') || 0;
+my $show_subdocs=$vdoc->Show_subdocs || 0;
 </%init>
