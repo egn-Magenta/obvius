@@ -1,4 +1,5 @@
 <!-- begin Search -->
+<& headline &>
 %if($do_search_page) {
 % my $html = $output->param('htdig_results');
 <% $html %>
