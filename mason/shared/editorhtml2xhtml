@@ -1,0 +1,46 @@
+<% $out %>\
+<%args>
+$html
+</%args>
+<%init>
+$out = '';
+$p->parse($html);
+$p->eof;
+</%init>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $attr, $attrseq)=@_;
+                                                  my @new_attrseq = grep {! /^(align|hspace|vspace)$/} @$attrseq;
+                                                  $attrseq = \@new_attrseq;
+
+                                                  my $endtag = "";
+                                                  $endtag = " /" if($tagname =~ /^(br|img|input)$/);
+
+                                                  my $text = "<$tagname";
+                                                  for(@$attrseq) {
+                                                    if($_ eq '/') {
+                                                        $endtag = " /";
+                                                        next;
+                                                    }
+                                                    $text .= " " . lc($_) . '="' . $attr->{$_} . '"' unless ($tagname =~ /^br$/);
+                                                  }
+
+                                                  $text .= "$endtag>";
+
+                                                  $out.= $text;
+                                                }, "self, tagname, attr, attrseq" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=lc($text);
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+
+</%once>
