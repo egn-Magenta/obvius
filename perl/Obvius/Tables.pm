@@ -172,8 +172,9 @@ sub get_table_record {
     return ($wantarray ? @records : $rec);
 }
 # insert_table_record ($table, $rec) - Inserts a row into a database table. 
-#                                      $rec should be a hash of fieldnames and values to
-#                                      be inserted into the table.
+#                                      $rec should be a hash, or a reference to a hash,
+#                                      of fieldnames and values to be inserted into
+#                                      the table.
 #                                      Returns a hash on succes.
 #                                      If an error occurs upon insertion the transaction
 #                                      is rolled back and the function returns undef.
@@ -314,6 +315,8 @@ Obvius::Tables - Table(List) functions for Obvius.
   my @recs=$obvius->get_table_record('comments', { docid=>$doc->Id });
 
   $obvius->insert_table_record('comments', {foo=>'bar', spam=>'ham'});
+  my %record = (foo=>'bar', spam=>'ham')
+  $obvius->insert_table_record('comments', \%record);
 
 =head1 DESCRIPTION
 
