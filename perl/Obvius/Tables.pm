@@ -141,13 +141,14 @@ sub get_table_record {
     $this->db_begin;
     my @records=();
     my $rec=undef;
+    my $wantarray=wantarray; # Changes inside the eval!
     eval {
         my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
 					    '!Table'      => $table,
 					   } );
         $set->Search($how);
 
-        if (wantarray) {
+        if ($wantarray) {
             while (my $rec = $set->Next) {
                 push(@records, $rec);
             }
@@ -166,7 +167,7 @@ sub get_table_record {
         return undef;
     }
 
-    return (wantarray ? @records : $rec);
+    return ($wantarray ? @records : $rec);
 }
 
 sub insert_table_record {
