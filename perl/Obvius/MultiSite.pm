@@ -444,7 +444,7 @@ sub search {
     }
 
     # Check if we are limited to a siteroot:
-    if($this->{ROOTID} and not $options{break_siteroot}) {
+    if($this->{SITEROOT} and not $options{break_siteroot}) {
         push(@table, 'uri_cache');
         push(@join, "(versions.docid = uri_cache.docid)");
         $where .= " AND uri_cache.path_part1_id = $this->{ROOTID}";
