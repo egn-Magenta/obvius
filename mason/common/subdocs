@@ -7,13 +7,13 @@
         <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a>
 %if ($show_subdoc_teaser == 1) {
 %  if ($_->{teaser} !~ /^\s+$/) {
-      <br><% $_->{teaser} %>
+      <br /><% $_->{teaser} %>
 %  if ($date == 1) {
-        <br>
+        <br />
 %  }
 %  }
 %}
-      <% $date != 0 ? '<br>'.$date .'<br><br>' : '<br><br>' %></li>
+      <% $date != 0 ? '<br />'.$date .'<br /><br />' : '<br /><br />' %></li>
 %     }
     </ul>
 % }
