@@ -6,7 +6,7 @@
 
 <table border="0" class="content">
 <tr>
-<td width="15"><img src="/grafik/1x1.gif" width="15" alt=""></td>
+<td width="15" height="5"><img src="/grafik/1x1.gif" width="15" alt="" height="5"></td>
 <td align="center">
 <& pager, output=>$output &>
 </td>
