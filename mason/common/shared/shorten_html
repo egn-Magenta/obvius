@@ -1,0 +1,68 @@
+<%args>
+$text
+$length
+</%args>\
+<%init>
+$text = $m->scomp('/shared/printhtml', html=>$text);
+$textlength = 0;
+$max_length = $length;
+$stop = 0;
+$out='';
+$r->notes('shortened' => 0);
+$p->parse($text);
+$p->eof;
+$r->notes('shortened' => 1) if($stop);
+</%init>
+<% $out %>\
+%
+%
+%
+%
+%
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $textlength = 0;
+my $max_length = 0;
+my %open_tags;
+my $stop = 0;
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                unless($stop) {
+                                                    $out .= $text;
+                                                    $open_tags{$tagname} = 0 unless(defined($open_tags{$tagname}));
+                                                    $open_tags{$tagname}++;
+                                                }
+                                            }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+
+                                            # If we want to stop only allow closing tags
+                                            if($stop) {
+                                                if($open_tags{$tagname} and $open_tags{$tagname} > 0) {
+                                                    $out.=$text;
+                                                    $open_tags{$tagname}--;
+                                                }
+                                            } else {
+                                                $out.=$text;
+                                                $open_tags{$tagname}--;
+                                            }
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                            my ($this, $text)=@_;
+                                            unless($stop) {
+                                                my $currentlength = length($text);
+                                                if($textlength + $currentlength > $max_length) {
+                                                    my $partialtext = substr($text, 0, $max_length - $currentlength);
+                                                    $out .= $partialtext . '...';
+                                                    $stop = 1;
+                                                } else {
+                                                    $out.=$text;
+                                                    $textlength += $currentlength;
+                                                }
+                                            }
+                                        },
+                                        "self, dtext" ]);
+</%once>
