@@ -45,6 +45,8 @@ sub get_user {
     return $this->{USERS}->{$userid};
 }
 
+# get_userid - given a string containing a username, returns the id of
+#              the user.
 sub get_userid {
     my ($this, $user) = @_;
 
@@ -329,6 +331,8 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
 
   my $userid=$obvius->get_userid($user);
   my $grpids=$obvius->get_user_groups($userid);
+
+  my $userid=$obvius->get_userid('stein');
 
 =head1 DESCRIPTION
 
