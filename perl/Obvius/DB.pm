@@ -4,13 +4,15 @@ package Obvius::DB;
 #
 # Obvius.pm - Content Manager, database handling
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/),
-#                    aparte A/S, Denmark (http://www.aparte.dk/),
-#                    FI, Denmark (http://www.fi.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/),
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: René Seindal (rene@magenta-aps.dk),
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#          Peter Makholm (pma@fi.dk),
+#          René Seindal,
 #          Adam Sjøgren (asjo@magenta-aps.dk),
-#          Peter Makholm (pma@fi.dk)
+#          Martin Skøtt (martin@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -500,6 +502,10 @@ sub db_insert_grp_user {
     return;
 }
 
+# db_insert_comment - given a hash-ref containing key-value pairs for
+#                     a comment (docid, name, email and text - date is
+#                     set to now automatically), inserts the comment
+#                     in the database.
 sub db_insert_comment {
     my ($this, $data) = @_;
 
@@ -706,7 +712,6 @@ sub db_delete_docparams {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -722,22 +727,25 @@ Obvius::DB - Database functions for L<Obvius>.
 
   $obvius->db_error();
 
-  etc.
+  $obvius->db_insert_comment({
+                              docid=>$doc->Id,
+                              name=>'Søren Hansen',
+                              email=>'sh@example.invalid',
+                              text=>'Jeg synes bare det er helt, ja det er.',
+                             });
 
 =head1 DESCRIPTION
 
 This module contains the database functions for the L<Obvius> module.
 It should not be used as a standalone module.
 
-=head2 EXPORT
-
-None.
-
 =head1 AUTHORS
 
-Adam Sjøgren E<lt>adam@aparte.dkE<gt>
-
-Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+Peter Makholm E<lt>pma@fi.dkE<gt>
+René Seindal
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
+Martin Skøtt E<lt>martin@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
