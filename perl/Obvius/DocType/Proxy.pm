@@ -79,8 +79,17 @@ sub action {
         return OBVIUS_OK;
     }
 
-    # Filter content:
-    $output->param(proxy_content=>filter_content($response->content, $fetch_url, $base_url, $prefixes));
+    # Filter content if it is a type we feel know:
+    if ($response->headers->header('content-type')=~m!^text/(html|xml|xhtml|plain)!) {
+        $output->param(proxy_content=>filter_content($response->content, $fetch_url, $base_url, $prefixes));
+    }
+    elsif ($response->is_success) {
+        # Success, but we don't know how to filter the page, so
+        # redirect to the actual url:
+        $output->param(redirect=>$fetch_url);
+        $output->param(status=>301);
+        return OBVIUS_OK;
+    }
 
     # Take care of the result of the request:
     handle_response($response, $fetch_url, $base_url, $prefixes, $via, $output);
