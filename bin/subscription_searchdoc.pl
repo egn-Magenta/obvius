@@ -275,11 +275,6 @@ sub get_in_subscription_docs {
 
     $in_subscription_cache = \%in_subscription_docs;
 
-    use Data::Dumper;
-    print STDERR Dumper(\%in_subscription_docs);
-
-    print scalar(keys %in_subscription_docs) . "\n";
-
     return \%in_subscription_docs;
 }
 
@@ -345,7 +340,6 @@ sub get_docs_by_search {
 
     my @result;
 
-
     for my $vdoc (@$vdocs) {
         $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category', 'docdate' ]);
 
@@ -360,10 +354,10 @@ sub get_docs_by_search {
                         url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
                         vdoc => $vdoc
                     }
-                ) if($vdoc->{PUBLISH_FIELDS}->{PUBLISHED});
-        }
+                );
+    }
 
-        return \@result;
+    return \@result;
 }
 
 sub send_mail {
