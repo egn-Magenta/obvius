@@ -172,7 +172,7 @@ sub action {
     my $require = $args{require} || '';
 
     if ($kwdocs) {
-        if ($vdoc->Pagesize) {
+        if ($pagesize) {
             my $page = $input->param('p') || 1;
             $this->export_paged_doclist($pagesize, $kwdocs, $output, $obvius,
                             name=>'kwdocs', page=>$page,
