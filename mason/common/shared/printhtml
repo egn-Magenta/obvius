@@ -1,0 +1,59 @@
+<%args>
+$html
+$no_first_paragraph=>undef
+$class=>undef
+$plaintext=>undef
+</%args>
+<%init>
+$html ||= '';
+$out = '';
+$pclass = $class;
+$_plaintext = $plaintext;
+$p->parse($html);
+$p->eof;
+$html=$out;
+if($no_first_paragraph) {
+    $html   =~ s/<P[^>]*>//i;
+    $html   =~ s/<\/P>//i;
+}
+# Cleanup -  &amp;#xxxx; back to &#xxxx;
+$html =~ s/&amp;#(\d+);/&#$1;/ig;
+</%init>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+# $farve should be set before parsing
+my $farve='';
+my $pclass='';
+my $_plaintext;
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $text ||= ''; $out.=$text }, "self, dtext" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                unless($_plaintext) {
+                                                    if($tagname eq 'a' and $attr->{href} and $attr->{href} =~ m!^/(\d+)\.docid!) {
+                                                        my $uri;
+                                                        my $d = $obvius->get_doc_by_id($1);
+                                                        $uri = $obvius->get_doc_uri($d) if($d);
+                                                        $text =~ s!/$1\.docid/?!$prefix$uri! if($uri);
+                                                        $out.=$text;
+                                                    } elsif($r->notes('is_admin') and $tagname eq 'img' and $attr->{src} and $attr->{src} =~ s!/$!!) {
+                                                        $out .= "<img " . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ">";
+                                                    } elsif($pclass and $tagname eq 'p' and not $attr->{class}) {
+                                                        $out .= '<P ' . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ' class="' . $pclass . '">';
+                                                    } else {
+                                                        $out.=$text;
+                                                    }
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=$text unless($_plaintext);
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                            my ($this, $text)=@_;
+                                            $out.=$text;
+                                        },
+                                        "self, dtext" ]);
+</%once>
+<% $html %>
