@@ -1,4 +1,32 @@
-package Obvius::Shell;		# Please use -*- cperl -*-, thanks.
+package Obvius::Shell;          # Please use -*- cperl -*-, thanks.
+
+########################################################################
+#
+# Shell.pm - experimental shell-interface for Obvius
+#
+# Copyright (C) 2002-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
+#
+# Authors: Peter Makholm (pma@fi.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
+# $Id$
 
 ########################################################################
 #
@@ -40,11 +68,11 @@ sub shell {
   $site = shift;
   croak ("No site defined")
     unless (defined($site));
-  
+
   $conf = new Obvius::Config($site);
   croak ("Could not get config for $site")
     unless(defined($conf));
-    
+
   $obvius = new Obvius($conf);
   croak ("Could not get Obvius object for $site")
     unless(defined($obvius));
@@ -66,7 +94,6 @@ sub shell {
   $shell->{SHELL}->{DOCLIST} = [];
 
   $shell->cmdloop;
-
 }
 
 
@@ -76,11 +103,11 @@ sub shell {
 #
 ########################################################################
 
-sub prompt_str { 
+sub prompt_str {
   my ($shell) = @_;
   my ($obvius, $doc, $vdoc) = extract_shell $shell;
 
-  $shell->{SHELL}->{site}.":".$obvius->get_doc_uri($doc)."> " 
+  $shell->{SHELL}->{site}.":".$obvius->get_doc_uri($doc)."> "
 }
 
 
@@ -92,7 +119,6 @@ sub prompt_str {
 
 # Please order functions smry_*, run_*, comp_*, and help_*
 # and always write a smry_* function.
-
 
 sub smry_ls { "List subdocuments"}
 
@@ -106,7 +132,6 @@ sub run_ls {
     my $doc = $obvius->get_doc_by_id($_->DocId);
     print $doc->Name, "\n";
   }
-
 }
 
 
@@ -126,9 +151,9 @@ sub smry_chver { "Change version" }
 sub run_chver {
   my ($shell, $ver) = @_;
   my ($obvius, $doc, $vdoc) = extract_shell $shell;
-    
+
   my $new_ver;
-    
+
   if ($ver =~ /^%(\d+)/) {
     $new_ver =  $shell->{SHELL}->{VERSIONS}->[$1];
   } elsif ($ver =~ /^%%/) {
@@ -136,13 +161,12 @@ sub run_chver {
   } else {
     $new_ver = $obvius->get_version($doc, $ver);
   }
-    
+
   if (defined($new_ver)) {
     $shell->{SHELL}->{vdoc} = $new_ver;
   } else {
     warn "No such version: $ver\n";
   }
-    
 }
 
 
@@ -179,25 +203,24 @@ sub run_pwd {
   my ($obvius, $doc, $vdoc) = extract_shell $shell;
 
   local @ARGV = @_;
-    
+
   my %opt;
-    
+
   getopts('aiuv', \%opt);
-    
+
   $opt{i} = $opt{u} = $opt{v} = 1 if ($opt{a});
 
   $opt{u} = 1 unless ($opt{i} || $opt{u} || $opt{v});
-    
+
   if ($opt{i}) {
     print "DocId:\t\t", $doc->Id, "\n"
-  } 
+  }
   if ($opt{u}) {
     print "Uri:\t\t", $obvius->get_doc_uri($doc), "\n";
   }
   if ($opt{v}) {
     print "Version:\t",  $vdoc->Version, "\n";
   }
-    
 }
 
 
@@ -208,7 +231,7 @@ sub run_show {
   my ($obvius, $doc, $vdoc) = extract_shell $shell;
 
   local @ARGV = @_;
-        
+
   my %options = ();
   GetOptions(\%options, qw(all publish));
 
@@ -231,9 +254,8 @@ sub run_show {
   foreach (@$needed) {
     $res->param($_ => $fields->param($_));
   }
-    
+
   print Dumper $res;
-    
 }
 
 
@@ -244,18 +266,18 @@ sub run_search {
   my ($obvius, $doc, $vdoc) = extract_shell $shell;
 
   local @ARGV = @_;
-    
+
   my %options = ();
   GetOptions(\%options, qw(nothidden notexpired public max=i sortvdoc=s));
-    
+
   if (defined $options{sortvdoc}) {
     $options{sortvdoc} = file2doc($shell, $options{sortvdoc});
   }
 
   my $where = shift @ARGV;
-    
+
   my $vdocs = $obvius->search(\@ARGV, $where, %options);
-    
+
   my @docs = map { $obvius->get_doc_by_id($_->DocId) } @$vdocs;
 
   $shell->{SHELL}->{DOCLIST} = \@docs;
@@ -276,6 +298,9 @@ sub extract_shell {
   @{$shell->{SHELL}}{'obvius','doc','vdoc'}
 }
 
+# file2doc - given a shell-object and a string describing a path,
+#            returns the document-object that the path refers to
+#            (perhaps relative to the current working directory.)
 sub file2doc {
   my ($shell, $id) = @_;
   my ($obvius, $doc, $vdoc) = extract_shell $shell;
@@ -286,7 +311,7 @@ sub file2doc {
 
   my @id = split '/', $id;
   my $d;
-    
+
   while (defined($doc) && defined($d = shift @id)) {
     if ($d eq '') {
       # no-op
@@ -294,7 +319,7 @@ sub file2doc {
       # no-op
     } elsif ($d eq '..') {
       $doc = $obvius->get_doc_by_id($doc->Parent)
-	unless ($doc == $obvius->get_root_document);
+        unless ($doc == $obvius->get_root_document);
     } elsif ($d eq '-') {
       $doc = $shell->{SHELL}->{OLDPWD};
     } elsif ($d =~ /^(\d+)\.docid/) {
@@ -304,7 +329,7 @@ sub file2doc {
     } else {
       $doc = $obvius->get_doc_by_name_parent($d, $doc->Id);
     }
-	
+
   }
 
   return $doc;
@@ -324,25 +349,25 @@ sub file_completion {
   my @res = map { $path. $_ }
     grep { m|^$word| } 
       map { $obvius->get_doc_by_id($_->DocId)->Name }
-	@{$obvius->get_document_subdocs($base_doc)};
-    
+        @{$obvius->get_document_subdocs($base_doc)};
+
   return @res;
 }
 
 sub fields_by_threshold {
   my ($obvius, $version, $threshold, $type) = @_;
   $type=(defined $type ? $type : 'FIELDS');
-    
+
   my $doctype = $obvius->get_version_type($version);
   my @fields;
-    
+
   if (ref $threshold) {
     @fields = grep { defined $doctype->field($_, undef, $type) } @$threshold
       ;
   } else {
     $threshold = 0 unless (defined $threshold and $threshold >= 0);
     $threshold = 255 if ($threshold > 255);
-	
+
     @fields = grep {
       $doctype->field($_, undef, $type)->Threshold <= $threshold
     } @{$doctype->fields_names($type)};
@@ -352,7 +377,6 @@ sub fields_by_threshold {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -364,23 +388,17 @@ Obvius::Shell - Shell-like interface to a Obvius-site
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Shell, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+Obvius::Shell implements an experimental shell-like interface to
+Obvius-sites.
 
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+Use the command "help" to get a list of available commands.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Peter Makholm E<lt>pma@fi.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius>.
 
 =cut
