@@ -383,6 +383,13 @@ sub do_urlencode_hook {
     return Apache::Util::escape_uri($this->_value_safe($n));
 }
 
+# do_htmlencode_hook - implements the htmlencode-command for use in
+#                      MCMS-templates; converting relevant characters
+#                      to entities ('<' and '>' for instance). This is
+#                      done by calling Apache::Util::escape_html if
+#                      available, if not HTML::Entities::encode is
+#                      used.
+#                      Used internally.
 sub do_htmlencode_hook {
     my ($this, $n) = @_;
     return escape_html($this->_value_safe($n));
