@@ -4,7 +4,7 @@ package Obvius::Pubauth;
 #
 # Obvius::Pubauth.pm - Public authentication methods for Obvius.
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2004-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
 # Authors: Jørgen Ulrik B. Krag <jubk@magenta-aps.dk>
 #          Adam Sjøgren <asjo@magenta-aps.dk>
@@ -381,6 +381,10 @@ sub update_public_user_areas {
 
 ## Missing helpers
 
+# get_public_user - given a hash-ref that matches exactly one public
+#                   user, returns a hash-ref with the user-data. If
+#                   more than one user or no user matches, then undef
+#                   is returned.
 sub get_public_user {
     my ($obvius, $how)=@_;
 
@@ -417,12 +421,7 @@ Obvius::Pubauth - Public authentication methods form Obvius.
 Provides Obvius with methods for accessing the public_users database
 table.
 
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
+=head1 AUTHORS
 
 Jørgen Ulrik B. KragE<lt>jubk@magenta-aps.dkE<gt>
 Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
