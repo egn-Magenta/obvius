@@ -21,6 +21,8 @@ $ENV{'PERL5LIB'} = $ENV{'PERL5LIB'} . ":/home/httpd/obvius/perl_blib";
 my %options=(
     website=>undef,
     dbname=>undef,
+    dbuser=>'root',
+    dbpasswd=>'',
     perlname=>undef,
     domain=>undef,
     wwwroot=>'/var/www',
@@ -33,6 +35,8 @@ my %options=(
 GetOptions(
 	   'website=s'    =>\$options{website},
 	   'dbname=s'     =>\$options{dbname},
+	   'dbuser=s'     =>\$options{dbuser},
+	   'dbpasswd=s'   =>\$options{dbpasswd},
 	   'perlname=s'   =>\$options{perlname},
 	   'domain=s'     =>\$options{domain},
 	   'wwwroot=s'    =>\$options{wwwroot},
@@ -122,6 +126,12 @@ my @skeleton_files=map { s|^[.]/||; $_; } split /\n/, `(cd $options{skeleton_dir
 foreach my $skeleton_file (@skeleton_files) {
     next if ($skeleton_file =~ /CVS/);
     copy_interpolate($options{skeleton_dir}, $skeleton_file, "$options{wwwroot}/$options{website}");
+}
+
+# Create Obvius dir:
+unless (-d "/etc/obvius/") {
+    print "creating /etc/obvius/ ...\n";
+    make_dir("/etc/obvius/", $options{staff_group});
 }
 
 # Create Obvius conf-file:
@@ -232,11 +242,11 @@ sub make_db {
 	print " The database $dbname already exists\n";
     }
     else {
-	system "mysqladmin create $dbname";
-	system "cat $options{wwwroot}/$options{website}/db/structure.sql | mysql $dbname";
-	system "cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname";
+	system "mysqladmin create $dbname -u $options{dbuser} --password=$options{dbpasswd}";
+	system "cat $options{wwwroot}/$options{website}/db/structure.sql | mysql $dbname -u $options{dbuser} --password=$options{dbpasswd}";
+	system "cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname -u $options{dbuser} --password=$options{dbpasswd}";
 	# Put doctypes, editpages, fieldspecs and fieldtypes in the database:
-	system "(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh)";
+	system "(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh $options{dbuser} $options{dbpasswd})";
 	# Make root document:
 	system "$options{wwwroot}/obvius/otto/create_root ${dbname} Forside";
     }
