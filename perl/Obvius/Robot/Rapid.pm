@@ -296,17 +296,30 @@ sub retrieve_real_title {
     return undef;
 }
 
-# narrow_unicode_utf8 - convert commonly used unicode characters in
-#                       utf8 to the similar ones in latin1.
+# narrow_unicode_utf8 - convert commonly used utf-8-encoded unicode
+#                       characters that do not have direct equivalents
+#                       in latin1 to the most similar character in
+#                       latin1.
+#
 #                       Note that the utf8-encoding of a single
 #                       character can be up to 6 bytes long.
+#
+#                       Handy unicode tables:
+#                        <http://ppewww.ph.gla.ac.uk/~flavell/unicode/unidata.html>
+#
+#                       Somebody must have done this before...
 sub narrow_unicode_utf8 {
     my ($text)=@_;
 
-    $text=~s/’/\'/g;
-    $text=~s/€/euro/g;
-    $text=~s/“/\"/g;
-    $text=~s/”/\"/g;
+    $text=~s/Č/C/g;     #  0x10c: Capital c with caron (^ upside down)
+
+    $text=s~/–/-/g;   # 0x2013: En dash
+    $text=~s/—/-/g;   # 0x2014: Em dash
+    $text=~s/‘/\'/g;  # 0x2018: Left single quotation mark
+    $text=~s/’/\'/g;  # 0x2019: Right single quotation mark
+    $text=~s/“/\"/g;  # 0x201c: Left double quotation mark
+    $text=~s/”/\"/g;  # 0x201d: Right double quotation mark
+    $text=~s/€/euro/g; # 0x20a0: Euro-currency sign
 
     return $text;
 }
