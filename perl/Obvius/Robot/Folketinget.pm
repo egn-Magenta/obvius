@@ -2,11 +2,13 @@ package Obvius::Robot::Folketinget;
 
 ########################################################################
 #
-# Folketinget.pm - Search robot for www.Folketinget.dk
+# Folketinget.pm - Search robot for www.folketinget.dk
 #
-# Copyright (C) 2000 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2000-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: René Seindal (rene@magenta-aps.dk)
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#          René Seindal,
+#          Adam Sjøgren
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,14 +28,13 @@ package Obvius::Robot::Folketinget;
 
 # $Id$
 
-require 5.005_62;
 use strict;
 use warnings;
 
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( search_folketinget get_ftdoc_data);
+our @EXPORT_OK = qw(search_folketinget get_ftdoc_data);
 our @EXPORT = qw();
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -43,8 +44,6 @@ use URI::Escape;
 use POSIX qw(strftime);
 
 use Obvius::Robot;
-
-use Data::Dumper;
 
 ###################################################################
 #                                                                 #
@@ -131,7 +130,7 @@ sub store_document {
 
     my $doc = $self->{DOC};
 
-    if(%$self->{KNOWN_DOCS}) {
+    if(ref $self->{KNOWN_DOCS} eq 'HASH') {
         my $existing_doc = $self->{KNOWN_DOCS}->{$doc->{url}};
         if($existing_doc) {
             if($doc->{size} != $existing_doc->{size} or $doc->{timestamp} ne $existing_doc->{timestamp}) {
@@ -166,6 +165,14 @@ sub comment_tag {
     my ($self, $text) = @_;
 }
 
+# start_tag - called by the HTML::Parser when the start of a tag is
+#             encountered.
+#             On a-tags the href-attribute is checked for a specific
+#             javascript-link ("HopTil") and such ones are stored in
+#             the URL-field. The state is set to get_title.
+#             On font-tags with the attribute size set to -1, the
+#             state is set to get_size_and_date for processing
+#             elsewhere.
 sub start_tag {
     my ($self, $tag, $text, $attr) = @_;
 
@@ -361,36 +368,29 @@ sub data_text_handler {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::Robot::Folketinget - Perl extension for blah blah blah
+Obvius::Robot::Folketinget - Search robot for www.folketinget.dk
 
 =head1 SYNOPSIS
 
   use Obvius::Robot::Folketinget;
-  blah blah blah
 
 =head1 DESCRIPTION
-
-Stub documentation for Obvius::Robot::Folketinget, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
 
 =head2 EXPORT
 
 None by default.
 
-
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+René Seindal
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::Robot>.
 
 =cut
