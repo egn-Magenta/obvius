@@ -23,12 +23,15 @@ sub start_tag {
         if($tag eq 'a' and $attr->{class} and $attr->{class} eq 'docSel-titleLink') {
             $self->{state} = 'get_title';
             if($attr->{href}) {
+                $attr->{href} =~ s/\s+//gs;
                 $self->{doc}->{globalurl} = "http://europa.eu.int/rapid/" . $attr->{href};
             }
         }
     } elsif($self->{state} eq 'get_html_links' or $self->{state} eq 'get_pdf_links') {
         if($tag eq 'a' and $attr->{href}) {
-            $self->{tmp_link} = "http://europa.eu.int/rapid/" . $attr->{href};
+            my $link = $attr->{href};
+            $link =~ s/\s+//gs;
+            $self->{tmp_link} = "http://europa.eu.int/rapid/" . $link;
         }
     } else {
         if($tag eq 'td' and $attr->{class} and $attr->{class} eq 'bluetext11') {
@@ -60,10 +63,13 @@ sub text_handler {
 
     return unless($text);
 
+    # Convert nobreakspaces to normal spaces.
+    $text =~ s/ / /g;
+
     return if($text =~ /^\s+$/s);
 
     if($self->{state} eq 'get_docdate') {
-        $text =~ s/\n/ /gs;
+        $text =~ s/\s+//gs;
         my ($docref, $docdate) = split(/Date:/, $text);
         $docref =~ s/ //g;
         $docdate =~ s/ //g;
@@ -72,10 +78,14 @@ sub text_handler {
         $self->{state} = 'look_for_title';
 
     } elsif($self->{state} eq 'look_for_html_links') {
+        # Remove any spaces
+        $text =~ s/\s+//sg;
         if($text eq 'HTML:') {
             $self->{state} = 'get_html_links';
         }
     } elsif($self->{state} eq 'get_html_links') {
+        # Remove any spaces
+        $text =~ s/\s+//sg;
         if($text eq 'PDF:') {
             $self->{state} = 'get_pdf_links';
         } else {
@@ -85,6 +95,8 @@ sub text_handler {
             }
         }
     } elsif($self->{state} eq 'get_pdf_links') {
+        # Remove any spaces
+        $text =~ s/\s+//sg;
         if($text eq 'DOC:') {
             # Document ends here:
             store_document($self);
