@@ -1,5 +1,4 @@
 <& ../headline &>
-<% $language %>
 	<table border="0">
 %for(@$events) {
          <tr>
