@@ -1,7 +1,7 @@
 <%args>
 $cookie
 $value=>undef
-$expires=>'+3M'
+$expires=>'undef'
 $path=>'/'
 </%args>
 %
