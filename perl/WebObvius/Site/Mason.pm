@@ -249,8 +249,7 @@ sub access_handler ($$) {
                                                                             # except on admin where it's
                                                                             # handled in Mason ...
 
-    return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external')
-	if ($uri =~ s![.]html/$!.html!i); # ... and we auto-deslash any uri which ends in .html.
+    return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external') if (!$this->param('is_admin') and ($uri =~ s![.]html/$!.html!i)); # ... and we auto-deslash any uri which ends in .html.
 
     my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
     return SERVER_ERROR unless ($obvius);
