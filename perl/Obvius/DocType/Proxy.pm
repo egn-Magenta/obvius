@@ -108,8 +108,8 @@ sub check_via_ok {
     my $header_via=$input->param('OBVIUS_HEADERS_IN')->{Via};
 
     # XXX This is an odd way of (an attempt at) finding a substring
-    # within a string:
-    my $pattern='[' . (join "][", split '', $via) . ']';
+    #     within a string:              escape any [ and ]'s:
+    my $pattern='[' . (join "][", map { s/\[/\\[/; s/\]/\\]/; $_ } split '', $via) . ']';
     return (defined $header_via ? $header_via!~m/$pattern/i : 1);
 }
 
