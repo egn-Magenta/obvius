@@ -336,6 +336,7 @@ sub export_eventlist {
         my $url = $obvius->get_doc_uri($doc);
         $obvius->get_version_fields($_, [
                                         'title',
+                                        'short_title',
                                         'eventtype',
                                         'eventtime',
                                         'eventplace',
@@ -346,6 +347,7 @@ sub export_eventlist {
                                 );
         push(@events, {
                         'title' => $_->field('title'),
+                        'short_title' => $_->field('short_title'),
                         'eventtype' => $_->field('eventtype'),
                         'date' => $_->DocDate,
                         'enddate' => $_->field('enddate'),
