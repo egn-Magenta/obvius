@@ -17,7 +17,13 @@ sub raw_document_data {
     $this->tracer($doc, $vdoc, $obvius) if ($this->{DEBUG});
 
     my $fields = $obvius->get_version_fields($vdoc, ['mimetype', 'uploaddata']);
-    return ($fields->param('mimetype'), $fields->param('uploaddata'));
+
+    my $name = $doc->Name || '';
+    if($name =~ /\.\w+$/) {
+        return ($fields->param('mimetype'), $fields->param('uploaddata'), $name);
+    } else {
+        return ($fields->param('mimetype'), $fields->param('uploaddata'));
+    }
 }
 
 
