@@ -1,9 +1,6 @@
 <& ../headline &>
 	<table border="0">
 %for(@$events) {
-         <tr>
-           <td colspan="2"><img src="/grafik/1x1.gif" height="10"></td>
-         </tr>
 %if ($show_event eq 'type') {
 	  <tr>
 	     <td colspan="2"><a href="<% $_->{url} %>"><% $_->{eventtype} %></a></td>
@@ -38,6 +35,9 @@
 	    <td valign="top" align="left" width="90">Information:</td>
 	    <td valign="top"><& /shared/htmlize, text=>$_->{eventinfo} &></td>
           </tr>
+         <tr>
+           <td colspan="2" height="6"><img src="/grafik/1x1.gif" height="6"></td>
+         </tr>
 %}
 %unless(scalar(@$events)) {
     <br>
