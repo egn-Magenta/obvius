@@ -11,6 +11,10 @@ use Obvius::DocType;
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+# raw_document_data($document, $version, $obvius)
+#    - returns the 'mimetype' and 'udloaddata' fields from the
+#      $version object.  If the $document's name ends with '.\w'
+#      the name is also returned.
 sub raw_document_data {
     my ($this, $doc, $vdoc, $obvius) = @_;
 
@@ -37,8 +41,7 @@ Obvius::DocType::Upload - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::Upload;
-  blah blah blah
+    use Obvius::DocType::Upload;
 
 =head1 DESCRIPTION
 
