@@ -1,49 +1,98 @@
-<& teaser, no_date=>1 &>
+<& headline &>
+<& teaser &>
 <& content &>
+
 % if ($kwdocs) {
+
+<table border="0">
+<tr>
+<td width="15"><img src="/grafik/1x1.gif" width="15"></td>
+<td align="center">
 <& pager, output=>$output &>
-<ul>
+</td>
+<tr>
+<td width="15"><img src="/grafik/1x1.gif" width="15"></td>
+<td>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+%     my $prev_head='';
 %     foreach my $kwdoc (@$kwdocs) {
- <li> <a href="<% $kwdoc->{url} %>" title="<% $kwdoc->{short_title} %>"<% $target %>><% $kwdoc->{title} %></a>
-%       my $linkvdoc = undef;
-%	if ($show_teasers) {
-%       $linkvdoc = get_public_version($kwdoc->{id});
-%       my $linkteaser = $obvius->get_version_field($linkvdoc, 'teaser');
-        <br />
-	<% $linkteaser %>
-%	}
-%       if($show_urls) {
-%       $linkvdoc = get_public_version($kwdoc->{id}) unless defined $linkvdoc;
-%	    my $linkurl = $obvius->get_version_field($linkvdoc, 'url');
-%       if(! $linkurl) {
-%           my $d = $obvius->get_doc_by_id($kwdoc->{id});
-%           $linkurl = 'http://' . $r->pnotes('site')->Sitename . $obvius->get_doc_uri($d) if($d);
+%         if ($show_new_titles and ($prev_head ne $kwdoc->{new_title}) and $kwdoc->{new_title}) {
+%              $prev_head=$kwdoc->{new_title};
+<tr><td height="10" colspan="2"></td></tr>
+<tr>
+<td valign="bottom" colspan="3" class="bigletter">
+<a name="<% $kwdoc->{new_title} %>"><% $kwdoc->{new_title} %></a>
+</td>
+</tr>
+%         }
+<tr>
+<td valign="top" width="15"><b>&#149;</b></td>
+<td colspan=2>
+<a href="<% $kwdoc->{url} %>" title="<% $kwdoc->{short_title} %>"<% $target %>><% $kwdoc->{title} %></a>
+</td>
+</tr>
+%	if ($show_searchdoc_teaser) {
+%         if ($kwdoc->{teaser}) {
+<tr>
+<td></td>
+<td class="linksteaser"><& /shared/htmlize, text=>$kwdoc->{teaser} &>
+</td>
+</tr>
+%         }
 %       }
-%	    if($linkurl and $linkurl !~ /^http:\/\//) {
-%             $linkurl = 'http://' . $linkurl;
-%       }
-     <br />
+%if ($show_searchdoc_date) {
+<tr>
+<td></td>
+<td class="docdate">
+<& /shared/display_date, date=>$kwdoc->{docdate} &>
+</td>
+</tr>
+%}
+
+
+
+<tr>
+<td></td>
+<td class="url">
+
+%       if($show_searchdoc_url) {
+%         my $d = $obvius->get_doc_by_id($kwdoc->{id});
+%         my $linkurl = 'http://' . $r->pnotes('site')->Sitename . $obvius->get_doc_uri($d) if($d);
+%	  if($linkurl and $linkurl !~ /^http:\/\//) {
+%          $linkurl = 'http://' . $linkurl;
+%         }
      <% $linkurl ? $linkurl : '' %>
 %       }
- </li>
+
+
+</td>
+</tr>
+
+
 %     }
-</ul>
+</table>
+</td>
+</tr>
+</table>
 % } else {
-No documents found.
+Søgning har ingen dokumenter fundet.
 % }
-% #####################
-%
+
 <%args>
 $output
 </%args>
 %
 <%init>
-$obvius->get_version_fields($vdoc, [qw(teaser new_window show_urls show_teasers)]);
+$obvius->get_version_fields($vdoc, [qw(teaser new_window show_searchdoc_url show_searchdoc_teaser show_searchdoc_date show_new_titles)]);
 
 my $target = '';
 $target = ' target="_blank"' if($vdoc->field('new_window'));
-my $show_urls = $vdoc->field('show_urls');
-my $show_teasers = $vdoc->field('show_teasers');
+
+my $show_new_titles=$obvius->get_version_field($vdoc, qw(show_new_titles));
+
+my $show_searchdoc_url = $vdoc->field('show_searchdoc_url');
+my $show_searchdoc_teaser = $vdoc->field('show_searchdoc_teaser');
+my $show_searchdoc_date = $vdoc->field('show_searchdoc_date');
 
 my $kwdocs=$output->param('kwdocs');
 
