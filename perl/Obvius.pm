@@ -779,6 +779,7 @@ sub search {
     $this->tracer($fields, $where, %options) if ($this->{DEBUG});
 
     my @table = ( 'versions' );
+    my @left_join_table;
     my @join;
     my @fields = ( 'versions.*' );
     my @where;
@@ -839,6 +840,11 @@ sub search {
 
     my %seen;
     for (@$fields) {
+        my $do_left_join;
+        if(s/^~//) {
+            $do_left_join = 1;
+        }
+
         my $fspec = $this->get_fieldspec($_);
         next if (defined $seen{$_} and (!$fspec->Repeatable or $options{override_repeatable}->{$_})); # Duplicate skippage
         $seen{$_}++;
@@ -850,18 +856,27 @@ sub search {
         }
         my $field = $fspec->FieldType->param('value_field');
 
-        push(@table,   "vfields AS vf$i");
-        push(@join,  "(versions.docid=vf$i.docid AND versions.version=vf$i.version)");
-        push(@where,   "vf$i.name='$_'");
+        if($do_left_join) {
+            push(@left_join_table, "LEFT JOIN vfields AS vf$i ON (versions.docid=vf$i.docid AND versions.version=vf$i.version AND vf$i.name='$_')");
+        } else {
+            push(@table,   "vfields AS vf$i");
+            push(@join,  "(versions.docid=vf$i.docid AND versions.version=vf$i.version)");
+            push(@where,   "vf$i.name='$_'");
+        }
+
         if($fspec->FieldType->param('validate') eq 'xref' and $fspec->FieldType->param('search') eq 'matchColumn') {
             my ($xref_table, $xref_column) = split(/\./, $fspec->FieldType->param('validate_args'));
             my $search_arg = $fspec->FieldType->param('search_args');
 
-            # Add the table we want to join
-            push(@table, "$xref_table as xref$xrefs");
+            if($do_left_join) {
+                push(@left_join_table, "LEFT JOIN $xref_table AS xref$xrefs ON (xref$xrefs.$xref_column = vf$i.${field}_value)");
+            } else {
+                # Add the table we want to join
+                push(@table, "$xref_table as xref$xrefs");
 
-            #make sure we get the right stuff
-            push(@join, "(xref$xrefs.$xref_column = vf$i.${field}_value)");
+                #make sure we get the right stuff
+                push(@join, "(xref$xrefs.$xref_column = vf$i.${field}_value)");
+            }
 
             #set the name of the field
             push (@fields, "xref$xrefs.$search_arg as $_$xrefs");
@@ -889,7 +904,7 @@ sub search {
     $where =~ s/$regex/$map{$1}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
-                                            '!Table'	    => $straight_fields . join(', ', @table),
+                                            '!Table'	    => $straight_fields . join(', ', @table) . " " . join(" ", @left_join_table),
                                             '!TabRelation'  => join(' AND ', @join),
                                             '!Fields'	    => join(', ', @fields),
 #                                           '!Debug'		=> 2,
