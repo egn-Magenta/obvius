@@ -28,7 +28,9 @@
 %        }
           <td valign="top" class="mellemstr">
 %        if(my $img_url = $_->param('img_url')) {
-            <img src="<% $img_url %>?size=30x40" alt="" width="30" height="40" style="border: 1px solid black;" align="top">
+            <a href="<% $img_url %>" target="_blank"><!--
+              --><img src="<% $img_url %>?size=30x40" alt="" width="30" height="40" style="border: 1px solid black;" align="top"><!--
+            --></a>
 %        }
             <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><strong><% $_->Title %></strong></a>
           </td>
@@ -57,7 +59,9 @@
 %        }
           <td valign="top" class="mellemstr">
 %        if(my $img_url = $_->param('img_url')) {
-            <img src="<% $img_url %>?size=30x40" alt="" width="30" height="40" style="border: 1px solid black;" align="top">
+            <a href="<% $img_url %>" target="_blank"><!--
+              --><img src="<% $img_url %>?size=30x40" alt="" width="30" height="40" style="border: 1px solid black;" align="top"><!--
+            --></a>
 %        }
             <a href="javascript:navigator_navigate('<% $_->Url %>')"><% $_->Seq < 0 ? '÷' : '' %><% $_->Title %></a>
           </td>
