@@ -1640,8 +1640,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Diff. from public">
     <translation lang="en">Diff. from public</translation>
-    <translation lang="da">Ændret ift. offentlige
-</translation>
+    <translation lang="da">Ændret ift. offentlige</translation>
   </text>
 
   <text key="Not public">
@@ -1656,8 +1655,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Other documents">
     <translation lang="en">Other documents</translation>
-    <translation lang="da">Øvrige dokumenter
-</translation>
+    <translation lang="da">Øvrige dokumenter</translation>
   </text>
 
   <text key="No documents">
@@ -3592,9 +3590,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Luk</translation>
   </text>
 
-  <text key=" Højreklik på AdminJump-linket nedenfor og vælg "Føj til foretrukne...". Hvis værktøjslinien "Hyperlinks" ikke er slået til, så gør det i menuen "Vis/Værktøjslinier/Hyperlinks" - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen "AdminJump" i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).">
+  <text key="Højreklik på AdminJump-linket nedenfor og vælg 'Føj til foretrukne...'. Hvis værktøjslinien 'Hyperlinks' ikke er slået til, så gør det i menuen 'Vis/Værktøjslinier/Hyperlinks' - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen 'AdminJump' i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).">
     <translation lang="en"> </translation>
-    <translation lang="da"> Højreklik på AdminJump-linket nedenfor og vælg "Føj til foretrukne...". Hvis værktøjslinien "Hyperlinks" ikke er slået til, så gør det i menuen "Vis/Værktøjslinier/Hyperlinks" - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen "AdminJump" i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).</translation>
+    <translation lang="da">Højreklik på AdminJump-linket nedenfor og vælg 'Føj til foretrukne...'. Hvis værktøjslinien 'Hyperlinks' ikke er slået til, så gør det i menuen 'Vis/Værktøjslinier/Hyperlinks' - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen 'AdminJump' i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).</translation>
   </text>
 
   <text key="Administration af brugere, grupper, abonnenter og login-adgang:">
