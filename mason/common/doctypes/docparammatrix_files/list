@@ -1,0 +1,68 @@
+<script type="text/javascript">
+document.pageform.obvius_op.value='';
+document.pageform.obvius_page.value='';
+
+var default_set = {
+%   for(keys %$default_set) {
+        '<% $_ %>': 1,
+%   }
+        'dummy': 1
+}
+
+
+function set_default(name) {
+    form_elems = document.pageform[name];
+
+    for(var i=0;i<form_elems.length;i++) {
+        var elem = form_elems[i];
+        if(default_set[elem.value]) {
+            elem.checked = 1;
+        } else {
+            elem.checked = 0;
+        }
+    }
+}
+
+</script>
+
+<table border="1">
+    <tr>
+        <th>&nbsp;</th>
+%   for(@$docparam_options) {
+        <th><% $_ %></th>
+%   }
+        <th>&nbsp</th>
+    <tr>
+%for my $d (@$first_level_docs) {
+%   my $default_checked = ($d->{no_docparam_value} and $vdoc->field('defaultallchecked'));
+    <tr>
+        <td>
+            <strong><% '/' . $d->{name} . '/' %></strong>
+            <input type="hidden" name="<% $d->{docid} %>_submitted" value="1" />
+        </td>
+%  for(@$docparam_options) {
+        <td><input type="checkbox" name="selection_<% $d->{docid} %>" value="<% $_ %>" <% ($d->{values}->{$_} or $default_checked) ? 'CHECKED ' : '' %>/>
+%  }
+        <td><input type="button" onclick="set_default('selection_<% $d->{docid} %>');" value="Set default" /></td>
+    </tr>
+%}
+    <tr>
+        <td colspan="<% scalar(@$docparam_options) + 2 %>">
+            <input type="hidden" name="mode" value="save" />
+            <input type="submit" value="Update" />
+        </td>
+    </tr>
+</table>
+<br />
+<br />
+<%args>
+$output
+</%args>
+<%init>
+my $docparam_options = $output->param('docparam_options') || [];
+my $first_level_docs = $output->param('first_level_docs') || [];
+
+my $default_set = $output->param('default_set') || {};
+
+$obvius->get_version_field($vdoc, 'defaultallchecked');
+</%init>

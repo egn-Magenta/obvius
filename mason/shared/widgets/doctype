@@ -7,10 +7,16 @@
 % }
 % map {
 <option value="<% $_->{id} %>"<% (defined $_->{selected} ? ' SELECTED' : '') %>><% $_->{translated_name} %></option>
-% } @doctypes;
+% } @doctypes, @admin_doctypes;
 </select>
 </td>
 </tr>
+%if($restricted and $is_admin_user) {
+<tr>
+    <td></td>
+    <td><& SELF:msg, text=>'admin_doctypes_available:admin_doctypes_notice' &></td>
+</tr>
+%}
 %
 <%args>
 $limit=>undef
@@ -20,23 +26,56 @@ $add_empty=>0
 %
 <%init>
 my @doctypes;
+my @admin_doctypes;
+
+my %available_doctypes;
+my $restricted;
+
+my $docparams = $obvius->get_docparams_recursive($doc);
+if(my $dt_value = $docparams->param('admin_doctypes_available')) {
+    if(my $dt_list = $dt_value->param('value')) {
+        $restricted = 1;
+        for(split(/\s*,\s*/, $dt_list)) {
+            $available_doctypes{$_} = 1;
+        }
+    }
+}
+
+
+# XXX Other way of checking this?
+my $is_admin_user = $obvius->param('user') =~ /^admin$/;
+
 foreach (@{$obvius->{DOCTYPES}}) {
     next unless $_;
     if ($obvius->get_editpages($_)) {
-	next if (defined $limit and !($_->{NAME} =~ /$limit/));
-	my %doctype = (
-		       id=>$_->{ID},
-		       name=>$_->{NAME},
-               translated_name=> $m->scomp('SELF:msg', text=>$_->{NAME})
-		      );
-	if (defined $selected) {
-	    $doctype{selected}=1 if ($_->{ID} eq $selected);
-	}
-	else {
-	    $doctype{selected}=1 if ($_->{ID} eq $vdoc->Type);
-	}
-	push @doctypes, \%doctype if $doctype{id};
+
+        # Skip by limit option:
+        next if (defined $limit and !($_->{NAME} =~ /$limit/));
+
+        my %doctype = (
+                        id=>$_->{ID},
+                        name=>$_->{NAME},
+                        translated_name=> $m->scomp('SELF:msg', text=>$_->{NAME})
+                    );
+        if (defined $selected) {
+            $doctype{selected}=1 if ($_->{ID} eq $selected);
+        } else {
+            $doctype{selected}=1 if ($_->{ID} eq $vdoc->Type);
+        }
+
+        # Skip if restricted by "admin_doctypes_available" docparam
+        # unless we're admin in which case we make the doctypes available
+        # but mark them as restricted types.
+        if ($restricted and not $available_doctypes{$_->{NAME}}) {
+            if($is_admin_user) {
+                $doctype{translated_name} .= " (*)";
+                push(@admin_doctypes, \%doctype) if($doctype{id});
+            }
+        } else {
+            push @doctypes, \%doctype if $doctype{id};
+        }
     }
 }
 @doctypes = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
+@admin_doctypes = sort {$a->{translated_name} cmp $b->{translated_name}} @admin_doctypes;
 </%init>

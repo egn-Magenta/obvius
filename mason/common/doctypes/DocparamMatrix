@@ -1,0 +1,16 @@
+%if($error) {
+    <div><strong>Error:</strong></div>
+    <pre>
+        <% $error %>
+    </pre>
+%} else {
+<& "docparammatrix_files/$mode", output => $output &>
+%}
+<%args>
+$output
+</%args>
+<%init>
+my $mode = $output->param('mode') || 'list';
+
+my $error = $output->param('error');
+</%init>

@@ -4117,6 +4117,13 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Tekst og links</translation>
   </text>
 
+  <text key="admin_doctypes_available:admin_doctypes_notice">
+    <translation lang="en">Doctypes marked with (*) are normally resticted in this area,
+    but are visible to the admin user.</translation>
+    <translation lang="da">Dokumenttyper markeret med (*) er normalt begrænset i dette område,
+    men er synlige for admin-brugeren.</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>

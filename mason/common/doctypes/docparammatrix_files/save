@@ -1,0 +1,16 @@
+%if($error) {
+<div><strong>Error:</strong></div>
+<pre>
+<% $error %>
+</pre>
+%} else {
+<p><strong>Update OK</strong></p>
+
+<p><a href="<% $prefix . $uri %>">Klik her for at fortsætte</a>.</p>
+%}
+<%args>
+$output
+</%args>
+<%init>
+my $error = $output->param('error');
+</%init>
