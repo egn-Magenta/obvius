@@ -120,6 +120,11 @@ function traverseDom(editNbr){
 
 
 function removeUnusedAttribute(editNbr,tag,attribute){
+    /* Notice: 
+	   This method cannot be used to remove the attributes: align, class, style or event handler!
+	   This is due to removeAttribute not wanting to remove those. 
+	   Use element.className = '' to set an empty class.
+	*/
 	var tmpFrame, tmpFmElement, tmpArray, root
 	
 	tmpFrame = eval("obvius_"+editNbr+"_editor")
