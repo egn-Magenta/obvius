@@ -186,17 +186,6 @@ sub connect {
     return $db;
 }
 
-sub validate_user {
-    my ($this) = @_;
-
-    $this->read_user_and_group_info();
-
-    if (my $crypted=$this->{USERS}->{$this->{USER}}->{passwd}) {
-	return ((crypt($this->{PASSWORD}, $crypted) eq $crypted));
-    }
-    return undef;
-}
-
 sub config {
     my ($this) = @_;
 

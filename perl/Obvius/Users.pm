@@ -78,6 +78,17 @@ sub get_group_users {
     return [map { $_->{user} } @{$this->{GROUP_USERS}->{$grpid}}];
 }
 
+sub validate_user {
+    my ($this) = @_;
+
+    $this->read_user_and_group_info();
+
+    if (my $crypted=$this->{USERS}->{$this->{USER}}->{passwd}) {
+        return ((crypt($this->{PASSWORD}, $crypted) eq $crypted));
+    }
+    return undef;
+}
+
 sub read_user_and_group_info {
     my ($this) = @_;
 
