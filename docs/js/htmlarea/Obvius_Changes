@@ -14,6 +14,10 @@ be resized to the same size as the editor/textarea.
 - Re-enabled the warning about MSIE-fullscreen mode not
 working properly.
 
+- Added posibility to add custom stylesheets to the content
+of the htmlarea iframe with the
+editor.config.editorStyleSheets array.
+
 
 obvius_htmlarea.js file:
 

@@ -751,6 +751,12 @@ HTMLArea.prototype.generate = function () {
 				html += '<base href="' + editor.config.baseURL + '" />';
 			html += "<style> html,body { border: 0px; } " +
 				editor.config.pageStyle + "</style>\n";
+			if(editor.config.editorStyleSheets) {
+				for(var i=0;i<editor.config.editorStyleSheets.length;i++) {
+					var ss = editor.config.editorStyleSheets[i];
+					html += '<link rel="stylesheet" type="text/css" href="' + ss + '" />' + "\n";
+				}
+			}
 			html += "</head>\n";
 			html += "<body>\n";
 			html += editor._textArea.value;
