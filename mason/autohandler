@@ -313,57 +313,67 @@ $sortvdoc=>undef
 <%perl>
 my @subdocs=();
 my $extra=0;
-my $docsubdocs=$obvius->get_docs_by_parent($docid || $doc->Id);
-# Find only the public or the latest version of the subdocs...
-my @where;
-foreach my $dsd (@$docsubdocs) {
-    my $dsv=$obvius->get_public_version($dsd);
-    $dsv=$obvius->get_latest_version($dsd) unless ($dsv);
-    push @where, '(docid=' . $dsd->Id . ' and version="' . $dsv->Version . '")';
-}
-my $where = (@where ? '(' . join(' OR ', @where) . ')' : undef);
-# ... when searching:
-my $vdocsubdocs=(defined $where ? $obvius->search([], $where, sortvdoc=>($sortvdoc || $vdoc), public=>0) : []);
-foreach my $vdoc (@$vdocsubdocs) {
-    my $vdoc_seq=$obvius->get_version_field($vdoc, 'seq');
-    $obvius->get_version_fields($vdoc);
-    my %marker;
-    if( $vdoc->Public ) {
-	if( defined $vdoc->Expires and $vdoc->Expires lt $r->notes('now') ) { # Expired
-	    $marker{expired}=1;
-	}
-	else {
-	    if( defined $vdoc_seq and ($vdoc_seq <= -1) ) {
-		$marker{hidden}=1;
-	    }
-	}
-    }
-    else {
-	$marker{not_public}=1;
-    }
-    if ( (!defined $seq or (defined $vdoc_seq and ($vdoc_seq > -1)))) {
-	my $tooltip=$vdoc->Title;
-	$tooltip=$vdoc->field('short_title') if (!$tooltip);
-	my $title=$m->scomp('SELF:shorten', text=>($vdoc->field('short_title')
-						    or $vdoc->Title), len=>22);
+$docid ||= $doc->Id;
 
-	my $extra;
-	my $vdoctype=$obvius->get_version_type($vdoc);
-	$extra='<IMG SRC="/grafik/admin/image.gif" WIDTH="9" HEIGHT="9" ALT="I" BORDER="0"> '
-	    if ($vdoctype->Name eq "Image");
-	my $doc=$obvius->get_doc_by_id($vdoc->Docid);
-	my %subdoc=(%marker, extra=>$extra, title=>$title, tooltip=>$tooltip,
-		    link=>$doc->Name . "/", msgify=>0, seq=>$vdoc_seq, docid=>$doc->Id);
-	push @subdocs, \%subdoc;
+my $number_of_subdocs = $obvius->get_nr_of_subdocs($obvius->get_doc_by_id($docid));
+
+# Find only the public or the latest version of the subdocs...
+# Yatta - new handling of non-public searches in $obvius->search
+# does this for us, so now can just call obvius->search :)
+
+my $append = ($max ? "LIMIT $max" : undef);
+
+my $vdocsubdocs = $obvius->search(
+                                    [],
+                                    "parent = $docid",
+                                    sortvdoc=>($sortvdoc || $vdoc),
+                                    public=>0,
+                                    nothidden => (defined($seq) ? 1 : undef),
+                                    needs_document_fields => ['parent', 'name'],
+                                    straight_documents_join => 1,
+                                    append => $append
+                                );
+my $NOW = $r->notes('now');
+foreach my $vdoc (@$vdocsubdocs) {
+    $obvius->get_version_fields($vdoc);
+    my $vdoc_seq=$vdoc->field('seq');
+    my %marker;
+
+    if( $vdoc->Public ) {
+        my $expires = $vdoc->field('expires');
+        if( defined $expires and $expires lt $NOW ) { # Expired
+            $marker{expired}=1;
+        } else {
+            if( defined $vdoc_seq and ($vdoc_seq <= -1) ) {
+                $marker{hidden}=1;
+            }
+        }
+    } else {
+        $marker{not_public}=1;
     }
-    else {
-	$extra++;
-    }
+
+    my $tooltip=$vdoc->Title;
+    $tooltip=$vdoc->field('short_title') if (!$tooltip);
+
+    my $title=$m->scomp('SELF:shorten', text=>($vdoc->field('short_title') or $vdoc->Title), len=>22);
+
+    my $extra;
+    my $vdoctype=$obvius->get_version_type($vdoc);
+    $extra='<IMG SRC="/grafik/admin/image.gif" WIDTH="9" HEIGHT="9" ALT="I" BORDER="0"> ' if ($vdoctype->Name eq "Image");
+
+    push @subdocs, {
+                    %marker,
+                    extra=>$extra,
+                    title=>$title,
+                    tooltip=>$tooltip,
+                    link=>$vdoc->param('Name') . "/",
+                    msgify=>0,
+                    seq=>$vdoc_seq,
+                    docid=>$doc->Id
+            };
 }
-my $i=0;
-$extra+=scalar @subdocs;
-@subdocs=grep { $i++; (!defined $max or ($max>$i)) } @subdocs;
-$extra -= scalar(@subdocs);
+
+$extra = $number_of_subdocs - scalar(@subdocs);
 return \@subdocs, $extra;
 </%perl>
 </%method>

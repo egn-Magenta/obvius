@@ -356,7 +356,7 @@ sub get_doc_uri {
     return $uri;
 }
 
-
+
 ########################################################################
 #
 #	Look up documents by id or (name,parent)
@@ -432,7 +432,7 @@ sub get_docs_by {
     return (@subdocs ? \@subdocs : undef);
 }
 
-
+
 ########################################################################
 #
 #	Public document check
@@ -683,13 +683,43 @@ sub get_document_subdocs_latest {
 			     straight_documents_join=>1,
                              sortvdoc => $sortvdoc,
                              %options,
-                            );  
+                            );
 
   $subdocs=[] unless $subdocs; # Empty list if there are no subdocs
   return $subdocs;
 }
 
+sub get_nr_of_subdocs {
+    my ($this, $doc, %options) = @_;
 
+    return 0 unless($doc);
+
+    my $tables = 'documents';
+    my $where = "parent = " . $doc->Id;
+
+    if($options{public}) {
+        $tables .= ", versions";
+        $where .= " AND documents.id = versions.docid and versions.public = 1";
+    }
+
+
+    my $set = DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'      => $tables,
+                                                '!Fields'     => 'COUNT(documents.id) as count'
+                                            }
+                                        );
+    $set->Search($where);
+    my $number = 0;
+    if(my $rec = $set->Next) {
+        $number = $rec->{count};
+    }
+    $set->Disconnect;
+
+    return $number;
+
+}
 
 ########################################################################
 #
@@ -754,6 +784,7 @@ sub search {
     my @where;
     my %map;
     my $straight_fields = '';
+    my $having = '';
 
     my $i = 0;
     my $xrefs = 0;
@@ -765,82 +796,92 @@ sub search {
     my $limit;
     my @limit_fields;
     if (defined $options{nothidden} and $options{nothidden}) {
-	push(@$fields, 'seq');
-	$where.=' AND seq >= 0';
+        push(@$fields, 'seq');
+        $where.=' AND seq >= 0';
     }
     if (defined $options{notexpired} and $options{notexpired}) {
         push (@$fields, 'expires');
-	$where.=' AND expires > NOW()';
+        $where.=' AND expires > NOW()';
     }
     if (defined $options{public} and $options{public}) {
-	$where.=' AND public > 0';
+        $where.=' AND public = 1'; # Formerly "public > 0", but = is more effective when using indexes.
+    } else {
+        # Lets try this - if public is not set we join an extra versions table on
+        # versions.docid = vmax_versions.docid. Since we already group by (docid,versions.lang),
+        # we can use the extra versions table to get a row with the versionnumber of the latest
+        # version using MAX(vmax_versions.version) and add a HAVING statement to the GROUP BY
+        # that gives us either the public or the latest version. This way we get distinct
+        # docid,version,lang rows which is what select_best_language_match_multiple expects.
+        push(@table, "versions as vmax_versions");
+        push(@join, "versions.docid = vmax_versions.docid");
+        push(@fields, "MAX(vmax_versions.version) as obvius_vmax");
+        $having .= "(public=1 or versions.version=obvius_vmax)";
     }
 
     # Sorting:
     my ($sort_fields, $order)=$this->calc_order_for_query($options{sortvdoc})
-	if defined $options{sortvdoc};
+        if defined $options{sortvdoc};
+
     map { push @$fields, $_ } (keys %$sort_fields);
 
     if($options{'needs_document_fields'} and ref($options{'needs_document_fields'}) eq 'ARRAY') {
         if($options{'straight_documents_join'}) {
             $straight_fields .= 'documents as obvius_documents STRAIGHT_JOIN ';
         } else {
-	    push(@table, "documents as obvius_documents");
+            push(@table, "documents as obvius_documents");
         }
-	push(@join, "(obvius_documents.id = versions.docid)");
-	for(@{$options{'needs_document_fields'}}) {
-	    push(@fields, "obvius_documents.$_ as $_");
-	    $map{$_} = "obvius_documents.$_";
-	}
+        push(@join, "(obvius_documents.id = versions.docid)");
+        for(@{$options{'needs_document_fields'}}) {
+            push(@fields, "obvius_documents.$_ as $_");
+            $map{$_} = "obvius_documents.$_";
+        }
     }
 
     my %seen;
     for (@$fields) {
-	my $fspec = $this->get_fieldspec($_);
-	next if (defined $seen{$_} and (!$fspec->Repeatable or $options{override_repeatable}->{$_})); # Duplicate skippage
-	$seen{$_}++;
+        my $fspec = $this->get_fieldspec($_);
+        next if (defined $seen{$_} and (!$fspec->Repeatable or $options{override_repeatable}->{$_})); # Duplicate skippage
+        $seen{$_}++;
 
-	# Would be cleaner to have a separate list for sorting-fields:
-	unless ($fspec->Searchable or $fspec->Sortable) {
-	    $this->log->warn("Can't search on field $_");
-	    next;
-	}
-	my $field = $fspec->FieldType->param('value_field');
+        # Would be cleaner to have a separate list for sorting-fields:
+        unless ($fspec->Searchable or $fspec->Sortable) {
+            $this->log->warn("Can't search on field $_");
+            next;
+        }
+        my $field = $fspec->FieldType->param('value_field');
 
-	push(@table,   "vfields AS vf$i");
-	push(@join,  "(versions.docid=vf$i.docid AND versions.version=vf$i.version)");
-	push(@where,   "vf$i.name='$_'");
-	if($fspec->FieldType->param('validate') eq 'xref' and $fspec->FieldType->param('search') eq 'matchColumn') {
-	    my ($xref_table, $xref_column) = split(/\./, $fspec->FieldType->param('validate_args'));
-	    my $search_arg = $fspec->FieldType->param('search_args');
+        push(@table,   "vfields AS vf$i");
+        push(@join,  "(versions.docid=vf$i.docid AND versions.version=vf$i.version)");
+        push(@where,   "vf$i.name='$_'");
+        if($fspec->FieldType->param('validate') eq 'xref' and $fspec->FieldType->param('search') eq 'matchColumn') {
+            my ($xref_table, $xref_column) = split(/\./, $fspec->FieldType->param('validate_args'));
+            my $search_arg = $fspec->FieldType->param('search_args');
 
-	    # Add the table we want to join
-	    push(@table, "$xref_table as xref$xrefs");
+            # Add the table we want to join
+            push(@table, "$xref_table as xref$xrefs");
 
-	    #make sure we get the right stuff
-	    push(@join, "(xref$xrefs.$xref_column = vf$i.${field}_value)");
+            #make sure we get the right stuff
+            push(@join, "(xref$xrefs.$xref_column = vf$i.${field}_value)");
 
-	    #set the name of the field
-	    push (@fields, "xref$xrefs.$search_arg as $_$xrefs");
+            #set the name of the field
+            push (@fields, "xref$xrefs.$search_arg as $_$xrefs");
 
-	    $where =~ s/$_([^\d])/$_$xrefs$1/;
+            $where =~ s/$_([^\d])/$_$xrefs$1/;
 
-	    # map all occurrences of $_ to xrefX.xref_column
-	    $map{$_ . $xrefs} = "xref$xrefs.$search_arg";
+            # map all occurrences of $_ to xrefX.xref_column
+            $map{$_ . $xrefs} = "xref$xrefs.$search_arg";
 
-	    $xrefs++;
-	}
-	else {
-	    push(@fields,  "vf$i.${field}_value as $_");
-	    if ($fspec->Repeatable and not $options{override_repeatable}->{$_}) {
-		$where =~ s/$_([^\d])/$_$i$1/;
-		$map{$_ . $i} = "vf$i.${field}_value";
-	    }
-	    else {
-		$map{$_} = "vf$i.${field}_value";
-	    }
-	}
-	$i++;
+            $xrefs++;
+        } else {
+            push(@fields,  "vf$i.${field}_value as $_");
+            if ($fspec->Repeatable and not $options{override_repeatable}->{$_}) {
+                $where =~ s/$_([^\d])/$_$i$1/;
+                $map{$_ . $i} = "vf$i.${field}_value";
+            } else {
+                $map{$_} = "vf$i.${field}_value";
+            }
+        }
+        $i++;
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
 
@@ -848,22 +889,25 @@ sub search {
     $where =~ s/$regex/$map{$1}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
-					    '!Table'	    => $straight_fields . join(', ', @table),
-					    '!TabRelation'  => join(' AND ', @join),
-					    '!Fields'	    => join(', ', @fields),
-#					    '!Debug'		=> 2,
-					   });
+                                            '!Table'	    => $straight_fields . join(', ', @table),
+                                            '!TabRelation'  => join(' AND ', @join),
+                                            '!Fields'	    => join(', ', @fields),
+#                                           '!Debug'		=> 2,
+                                        });
 
-    my $query = { '$where'	=> join(' AND ', @where, "($where)"),
-		  '$group'	=> 'versions.docid, versions.version, versions.lang',
-		};
+    $having = ($having ? " HAVING $having" : '');
+
+    my $query = {
+                    '$where'	=> join(' AND ', @where, "($where)"),
+                    '$group'	=> "versions.docid, versions.version, versions.lang $having",
+                };
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
     $query->{'$order'}=~ s/$regex/$map{$1}/gie if ($query->{'$order'});
 
     $options{order} =~ s/$regex/$map{$1}/gie if ($options{order});
     for (keys %options) {
-	$query->{"\$$_"} = $options{$_};
+        $query->{"\$$_"} = $options{$_};
     }
 
     $this->{LOG}->notice(" Search query: " . Dumper($query)) if ($options{'obvius_dump'});
@@ -871,16 +915,15 @@ sub search {
 
     my @subdocs;
     while (my $rec = $set->Next) {
-	#print STDERR "Record: ", Dumper($rec);
-	if ($options{public}) {
-	    # If we've got a parent (from the search), check from the parent up:
-	    my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
+        if ($options{public}) {
+            # If we've got a parent (from the search), check from the parent up:
+            my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
 
-	    # If there is no parent, we pass the hint that the document being checked _is_
-	    # public itself (options{public} ensures that):
-	    next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
-	}
-	push(@subdocs, new Obvius::Version($rec));
+            # If there is no parent, we pass the hint that the document being checked _is_
+            # public itself (options{public} ensures that):
+            next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
+        }
+        push(@subdocs, new Obvius::Version($rec));
     }
     $set->Disconnect;
 
