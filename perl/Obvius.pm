@@ -826,7 +826,7 @@ sub search {
 	}
 	else {
 	    push(@fields,  "vf$i.${field}_value as $_");
-	    if ($fspec->Repeatable) {
+	    if ($fspec->Repeatable and not ($options{override_repeatable} and $options{override_repeatable}->{$_})) {
 		$where =~ s/$_([^\d])/$_$i$1/;
 		$map{$_ . $i} = "vf$i.${field}_value";
 	    }
