@@ -18,7 +18,7 @@ then=$(date -d '6 weeks ago' '+%Y%m%d')
 orig_pwd=$(pwd)
 for dir; do
     cd $orig_pwd
-	test -d $dir || test -d /home/httpd/$dir || continue
+	test -d $dir || test -d /home/httpd/$dir || continue
     cd $dir || cd /home/httpd/$dir || continue
     # test -e "SERVER_IS_$hostname" -o "$FORCE" || continue
     test -d backup && cd backup || continue
