@@ -3715,6 +3715,21 @@ abonnement på samme email-adresse.</translation>
         automatisk direkte til adressen</translation>
   </text>
 
+  <text key="Events from this date">
+    <translation lang="en">Events from this date</translation>
+    <translation lang="da">Arrangementer fra og med denne dato</translation>
+  </text>
+
+  <text key="Events to this date">
+    <translation lang="en">Events to this date</translation>
+    <translation lang="da">Arrangementer til og med denne dato</translation>
+  </text>
+
+  <text key="Vis/Rediger HTML">
+    <translation lang="en">Show/Edit HTML</translation>
+    <translation lang="da">Vis/Rediger HTML</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
