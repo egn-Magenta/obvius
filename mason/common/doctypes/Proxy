@@ -1,0 +1,30 @@
+% if ($r->notes('is_admin')) {
+<p class="obviusnotice">
+  <& /shared/msg, text=>'The content below was fetched from' &>: <a href="<% $url |h %>"><% $url |h %></a>
+</p>
+% }
+%
+% if ($output->param('via_loop_detected')) {
+%     $r->notes('http_return_code'=>403);
+<p class="obviusnotice">
+  <& /shared/msg, text=>'Error: This proxy-document loops (i.e. it fetches itself). Stopped.' &>
+</p>
+% }
+%
+% if ($output->param('error')) {
+<p class="obviusnotice">
+  <% $output->param('error') %>
+</p>
+% }
+% else {
+<% $output->param('proxy_content') || $m->scomp('/shared/msg', text=>'No content') %>
+% }
+%
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+my $url=$output->param('url');
+</%init>
