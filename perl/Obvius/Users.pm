@@ -66,6 +66,8 @@ sub get_grpid {
     return $grpid;
 }
 
+# get_user_groups - returns an array-ref to the ids of the groups that
+#                   the user identified by the userid argument belongs to.
 sub get_user_groups {
     my ($this, $userid) = @_;
 
@@ -323,9 +325,10 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
   my $config = new Obvius::Config("configname");
   my $obvius = new Obvius($config);
 
-  $obvius->encrypt_password();
+  my $crypted=$obvius->encrypt_password($clear);
 
-  etc.
+  my $userid=$obvius->get_userid($user);
+  my $grpids=$obvius->get_user_groups($userid);
 
 =head1 DESCRIPTION
 
