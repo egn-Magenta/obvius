@@ -36,6 +36,17 @@ use Obvius::Data;
 our @ISA = qw( Obvius::Data );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+# new ($class, $rec)
+#   - TODO: Document instantiation...
+#     
+#     The object contains two instances of Obvius::Data. Both contain
+#     fields associated with the object:
+#     FIELDS: Fields which cannot be changed after the object has been 
+#             created. A new version must be created to change them.
+#     PUBLISH_FIELDS: Fields which can be changed without creating a new
+#                     version. These fields are usually associated with a 
+#                     published version of the document and usually 
+#                     dropped once the document is no longer published.     
 sub new {
     my ($class, $rec) = @_;
 
@@ -292,16 +303,23 @@ sub field {
     return $this->{$type}->param($name => $value);
 }
 
+# publish_fields_names ()
+#  - Returns a list with the names of the fields in the PUBLISH_FIELDS
 sub publish_fields_names {
     my ($this) = @_;
     return $this->fields_names('PUBLISH_FIELDS');
 }
 
+# publish_fields ()
+#   - Returns the PUBLISH_FIELDS Obvius::Data object for the document.
 sub publish_fields {
     my ($this) = @_;
     return $this->fields('PUBLISH_FIELDS');
 }
 
+# publish_field ($name, $value)
+# - Add a field with the name $name and value $value to PUBLISH_FIELDS
+#   Returns $value
 sub publish_field {
     my ($this, $name, $value) = @_;
     return $this->field($name => $value, 'PUBLISH_FIELDS');
@@ -472,12 +490,19 @@ __END__
 
 =head1 NAME
 
-Obvius::DocType - Perl extension for blah blah blah
+Obvius::DocType - Base class for Obvius doctypes.
 
 =head1 SYNOPSIS
 
   use Obvius::DocType;
-  blah blah blah
+
+  # Usage of convenience functions
+  $obj->publish_fields_names() # Returns [name1, name2, ...]
+
+  $obj->publish_fields() # Returns Obvius::Data object
+
+  
+  %obj->publish_field(field_name, field_value) #Returns field_value
 
 =head1 DESCRIPTION
 
