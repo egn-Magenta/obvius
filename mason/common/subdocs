@@ -1,26 +1,36 @@
+%if (not defined($show_subdocs) or $show_subdocs == 1) {
 % if (@subdocs) {
-
     <ul>
 %     foreach (@subdocs) {
-      <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a></li>
+%my $date = $m->scomp('/shared/display_date', date=>$_->{docdate}, format=>'verbatim');
+      <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a><br><% $_->{teaser} %><br><% $date !~ 'none' ? $date : '' %></li>
 %     }
     </ul>
 % }
-%
+%}
+
 <%init>
 my $subvdocs=$obvius->get_document_subdocs($doc,
                                             nothidden=>1,
                                             public=>($r->pnotes('site')->param('is_admin') ? 0 : 1),
                                             notexpired => ($r->pnotes('site')->param('is_admin') ? 0 : 1),
                                             sortvdoc=>$vdoc);
-my $subdocs_with_teaser=$obvius->get_version_field($vdoc, qw(subdocs_with_teaser));
+$obvius->get_version_field($vdoc, [qw(show_subdoc_teaser show_subdoc_date show_subdocs)]);
+my $show_subdoc_teaser=$vdoc->Show_subdoc_teaser;
+my $show_subdoc_date=$vdoc->Show_subdoc_date;
+my $show_subdocs=$vdoc->Show_subdocs;
 
-my @subdocs=map {
+my @subdocs=[];
+
+if (not defined($show_subdocs) or $show_subdocs == 1) {
+@subdocs=map {
     my $subdoc=$obvius->get_doc_by_id($_->Docid);
     $obvius->get_version_fields($_, [qw(title short_title)]);
-    $obvius->get_version_field($_, qw(teaser)) if ($subdocs_with_teaser);
+    $obvius->get_version_field($_, qw(teaser)) if ($show_subdoc_teaser);
+    $obvius->get_version_field($_, qw(docdate)) if ($show_subdoc_date);
     { name=>$subdoc->Name, short_title=>($_->Short_title ? $_->Short_title : $_->Title),
-      teaser=>$_->field('teaser'), icons=>'', vdoc=>$_}
+      teaser=>$_->field('teaser'), docdate=>$_->field('docdate'), icons=>'', vdoc=>$_}
  } @$subvdocs;
+}
 
 </%init>
