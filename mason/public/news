@@ -18,7 +18,7 @@
 </td>
 </tr>
 <tr>
-<td><span class="ti"><a href="/news/"><% $language eq 'en' ? 'All...' : 'Alle...' %></a></span></td>
+<td><span class="ti"><a href="<% $language eq 'en' ? '/nyheder_en/' : '/nyheder/' %>"><% $language eq 'en' ? 'All...' : 'Alle...' %></a></span></td>
 </tr>
 %} else {
 <td height="50" align="center">
