@@ -83,8 +83,8 @@ sub action {
         $where .= "eventtype = '" . $vdoc->S_Event_Type . "' and ";
     }
     if($vdoc->field('startdate') and $vdoc->field('enddate')) {
-        $where .= "docdate > '" . $vdoc->Startdate . "' and ";
-        $where .= "docdate < '" . $vdoc->Enddate . "' and ";
+        $where .= "docdate >= '" . $vdoc->Startdate . "' and ";
+        $where .= "docdate <= '" . $vdoc->Enddate . "' and ";
     }
     if($vdoc->field('s_event_place')) {
         push(@fields, 'eventplace');
