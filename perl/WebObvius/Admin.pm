@@ -1,6 +1,35 @@
-# $Id$
-
 package WebObvius::Admin;
+
+########################################################################
+#
+# Admin.pm - support module for the Obvius administration system
+#
+# Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
+#
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          Peter Makholm (pma@fi.dk)
+#          René Seindal,
+#          Adam Sjøgren (asjo@magenta-aps.dk),
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
+# $Id$
 
 use strict;
 use warnings;
@@ -121,6 +150,16 @@ sub split_language_preferences {
     return %weights;
 }
 
+# read_translations - given a request object, a string with a
+#                     file-prefix ("translations"), an optional lang
+#                     string and an obvius-object, makes sure that the
+#                     translations relevant for the language is on the
+#                     site-object (by checking the cache and reading
+#                     $file.xml and $file_local.xml on a miss).
+#                     The return-value does not signify anything.
+#                     Note that the function does not check if the
+#                     files have been updated, the only way to
+#                     invalidate the cache is to restart Apache.
 sub read_translations {
     my ($this, $r, $file, $lang, $obvius) = @_;
 
