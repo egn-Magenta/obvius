@@ -4131,7 +4131,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Docparam name">
     <translation lang="en">Docparam name</translation>
-    <translation lang="da">Dokumentparamter navn</translation>
+    <translation lang="da">Dokumentparameter navn</translation>
   </text>
 
   <text key="Docparam options (comma separated list or function:functionname)">
@@ -4141,7 +4141,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="Default set of checked values">
     <translation lang="en">Default set of checked values</translation>
-    <translation lang="da">Set af default-værdier</translation>
+    <translation lang="da">Default-værdier</translation>
   </text>
 
   <text key="">
