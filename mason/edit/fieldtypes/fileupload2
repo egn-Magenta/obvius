@@ -6,7 +6,11 @@ $name
 $session
 $size=>60
 </%args>
-<& SELF:msg, text=>'Current value' &>: <% $value |h %><br>
+<& SELF:msg, text=>'Current value' &>: <% $value |h %>
+%if($value) {
+<input type="checkbox" name="obvius_upload_<% $name %>_delete"> <& SELF:msg, text=>'Delete' &>
+%}
+<br>
 <input type="file" size="<% $size %>" name="<% $name %>" tabindex="10">
 <%init>
 my $value=$session->{fields_out}->param(uc($name));
@@ -31,7 +35,12 @@ if (my $upload=$r->upload($name)) {
 
         $value = $m->scomp('/shared/place_file_in_upload', fh => $fh, type => $upload->type, filename => $upload->filename);
     }
+} else {
+    if($r->param('obvius_upload_' . $name . '_delete')) {
+        $value = '';
+    }
 }
+
 return $value;
 </%perl>
 </%method>
