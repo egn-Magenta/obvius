@@ -39,6 +39,8 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #
 ########################################################################
 
+# get_user - given a user id, returns a hash-ref with the information
+#            of the corresponding user, if any.
 sub get_user {
     my ($this, $userid) = @_;
 
@@ -341,6 +343,8 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
   my $userid=$obvius->get_userid('stein');
 
   my $grpid=$obvius->create_new_group({ name=>'Boxers', user=>$userid }, $doc);
+
+  my $href=$obvius->get_user($userid);
 
 =head1 DESCRIPTION
 
