@@ -46,19 +46,36 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 if($in_body) {
                                                     my $modified;
                                                     if($tagname eq 'a' and $attr->{href}) {
-                                                        if($attr->{href} !~ m!^https?://!) {
-                                                            unless($attr->{href} =~ s!^/!$rooturl!) {
-                                                                $attr->{href} = $baseurl . $attr->{href}
-                                                            }
-                                                            if($_replace_url) {
-                                                                my ($thisurl, $querystring) = split(/\?/, $attr->{href});
-                                                                if($org_url eq $thisurl) {
-                                                                    $querystring = ($querystring ? "?$querystring" : '');
-                                                                    $attr->{href} = "$prefix$uri$querystring";
-                                                                }
-                                                            }
-                                                            $modified = 1;
+                                                        my $anchor = '';
+                                                        if($attr->{href} =~ s/(#[^#]+)$//) {
+                                                            $anchor = $1;
                                                         }
+                                                        my ($link, $querystring) = ($attr->{href} =~ /^([^?]+)(\?.*)?/);
+                                                        $link ||= '';
+                                                        $querystring ||= '';
+
+                                                        # Only for links not starting with "something:"
+                                                        if($link and $link !~ m!^\w+:!) {
+                                                            unless($link =~ s!^/!$rooturl!) {
+                                                                $link = $baseurl . $attr->{href}
+                                                            }
+                                                        }
+
+                                                        if($link) {
+                                                            # Replace target URL with local URI if replace_url is set
+                                                            if($_replace_url and $link eq $org_url) {
+                                                                $link = "$prefix$uri";
+                                                            }
+                                                        } else {
+                                                            if($_replace_url) {
+                                                                $link = "$prefix$uri";
+                                                            } else {
+                                                                $link = $org_url;
+                                                            }
+                                                        }
+
+                                                        $attr->{href} = "$link$querystring$anchor";
+                                                        $modified = 1;
                                                     } elsif($tagname eq 'img' and $attr->{src}) {
                                                         if($attr->{src} !~ m!^https?://!) {
                                                             unless($attr->{src} =~ s!^/!$rooturl!) {
@@ -67,19 +84,36 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             $modified = 1;
                                                         }
                                                     } elsif($tagname eq 'form' and $attr->{action}) {
-                                                        if($attr->{action} !~ m!^https?://!) {
-                                                            unless($attr->{action} =~ s!^/!$rooturl!) {
-                                                                $attr->{action} = $baseurl . $attr->{action}
-                                                            }
-                                                            if($_replace_url) {
-                                                                my ($thisurl, $querystring) = split(/\?/, $attr->{action});
-                                                                if($org_url eq $thisurl) {
-                                                                    $querystring = ($querystring ? "?$querystring" : '');
-                                                                    $attr->{action} = "$prefix$uri$querystring";
-                                                                }
-                                                            }
-                                                            $modified = 1;
+                                                        my $anchor = '';
+                                                        if($attr->{action} =~ s/(#[^#]+)$//) {
+                                                            $anchor = $1;
                                                         }
+                                                        my ($link, $querystring) = ($attr->{action} =~ /^([^?]+)(\?.*)?/);
+                                                        $link ||= '';
+                                                        $querystring ||= '';
+
+                                                        # Only for links not starting with "something:"
+                                                        if($link and $link !~ m!^\w+:!) {
+                                                            unless($link =~ s!^/!$rooturl!) {
+                                                                $link = $baseurl . $attr->{href}
+                                                            }
+                                                        }
+
+                                                        if($link) {
+                                                            # Replace target URL with local URI if replace_url is set
+                                                            if($_replace_url and $link eq $org_url) {
+                                                                $link = "$prefix$uri";
+                                                            }
+                                                        } else {
+                                                            if($_replace_url) {
+                                                                $link = "$prefix$uri";
+                                                            } else {
+                                                                $link = $org_url;
+                                                            }
+                                                        }
+
+                                                        $attr->{action} = "$link$querystring$anchor";
+                                                        $modified = 1;
                                                     }
                                                     if($modified) {
                                                         $text = "<$tagname";
