@@ -100,7 +100,7 @@ function obvius_<% $name %>_startup() {
 
     // Add already chosen options
 %for(@$value) {
-    $_ =~ s/'/\\'/g;
+%    $_ =~ s/'/\\'/g;
     formElem.options[formElem.options.length] = new Option('<% $_ %>', '<% $_ %>');
 %}
 
