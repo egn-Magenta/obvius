@@ -51,7 +51,7 @@ croak ("Could not get Obvius object for $site")
     unless(defined($obvius));
 
 croak ("Must have a sitename") unless($sitename);
-my $base_dir = '/var/www/'. $sitename;
+my $base_dir = '/home/httpd/'. $sitename;
 
 
 ## "Main" program part
