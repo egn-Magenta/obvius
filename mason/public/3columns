@@ -1,0 +1,120 @@
+  <head>
+    <title><% $title %></title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/css/public.css" Title="Public">
+    <link rel="stylesheet" type="text/css" href="/css/common.css" Title="Public">
+    <link rel="shortcut icon" href="/grafik/siteicon.gif" type="image/gif">
+    <& metatags,format=>'text/html',publisher=>'Lisa Radov',rights=>'http://www.radov.dk/copyright/'&>
+  </head>
+ <body TOPMARGIN="0" LEFTMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" class="height100">
+    <table border="0" cellspacing="0" cellpadding="0" width="100%" class="height100">
+	<tr>
+            <td width="100%" align="center">
+              <table border="1" cellspacing="0" cellpadding="0" width="760" class="height100">
+                  <tr>
+                    <td width="100%" align="center" valign="top">
+                      <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                          <tr>
+                            <td height="100">
+
+                            </td>
+                          </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><img src="/grafik/1x1.gif" height="20"></td>
+                  </tr>
+                  <tr>
+                    <td width="100%" valign="top" class="height100">
+                      <table border="0" cellspacing="0" cellpadding="0" width="100%" class="height100">
+                          <tr>
+                            <td width="131" valign="top">
+                              <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td>
+                                      <noindex follow>
+                                        <& leftmenu &>
+                                      </follow>
+                                     </td>
+                                 </tr>
+                                  <tr>
+                                    <td>
+                                      <img src="/grafik/1x1.gif" height="20">
+                                     </td>
+                                    </tr>
+                                  <tr>
+                                    <td class="ti" align="left">
+                                      &nbsp;&nbsp;&nbsp;<a href="<% $langlink %>"><% $lang %></a>
+                                    </td>
+                                    </tr>
+                               </table>
+                            </td>
+                            <td width="10"><img src="/grafik/1x1.gif" width="10" alt=""></td>
+                            <td width="100%" class="content" valign="top">
+                              <& subsite &>
+                            </td>
+                            <td width="10"><img src="/grafik/1x1.gif" width="10" alt=""></td>
+%if ($show_news == 1) {
+                            <td width="131" valign="top">
+                              <& news &>
+                            </td>
+%}
+                          </tr>
+                      </table>
+                    </td>
+                  </tr>
+              </table>
+    </body>
+
+<%init>
+print STDERR ">>> public/switch\n";
+
+$obvius->get_version_fields($vdoc, [qw(title show_news)]);
+my $title = $vdoc->Title;
+my $show_news = $vdoc->Show_news;
+my $siteflag = $r->notes('siteflag');
+my $language = $r->notes('language');
+
+
+if ($uri eq '/' and (not defined $siteflag)) {
+$language = 'da';
+}
+
+my $english_frontpage = $obvius->config->{ENGLISH_FRONTPAGE};
+
+my $langlink = '';
+my $lang = '';
+my $langalt = '';
+if($language eq 'en') {
+    # Defaults
+    $langlink = '/';
+    $lang = 'Dansk';
+    $langalt = 'Dansk version';
+
+    my $da_uri = $uri;
+    $da_uri =~ s#^/([^/]*)_en/#/$1/#;
+    my $da_doc = $obvius->lookup_document($da_uri);
+    if($da_doc) {
+        my $da_vdoc = $obvius->get_public_version($da_doc);
+        $langlink = $da_uri if($da_vdoc);
+        $lang = 'Dansk';
+    }
+} else {
+    # Defaults
+    $langlink = '/'.$english_frontpage.'/';
+    $lang = 'English';
+    $langalt = 'English version';
+
+    my $en_uri = $uri;
+    $en_uri =~ s#^/([^/]*)/#/$1_en/#;
+    my $en_doc = $obvius->lookup_document($en_uri);
+    if($en_doc) {
+        my $en_vdoc = $obvius->get_public_version($en_doc);
+        $langlink = $en_uri if($en_vdoc);
+        $langlink = $english_frontpage if ($uri eq '/');
+        $lang = 'English';
+    }
+}
+
+</%init>
