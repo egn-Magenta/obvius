@@ -400,6 +400,14 @@ sub authen_handler ($$) {
     return OK;
 }
 
+# public_authen_handler - this method is called by Apache with a
+#                         request object (notice the prototype, which
+#                         is necessary for Apache) during the
+#                         authentification phase of the request on the
+#                         public website (if so defined in
+#                         setup.conf). Connects to obvius and handles
+#                         a public login cookie if the request isn't a
+#                         sub-request. Always returns OK.
 sub public_authen_handler($$) {
     my ($this, $req) = @_;
 
@@ -499,15 +507,13 @@ WebObvius::Site::Mason - use Mason as the template system for a site.
 
   my $output=$this->create_output_object($r, $doc, $vdoc, $doctype, $obvius);
 
+  # In setup.conf:
+  PerlAuthenHandler Example::Site::Public->public_authen_handler
+
 =head1 DESCRIPTION
 
 Connects WebObvius with Mason, so Mason can be used as the template
 system for an Obvius-site.
-
-=head2 EXPORT
-
-None by default.
-
 
 =head1 AUTHOR
 
