@@ -17,9 +17,10 @@ my $date='';
 
 if ($vdoc->field($field) and $show_teaser == 1) {
     $teaser=$m->scomp('/shared/htmlize', text=>$vdoc->field($field), class=>'teaser');
+    $teaser='<p class="teaser">'.$teaser.'</p>';
 }
 
-if ($show_date == 1 and $uri ne '/' and $uri !~ m!^/\w+[/]?$!) {
+if ($show_date == 1) {
     $date='<p class="enddate">' . $m->scomp('/shared/display_date',
 			date=>$vdoc->Docdate, format=>'verbatim') . '</p>';
 }
