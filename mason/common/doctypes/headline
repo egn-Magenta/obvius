@@ -5,5 +5,5 @@
 <%init>
 $obvius->get_version_fields($vdoc, [qw(title show_title)]);
 my $title = $vdoc->field('Title');
-my $show_title = $vdoc->field('Show_title');
+my $show_title = $vdoc->field('Show_title') || 0;
 </%init>
