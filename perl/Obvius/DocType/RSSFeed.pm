@@ -105,7 +105,7 @@ sub raw_document_data {
 	}
 
 	my $rss_string = latin1($rss->as_string)->utf8;
-	return ('text/xml', $rss_string);
+	return ('text/xml; charset=utf-8', $rss_string);
 }
 
 
