@@ -20,7 +20,7 @@ $m->comp('/shared/path_section');
 unless ($r->notes('siteflag')) {
 my @path = $obvius->get_doc_path($doc);
 
-my $siteflag = @path->[1]->{NAME} || '';
+my $siteflag = ($path[1] ? $path[1]->Name : '');
 
 $r->notes('siteflag' =>$siteflag);
 
