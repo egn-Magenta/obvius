@@ -2294,7 +2294,7 @@ function TinyMCE_convertRelativeToAbsoluteURL(base_url, relative_url) {
 	var baseURL = TinyMCE_parseURL(base_url);
 	var relURL = TinyMCE_parseURL(relative_url);
 
-	if (relative_url.indexOf('://') != -1 || relative_url.indexOf('mailto:') != -1 || relative_url.indexOf('javascript:') != -1 || tinyMCE.regexpReplace(relative_url,'[ \t\r\n\+]|%20','').charAt(0) == "#")
+	if (relative_url.indexOf('://') != -1 || relative_url.indexOf('mailto:') != -1 || relative_url.indexOf('javascript:') != -1 || tinyMCE.regexpReplace(relative_url,'[ \t\r\n\+]|%20','').charAt(0) == "#" || relative_url.charAt(0) == '/')
 		return relative_url;
 
 	// Split parts
