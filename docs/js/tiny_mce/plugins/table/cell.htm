@@ -14,6 +14,7 @@ function insertTable() {
 		args["align"] = document.forms[0].align.options[document.forms[0].align.selectedIndex].value;
 		args["valign"] = document.forms[0].valign.options[document.forms[0].valign.selectedIndex].value;
 		args["className"] = document.forms[0].styleSelect.options[document.forms[0].styleSelect.selectedIndex].value;
+		args["scope"] = document.forms[0].scope.options[document.forms[0].scope.selectedIndex].value;
 
 		window.opener.tinyMCE.execCommand("mceTableCellProps", false, args);
 		top.close();
@@ -30,6 +31,12 @@ function init() {
 		if (document.forms[0].valign.options[i].value == tinyMCE.getWindowArg('valign'))
 			document.forms[0].valign.options.selectedIndex = i;
 	}
+
+	for (var i=0; i<document.forms[0].scope.options.length; i++) {
+		if (document.forms[0].scope.options[i].value == tinyMCE.getWindowArg('scope'))
+			document.forms[0].scope.options.selectedIndex = i;
+	}
+
 
 	var className = tinyMCE.getWindowArg('className');
 	var styleSelectElm = document.forms[0].styleSelect;
@@ -97,8 +104,14 @@ function cancelAction() {
                 <option value="middle">{$lang_insert_table_align_middle}</option>
                 <option value="bottom">{$lang_insert_table_align_bottom}</option>
             </select></td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
+            <td>Scope</td>
+            <td><select name="scope">
+                <option value="">{$lang_insert_table_scope_default}</option>
+                <option value="row">{$lang_insert_table_scope_row}</option>
+                <option value="col">{$lang_insert_table_scope_col}</option>
+                <option value="rowgroup">{$lang_insert_table_scope_rowgroup}</option>
+                <option value="colgroup">{$lang_insert_table_scope_colgroup}</option>
+            </select></td>
           </tr>
           <tr>
             <td>{$lang_insert_table_width}:</td>

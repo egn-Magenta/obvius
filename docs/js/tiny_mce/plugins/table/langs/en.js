@@ -42,4 +42,10 @@ tinyMCELang['lang_table_merge_cells_merge'] = 'Merge';
 
 tinyMCELang['lang_insert_table_caption'] = 'Caption';
 tinyMCELang['lang_insert_table_summary'] = 'Summary';
+
+tinyMCELang['lang_insert_table_scope_default'] = ' -- Scope --';
+tinyMCELang['lang_insert_table_scope_row'] = 'row';
+tinyMCELang['lang_insert_table_scope_col'] = 'col';
+tinyMCELang['lang_insert_table_scope_rowgroup'] = 'rowgroup';
+tinyMCELang['lang_insert_table_scope_colgroup'] = 'colgroup';
 //**

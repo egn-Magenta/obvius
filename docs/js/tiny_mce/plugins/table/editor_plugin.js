@@ -90,6 +90,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 	
 	var tdElm = tinyMCE.getParentElement(focusElm, "td");
 	var trElm = tinyMCE.getParentElement(focusElm, "tr");
+	var thElm = tinyMCE.getParentElement(focusElm, "th");
 
 	// Handle commands
 	switch (command) {
@@ -119,6 +120,9 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 
 		case "mceTableCellProps":
 			if (tdElm == null)
+				tdElm = thElm;
+
+			if (tdElm == null)
 				return true;
 
 			if (user_interface) {
@@ -130,7 +134,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				template['height'] = 220;
 
 				// Open window
-				tinyMCE.openWindow(template, {editor_id : inst.editorId, align : getAttrib(tdElm, 'align'), valign : getAttrib(tdElm, 'valign'), width : getAttrib(tdElm, 'width'), height : getAttrib(tdElm, 'height'), className : getAttrib(tdElm, 'className')});
+				tinyMCE.openWindow(template, {editor_id : inst.editorId, align : getAttrib(tdElm, 'align'), valign : getAttrib(tdElm, 'valign'), width : getAttrib(tdElm, 'width'), height : getAttrib(tdElm, 'height'), className : getAttrib(tdElm, 'className'), scope:getAttrib(tdElm, 'scope') });
 			} else {
 				tdElm.setAttribute('align', value['align']);
 				tdElm.setAttribute('vAlign', value['valign']);
@@ -138,6 +142,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				tdElm.setAttribute('height', value['height']);
 				tdElm.setAttribute('class', value['className']);
 				tdElm.setAttribute('className', value['className']);
+				tdElm.setAttribute('scope', value['scope']);
 			}
 
 			return true;
@@ -697,7 +702,10 @@ function TinyMCE_table_handleNodeChange(editor_id, node, undo_index, undo_levels
 		tinyMCE.switchClassSticky(editor_id + '_table', 'mceButtonSelected');
 
 	// Within tableheader
-	if (tinyMCE.getParentElement(node, "th"))
+	if (tinyMCE.getParentElement(node, "th")){
 		tinyMCE.switchClassSticky(editor_id + '_convert_th_to_td', 'mceButtonNormal', false);
+		tinyMCE.switchClassSticky(editor_id + '_cell_props', 'mceButtonSelected', false);
+	}
+
 
 }
