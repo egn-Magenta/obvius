@@ -1,0 +1,42 @@
+<h1><& SELF:msg, text=>'Edit docparams' &></h1>
+%if($go) {
+%   if($error) {
+        <& SELF:msg, text=>'There was an error setting the docparams' &>: <% $error %>
+        <a href="<% $prefix . $uri %>"><& SELF:msg, text=>'Click here to continue' &></a>
+%   } else {
+        <& SELF:msg, text=>'Docparams set' &><br>
+        <a href="<% $prefix . $uri %>"><& SELF:msg, text=>'Click here to continue' &></a>
+%   }
+%} else {
+<input type="hidden" name="go" value="">
+<input type="hidden" name="obvius_op" value="docparams">
+<textarea name="obvius_docparams" cols="55" rows="10"><% $textareacontent %></textarea>
+<br>
+<input type="button" value="<& SELF:msg, text=>'Save' &>" class="okknap" onclick="javascript:document.pageform.go.value=1;submit_page()" style="width: 40px">
+<input type="button" value="<& SELF:msg, text=>'Cancel' &>"  class="cancelknap" onclick="javascript:document.location.href='<% $prefix . $uri %>';" style="width: 70px">
+%}
+<%init>
+my $error = '';
+my $go = $r->param('go');
+my $textareacontent = '';
+
+if($go) {
+    my $new_set = new Obvius::Data;
+
+    my $docparam_text = $r->param('obvius_docparams') || '';
+    my @params = split(/[\r\n]/, $docparam_text);
+
+    for(@params) {
+        my ($name, $value) = /^([^=]+)=(.*)$/;
+        $new_set->param($name => $value) if($name);
+    }
+
+    my $retval = $obvius->set_docparams($doc, $new_set, \$error);
+} else {
+    my $docparams = $obvius->get_docparams($doc);
+
+    for(sort $docparams->param) {
+        $textareacontent .= lc($_) . "=" . $docparams->param($_)->param('value') . "\n";
+    }
+}
+</%init>

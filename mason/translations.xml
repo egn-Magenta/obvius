@@ -3765,6 +3765,31 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Vis datoer</translation>
   </text>
 
+  <text key="Edit docparams">
+    <translation lang="en">Edit docparams</translation>
+    <translation lang="da">Rediger dokumentparametre</translation>
+  </text>
+
+  <text key="Edit docparams">
+    <translation lang="en">Edit docparams</translation>
+    <translation lang="da">Dokumentparametre gemt</translation>
+  </text>
+
+  <text key="Docparams on this document">
+    <translation lang="en">Docparams on this document</translation>
+    <translation lang="da">Dokumentparametre på dette dokument</translation>
+  </text>
+
+  <text key="Calculated docparams">
+    <translation lang="en">Calculated docparams</translation>
+    <translation lang="da">Beregnede dokumentparametre</translation>
+  </text>
+
+  <text key="Til dokumentet">
+    <translation lang="en">To the document</translation>
+    <translation lang="da">Til dokumentet</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>

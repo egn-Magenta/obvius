@@ -41,6 +41,33 @@
 
 <TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
 
+%if($can_edit_docparams) {
+<tr>
+    <td class="sublevel"><& SELF:msg, text=>'Docparams on this document' &></td>
+    <td class="sublevel">:
+        <% shift (@docparams) %>
+        [<a href="<% $prefix . $uri %>?obvius_op=docparams"><& SELF:msg, text=>'Edit' &></a>]
+    </td>
+</tr>
+%} else {
+<tr><td class="sublevel"><& SELF:msg, text=>'Docparams on this document' &></td><td class="sublevel">: <% shift (@docparams) %></td></tr>
+%}
+
+%for(@docparams) {
+<tr><td class="sublevel"></td><td class="sublevel">&nbsp; <% $_ %></td></tr>
+%}
+
+<TR><td colspan='2'><img width="10" height="5" src='/grafik/admin/1x1.gif' border='0'></td></tr>
+
+
+<tr><td class="sublevel"><& SELF:msg, text=>'Calculated docparams' &></td><td class="sublevel">: <% shift (@all_docparams) %></td></tr>
+%for(@all_docparams) {
+<tr><td class="sublevel"></td><td class="sublevel">&nbsp; <% $_ %></td></tr>
+%}
+
+<TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
+
+
 <TR><TD class="sublevel"><& SELF:msg, text=>'Owner' &></td>
 <td class="sublevel">: <A HREF="mailto:<% $owner->{email} %> (<% $owner->{name} %>)"
 title="<& SELF:msg, text=>'Send email to' &> <% $owner->{name} %>"><% $owner->{name} %></A>
@@ -48,7 +75,7 @@ title="<& SELF:msg, text=>'Send email to' &> <% $owner->{name} %>"><% $owner->{n
 <TR><TD class="sublevel"><& SELF:msg, text=>'Group' &></td><TD class="sublevel">: <% $group->{name} %></TD></TR>
 
 <tr><td class="sublevel"><& SELF:msg, text=>'Access' &></td><td class="sublevel">:
-<& SELF:link, text=>'Redigér', link=>"$prefix$uri?obvius_op=access", ghosted=>$ghosted{access} &></td></tr>
+<& SELF:link, text=>'Edit', link=>"$prefix$uri?obvius_op=access", ghosted=>$ghosted{access} &></td></tr>
 % my @rules=$obvius->get_capability_rules($doc);
 <tr><td class="sublevel"><& SELF:msg, text=>'Applied rules' &></td><td class="sublevel">: <% shift @rules %></td></tr>
 <% map { '<tr><td class="sublevel"></td><td>&nbsp; ' . $_ . '</td></tr>' } @rules %>
@@ -96,4 +123,21 @@ if($obvius->can_delete_single_version($doc)) {
         }
     }
 }
+
+my $all_docparams = $obvius->get_docparams_recursive($doc);
+my $docparams = $obvius->get_docparams($doc);
+
+my @all_docparams;
+my @docparams;
+
+for(sort $all_docparams->param) {
+    push(@all_docparams, lc($_) . "=" . $all_docparams->param($_)->param('value'));
+}
+
+for(sort $docparams->param) {
+    push(@docparams, lc($_) . "=" . $all_docparams->param($_)->param('value'));
+}
+
+my $can_edit_docparams = $obvius->can_set_docparams($doc);
+
 </%init>
