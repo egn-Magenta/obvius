@@ -18,12 +18,12 @@ function downloadObviusEd() {
 function checkObviusEdVersion(version) {
     var v1 = 0;
     var v2 = 0;
-    var v3 = 2;
+    var v3 = 5;
     var vArray = version.split(".");
     if(vArray[0] < v1 || vArray[1] < v2 || vArray[2] < v3) {
         var test = confirm("Der findes en nyere version af Obvius Ed editoren end den du har installeret på din maskine\nTryk OK for at hente den nye version");
         if(test) {
-            window.open('http://test22.magenta-aps.dk/obvius_ed/obviusEd.xpi');
+            window.open('http://www.magenta-aps.dk/obvius_ed/obviusEd.xpi');
             return 0;
         }
     }
