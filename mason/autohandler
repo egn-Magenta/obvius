@@ -332,7 +332,7 @@ my $vdocsubdocs = $obvius->search(
                                     needs_document_fields => ['parent', 'name'],
                                     straight_documents_join => 1,
                                     append => $append
-                                );
+                                ) || [];
 my $NOW = $r->notes('now');
 foreach my $vdoc (@$vdocsubdocs) {
     $obvius->get_version_fields($vdoc);
