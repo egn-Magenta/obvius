@@ -162,14 +162,14 @@ sub export_doclist {
             $data = $_;
             $data->param('id' => $doc->Id);
             $data->param('name' => $doc->Name);
-            $data->param('url' => $prefix . $obvius->get_doc_uri($doc));
+            $data->param('url' => $prefix . $obvius->get_doc_uri($doc, break_siteroot => $options{break_siteroot}));
             $data->param('new_date' => $new_date);
             $data->param('new_title' => $new_title);
         } else {
 	    $data = {
 			id		=> $doc->Id,
 			name	=> $doc->Name,
-			url		=> $prefix . $obvius->get_doc_uri($doc),
+			url		=> $prefix . $obvius->get_doc_uri($doc, break_siteroot => $options{break_siteroot}),
 
 			version	=> $_->Version,
 			public	=> ($_->Public > 0),

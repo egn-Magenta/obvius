@@ -75,6 +75,14 @@ sub action {
         }
     }
 
+    my %extra_search_options;
+
+    # Handle breaking of site root
+    if($program =~ m!^break_siteroot!m) {
+        $extra_search_options{break_siteroot} = 1;
+        $output->param('break_siteroot' => 1);
+    }
+
     $program =~ s/^.*?\@search\b//s;
     $program =~ s/\@end\b.*$//s;
 
@@ -87,8 +95,6 @@ sub action {
 	$output->param(error_message=>"Couldn't parse search expression");
 	return OBVIUS_OK;
     }
-
-    my %extra_search_options;
 
     # Remove version and document fields from the field list
     my %versionfields = (
@@ -170,12 +176,14 @@ sub action {
                                     name=>'kwdocs', page=>$page,
                                     require=>$require,
                                     include_images=>1,
+                                    break_siteroot => $extra_search_options{break_siteroot},
                                 );
     } else {
         $this->export_doclist($vdocs,  $output, $obvius,
                                 name=>'kwdocs',
                                 require=>$require,
                                 include_images=>1,
+                                break_siteroot => $extra_search_options{break_siteroot},
                             );
     }
 
