@@ -6,10 +6,8 @@ package WebObvius::Admin;
 #
 # Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
-#                         FI, Denmark (http://www.fi.dk/)
 #
 # Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
-#          Peter Makholm (pma@fi.dk)
 #          René Seindal,
 #          Adam Sjøgren (asjo@magenta-aps.dk),
 #
