@@ -3,7 +3,7 @@
     <ul>
 %     foreach (@subdocs) {
 %my $date = $m->scomp('/shared/display_date', date=>$_->{docdate}, format=>'verbatim');
-      <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a><br><% $_->{teaser} %><br><% $date !~ 'none' ? $date : '' %></li>
+      <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a><br><% $_->{teaser} %><% $date !~ 'none' ? $date .'<br>' : '' %></li>
 %     }
     </ul>
 % }
