@@ -53,6 +53,7 @@ sub action {
     $output->param(prefixes=>$prefixes);
 
     # Check for loop; return immediately if detected:
+    #  XXX Set protocol/version automati/dynamically?
     my $via='HTTP/1.1 ' . $obvius->config->Sitename . ' (Obvius::DocType::Proxy ' . $VERSION . ')';
     if (!check_via_ok($input, $via)) {
         $output->param('via_loop_detected'=>1);
@@ -256,7 +257,6 @@ sub make_request {
     my ($url, $via, $input)=@_;
 
     # Read headers from the hashref $input->param('OBVIUS_HEADERS_IN');
-    #  XXX Set protocol/version automatically from $proxy_request below?
     my %headers_to_external_server=();
     foreach my $header (keys %{$input->param('OBVIUS_HEADERS_IN')}) {
         $headers_to_external_server{$header}=$input->param('OBVIUS_HEADERS_IN')->{$header} if ($client_to_proxy_headers{lc($header)});
@@ -316,6 +316,9 @@ sub handle_response {
         # Should perhaps signal that no caching should be done?
         if ($response->code() == 403) {
             $output->param(error=>'403 Forbidden; possible loop');
+        }
+        elsif ($response->code() == 404) {
+            $output->param(error=>'404 Not Found');
         }
         else {
             $output->param(error=>$response->code() . ' Unhandled error');
