@@ -165,9 +165,9 @@ function adjust_hoejde() {
 </tr>
 <tr>
     <td>
-        <& SELF:msg, text=>'Width' &>: <input type="text" name="new_width" size="6" onchange="adjust_bredde()">
+        <& SELF:msg, text=>'Width' &>: <input type="text" name="new_width" size="6" onchange="adjust_bredde()"> pixels
         &nbsp;
-        <& SELF:msg, text=>'Height' &>: <input type="text" name="new_height" size="6" onchange="adjust_hoejde()">
+        <& SELF:msg, text=>'Height' &>: <input type="text" name="new_height" size="6" onchange="adjust_hoejde()"> pixels
     </td>
 </tr>
 <tr>
