@@ -155,7 +155,7 @@ sub action {
                 my $url = $obvius->get_doc_uri($doc_object);
 
                 my $section = $url =~ /^\/([^\/]*)/ ? $1 : 'dummy';
-                $data->{section} = $section;
+                $data->{section} = lc($section);
 
                 push(@subscribe_list, $data);
             }
@@ -163,17 +163,20 @@ sub action {
 
             # Sort according to above hash. Anything that is not listed in the hash will get the
             # sort-value 1000000, which equals being put at the bottom.
-            @subscribe_list = sort { ($sort_map -> { $a->{section} } || 1000000) <=> ($sort_map -> { $b->{section} } || 1000000) } @subscribe_list;
-
+            # If the seq-nr comparison returns 0, eg. the values are the same do a comparison of
+            # the section names instead.
+            @subscribe_list = sort {
+                                        my $tmpval = ($sort_map -> { $a->{section} } || 1000000) <=> ($sort_map -> { $b->{section} } || 1000000);
+                                        ($tmpval == 0 ? $a->{section} cmp $b->{section} : $tmpval);
+                                } @subscribe_list;
 
             # If we have a new section, uppercase the first char and put on the object
 
             my $current_section = '';
             for(@subscribe_list) {
-                if($current_section ne $_->{section}) {
-                    $current_section = $_->{section};
-                    my $c = uc(substr($_->{section}, 0, 1));
-                    $_->{section} =~ s/^./$c/;
+                if($current_section ne lc($_->{section})) {
+                    $current_section = lc($_->{section});
+                    $_->{section} = ucfirst($_->{section});
                     $_->{new_section} = $_->{section};
                 }
             }
@@ -257,7 +260,7 @@ sub action {
 	    my $url = $obvius->get_doc_uri($doc_object);
 
 	    my $section = $url =~ /^\/([^\/]*)/ ? $1 : 'dummy';
-	    $data->{section} = $section;
+	    $data->{section} = lc($section);
 
 	    push(@subscribe_list, $data);
 	}
@@ -265,7 +268,10 @@ sub action {
 
 	# Sort according to above hash. Anything that is not listed in the hash will get the
 	# sort-value 1000000, which equals being put at the bottom.
-	@subscribe_list = sort { ($sort_map -> { $a->{section} } || 1000000) <=> ($sort_map -> { $b->{section} } || 1000000) } @subscribe_list;
+	@subscribe_list = sort {
+                                    my $tmpval = ($sort_map -> { $a->{section} } || 1000000) <=> ($sort_map -> { $b->{section} } || 1000000);
+                                    ($tmpval == 0 ? $a->{section} cmp $b->{section} : $tmpval);
+                                } @subscribe_list;
 
 	@subscribe_list = grep { $obvius->is_public_document($obvius->get_doc_by_id($_->{id})) } @subscribe_list;
 
@@ -391,7 +397,7 @@ sub get_section_hash {
     for(@$results) {
         my $seq = $_->Seq;
         $seq = $seq < 0 ? 1000000 : $seq;
-        $hash{$_->Name} = $seq;
+        $hash{lc($_->Name)} = $seq;
     }
     return \%hash;
 }
