@@ -50,6 +50,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #                   * max     - maximum number of records to return
 #                   * sort    - what column to sort the table by (before applying start and max)
 #                   * reverse - reverses the sort, if true
+#                   * where   - conditions for selection of data
 sub get_table_data {
     my ($this, $table, %options) = @_;
 
