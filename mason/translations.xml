@@ -3693,7 +3693,7 @@ abonnement på samme email-adresse.</translation>
 
   <text key="lang_notification:msg5">
     <translation lang="en">version of this document has not yet been created</translation>
-    <translation lang="da">version af dette dokumment er endnu ikke oprettet</translation>
+    <translation lang="da">version af dette dokument er endnu ikke oprettet</translation>
   </text>
 
   <text key="lang_notification:msg6">
@@ -3755,9 +3755,9 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Klik her for at fortsætte</translation>
   </text>
 
-  <text key="">
-    <translation lang="en"></translation>
-    <translation lang="da"></translation>
+  <text key="Show alphabetic index">
+    <translation lang="en">Show alphabetic index</translation>
+    <translation lang="da">Vis alfabetisk oversigt</translation>
   </text>
 
   <text key="">
