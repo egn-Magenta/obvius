@@ -281,17 +281,18 @@ sub get_public_users_area {
 #                             containing document-objects for the
 #                             areas available.
 sub get_public_user_area_docs {
-    my ($obvius)=@_;
+    my ($obvius, $doctypename)=@_;
 
-    # XXX Find all documents that denote an area...
+    my $doctype=$obvius->get_doctype_by_name($doctypename);
+    return undef unless ($doctype);
 
-    my @list=($obvius->get_root_document());
+    my @list=();
 
-    my $doc;
-    $doc=$obvius->lookup_document('/test/');
-    push @list, $doc if ($doc);
-    $doc=$obvius->lookup_document('/laboratorium/');
-    push @list, $doc if ($doc);
+    my $vdocs=$obvius->search([], 'type=' . $doctype->Id, public=>1, notexpired=>1);
+    foreach my $vdoc (@$vdocs) {
+        my $doc=$obvius->get_doc_by_id($vdoc->Docid);
+        push @list, $doc if ($doc);
+    }
 
     return \@list;
 }
