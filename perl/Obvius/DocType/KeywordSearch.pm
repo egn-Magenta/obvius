@@ -154,11 +154,8 @@ sub action {
     else {
         $kwdocs = $obvius->get_document_subdocs($basedoc,
                                               sortvdoc=>$vdoc,
-					      nothidden=>(defined $vdoc->field('show_hidden') ?
-							  1-$vdoc->field('show_hidden') :
-							  1),
                                               public=>!$is_admin,
-					     );
+                                            );
     }
 
     # This is handled by search when public is 1!
