@@ -303,7 +303,7 @@ sub action {
 
 	my $part;
 	foreach $part (@main_parts) {
-	    $args{restrict} = $base . $part->param('name') . '/';
+	    $args{restrict} = $base . lc($part->param('name')) . '/';
 
 	    $output->param(Obvius_SIDE_EFFECTS => 1); # htdig could do anything....
 	    my $lines = read_htdig_output(\%args, $part, 1, 1, $obvius);
