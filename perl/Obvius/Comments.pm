@@ -50,7 +50,7 @@ sub get_comments {
     my @comments;
     $set->Search({docid=>$docid, '$order'=>'date', %options });
     while (my $rec=$set->Next) {
-	my %comment=(name=>$rec->{name}, email=>$rec->{email}, text=>$rec->{text});
+	my %comment=(date=>$rec->{date}, name=>$rec->{name}, email=>$rec->{email}, text=>$rec->{text}, show_email=>$rec->{show_email});
 	push @comments, \%comment;
     }
 
