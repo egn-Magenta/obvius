@@ -117,16 +117,15 @@ $message
 
     The Daily Dispatcher of Good News.
 
-
+-- 
 P.S. Here are the tentative guidelines for what to do:
 
  1) Add a comment before the function, documenting what it does. In
     the form:
 
-    # funname(arguments) - creates a fun name, while still keeping
-    #                      the sanity intact and maintaining
-    #                      atomicity and astronomy. Returns a reference
-    #                      to a hash, describing the shape of the world.
+    # funname - creates a fun name, while still keeping the sanity intact
+    #           and maintaining atomicity and astronomy. Returns a
+    #           reference to a hash, describing the shape of the world.
     sub funname {
         my (\$letters, \$length)=\@_;
 
