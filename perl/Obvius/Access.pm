@@ -193,6 +193,10 @@ sub user_capabilities {
     return \%capabilities;
 }
 
+# set_access_data - given a document object, a numerical owner id, a
+#                   numerical group id and a string with accessrules,
+#                   updates the database with them if the user has
+#                   access to do so. Returns nothing.
 sub set_access_data {
     my ($this, $doc, $owner, $grp, $accessrules) = @_;
 
@@ -335,6 +339,8 @@ Obvius::Access - Access related functions for L<Obvius>.
   $ret=$obvius->user_has_capabilities($doc, qw (edit delete create));
 
   $ret=$obvius->user_has_any_capability($doc, qw (edit delete create));
+
+  $obvius->set_access_data($doc, $new_owner->Id, $new_grp->Id, accessrules=>$str);
 
 =head1 DESCRIPTION
 
