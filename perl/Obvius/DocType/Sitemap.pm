@@ -29,6 +29,12 @@ sub action {
 	}
     $top = $obvius->get_public_version($top);
 
+	unless ($top) {
+		#Something is wrong with $top, tell the user
+		$output->param('message' => 'INVALID_ROOT');
+		return OBVIUS_ERROR;
+	}
+
     $obvius->get_version_fields($top, [ 'title', 'short_title' ]);
     $top->{SHORT_TITLE} = $top->field('short_title');
     $top->{TITLE} = $top->field('title');
