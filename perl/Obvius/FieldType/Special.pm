@@ -71,7 +71,7 @@ sub copy_out {
         if ($value =~ m!^/!) {
             my $doc = $obvius->lookup_document($value);
             if($doc) {
-                return $doc->Id . ".docid";
+                return "/" . $doc->Id . ".docid";
             } else {
                 return $value;
             }
