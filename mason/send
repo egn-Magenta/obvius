@@ -183,7 +183,7 @@ $smtp->datasend("MIME-Version: 1.0\n");
 $smtp->datasend("Content-Type: text/plain; charset=iso-8859-1\n");
 $smtp->datasend("Content-Transfer-Encoding: 8bit\n");
 $smtp->datasend("\n");
-$smtp->datasend($fields->param('text'));
+$smtp->datasend($m->scomp('/common/shared/html2text', html=>$fields->param('text')));
 $smtp->datasend("\n\n");
 if ($fields->param('linktype') eq 'public') {
     $smtp->datasend(" http://" . $sitename . "$uri\n");
