@@ -12,6 +12,7 @@
 %         }
 %     }
 %     $level=$_->{level};
+%next if ($_->{url} eq '/sitemap/');
 <li><a href="<% $prefix %><% $_->{url} %>"><% $_->{title} |h %></a></li>
 % }
 %
