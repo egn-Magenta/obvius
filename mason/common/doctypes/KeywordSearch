@@ -4,19 +4,19 @@
 % if ($kwdocs) {
 <table border="0" class="content">
 <tr>
-<td width="15"><img src="/grafik/1x1.gif" width="15"></td>
+<td width="15"><img src="/grafik/1x1.gif" width="15" alt=""></td>
 <td align="center">
 <& pager, output=>$output &>
 </td>
 <tr>
-<td width="15"><img src="/grafik/1x1.gif" width="15"></td>
+<td width="15"><img src="/grafik/1x1.gif" width="15" alt=""></td>
 <td>
 <table width="100%" border="0" cellpadding="0" cellspacing="0" class="content">
 %     my $prev_head='';
 %     foreach my $kwdoc (@$kwdocs) {
 %         if ($show_new_titles and ($prev_head ne $kwdoc->{new_title}) and $kwdoc->{new_title}) {
 %              $prev_head=$kwdoc->{new_title};
-<tr><td height="10" colspan="2"></td></tr>
+<tr><td height="10" colspan="2"><img src="/grafik/1x1.gif" height="10" alt=""></td></tr>
 <tr>
 <td valign="bottom" colspan="3" class="bigletter">
 <a name="<% $kwdoc->{new_title} %>"><% $kwdoc->{new_title} %></a>
@@ -64,6 +64,9 @@
 </td>
 </tr>
 
+<tr>
+<td colspan="2" height="3"><img src="/grafik/1x1.gif" height="3" alt=""></td>
+</tr>
 
 %     }
 </table>
