@@ -1052,6 +1052,9 @@ sub update_udsaetning {
     return $retval;
 }
 
+# delete_udsætning - given an obvius object and an array-ref with
+#                    entries that identify one or more udsætninger in
+#                    the fsu_udsaetninger table, deletes them.
 sub delete_udsaetninger {
     my ($this, $obvius, $where) = @_;
 
@@ -1282,11 +1285,10 @@ sub delete_produkt {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::ForsoegsSearch - Perl extension for blah blah blah
+Obvius::DocType::ForsoegsSearch - Perl module implementing ForsoegsSearch for BioTIK.
 
 =head1 SYNOPSIS
 
@@ -1299,15 +1301,16 @@ Obvius::DocType::ForsoegsSearch - Perl extension for blah blah blah
                                                 ikon => 'iconname'
                                             });
 
+  my $ret=$doctype->delete_udsaetninger($obvius, { godkendelse=>$godkendelse_id });
+
 =head1 DESCRIPTION
 
 This module contains methods for use with the ForsoegsSearch doctype
 for Obvius[tm].
 
-=head2 EXPORT
+=head1 NOTE
 
-None by default.
-
+This is a website-specific module, it should be moved to BioTIK::DocType::.
 
 =head1 AUTHOR
 
