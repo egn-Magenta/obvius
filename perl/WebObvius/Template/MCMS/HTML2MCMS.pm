@@ -1,5 +1,29 @@
 package WebObvius::Template::MCMS::HTML2MCMS;
 
+########################################################################
+#
+# WebObvius::Template::MCMS::HTML2MCMS.pm - HTML to MCMS parser.
+#
+# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
 use strict;
 use warnings;
 
@@ -7,6 +31,8 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 use HTML::Parser ();
 
+# html2mcms($html) - converts HTML to the MCMS markup. Returns
+#                    the MCMS markup.
 sub html2mcms {
     my $html = shift;
     my $parser = new HTML::Parser(
@@ -40,10 +66,14 @@ sub html2mcms {
     return $parser->{OUTPUT};
 }
 
+# comment_tag($text) - dummy function used by the HTML-parser.
+#                      Does nothing.
 sub comment_tag {
     my ($self, $text) = @_;
 }
 
+# start_tag($tag, $text, \%attr) - Handler for start tags in
+#           the parser. Returns nothing.
 sub start_tag {
     my ($self, $tag, $text, $attr) = @_;
 
@@ -126,6 +156,8 @@ sub start_tag {
     }
 }
 
+# end_tag($tag, $text) - Handler for end tags in the parser.
+#                       Returns nothing.
 sub end_tag {
     my ($self, $tag, $text) = @_;
 
@@ -171,6 +203,8 @@ sub end_tag {
     $self->{LAST_TAG} = $tag;
 }
 
+# text_handler($origtext) - Text-handler for the HTML-parser.
+#                          Returns nothing.
 sub text_handler {
     my ($self, $origtext) = @_;
     $origtext =~ s/\r//g;
@@ -192,32 +226,31 @@ __END__
 
 =head1 NAME
 
-WebObvius::Template::MCMS::HTML2MCMS - Perl extension for blah blah blah
+WebObvius::Template::MCMS::HTML2MCMS - HTML parser for converting
+HTML to MCMS-markup.
 
 =head1 SYNOPSIS
 
   use WebObvius::Template::MCMS::HTML2MCMS;
-  blah blah blah
+
+  my $mcms_markup = WebObvius::Template::MCMS::HTML2MCMS::html2mcms($html);
 
 =head1 DESCRIPTION
 
-Stub documentation for WebObvius::Template::MCMS::HTML2MCMS, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+  A HTML parser translating HTML to MCMS markup.
 
 =head2 EXPORT
 
-None by default.
+  None by default.
 
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. KragE<lt>jubk@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius>,
+L<WebObvius>.
 
 =cut
