@@ -27,3 +27,11 @@ sub handler {
 
     return OK;
 }
+
+1;
+__END__
+
+=head1 NAME
+
+WebObvius::Cache - Perl module for setting content-type from cache-dir
+                   path.

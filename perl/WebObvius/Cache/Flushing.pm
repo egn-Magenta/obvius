@@ -102,3 +102,8 @@ sub step {
 }
 
 42; 
+__END__
+
+=head1 NAME
+
+WebObvius::Cache::Flushing - Perl module for flushing the cache in steps.

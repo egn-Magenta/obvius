@@ -31,3 +31,10 @@ sub LogTimer {
     close FH;
     return OK;
 }
+
+1;
+__END__
+
+=head1 NAME
+
+WebObvius::Timer - Perl module for logging status, bytes and time of each request.
