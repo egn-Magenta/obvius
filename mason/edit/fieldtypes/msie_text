@@ -494,5 +494,5 @@ function obvius_<% $name %>_selection_change() {
     obvius_<% $name %>_editor.document.designMode = "On";
     obvius_<% $name %>_editor.document.onselectionchange = obvius_<% $name %>_selection_change;
 </script>
-<br><a href="javascript:traverseDom('<% $name %>')">Fix MS Word html</a><br>
-<br><a href="javascript:obvius_<% $name %>_save(); OpenWin('/admin/?obvius_op=html_code_editor&fieldname=<% $name %>', 750, 550)"><& SELF:msg, text=>'Vis/Rediger HTML' &></a><br>
+<br><a href="javascript:traverseDom('<% $name %>')">Fix MS Word html</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:obvius_<% $name %>_save(); OpenWin('/admin/?obvius_op=html_code_editor&fieldname=<% $name %>', 750, 550)"><& SELF:msg, text=>'Vis/Rediger HTML' &></a><br>
+<br>
