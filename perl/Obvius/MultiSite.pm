@@ -454,7 +454,7 @@ sub search {
         # Don't know if we can use this?
         for(@{$options{'needs_uricache_fields'}}) {
             push(@fields, "uri_cache.$_ as $_");
-            $map{$_} = "uri_cache.$_";
+            $map{'\s' . $_} = " uri_cache.$_";
         }
     }
 
