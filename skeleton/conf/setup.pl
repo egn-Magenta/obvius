@@ -19,6 +19,8 @@ our @ISA = qw( WebObvius::Site::Mason WebObvius::Access );
 package ${perlname}::Site::Admin;
 our @ISA = qw( WebObvius::Site::Mason WebObvius::Admin );
 
+package ${perlname}::Site::Admin::CacheHandling;
+
 package ${perlname}::Site;
 
 print STDERR "Starting ${perlname} ...\n";
