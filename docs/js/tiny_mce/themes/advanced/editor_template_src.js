@@ -22,6 +22,7 @@ var TinyMCE_advanced_buttons = [
 		['cut', 'cut.gif', '{$lang_cut_desc}', 'Cut'],
 		['copy', 'copy.gif', '{$lang_copy_desc}', 'Copy'],
 		['paste', 'paste.gif', '{$lang_paste_desc}', 'Paste'],
+		['pastetext', 'pastetext.gif', '{$lang_pastetext_desc}', 'PasteText'],
 		['undo', 'undo.gif', '{$lang_undo_desc}', 'Undo'],
 		['redo', 'redo.gif', '{$lang_redo_desc}', 'Redo'],
 		['link', 'link.gif', '{$lang_link_desc}', 'mceLink', true],
@@ -46,7 +47,7 @@ var TinyMCE_advanced_buttons = [
  * Returns HTML code for the specificed control.
  */
 function TinyMCE_advanced_getControlHTML(button_name) {
-	var buttonTileMap = new Array('anchor.gif','backcolor.gif','bullist.gif','center.gif','charmap.gif','cleanup.gif','code.gif','copy.gif','custom_1.gif','cut.gif','forecolor.gif','full.gif','help.gif','hr.gif','image.gif','indent.gif','left.gif','link.gif','numlist.gif','outdent.gif','paste.gif','redo.gif','removeformat.gif','right.gif','strikethrough.gif','sub.gif','sup.gif','undo.gif','unlink.gif','visualaid.gif');
+	var buttonTileMap = new Array('pastetext.gif','anchor.gif','backcolor.gif','bullist.gif','center.gif','charmap.gif','cleanup.gif','code.gif','copy.gif','custom_1.gif','cut.gif','forecolor.gif','full.gif','help.gif','hr.gif','image.gif','indent.gif','left.gif','link.gif','numlist.gif','outdent.gif','paste.gif','redo.gif','removeformat.gif','right.gif','strikethrough.gif','sub.gif','sup.gif','undo.gif','unlink.gif','visualaid.gif');
 
 	// Lookup button in button list
 	for (var i=0; i<TinyMCE_advanced_buttons.length; i++) {
@@ -364,7 +365,7 @@ function TinyMCE_advanced_getEditorTemplate(settings) {
             template['html'] += '</tbody></table>';
 		break;
 		case "BorderLayout" : //will be like java.awt.BorderLayout of SUN Java...
-			// Not implemented yet... 
+			// Not implemented yet...
 		break;
 		case "CustomLayout" : //User defined layout callback...
 				var customLayout = tinyMCE.getParam("theme_advanced_custom_layout","");
@@ -406,9 +407,9 @@ function TinyMCE_advanced_getEditorTemplate(settings) {
 /**
  * Insert link template function.
  */
+
 function TinyMCE_advanced_getInsertLinkTemplate() {
 	var template = new Array();
-
 	template['file'] = 'link.htm';
 	template['width'] = 320;
 	template['height'] = 170;
@@ -440,6 +441,7 @@ function TinyMCE_advanced_getInsertImageTemplate() {
 /**
  * Node change handler.
  */
+_AnchorWindow_timeout = new Date().getTime() //Chris Benjaminsen BeIT ApS **
 function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_levels, visual_aid, any_selection) {
 	function selectByValue(select_elm, value) {
 		if (select_elm) {
@@ -461,6 +463,25 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 	// No node provided
 	if (node == null)
 		return;
+
+
+
+	//Chris Benjaminsen BeIT ApS **
+	//If the node is a anchor marker then show anchor window and return
+	if( node.nodeName.toLowerCase() == 'img' && node.getAttribute('alt') == 'mceVisualAid' ){
+		if( new Date().getTime() - _AnchorWindow_timeout < 2000 ) return false
+		_AnchorWindow_timeout = new Date().getTime()
+		if( node.parentNode ){
+			TinyMCE_advanced_anchorName = node.parentNode.getAttribute('name')
+			tinyMCE.selectedInstance.selectNode(node.parentNode, false )
+			tinyMCE.execCommand('mceInsertAnchor', false);
+		}
+	}
+	//**
+
+
+
+
 
 	// Update path
 	var pathElm = document.getElementById(editor_id + "_path");
@@ -511,6 +532,14 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 				nodeData = "";
 			}
 
+			if (getAttrib(path[i], 'name').indexOf("mce_") != 0) {
+				if (getAttrib(path[i], "className") != "")
+					nodeName += "." + getAttrib(path[i], "className");
+				else if (getAttrib(path[i], "class") != "")
+					nodeName += "." + getAttrib(path[i], "class");
+			}
+
+
 			if (tinyMCE.isMSIE)
 				html += '<a title="' + nodeData + '" href="javascript:void(0);" onmousedown="tinyMCE.execInstanceCommand(\'' + editor_id + '\',\'mceSelectNodeDepth\',false,\'' + i + '\');return false;" class="mcePathItem">' + nodeName + '</a>';
 			else
@@ -545,6 +574,7 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 	tinyMCE.switchClassSticky(editor_id + '_link', 'mceButtonDisabled', true);
 	tinyMCE.switchClassSticky(editor_id + '_unlink', 'mceButtonDisabled', true);
 	tinyMCE.switchClassSticky(editor_id + '_outdent', 'mceButtonDisabled', true);
+
     tinyMCE.switchClassSticky(editor_id + '_image', 'mceButtonNormal');
     tinyMCE.switchClassSticky(editor_id + '_hr', 'mceButtonNormal');
 
@@ -572,8 +602,9 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 	}
 
 	// Within li, blockquote
-	if (tinyMCE.getParentElement(node, "li,blockquote"))
+	if (tinyMCE.getParentElement(node, "ul,li,blockquote"))//Chris Benjaminsen BeIT ApS
 		tinyMCE.switchClassSticky(editor_id + '_outdent', 'mceButtonNormal', false);
+	
 
 	// Has redo levels
 	if (undo_index != -1 && (undo_index < undo_levels-1 && undo_levels > 0))

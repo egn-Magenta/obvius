@@ -365,7 +365,7 @@ function TinyMCE_advanced_getEditorTemplate(settings) {
             template['html'] += '</tbody></table>';
 		break;
 		case "BorderLayout" : //will be like java.awt.BorderLayout of SUN Java...
-			// Not implemented yet... 
+			// Not implemented yet...
 		break;
 		case "CustomLayout" : //User defined layout callback...
 				var customLayout = tinyMCE.getParam("theme_advanced_custom_layout","");
@@ -407,7 +407,7 @@ function TinyMCE_advanced_getEditorTemplate(settings) {
 /**
  * Insert link template function.
  */
- 
+
 function TinyMCE_advanced_getInsertLinkTemplate() {
 	var template = new Array();
 	template['file'] = 'link.htm';
@@ -441,7 +441,7 @@ function TinyMCE_advanced_getInsertImageTemplate() {
 /**
  * Node change handler.
  */
-_AnchorWindow_timeout = new Date().getTime() //Chris Benjaminsen BeIT ApS ** 
+_AnchorWindow_timeout = new Date().getTime() //Chris Benjaminsen BeIT ApS **
 function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_levels, visual_aid, any_selection) {
 	function selectByValue(select_elm, value) {
 		if (select_elm) {
@@ -463,9 +463,9 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 	// No node provided
 	if (node == null)
 		return;
-		
-		
-		
+
+
+
 	//Chris Benjaminsen BeIT ApS **
 	//If the node is a anchor marker then show anchor window and return
 	if( node.nodeName.toLowerCase() == 'img' && node.getAttribute('alt') == 'mceVisualAid' ){
@@ -478,10 +478,10 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 		}
 	}
 	//**
-	
-	
-	
-	
+
+
+
+
 
 	// Update path
 	var pathElm = document.getElementById(editor_id + "_path");
@@ -532,6 +532,14 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 				nodeData = "";
 			}
 
+			if (getAttrib(path[i], 'name').indexOf("mce_") != 0) {
+				if (getAttrib(path[i], "className") != "")
+					nodeName += "." + getAttrib(path[i], "className");
+				else if (getAttrib(path[i], "class") != "")
+					nodeName += "." + getAttrib(path[i], "class");
+			}
+
+
 			if (tinyMCE.isMSIE)
 				html += '<a title="' + nodeData + '" href="javascript:void(0);" onmousedown="tinyMCE.execInstanceCommand(\'' + editor_id + '\',\'mceSelectNodeDepth\',false,\'' + i + '\');return false;" class="mcePathItem">' + nodeName + '</a>';
 			else
@@ -566,7 +574,7 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 	tinyMCE.switchClassSticky(editor_id + '_link', 'mceButtonDisabled', true);
 	tinyMCE.switchClassSticky(editor_id + '_unlink', 'mceButtonDisabled', true);
 	tinyMCE.switchClassSticky(editor_id + '_outdent', 'mceButtonDisabled', true);
-	
+
     tinyMCE.switchClassSticky(editor_id + '_image', 'mceButtonNormal');
     tinyMCE.switchClassSticky(editor_id + '_hr', 'mceButtonNormal');
 
