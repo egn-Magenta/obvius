@@ -115,7 +115,8 @@ sub export_doclist {
     $output->param(Obvius_DEPENCIES => 1);
 
     # The configfile might tell us to just export the vdocs
-    if($obvius->config->param('searchdocs_exports_vdocs')) {
+    # "return_vdoclist" option also forces this behavior
+    if($obvius->config->param('searchdocs_exports_vdocs') || $options{'return_vdoclist'}) {
         $output->param($options{name} || 'subdocs', $vdoclist);
         return $vdoclist;
     }
