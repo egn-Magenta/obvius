@@ -207,7 +207,7 @@ for(my $path_index = $path_levels - 1; $path_index >= 0;$path_index--) {
     my $path_doc=$path[$path_index];
     my $documents = $obvius->get_docs_by_parent($path_doc->Id);
     $documents = [] unless($documents);
-    for(@$documents) {
+    for(sort {lc($a->Name) cmp lc($b->Name)} @$documents) {
         if($path_index == $path_levels - 1) { # Only first time
             push(@here_docs, $_);
         }
