@@ -38,3 +38,9 @@ sub action {
 
 1;
 __END__
+
+=head1 NAME
+
+Obvius::DocType::UFOForm - Perl extension for ?
+
+=cut

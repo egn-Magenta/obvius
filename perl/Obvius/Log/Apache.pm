@@ -91,18 +91,18 @@ __END__
 
 =head1 NAME
 
-Obvius::Log - Perl extension for blah blah blah
+Obvius::Log::Apache - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use Obvius::Log;
+  use Obvius::Log::Apache;
   blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Log, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+Stub documentation for Obvius::Log::Apache, created by h2xs. It looks
+like the author of the extension was negligent enough to leave the
+stub unedited.
 
 Blah blah blah.
 

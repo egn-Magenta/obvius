@@ -42,7 +42,7 @@ __END__
 
 =head1 NAME
 
-Obvius::DocType::Image - Perl extension for blah blah blah
+Obvius::DocType::EtikImage - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 

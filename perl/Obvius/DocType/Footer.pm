@@ -48,3 +48,9 @@ sub action {
 
 1;
 __END__
+
+=head1 NAME
+
+Obvius::DocType::Footer - Perl extension for ?
+
+=cut

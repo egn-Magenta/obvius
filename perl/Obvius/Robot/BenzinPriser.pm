@@ -131,9 +131,9 @@ sub chrhndl {
 1;
 __END__
 
-==head1 NAME
+=head1 NAME
 
-Obvius::Robot::BenzinPriser
+Obvius::Robot::BenzinPriser - ?
 
 =head1 SYNOPSIS
 
