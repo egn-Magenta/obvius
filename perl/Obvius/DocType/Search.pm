@@ -62,7 +62,11 @@ sub read_htdig_output {
     $ENV{SCRIPT_NAME} = '@SEARCH_PAGE@';
 
     local (*INPUT);
-    $obvius->log->debug("RUNNING $htsearch '$cmd'| ");
+    if($obvius->config->param('report_htdig_running')) {
+        $obvius->log->error("RUNNING $htsearch '$cmd'| ");
+    } else {
+        $obvius->log->debug("RUNNING $htsearch '$cmd'| ");
+    }
     open(INPUT, "$htsearch |") or return undef;
     my @lines = <INPUT>;
     close(INPUT);
@@ -249,7 +253,7 @@ sub action {
 	my @path = $obvius->get_doc_by_path($base, \$junk);
 	my $part = $path[-1];
 
-	$args{restrict} = 'http://' . $config->SITENAME . $base;
+	$args{restrict} = 'http://' . ($config->param('HTDIG_SITENAME') || $config->param('SITENAME')) . $base;
 
 	$output->param(Obvius_SIDE_EFFECTS => 1); # htdig could do anything....
         my $lines = read_htdig_output(\%args, $part, 1, 0, $obvius);
@@ -268,7 +272,7 @@ sub action {
 
 	$output->param(restrict=>$base);
     } else {
-	my $base = 'http://' . $config->SITENAME . '/';
+	my $base = 'http://' . ($config->param('HTDIG_SITENAME') || $config->param('SITENAME')) . '/';
 
 	my @path = $obvius->get_doc_by_path('/');
 
