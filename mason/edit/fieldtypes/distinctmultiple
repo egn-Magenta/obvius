@@ -6,6 +6,7 @@ $name
 $session
 $doctypeid=>undef
 $doctypename=>undef
+$sortrecent=>undef
 </%args>
 %
 <script language="javascript" type="text/javascript">
@@ -189,7 +190,7 @@ for(@$value) {
     $values{$_} = 1;
 }
 
-my @options = grep {! $values{$_} } @{$obvius->get_distinct_vfields($name, 'text', doctypeid => $doctypeid ) || []};
+my @options = grep {! $values{$_} } @{$obvius->get_distinct_vfields($name, 'text', doctypeid => $doctypeid, sortrecent=>$sortrecent ) || []};
 </%init>
 </%method>
 %
