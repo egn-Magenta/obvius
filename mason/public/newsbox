@@ -54,12 +54,10 @@ unless (($all and @$all) or ($sorted and @$sorted)) {
     $all=$obvius->search([qw(front_prio front_dura published)],
 			  'front_prio=1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura',
 			   notexpired=>1, public=>1,
-			   obvius_dump=>1,	
 			  order=>'published DESC');
     $sorted=$obvius->search([qw(front_prio front_dura published)],
 			  'front_prio>1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura',
 			   notexpired=>1, public=>1,
-			   obvius_dump=>1,
 			  order=>'front_prio DESC, published DESC',
 			  max=>(($all and @$all) ? $max-1 : $max),
 			 );
