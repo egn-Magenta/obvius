@@ -21,6 +21,37 @@ sub action {
 
     $this->tracer($input, $output, $doc, $vdoc, $obvius) if ($this->{DEBUG});
 
+
+    my $session = $input->param('session') || {};
+    my $sesdocs = $session->{docs};
+
+    if($sesdocs and scalar(@$sesdocs)) {
+        # Carry on session ID
+        $output->param('SESSION_ID' => $session->{_session_id}) if($session->{_session_id});
+
+        my $pagesize = $session->{pagesize};
+        my $require = $session->{require};
+        if($pagesize) {
+            my $page = $input->param('p') || 1;
+            $this->export_paged_doclist($pagesize, $sesdocs, $output, $obvius,
+                                        name=>'kwdocs',
+                                        page=>$page,
+                                        require=>$require,
+                                        include_images=>1,
+                                    );
+        } else {
+            $this->export_doclist($sesdocs,  $output, $obvius,
+                                    name=>'kwdocs',
+                                    #prefix => $prefix,
+                                    require=>$require,
+                                    include_images=>1,
+                        );
+        }
+
+        return OBVIUS_OK;
+    }
+
+
     my $prefix = $output->param('PREFIX');
     my $is_admin = $input->param('IS_ADMIN');
 
@@ -136,24 +167,36 @@ sub action {
     # }
 
     # my %baseargs = $base->document_options;
+
+    my $pagesize = $vdoc->field('pagesize');
+    my $require = $args{require} || '';
+
     if ($kwdocs) {
-	if ($vdoc->Pagesize) {
-	    my $page = $input->param('p') || 1;
-	    $this->export_paged_doclist($vdoc->Pagesize, $kwdocs, $output, $obvius,
-				    	name=>'kwdocs', page=>$page,
-				    	prefix => $prefix,
-				    	require=>$args{require} || '',
-					include_images=>1,
-				       );
-    	} else {
-	    $this->export_doclist($kwdocs,  $output, $obvius,
-				  name=>'kwdocs',
-				  prefix => $prefix,
-				  require=>$args{require} || '',
-				  include_images=>1,
-				 );
-	}
+        if ($vdoc->Pagesize) {
+            my $page = $input->param('p') || 1;
+            $this->export_paged_doclist($pagesize, $kwdocs, $output, $obvius,
+                            name=>'kwdocs', page=>$page,
+                            prefix => $prefix,
+                            require=>$require,
+                        include_images=>1,
+                        );
+        } else {
+            $this->export_doclist($kwdocs,  $output, $obvius,
+                    name=>'kwdocs',
+                    prefix => $prefix,
+                    require=>$require || '',
+                    include_images=>1,
+                    );
+        }
+
+        # Store stuff in session
+        $session->{docs} = $kwdocs;
+        $session->{pagesize} = $pagesize;
+        $session->{require} = $require;
+        $output->param('session' => $session);
     }
+
+
 
     return OBVIUS_OK;
 }
