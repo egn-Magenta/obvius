@@ -136,10 +136,17 @@ unless (-d "/etc/obvius/") {
 
 # Create Obvius conf-file:
 print "Configuration and database ...\n";
+
 make_conf("/etc/obvius/$options{dbname}.conf");
 
 # Create database:
 make_db($options{dbname});
+
+print "Do you want to import some basic documents (Y/n)? ";
+my $test = <STDIN>;
+unless($test and $test =~ /^n/i) {
+    system("cat $options{wwwroot}/obvius/otto/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
+}
 
 exit 0;
 
