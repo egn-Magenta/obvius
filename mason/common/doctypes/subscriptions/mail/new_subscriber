@@ -11,13 +11,8 @@ Kære abonnent
 Du har tilmeldt dig den elektroniske nyhedsservice og vil modtage
 nyheder, når du har aktiveret dit abonnement.
 
-Du kan aktivere dit abonnement på to måder:
-
-Enten ved at klikke på det følgende link,
+Du kan aktivere dit abonnement ved at klikke på det følgende link,
 <http://<% $r->pnotes('site')->Sitename %>/abonner/?mode=activate;e=<% $email %>;p=<% $password %>>
-
-Eller ved at returnere denne mail. Hvis du vælger at returnere mailen,
-skal du ikke ændre i indholdet.
 
 Med venlig hilsen
 
