@@ -48,19 +48,41 @@ sub action {
 	return OBVIUS_OK;
     }
 
+    my %extra_search_options;
+
     # Remove version and document fields from the field list
-    my @versionfields = (
-                            'version',
-                            'doctype', # Which is mapped to type (the db-fieldname) below
-                            'public',
-                            'valid',
-                            'lang',
+    my %versionfields = (
+                            'version' => 1,
+                            'doctype' => 1, # Which is mapped to type (the db-fieldname) below
+                            'public' => 1,
+                            'valid' => 1,
+                            'lang' => 1,
                         );
+    my %parentfields = (
+                            'id' => 1,
+                            'parent' => 1,
+                            'owner' => 1,
+                            'grp' => 1
+                        );
+
+    my @needed_parent_fields;
+
     my @search_fields;
     for my $field (@fields) {
-        unless(grep { lc($field) eq lc($_) } @versionfields) {
-            push(@search_fields, $field);
+        unless($versionfields{lc($field)}) {
+            if($parentfields{lc($field)}) {
+                push(@needed_parent_fields, $field);
+            } else {
+                push(@search_fields, $field);
+            }
         }
+    }
+
+    if(scalar(@needed_parent_fields)) {
+        # Add the document fields to the search
+        $extra_search_options{needs_document_fields} = \@needed_parent_fields;
+        # If we are searching on something in documents it's a good idea to use straight_documents_join
+        $extra_search_options{straight_documents_join} = 1;
     }
 
     # doctype is actually type:
@@ -82,7 +104,7 @@ sub action {
 			      sortvdoc=>$vdoc,
 			      notexpired=>!$is_admin,
 			      public=>!$is_admin,
-#			      obvius_dump=>1,
+			      %extra_search_options
 			     );
 
     #print STDERR "vdoc: " . Dumper($vdoc);
