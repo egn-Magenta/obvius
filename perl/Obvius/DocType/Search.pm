@@ -129,7 +129,7 @@ sub get_search_words {
 	$words = lc($words);
     }
 
-    return ($words =~ /\b(\w+)/g);
+    return ($words =~ /\b(\w+[*]?)/g);
 }
 
 sub do_search_page {
