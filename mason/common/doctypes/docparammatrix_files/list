@@ -27,29 +27,28 @@ function set_default(name) {
 
 <table border="1">
     <tr>
-        <th>&nbsp;</th>
+        <th><% $vdoc->field('short_title') || $vdoc->field('title') %></th>
 %   for(@$docparam_options) {
         <th><% $_ %></th>
 %   }
         <th>&nbsp</th>
     <tr>
 %for my $d (@$first_level_docs) {
-%   my $default_checked = ($d->{no_docparam_value} and $vdoc->field('defaultallchecked'));
     <tr>
         <td>
             <strong><% '/' . $d->{name} . '/' %></strong>
             <input type="hidden" name="<% $d->{docid} %>_submitted" value="1" />
         </td>
 %  for(@$docparam_options) {
-        <td><input type="checkbox" name="selection_<% $d->{docid} %>" value="<% $_ %>" <% ($d->{values}->{$_} or $default_checked) ? 'CHECKED ' : '' %>/>
+        <td><input type="checkbox" name="selection_<% $d->{docid} %>" value="<% $_ %>" <% $d->{values}->{$_} ? 'CHECKED ' : '' %><% $form_disabled ? 'disabled="disabled" ' : '' %>/>
 %  }
-        <td><input type="button" onclick="set_default('selection_<% $d->{docid} %>');" value="Set default" /></td>
+        <td><input type="button" onclick="set_default('selection_<% $d->{docid} %>');" value="Set default" <% $form_disabled ? 'disabled="disabled" ' : '' %>/></td>
     </tr>
 %}
     <tr>
         <td colspan="<% scalar(@$docparam_options) + 2 %>">
             <input type="hidden" name="mode" value="save" />
-            <input type="submit" value="Update" />
+            <input type="submit" value="Update" <% $form_disabled ? 'disabled="disabled" ' : '' %>/>
         </td>
     </tr>
 </table>
@@ -64,5 +63,5 @@ my $first_level_docs = $output->param('first_level_docs') || [];
 
 my $default_set = $output->param('default_set') || {};
 
-$obvius->get_version_field($vdoc, 'defaultallchecked');
+my $form_disabled = $output->param('disable_form');
 </%init>

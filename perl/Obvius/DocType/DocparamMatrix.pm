@@ -79,6 +79,17 @@ sub action {
     my $mode = $input->param('mode') || '';
 
     if($mode eq 'save') {
+
+        $output->param('mode' => 'save');
+
+        # Check whether the user have the admin capability:
+
+        unless($obvius->user_has_capabilities($doc, qw(admin))) {
+            $output->param('error' => 'You are not allowed change the docparams specified in this document');
+            return OBVIUS_OK;
+        }
+
+
         # Loop over the level-1 docs and update each of them with the newly chosen values.
 
         for(@first_level_docs) {
@@ -108,9 +119,6 @@ sub action {
 
             # Store it:
             $obvius->set_docparams($d, $new_docparams);
-
-            $output->param('mode' => 'save');
-
         }
     } else {
 
@@ -152,6 +160,11 @@ sub action {
             my %defaults = map {$_ => 1} split(/\s*,\s*/, $default_str);
 
             $output->param('default_set' => \%defaults);
+        }
+
+        # If the user lacks capabilities, we make disable the form buttons
+        unless($obvius->user_has_capabilities($doc, qw(admin))) {
+            $output->param('disable_form' => 1);
         }
 
     }

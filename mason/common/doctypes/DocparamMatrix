@@ -10,6 +10,7 @@
 $output
 </%args>
 <%init>
+$obvius->get_version_fields($vdoc, 255);
 my $mode = $output->param('mode') || 'list';
 
 my $error = $output->param('error');
