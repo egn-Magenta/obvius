@@ -1,0 +1,132 @@
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>100
+$rows=>22
+$wrap=>1
+$onlylineif=>undef
+</%args>
+%unless($r->param('jsXMLparser_loaded')) {
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlw3cdom.js"></script>
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlsax.js"></script>
+<script type="text/javascript" src="/admin_js/formdata/formdata.js"></script>
+<& formdata:translations &>
+%$r->param('jsXMLparser_loaded' => 1);
+%}
+
+<script type="text/javascript">
+function obvius_<% $name %>_onload() {
+    formdata_init(document.pageform.<% $name %>);
+}
+
+function obvius_<% $name %>_save() {
+    formdata_save(document.pageform.<% $name %>);
+}
+
+onload_array[onload_array.length] = obvius_<% $name %>_onload;
+onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
+</script>
+
+<div style="display: none" id="obvius_<% $name %>_advanced_editing">
+<table border="1" id="obvius_<% $name %>_displaylist" width="600">
+    <tr>
+        <th><& SELF:msg, text=>"formdata_name" &></th>
+        <th><& SELF:msg, text=>"Title" &></th>
+        <th><& SELF:msg, text=>"formdata_type" &></th>
+        <th><& SELF:msg, text=>"Mandatory" &></th>
+        <th><& SELF:msg, text=>"Edit" &></th>
+        <th><& SELF:msg, text=>"Delete" &></th>
+        <th><& SELF:msg, text=>"Up" &> / <& SELF:msg, text=>"Down" &></th>
+    </tr>
+</table>
+</div>
+<br />
+<div>
+<& SELF:msg, text=>"Add new field" &>:
+<select name="obvius_<% $name %>_new_field_type" style="vertical-align: middle;">
+    <option></option>
+    <option value="text"><& SELF:msg, text=>"Text" &></option>
+    <option value="password"><& SELF:msg, text=>"Password" &></option>
+    <option value="textarea"><& SELF:msg, text=>"Textarea" &></option>
+    <option value="radio"><& SELF:msg, text=>"Radiobuttons" &></option>
+    <option value="checkbox"><& SELF:msg, text=>"Checkboxes" &></option>
+    <option value="select"><& SELF:msg, text=>"Dropdown" &></option>
+    <option value="selectmultiple"><& SELF:msg, text=>"Select multiple" &></option>
+</select>
+<strong>[</strong>
+<a href="<% $prefix . $uri %>" onclick="formdata_add_new(document.pageform.<% $name %>); return false;"><& SELF:msg, text=>"Create" &></a>
+<strong>]</strong>
+</div>
+<br />
+<br />
+%
+<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
+<& /shared/add_reset_field, name=>$name &>
+%
+<%init>
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+$wrap=' WRAP="' . $wrap . '" ';
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+</%args>
+<%perl>
+$value =~ s/\r//g if defined ($value);
+return $value;
+</%perl>
+</%method>
+%
+%
+%
+<%method translations>
+<script type="text/javascript">
+var formdata_translations = {
+                                'Up': "<& SELF:msg, text=>'Up' &>",
+                                'Down': "<& SELF:msg, text=>'Down' &>",
+                                'Edit': "<& SELF:msg, text=>'Edit' &>",
+                                'Delete': "<& SELF:msg, text=>'Delete' &>",
+                                'Yes': "<& SELF:msg, text=>'Yes' &>",
+                                'No': "<& SELF:msg, text=>'No' &>",
+                                'mandatory_yes_if': "<& SELF:msg, text=>'formdata_yes_if' &>",
+                                'mandatory_yes_if_has': "<& SELF:msg, text=>'formdata_has_been_filled' &>",
+                                'mandatory_yes_if_has_not': "<& SELF:msg, text=>'formdata_has_not_been_filled' &>",
+                                'cant_find_type': "<& SELF:msg, text=>'Cannot find type selection dropdown' &>",
+                                'must_chose_type': "<& SELF:msg, text=>'You must chose the type of field to add' &>",
+                                'parent_connection_lost': "<& SELF:msg, text=>'Seems to have lost connection with the main edit page' &>",
+                                'couldnt_find_node': "<& SELF:msg, text=>"Couldn't find a node with name" &>",
+                                'no_parent_fieldnode': "<& SELF:msg, text=>"Couldn't get parent fieldNode" &>",
+                                'must_specify_title': "<& SELF:msg, text=>'You must specify a title' &>",
+                                'must_specify_name': "<& SELF:msg, text=>'You must specify a name' &>",
+                                'must_specify_mandatory': "<& SELF:msg, text=>'You must specify whether the field is mandatory' &>",
+                                'must_specify_mandatory_depends': "<& SELF:msg, text=>'You must specify which other field makes this field mandatory' &>",
+                                'must_specify_value': "<& SELF:msg, text=>'You must specify a value' &>",
+                                'must_specify_validation_type': "<& SELF:msg, text=>'You must specify a validation type' &>",
+                                'must_specify_arg_regexp': "<& SELF:msg, text=>'You must specify an argument for regexp validation type' &>",
+                                'must_specify_arg_min_checked': "<& SELF:msg, text=>'You must specify a number as argument for min_checked validationtype' &>",
+                                'must_specify_errormessage': "<& SELF:msg, text=>'You must specify an errormessage' &>",
+                                'cant_depend_on_self': "<& SELF:msg, text=>"A field can't depend on itself" &>",
+                                'cant_delete_option': "<& SELF:msg, text=>"Couldn't delete option with nr." &>",
+                                'cant_delete_valrule': "<& SELF:msg, text=>"Couldn't delete validaterule with nr." &>",
+                                'cant_edit_option' : "<& SELF:msg, text=>"can't edit option" &>",
+                                'cant_save_option' : "<& SELF:msg, text=>"can't save option" &>",
+                                'cant_edit_valrule' : "<& SELF:msg, text=>"can't edit validaterule" &>",
+                                'cant_save_valrule' : "<& SELF:msg, text=>"can't save validaterule" &>",
+                                'unknown_validate_type': "<& SELF:msg, text=>'Unkown validation type' &>",
+                                "field_type_text" : "<& SELF:msg, text=>"Text" &>",
+                                "field_type_password" : "<& SELF:msg, text=>"Password" &>",
+                                "field_type_textarea" : "<& SELF:msg, text=>"Textarea" &>",
+                                "field_type_radio" : "<& SELF:msg, text=>"Radiobuttons" &>",
+                                "field_type_checkbox" : "<& SELF:msg, text=>"Checkboxes" &>",
+                                "field_type_select" : "<& SELF:msg, text=>"Dropdown" &>",
+                                "field_type_selectmultiple" : "<& SELF:msg, text=>"Select multiple" &>",
+                                'dummy': ''
+                            };
+</script>
+</%method>

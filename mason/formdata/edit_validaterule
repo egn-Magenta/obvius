@@ -1,0 +1,50 @@
+%unless($r->param('jsXMLparser_loaded')) {
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlw3cdom.js"></script>
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlsax.js"></script>
+<script type="text/javascript" src="/admin_js/formdata/formdata.js"></script>
+<& /edit/fieldtypes/formdata:translations &>
+%$r->param('jsXMLparser_loaded' => 1);
+%}
+<script type="text/javascript">
+var valruleNode;
+function Init() {
+    formdata_init_valrule_edit('<% $r->param('rulenr') %>')
+}
+
+onload_array[onload_array.length] = Init;
+</script>
+<table border="0" style="margin: 20px;">
+    <tr>
+        <td colspan="2"><strong><& SELF:msg, text=>"Edit validaterule" &></strong></td>
+    </tr>
+    <tr>
+        <th><& SELF:msg, text=>"formdata_type" &></th>
+        <td>
+            <select name="type">
+                <option></option>
+                <option value="regexp">regexp</option>
+                <option value="min_checked">min_checked</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th><& SELF:msg, text=>"Argument" &></th>
+        <td><input type="text" size="30" value="" name="argument" /></td>
+    </tr>
+    <tr>
+        <th><& SELF:msg, text=>"Error message" &></th>
+        <td>
+            <textarea name="errormessage" rows="4" cols="30"></textarea>
+        </td>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            <button onclick="formdata_validate_and_<% defined($r->param('rulenr')) ? 'save_valrule' : 'add_valrule' %>('<% $r->param('rulenr') %>'); return false;"><& SELF:msg, text=>"Save" &></button>
+        </td>
+        <td style="text-align: right;">
+            <button onclick="window.close(); return false;"><& SELF:msg, text=>"Cancel" &></button>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,40 @@
+%unless($r->param('jsXMLparser_loaded')) {
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlw3cdom.js"></script>
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlsax.js"></script>
+<script type="text/javascript" src="/admin_js/formdata/formdata.js"></script>
+<& /edit/fieldtypes/formdata:translations &>
+%$r->param('jsXMLparser_loaded' => 1);
+%}
+<script type="text/javascript">
+var optionNode;
+function Init() {
+    formdata_init_option_edit('<% $r->param('rulenr') %>')
+}
+
+onload_array[onload_array.length] = Init;
+</script>
+<table border="0" style="margin: 20px;">
+    <tr>
+        <td colspan="2"><strong><& SELF:msg, text=>"Edit option" &></strong></td>
+    </tr>
+    <tr>
+        <th><& SELF:msg, text=>"Title" &></th>
+        <td><input type="text" size="30" value="" name="title" /></td>
+    </tr>
+    <tr>
+        <th><& SELF:msg, text=>"Value" &></th>
+        <td><input type="text" size="30" value="" name="optionvalue" /></td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            <button onclick="formdata_validate_and_<% defined($r->param('rulenr')) ? 'save_option' : 'add_option' %>('<% $r->param('rulenr') %>'); return false;"><& SELF:msg, text=>"Save" &></button>
+        </td>
+        <td style="text-align: right;">
+            <button onclick="window.close(); return false;"><& SELF:msg, text=>"Cancel" &></button>
+        </td>
+    </tr>
+
+</table>

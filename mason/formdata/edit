@@ -1,0 +1,100 @@
+%unless($r->param('jsXMLparser_loaded')) {
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlw3cdom.js"></script>
+<script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlsax.js"></script>
+<script type="text/javascript" src="/admin_js/formdata/formdata.js"></script>
+<& /edit/fieldtypes/formdata:translations &>
+%$r->param('jsXMLparser_loaded' => 1);
+%}
+<script type="text/javascript">
+var fieldNode;
+function Init() {
+    formdata_init_field_edit('<% $r->param('fieldname') %>', '<% $r->param('new') %>', '<% $r->param('field') %>')
+}
+
+onload_array[onload_array.length] = Init;
+</script>
+<table border="0" style="margin: 20px;">
+    <tr>
+        <td colspan="2"><strong><& SELF:msg, text=>"Edit field" &></strong></td>
+    </tr>
+    <tr>
+        <td valign="top"><& SELF:msg, text=>"Title" &>:</td>
+        <td><input type="text" name="title" size="30" /></td>
+    </tr>
+    <tr>
+        <td valign="top"><& SELF:msg, text=>"formdata_name" &>:</td>
+        <td><input type="text" name="name" size="30" /></td>
+    </tr>
+    <tr>
+        <td valign="top"><& SELF:msg, text=>"formdata_type" &>:</td>
+        <td>
+            <div id="type_field">
+                &nbsp;
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top"><& SELF:msg, text=>"Mandatory" &>:</td>
+        <td>
+            <div>
+                <input type="radio" name="mandatory_type" value="1" id="mand_yes" /> <& SELF:msg, text=>"Yes" &>
+                <input type="radio" name="mandatory_type" value="0" id="mand_no" /> <& SELF:msg, text=>"No" &>
+                <input type="radio" name="mandatory_type" value="field" id="mand_field" /> <& SELF:msg, text=>"If.." &>
+            </div>
+            <div>
+                <& SELF:msg, text=>"The field" &>:
+                <select name="mandatory_fields">
+                </select>
+                <select name="mandatory_operator">
+                    <option value="1"><& SELF:msg, text=>"has been filled" &></option>
+                    <option value="0"><& SELF:msg, text=>"has not been filled" &></option>
+                </select>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top"><& SELF:msg, text=>"Options" &>:</td>
+        <td>
+            <div>
+                <table border="1" id="options_table">
+                    <tr>
+                        <th><& SELF:msg, text=>"Title" &></th>
+                        <th><& SELF:msg, text=>"Value" &></th>
+                        <th><& SELF:msg, text=>"Edit" &></th>
+                        <th><& SELF:msg, text=>"Delete" &></th>
+                        <th><& SELF:msg, text=>"Up" &> / <& SELF:msg, text=>"Down" &></th>
+                    </tr>
+                </table>
+            </div>
+            <div><strong>[</strong><a href="<% $prefix . $uri %>" onclick="formdata_add_new_option(); return false;"><& SELF:msg, text=>"Add new" &></a><strong>]</strong></div>
+            <br />
+        </td>
+    </tr>
+    <tr>
+        <td valign="top"><& SELF:msg, text=>"Validaterules" &>:</td>
+        <td>
+            <div>
+                <table border="1" id="validaterules_table">
+                    <tr>
+                        <th><& SELF:msg, text=>"Type" &></th>
+                        <th><& SELF:msg, text=>"Argument" &></th>
+                        <th><& SELF:msg, text=>"Error message" &></th>
+                        <th><& SELF:msg, text=>"Edit" &></th>
+                        <th><& SELF:msg, text=>"Delete" &></th>
+                        <th><& SELF:msg, text=>"Up" &> / <& SELF:msg, text=>"Down" &></th>
+                    </tr>
+                </table>
+            </div>
+            <div><strong>[</strong><a href="<% $prefix . $uri %>" onclick="formdata_add_new_valrule(); return false;"><& SELF:msg, text=>"Add new" &></a><strong>]</strong></div>
+            <br />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <button onclick="formdata_validate_and_<% $r->param('new') ? 'add_field' : 'save_field' %>('<% $r->param('fieldname') %>', '<% $r->param('field') %>'); return false;"><& SELF:msg, text=>"Save" &></button>
+        </td>
+        <td style="text-align: right;">
+            <button onclick="window.close(); return false;"><& SELF:msg, text=>"Cancel" &></button>
+        </td>
+    </tr>
+</table>
