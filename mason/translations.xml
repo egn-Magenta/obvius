@@ -3942,6 +3942,11 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Sletning af en enkelt version kan foretages på redigeringssiden 'Om dokumentet'</translation>
   </text>
 
+  <text key="Base of sitemap">
+    <translation lang="en">Base of sitemap</translation>
+    <translation lang="da">Top url for sitemap</translation>
+  </text>
+
 
   <text key="">
     <translation lang="en"></translation>
