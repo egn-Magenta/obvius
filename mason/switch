@@ -72,6 +72,8 @@ my %ops = (
             print => '/print',
             mcms_code_editor => '/mcms_code_editor',
             html_code_editor => '/html_code_editor',
+            htmlarea_imagedialog => '/htmlarea/imagedialog',
+            htmlarea_linkdialog => '/htmlarea/linkdialog'
         );
 
 my %contents = (
