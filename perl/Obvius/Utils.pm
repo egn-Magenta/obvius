@@ -17,6 +17,9 @@ sub get_passwordprotectedurl {
     return $this->get_table_record('passwordprotectedurls', {url=>$url});
 }
 
+# can_create_new_passwordprotedtedurl()
+#    - undersøger om den aktuelle bruger har adminrettigheder på forsiden
+#
 sub can_create_new_passwordprotectedurl {
     my ($this) = @_;
 
@@ -538,7 +541,7 @@ Obvius::Utils - Utility functions for Obvius.pm
 
   $obvius->create_msg_digest();
 
-  etc.
+  can_create_new_passwordprotedtedurl();
 
 =head1 DESCRIPTION
 
