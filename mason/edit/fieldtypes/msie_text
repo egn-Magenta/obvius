@@ -482,7 +482,7 @@ function obvius_<% $name %>_selection_change() {
         <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'InsertUnorderedList');fix_ul('<% $name %>');"><IMG SRC="/grafik/admin/msie-editor/icons/list.gif" TITLE="Punktopstilling" width="16" height="16"></A></td>
         <td align="center"><A onClick="obvius_<% $name %>_start_linkdlg();"><IMG SRC="/grafik/admin/msie-editor/icons/link1.gif" TITLE="Link" width="16" height="16"></A></td>
         <td align="center"><A onclick="obvius_<% $name %>_start_imagedlg();"><IMG SRC="/grafik/admin/msie-editor/icons/image.gif" TITLE="Billede" width="16" height="16"></A></td>
-        <!-- td align="center"><A onclick="OpenWin('/admin/?obvius_op=anchordlg&editor=<% $name %>',450,100);"><IMG SRC="/grafik/admin/msie-editor/icons/anchor.gif" border="0" TITLE="Indsæt anker" width="16" height="16"></A></td -->
+        <td align="center"><A onclick="OpenWin('/admin/?obvius_op=anchordlg&editor=<% $name %>',450,100);"><IMG SRC="/grafik/admin/msie-editor/icons/anchor.gif" border="0" TITLE="Indsæt anker" width="16" height="16"></A></td>
     </tr>
 </table>
 <INPUT TYPE="hidden" NAME="obvius_<% $name %>_ID" VALUE="">
