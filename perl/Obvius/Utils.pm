@@ -3,6 +3,8 @@ package Obvius::Utils;
 use strict;
 use warnings;
 
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 ########################################################################
 #
 #	Handling passwordprotectedurls:
