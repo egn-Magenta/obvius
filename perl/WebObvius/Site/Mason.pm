@@ -1,5 +1,34 @@
 package WebObvius::Site::Mason;
 
+########################################################################
+#
+# Mason.pm - using Mason as the template system for a WebObvius::Site
+#
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
+#
+# Authors: Jørgen Ulrik B. Krag <jubk@magenta-aps.dk>
+#          Peter Makholm <pma@fi.dk>
+#          René Seindal
+#          Adam Sjøgren <asjo@magenta-aps.dk>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
 # $Id$
 
 use strict;
@@ -389,6 +418,17 @@ sub authz_handler ($$) {
 #
 #######################################################################
 
+# create_output_object - if an output-object has already been created,
+#                        put on $r->pnotes, return that. Otherwise
+#                        create an output-object (with SERVER_NAME,
+#                        PREFIX, URI, PATH_INFO, NOW, VERSION,
+#                        DOCUMENT, DOCTYPE), put it on $r->pnotes and
+#                        return it.
+#
+#                        Expects the request object, doc object,
+#                        version object, doctype object and obvius
+#                        object as inputs.
+#
 sub create_output_object {
     my ($this, $req, $doc, $vdoc, $doctype, $obvius) = @_;
 
@@ -436,24 +476,21 @@ sub expand_output {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-WebObvius::Site::Mason - Perl extension for blah blah blah
+WebObvius::Site::Mason - use Mason as the template system for a site.
 
 =head1 SYNOPSIS
 
   use WebObvius::Site::Mason;
-  blah blah blah
+
+  my $output=$this->create_output_object($r, $doc, $vdoc, $doctype, $obvius);
 
 =head1 DESCRIPTION
 
-Stub documentation for WebObvius::Site::Mason, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+Connects WebObvius with Mason, so Mason can be used as the template
+system for an Obvius-site.
 
 =head2 EXPORT
 
@@ -462,10 +499,13 @@ None by default.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag <jubk@magenta-aps.dk>
+Peter Makholm <pma@fi.dk>
+René Seindal
+Adam Sjøgren <asjo@magenta-aps.dk>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<WebObvius::Site>, L<Obvius>.
 
 =cut
