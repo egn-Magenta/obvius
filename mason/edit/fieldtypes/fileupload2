@@ -27,6 +27,8 @@ $fields
 <%perl>
 $value=$fields->param($name);
 
+my $new_upload = 0;
+
 if (my $upload=$r->upload($name)) {
     if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
 
@@ -34,11 +36,11 @@ if (my $upload=$r->upload($name)) {
         $fields->param('size'=>$upload->size);
 
         $value = $m->scomp('/shared/place_file_in_upload', fh => $fh, type => $upload->type, filename => $upload->filename);
+        $new_upload = 1;
     }
-} else {
-    if($r->param('obvius_upload_' . $name . '_delete')) {
-        $value = '';
-    }
+}
+if(! $new_upload  and $r->param('obvius_upload_' . $name . '_delete')) {
+    $value = '';
 }
 
 return $value;
