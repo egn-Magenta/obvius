@@ -1,0 +1,111 @@
+<% $html %>
+<%args>
+$url
+$replace_url=>0
+</%args>
+<%init>
+my $html;
+if($url and $url =~ m!^http://!) {
+    $html = get($url);
+    $out='';
+    $in_body=0;
+
+    ($org_url) = split(/\?/, $url);
+
+    $baseurl = $org_url;
+    $baseurl =~ s![^/]+$!!;
+
+    $rooturl = $org_url;
+    $rooturl =~ s!^(http://[^/]+/).*!$1!i;
+
+    $_replace_url = $replace_url;
+
+    $p->parse($html);
+    $html=$out;
+} else {
+    $url ||='';
+    $html = "<p>No URL given or not an http:// url when trying to import '$url'</p>";
+}
+</%init>
+<%once>
+use LWP::Simple;
+use HTML::Parser;
+
+my $out='';
+my $in_body = 0;
+my $baseurl='';
+my $rooturl='';
+my $_replace_url;
+my $org_url;
+
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $text ||= ''; $out.=$text }, "self, dtext" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+
+                                                if($in_body) {
+                                                    my $modified;
+                                                    if($tagname eq 'a' and $attr->{href}) {
+                                                        if($attr->{href} !~ m!^https?://!) {
+                                                            unless($attr->{href} =~ s!^/!$rooturl!) {
+                                                                $attr->{href} = $baseurl . $attr->{href}
+                                                            }
+                                                            if($_replace_url) {
+                                                                my ($thisurl, $querystring) = split(/\?/, $attr->{href});
+                                                                if($org_url eq $thisurl) {
+                                                                    $querystring = ($querystring ? "?$querystring" : '');
+                                                                    $attr->{href} = "$prefix$uri$querystring";
+                                                                }
+                                                            }
+                                                            $modified = 1;
+                                                        }
+                                                    } elsif($tagname eq 'img' and $attr->{src}) {
+                                                        if($attr->{src} !~ m!^https?://!) {
+                                                            unless($attr->{src} =~ s!^/!$rooturl!) {
+                                                                $attr->{src} = $baseurl . $attr->{src}
+                                                            }
+                                                            $modified = 1;
+                                                        }
+                                                    } elsif($tagname eq 'form' and $attr->{action}) {
+                                                        if($attr->{action} !~ m!^https?://!) {
+                                                            unless($attr->{action} =~ s!^/!$rooturl!) {
+                                                                $attr->{action} = $baseurl . $attr->{action}
+                                                            }
+                                                            if($_replace_url) {
+                                                                my ($thisurl, $querystring) = split(/\?/, $attr->{action});
+                                                                if($org_url eq $thisurl) {
+                                                                    $querystring = ($querystring ? "?$querystring" : '');
+                                                                    $attr->{action} = "$prefix$uri$querystring";
+                                                                }
+                                                            }
+                                                            $modified = 1;
+                                                        }
+                                                    }
+                                                    if($modified) {
+                                                        $text = "<$tagname";
+                                                        for(keys %$attr) {
+                                                            $text .= " $_" . '="' . $attr->{$_} . '"';
+                                                        }
+                                                        $text .= '>';
+                                                    }
+                                                    $out .= $text;
+                                                } else {
+                                                    $in_body = 1 if($tagname eq 'body');
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            if($in_body) {
+                                                if($tagname eq 'body') {
+                                                    $in_body = 0;
+                                                } else {
+                                                    $out.=$text;
+                                                }
+                                            }
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                            my ($this, $text)=@_;
+                                            $out.=$text if($in_body);
+                                        },
+                                        "self, dtext" ]);
+</%once>
