@@ -18,13 +18,18 @@ my $dbi_debug=0;
 
 ##
 
-my %db = (
-	  user    =>'rene',
-	  password=>'myindal',
-	 );
+my %db = ();
 
 $db{db}=shift @ARGV;
 $db{file}=shift @ARGV;
+my $dbuser=shift @ARGV;
+my $dbpasswd=shift @ARGV;
+
+$dbuser = 'root' unless ($dbuser); 
+$dbpasswd = '' unless ($dbpasswd); 
+
+$db{user} = $dbuser;
+$db{password} = $dbpasswd;
 
 die "Usage: add_fieldtypes.pl <db name> <fieldtype file>\n" unless ($db{db} and $db{file});
 
