@@ -81,6 +81,7 @@ my @dirs=(
 
 my @files=(
 	   { dir=>'var', file=>'document_cache.txt', perms=>'0664', group=>$options{httpd_group} },
+	   { dir=>'var', file=>'document_cache.txt-off', perms=>'0664', group=>$options{httpd_group} },
 	  );
 
 my @symlinks=(
