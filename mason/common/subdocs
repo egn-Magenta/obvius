@@ -1,4 +1,5 @@
 %if (not defined($show_subdocs) or $show_subdocs == 1) {
+<& doctypes/pager, output=>$output &>
 % if (@subdocs) {
     <ul>
 %     foreach (@subdocs) {
@@ -28,7 +29,24 @@ my $subvdocs=$obvius->get_document_subdocs($doc,
                                             public=>($r->pnotes('site')->param('is_admin') ? 0 : 1),
                                             notexpired => ($r->pnotes('site')->param('is_admin') ? 0 : 1),
                                             sortvdoc=>$vdoc);
-$obvius->get_version_fields($vdoc, [qw(show_subdoc_teaser show_subdoc_date show_subdocs)]);
+$obvius->get_version_fields($vdoc, [qw(show_subdoc_teaser show_subdoc_date show_subdocs pagesize)]);
+
+my $pagesize = $vdoc->field('pagesize');
+
+if($pagesize) {
+    my $page = $r->param('p') || 1;
+    $doctype->export_paged_doclist($vdoc->Pagesize, $subvdocs, $output, $obvius,
+                                                                                name=>'kwdocs',
+                                                                                page=>$page,
+                                                                                prefix => $prefix,
+                                                                                include_images=>1,
+                                                                                return_vdoclist => 1,
+                                            );
+    $subvdocs = $output->param('kwdocs') || [];
+}
+
+
+
 my $show_subdoc_teaser=$vdoc->field('show_subdoc_teaser') || 0;
 my $show_subdoc_date=$vdoc->field('show_subdoc_date') || 0;
 my $show_subdocs=$vdoc->field('show_subdocs');
