@@ -635,6 +635,16 @@ sub db_insert_table {
     return;
 }
 
+# db_update_table - updates a record in a database-table. Input is a
+#                   hash with arguments. An argument named 'table'
+#                   must give a tablename in the database, and an
+#                   argument 'value' must exist and be a hash-ref to
+#                   the values that should be updated. If there is no
+#                   argument named 'key', the value 'id' is used for
+#                   key. Returns undef if table and value aren't in
+#                   the arguments. Returns nothing (i.e. empty list in
+#                   list-context and undef in scalar context; see
+#                   perldoc -f return) on success.
 sub db_update_table {
     my ($this, %args) = @_;
 
