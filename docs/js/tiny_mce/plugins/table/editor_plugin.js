@@ -22,8 +22,8 @@ function TinyMCE_table_getControlHTML(control_name) {
 		['delete_cell', 'table_remove_cell.gif', '{$lang_table_delete_cell_desc}', 'mceTableDeleteCell'],
 		['merge_cells', 'table_merge_cells.gif', '{$lang_table_merge_cells_desc}', 'mceTableMergeCells',true],
 
-		['convert_td_to_th', 'table_convert_td_to_th.gif', 'td_to_th\n{$lang_table_delete_cell_desc}', 'mceTableConvertTdToTh'],
-		['convert_th_to_td', 'table_convert_th_to_td.gif', 'th_to_td\n{$lang_table_merge_cells_desc}', 'mceTableConvertThToTd']
+		['convert_td_to_th', 'table_convert_td_to_th.gif', '{$lang_table_td_to_th_desc}', 'mceTableConvertTdToTh'],
+		['convert_th_to_td', 'table_convert_th_to_td.gif', '{$lang_table_th_to_td_desc}', 'mceTableConvertThToTd']
 
 		//**
 	);

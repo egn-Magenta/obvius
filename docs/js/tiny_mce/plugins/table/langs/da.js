@@ -28,3 +28,21 @@ tinyMCELang['lang_table_cell_desc'] = 'Egenskaber for celle';
 tinyMCELang['lang_insert_table_valign'] = 'Vertical alignment';
 tinyMCELang['lang_insert_table_align_top'] = 'Top';
 tinyMCELang['lang_insert_table_align_bottom'] = 'Bund';
+
+// Added with the changes from BeIT
+tinyMCELang['table_insert_cell_before_desc'] = 'Inds&#230;t celle f&#248;r';
+tinyMCELang['table_insert_cell_after_desc'] = 'Inds&#230;t celle efter';
+tinyMCELang['lang_table_delete_cell_desc'] = 'Fjern celle';
+tinyMCELang['lang_table_merge_cells_desc'] = 'Merge cells';
+
+tinyMCELang['lang_table_merge_cells_title'] = 'Merge cells';
+tinyMCELang['lang_table_merge_cells_width'] = 'Row span';
+tinyMCELang['lang_table_merge_cells_height'] = 'Column span';
+tinyMCELang['lang_table_merge_cells_merge'] = 'Merge';
+
+tinyMCELang['lang_insert_table_caption'] = 'Caption';
+tinyMCELang['lang_insert_table_summary'] = 'Summary';
+
+// Added by jubk:
+tinyMCELang['lang_table_td_to_th_desc'] = 'Tabelcelle til tabelheading';
+tinyMCELang['lang_table_th_to_td_desc'] = 'Tabelheading til tabelcelle';
