@@ -15,8 +15,6 @@ $onlylineif=>undef
 $no_msie_editor=>undef
 </%args>
 
-%unless($user_agent =~ /opera/i) {
-
 %# Only load script once:
 %unless($r->notes('tinymce_script_loaded')) {
 <!-- load the main Tinymce files -->
@@ -43,11 +41,17 @@ $no_msie_editor=>undef
         theme_advanced_blockformats : "p,address,h1,h2,h3,blockquote",
         theme_advanced_disable : "styleselect,help",
         document_base_url : 'http://<% $r->hostname %><% $uri . $uri_extra %>',
+        apply_source_formatting : 1,
         relative_urls : false,
         remove_script_host : false,
         debug : false
         //save_callback : "customSave",
     });
+
+    // Unhide javascript buttons for unsupported browsers:
+    if(typeof(document.execCommand) == 'undefined') {
+        onload_array[onload_array.length] = obvius_tinymce_unhide_textarea_buttons;
+    }
 
     function obvius_save_tinymce() {
         tinyMCE.triggerSave();
@@ -58,12 +62,16 @@ $no_msie_editor=>undef
 
 % $r->notes('tinymce_script_loaded' => 1);
 %}
-%}
 
 <textarea mce_editable="true" id="<% $name %>" name="<% $name %>" cols="<% $cols %>" rows="<% $rows %>" style="height: <% $pixelheight %>px; width: <% $pixelwidth %>px;" <% $wrap %> tabindex="10"><% $value |h %></textarea>
 
 <input type="hidden" name="obvius_<% $name %>_compare" value="<% $value |h %>">
 <br />
+<div id="obvius_<% $name %>_buttons" style="display: none; padding-bottom: 10px;">
+    <a href="<% $prefix . $uri %>" onclick="window.open('/admin/?obvius_op=check_editor_xhtml&fieldname=<% $name %>'); return false;"><!--
+    --><& SELF:msg, text=>"Validate Xhtml" &><!--
+    --></a>
+</div>
 %
 <%init>
 my $use_msie = 0;
@@ -121,6 +129,7 @@ $p->parse($value);
 $p->eof;
 $value = $out;
 $value = $m->scomp('/common/shared/editorhtml2xhtml', html=>$value);
+
 
 # Remove extra linebreaks at the end of the text:
 $value =~ s!\s+$!\n!s;
