@@ -3,7 +3,7 @@
 %for(@$events) {
 %if ($show_event eq 'type') {
 	  <tr>
-	     <td colspan="2"><a href="<% $_->{url} %>"><% $_->{eventtype} %></a></td>
+	     <td colspan="2"><a href="<% $prefix . $_->{url} %>"><% $_->{eventtype} %></a></td>
 	  </tr>
 	  <tr>
 	    <td valign="top" align="left"><% $language eq 'da' ? 'Titel' : 'Title' %>:</td>
@@ -12,7 +12,7 @@
 
 %} else {
 	  <tr>
-              <td colspan="2"><a href="<% $_->{url} %>"><% $_->{title} %></a></td>
+              <td colspan="2"><a href="<% $prefix .  $_->{url} %>"><% $_->{title} %></a></td>
 	  </tr>
 	  <tr>
 	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Kategori' : 'Type' %>:</td>
