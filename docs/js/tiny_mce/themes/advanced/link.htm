@@ -30,7 +30,7 @@ if (url != null)
 			html += ' onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');"';
 			html += ' onmouseout="tinyMCE.restoreClass(this);"';
 			html += ' onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');"';
-			html += ' onclick="javascript:tinyMCE.openFileBrowser(\'href\',document.forms[0].href.value,\'file\');"';
+			html += ' onclick="javascript:tinyMCE.openFileBrowser(\'href\',document.forms[0].href.value,\'file\',window);"';
 			html += ' width="20" height="18" border="0" title="' + tinyMCE.getLang('lang_browse') + '"';
 			html += ' class="mceButtonNormal" alt="' + tinyMCE.getLang('lang_browse') + '" />';
 
