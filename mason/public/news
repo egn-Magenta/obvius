@@ -48,7 +48,7 @@ my $path_number = scalar(@$path);
 #return if $m->cache_self(expire_next=>'day', keep_in_memory=>1, key=>$section->Name);
 
 my @newsitems=();
-
+my $lang = $r->notes('language');
 
 my $all;
 my $sorted;
@@ -56,12 +56,12 @@ my $sorted;
 unless (($all and @$all) or ($sorted and @$sorted)) {
     # Frontpage-news:
     $all=$obvius->search([qw(front_prio front_dura published)],
-			  'front_prio=1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura',
+			  'front_prio=1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura' . " AND lang = '$lang'",
 			   notexpired=>1, public=>1,
 			   obvius_dump=>1,	
 			  order=>'published DESC');
     $sorted=$obvius->search([qw(front_prio front_dura published)],
-			  'front_prio>1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura',
+			  'front_prio>1 AND (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(published))/(24*60*60)<=front_dura' . " AND lang = '$lang'",
 			   notexpired=>1, public=>1,
 			   obvius_dump=>1,
 			  order=>'front_prio DESC, published DESC',
