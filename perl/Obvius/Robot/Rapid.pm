@@ -313,6 +313,7 @@ sub narrow_unicode_utf8 {
 
     $text=~s/Č/C/g;     #  0x10c: Capital c with caron (^ upside down)
 
+    $text=~s/–/-/g;   # 0x2013  En dash
     $text=~s/—/-/g;   # 0x2014: Em dash
     $text=~s/‘/\'/g;  # 0x2018: Left single quotation mark
     $text=~s/’/\'/g;  # 0x2019: Right single quotation mark
