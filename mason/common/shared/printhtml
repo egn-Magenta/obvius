@@ -40,7 +40,7 @@ my $p = HTML::Parser->new(api_version=>3,
                                                     } elsif($r->notes('is_admin') and $tagname eq 'img' and $attr->{src} and $attr->{src} =~ s!/$!!) {
                                                         $out .= "<img " . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ">";
                                                     } elsif($pclass and $tagname eq 'p' and not $attr->{class}) {
-                                                        $out .= '<P ' . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ' class="' . $pclass . '">';
+                                                        $out .= '<p ' . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ' class="' . $pclass . '">';
                                                     } else {
                                                         $out.=$text;
                                                     }
