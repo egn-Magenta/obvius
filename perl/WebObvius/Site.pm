@@ -131,7 +131,6 @@ sub obvius_document {
 
     if ($path) { # Specific path lookup
         my $found_doc=$obvius->lookup_document($path);
-        #print STDERR "found_doc $found_doc\n" if (defined $found_doc);
         return $found_doc if (defined $found_doc); # Document found - return it.
 
         # Otherwise, check if the last document found in the path
@@ -140,13 +139,8 @@ sub obvius_document {
 
         my $doctype=$obvius->get_document_type($doc); # XXX Should look at the public version?
 
-        print STDERR "path $path not found\n";
-        print STDERR " first doc found: ", $obvius->get_doc_uri($doc), "\n path_info: $path_info\n";
-        print STDERR "  doctype: ", $doctype->Name, "\n";
-
         # It can:
         if ($doctype->handle_path_info()) {
-            print STDERR "   handled by: ", $obvius->get_doc_uri($doc), "\n";
             $req->notes('obvius_path_info'=>$path_info);
             my $handle_uri=$obvius->get_doc_uri($doc);
             $req->notes(uri=>$handle_uri);
@@ -155,7 +149,6 @@ sub obvius_document {
         }
 
         # It couldn't:
-        print STDERR "   unhandled, returning undef\n";
         return undef;
     }
     else {
