@@ -4394,6 +4394,16 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Rediger valgmulighed</translation>
   </text>
 
+  <text key="Up">
+    <translation lang="en">Up</translation>
+    <translation lang="da">Op</translation>
+  </text>
+
+  <text key="Down">
+    <translation lang="en">Down</translation>
+    <translation lang="da">Ned</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
