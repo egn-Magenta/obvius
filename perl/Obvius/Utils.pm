@@ -48,7 +48,7 @@ sub get_passwordprotectedurl {
 }
 
 # can_create_new_passwordprotedtedurl()
-#    - undersøger om den aktuelle bruger har adminrettigheder på forsiden
+#    - checks whether the user has admin cababilities on the frontpage or not
 #
 sub can_create_new_passwordprotectedurl {
     my ($this) = @_;
