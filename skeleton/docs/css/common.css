@@ -1,7 +1,7 @@
-a:link { color: #91001d; background: transparent; text-decoration: none;}
-a:visited { color: #540010; background: transparent; text-decoration: none;}
-a:active { color: #f98752; background: transparent; text-decoration: none;}
-a:hover { color: #540010; background: transparent; text-decoration: underline;}
+a:link { color: #8A004F; background: transparent; text-decoration: none;}
+a:visited { color: #8A004F; background: transparent; text-decoration: none;}
+a:active { color: #8A004F; background: transparent; text-decoration: none;}
+a:hover { color: #8A004F; background: transparent; text-decoration: underline;}
 
 H1 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 8px;}
 H2 {font-family: Verdana,Arial,Helvetica,sans-serif; font-size: 13px; font-weight: bold; }
