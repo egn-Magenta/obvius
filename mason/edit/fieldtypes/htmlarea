@@ -48,6 +48,8 @@ function initEditor_<% $name %>() {
 
   config.baseURL = '<% $uri . $uri_extra %>';
 
+  config.editorStyleSheets = [ "/css/public.css", "/css/common.css" ];
+
   // Adjust the toolbar:
 
   var top_toolbar = config.toolbar[0];
@@ -56,6 +58,13 @@ function initEditor_<% $name %>() {
   for(var i=0;i < 4; i++) {
     top_toolbar.shift();
   }
+
+  // Add a cleanup-word button:
+  config.btnList["killword"] = [ "Clean HTML", "/admin_js/htmlarea/images/ed_killword.gif", false, function(e) {e.execCommand("killword");} ]
+
+  top_toolbar[top_toolbar.length] = "separator";
+  top_toolbar[top_toolbar.length] = "killword";
+
 
   editor_<% $name %> = new HTMLArea("<% $name %>", config);
 
