@@ -158,6 +158,7 @@ function TinyMCE_init(settings) {
 	defParam("focus_alert", true);
 	defParam("document_base_url", "" + document.location.href);
 	defParam("visual", true);
+	defParam("showanchors", false); //Chris Benjaminsen BeIT ApS
 	defParam("visual_table_style", "border: 1px dashed #BBBBBB");
 	defParam("setupcontent_callback", "");
 	defParam("fix_content_duplication", true);
@@ -2613,14 +2614,32 @@ function TinyMCE_handleVisualAid(element, deep, state) {
 
 			break;
 
-/*		case "a":
+		//Chris Benjaminsen BeIT ApS **
+		case "a":
 			var name = element.getAttribute("name");
-			if (name && name != "" && state) {
-				//element.innerHTML += '<img mceVisualAid="true" src="' + (tinyMCE.themeURL + "/images/anchor.gif") + '" />';
-				return;
+			var src = element.getAttribute("src")
+			if (name && name != "" && !src) {
+				var images = element.getElementsByTagName('img')
+				for( var a=0;a<images.length;a++){
+					if(images[a].getAttribute('alt') == 'mceVisualAid')
+						images[a].parentNode.removeChild(images[a])
+				}
+				if( state ){
+					element.innerHTML += '<img alt="mceVisualAid" style="margin-top:-5px;position:absolute;" src="' + (tinyMCE.themeURL + "/images/showanchor.gif") + '" />';
+					var images = element.getElementsByTagName('img')
+					var element = null
+					for( var a=0;a<images.length;a++){
+						if(images[a].getAttribute('alt') == 'mceVisualAid')
+							element  = images[a]
+					}
+				}
 			}
-
-			break;*/
+		break;
+		case "img":
+			if(element.getAttribute('alt')=='mceVisualAid' && !state)
+				element.parentNode.removeChild(element)
+		break;
+		//**
 	}
 
 	if (deep && element.hasChildNodes()) {
@@ -3716,10 +3735,14 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 		break;
 
 		case "mceAnchor":
+			//Chris Benjaminsen BeIT ApS (Misc changes) **
 			if (!user_interface) {
 				var aElm = tinyMCE.getParentElement(this.getFocusElement(), "a", "name");
+				//window.getSelection().getRangeAt(0)
 				if (aElm) {
 					if (value == null || value == "") {
+						if( this.visualAid ) 
+							tinyMCE.handleVisualAid(this.getBody(), true, false);
 						if (tinyMCE.isMSIE) {
 							aElm.outerHTML = aElm.innerHTML;
 						} else {
@@ -3734,11 +3757,41 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 				} else {
 					this.contentDocument.execCommand("fontname", false, "#mce_temp_font#");
 					var elementArray = tinyMCE.getElementsByAttributeValue(this.contentDocument.body, "font", "face", "#mce_temp_font#");
-					for (var x=0; x<elementArray.length; x++) {
-						elm = elementArray[x];
+					
+					var wasReplaced = false
+					if( tinyMCE.isGecko ){
+						for (var x=0; x<elementArray.length; x++) {
+							var aElms = elementArray[x].getElementsByTagName('a')
+							for(var y=0;y<aElms.length;y++){
+								var cE = aElms[y]
+								if(cE.getAttribute('name')){
+									if (value == null || value == "") {
+										if( this.visualAid ) 
+											tinyMCE.handleVisualAid(this.getBody(), true, false);
 
-						var aElm = this.contentDocument.createElement("a");
-						aElm.setAttribute('name', value);
+										var newNode = this.contentDocument.createDocumentFragment();
+										newNode.appendChild(this.contentDocument.createTextNode(cE.innerHTML))
+										cE.parentNode.replaceChild(newNode,cE )
+
+									}else{
+										cE.setAttribute('name', value);
+									}
+									wasReplaced = true
+									y = aElms.length
+									x = elementArray.length
+								}
+							}
+						}
+					}
+
+					for (var x=0; x<elementArray.length; x++) {
+						var elm = elementArray[x];
+						if( wasReplaced ){
+							var aElm = this.contentDocument.createDocumentFragment();
+						}else{
+							var aElm = this.contentDocument.createElement("a");
+							aElm.setAttribute('name', value);
+						}
 
 						if (elm.hasChildNodes()) {
 							for (var i=0; i<elm.childNodes.length; i++)
@@ -3747,10 +3800,19 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 
 						elm.parentNode.replaceChild(aElm, elm);
 					}
+					//Chris Benjaminse BeIT ApS **
+					if( !elementArray.length ){
+						var html = '<a name="'+ value +'"></a>'
+						tinyMCE.execCommand('mceInsertContent', false, html);
+					}
+					//**
+					
 				}
 
 				tinyMCE.triggerNodeChange();
 			}
+			tinyMCE.handleVisualAid(this.getBody(), true, this.visualAid);
+			//**
 			break;
 
 		case "mceReplaceContent":
@@ -3870,7 +3932,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 				// If target node is text do special treatment, (Mozilla 1.3 fix)
 				if (rng.startContainer.nodeType == 3) {
 					var node = rng.startContainer.splitText(rng.startOffset);
-					node.parentNode.insertBefore(value, node);
+					node.parentNode.insertBefore(value, node); 
 				} else
 					rng.insertNode(value);
 
