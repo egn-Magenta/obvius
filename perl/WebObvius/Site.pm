@@ -249,7 +249,7 @@ sub create_input_object {
     $input->param(NOW=>$req->notes('now'));
     $input->param(THE_REQUEST=>$req->the_request);
     $input->param(REMOTE_IP=>$req->connection->remote_ip);
-    $input->param(IS_ADMIN => $options{is_admin});
+    $input->param(IS_ADMIN => (defined $options{is_admin} ? $options{is_admin} : 0));
     if (my $cookies=Apache::Cookie->fetch) {
 	$cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
 	$input->param('OBVIUS_COOKIES'=>$cookies);
