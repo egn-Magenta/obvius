@@ -1146,6 +1146,11 @@ Felterne er konstrueret i overensstemmelse med Biblioteksstyrelsens retningslini
     <translation lang="da">Abonnent-data er gemt</translation>
   </text>
 
+  <text key="A subscriber already exists with the email address">
+    <translation lang="en">A subscriber already exists with the email address</translation>
+    <translation lang="da">Der findes allerede en abonnent med email-adressen</translation>
+  </text>
+
   <text key="The document is no longer public">
     <translation lang="en">The document is no longer public</translation>
     <translation lang="da">Dokumentet er ikke længere offentligt</translation>
