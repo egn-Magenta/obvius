@@ -163,6 +163,9 @@ sub check_xhtml {
             if($output =~ m!This Page Is Valid!) {
                 return $value;
             } else {
+                if($obvius->config->param('debug_html_check')) {
+                    print STDERR "HTML_CHECK_ERROR: $output\n";
+                }
                 return undef;
             }
         } else {
