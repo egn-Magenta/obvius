@@ -4154,4 +4154,19 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Nu</translation>
   </text>
 
+  <text key="ObviusRSSFeedExplanation">
+    <translation lang="en">This is a RSS feed. RSS feeds are not displayed in your browser, but in a special client.</translation>
+    <translation lang="da">Dette er et RSS feed. Du kan ikke læse et RSS feed i din browser, men skal istedet bruge en speciel klient.</translation>
+  </text>
+
+  <text key="Now">
+    <translation lang="en">Now</translation>
+    <translation lang="da">Nu</translation>
+  </text>
+
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
 </messages>
