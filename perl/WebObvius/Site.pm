@@ -603,8 +603,12 @@ sub get_public_login_expire {
 # Checks for the obvius_public_login cookie and if present
 # try to look up a public user from the cookie value. If
 # a user is found it is placed on the Obvius object for
-# later use. Also refreshes the cookie if a successfull
-# was made.
+# later use.
+# Previously refreshed the users cookie with a new value
+# for each request, but this behavior was changed since
+# it gave problem when the user requested two pages from
+# the server at the same time (eg. by clicking a link
+# before the current page was done loading).
 sub public_login_cookie {
     my ($this, $req, $obvius) = @_;
 
@@ -615,7 +619,7 @@ sub public_login_cookie {
             my $user = $users->[0];
             $obvius->param('public_user' => $user);
 
-            $this->set_public_login_cookie($req, $obvius, $user);
+            #$this->set_public_login_cookie($req, $obvius, $user);
         }
     }
 }
