@@ -2,10 +2,10 @@
 # another handle as another user, this needs adjustment:
 
 use mysql;
-#grant select on ${dbname}.* to ${dbname}_normal@localhost identified by 'default_normal';
-grant select,insert,update,delete on ${dbname}.* to ${dbname}_normal@localhost identified by 'default_normal';
-#grant insert,update on ${dbname}.subscribers to ${dbname}_normal@localhost;
-#grant insert,update,delete on ${dbname}.subscriptions to ${dbname}_normal@localhost;
+#grant select on ${dbname}.* to ${dbusername}_normal@localhost identified by 'default_normal';
+grant select,insert,update,delete on ${dbname}.* to ${dbusername}_normal@localhost identified by 'default_normal';
+#grant insert,update on ${dbname}.subscribers to ${dbusername}_normal@localhost;
+#grant insert,update,delete on ${dbname}.subscriptions to ${dbusername}_normal@localhost;
 
 
 # Local Variables: ***
