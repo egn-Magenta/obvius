@@ -1,6 +1,6 @@
 <h1><% $title %></h1>
 <& /shared/htmlize, text=>$vdoc->field('teaser') &>
-<p>RSS feed: <a href="<% $url %>"><% $url %></p>
+<p>RSS feed: <a href="<% $url %>"><% $url %></a></p>
 <p class="obviusnotice">
 <strong><& /shared/msg, text=>'Notice' &>:</strong>
 <& /shared/msg, text=>'ObviusRSSFeedExplanation' &>
