@@ -68,6 +68,33 @@ sub update_public_users {
     return $set->Update($data, $where);
 }
 
+sub create_public_user {
+    my ($this, $data) = @_;
+
+    my $set=DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'     => 'public_users',
+                                            }
+                                        );
+
+
+    return $set->Insert($data);
+}
+
+sub delete_public_users {
+    my ($this, $where) = @_;
+
+    my $set=DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'     => 'public_users',
+                                            }
+                                        );
+
+
+    return $set->Delete($where);
+}
 
 1;
 __END__
