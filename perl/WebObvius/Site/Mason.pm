@@ -357,6 +357,14 @@ sub handler ($$) {
         }
         ${$this->{'SITE_SCALAR_REF'}}='';
 
+        # Set headers from the hashref $output->param('OBVIUS_HEADERS_OUT'), if present.
+        # XXX Consider whether checking if each header is already set should be done,
+        #     and how conflicts should be resolved?
+        my $headers_out=$req->pnotes('OBVIUS_OUTPUT')->param('OBVIUS_HEADERS_OUT');
+        if ($headers_out) {
+            map { $req->header_out($_=>$headers_out->{$_}); } keys %$headers_out;
+        }
+
         # Previously the ::Common object would send the headers, so
         # the Public-object had to not do that.  Now the
         # WebObvius::Site::Mason::new()-method sets auto_send_header to
