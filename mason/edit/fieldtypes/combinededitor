@@ -157,6 +157,9 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 my($this, $tagname, $text, $attr)=@_;
                                                 if($tagname eq 'a' and $attr->{href} and $attr->{href} =~ m!^/! and not $attr->{href} =~ m!^/\d+\.docid!) {
                                                     my $uri = $attr->{href};
+                                                    # Remove anchor ref
+                                                    $uri =~ s!#.*$!!;
+                                                    # Remove querystring
                                                     $uri =~ s!\?.*$!!;
                                                     my $doc = $obvius->lookup_document($uri);
                                                     my $docid;
