@@ -3,7 +3,6 @@
 DocType: Base basis searchable sortorder_field_is=sortorder
  title         title                        searchable sortable threshold=0
  short_title   line                         searchable sortable threshold=0
- category      category repeatable optional searchable sortable
  keyword       keyword  repeatable optional searchable sortable
  docdate       date                         searchable sortable threshold=0
  seq           double                                  sortable threshold=0 default_value=10.00
@@ -15,13 +14,16 @@ DocType: Base basis searchable sortorder_field_is=sortorder
  publish_on    publish_on                   searchable sortable publish default_value=0000-00-00_00:00:00
  in_subscription bool			    searchable sortable publish default_value=0
  mimetype      line			    searchable sortable threshold=0
- rel_category  category repeatable optional searchable sortable
- rel_keyword   keyword  repeatable optional searchable sortable
  front_prio    priority			    searchable sortable publish default_value=0
  front_dura    int>=0			    searchable sortable publish default_value=0
- sec_prio      priority			    searchable sortable publish default_value=0
- sec_dura      int>=0			    searchable sortable publish default_value=0
  sec	       int	           optional searchable sortable publish default_value=0
+ show_title    bool                         default_value=1
+ show_teaser   bool                         default_value=1
+ show_date     bool                         default_value=0
+ show_news     bool                         default_value=1
+ show_subdocs  bool                         default_value=0
+ show_subdoc_teaser bool                    default_value=0
+ show_subdoc_date  bool                     default_value=0
 
 DocType: Standard parent=Base basis searchable
  author        line                         searchable sortable threshold=64
@@ -32,22 +34,26 @@ DocType: Standard parent=Base basis searchable
  contributors  line                         searchable sortable threshold=64
  source        line                         searchable sortable threshold=64
  picture       path                         searchable sortable optional threshold=128
- votebox       path                         searchable sortable optional threshold=128
- section_news  bool                         default_value=0
+ secion_news  bool                         default_value=0
 
 DocType: Search parent=Standard basis searchable
  form          textwupload                  searchable sortable threshold=128
  search_expression text
- new_window    bool                         default_value=0
- show_urls     bool                         default_value=0
- show_teasers  bool                         default_value=0
- show_new_titles bool			    default_value=0
+ new_window               bool              default_value=0
+ show_urls                bool              default_value=0
+ show_teasers             bool              default_value=0
+ show_new_titles          bool              default_value=0
+ show_searchdoc_teaser    bool              default_value=0
+ show_searchdoc_date      bool              default_value=0
+ show_searchdoc_url       bool              default_value=0
 
 DocType: ComboSearch parent=Search basis searchable
+ show_new_titles          bool              default_value=0
 
 DocType: KeywordSearch parent=Search basis searchable
- base          path
- search_type   searchtype
+ base                     path
+ search_type              searchtype
+ show_new_titles          bool              default_value=0
 
 DocType: HTML parent=Base basis searchable
  author        line                         searchable sortable threshold=64
@@ -57,8 +63,6 @@ DocType: HTML parent=Base basis searchable
  contributors  line                         searchable sortable threshold=64
  source        line                         searchable sortable threshold=64
  html_content       textwupload                  searchable sortable threshold=128
- bare	       bool                              default_value=0
- votebox       path                         searchable sortable optional threshold=128
 
 DocType: Upload parent=Base basis
  author        line                         searchable sortable threshold=64
@@ -100,11 +104,13 @@ DocType: CreateDocument parent=Base basis searchable
  email              email                   searchable sortable optional threshold=128
 
 DocType: Sitemap parent=Standard basis searchable
- levels            int>0    default_value=2
+ levels            priority6    default_value=2
 
 DocType: Subscribe parent=Standard basis searchable
  mailfrom          email
  passwdmsg         line
+ show_title        bool                      default_value=0
+ show_teaser       bool                      default_value=0
 
 DocType: Image basis
  title         title              searchable sortable threshold=0
@@ -119,7 +125,6 @@ DocType: Image basis
  size	       int>=0				      threshold=0
  mimetype      line		  searchable sortable threshold=0
  seq           double                        sortable threshold=0 default_value=-10.00
- category      category repeatable optional searchable sortable
  keyword       keyword  repeatable optional searchable sortable
 
 DocType: Link parent=Base basis searchable
@@ -133,6 +138,8 @@ DocType: Link parent=Base basis searchable
 DocType: DBSearch parent=Base basis searchable
  teaser        text                         searchable sortable threshold=128
  form          textwupload                  searchable sortable threshold=128
+ show_title    bool                         default_value=0
+ show_teaser   bool                         default_value=0
 
 DocType: MailData parent=Standard basis searchable
  mailfrom          email
@@ -170,6 +177,7 @@ DocType: Calendar parent=Base basis searchable
  s_event_order_by   orderevents             default_value=-docdate
  s_event_path       path
  show_as            showcal                 searchable default_value=2D
+ show_event         showevent               searchable default_value=title
 
 DocType: SubDocuments parent=Base basis searchable
  author        line                         searchable sortable threshold=64
@@ -180,5 +188,4 @@ DocType: SubDocuments parent=Base basis searchable
  source        line                         searchable sortable threshold=64
  logo          path                         searchable sortable optional threshold=128
  picture       path                         searchable sortable optional threshold=128
- votebox       path                         searchable sortable optional threshold=128
  show_teasers  bool                         searchable sortable threshold=128 default_value=0
