@@ -1,0 +1,319 @@
+<script type="text/javascript" src="/admin_js/htmlarea/popups/popup.js"></script>
+
+<script type="text/javascript">
+
+var nav_features = ('toolbar=0,location=0,directories=0,status=0,'
+    +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
+    +'width=750,height=550');
+
+window.resizeTo(400, 100);
+
+var nav_start_url;
+
+function Init() {
+    __dlg_init();
+    var param = window.dialogArguments;
+    if (param && param["f_url"]) {
+
+        // Strip out the hostname from the URL:
+        param["f_url"] = param["f_url"].replace(/^http:\/\/<% $r->hostname %>\//, '/');
+
+        document.getElementById("f_url").value = param["f_url"];
+        document.getElementById("f_alt").value = param["f_alt"];
+        document.getElementById("f_border").value = param["f_border"];
+        document.getElementById("f_align").value = param["f_align"];
+        document.getElementById("f_vert").value = param["f_vert"];
+        document.getElementById("f_horiz").value = param["f_horiz"];
+        window.ipreview.location.replace(param.f_url);
+
+        nav_start_url = param["f_url"];
+
+    } else {
+        nav_start_url = param["f_baseurl"];
+    }
+
+    if(! nav_start_url) {
+        nav_start_url = '/';
+    }
+
+    nav_start_url = nav_start_url.replace(/^http:\/\/<% $r->hostname %>\//, '/');
+    nav_start_url = nav_start_url.replace(/^\/admin\//, '/');
+
+    if(! nav_start_url.match(/^\//)) {
+        nav_start_url = '/';
+    } else {
+        // Remove querystring
+        nav_start_url = nav_start_url.replace(/\?.*$/, '');
+        nav_start_url = nav_start_url.replace(/([^\/])$/, '$1/');
+    }
+
+
+    document.getElementById("f_url").focus();
+};
+
+onload_array[onload_array.length] = Init;
+
+function onOK() {
+  var required = {
+    "f_url": "You must enter the URL"
+  };
+  for (var i in required) {
+    var el = document.getElementById(i);
+    if (!el.value) {
+      alert(required[i]);
+      el.focus();
+      return false;
+    }
+  }
+
+  var url = document.getElementById("f_url").value;
+
+  // If the url is intern convert it to something both internet explorer
+  // and mozilla understands: A complete URL with hostname and /admin/
+  // not ending in a /.
+
+  if(url.match(/^\//)) {
+    if(! url.match(/^\/admin\//)) {
+        url = '/admin' + url;
+    }
+
+    // Try to remove the last slash:
+    if(url.match(/\/$/)) {
+        url = url.replace(/\/$/, '');
+    } else if(url.match(/\/\?/)) {
+        url = url.replace(/\/\?/, '?');
+    }
+
+    document.getElementById("f_url").value = 'http://<% $r->hostname %>' + url;
+  }
+
+  // pass data back to the calling window
+  var fields = ["f_url", "f_alt", "f_align", "f_border",
+                "f_horiz", "f_vert"];
+  var param = new Object();
+  for (var i in fields) {
+    var id = fields[i];
+    var el = document.getElementById(id);
+    param[id] = el.value;
+  }
+  __dlg_close(param);
+  return false;
+};
+
+function onCancel() {
+  __dlg_close(null);
+  return false;
+};
+
+function onPreview() {
+  var f_url = document.getElementById("f_url");
+  var url = f_url.value;
+  if (!url) {
+    alert("You have to enter an URL first");
+    f_url.focus();
+    return false;
+  }
+  window.ipreview.location.replace(url);
+  return false;
+};
+
+function adjust_size() {
+    var url = document.pageform.f_url.value;
+    if(! url) {
+        alert('Vælg et billede først');
+        return;
+    }
+
+    url = url.replace(/&?size=\d+x\d+/gi, '');
+    url = url.replace(/&?size=\d+%/gi, '');
+    url = url.replace(/\?$/, '');
+
+    var val = document.pageform.size.options[document.pageform.size.selectedIndex].value;
+    if(val && val != '') {
+        if(url.match(/\?/)) {
+            url += '&size=' + val;
+        } else {
+            url += '?size=' + val;
+        }
+    }
+
+    document.pageform.f_url.value = url;
+}
+
+function check_start_size() {
+    var size_arr = document.pageform.size.options;
+
+    var url = document.pageform.f_url.value;
+    if(url) {
+        var sel_value;
+        if(url.match(/size=([0-9]+)x([0-9]+)/)) {
+            sel_value = RegExp.$1 + "x" + RegExp.$2;
+        } else if(url.match(/size=([0-9]+)%/)) {
+            sel_value = RegExp.$1 + "%";
+        }
+
+        if(sel_value) {
+            for(var i=0; i<size_arr.length; i++) {
+                if(size_arr[i].value == sel_value) {
+                    document.pageform.size.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+onload_array[onload_array.length] = check_start_size;
+</script>
+
+<style type="text/css">
+html, body {
+  background: ButtonFace;
+  color: ButtonText;
+  font: 11px Tahoma,Verdana,sans-serif;
+  margin: 0px;
+  padding: 0px;
+}
+body { padding: 5px; }
+table {
+  font: 11px Tahoma,Verdana,sans-serif;
+}
+form p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.fl { width: 9em; float: left; padding: 2px 5px; text-align: right; }
+.fr { width: 6em; float: left; padding: 2px 5px; text-align: right; }
+fieldset { padding: 0px 10px 5px 5px; }
+select, input, button { font: 11px Tahoma,Verdana,sans-serif; }
+button { width: 70px; }
+.space { padding: 2px; }
+
+.title { background: #ddf; color: #000; font-weight: bold; font-size: 120%; padding: 3px 10px; margin-bottom: 10px;
+border-bottom: 1px solid black; letter-spacing: 2px;
+}
+form { padding: 0px; margin: 0px; }
+</style>
+
+
+
+
+<div class="title">Insert Image</div>
+<!--- new stuff --->
+<table border="0" width="100%" style="padding: 0px; margin: 0px">
+  <tbody>
+
+  <tr>
+    <td style="width: 7em; text-align: right">Image URL:</td>
+    <td><input type="text" name="url" id="f_url" style="width:75%"
+      title="Enter the image URL here" />
+      <button name="find" onclick="window.open('/admin/?obvius_op=navigator&doctype=Image&fieldname=f_url&path=' + nav_start_url, '', nav_features); return false;" title="Find the image with the navigator">Find..</button>
+    </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>
+
+    </td>
+  </tr>
+  <tr>
+    <td style="width: 7em; text-align: right">Alternate text:</td>
+    <td><input type="text" name="alt" id="f_alt" style="width:100%"
+      title="For browsers that don't support images" /></td>
+  </tr>
+
+  </tbody>
+</table>
+
+<p />
+
+<fieldset style="float: left; margin-left: 5px;">
+<legend>Layout</legend>
+
+<div class="space"></div>
+
+<div class="fl">Alignment:</div>
+<select size="1" name="align" id="f_align"
+  title="Positioning of this image">
+  <option value=""                             >Not set</option>
+  <option value="left"                         >Left</option>
+  <option value="right"                        >Right</option>
+  <option value="texttop"                      >Texttop</option>
+  <option value="absmiddle"                    >Absmiddle</option>
+  <option value="baseline" selected="1"        >Baseline</option>
+  <option value="absbottom"                    >Absbottom</option>
+  <option value="bottom"                       >Bottom</option>
+  <option value="middle"                       >Middle</option>
+  <option value="top"                          >Top</option>
+</select>
+
+<p />
+
+<div class="fl">Border thickness:</div>
+<input type="text" name="border" id="f_border" size="5"
+title="Leave empty for no border" />
+
+<div class="space"></div>
+
+</fieldset>
+
+<fieldset style="float:right; margin-right: 5px;">
+<legend>Spacing</legend>
+
+<div class="space"></div>
+
+<div class="fr">Horizontal:</div>
+<input type="text" name="horiz" id="f_horiz" size="5"
+title="Horizontal padding" />
+
+<p />
+
+<div class="fr">Vertical:</div>
+<input type="text" name="vert" id="f_vert" size="5"
+title="Vertical padding" />
+
+<div class="space"></div>
+
+</fieldset>
+<br clear="all" />
+<fieldset style="float:left; margin-left: 5px;">
+<legend>Size</legend>
+<select name="size" onchange="adjust_size()">
+    <option value="">Normal</option>
+%if($m->comp_exists('/defaults/imagesizes')) {
+    <& /defaults/imagesizes &>;
+%} else {
+% for(@sizes){
+    <option value="<% $_ %>"><% $_ %></option>
+% }
+%}
+</select>
+</fieldset>
+<br clear="all" />
+<table width="100%" style="margin-bottom: 0.2em">
+ <tr>
+  <td valign="bottom" rowspan="2">
+    Image Preview:<br />
+    <iframe name="ipreview" id="ipreview" frameborder="0" style="border : 1px solid gray;" height="200" width="300" src=""></iframe>
+  </td>
+  <td valign="top">
+    <br />
+    <button name="preview" onclick="return onPreview();" title="Preview the image in a new window">Update</button>
+  </td>
+ </tr>
+ <tr>
+  <td valign="bottom" style="text-align: right">
+    <button type="button" name="ok" onclick="return onOK();">OK</button><br>
+    <button type="button" name="cancel" onclick="return onCancel();">Cancel</button>
+  </td>
+ </tr>
+</table>
+<%init>
+my $image_doctype = $obvius->get_doctype_by_name('Image');
+my @sizes;
+for(keys %{$image_doctype->{FIELDS}}) {
+    if(/^DATA_(\d+)x(\d+)$/i) {
+        push(@sizes, "$1x$2");
+    }
+}
+</%init>

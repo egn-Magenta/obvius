@@ -1,0 +1,214 @@
+%# This fieldtype is ment to combine all the avaiable editors in the Obvius system.
+%#
+<%method edit>
+<%args>
+$fieldspec
+$fieldtype
+$name
+$session
+$cols=>59
+$rows=>22
+$wrap=>1
+$onlylineif=>undef
+$no_msie_editor=>undef
+</%args>
+
+%unless($user_agent =~ /opera/i) {
+
+%# Only load script once:
+%unless($r->notes('htmlarea_script_loaded')) {
+<script type="text/javascript">
+  _editor_lang = "en";
+  _editor_url = "/admin_js/htmlarea/";
+</script>
+
+<!-- load the main HTMLArea files -->
+<script type="text/javascript" src="/admin_js/htmlarea/htmlarea.js"></script>
+<script type="text/javascript" src="/admin_js/htmlarea/obvius_htmlarea.js"></script>
+% $r->notes('htmlarea_script_loaded' => 1);
+%}
+
+<script type="text/javascript">
+// load the plugin files
+HTMLArea.loadPlugin("TableOperations");
+
+var editor = null;
+function initEditor_<% $name %>() {
+  // Make an editor for <% $name %> textarea:
+
+  var config = new HTMLArea.Config();
+
+  config.width = '550px';
+  config.sizeIncludesToolbar = false;
+  config.height = '<% $rows * 15 + 10 %>px';
+
+  config.resizeToolbars = 1;
+
+  config.pageStyle = 'body { padding: 5px; margin: 0px; }';
+
+  config.baseURL = '<% $uri . $uri_extra %>';
+
+  // Adjust the toolbar:
+
+  var top_toolbar = config.toolbar[0];
+
+  // Remove the first 4 elements in the default toolbar (font-editing):
+  for(var i=0;i < 4; i++) {
+    top_toolbar.shift();
+  }
+
+  editor_<% $name %> = new HTMLArea("<% $name %>", config);
+
+  // Register customized functions:
+
+  editor_<% $name %>._insertImage = htmlarea_InsertImage_Obvius;
+  editor_<% $name %>._createLink = htmlarea_CreateLink_Obvius;
+  editor_<% $name %>.stripBaseURL = htmlarea_stripBaseURL_Obvius;
+
+  // register the TableOperations plugin with our editor
+  editor_<% $name %>.registerPlugin(TableOperations);
+
+  editor_<% $name %>.generate();
+
+  // Register save functions:
+
+  onsubmit_array[onsubmit_array.length] = function() { editor_<% $name %>._textArea.value = editor_<% $name %>.getHTML(); }
+
+  return false;
+}
+
+onload_array[onload_array.length] = initEditor_<% $name %>;
+</script>
+
+%}
+
+<textarea id="<% $name %>" name="<% $name %>" cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
+
+<input type="hidden" name="obvius_<% $name %>_compare" value="<% $value |h %>">
+<br />
+%
+<%init>
+my $use_msie = 0;
+my $user_agent = $r->header_in('user-agent');
+
+print STDERR "User-agent: $user_agent\n";
+
+my $value=$session->{fields_out}->param(uc($name));
+   $value=$session->{fields_in}->param(uc($name)) unless defined($value);
+
+$value = $m->scomp('/shared/printhtml', html => $value, noprefix => 1) if($value);
+
+my $imagesizes = '';
+
+$wrap=' WRAP="' . $wrap . '" ';
+
+# Figure out whether we are creating a new document or editing an old.
+# If we are creating a new one we should add the documents name
+# to the document base used in the editors
+my $uri_extra = '';
+if(my $ses_doc = $session->{document}) {
+    unless($ses_doc->param('id')) {
+        $uri_extra = $ses_doc->param('name') . '/';
+    }
+}
+
+</%init>
+</%method>
+%
+<%method cook>
+<%args>
+$value=>undef
+$name=>undef
+</%args>
+<%perl>
+if(defined($value)) {
+    $value =~ s/\r//g;
+    if($value =~ m#^\s*<P>&nbsp;</P>\s*$#si) {
+        $value = '';
+    }
+}
+$out = '';
+$p->parse($value);
+$p->eof;
+$value = $out;
+return $value;
+</%perl>
+</%method>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $hostname_from_req = $r->hostname;
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                if($tagname eq 'a' and $attr->{href}) {
+
+                                                    # Make urls relative to / and convert to .docid format if possible:
+
+                                                    my $uri = $attr->{href};
+                                                    my $org_uri = $uri;
+
+                                                    if($uri) {
+                                                        $uri =~ s!^http://$hostname_from_req/(admin/)?!/!g;
+
+                                                        if($uri =~ m!^/!) {
+                                                            # Remove anchor ref and querystring:
+                                                            $uri =~ s!#.*$!!;
+                                                            $uri =~ s!\?.*$!!;
+
+                                                            if(my $doc = $obvius->lookup_document($uri)) {
+                                                                $uri = "/" . $doc->Id . ".docid";
+                                                                $text =~ s!\Q$org_uri\E!$uri!;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    $out.=$text;
+
+                                                } elsif($tagname eq 'img') {
+
+                                                    # Make images relative to / and convert to .docid format if possible:
+
+                                                    my $org_src = $attr->{src};
+
+                                                    if($org_src) {
+                                                        # Remove achor and querystring:
+                                                        $org_src =~ s!#.*$!!;
+                                                        $org_src =~ s!\?.*$!!;
+
+                                                        my $src = $org_src;
+
+                                                        # Remove hostname:
+                                                        $src =~ s!^http://$hostname_from_req/(admin/)?!/!g;
+
+                                                        if($src =~ m!^/!) {
+                                                            if(my $imgdoc = $obvius->lookup_document($src)) {
+                                                                $src = "/" . $imgdoc->Id . ".docid";
+                                                            }
+                                                        }
+
+                                                        print STDERR "Text before: $text\n";
+
+                                                        $text =~ s!\Q$org_src\E!$src!;
+
+                                                        print STDERR "Text after: $text\n";
+
+                                                    }
+
+                                                    $out .= $text;
+
+                                                } else {
+                                                    $out.=$text;
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=$text;
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+</%once>
