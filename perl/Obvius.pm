@@ -194,6 +194,13 @@ sub config {
     return $this->{OBVIUS_CONFIG};
 }
 
+# user - returns the current users login as a string.
+sub user {
+    my ($this)=@_;
+
+    return $this->{USER};
+}
+
 ########################################################################
 #
 #	Object cache
