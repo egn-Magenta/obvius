@@ -106,6 +106,13 @@ function obvius_<% $name %>_execCommand(editor, command, var3, var4) {
     var ed = eval("frames." + editor);
     var tr = ed.document.selection.createRange();
 
+    // Special case for undo/redo: do it on the document, not the selection
+    if(command == 'undo' || command == 'redo') {
+        ed.document.execCommand(command);
+        return;
+    }
+
+
     if(! tr.queryCommandEnabled(command)) {
         alert("Command " + command + " not enabled!");
         return;
@@ -476,8 +483,8 @@ function obvius_<% $name %>_selection_change() {
         <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'Cut')"><IMG SRC="/grafik/admin/msie-editor/icons/cut.gif" TITLE="Klip" width="16" height="16"></A></td>
         <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'Copy')"><IMG SRC="/grafik/admin/msie-editor/icons/copy.gif" TITLE="Kopier" width="16" height="16"></A></td>
         <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'Paste')"><IMG SRC="/grafik/admin/msie-editor/icons/paste.gif" TITLE="Sæt ind" width="16" height="16"></A></td>
-        <td align="center"><A onClick="obvius_<% $name %>_undo_redo()"><IMG SRC="/grafik/admin/msie-editor/icons/undo.gif" TITLE="Fortryd" width="16" height="16"></A></td>
-        <td align="center"><A onClick="obvius_<% $name %>_undo_redo()"><IMG SRC="/grafik/admin/msie-editor/icons/redo.gif" TITLE="Annuler fortryd" width="16" height="16"></A></td>
+        <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'undo', null, null)"><IMG SRC="/grafik/admin/msie-editor/icons/undo.gif" TITLE="Fortryd" width="16" height="16"></A></td>
+        <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'redo', null, null)"><IMG SRC="/grafik/admin/msie-editor/icons/redo.gif" TITLE="Annuler fortryd" width="16" height="16"></A></td>
         <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'InsertOrderedList');fix_ol('<% $name %>');"><IMG SRC="/grafik/admin/msie-editor/icons/olist.gif" TITLE="Punktopstilling" width="16" height="16"></A></td>
         <td align="center"><A onClick="obvius_<% $name %>_execCommand('obvius_<% $name %>_editor', 'InsertUnorderedList');fix_ul('<% $name %>');"><IMG SRC="/grafik/admin/msie-editor/icons/list.gif" TITLE="Punktopstilling" width="16" height="16"></A></td>
         <td align="center"><A onClick="obvius_<% $name %>_start_linkdlg();"><IMG SRC="/grafik/admin/msie-editor/icons/link1.gif" TITLE="Link" width="16" height="16"></A></td>
