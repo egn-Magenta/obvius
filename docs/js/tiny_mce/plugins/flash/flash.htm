@@ -33,7 +33,7 @@ if (url != null)
             formObj.height.value  = swfheight;
         }
         formObj.file.value = swffile;
-        formObj.insert.value = tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('mceDo'));
+        formObj.insert.value = tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('action'));
 
 		// Handle file browser
 		if (tinyMCE.getParam("file_browser_callback") != null) {
@@ -45,7 +45,7 @@ if (url != null)
 			html += ' onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');"';
 			html += ' onmouseout="tinyMCE.restoreClass(this);"';
 			html += ' onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');"';
-			html += ' onclick="javascript:tinyMCE.openFileBrowser(\'file\',document.forms[0].file.value,\'flash\');"';
+			html += ' onclick="javascript:tinyMCE.openFileBrowser(\'file\',document.forms[0].file.value,\'flash\',window);"';
 			html += ' width="20" height="18" border="0" title="' + tinyMCE.getLang('lang_browse') + '"';
 			html += ' class="mceButtonNormal" alt="' + tinyMCE.getLang('lang_browse') + '" />';
 
