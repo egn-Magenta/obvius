@@ -702,6 +702,11 @@ sub db_delete_table {
     return;
 }
 
+# db_insert_docparams - given a document object and an object with a
+#                       param-method (Obvius::Data springs to mind)
+#                       returning key=>value pairs, inserts the
+#                       parameters into the docparms database-table.
+#                       Does not return anything.
 sub db_insert_docparams {
     my ($this, $doc, $params) = @_;
 
@@ -768,10 +773,14 @@ Obvius::DB - Database functions for L<Obvius>.
   $obvius->db_update_table(table=>'synonyms', synonyms=>'Søren Soeren');
   $obvius->db_update_table(table=>'docparms', key=>'docid', name=>'fancy_box', value=>'NO!', type=>0);
 
+  $obvius->db_insert_docparams($doc, $paramobj);
+
 =head1 DESCRIPTION
 
 This module contains the database functions for the L<Obvius> module.
 It should not be used as a standalone module.
+
+The methods present here are for internal use by Obvius only.
 
 =head1 AUTHORS
 
