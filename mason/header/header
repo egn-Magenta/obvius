@@ -39,7 +39,7 @@ $tabindex=>30
        <p align="right">
        <img border="0" src="/grafik/admin/spacer.gif" width="2" height="2"><br>
        <b><a href="<% $prefix %>/admin/"><span class="megetlyslink"><& SELF:msg, text=>'Administration' &></span></a><br>
-       <a href="<% $prefix %>/sitemap/"><span class="megetlyslink"><& SELF:msg, text=>'Sitemap' &></span></a><br>
+       <a href="<% $prefix %><& /defaults/sitemaplink &>"><span class="megetlyslink"><& SELF:msg, text=>'Sitemap' &></span></a><br>
        <a href="javascript:OpenWin('http://<% $r->notes('helpserver') %>/<% $sitename %>/general?orig=<% $sitename %>/general');"><span class="megetlyslink"><& SELF:msg, text=>'Hjælp' &></span></a></b>
        </p>
       </td>
