@@ -6,6 +6,8 @@
 %
 <& content &>
 %
+<& comments, output=>$output &>
+%
 % if (my $url=$vdoc->field('url')) {
 <a href="<% $url %>"><% $url |h %></a>
 % }
