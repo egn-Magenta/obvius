@@ -13,8 +13,16 @@ function navigator_choose(path) {
     }
     var fieldname = document.pageform.fieldname.value;
     if(fieldname) {
-        window.opener.document.pageform[fieldname].value = path;
-        this.close();
+        // First look for tinymce dialog callback:
+        var get_dialog_func = window.opener.obvius_tinymce_get_dialogfield;
+        if(get_dialog_func && get_dialog_func(fieldname)) {
+            var field = get_dialog_func(fieldname);
+            field.value = path;
+            this.close();
+        } else {
+            window.opener.document.pageform[fieldname].value = path;
+            this.close();
+        }
     } else {
         window.opener.location.href='/admin' + path;
         this.close();
