@@ -3877,6 +3877,11 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Nyheder</translation>
   </text>
 
+  <text key="News duration ">
+    <translation lang="en">News duration</translation>
+    <translation lang="da">Nyhedens varighed</translation>
+  </text>
+
   <text key="News duration">
     <translation lang="en">News duration</translation>
     <translation lang="da">Nyhedens varighed</translation>
