@@ -211,6 +211,7 @@ DocType: Sitemap
   Fields: levels Levels
   Fields: docdate Date (YYYY-MM-DD)
   Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
+  Fields: root Base of sitemap
  End
  Page: P
   Title: Publish document
