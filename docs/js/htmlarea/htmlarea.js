@@ -1600,7 +1600,7 @@ HTMLArea.prototype.execCommand = function(cmdID, UI, param) {
 		if (this._customUndo)
 			this[cmdID]();
 		else
-			this._doc.execCommand(cmdID, UI, param);
+			this._doc.execCommand(cmdID);
 		break;
 	    case "inserttable": this._insertTable(); break;
 	    case "insertimage": this._insertImage(); break;
