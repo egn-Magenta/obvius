@@ -18,6 +18,8 @@ use POSIX qw(strftime);
 use Getopt::Long;
 use Carp;
 
+use locale;
+
 use Data::Dumper;
 
 my ($automatic, $manual, $site, $sender, $debug, $docid, $sitename) = (0,0,undef,undef,0, 0, undef);
@@ -109,7 +111,12 @@ sub send_manual {
             }
             next if ($subscriber->{suspended});
 
-            $subscriber->{subscriptions} = [ { title => $vdoc->Title, docs => \@docs_2_send } ];
+            $subscriber->{subscriptions} = [ {
+                                                title => $vdoc->Title,
+                                                docs => \@docs_2_send,
+                                                url=>$obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
+                                                docid => $vdoc->DocId
+                                             } ];
 
             my $mail_error = send_mail($sender, $subscriber, $mailtemplate);
 
