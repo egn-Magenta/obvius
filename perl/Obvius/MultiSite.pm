@@ -505,9 +505,8 @@ sub search {
         $i++;
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
-
-    my $regex = '(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
-    $where =~ s/$regex/$map{$1}/gie;
+    my $regex = '(^|[^_])(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
+    $where =~ s/$regex/$1 . $map{$2}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
                                             '!Table'	    => $straight_fields . join(', ', @table),
@@ -524,9 +523,9 @@ sub search {
                 };
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
-    $query->{'$order'}=~ s/$regex/$map{$1}/gie if ($query->{'$order'});
+    $query->{'$order'}=~ s/$regex/$1 . $map{$2}/gie if ($query->{'$order'});
 
-    $options{order} =~ s/$regex/$map{$1}/gie if ($options{order});
+    $options{order} =~ s/$regex/$1 . $map{$2}/gie if ($options{order});
     for (keys %options) {
         $query->{"\$$_"} = $options{$_};
     }
