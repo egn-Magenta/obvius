@@ -744,6 +744,9 @@ Obvius::DB - Database functions for L<Obvius>.
                               text=>'Jeg synes bare det er helt, ja det er.',
                              });
 
+  $obvius->db_update_table(table=>'synonyms', synonyms=>'Søren Soeren');
+  $obvius->db_update_table(table=>'docparms', key=>'docid', name=>'fancy_box', value=>'NO!', type=>0);
+
 =head1 DESCRIPTION
 
 This module contains the database functions for the L<Obvius> module.
