@@ -474,6 +474,11 @@ sub create_msg_digest {
 #
 ########################################################################
 
+# get_loginuser - given a string with a login and an optional prefix,
+#                 returns a hash-ref with the matching row in the
+#                 table prefixloginusers. Returns undef if nothing is
+#                 found (in scalar context, in array context an empty
+#                 list is returned).
 sub get_loginuser {
     my ($this, $login, $prefix) = @_;
     $prefix='' unless (defined $prefix);
@@ -593,6 +598,9 @@ Obvius::Utils - Utility functions for Obvius.pm
   my $phorums=$obvius->get_phorum_names('hope');
   my $phorum_id=$obvius->get_phorum_id_by_name('Almen debat');
   my $phorum_name=$obvius->get_phorum_by_id('12');
+
+  my $loginuser=$obvius->get_loginuser(login=>'asjo');
+  my $fun_loginuser=$obvius->get_loginuser(login=>'asjo', prefix=>'fun_');
 
 =head1 DESCRIPTION
 
