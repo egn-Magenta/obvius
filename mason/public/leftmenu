@@ -86,18 +86,14 @@ my %search_options = (
 
 my @parent = $obvius->get_doc_by_path('/');
 
-#if ($path_number <= 2){
-$menu = $obvius->search([qw(title seq)], "parent = " . $parent[0]->Id, sortvdoc => $obvius->get_public_version($section), %search_options);# if($section and $uri ne '/');
-#} else {
-#$menu = $obvius->search([qw(title seq)], "parent = " . $path->[2]->Id, sortvdoc => $obvius->get_public_version($path->[2]), %search_options) if($section and $uri ne '/');
-#}
+$menu = $obvius->search([qw(title seq)], "parent = " . $parent[0]->Id, sortvdoc => $obvius->get_public_version($parent[0]), %search_options);
 $menu = [] unless(defined($menu));
 
 my $second_level;
 
 if($path->[1]) {
 
-    $second_level = $obvius->search([qw(title seq)], "parent = " . $path->[1]->Id, %search_options);
+    $second_level = $obvius->search([qw(title seq)], "parent = " . $path->[1]->Id, sortvdoc => $obvius->get_public_version($section), %search_options);
 
     $second_level = [] unless($second_level);
 
@@ -111,7 +107,7 @@ if($path->[1]) {
 	}
 } else {
 
-    $second_level = $obvius->search([qw(title seq)], "parent = " . $path->[0]->Id, %search_options);
+    $second_level = $obvius->search([qw(title seq)], "parent = " . $path->[0]->Id, sortvdoc => $obvius->get_public_version($section), %search_options);
 
     $second_level = [] unless($second_level);
 
