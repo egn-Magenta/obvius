@@ -3730,6 +3730,41 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Vis/Rediger HTML</translation>
   </text>
 
+  <text key="Warning! Deleted versions can never be recovered">
+    <translation lang="en">Warning! Deleted versions can never be recovered</translation>
+    <translation lang="da">Advarsel! Slettede version kan aldrig genskabes</translation>
+  </text>
+
+  <text key="Are you sure you want to delete the following version">
+    <translation lang="en">Are you sure you want to delete the following version</translation>
+    <translation lang="da">Er du sikker på du vil slette følgende version</translation>
+  </text>
+
+  <text key="There was a problem deleting the version">
+    <translation lang="en">There was a problem deleting the version</translation>
+    <translation lang="da">Der opstod et problem under sletning af versionen</translation>
+  </text>
+
+  <text key="Version deleted">
+    <translation lang="en">Version deleted</translation>
+    <translation lang="da">Version slettet</translation>
+  </text>
+
+  <text key="Click here to continue">
+    <translation lang="en">Click here to continue</translation>
+    <translation lang="da">Klik her for at fortsætte</translation>
+  </text>
+
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>

@@ -1,0 +1,23 @@
+<h1>Delete single version</h1>
+%unless($r->param('sure')) {
+<input type="hidden" name="sure" value="">
+<input type="hidden" name="obvius_op" value="delete_single_version">
+<strong><& SELF:msg, text=>'Warning! Deleted versions can never be recovered' &>.</strong><br>
+<br>
+<& SELF:msg, text=>'Are you sure you want to delete the following version' &>?<br>
+<br>
+<% $vdoc->Version %><br>
+<br>
+<input type="button" value="<& SELF:msg, text=>'Yes' &>" class="okknap" onclick="javascript:document.pageform.sure.value=1;submit_page()" style="width: 50px">
+<input type="button" value="<& SELF:msg, text=>'No' &>"  class="cancelknap" onclick="javascript:document.location.href='<% $prefix . $uri %>';" style="width: 50px">
+%} else {
+%   my $errstr;
+%   $obvius->delete_single_version($vdoc, \$errstr);
+%   if($errstr) {
+    <& SELF:msg, text=>'There was a problem deleting the version' &>: <% $errstr %><br>
+%   } else {
+    <& SELF:msg, text=>'Version deleted' &>.<br>
+    <br>
+    <a href="<% $prefix . $uri %>"><& SELF:msg, text=>'Click here to continue' &></a>.
+%   }
+%}

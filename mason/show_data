@@ -20,14 +20,23 @@
 %    }
 
 <TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
-<TR><TD class="sublevel"><& SELF:msg, text=>'This version' &></td><TD class="sublevel">: <% $vdoc->Version %></TD</TR>
-<TR><TD class="sublevel"><& SELF:msg, text=>'Latest version' &></td><TD class="sublevel">: <% $latest->Version %></TD</TR>
+%if($delete_version) {
+<TR>
+    <TD class="sublevel">
+        <& SELF:msg, text=>'This version' &></td><TD class="sublevel">: <% $vdoc->Version %>
+        [<a href="<% $prefix . $uri %>?obvius_op=delete_single_version&obvius_version=<% $obvius_version |u %>"><& SELF:msg, text=>'Delete' &></a>]
+    </TD>
+</TR>
+%} else {
+<TR><TD class="sublevel"><& SELF:msg, text=>'This version' &></td><TD class="sublevel">: <% $vdoc->Version %></TD></TR>
+%}
+<TR><TD class="sublevel"><& SELF:msg, text=>'Latest version' &></td><TD class="sublevel">: <% $latest->Version %></TD></TR>
 % if ($public) {
-<TR><TD class="sublevel"><& SELF:msg, text=>'Public version' &></td><TD class="sublevel">: <% $public->Version %></TD</TR>
-<TR><TD class="sublevel"><& SELF:msg, text=>'Expires' &><TD class="sublevel">: <% $expires %></TD</TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Public version' &></td><TD class="sublevel">: <% $public->Version %></TD></TR>
+<TR><TD class="sublevel"><& SELF:msg, text=>'Expires' &><TD class="sublevel">: <% $expires %></TD></TR>
 % }
 % else {
-<TR><TD class="sublevel" colspan="2"><& SELF:msg, text=>'No public version' &></TD</TR>
+<TR><TD class="sublevel" colspan="2"><& SELF:msg, text=>'No public version' &></TD></TR>
 % }
 
 <TR><td colspan='2'><img width="10" height="10" src='/grafik/admin/1x1.gif' border='0'></td></tr>
@@ -74,4 +83,17 @@ else {
 my $title  =($public ? $public->Title   : $latest->Title);
 my $expires=($public ? $public->field('expires') : $latest->field('expires'));
 my $seq    =($public ? $public->Seq     : $latest->Seq);
+
+my $delete_version;
+if($obvius->can_delete_single_version($doc)) {
+    if($public) {
+        if($public->Version ne $vdoc->Version) {
+            $delete_version = "Public exists and this is not the public version";
+        }
+    } else {
+        if($latest->Version ne $vdoc->Version) {
+            $delete_version = "No public and this is not the latest version";
+        }
+    }
+}
 </%init>
