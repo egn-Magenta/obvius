@@ -1,5 +1,5 @@
 %if(@$weeks) {
-    <table border="0" cellpadding="2" cellspacing="1" width="410" bgcolor="#333333">
+    <table border="0" cellpadding="2" cellspacing="1" bgcolor="#333333" width="100%">
         <tr>
             <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Mandag</span></font></td>
             <td width="14%" bgcolor="#666666"><font color="#FFFFFF"><span class="tekstLilleFed">Tirsdag</span></font></td>
@@ -36,7 +36,11 @@
 %   for my $doc(@$docs) {
 	      <p align="left">
 		<a class="nounderline" href="<% $prefix .$doc->{url} %>" title="<% $doc->{title} %>">
+%if ($show_event eq 'type') {
 		  <span class="tekstLille"><% $doc->{eventtype} %></span>
+%} else {
+		  <span class="tekstLille"><% $doc->{title} %></span>
+%}
 		</a>
 	      </p>
 %   }
@@ -60,4 +64,7 @@ $weeks=>undef
 </%args>
 <%init>
 $weeks = [] unless($weeks);
+
+$obvius->get_version_fields($vdoc, [qw(show_event)]);
+my $show_event = $vdoc->Show_event;
 </%init>
