@@ -288,7 +288,7 @@ sub retrieve_real_title {
         $title =~ s/\s+$//;
 
         # Convert utf8
-        $title = utf8($title)->latin1;
+        $title = utf8(narrow_unicode_utf8($title))->latin1;
 
         return $title;
     }
@@ -296,6 +296,18 @@ sub retrieve_real_title {
     return undef;
 }
 
+# narrow_unicode_utf8 - convert commonly used unicode-sequences to the
+#                       similar ones in latin1.
+sub narrow_unicode_utf8 {
+    my ($text)=@_;
+
+    $text=~s/’/\'/g;
+    $text=~s/€/euro/g;
+    $text=~s/“/\"/g;
+    $text=~s/”/\"/g;
+
+    return $text;
+}
 
 1;
 __END__
