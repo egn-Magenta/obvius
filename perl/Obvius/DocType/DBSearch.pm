@@ -10,8 +10,6 @@ use Obvius::DocType;
 
 use Carp;
 
-use Data::Dumper;
-
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -90,7 +88,13 @@ sub action {
                 # $field can be a list of fields, where either one of them can match:
                 my @field_list=split /\s*,\s*/, $field;
                 foreach (@field_list) {
-                    push(@fields, $_) if($obvius->get_fieldspec($_));
+                    my $fieldspec=$obvius->get_fieldspec($_);
+                    if ($fieldspec) {
+                        # If it is optional, add a '~', meaning "use
+                        # left join".  I wonder why Obvius::search
+                        # can't figure this out for itself...
+                        push(@fields, ($fieldspec->Optional ? '~' : '') . $_);
+                    }
                 }
                 # XXX Had to add an extra space here (before
                 # $how). Guess something is wrong with some regexps in
