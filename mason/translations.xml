@@ -3557,7 +3557,7 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Rediger med Obvius Ed</translation>
   </text>
 
-  <text key="Download/installer Obvius Ed editor">
+  <text key="Download/install Obvius Ed editor">
     <translation lang="en">Download/install Obvius Ed editor</translation>
     <translation lang="da">Download/installer Obvius Ed editor</translation>
   </text>
@@ -3945,6 +3945,14 @@ abonnement på samme email-adresse.</translation>
   <text key="Base of sitemap">
     <translation lang="en">Base of sitemap</translation>
     <translation lang="da">Top url for sitemap</translation>
+  </text>
+  <text key="No subdoc limit">
+    <translation lang="en">No pager</translation>
+    <translation lang="da">Ingen begrænsning</translation>
+  </text>
+  <text key="docs on each page">
+    <translation lang="en">docs on each page</translation>
+    <translation lang="da">underdokumenter</translation>
   </text>
 
 

@@ -9,7 +9,7 @@ $size=>19
 
 <select name="<% $name %>" tabindex="10">
 %   for (@values) {
-        <option value="<% $_ %>" <% $value eq $_ ? "SELECTED" : "" %>><% $_ eq "0" ? "Ingen begrænsning" : "$_ underdokumenter"%></option>
+        <option value="<% $_ %>" <% $value eq $_ ? "SELECTED" : "" %>><% $_ eq "0" ? $m->scomp('SELF:msg', text=>"No subdoc limit") : "$_ " . $m->scomp('SELF:msg', text=>"docs on each page") %></option>
 % }
 </select>
 <%init>

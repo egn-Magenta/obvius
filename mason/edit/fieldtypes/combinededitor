@@ -39,7 +39,7 @@ var imagesizes_for_<% $name %> = '<% $imagesizes %>';
             <a href="javascript:OpenWin('/admin/?obvius_op=mcms_code_editor&get_html=1&fieldname=<% $name %>', 750, 550)"><span style="font-size: 10px;"><& SELF:msg, text=>'Rediger med MCMS koder' &></a><br><br></span></td>
 %}
 %  if($is_composite_compatible) {
-        <td valign="top" align="right"><a href="javascript:downloadObviusEd()" id="starteditor_button_for_<% $name %>"><span style="font-size: 10px;"><& SELF:msg, text=>'Download/installer Obvius Ed editor' &></span></a><br><br></td>
+        <td valign="top" align="right"><a href="javascript:downloadObviusEd()" id="starteditor_button_for_<% $name %>"><span style="font-size: 10px;"><& SELF:msg, text=>'Download/install Obvius Ed editor' &></span></a><br><br></td>
 %  }
     </tr>
     <tr>
