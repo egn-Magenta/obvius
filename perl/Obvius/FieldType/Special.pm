@@ -128,12 +128,14 @@ sub check_xhtml {
 
     my $tmpfile = "/tmp/obvius-htmlcheck-" . $fspec->param('name') . "-" . time . ".html";
 
+    my $charset = $obvius->config->param('html_charset') || 'iso-8859-1';
+
     if(open(FH, "> $tmpfile")) {
         print FH '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' . "\n";
         print FH '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' . "\n";
         print FH '<head>' . "\n";
         print FH '<title>Obvius test of Xhtml</title>' . "\n";
-        print FH '<meta http-equiv="content-Type" content="text/html; charset=iso-8859-1" />' . "\n";
+        print FH '<meta http-equiv="content-Type" content="text/html; charset=' . $charset . '" />' . "\n";
         print FH '</head>' . "\n";
         print FH '<body>' . "\n";
         print FH '<div>' . "\n";
