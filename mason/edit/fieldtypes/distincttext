@@ -12,7 +12,7 @@ $doctypename=>undef
 <select name="<% $name %>">
     <option value=""></option>
 %for(@options) {
-    <option value="<% $_ |h %>"><% $_ %></option>
+    <option value="<% $_ |h %>"<% ($value and $value eq $_ ? ' SELECTED' : '') %>><% $_ %></option>
 %}
 </select>
 %
