@@ -176,6 +176,12 @@ sub delete_synonyms {
     return 1;
 }
 
+# create_new_synonyms - given a hashref with a space-separated list of
+#                       synonyms as the value of the key 'synonyms'
+#                       creates them in the database. Returns false if
+#                       the user doesn't have access to create
+#                       synonyms and if creation fails. Returns true
+#                       upon success.
 sub create_new_synonyms {
     my ($this, $synonyms) = @_;
 
@@ -572,6 +578,8 @@ Obvius::Utils - Utility functions for Obvius.pm
   $obvius->create_msg_digest();
 
   can_create_new_passwordprotedtedurl();
+
+  my $ret=$obvius->create_new_synonyms( { synonyms=>'hest pony hingst hoppe' } );
 
 =head1 DESCRIPTION
 
