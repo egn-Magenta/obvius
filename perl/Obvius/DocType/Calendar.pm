@@ -70,19 +70,12 @@ sub action {
                                         'show_as'
                                         ]);
 
-    my @fields = (
-                    'title',
-                    'eventtype',
-                    'docdate',
-                    'eventtime',
-                    'eventplace',
-                    'contactinfo',
-                    'eventinfo'
-                );
+    my @fields = ( 'docdate' );
 
     my $where = "type = " . $event_doctype->param('ID') . " and ";
 
     if($vdoc->field('s_event_title')) {
+        push(@fields, 'title');
         $where .= "title LIKE '%" . $vdoc->S_Event_Title ."%' and ";
     }
     if($vdoc->field('s_event_type')) {
@@ -94,12 +87,15 @@ sub action {
         $where .= "docdate < '" . $vdoc->Enddate . "' and ";
     }
     if($vdoc->field('s_event_place')) {
+        push(@fields, 'eventplace');
         $where .= "eventplace LIKE '%" . $vdoc->S_Event_Place . "%' and ";
     }
     if($vdoc->field('s_event_contact')) {
+        push(@fields, 'contactinfo');
         $where .= "contactinfo LIKE '%" . $vdoc->S_Event_Contact . "%' and ";
     }
     if($vdoc->field('s_event_info')) {
+        push(@fields, 'eventinfo');
         $where .= "eventinfo LIKE '%" . $vdoc->S_Event_Info . "%' and ";
     }
 
@@ -108,6 +104,9 @@ sub action {
     my $sortorder;
     if($show_as eq 'list'){
         $sortorder = $vdoc->field('s_event_order_by') || '-docdate';
+        my $testorder = $sortorder;
+        $testorder =~ s/[+-]//g;
+        push(@fields, $testorder) unless(grep {$_ eq $testorder} @fields);
     } else {
         $sortorder = '-docdate';
     }
@@ -143,14 +142,23 @@ sub action {
     for(@$result) {
         my $doc = $obvius->get_doc_by_id($_->DocId);
         my $url = $obvius->get_doc_uri($doc);
+        $obvius->get_version_fields($_, [
+                                        'title',
+                                        'eventtype',
+                                        'eventtime',
+                                        'eventplace',
+                                        'contactinfo',
+                                        'eventinfo'
+                                    ]
+                                );
         push(@events, {
-                        'title' => $_->Title,
-                        'eventtype' => $_->EventType,
+                        'title' => $_->field('title'),
+                        'eventtype' => $_->field('eventtype'),
                         'date' => $_->DocDate,
-                        'time' => $_->EventTime,
-                        'place' => $_->EventPlace,
-                        'contactinfo' => $_->ContactInfo,
-                        'eventinfo' => $_->EventInfo,
+                        'time' => $_->field('eventtime'),
+                        'place' => $_->field('eventplace'),
+                        'contactinfo' => $_->field('contactinfo'),
+                        'eventinfo' => $_->field('eventinfo'),
                         'url' => $url
                     });
     }
