@@ -253,6 +253,12 @@ sub delete_group {
     return $grpid;
 }
 
+# create_new_group - given a hash-ref with a name-entry string and a
+#                    user-entry with a user id, creates a group with
+#                    that name and puts the user in it.
+#                    Returns the group id on success and undef on
+#                    failure.
+#                    (Why the user-thing?!)
 sub create_new_group {
     my ($this, $group, $doc) = @_;
 
@@ -333,6 +339,8 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
   my $grpids=$obvius->get_user_groups($userid);
 
   my $userid=$obvius->get_userid('stein');
+
+  my $grpid=$obvius->create_new_group({ name=>'Boxers', user=>$userid }, $doc);
 
 =head1 DESCRIPTION
 
