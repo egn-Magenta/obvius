@@ -84,6 +84,13 @@ sub clear {
     %$this = ();
 }
 
+# param () - return an array of all existing parameters
+#
+# param ($param) - return the value of the parameter named $param
+#
+# param ($param, $value) - assigns a new $value to the $param and
+#                          returns the old value
+#
 sub param {
     my ($this, $name, $value) = @_;
 
@@ -256,6 +263,11 @@ Obvius::Data - Perl extension for blah blah blah
 
   # Usage of clear:
   $obj->clear();
+
+  # Usages of param:
+  $obj->param(); # Returns [param1, param2]
+  $obj->param('param1'); # Returns value1
+  $obj->param('param1' => $new_value); # Assigns $new_value and returns value1
 
 =head1 DESCRIPTION
 
