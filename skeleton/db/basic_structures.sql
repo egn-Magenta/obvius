@@ -592,8 +592,8 @@ CREATE TABLE users (
 --
 
 
-INSERT INTO users VALUES (1,'admin','$1$safdasdf$hjqFW5Yb3JysogKILEjBd.','Admin','webmaster@madsen.dk','');
-INSERT INTO users VALUES (2,'nobody','$1$safdasdf$1nrCPtQuzQdXcU74o11Tk/','Nobody','nobody@madsen.dk','');
+INSERT INTO users VALUES (1,'admin','$1$safdasdf$hjqFW5Yb3JysogKILEjBd.','Admin','webmaster@${dbname}','');
+INSERT INTO users VALUES (2,'nobody','$1$safdasdf$1nrCPtQuzQdXcU74o11Tk/','Nobody','nobody@${dbname}','');
 
 --
 -- Table structure for table 'versions'
