@@ -1,8 +1,10 @@
 <!-- News start -->
 <table border="0" cellspacing="0" cellpadding="5" width="145">
 <tr>
-<td height="50">
+<td height="50" class="news">
 <br>
+<strong>Nyheder</strong>
+<br><br>
 %my $newsnumber = 1;
 % if (@newsitems) {
 %    foreach my $newsitem (@newsitems) {
