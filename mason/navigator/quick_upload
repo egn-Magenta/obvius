@@ -102,7 +102,7 @@ if(my $name = $r->param('upload_data')) {
             local $/ = undef;
             my $value = <$fh>;
 
-            my $fields = new MCMS::Data;
+            my $fields = new Obvius::Data;
 
             # Set default values
             for(keys %{$upload_doctype->{FIELDS}}) {
