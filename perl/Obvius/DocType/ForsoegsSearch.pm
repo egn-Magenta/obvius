@@ -1,5 +1,33 @@
 package Obvius::DocType::ForsoegsSearch;
 
+########################################################################
+#
+# ForsoegsSearch.pm - A doctype for Obvius[tm] that handles searching
+#                     and manipulating a database of test-fields for
+#                     genetically modified crops.
+#
+# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                    aparte A/S, Denmark (http://www.aparte.dk/),
+#
+# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
+#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
 # $Id$
 
 use strict;
@@ -1213,6 +1241,15 @@ sub update_produkt {
     return $retval;
 }
 
+# $this->insert_produkt($obvius, $data)
+#   Insert a produkt in the fsu_produkter database table.
+#   Arguments are:
+#       $obvius - the obvius object
+#       $data - a hashref containing data to be inserted in the table.
+#
+#   Returns the id of the inserted row (LastSerial).
+#
+
 sub insert_produkt {
     my ($this, $obvius, $data) = @_;
 
@@ -1254,15 +1291,18 @@ Obvius::DocType::ForsoegsSearch - Perl extension for blah blah blah
 =head1 SYNOPSIS
 
   use Obvius::DocType::ForsoegsSearch;
-  blah blah blah
+
+  my $doctype = new Obvius::DocType::ForsoegsSearch;
+
+  my $id = $doctype->insert_produkt($obvius, {
+                                                navn => 'Name',
+                                                ikon => 'iconname'
+                                            });
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::ForsoegsSearch, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+This module contains methods for use with the ForsoegsSearch doctype
+for Obvius[tm].
 
 =head2 EXPORT
 
@@ -1271,10 +1311,12 @@ None by default.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magneta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
 L<perl>.
+L<Obvius>.
+L<Obvius::DocType>
 
 =cut
