@@ -42,6 +42,7 @@ sub get_public_users {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users',
+                                                '!TieRow'    => 0,
                                             }
                                         );
 
@@ -68,6 +69,7 @@ sub update_public_users {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users',
+                                                '!TieRow'    => 0,
                                             }
                                         );
 
@@ -85,6 +87,7 @@ sub create_public_user {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users',
+                                                '!TieRow'    => 0,
                                                 '!Serial'   => 'id'
                                             }
                                         );
@@ -105,6 +108,7 @@ sub delete_public_users {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users',
+                                                '!TieRow'    => 0,
                                             }
                                         );
 
@@ -127,6 +131,7 @@ sub insert_public_user_metadata {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users_metadata',
+                                                '!TieRow'    => 0,
                                             }
                                         );
     for my $value (@$values) {
@@ -149,6 +154,7 @@ sub get_public_user_metadata {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users_metadata',
+                                                '!TieRow'    => 0,
                                             }
                                         );
     for my $name (@$nameslist) {
@@ -176,6 +182,7 @@ sub delete_public_user_metadata {
                                             {
                                                 '!DataSource' => $this->{DB},
                                                 '!Table'     => 'public_users_metadata',
+                                                '!TieRow'    => 0,
                                             }
                                         );
     return $set->Delete({user_id => $user->{id}, name => $name});
@@ -225,7 +232,7 @@ sub get_public_user_areas {
 sub get_public_user_area {
     my ($obvius, $user, $area)=@_;
     return undef unless ($obvius->get_public_user({ id=>$user->{id} }));
-    return undef unless (0); # get_area(?) ?
+    #return undef unless (); # Check area? get_area(?) ?
 
     return $obvius->get_table_record('public_users_areas', { public_userid=>$user->{id}, docid=>$area->{docid} });
 }
@@ -321,21 +328,45 @@ sub update_public_user_area {
     return $obvius->update_table_record('public_users_areas', $area, { public_userid=>$user->{id}, docid=>$area->{docid} });
 }
 
-# update_public_user_areas - deletes all the area-information for the
-#                            supplied user and adds the areas given.
-#                            Note that this is potentially quite
-#                            destructive!
+# update_public_user_areas - given an array-ref of the all the areas
+#                            the user should have, deletes the ones
+#                            that exist but aren't in the new areas,
+#                            updates the ones that are there and
+#                            should be, and finally creates new ones.
+#                            Returns true if everything went well,
+#                            false if there was at least one error.
 sub update_public_user_areas {
     my ($obvius, $user, $areas)=@_;
     return undef unless ($obvius->get_public_user({ id=>$user->{id} }));
     return undef unless (ref $areas eq 'ARRAY');
 
+    my $now=strftime('%Y-%m-%d %H:%M:%S', localtime);
+
     # (Transaction begin)
-    $obvius->delete_public_user_areas($user);
     my $ret=1;
+    #  delete areas that no longer should be there:
+    my %areas=map { $_->{docid}=>1 } @$areas;
+    my $existing_areas=$obvius->get_public_user_areas($user);
+    foreach my $existing_area (@$existing_areas) {
+        print STDERR "DELETING AREA $existing_area->{docid}\n" unless ($areas{$existing_area->{docid}});
+        if (!$areas{$existing_area->{docid}}) {
+            $ret=0 unless ($obvius->delete_public_user_area($user, $existing_area));
+        }
+    }
+    #  update existing/create new:
     foreach my $new_area (@$areas) {
-        unless ($obvius->create_public_user_area($user, $new_area)) {
-            $ret=0; # Remember errors (Rollback)
+        if (my $existing_area=$obvius->get_public_user_area($user, $new_area)) { # It exists
+            # Update the existing area:
+            #  set modified to now, copy activated and expires from the new area if they are defined
+            #  created is not changed, ever.
+            $existing_area->{modified}=$now;
+            map { $existing_area->{$_}=$new_area->{$_} if defined $new_area->{$_} } qw(activated expires);
+            print STDERR "UPDATING AREA $existing_area->{docid}\n";
+            $ret=0 unless ($obvius->update_public_user_area($user, $existing_area));
+        }
+        else { # It's a brand new one:
+            print STDERR "CREATING AREA $new_area->{docid}\n";
+            $ret=0 unless ($obvius->create_public_user_area($user, $new_area));
         }
     }
     # (Commit if no errors)
