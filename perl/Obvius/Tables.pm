@@ -176,7 +176,7 @@ sub get_table_record {
 #                                      $rec should be a hash, or a reference to a hash,
 #                                      of fieldnames and values to be inserted into
 #                                      the table.
-#                                      Returns a hash on succes.
+#                                      Returns true on succes.
 #                                      If an error occurs upon insertion the transaction
 #                                      is rolled back and the function returns undef.
 sub insert_table_record {
