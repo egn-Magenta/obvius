@@ -23,7 +23,7 @@
 %if($delayed) {
 % if($go) {
 %  my ($d_year, $d_month, $d_day, $d_hour, $d_min) = $delayed =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
-%  my $command = "echo perl -w /home/httpd/obvius/bin/subscription.pl";
+%  my $command = "echo perl -w /var/www/obvius/bin/subscription.pl";
 %  $command .= " --sender=$sender";
 %  $command .= " --site=$site";
 %  $command .= " --sitename=$sitename";
@@ -65,7 +65,7 @@
 % }
 %} else {
 % if($go) {
-%  my $command = "perl -w /home/httpd/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
+%  my $command = "perl -w /var/www/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
 %  my $retval = system($command);
     <tr>
       <td>
@@ -123,7 +123,7 @@ my $subscriber_docs;
 my $sender = 'jubk@magenta-aps.dk';
 
 my $site = $obvius->{OBVIUS_CONFIG}->{NAME};
-my $sitename = $obvius->{OBVIUS_CONFIG}->{SITENAME}
+my $sitename = $obvius->{OBVIUS_CONFIG}->{SITENAME};
 
 my ($year, $month, $day, $hour, $min, $sec) = Today_and_Now();
 my $now = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year, $month, $day, $hour, $min, $sec);
