@@ -14,18 +14,29 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
     my $depth=$obvius->get_version_field($vdoc, 'Levels') || 2;
+	my $root=$obvius->get_version_field($vdoc, 'Root');
     $this->tracer($input, $output, $doc, $vdoc, $obvius) if ($this->{DEBUG});
 
     $output->param(Obvius_DEPENCIES =>1);
-    my $top = $obvius->get_root_document();
+
+	my $top;
+	if ($root && $root ne '/') {
+		$top = $obvius->lookup_document($root);
+		chop($root);
+	} else {
+		$top = $obvius->get_root_document();
+		$root = ''; # Needed if $root was /
+	}
     $top = $obvius->get_public_version($top);
+
     $obvius->get_version_fields($top, [ 'title', 'short_title' ]);
     $top->{SHORT_TITLE} = $top->field('short_title');
     $top->{TITLE} = $top->field('title');
     $top->{NAME} = '';
     my $elements= [];
 
-    add_to_sitemap($top, 0, $depth, $obvius, $elements, '');
+    add_to_sitemap($top, 0, $depth, $obvius, $elements, $root);
+
     $output->param('sitemap' => $elements);
     $output->param('depth' => $depth);
     return OBVIUS_OK;
@@ -34,12 +45,12 @@ sub action {
 sub add_to_sitemap{
     my ($vdoc, $level, $depth, $obvius, $elements, $url) = @_;
 
-    #$obvius->get_version_fields($vdoc, ['Title', 'Short_title', 'Seq']);
-    #return if ($vdoc->Seq < 0);
-
     my $title= $vdoc->{SHORT_TITLE} || $vdoc->{TITLE};
     my $uri = $url . $vdoc->{NAME} . '/';
     my $seq = $vdoc->{SEQ};
+
+	use Data::Dumper;
+	print STDERR Dumper($uri);
 
     my $element = {
                     'title' => $title,
