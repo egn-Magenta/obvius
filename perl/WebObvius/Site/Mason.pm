@@ -214,7 +214,7 @@ sub save_in_cache {
 
         my $extra = '';
         my $qstring = $req->args;
-        if($qstring and $qstring =~ /^size=\d+x\d+$/) {
+        if($qstring and $qstring =~ /^size=\d+(x\d+|\%)$/) {
             $extra = $qstring;
         }
 
