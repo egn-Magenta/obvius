@@ -3,12 +3,14 @@ $html
 $no_first_paragraph=>undef
 $class=>undef
 $plaintext=>undef
+$dont_decode_entities=>undef
 </%args>
 <%init>
 $html ||= '';
 $out = '';
 $pclass = $class;
 $_plaintext = $plaintext;
+$decode_entities = (! $dont_decode_entities);
 $p->parse($html);
 $p->eof;
 $html=$out;
@@ -26,6 +28,7 @@ my $out='';
 my $farve='';
 my $pclass='';
 my $_plaintext;
+my $decode_entities = 1;
 my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub {
                                                 my($this, $text, $dtext)=@_;
@@ -72,9 +75,9 @@ my $p = HTML::Parser->new(api_version=>3,
                                             $out.=$text unless($_plaintext);
                                         }, "self, tagname, text, attr" ],
                             text_h=> [ sub {
-                                            my ($this, $text)=@_;
-                                            $out.=$text;
+                                            my ($this, $dtext, $text)=@_;
+                                            $out.=($decode_entities ? $dtext : $text);
                                         },
-                                        "self, dtext" ]);
+                                        "self, dtext, text" ]);
 </%once>
 <% $html %>

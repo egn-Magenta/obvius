@@ -20,7 +20,7 @@ if($old_htmlize) {
   $text=$tmpl->do_htmlize_hook('MASON_CONTENT', $class, dont_wrap=>$dont_wrap);
   $text=~s/[&]amp;#(\d+);/&#$1;/g;
 } else {
-  $text=$m->scomp('printhtml', html=>$text, no_first_paragraph=>$no_first_paragraph, class=>$class);
+  $text=$m->scomp('printhtml', html=>$text, no_first_paragraph=>$no_first_paragraph, class=>$class, %ARGS);
 }
 if($no_first_paragraph) {
     $text =~ s/<P[^>]*>//;
