@@ -1,33 +1,44 @@
+<& ../headline &>
+<% $language %>
+	<table border="0">
 %for(@$events) {
-	<table>
-	  <tr>
+         <tr>
+           <td colspan="2"><img src="/grafik/1x1.gif" height="10"></td>
+         </tr>
 %if ($show_event eq 'type') {
-	    <th><% $_->{eventtype} %></th>
+	  <tr>
+	     <td colspan="2"><a href="<% $_->{url} %>"><% $_->{eventtype} %></a></td>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="left"><% $language eq 'da' ? 'Titel' : 'Title' %>:</td>
+	    <td valign="top"><% $_->{title} %></td>
+	  </tr>
+
 %} else {
-            <th><% $_->{title} %></th>
+	  <tr>
+              <td colspan="2"><a href="<% $_->{url} %>"><% $_->{title} %></a></td>
+	  </tr>
+	  <tr>
+	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Kategori' : 'Type' %>:</td>
+	    <td valign="top"><% $_->{eventtype} %></td>
+	  </tr>
 %}
-	  </tr>
 	  <tr>
-	    <td valign="top" align="right">Titel:</td>
-	    <td valign="top"><a href="<% $_->{url} %>"><% $_->{title} %></a></td>
-	  </tr>
-	  <tr>
-	    <td valign="top" align="right">Dato:</td>
+	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Dato' : 'Date' %>:</td>
 	    <td valign="top"><& /shared/display_date, date=>$_->{date} &> <% $_->{time} %></td>
 	  </tr>
 	  <tr>
-	    <td valign="top" align="right">Sted:</td>
+	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Sted' : 'Place' %>:</td>
 	    <td valign="top"><% $_->{place} %></td>
 	  </tr>
 	  <tr>
-	    <td valign="top" align="right">Kontaktperson:</td>
+	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Kontakt' : 'Contact' %>:</td>
 	    <td valign="top"><& /shared/htmlize, text=>$_->{contactinfo} &></td>
 	  </tr>
 	  <tr>
-	    <td valign="top" align="right">Anden information:</td>
+	    <td valign="top" align="left" width="90">Information:</td>
 	    <td valign="top"><& /shared/htmlize, text=>$_->{eventinfo} &></td>
           </tr>
-        </table>
 %}
 %unless(scalar(@$events)) {
     <br>
@@ -41,4 +52,5 @@ $events=>[]
 <%init>
 $obvius->get_version_fields($vdoc, [qw(show_event)]);
 my $show_event = $vdoc->Show_event;
+my $language = $r->notes('language');
 </%init>
