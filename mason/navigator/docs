@@ -78,7 +78,19 @@
 %unless($simple) {
         <tr>
           <td valign="top" class="mellemstr">&nbsp;</td>
-          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_picture('<% $path %>')"><strong>Opret nyt billede her</a></strong></td>
+          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_picture('<% $path %>')"><strong><& SELF:msg, text=>'Opret nyt billede her' &></a></strong></td>
+          <td valign="top" align="center" class="mellemstr">-</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" align="center"  class="mellemstr">-</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" align="center"  class="mellemstr">-</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+        </tr>
+        <tr>
+          <td valign="top" class="mellemstr">&nbsp;</td>
+          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_upload('<% $path %>')"><strong><& SELF:msg, text=>'Opret upload-dokument her' &></a></strong></td>
           <td valign="top" align="center" class="mellemstr">-</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
           <td valign="top" class="mellemstr">&nbsp;</td>

@@ -1,0 +1,175 @@
+%if($new_path) {
+<script language="javascript">
+    document.pageform.path.value = '<% $new_path %>';
+    document.pageform.quick_upload.value = 0;
+    document.pageform.method='GET';
+    document.pageform.submit();
+</script>
+%} else {
+<script language="javascript">
+<!--
+function uploadform_submit() {
+    if(! document.pageform.title.value) {
+        alert('Du skal angive en titel');
+        return;
+    }
+    if(! document.pageform.short_title.value) {
+        document.pageform.short_title.value = document.pageform.title.value;
+    }
+    if(! document.pageform.upload_data.value) {
+        alert('Du skal angive et upload-dokument');
+        return;
+    }
+    document.pageform.quick_upload.value = 1;
+    document.pageform.method='post';
+    document.pageform.enctype='multipart/form-data';
+    document.pageform.submit();
+}
+// -->
+</script>
+
+<table border="0" cellpadding="5" align="left">
+<tr>
+<td>
+
+<h2>Nyt upload-dokument</h2>
+%if($error) {
+    <strong>Der opstod følgende fejl ved oprettelsen af upload-dokumentet:</strong><br>
+    <% $error %><br>
+    <br>
+%}
+
+<input type="hidden" name="go" value="">
+
+Dokumentets titel<br>
+<input type="text" name="title" size=50><br>
+<br>
+Kort titel<br>
+<input type="text" name="short_title" size=50><br>
+<br>
+%if($show_teaser) {
+Teaser<br>
+<textarea rows="4" cols="50" name="teaser"></textarea><br>
+<br>
+%}
+Upload-fil<br>
+<input type="file" size="40" name="upload_data">
+<br>
+<br>
+Rettigheder<br>
+Bruger: <% $obvius->{USER} %> &nbsp;
+Gruppe:
+<select name="group">
+%for(@$user_groups) {
+    <option value="<% $_->{grp} %>"><% $obvius->{GROUPS}->{$_->{grp}}->{name} %>  </option>
+%}
+</select>
+<br>
+<br>
+<input type="button" value="Upload dokument" onclick="uploadform_submit()">
+
+</td>
+</tr>
+</table>
+%}
+<%args>
+$path
+</%args>
+<%once>
+my $upload_doctype = $obvius->get_doctype_by_name('Upload');
+</%once>
+<%init>
+# Disable cache
+$r->no_cache(1);
+
+my $new_path; # When we have created the picture, go here..
+
+my $parent = $obvius->lookup_document($path);
+my $parent_version = $obvius->get_public_version($parent) || $obvius->get_latest_version($parent);
+my $parent_title = $obvius->get_version_field($parent_version, 'title');
+
+my $user = $obvius->{USERS}->{$obvius->{USER}};
+my $user_groups = $obvius->{USER_GROUPS}->{$user->{id}} || [ {grp => 1} ];
+
+my $show_teaser;
+$show_teaser = 1 if(defined($upload_doctype->{FIELDS}->{TEASER}));
+
+my $error;
+
+if(my $name = $r->param('upload_data')) {
+    if (my $upload=$r->upload('upload_data')) {
+        if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
+            local $/ = undef;
+            my $value = <$fh>;
+
+            my $fields = new MCMS::Data;
+
+            # Set default values
+            for(keys %{$upload_doctype->{FIELDS}}) {
+                $fields->param($_ => $upload_doctype->{FIELDS}->{$_}->{DEFAULT_VALUE});
+            }
+
+            $fields->param('appdata' => $value);
+            $fields->param('mimetype' => $upload->type);
+            $fields->param('size' => length($value));
+
+            my $docdate = $r->notes('now');
+            $docdate =~ s/\d\d:\d\d:\d\d$/00:00:00/;
+            $fields->param('docdate' => $docdate);
+
+            $fields->param(title => $r->param('title'));
+            $fields->param(short_title => $r->param('short_title'));
+
+            my $owner = $obvius->{USERS}->{$obvius->{USER}}->{id};
+            my $group = $r->param('group') || 1;
+
+            # Adjust name
+            $name =~ s!^.*[/\\]([^/\\]+)$!$1!; # Only last part of filename.
+            $name =~ s/æ/ae/g;
+            $name =~ s/ø/oe/g;
+            $name =~ s/å/aa/g;
+            $name =~ s/Æ/AE/g;
+            $name =~ s/Ø/OE/g;
+            $name =~ s/Å/AA/g;
+            $name =~ s/[^a-zA-Z0-9._-]/_/g;
+
+            if($obvius->get_doc_by_name_parent($name, $parent->Id)) {
+                $error="Der findes allerede et dokument med det navn";
+            } else {
+                my $create_error;
+                my ($docid, $version) = $obvius->create_new_document($parent, $name, $upload_doctype->Id, 'da', $fields, $owner, $group, \$create_error);
+                if($create_error) {
+                    $error = $create_error;
+                } else {
+                    # publish stuff
+                    my $new_doc = $obvius->get_doc_by_id($docid);
+                    die "No doc?!?" unless($new_doc);
+                    my $new_vdoc = $obvius->get_version($new_doc, $version);
+                    die "No vdoc?!?" unless($new_vdoc);
+                    $obvius->get_version_fields($new_vdoc, 255, 'PUBLISH_FIELDS');
+                    my $publish_fields = $new_vdoc->publish_fields;
+                    $publish_fields->param(PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
+
+                    # XXX Always in subscription?
+                    $publish_fields->param(in_subscription => 0);
+
+                    my $publish_error;
+                    $obvius->publish_version($new_vdoc, \$publish_error);
+                    if($publish_error) {
+                        $error = $publish_error;
+                    } else {
+                        $new_path = $obvius->get_doc_uri($new_doc);
+                    }
+                }
+            }
+        } else {
+            $error="Kunne ikke finde uploadet data";
+        }
+    } else {
+        $error="Kunne ikke finde uploadet data";
+    }
+}
+</%init>
+<%once>
+use POSIX qw(strftime);
+</%once>

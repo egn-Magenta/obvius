@@ -32,6 +32,12 @@ function navigator_add_picture(path) {
     document.pageform.submit();
 }
 
+function navigator_add_upload(path) {
+    document.pageform.path.value=path;
+    document.pageform.quick_upload.value = 1;
+    document.pageform.submit();
+}
+
 %unless($r->param('quick_picture')) {
 // For better reload:
 document.pageform.method = 'GET';
@@ -54,6 +60,7 @@ document.pageform.method = 'GET';
 <input type="hidden" name="path" value="<% $r->param('path') %>">
 
 <input type="hidden" name="quick_picture" value="0">
+<input type="hidden" name="quick_upload" value="0">
 
 
 
@@ -133,6 +140,8 @@ document.pageform.method = 'GET';
       </table>
 %if($r->param('quick_picture')) {
       <& quick_picture, %ARGS &>
+%} elsif($r->param('quick_upload')) {
+      <& quick_upload, %ARGS &>
 %} else {
       <& docs, here_docs=>\@here_docs, %ARGS &>
 %}
