@@ -375,7 +375,6 @@ sub search {
     my %map;
     my $straight_fields = '';
     my $having = '';
-    my $extra_tables;
 
     my $i = 0;
     my $xrefs = 0;
@@ -420,9 +419,6 @@ sub search {
         # element in the @table array:
 
         $table[0] .= " LEFT JOIN versions as pubflag_versions ON (versions.docid = pubflag_versions.docid and pubflag_versions.public = 1)";
-
-        $extra_tables .= "";
-        $extra_tables .= "";
 
         push(@fields, "MAX(vmax_versions.version) as obvius_vmax, pubflag_versions.public as pubflag");
         $having .= "((pubflag IS NULL AND versions.version=obvius_vmax) OR public=1)";
@@ -512,7 +508,7 @@ sub search {
     $where =~ s/$regex/$map{$1}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
-                                            '!Table'	    => $straight_fields . join(', ', @table) . $extra_tables,
+                                            '!Table'	    => $straight_fields . join(', ', @table),
                                             '!TabRelation'  => join(' AND ', @join),
                                             '!Fields'	    => join(', ', @fields),
 #                                           '!Debug'		=> 2,
