@@ -41,7 +41,7 @@ function set_default(name) {
             <input type="hidden" name="<% $d->{docid} %>_submitted" value="1" />
         </td>
 %  for(@$docparam_options) {
-        <td><input type="checkbox" name="selection_<% $d->{docid} %>" value="<% $_ %>" <% $d->{values}->{$_} ? 'CHECKED ' : '' %><% $form_disabled ? 'disabled="disabled" ' : '' %>/>
+        <td><input type="checkbox" name="selection_<% $d->{docid} %>" value="<% $_ %>" <% ($d->{values}->{$_} or $d->{no_docparam_value}) ? 'CHECKED ' : '' %><% $form_disabled ? 'disabled="disabled" ' : '' %>/>
 %  }
         <td><input type="button" onclick="set_default('selection_<% $d->{docid} %>');" value="Set default" <% $form_disabled ? 'disabled="disabled" ' : '' %>/></td>
     </tr>
