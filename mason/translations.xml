@@ -3927,6 +3927,17 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Kategori</translation>
   </text>
 
+  <text key="Be aware that you will delete the entire document and all versions.">
+    <translation lang="en">Be aware that you will delete the entire document and all versions.</translation>
+    <translation lang="da">Vær opmærksom på, at sletningen gælder det samlede dokument og dermed alle versioner.</translation>
+  </text>
+
+  <text key="You can delete a single version under the edit page 'About the document'">
+    <translation lang="en">You can delete a single version under the edit page 'About the document'</translation>
+    <translation lang="da">Sletning af en enkelt version kan foretages på redigeringssiden 'Om dokumentet'</translation>
+  </text>
+
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
