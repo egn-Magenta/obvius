@@ -70,11 +70,17 @@ use Data::Dumper;
 
 sub get_all  { return shift->{PROVIDER}->get_all; }
 
+# request - returns the current site object.
 sub site     { return shift->{PROVIDER}->site; }
+# request - returns the current request object.
 sub request  { return shift->{PROVIDER}->request; }
+# obvius - returns the current obvius object.
 sub obvius   { return shift->{PROVIDER}->obvius; }
+# doc - returns the current document object.
 sub doc	     { return shift->{PROVIDER}->document; }
+# vdoc - returns the current version object.
 sub vdoc     { return shift->{PROVIDER}->version; }
+# doctype - returns the current doctype object.
 sub doctype  { return shift->{PROVIDER}->doctype; }
 
 sub escape_html {
@@ -1574,6 +1580,13 @@ WebObvius::Template::MCMS - Methods that convert MCMS-encoded text to
 
   # Used internally:
   $newanchor=add_anchor($req, $anchor, $text, $tag, OPTION=>'value', ...);
+
+  my $site   =$this->site();
+  my $r      =$this->request();
+  my $obvius =$this->obvius();
+  my $doc    =$this->doc();
+  my $vdoc   =$this->vdoc();
+  my $doctype=$this->doctype();
 
 =head1 DESCRIPTION
 
