@@ -294,6 +294,7 @@ sub create_input_object {
 	$cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
 	$input->param('OBVIUS_COOKIES'=>$cookies);
     }
+    $input->param('OBVIUS_HEADERS_IN'=>{ $req->headers_in() });
     if (my $obvius_session_id=$req->param('obvius_session_id')) {
 	my $session=$this->get_session($obvius_session_id);
 	$input->param(SESSION=>$session);
