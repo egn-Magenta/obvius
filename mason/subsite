@@ -1,3 +1,4 @@
+<& lang_notification &>
 <% $data %>
 %
 <%init>
