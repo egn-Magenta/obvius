@@ -264,13 +264,7 @@ sub access_handler ($$) {
     return NOT_FOUND unless ($doc);
 
     if($obvius->config->param('use_public_authentication')) {
-        my $cookies=Apache::Cookie->fetch || {};
-        if(my $cookie = $cookies->{obvius_public_login}) {
-            my $users = $obvius->get_public_users({cookie => $cookie->value});
-            if($users) {
-                $obvius->param('public_user' => $users->[0]);
-            }
-        }
+        $this->public_login_cookie($req, $obvius);
     }
 
     $req->pnotes('document'=>$doc);

@@ -19,6 +19,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 use Apache::Constants qw(:common :methods :response);
 use Apache::Util qw(ht_time);
 use Apache::Cookie();
+use Digest::MD5 qw(md5_hex);
 
 use POSIX qw(strftime);
 
@@ -529,7 +530,84 @@ sub release_session {
     untie %$session;
 }
 
-
+# Public login:
+
+# The different types of expiration on the cookies:
+our %cookie_expire_types = (
+                                'session' => '',
+                                'timebased' => '+20m',
+                                'permanent' => '+3y'
+                        );
+
+# get_public_login_expire($login_type) -
+# Translates login_type from the public_users table
+# to an expire time for a cookie.
+# Return the expire time.
+sub get_public_login_expire {
+    my ($this, $type) = @_;
+
+    $type ||= 'session';
+
+    return $cookie_expire_types{$type};
+}
+
+# public_login_cookie($req) -
+# Checks for the obvius_public_login cookie and if present
+# try to look up a public user from the cookie value. If
+# a user is found it is placed on the Obvius object for
+# later use. Also refreshes the cookie if a successfull
+# was made.
+sub public_login_cookie {
+    my ($this, $req, $obvius) = @_;
+
+    my $cookies=Apache::Cookie->fetch || {};
+    if(my $cookie = $cookies->{obvius_public_login}) {
+        my $users = $obvius->get_public_users({cookie => $cookie->value});
+        if($users) {
+            my $user = $users->[0];
+            $obvius->param('public_user' => $user);
+
+            $this->set_public_login_cookie($req, $obvius, $user);
+        }
+    }
+}
+
+# set_public_login_cookie($req, $obvius, $user) -
+# Sets the cookie used in public login and updates
+# the public_user database with the new cookie value.
+sub set_public_login_cookie {
+    my ($this, $req, $obvius, $user) = @_;
+
+    # Set a new cookie:
+    my $cookie_value = md5_hex($req->request_time . $req->the_request);
+    my $expire = $this->get_public_login_expire($user->{login_type});
+    my $cookie = Apache::Cookie->new($req,
+                                        -name    =>  'obvius_public_login',
+                                        -value   =>  $cookie_value,
+                                        -expires =>  $expire,
+                                        -path    =>  '/'
+                                    );
+    $cookie->bake;
+
+    #Update the DB with the new cookie value:
+    $obvius->update_public_users({cookie => $cookie_value}, {id=>$user->{id}});
+}
+
+# expire_public_login_cookie($req, $user)
+# Expires (removes) the obvius_public_login cookie. Used
+# for logging out public users.
+sub expire_public_login_cookie {
+    my ($this, $req) = @_;
+
+    my $cookie = Apache::Cookie->new($req,
+                                        -name    =>  'obvius_public_login',
+                                        -value   =>  '',
+                                        -expires =>  '-3M',
+                                        -path    =>  '/'
+                                    );
+    $cookie->bake;
+}
+
 1;
 __END__
 # Below is stub documentation for your module. You better edit it!
