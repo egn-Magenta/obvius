@@ -2,7 +2,7 @@
 % if (@subdocs) {
     <ul>
 %     foreach (@subdocs) {
-%       my $date = $m->scomp('/shared/display_date', date=>$_->{docdate}, format=>'verbatim');
+%       my $date = $m->scomp('/shared/display_date', date=>$_->{docdate}, format=>'verbatim') || '';
         <li><a href="./<% $_->{name} %>/"><% $_->{short_title} %></a>
 %if ($show_subdoc_teaser == 1) {
 %  if ($_->{teaser} !~ /^\s+$/) {
@@ -12,7 +12,7 @@
 %  }
 %  }
 %}
-      <% $date != 0 ? '<br>'.$date .'<br><br>' : '<br><br>' %></li>
+      <% $date ? '<br>'.$date .'<br><br>' : '<br><br>' %></li>
 %     }
     </ul>
 % }
@@ -44,7 +44,7 @@ push(@get_fields, 'docdate') if ($show_subdoc_date == 1);
     $obvius->get_version_fields($_, \@get_fields);
     {
         name=>$subdoc->Name,
-        short_title=>($_->Short_title ? $_->Short_title : $_->Title),
+        short_title=>($_->field('Short_title') ? $_->Short_title : $_->Title),
         teaser=>$_->field('teaser'),
         docdate=>$_->field('docdate'),
         icons=>'',
