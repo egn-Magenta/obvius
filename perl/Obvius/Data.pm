@@ -104,6 +104,8 @@ sub param {
     return $oldvalue;
 }
 
+# delete ($param) - deletes a named parameter and return its value
+#
 sub delete {
     my ($this, $name) = @_;
 
@@ -268,6 +270,9 @@ Obvius::Data - Perl extension for blah blah blah
   $obj->param(); # Returns [param1, param2]
   $obj->param('param1'); # Returns value1
   $obj->param('param1' => $new_value); # Assigns $new_value and returns value1
+
+  # Usage of delete:
+  $obj->('param2'); # Deletes param2 and returns value2
 
 =head1 DESCRIPTION
 
