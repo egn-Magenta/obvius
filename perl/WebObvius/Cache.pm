@@ -18,5 +18,12 @@ sub handler {
     $filename =~ s/^$prefix//;
     $filename =~ m|([^/]*/[^/]*)|; 
     $r->content_type($1);
+
+    # Most browsers doesn't understand get filenames ending in a slash.
+    # Therefore we should tell them what filename to use.
+    if($r->uri =~ m!/([^/]+\.\w+)/$!) {
+        $r->header_out("Content-Disposition", "attachment; filename=$1");
+    }
+
     return OK;
 }
