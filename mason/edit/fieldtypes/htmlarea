@@ -54,17 +54,14 @@ function initEditor_<% $name %>() {
 
   var top_toolbar = config.toolbar[0];
 
-  // Remove the first 4 elements in the default toolbar (font-editing):
-  for(var i=0;i < 4; i++) {
-    top_toolbar.shift();
-  }
+  // Remove some unwanted buttons:
+  config.hideSomeButtons(" fontname fontsize inserthorizontalrule ")
 
   // Add a cleanup-word button:
   config.btnList["killword"] = [ "Clean HTML", "/admin_js/htmlarea/images/ed_killword.gif", false, function(e) {e.execCommand("killword");} ]
 
   top_toolbar[top_toolbar.length] = "separator";
   top_toolbar[top_toolbar.length] = "killword";
-
 
   editor_<% $name %> = new HTMLArea("<% $name %>", config);
 
