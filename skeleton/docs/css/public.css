@@ -2,6 +2,91 @@ body {
 	font-family: sans-serif;
 }
 
+/* LEFTMENU CLASSES - START  */
+
+.submenu {
+  color: #8A004F;
+  font-weight: bold;
+  font-size: 10px;
+  text-decoration: none;
+}
+
+/* LEFTMENU CLASSES - END  */
+
+
+/* NEWSBOX CLASSES - START  */
+
+.newstop {
+  font-family: Verdana,Arial,Helvetica,sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  text-transform: uppercase;
+  color: black;
+  background-color: #ededed;
+}
+
+.newsheader {
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.newsteaser {
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    font-weight: normal;
+    text-decoration: none;
+    color: black;
+}
+
+.newsdate {
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    font-weight: normal;
+    text-decoration: none;
+    color: black;
+}
+
+.ti {
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    font-weight: normal;
+    text-decoration: none;
+    color: black;
+}
+
+.ti A:link {text-decoration: none;}
+.ti A:visited {text-decoration: none;}
+.ti A:active {text-decoration: none;}
+.ti A:hover { text-decoration: underline;}
+
+.black   {
+    background-color:	#000000;
+    font-size: 12px;
+    vertical-align:	top;
+    color: white;
+}
+
+.nonews {
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 10px;
+    font-weight: normal;
+    text-decoration: none;
+    color: black;
+}
+
+/* NEWSBOX CLASSES - END  */
+
+.height100 {
+ height: 100%;
+}
+
+
+
+
 /*
  Local Variables: ***
  mode:c ***
