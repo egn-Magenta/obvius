@@ -245,12 +245,12 @@ sub retrieve_real_title {
         $title =~ s/\s+$//;
 
         # Convert utf8
-        if ($title =~ /Ã/) {
-            $title = utf8($title)->latin1;
-        }
+        $title = utf8($title)->latin1;
 
         return $title;
     }
+
+    return undef;
 }
 
 
