@@ -1,3 +1,5 @@
+Page_max er: <% $page_max %><br>
+
 % if ($page_max>1) {
 <!-- begin pager -->
 %if($page) {
@@ -6,8 +8,8 @@
     <BR>
 
 % if($page_prev) {
-    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=1&format=<% $format |u %>" title="Gå til første side"><img src="/grafik/pager/left-end.gif" width="18" height="12" border="0" alt="&lt;&lt;"></a>
-    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_prev %>&format=<% $format |u %>" title="Gå til forrige side"><img src="/grafik/pager/left.gif" width="12" height="12" border="0" alt="&lt;"></a>
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=1&format=<% $format |u %><% $url_extra %>" title="Gå til første side"><img src="/grafik/pager/left-end.gif" width="18" height="12" border="0" alt="&lt;&lt;"></a>
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_prev %>&format=<% $format |u %><% $url_extra %>" title="Gå til forrige side"><img src="/grafik/pager/left.gif" width="12" height="12" border="0" alt="&lt;"></a>
 % } else {
     <img src="/grafik/pager/left-grey-end.gif" width="18" height="12" border="0" alt="&lt;&lt;">
     <img src="/grafik/pager/left-grey.gif" width="12" height="12" border="0" alt="&lt;">
@@ -19,15 +21,15 @@
 %   if($_->{active}) {
         <b><% $page %></b>
 %   } else {
-        <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $_->{page} %>&format=<% $format |u %>" title="Gå til side <% $_->{page} %>"><% $_->{page} %></a>
+        <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $_->{page} %>&format=<% $format |u %><% $url_extra %>" title="Gå til side <% $_->{page} %>"><% $_->{page} %></a>
 %   }
 %  }
     &nbsp;&nbsp;&nbsp;
 % }
 
 % if($page_next) {
-    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_next %>&format=<% $format |u %>" title="Gå til næste side"><img src="/grafik/pager/right.gif" width="12" height="12" border="0" alt="&gt;"></a>
-    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_max %>&format=<% $format |u %>" title="Gå til sidste side"><img src="/grafik/pager/right-end.gif" width="18" height="12" border="0" alt="&gt;&gt;"></A>
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_next %>&format=<% $format |u %><% $url_extra %>" title="Gå til næste side"><img src="/grafik/pager/right.gif" width="12" height="12" border="0" alt="&gt;"></a>
+    <a href="<% $prefix . $uri %>?obvius_session_id=<% $session_id %>&p=<% $page_max %>&format=<% $format |u %><% $url_extra %>" title="Gå til sidste side"><img src="/grafik/pager/right-end.gif" width="18" height="12" border="0" alt="&gt;&gt;"></A>
 % } else {
     <img src="/grafik/pager/right-grey.gif" width="12" height="12" border="0" alt="&gt;">
     <img src="/grafik/pager/right-grey-end.gif" width="18" height="12" border="0" alt="&gt;&gt;">
@@ -40,6 +42,7 @@
 <%args>
 $output
 $format=>''
+$url_extra=>''
 </%args>
 <%init>
 my $session_id = $output->param('SESSION_ID');
