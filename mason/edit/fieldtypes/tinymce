@@ -153,6 +153,10 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             $uri =~ s!\?.*$!!;
 
                                                             if(my $doc = $obvius->lookup_document($uri)) {
+                                                                # Remove anchor and querystring from original uri:
+                                                                $org_uri =~ s!#.*$!!;
+                                                                $org_uri =~ s!\?.*$!!;
+
                                                                 $uri = "/" . $doc->Id . ".docid";
                                                                 $text =~ s!\Q$org_uri\E!$uri!;
                                                             }
