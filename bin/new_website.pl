@@ -255,7 +255,9 @@ sub make_db {
 sub db_exists {
     my ($dbname)=@_;
 
-    my $o=`mysql $dbname -e "show tables;" 2> /dev/null`;
+    my $command = "mysql $dbname -u $options{dbuser} --password=$options{dbpasswd} -e 'show tables;' 2> /dev/null";
+    
+    my $o=`$command`;
     if ($o eq "") {
 	return 0;
     }
