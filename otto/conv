@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Convert an old database to a new
-#
+# Test
 # $Id$
 
 OLDDB=$1
