@@ -29,6 +29,7 @@ package Obvius::Tables;
 use strict;
 use warnings;
 
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 ########################################################################
 #

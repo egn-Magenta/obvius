@@ -33,6 +33,8 @@ use warnings;
 
 use POSIX qw(strftime);
 
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 ########################################################################
 #
 #	Database update helpers.

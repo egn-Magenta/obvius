@@ -31,6 +31,8 @@ package Obvius::Subscriptions;
 use strict;
 use warnings;
 
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 ########################################################################
 #
 #	Methods for Subscription System

@@ -31,6 +31,8 @@ package Obvius::Users;
 use strict;
 use warnings;
 
+our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 ########################################################################
 #
 #	User and group information retrieval
