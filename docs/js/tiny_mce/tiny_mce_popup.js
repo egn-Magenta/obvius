@@ -17,6 +17,15 @@ if (!tinyMCE)
 // Setup window openerer
 window.opener = win;
 
+
+// Place a reference to this dialog's window object on the opener
+// so browsercallback functions can find the dialog.
+if(!win.tinymce_dialogrefs) {
+    win.tinymce_dialogrefs = new Object;
+}
+
+win.tinymce_dialogrefs[window.name] = window;
+
 // Setup title
 var re = new RegExp('{|\\\$|}', 'g');
 var title = document.title.replace(re, "");
