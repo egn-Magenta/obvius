@@ -662,9 +662,9 @@ HTMLArea.prototype.generate = function () {
 
 	// add a handler for the "back/forward" case -- on body.unload we save
 	// the HTML content into the original textarea.
-	window.onunload = function() {
-		editor._textArea.value = editor.getHTML();
-	};
+	//window.onunload = function() {
+		//editor._textArea.value = editor.getHTML();
+	//};
 
 	// creates & appends the toolbar
 	this._createToolbar();
@@ -709,6 +709,14 @@ HTMLArea.prototype.generate = function () {
 		height = 0;
 	}
 	iframe.style.height = height + "px";
+
+	if(this.config.resizeToolbars) {
+	    var toolbarWidth = iframe.style.width;
+	    toolbarWidth = toolbarWidth.replace(/px$/, '');
+	    toolbarWidth -= 2;
+	    this._toolbar.style.width = toolbarWidth + 'px';
+	    this._statusBar.style.width = (toolbarWidth - 4) + 'px';
+	}
 
 	// the editor including the toolbar now have the same size as the
 	// original textarea.. which means that we need to reduce that a bit.

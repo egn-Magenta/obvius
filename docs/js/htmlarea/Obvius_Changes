@@ -1,0 +1,38 @@
+The following changes have been added to htmlarea to make it
+work with Obvius:
+
+
+
+htmlarea.js file:
+
+- Removed onunload handler since it seemed to mess up saving
+of the data when having more than one editor.
+
+- Added a config option, resizeToolbars, to make the toolbars
+be resized to the same size as the editor/textarea.
+
+
+
+obvius_htmlarea.js file:
+
+This file contains functions used to override the default
+htmlarea functions:
+
+- htmlarea_InsertImage_Obvius
+    Used to override HTMLArea._insertImage. Makes sure
+    baseURL is always passed to the image dialog and
+    starts the Obvius image dialog instead of the standard
+    htmlarea image dialog.
+
+- htmlarea_CreateLink_Obvius
+    Used to override HTMLArea._createLink. Makes sure
+    baseURL is always passed to the link dialog and
+    starts the Obvius link dialog instead of the standard
+    htmlarea link dialog.
+
+- htmlarea_stripBaseURL_Obvius
+    Used to override HTMLArea.stripBaseURL
+    Only converts MSIE "http:///" links to "/" instead of
+    stripping down urls to the baseURL. We do this since
+    Obvius wants URLs starting with a "/".
+
