@@ -63,6 +63,8 @@ sub get_group {
     return $this->{GROUPS}->{$grpid};
 }
 
+# get_grpid - given a string with a group name, returns the
+#             corresponding group id, if any.
 sub get_grpid {
     my ($this, $grp) = @_;
 
@@ -345,6 +347,8 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
   my $grpid=$obvius->create_new_group({ name=>'Boxers', user=>$userid }, $doc);
 
   my $href=$obvius->get_user($userid);
+
+  my $grpid=$obvius->get_grpid($group_name);
 
 =head1 DESCRIPTION
 
