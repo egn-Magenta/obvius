@@ -356,10 +356,17 @@ sub generate_page {
 	#$this->add_benchmark($req, 'Bake cookies') if ($this->{BENCHMARK});
 	my $outgoing_cookies=$output->param('OBVIUS_COOKIES') || {};
 	foreach my $k (keys %$outgoing_cookies) {
+	    # To keep backwards compatibility we do something like this,
+	    # even though it would have been nicer to keep compatibility
+	    # with the Apache::Cookie/CGI::Cookie interface (eg. make
+	    # a session cookie if expires is undef).
+
+	    my $expires = $outgoing_cookies->{$k}->{expires} || '+3M';
+	    $expires = undef if($expires eq 'session');
 	    my $cookie=new Apache::Cookie($req,
 					  -name => $k,
 					  -value => $outgoing_cookies->{$k}->{value},
-					  -expires => $outgoing_cookies->{$k}->{expires} || '+3M',
+					  -expires => $expires,
 					  -path => '/',
 					 );
 	    $cookie->bake;
