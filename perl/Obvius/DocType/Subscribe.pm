@@ -239,7 +239,17 @@ sub action {
         $output->param(sender => $mailfrom);
         $subscriber = $obvius->get_subscriber( { email => $email } );
         if($subscriber) {
-            $output->param( password => $subscriber->{passwd});
+		  if ($subscriber->{passwd}) {
+			$output->param( password => $subscriber->{passwd});
+		  } else {
+			#The user doesn't have a password so make him one
+            my @chars = (0..9, 'A'..'Z', 'a'..'z');
+			my $passwd;
+			$passwd .= $chars[rand scalar(@chars)] for (1..8);
+			$obvius->update_subscriber( { passwd => $passwd }, email => $email);
+			$output->param( password => $passwd);
+		  }
+
         } else {
             $output->param( error_no_subscriber => 1);
         }
