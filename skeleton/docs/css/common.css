@@ -118,6 +118,37 @@ form td select {
 
 /* COMBO/KEYWORD SEARCH - END */
 
+div.comments {
+  margin-top: 2em;
+}
+
+div.comments div {
+  background-color: #f8f8f8;
+  margin-bottom: 0.25em;
+}
+
+div.comments div p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+div.comments p.author {
+  margin-top: -0.5em;
+  margin-left: 0.25em;
+  margin-bottom: 1.5em;
+  font-style: italic;
+}
+
+div.comments form label {
+  display: block;
+  font-size: small;
+}
+
+div.comments form label.after {
+  display: inline;
+  font-size: normal;
+}
+
 /*
  Local Variables: ***
  mode:c ***
