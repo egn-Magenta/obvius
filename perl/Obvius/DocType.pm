@@ -74,7 +74,7 @@ sub doctypemap {
     # XXX Should check translations as well...
     if (my $doctype=$obvius->get_doctype_by_name($doctypename)) {
 	$doctypeid=$doctype->Id;
-	warn "DOCTYPE $doctypename has id $doctypeid!";
+	#warn "DOCTYPE $doctypename has id $doctypeid!";
     }
     else {
 	warn "Couldn't determine id for doctype $doctypename. Defaulting to 1.";
