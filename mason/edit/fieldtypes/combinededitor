@@ -15,7 +15,7 @@ $no_msie_editor=>undef
 %
 % # Always use MSIE editor if possible..
 % if($use_msie) {
-    <& msie_text, value=>$value, name=>$name, cols=>$cols, rows=>$rows, pure_html => 1 &>
+    <& msie_text, value=>$value, name=>$name, cols=>$cols, rows=>$rows, pure_html => 1, uri_extra => $uri_extra &>
 % } else {
 % # Use standard textarea with added on buttons for more advanced editors.
 %  if($is_composite_compatible) {
@@ -27,7 +27,7 @@ $no_msie_editor=>undef
 var choose_link_url_for_<% $name %> = 'http://<% $hostname %>/admin/?obvius_op=navigator&path=<% $uri %>';
 var choose_image_url_for_<% $name %> = 'http://<% $hostname %>/admin/?obvius_op=navigator&path=<% $uri %>&doctype=Image';
 var stylesheets_for_<% $name %> = 'http://<% $hostname %>/css/public.css,http://<% $hostname %>/css/common.css';
-var basehref_for_<% $name %> = 'http://<% $hostname . $uri %>';
+var basehref_for_<% $name %> = 'http://<% $hostname . $uri . $uri_extra %>';
 </script>
 %  }
 
@@ -81,6 +81,17 @@ if($is_composite_compatible) {
 }
 
 $wrap=' WRAP="' . $wrap . '" ';
+
+# Figure out whether we are creating a new document or editing an old.
+# If we are creating a new one we should add the documents name
+# to the document base used in the editors
+my $uri_extra = '';
+if(my $ses_doc = $session->{document}) {
+    unless($ses_doc->param('id')) {
+        $uri_extra = $ses_doc->param('name') . '/';
+    }
+}
+
 </%init>
 </%method>
 %

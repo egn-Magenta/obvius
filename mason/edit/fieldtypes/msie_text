@@ -4,6 +4,7 @@ $name
 $cols=>59
 $rows=>22
 $pure_html=>undef
+$uri_extra=>''
 </%args>
 <%init>
 my $html_value = $pure_html ? $value : $m->scomp('/shared/htmlize', text=>$value, dont_wrap=>1);
@@ -135,7 +136,7 @@ function obvius_<% $name %>_load()
             headTag = headTag[0];
             if(headTag) {
                 var baseTag = tmpFrame.document.createElement("base");
-                baseTag.href = 'http://<% $r->hostname . $uri %>';
+                baseTag.href = 'http://<% $r->hostname . $uri . $uri_extra %>';
                 headTag.appendChild(baseTag);
             }
         }
