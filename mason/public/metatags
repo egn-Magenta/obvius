@@ -16,35 +16,90 @@
 % }
 % if (my $v=$vdoc->field('docdate')) {
     <meta name="DC.Date" scheme="ISO8601" content="<% substr($v, 0, 10) %>"<% $endtag %>>
+    <meta name="DC.Date.Created" scheme="ISO8601" content="<% substr($v, 0, 10) %>"<% $endtag %>>
+% }
+% if ($modified) {
+    <meta name="DC.Date.Modified" scheme="ISO8601" content="<% substr($modified, 0, 10) %>"<% $endtag %>>
 % }
 % if (my $v=$vdoc->param('lang') || 'da') {
     <meta name="DC.Language" scheme="ISO639-1" content="<% $v |h %>"<% $endtag %>>
 % }
 %
 <%args>
-$publisher=>undef
 $rights=>undef
 $format=>'text/html'
 </%args>
 %
 <%init>
-$obvius->get_version_fields($vdoc, [qw(title version author category keyword teaser
-				     docdate docref source expires)]);
-my %metadata=(
-	      'DC.Title'=>$vdoc->Title,
-	      'DC.Title.Release'=>$vdoc->Version,
-	      'DC.Creator'=>$vdoc->field('author'),
-	      'DC.Subject'=>$vdoc->field('subject'),
-	      'DC.Description'=>$m->scomp('/shared/htmlunmap', text=>$vdoc->field('teaser')),
-	      'DC.Publisher'=>$publisher,
-	      'DC.Format'=>$format,
-	      'DC.Identifier'=>$vdoc->field('docref'),
-	      'DC.Source'=>$vdoc->field('source'),
-	      'DC.Coverage'=>($vdoc->field('expires') eq '9999-01-01 00:00:00' ? undef : $vdoc->field('expires')),
-	      'DC.Rights'=>$rights,
-	     );
+$obvius->get_version_fields($vdoc, [qw(title version category keyword teaser
+                                        docdate expires docref
+                                        publisher contributors
+                                        source author)]);
 
-# DC.Type?
+#Lav date.modified feltet
+$obvius->get_version_fields($vdoc, [qw(published)], 'PUBLISH_FIELDS');
+my $modified = $vdoc->publish_field('PUBLISHED') || '';
+
+# Lav publisher feltet
+my $publisher = $vdoc->field('publisher') || '';
+
+#Opbyg en liste af keywords til standard keywords tag'en.
+my $keywordlist = '';
+if(my $keywords = $vdoc->field('keyword')) {
+    $keywordlist = join(", ", map { $_->Name } @$keywords);
+}
+if(my $categories = $vdoc->field('category')) {
+    if(scalar(@$categories)) {
+        $keywordlist .= ', ' if($keywordlist);
+        $keywordlist .= join(", ", map { $_->Name } @$categories);
+    }
+}
+
+# Opbyg description tag:
+
+# Konverter til plaintext:
+my $description = $m->scomp('/shared/html2text', html=>($vdoc->field('teaser') || ''));
+
+# Htmlunmap
+$description = $m->scomp('/shared/htmlunmap', text=>$description);
+
+# Fjern liniebreaks til sidst:
+$description =~ s/[\r\n]*$//;
+
+my $author = $m->scomp('/shared/html2text', html=>($vdoc->field('author') || ''));
+if ($author =~ /^\s+$/) {
+    $author = undef;
+} elsif  ($author =~ /(\n|\r)/) {
+    $author =~ s/(\n|\r)//;
+}
+
+my %metadata=(
+                'DC.Title'=>$vdoc->Title,
+                'DC.Description'=>$description,
+                'DC.Publisher'=>$publisher,
+                'DC.Creator'=>$author,
+                'DC.Contributor'=>$vdoc->field('contributors'),
+
+                #Keywords hedder Subject i dublin core standarden og håndteres separat.
+                'Keywords'=>$keywordlist,
+
+                # Obvius standard
+                'DC.Title.Release'=>$vdoc->Version,
+                'DC.Format'=>$format,
+                'DC.Identifier'=>$vdoc->field('docref'),
+                'DC.Source'=>$vdoc->field('source'),
+                'DC.Coverage'=>($vdoc->field('expires') eq '9999-01-01 00:00:00' ? undef : $vdoc->field('expires')),
+                'DC.Rights'=>$rights,
+            );
+
+# Standard pendant til DC.* tags:
+$metadata{'Title'} = $metadata{'DC.Title'};
+$metadata{'Description'} = $metadata{'DC.Description'};
+$metadata{'Publisher'} = $metadata{'DC.Publisher'};
+$metadata{'Creator'} = $metadata{'DC.Creator'};
+$metadata{'Contributor'} = $metadata{'DC.Contributor'};
+
+# Andre?
 
 my $endtag=($format eq 'text/xhtml' ? ' /' : '');
 </%init>
