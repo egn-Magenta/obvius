@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# backup_postgres - makes a backup of PostgreSQL databases.
+#                   Which databases to backup on which server is controlled
+#                   by the presence of the files: 
+#                     POSTGRES:"dbname" 
+#                     POSTGRES_SERVER_"hostname"
+#                   Files are placed in backup/ under the current site. All filenames
+#                   are prefixed with "PG_" to distinguish them from MySQL databases.
+#
+#                   Notice: This script just dumps databases to disk. Another script is
+#                   needed to copy them somewhere else. The ordinary Obvius backup script
+#                   could be such a script.
+#
+# Copyright (C) 2005, Magenta ApS. Written by Martin Skøtt (martin@magenta-aps.dk).
+# Licensed under the GPL.
+#
+# $Id$
+
+HOSTNAME="$(hostname)"
+TODAY="$(date '+%Y%m%d')"
+
+for d in /var/www/*/; do
+    test -e ${d}POSTGRES_SERVER_$HOSTNAME || continue
+    site="$(basename $d)"  
+    echo "#Backing up PostgreSQL databases under ${site} on ${HOSTNAME}:"
+
+    for file in ${d}POSTGRES:*; do
+        if [ -e "$file" ]; then
+            db="$(echo "$file" | cut -d: -f2)" 
+            echo -e "#\t$db"
+        fi
+    done
+
+done
