@@ -1,0 +1,61 @@
+To: <% $mailto %>
+From: <% $from %>
+Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $r->hostname . $uri %>)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Content-Disposition: inline
+Precedence: bulk
+
+Formularen "<% $vdoc->field('title') %>" er blevet udfyldt med følgende data:
+
+%for(@$fields) {
+<% $_->{title} %> (<% $_->{name} %>):
+%if(ref($_->{_submitted_value})) {
+<% join(", ", @{ $_->{_submitted_value} }) %>
+%} else {
+<% $_->{_submitted_value} %>
+%}
+
+%}
+
+
+--
+  <% $obvius->config->param('sitename') %>
+%
+%
+%
+<%args>
+$output
+$mailto
+</%args>
+%
+%
+<%init>
+my $formdata = $output->param('formdata');
+
+my $fields = $formdata->{field} || [];
+my %fields_by_name = map { $_->{name} => $_ } @$fields;
+
+
+my $from = $mailto;
+
+# Try to make the mail originate from whoever filled the
+# form. Magic fieldnames used are "email" and "name".
+if($fields_by_name{'name'}->{_submitted_value} and $fields_by_name{'email'}->{_submitted_value}) {
+    $from = $fields_by_name{'name'}->{_submitted_value} . " <" . $fields_by_name{'email'}->{_submitted_value} . ">";
+    $r->notes('formdata_mail_from' => $fields_by_name{'email'}->{_submitted_value})
+} elsif($fields_by_name{'email'}) {
+    $from = $fields_by_name{'email'}->{_submitted_value};
+    $r->notes('formdata_mail_from' => $fields_by_name{'email'}->{_submitted_value})
+}
+</%init>
+<%once>
+use Unicode::String qw(utf8 latin1);
+</%once>
+<%filter>
+# Cleanup utf characters
+$_ =~ s/(Ã.)/utf8($1)->latin1/ge;
+</%filter>
+%
+%

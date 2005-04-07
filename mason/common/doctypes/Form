@@ -2,7 +2,12 @@
 
 <& headline &>
 %
+%if($r->param('obvius_form_submitted') and $output->param('submitted_data_ok')) {
+<& form_files/after_submit, %ARGS, output=>$output &>
+%} else {
 <& teaser &>
+
+<& /shared/htmlize, text=>$vdoc->field('formtext') || '' &>
 
 <div class="obviusform">
 
@@ -17,6 +22,7 @@ Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette
 </div>
 <br />
 %}
+
 
 %unless($prefix) {
 <form name="pageform" action="<% $uri %>" method="get">
@@ -39,6 +45,7 @@ Fejl: <% $_->{invalid} %>
     <& 'form_files/fieldtypes/default', fielddata=>$_ &>
 %   }
 %}
+
 <br />
 <div>
 <input type="submit" value="Submit" />
@@ -46,8 +53,9 @@ Fejl: <% $_->{invalid} %>
 %unless($prefix) {
 </form>
 %}
-
 </div>
+%
+%}
 %
 %
 <%args>
@@ -55,6 +63,7 @@ $output
 </%args>
 %
 <%init>
+$obvius->get_version_fields($vdoc, ['formtext']);
 my $formdata = $output->param('formdata');
 my $fields = $formdata->{field} || [];
 
@@ -62,6 +71,9 @@ my $invalid = $output->param('invalid') || [];
 
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 </%init>
+<%once>
+use Unicode::String qw(utf8 latin1);
+</%once>
 %
 %
 %
