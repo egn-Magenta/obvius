@@ -83,6 +83,9 @@ if ($obvius_new_keywords) {
     }
 }
 
-return [ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value ];
+# If the user writes an existing keyword as a new one, don't add
+# duplicates (i.e. remove any dupes):
+my %values=map { $_=>1 } @$value;
+return [ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } keys %values ];
 </%perl>
 </%method>
