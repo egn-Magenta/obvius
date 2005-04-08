@@ -249,11 +249,12 @@ sub action {
         $entry{fields} = { field => [] };
 
         for(@{$formdata->{field}}) {
-            push(@{$entry{fields}->{field}}, { name => $_->{name}, value => $_->{_submitted_value} });
+            push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
         }
 
-        push(@{ $xml->{entry} }, unutf8ify(\%entry));
+        push(@{ $xml->{entry} }, $this->unutf8ify(\%entry));
 
+        $xml = $this->utf8ify($xml);
 
         XMLout($xml, rootname=>'entries', noattr=>1, outputfile => $data_file);
 
@@ -276,7 +277,26 @@ sub unutf8ify {
         return [ map { $this->unutf8ify($_) } @$obj ];
     }
     elsif ($ref eq 'HASH') { # Hash:
-        return { map { $this->unutf8ify($_) => $this->unutf8ify($obj->{$_}) } keys (%$obj) };
+        return { map { $_ => $this->unutf8ify($obj->{$_}) } keys (%$obj) };
+    }
+    else {
+        return 'UNUNUTF8IFIABLE';
+    }
+}
+
+sub utf8ify {
+    my ($this, $obj)=@_;
+
+    my $ref=ref $obj;
+
+    if (!$ref) { # Scalar:
+        return latin1($obj)->utf8;
+    }
+    elsif ($ref eq 'ARRAY') { # Array:
+        return [ map { $this->utf8ify($_) } @$obj ];
+    }
+    elsif ($ref eq 'HASH') { # Hash:
+        return { map { $_ => $this->utf8ify($obj->{$_}) } keys (%$obj) };
     }
     else {
         return 'UNUTF8IFIABLE';
