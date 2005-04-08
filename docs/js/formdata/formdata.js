@@ -497,6 +497,15 @@ function formdata_validate_and_add_field(form_fieldname, old_name) {
     // First import the fieldNode into the rootDoc
     var newNode = rootDoc.importNode(fieldNode, true);
 
+    // Hmmm, the type field seems to be reset for some reason in Internet Explorer.
+    // Try to fix it like this:
+    var newTypeNode = newNode.getElementsByTagName('type').item(0);
+    if(newTypeNode.getFirstChild()) {
+        var typeText = newTypeNode.getFirstChild().getXML();
+        newTypeNode.removeChild(newTypeNode.getFirstChild());
+        newTypeNode.appendChild(newTypeNode.getOwnerDocument().createTextNode(typeText));
+    }
+
     // Then add it as a child of the fields element:
     var fieldsNode = rootDoc.getElementsByTagName('fields').item(0);
     fieldsNode.appendChild(newNode);
