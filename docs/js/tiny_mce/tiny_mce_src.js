@@ -1875,6 +1875,14 @@ function TinyMCE__cleanupHTML(doc, config, element, visual, on_save) {
 	tinyMCE.cleanup_idCount = 0;
 	tinyMCE.cleanup_elementLookupTable = new Array();
 
+	if( tinyMCE.cleanup_on_save ){
+		var elements = this.getElementsByAttributeValue(doc.body, "img", "alt", "mceVisualAid");
+		for( var a=0;a<elements.length;a++){
+			var cE = elements[a];
+			cE.parentNode.removeChild(cE);
+		}
+	}
+
 	var startTime = new Date().getTime();
 
 	tinyMCE._convertOnClick(element);
@@ -3678,7 +3686,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 					return;
 			}
 
-			var href = "", target = "", title = "", onclick = "", action = "insert";
+			var href = "", target = "", title = "", onclick = "", action = "insert", links = [];
 
 			if (tinyMCE.selectedElement.nodeName.toLowerCase() == "a")
 				tinyMCE.linkElement = tinyMCE.selectedElement;
@@ -3708,12 +3716,20 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 				action = "update";
 			}
 
+			var aElements = this.contentDocument.getElementsByTagName('a')
+			for( var a=0;a<aElements.length;a++){
+				var name = aElements[a].getAttribute('name')
+				if(name){
+					links.push([tinyMCELang['lang_insert_link_popup_anchor'] + '#' + name, '#'  + name])
+				}
+			}
+
 			if (this.settings['insertlink_callback']) {
 				var returnVal = eval(this.settings['insertlink_callback'] + "(href, target, title, onclick, action);");
 				if (returnVal && returnVal['href'])
 					tinyMCE.insertLink(returnVal['href'], returnVal['target'], returnVal['title'], returnVal['onclick']);
 			} else {
-				tinyMCE.openWindow(this.insertLinkTemplate, {href : href, target : target, title : title, onclick : onclick, action : action});
+				tinyMCE.openWindow(this.insertLinkTemplate, {href : href, target : target, title : title, onclick : onclick, action : action, links: links });
 			}
 		break;
 
