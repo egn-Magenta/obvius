@@ -29,6 +29,7 @@ for d in /var/www/*/; do
         if [ -e "$file" ]; then
             db="$(echo "$file" | cut -d: -f2)" 
             echo -e "#\t$db"
+            pg_dump --clean $db | gzip > ${d}backup/PG_$db-$TODAY.sql.gz
         fi
     done
 
