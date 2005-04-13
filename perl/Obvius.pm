@@ -1141,6 +1141,10 @@ sub get_version_fields {
     return $version->fields($type);
 }
 
+# get_version_field - given a version object, a string with a
+#                     fieldname and optionally a type, gets the field
+#                     and returns the value, if present. Returns undef
+#                     on failure.
 sub get_version_field {
     my ($this, $version, $name, $type) = @_;
 
@@ -2133,9 +2137,11 @@ sub delete_single_version {
 ########################################################################
 ########################################################################
 
-
+# get_field - XXX OBSOLETE, to be removed. Don't call.
 sub get_field {
     my ($this, $version, $name) = @_;
+
+    carp "Call to OBSOLETE method Obvius::get_field";
 
     $this->tracer($version, $name) if ($this->{DEBUG});
 
@@ -2278,6 +2284,8 @@ Obvius - Content Manager, database handling.
     $obvius->sanity_check($config); # Obsolete, not used.
 
     my $aref=$obvius->get_public_version($doc);
+
+    my $value=$obvius->get_version_field($vdoc, 'title');
 
 =head1 DESCRIPTION
 
