@@ -5,6 +5,7 @@
 #                   by the presence of the files: 
 #                     POSTGRES:"dbname" 
 #                     POSTGRES_SERVER_"hostname"
+#                     POSTGRES_USER_"postgres user" (optional)
 #                   Files are placed in backup/ under the current site. All filenames
 #                   are prefixed with "PG_" to distinguish them from MySQL databases.
 #
@@ -25,11 +26,20 @@ for d in /var/www/*/; do
     site="$(basename $d)"  
     echo "#Backing up PostgreSQL databases under ${site} on ${HOSTNAME}:"
 
+    #Detect additional arguments for pg_dump
+    dump_args="--clean "
+    for file in ${d}POSTGRES_USER_*; do
+        if [ -e "$file" ]; then
+            username="$(echo "$file" | cut -d_ -f3)"
+            dump_args="${dump_args} -U ${username}"
+        fi
+    done
+
     for file in ${d}POSTGRES:*; do
         if [ -e "$file" ]; then
             db="$(echo "$file" | cut -d: -f2)" 
             echo -e "#\t$db"
-            pg_dump --clean $db | gzip > ${d}backup/PG_$db-$TODAY.sql.gz
+            pg_dump $dump_args $db | gzip > ${d}backup/PG_$db-$TODAY.sql.gz
         fi
     done
 
