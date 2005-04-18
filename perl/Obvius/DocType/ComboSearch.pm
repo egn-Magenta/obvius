@@ -334,7 +334,7 @@ sub or_result {
         }
     }
 
-    return [ map { $new_result{key} } keys %new_result ];
+    return [ map { $new_result{$_} } keys %new_result ];
 }
 
 sub and_result {
