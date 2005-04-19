@@ -45,6 +45,7 @@ tinyMCELang['lang_theme_charmap_desc'] = 'Insert custom character';
 tinyMCELang['lang_theme_visualaid_desc'] = 'Toggle guidelines/invisible elements';
 tinyMCELang['lang_insert_anchor_title'] = 'Insert/edit anchor';
 tinyMCELang['lang_insert_anchor_name'] = 'Anchor name';
+tinyMCELang['lang_insert_inval_error'] = 'The anchor name may not contain special characters';
 tinyMCELang['lang_theme_anchor_desc'] = 'Insert/edit anchor';
 tinyMCELang['lang_theme_insert_link_titlefield'] = 'Title';
 tinyMCELang['lang_theme_clipboard_msg'] = 'Copy/Cut/Paste is not available in Mozilla and Firefox.\nDo you want more information about this issue?';

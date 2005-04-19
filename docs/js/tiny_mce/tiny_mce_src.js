@@ -3826,6 +3826,11 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 					this.contentDocument.execCommand("fontname", false, "#mce_temp_font#");
 					var elementArray = tinyMCE.getElementsByAttributeValue(this.contentDocument.body, "font", "face", "#mce_temp_font#");
 					
+					var cE = this.getFocusElement()
+					if(!elementArray.length && cE && cE.tagName.toLowerCase() == 'img'){
+						elementArray = [cE.parentNode]
+					}
+					
 					var wasReplaced = false
 					if( tinyMCE.isGecko ){
 						for (var x=0; x<elementArray.length; x++) {
@@ -3837,7 +3842,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 										if( this.visualAid ) 
 											tinyMCE.handleVisualAid(this.getBody(), true, false);
 
-										var newNode = this.contentDocument.createDocumentFragment();
+										var newNode = this.contentDocument.createElement();
 										newNode.appendChild(this.contentDocument.createTextNode(cE.innerHTML))
 										cE.parentNode.replaceChild(newNode,cE )
 
