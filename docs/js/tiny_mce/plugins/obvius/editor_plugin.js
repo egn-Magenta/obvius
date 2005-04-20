@@ -10,7 +10,7 @@ function TinyMCE_obvius_getControlHTML(control_name) {
 }
 
 /**
- * Executes the mceAdvanceHr command.
+ * Executes the mceW3cCheck command.
  */
 function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface, value) {
     // Handle commands
