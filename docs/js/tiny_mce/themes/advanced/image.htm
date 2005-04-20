@@ -27,13 +27,21 @@ if (url != null)
 
 			var alt = document.forms[0].alt.value;
 			var border = document.forms[0].border.value;
-			var vspace = document.forms[0].vspace.value;
-			var hspace = document.forms[0].hspace.value;
-			var width = document.forms[0].width.value;
+			
+			var vspace = document.forms[0].left.value == document.forms[0].right.value ? document.forms[0].right.value : '';
+			var hspace = document.forms[0].top.value == document.forms[0].bottom.value ? document.forms[0].bottom.value : '';
+			
+			var width  = document.forms[0].width.value;
 			var height = document.forms[0].height.value;
-			var align = document.forms[0].align.options[document.forms[0].align.selectedIndex].value;
+			var align  = document.forms[0].align.options[document.forms[0].align.selectedIndex].value;
+			
+			var rtop = document.forms[0].top.value
+			var rbottom = document.forms[0].bottom.value
+			var rleft = document.forms[0].left.value
+			var rright = document.forms[0].right.value
 
-			window.opener.tinyMCE.insertImage(src, alt, border, hspace, vspace, width, height, align);
+
+			window.opener.tinyMCE.insertImage(src, alt, border, hspace, vspace, width, height, align, null, null, null, rtop, rbottom, rleft, rright);
 			top.close();
 		}
 	}
@@ -50,13 +58,17 @@ if (url != null)
         src = src.replace(/^\/admin/, "");
 		formObj.src.value = src;
 
-		formObj.alt.value = tinyMCE.getWindowArg('alt');
-		formObj.border.value = tinyMCE.getWindowArg('border');
-		formObj.vspace.value = tinyMCE.getWindowArg('vspace');
-		formObj.hspace.value = tinyMCE.getWindowArg('hspace');
-		formObj.width.value = tinyMCE.getWindowArg('width');
-		formObj.height.value = tinyMCE.getWindowArg('height');
-		formObj.insert.value = tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('action'), 'Insert', true);
+		formObj.alt.value		= tinyMCE.getWindowArg('alt');
+		formObj.border.value	= tinyMCE.getWindowArg('border');
+
+		formObj.left.value		= tinyMCE.getWindowArg('vspace') || tinyMCE.getWindowArg('leftMargin');
+		formObj.right.value		= tinyMCE.getWindowArg('vspace') || tinyMCE.getWindowArg('rightMargin');
+		formObj.top.value		= tinyMCE.getWindowArg('hspace') || tinyMCE.getWindowArg('topMargin');
+		formObj.bottom.value	= tinyMCE.getWindowArg('hspace') || tinyMCE.getWindowArg('bottomMargin');
+
+		formObj.width.value		= tinyMCE.getWindowArg('width');
+		formObj.height.value	= tinyMCE.getWindowArg('height');
+		formObj.insert.value	= tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('action'), 'Insert', true);
 
 		// Handle file browser
 		if (tinyMCE.getParam("file_browser_callback") != null) {
@@ -121,11 +133,11 @@ if (url != null)
     <tr>
       <td align="center" valign="middle"><table border="0" cellpadding="4" cellspacing="0">
           <tr>
-            <td colspan="2" class="title">{$lang_insert_image_title}</td>
+            <td colspan="4" class="title">{$lang_insert_image_title}</td>
           </tr>
           <tr>
             <td>{$lang_insert_image_src}:</td>
-            <td><table border="0" cellspacing="0" cellpadding="0">
+            <td colspan="3"><table border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td><input name="src" type="text" id="src" value="" style="width: 200px" onchange="getImageData();"></td>
                   <td id="browser"></td>
@@ -152,11 +164,11 @@ if (url != null)
 		  <!-- /Image list -->
           <tr>
             <td>{$lang_insert_image_alt}:</td>
-            <td><input name="alt" type="text" id="alt" value="" style="width: 200px"></td>
+            <td colspan="3"><input name="alt" type="text" id="alt" value="" style="width: 200px"></td>
           </tr>
           <tr>
             <td>{$lang_insert_image_align}:</td>
-            <td><select name="align">
+            <td colspan="3"><select name="align">
                 <option value="">{$lang_insert_image_align_default}</option>
                 <option value="left">{$lang_insert_image_align_left}</option>
                 <option value="right">{$lang_insert_image_align_right}</option>
@@ -164,26 +176,30 @@ if (url != null)
           </tr>
           <tr>
             <td>{$lang_insert_image_dimensions}:</td>
-            <td><input name="width" type="text" id="width" value="" size="3" maxlength="3"> pixels
+            <td colspan="3"><input name="width" type="text" id="width" value="" size="3" maxlength="3">
               x
-              <input name="height" type="text" id="height" value="" size="3" maxlength="3"> pixels</td>
+              <input name="height" type="text" id="height" value="" size="3" maxlength="3"> px</td>
           </tr>
           <tr>
             <td>{$lang_insert_image_border}:</td>
-            <td><input name="border" type="text" id="border" value="" size="3" maxlength="3"> pixels</td>
+            <td colspan="3"><input name="border" type="text" id="border" value="" size="3" maxlength="3"> px</td>
           </tr>
           <tr>
-            <td>{$lang_insert_image_vspace}:</td>
-            <td><input name="vspace" type="text" id="vspace" value="" size="3" maxlength="3"> pixels</td>
+            <td>{$lang_insert_image_right}:</td>
+            <td><input name="right" type="text" id="right" value="" size="3" maxlength="3"> px</td>
+            <td>{$lang_insert_image_top}:</td>
+            <td><input name="top" type="text" id="top" value="" size="3" maxlength="3"> px</td>
           </tr>
           <tr>
-            <td>{$lang_insert_image_hspace}:</td>
-            <td><input name="hspace" type="text" id="hspace" value="" size="3" maxlength="3"> pixels</td>
+            <td>{$lang_insert_image_left}:</td>
+            <td><input name="left" type="text" id="left" value="" size="3" maxlength="3"> px</td>
+            <td>{$lang_insert_image_bottom}:</td>
+            <td><input name="bottom" type="text" id="bottom" value="" size="3" maxlength="3"> px</td>
           </tr>
           <tr>
             <td><input type="button" id="insert" name="insert" value="{$lang_insert}" onclick="insertImage();">
             </td>
-            <td align="right"><input type="button" id="cancel" name="cancel" value="{$lang_cancel}" onclick="cancelAction();"></td>
+            <td align="right" colspan="3"><input type="button" id="cancel" name="cancel" value="{$lang_cancel}" onclick="cancelAction();"></td>
           </tr>
         </table></td>
     </tr>
