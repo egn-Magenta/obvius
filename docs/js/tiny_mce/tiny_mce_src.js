@@ -1992,7 +1992,7 @@ function TinyMCE_insertLink(href, target, title, onclick) {
 	}
 }
 
-function TinyMCE_insertImage(src, alt, border, hspace, vspace, width, height, align, title, onmouseover, onmouseout) {
+function TinyMCE_insertImage(src, alt, border, hspace, vspace, width, height, align, title, onmouseover, onmouseout,top,bottom,left,right) {
 	this.execCommand("mceAddUndoLevel");
 
 	function setAttrib(element, name, value, no_fix_value) {
@@ -2025,13 +2025,24 @@ function TinyMCE_insertImage(src, alt, border, hspace, vspace, width, height, al
 		tinyMCE.setAttrib(this.imgElement, 'title', title, true);
 		tinyMCE.setAttrib(this.imgElement, 'align', align, true);
 		tinyMCE.setAttrib(this.imgElement, 'border', border);
+
+
 		tinyMCE.setAttrib(this.imgElement, 'hspace', hspace);
 		tinyMCE.setAttrib(this.imgElement, 'vspace', vspace);
+
+		this.imgElement.style.marginTop = top != bottom ? top + 'px' : ''
+		this.imgElement.style.marginBottom= top != bottom ? bottom + 'px' : ''
+		this.imgElement.style.marginLeft = left != right ? left + 'px' : ''
+		this.imgElement.style.marginRight = left != right ? right + 'px' : ''
+
 		tinyMCE.setAttrib(this.imgElement, 'width', width);
 		tinyMCE.setAttrib(this.imgElement, 'height', height);
 		tinyMCE.setAttrib(this.imgElement, 'border', border);
         tinyMCE.setAttrib(this.imgElement, 'onmouseover', onmouseover, true);
         tinyMCE.setAttrib(this.imgElement, 'onmouseout', onmouseout, true);
+
+		this.imgElement.style.width = width && parseInt(width) ? parseInt(width) + 'px' : ''
+		this.imgElement.style.height = height && parseInt(height) ? parseInt(height) + 'px' : ''
 
 		// Fix for bug #989846 - Image resize bug
 		if (width && width != "")
@@ -3736,6 +3747,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 		case "mceImage":
 			var src = "", alt = "", border = "", hspace = "", vspace = "", width = "", height = "", align = "";
 			var title = "", onmouseover = "", onmouseout = "", action = "insert";
+			var topMargin = "", leftMargin = "", rightMargin = "", bottomMargin = "";
 
 			if (tinyMCE.selectedElement != null && tinyMCE.selectedElement.nodeName.toLowerCase() == "img")
 				tinyMCE.imgElement = tinyMCE.selectedElement;
@@ -3762,6 +3774,13 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
                 onmouseover = getAttrib(tinyMCE.imgElement, 'onmouseover');
                 onmouseout = getAttrib(tinyMCE.imgElement, 'onmouseout');
                 title = getAttrib(tinyMCE.imgElement, 'title');
+                
+                
+                topMargin		= parseInt( tinyMCE.imgElement.style.topMargin ) || parseInt( tinyMCE.imgElement.style.marginTop ) || ''
+                leftMargin		= parseInt( tinyMCE.imgElement.style.leftMargin ) || parseInt( tinyMCE.imgElement.style.marginLeft ) || ''
+                bottomMargin	= parseInt( tinyMCE.imgElement.style.bottomMargin ) || parseInt( tinyMCE.imgElement.style.marginBottom ) || ''
+                rightMargin		= parseInt( tinyMCE.imgElement.style.rightMargin ) || parseInt( tinyMCE.imgElement.style.marginRight ) || ''
+                
 
 				onmouseover = tinyMCE.cleanupEventStr(onmouseover);
 				onmouseout = tinyMCE.cleanupEventStr(onmouseout);
@@ -3780,7 +3799,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 				if (returnVal && returnVal['src'])
 					tinyMCE.insertImage(returnVal['src'], returnVal['alt'], returnVal['border'], returnVal['hspace'], returnVal['vspace'], returnVal['width'], returnVal['height'], returnVal['align'], returnVal['title'], returnVal['onmouseover'], returnVal['onmouseout']);
 			} else
-				tinyMCE.openWindow(this.insertImageTemplate, {src : src, alt : alt, border : border, hspace : hspace, vspace : vspace, width : width, height : height, align : align, title : title, onmouseover : onmouseover, onmouseout : onmouseout, action : action});
+				tinyMCE.openWindow(this.insertImageTemplate, {src : src, alt : alt, border : border, hspace : hspace, vspace : vspace, width : width, height : height, align : align, title : title, onmouseover : onmouseover, onmouseout : onmouseout, action : action, leftMargin: leftMargin, topMargin:topMargin, rightMargin:rightMargin,bottomMargin:bottomMargin});
 		break;
 
 		case "mceCleanupWord":
