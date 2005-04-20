@@ -495,6 +495,9 @@ function TinyMCE__createIFrame(replace_element) {
 	iframe.setAttribute("topMargin", "0");
 	iframe.setAttribute("width", tinyMCE.settings['area_width']);
 	iframe.setAttribute("height", tinyMCE.settings['area_height']);
+	if(tinyMCE.settings['tabindex']) {
+		iframe.setAttribute("tabindex", tinyMCE.settings['tabindex']);
+	}
 
 	if (tinyMCE.settings["auto_resize"])
 		iframe.setAttribute("scrolling", "no");
