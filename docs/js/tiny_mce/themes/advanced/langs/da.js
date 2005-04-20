@@ -13,6 +13,13 @@ tinyMCELang['lang_insert_image_border'] = 'Kant';
 tinyMCELang['lang_insert_image_dimensions'] = 'St&#248;rrelse';
 tinyMCELang['lang_insert_image_vspace'] = 'Lodret afstand';
 tinyMCELang['lang_insert_image_hspace'] = 'Vandret afstand';
+
+tinyMCELang['lang_insert_image_right'] = 'H&oslash;jre afstand';
+tinyMCELang['lang_insert_image_left'] = 'Venstre afstand';
+tinyMCELang['lang_insert_image_top'] = '&Oslash;vre afstand';
+tinyMCELang['lang_insert_image_bottom'] = 'Nedre afstand';
+
+
 tinyMCELang['lang_insert_image_align'] = 'Justering';
 tinyMCELang['lang_insert_image_align_default'] = 'Standard';
 tinyMCELang['lang_insert_image_align_baseline'] = 'Bundlinje';
