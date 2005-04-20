@@ -70,6 +70,11 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             push(@$attrseq, 'alt');
                                                             $attr->{alt} ||= "";
                                                         }
+
+                                                        # Fixup ismap attribute
+                                                        if($existing_attr{'ismap'}) {
+                                                            $attr->{'ismap'} = "ismap";
+                                                        }
                                                     }
 
                                                     # a
