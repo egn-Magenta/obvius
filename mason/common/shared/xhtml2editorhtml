@@ -14,9 +14,17 @@ my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
                                                 my($this, $tagname, $text, $attr, $attrseq)=@_;
-                                                  if($tagname eq 'img') {
+                                                    # List of attributes to be removed from the tag:
+                                                    my %remove_attr;
+                                                    my %existing_attr = map { $_ => 1 } @$attrseq;
+
+                                                    # Always remove "/"-attribute
+                                                    $remove_attr{'/'} = 1;
+
                                                     my $adjust = 0;
-                                                    if($attr->{style}) {
+
+                                                    # Image:
+                                                    if($tagname eq 'img' && $attr->{style}) {
                                                         # Set align from float:
                                                         if($attr->{style} =~ s!float:([^;]+);!!) {
                                                             my $align_val = $1;
@@ -24,81 +32,124 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                                             $attr->{align} = $align_val;
 
-                                                            push(@$attrseq, "align") unless(grep { $_ eq 'align' } @$attrseq);
+                                                            push(@$attrseq, "align") unless($existing_attr{'align'});
 
                                                             $adjust = 1;
                                                         }
 
-                                                        if($attr->{style} =~ m!margin-top:([^;]+);!) {
-                                                            my $top_val = $1;
-                                                            $top_val =~ s/^\s+//;
-                                                            if($attr->{style} =~ m!margin-bottom:([^;]+);!) {
-                                                                my $bottom_val = $1;
-                                                                $bottom_val =~ s/^\s+//;
+                                                        # No longer necessary to convert padding-styles back to
+                                                        # hspace and vspace since the editor now allows editing of all
+                                                        # four of the padding styles instead of hspace and vspace.
 
-                                                                if($bottom_val eq $top_val) {
-                                                                    # Remove styles:
-                                                                    $attr->{style} =~ s!margin-(bottom|top):[^;]+;!!g;
-
-                                                                    # Set vspace:
-                                                                    $top_val =~ s!\D*(\d+)\D*!$1!;
-                                                                    $attr->{vspace} = $top_val;
-
-                                                                    push(@$attrseq, "vspace") unless(grep { $_ eq 'vspace' } @$attrseq);
-                                                                    $adjust = 1;
-                                                                }
-                                                            }
-                                                        }
-
-                                                        if($attr->{style} =~ m!margin-left:([^;]+);!) {
-                                                            my $left_val = $1;
-                                                            $left_val =~ s/^\s+//;
-                                                            if($attr->{style} =~ m!margin-right:([^;]+);!) {
-                                                                my $right_val = $1;
-                                                                $right_val =~ s/^\s+//;
-
-                                                                if($left_val eq $right_val) {
-                                                                    # Remove styles:
-                                                                    $attr->{style} =~ s!margin-(left|right):[^;]+;!!g;
-
-                                                                    # Set hspace:
-                                                                    $left_val =~ s!\D*(\d+)\D*!$1!;
-                                                                    $attr->{hspace} = $left_val;
-
-                                                                    push(@$attrseq, "hspace") unless(grep { $_ eq 'hspace' } @$attrseq);
-                                                                    $adjust = 1;
-                                                                }
-                                                            }
+                                                        unless($attr->{style}) {
+                                                            $remove_attr{'style'} = 1;
                                                         }
                                                     }
 
-                                                    if($tagname eq 'a') {
+                                                    # Link
+                                                    elsif($tagname eq 'a') {
                                                         if($attr->{onclick} and $attr->{onclick} =~ m!this.target='([^']+)'!) {
                                                             $attr->{target} = $1;
-                                                            push(@$attrseq, 'target') unless (grep { $_ eq 'target'} @$attrseq);
-                                                            @$attrseq = grep { $_ ne 'onclick' } @$attrseq;
+                                                            push(@$attrseq, 'target') unless ($existing_attr{'target'});
+                                                            $remove_attr{'onclick'} = 1;
+                                                            $adjust = 1;
                                                         }
                                                     }
 
+                                                    # Table
+                                                    elsif($tagname eq 'table' and $attr->{style}) {
+                                                        # Set align from float
+                                                        if($attr->{style} =~ s!float:([^;]+);!!) {
+                                                            my $align_val = $1;
+                                                            $align_val =~ s/^\s+//;
+
+                                                            $attr->{align} = $align_val;
+
+                                                            push(@$attrseq, "align") unless($existing_attr{'align'});
+
+                                                            $adjust = 1;
+                                                        }
+
+                                                        # Set width
+                                                        if($attr->{style} =~ s!width:([^;]+);!!) {
+                                                            my $width_val = $1;
+                                                            $width_val =~ s/^\s+//;
+                                                            $width_val =~ s/px$//;
+
+                                                            $attr->{width} = $width_val;
+
+                                                            push(@$attrseq, "width") unless($existing_attr{'width'});
+
+                                                            $adjust = 1;
+                                                        }
+
+                                                        # Set height
+                                                        if($attr->{style} =~ s!height:([^;]+);!!) {
+                                                            my $height_val = $1;
+                                                            $height_val =~ s/^\s+//;
+                                                            $height_val =~ s/px$//;
+
+                                                            $attr->{height} = $height_val;
+
+                                                            push(@$attrseq, "height") unless($existing_attr{'height'});
+
+                                                            $adjust = 1;
+                                                        }
+                                                    }
+
+                                                    # TD
+                                                    elsif($tagname eq 'td' and $attr->{style}) {
+                                                        # Set width
+                                                        if($attr->{style} =~ s!width:([^;]+);!!) {
+                                                            my $width_val = $1;
+                                                            $width_val =~ s/^\s+//;
+                                                            $width_val =~ s/px$//;
+
+                                                            $attr->{width} = $width_val;
+
+                                                            push(@$attrseq, "width") unless($existing_attr{'width'});
+
+                                                            $adjust = 1;
+                                                        }
+
+                                                        # Set height
+                                                        if($attr->{style} =~ s!height:([^;]+);!!) {
+                                                            my $height_val = $1;
+                                                            $height_val =~ s/^\s+//;
+                                                            $height_val =~ s/px$//;
+
+                                                            $attr->{height} = $height_val;
+
+                                                            push(@$attrseq, "height") unless($existing_attr{'height'});
+
+                                                            $adjust = 1;
+                                                        }
+                                                    }
+
+                                                    # Remove style attribute if it's empty
+                                                    unless($attr->{style}) {
+                                                        $remove_attr{'style'} = 1;
+                                                        $adjust = 1
+                                                    }
+
+
                                                     if($adjust) {
-                                                        my $endtag = ' /';
+                                                        my $endtag = "";
+                                                        $endtag = " /" if($tagname =~ /^(br|img|input)$/ or $existing_attr{'/'});
+                                                        @$attrseq = grep {
+                                                                            ! $remove_attr{$_} # skip tags that were removed above
+                                                                            and
+                                                                            $_ !~ /^(mce_|editor_id)/ # skip editorspecific tags
+                                                                        } @$attrseq;
+
                                                         $text = "<$tagname";
                                                         for(@$attrseq) {
-                                                            next if($_ eq 'style' and not $attr->{style});
-                                                            if($_ eq '/') {
-                                                                $endtag = " /";
-                                                                next;
-                                                            } elsif(/^(mce_|editor_id)/) {
-                                                                # Skip tinymce tags:
-                                                                next;
-                                                            }
-                                                            $text .= " " . lc($_) . '="' . $attr->{$_} . '"' unless ($tagname =~ /^br$/);
+                                                            $text .= " " . lc($_) . '="' . $attr->{$_} . '"';
                                                         }
                                                         $text .= "$endtag>";
                                                     }
-                                                  }
 
-                                                  $out.= $text;
+                                                    $out.= $text;
                                                 }, "self, tagname, text, attr, attrseq" ],
                             end_h=> [sub {
                                             my($this, $tagname, $text, $attr)=@_;
