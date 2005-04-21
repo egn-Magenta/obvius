@@ -22,8 +22,8 @@ onload_array[onload_array.length] = Init;
         <td>
             <select name="type">
                 <option></option>
-                <option value="regexp">regexp</option>
-                <option value="min_checked">min_checked</option>
+                <option value="regexp"><& SELF:msg, text=>"validate_type_regexp" &></option>
+                <option value="min_checked"><& SELF:msg, text=>"validate_type_min_checked" &></option>
             </select>
         </td>
     </tr>

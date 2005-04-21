@@ -310,7 +310,7 @@ function formdata_populate_validaterules(fieldNode) {
         var tr = document.createElement('tr')
 
         var type_td = document.createElement('td');
-        type_td.innerHTML = valObj.validationtype;
+        type_td.innerHTML = formdata_translations['validate_type_' + valObj.validationtype] || valObj.validationtype;
         tr.appendChild(type_td);
 
         var arg_td = document.createElement('td');

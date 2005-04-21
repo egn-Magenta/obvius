@@ -126,6 +126,8 @@ var formdata_translations = {
                                 "field_type_checkbox" : "<& SELF:msg, text=>"Checkboxes" &>",
                                 "field_type_select" : "<& SELF:msg, text=>"Dropdown" &>",
                                 "field_type_selectmultiple" : "<& SELF:msg, text=>"Select multiple" &>",
+                                "validate_type_regexp" : "<& SELF:msg, text=>"validate_type_regexp" &>",
+                                "validate_type_min_checked" : "<& SELF:msg, text=>"validate_type_min_checked" &>",
                                 'dummy': ''
                             };
 </script>

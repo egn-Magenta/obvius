@@ -4404,6 +4404,17 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Ned</translation>
   </text>
 
+  <text key="validate_type_regexp">
+    <translation lang="en">Regular expression</translation>
+    <translation lang="da">Regulært udtryk</translation>
+  </text>
+
+  <text key="validate_type_min_checked">
+    <translation lang="en">Min. X chosen items</translation>
+    <translation lang="da">Min. X valgte værdier</translation>
+  </text>
+
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
