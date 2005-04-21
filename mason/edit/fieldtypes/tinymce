@@ -44,6 +44,7 @@ $no_msie_editor=>undef
         apply_source_formatting : 1,
         relative_urls : false,
         remove_script_host : false,
+        tabindex : "10",
         debug : false
         //save_callback : "customSave",
     });
