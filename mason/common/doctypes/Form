@@ -1,5 +1,14 @@
 <!-- Standard doctype: -->
 
+%if($prefix) {
+%   my $uri2 = $uri;
+%   $uri2 =~ s!/$!!;
+<div class="obviusformdownload">
+    <div><a href="<% $prefix . $uri2 %>?get_file=1">Click here to download collected form data in XML format</a>.</div>
+    <div><a href="<% $prefix . $uri2 %>?get_file=1&format=excel">Click here to download collected form data in Excel format</a>.</div>
+</div>
+%}
+
 <& headline &>
 %
 %if($r->param('obvius_form_submitted') and $output->param('submitted_data_ok')) {

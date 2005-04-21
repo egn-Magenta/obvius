@@ -35,6 +35,7 @@ use Data::Dumper;
 use XML::Simple;
 use POSIX qw(strftime);
 use Unicode::String qw(utf8 latin1);
+use Spreadsheet::WriteExcel;
 
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -59,7 +60,8 @@ sub raw_document_data {
 
     $obvius->get_version_fields($vdoc, ['title', 'formdata']);
 
-    my $xmldata = "<formexport>\n";
+    my $xmldata = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
+    $xmldata .= "<formexport>\n";
     $xmldata .= "  <title>" . $vdoc->field('title') . "</title>\n";
     $xmldata .= "  <url>" . $obvius->get_doc_uri($doc) . "</url>\n";
     $xmldata .= "  <docid>" . $doc->Id . "</docid>\n";
@@ -76,25 +78,91 @@ sub raw_document_data {
         $entries_xml = join("", <FH>);
         close(FH);
 
+        # Remove  xml declaration:
+        $entries_xml =~ s!^<[?]xml[^>]+>\s*!!s;
+
         # Indent:
-        $entries_xml =~ s/^/  /g;
+        $entries_xml =~ s/^/  /m;
     }
 
     $xmldata .= $entries_xml;
 
     my $formdata_xml = $vdoc->field('formdata') || '';
 
-    $formdata_xml =~ s/^/  /;
+    $entries_xml =~ s/^/  /m;
     $xmldata .= $formdata_xml . "\n";
 
     $xmldata .= "</formexport>\n";
 
     my $name = $doc->Name || $doc->Id;
-    unless($name =~ m!\.\w+$!) {
-        $name .= ".xml";
+
+    my $format = $input->param('format') || '';
+
+    if($format eq 'excel') {
+
+        my $xml_data = XMLin(
+                                $xmldata,
+                                keyattr=>[],
+                                forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
+                                suppressempty => ''
+                            );
+        my @headers;
+
+        for(@{ $xml_data->{fields}->{field} || [] }) {
+            my $header = $_->{title} . " (" . $_->{name} . ")";
+            $header = $this->unutf8ify($header);
+            push(@headers, $header);
+        }
+
+
+        my @data;
+
+        my $tempfile="/tmp/" . $name . ".xls";
+        my $workbook=Spreadsheet::WriteExcel->new($tempfile);
+        my $worksheet=$workbook->addworksheet();
+
+        # Headers:
+        my $header_format=$workbook->addformat();
+        $header_format->set_bold();
+        $worksheet->write_row(0, 0, \@headers, $header_format);
+
+        # Data:
+        my $data_format=$workbook->addformat();
+        $data_format->set_align('top');
+        my $i=1;
+
+        for(@{ $xml_data->{entries}->{entry} || [] }) {
+            my @row;
+            my $fields = $_->{fields}->{field} || [];
+            for(@$fields) {
+                my $val = $_->{fieldvalue};
+
+                if(ref $val) {
+                    $val = join(", ", @$val);
+                }
+
+                $val = $this->unutf8ify($val);
+                push(@row, $val);
+            }
+
+            $worksheet->write_row($i, 0, \@row, $data_format);
+            $i++;
+        }
+
+        # Close $tempfile, read it and delete it:
+        my $data='';
+        $workbook->close();
+        my $fh;
+        open($fh, $tempfile) or die "Couldn't open $tempfile, stopping";
+        { local $/; $data=<$fh>; }
+        close $fh;
+        unlink $tempfile;
+
+        return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
     }
 
-    return ("text/xml", $xmldata, $name, "attachment");
+
+    return ("text/xml", $xmldata, $name . ".xml", "attachment");
 }
 
 
@@ -228,6 +296,7 @@ sub action {
         if(! -f $data_file) {
             # create the file:
             if(open(FH, ">$data_file")) {
+                print FH '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
                 print FH "<entries></entries>\n";
                 close(FH);
             } else {
@@ -256,7 +325,13 @@ sub action {
 
         $xml = $this->utf8ify($xml);
 
-        XMLout($xml, rootname=>'entries', noattr=>1, outputfile => $data_file);
+        XMLout(
+                $xml,
+                rootname=>'entries',
+                noattr=>1,
+                outputfile => $data_file,
+                xmldecl=> '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>'
+            );
 
         $output->param('submitted_data_ok' => 1);
         $output->param('formdata' => $formdata);
