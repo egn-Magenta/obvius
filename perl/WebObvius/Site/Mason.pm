@@ -353,6 +353,11 @@ sub handler ($$) {
 	    if($filename) {
 	        $con_disp ||= 'attachment';
 	        $req->header_out("Content-Disposition", "$con_disp; filename=$filename");
+                # Microsoft Internet Explorer/Adobe Reader has
+                # problems if Vary is set at the same time as
+                # Content-Disposition is(!) - so we unset Vary if we
+                # set Content-Disposition.
+                $req->header_out('Vary'=>undef);
 	    }
 	    $req->set_content_length(length($data));
 	    $req->send_http_header;
