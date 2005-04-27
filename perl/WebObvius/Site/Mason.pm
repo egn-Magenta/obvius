@@ -287,6 +287,12 @@ sub access_handler ($$) {
     $req->notes(uri=>$uri);
     $req->uri($uri) unless ($req->dir_config('AddPrefix')); # I'm unsure about this... but I'm guessing it's okay to put here.
 
+    # XXX Instead of checking for a '.' in the uri here, wouldn't it
+    # be better to only do this whole slash-redirection thing only if
+    # there is no alternate_location for the document?
+    # The problem with that is, that we only know if there is an
+    # alternate location much later (in handler, below), so it takes a
+    # little more work to change it.
     return $this->redirect($req, $req->notes('prefix') . $uri . '/', 'force-external')
 	if ($uri !~ m!/$! and $uri !~ /[.]/ and !$this->param('is_admin')); # ... and we auto-slash
                                                                             # any uri without .'s in it
