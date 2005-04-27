@@ -312,6 +312,7 @@ sub access_handler ($$) {
     return OK;
 }
 
+# handler - Handles incoming Apacghe requests when using Mason as template system.
 sub handler ($$) {
     my ($this, $req) = @_;
 
@@ -336,11 +337,15 @@ sub handler ($$) {
 
         my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
 
+    # The document can have a "alternate_location" method if the user should be redirected to a different URL.
+    # The method should return a path or URL to the new location.
 	if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri)) {
 	    return NOT_FOUND if (Apache->define('NOREDIR'));
 	    return $this->redirect($req, $alternate, 'force-external');
 	}
 
+    # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
+    # by the browser should have a method called "raw_document_data"
 	my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data($doc, $vdoc, $obvius, $req, $output);
 
 	if ($data) {
