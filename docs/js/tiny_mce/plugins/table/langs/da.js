@@ -48,8 +48,9 @@ tinyMCELang['lang_table_td_to_th_desc'] = 'Alm. celle til overskriftcelle';
 tinyMCELang['lang_table_th_to_td_desc'] = 'Overskriftcelle til alm. celle';
 
 // Scope for th tags:
-tinyMCELang['lang_insert_table_scope_default'] = ' -- Scope --';
-tinyMCELang['lang_insert_table_scope_row'] = 'row';
-tinyMCELang['lang_insert_table_scope_col'] = 'col';
+tinyMCELang['lang_insert_table_scope'] = 'Retning';
+tinyMCELang['lang_insert_table_scope_default'] = ' -- Retning --';
+tinyMCELang['lang_insert_table_scope_row'] = 'R' + unescape('%E6') + 'kke';
+tinyMCELang['lang_insert_table_scope_col'] = 'Kollonne';
 tinyMCELang['lang_insert_table_scope_rowgroup'] = 'rowgroup';
 tinyMCELang['lang_insert_table_scope_colgroup'] = 'colgroup';
