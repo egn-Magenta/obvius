@@ -119,6 +119,10 @@ sub read_user_and_group_info {
 #
 ########################################################################
 
+# encrypt_password - Returns an encrypted version of the password.
+#                    The password is encrypted using the traditional
+#                    UNIX crypt() method with a random salt. All
+#                    passwords are thefore one-way passwords.
 sub encrypt_password {
     my ($this, $pw) = @_;
 
