@@ -19,10 +19,6 @@ our @ISA = qw( WebObvius::Site::Mason WebObvius::Access );
 package ${perlname}::Site::Admin;
 our @ISA = qw( WebObvius::Site::Mason WebObvius::Admin );
 
-# Namespace for running Mason seperately for mason-cache handling:
-package ${perlname}::Site::Admin::CacheHandling;
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-
 package ${perlname}::Site;
 
 print STDERR "Starting ${perlname} ...\n";
@@ -96,7 +92,7 @@ our $Admin = ${perlname}::Site::Admin->new(
 				      comp_root=>[
 						  [docroot  =>"$base/docs"],
 						  [sitecomp =>"$base/mason/admin"],
-						  [admincomp=>"$globalbase/obvius/mason/admin"],
+						  [admincomp=>"$globalbase/obvius/mason"],
 						  [commoncomp => "$base/mason/common"],
 						  [globalcommoncomp =>"$globalbase/obvius/mason/common"],
 						 ],
