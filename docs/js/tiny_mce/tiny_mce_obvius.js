@@ -105,6 +105,9 @@ function obvius_tinymce_html_cleanup(type, content) {
     obvius_tinymce_remove_wrong_span_type_tags(tmpContainer, 'b');
     obvius_tinymce_remove_wrong_span_type_tags(tmpContainer, 'strong');
 
+    // Fixup <p> inside <caption> on tables:
+    obvius_tinymce_fix_caption_p_tags(tmpContainer);
+
     content = tmpContainer.innerHTML;
 
     return content;
@@ -270,6 +273,25 @@ function obvius_tinymce_remove_wrong_span_type_tags(rootElem, tagName) {
                 parent.removeChild(fixNode);
             } else {
                 alert(oldNode.tagName + ": " + oldNode.innerHTML + " has no parent");
+            }
+        }
+    }
+}
+
+function obvius_tinymce_fix_caption_p_tags(rootElem) {
+    var captions = rootElem.getElementsByTagName('caption');
+    if(captions) {
+        for(var i=0;i<captions.length;i++) {
+            var caption = captions[i];
+            var paragraphs = caption.getElementsByTagName('p');
+            if(paragraphs) {
+                for(var j=0;j<paragraphs.length;j++) {
+                    var paragraph = paragraphs[j];
+                    for(var k=0;k<paragraph.childNodes.length;k++) {
+                        paragraph.parentNode.insertBefore(paragraph.childNodes[k].cloneNode(true), paragraph);
+                    }
+                    paragraph.parentNode.removeChild(paragraph);
+                }
             }
         }
     }
