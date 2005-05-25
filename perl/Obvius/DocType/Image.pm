@@ -122,9 +122,11 @@ sub get_resized_data {
         } else {
             # Limit images to 300 pixels in both width and height
             # This is so outsiders can't bring the server down by
-            # making requesting huge pictures.
-            $new_width = 300 if($new_width > 300);
-            $new_height = 300 if($new_height > 300);
+            # requesting huge pictures. The 300px limit can be
+            # overruled in the config file with max_image_width and
+            # max_image_height.
+            $new_width = 300 if($new_width > ($obvius->config->param('max_image_width') || 300));
+            $new_height = 300 if($new_height > ($obvius->config->param('max_image_height') || 300));
 
             # Scale the image
             $image->Scale(geometry => $new_width . "x" . $new_height);
