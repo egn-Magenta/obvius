@@ -11,6 +11,9 @@
 
 	function insertAnchor() {
 		if (window.opener) {
+			if( !document.forms[0].anchorName.value && !window.confirm(window.opener.tinyMCELang['lang_theme_anchor_confirm_delete'])){
+				return false				
+			}
 			value = document.forms[0].anchorName.value
 			if( value.replace(/\w+/g,'') ){ alert(window.opener.tinyMCELang['lang_insert_inval_error']); return false}
 			tinyMCE.execInstanceCommand(tinyMCE.getWindowArg('editor_id'), 'mceAnchor', false, document.forms[0].anchorName.value);

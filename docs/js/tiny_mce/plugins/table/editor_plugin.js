@@ -140,8 +140,8 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				tdElm.setAttribute('vAlign', value['valign']);
 				tdElm.setAttribute('width', value['width']);
 				tdElm.setAttribute('height', value['height']);
-				tdElm.setAttribute('class', value['className']);
-				tdElm.setAttribute('className', value['className']);
+				if( value['className'] ) tdElm.setAttribute('class', value['className']);
+				if( value['className'] ) tdElm.setAttribute('className', value['className']);
 				tdElm.setAttribute('scope', value['scope']);
 			}
 
@@ -177,10 +177,8 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 					summary = tinyMCE.getAttrib(tinyMCE.tableElement, 'summary', summary );
 					//**
 
-					if (tinyMCE.isMSIE) {
-						width = tinyMCE.tableElement.style.pixelWidth == 0 ? tinyMCE.tableElement.getAttribute("width") : tinyMCE.tableElement.style.pixelWidth;
-						height = tinyMCE.tableElement.style.pixelHeight == 0 ? tinyMCE.tableElement.getAttribute("height") : tinyMCE.tableElement.style.pixelHeight;
-					}
+					width = tinyMCE.tableElement.offsetWidth == 0 ? tinyMCE.tableElement.getAttribute("width") : tinyMCE.tableElement.offsetWidth;
+					height = tinyMCE.tableElement.offsetHeight == 0 ? tinyMCE.tableElement.getAttribute("height") : tinyMCE.tableElement.offsetHeight;
 
 					action = "update";
 				}
@@ -236,12 +234,10 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 						if( tinyMCE.isGecko ) 
 							tinyMCE.tableElement.innerHTML = tinyMCE.tableElement.innerHTML
 					}
-					//**
 
-					if (tinyMCE.isMSIE) {
-						tinyMCE.tableElement.style.pixelWidth = (width == null || width == "") ? 0 : width;
-						tinyMCE.tableElement.style.pixelHeight = (height == null || height == "") ? 0 : height;
-					}
+					tinyMCE.tableElement.style.width = width + 'px'
+					tinyMCE.tableElement.style.height = height + 'px'
+					//**
 
 					tinyMCE.handleVisualAid(tinyMCE.tableElement, false, inst.visualAid);
 

@@ -2033,10 +2033,10 @@ function TinyMCE_insertImage(src, alt, border, hspace, vspace, width, height, al
 		tinyMCE.setAttrib(this.imgElement, 'hspace', hspace);
 		tinyMCE.setAttrib(this.imgElement, 'vspace', vspace);
 
-		this.imgElement.style.marginTop = top != bottom ? top + 'px' : ''
-		this.imgElement.style.marginBottom= top != bottom ? bottom + 'px' : ''
-		this.imgElement.style.marginLeft = left != right ? left + 'px' : ''
-		this.imgElement.style.marginRight = left != right ? right + 'px' : ''
+		this.imgElement.style.marginTop = top != bottom && top ? top + 'px' : ''
+		this.imgElement.style.marginBottom = top != bottom && bottom? bottom + 'px' : ''
+		this.imgElement.style.marginLeft = left != right && left ? left + 'px' : ''
+		this.imgElement.style.marginRight = left != right && right? right + 'px' : ''
 
 		tinyMCE.setAttrib(this.imgElement, 'width', width);
 		tinyMCE.setAttrib(this.imgElement, 'height', height);
@@ -3845,6 +3845,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 					} else
 						aElm.setAttribute('name', value);
 				} else {
+					if(!value && tinyMCE.isMSIE) return false
 					this.contentDocument.execCommand("fontname", false, "#mce_temp_font#");
 					var elementArray = tinyMCE.getElementsByAttributeValue(this.contentDocument.body, "font", "face", "#mce_temp_font#");
 					
@@ -3863,10 +3864,9 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 									if (value == null || value == "") {
 										if( this.visualAid ) 
 											tinyMCE.handleVisualAid(this.getBody(), true, false);
+											
+										cE.parentNode.replaceChild(this.contentDocument.createTextNode(cE.innerHTML),cE )
 
-										var newNode = this.contentDocument.createElement();
-										newNode.appendChild(this.contentDocument.createTextNode(cE.innerHTML))
-										cE.parentNode.replaceChild(newNode,cE )
 
 									}else{
 										cE.setAttribute('name', value);
