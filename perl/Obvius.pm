@@ -923,7 +923,7 @@ sub search {
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
 
-    my $regex = '(^|[^_])(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
+    my $regex = '(^|[^\w])(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
     $where =~ s/$regex/$1 . $map{$2}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
