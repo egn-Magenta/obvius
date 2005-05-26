@@ -158,7 +158,7 @@ sub can_use_cache {
                                             # Not really the RFC2045 definition but should work most of the time
     $req->content_type($content_type);
 
-    my $id = md5_hex($req->the_request);
+    my $id = md5_hex($req->the_request . $req->hostname);
     $id .= '.gz' if ($req->notes('gzipped_output'));
 
     $req->notes('cache_id' => $id);
