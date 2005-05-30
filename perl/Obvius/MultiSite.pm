@@ -2,7 +2,7 @@ package Obvius::MultiSite;
 
 ########################################################################
 #
-# MultiSite.pm -
+# MultiSite.pm - ?
 #
 # Copyright (C) 2004-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
@@ -587,7 +587,7 @@ __END__
 
 =head1 NAME
 
-Obvius::MultiSite -
+Obvius::MultiSite - ?
 
 =head1 SYNOPSIS
 
