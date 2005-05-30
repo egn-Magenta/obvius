@@ -20,7 +20,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         theme : "advanced",
         language : "da",
         mode : "specific_textareas",
-        content_css : "/style/editor.css",
+        content_css : "http://<% $r->hostname %>/style/editor.css", /* MSIE demands the http://hostname/-part */
         valid_elements : "*[*]",
         plugins : "table,obvius,searchreplace",
         file_browser_callback : "obvius_tinymce_new_navigator_callback",
