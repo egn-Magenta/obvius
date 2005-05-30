@@ -31,7 +31,7 @@
 %         my $value=(defined $field->{len} ? $m->scomp('/shared/shorten', text=>$values{$field->{name}}, len=>$field->{len}) : $values{$field->{name}});
         <td>\
 %         if ($field->{link}) {
-<a href="<% $prefix . $url %>?obvius_app_navigator=1<& util/args, %ARGS &>" onclick="javascript:return obvius_navigator_done('<% $url |h %>')"<% length($values{$field->{name}}) ne length($value) ? ' title="' . $values{$field->{name}} . '"' : '' %>>\
+<a href="<% $prefix . $url %><& util/args, obvius_app_navigator=>1, %ARGS &>" onclick="javascript:return obvius_navigator_done('<% $url |h %>')"<% length($values{$field->{name}}) ne length($value) ? ' title="' . $values{$field->{name}} . '"' : '' %>>\
 %         }
 %         if ($field->{icons}) {
 <& /portal/subdocs:display_icons, doc=>$sub->{doc}, vdoc=>$sub->{vdoc} &> \
