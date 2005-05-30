@@ -20,6 +20,7 @@
 <span class="obvius-inactive"><& /shared/msg, text=>'Not registered' &></span>
 % }
 <br/>
+<%doc>
        <& /shared/msg, text=>'Annotation' &>:
 % if ($annotation) {
 %     my $annotation_user=$obvius->get_user($annotation->{user});
@@ -33,6 +34,7 @@
 % else {
 <span class="obvius-inactive"><& /shared/msg, text=>'None' &></span><br/>
 % }
+</%doc>
        <& /shared/msg, text=>'Compare to' &>:
        <span class="obvius-diff-links">\
 % if ($previous_version) {
@@ -61,8 +63,8 @@ $public_version=>undef
 %
 <%init>
 my $user=$obvius->get_user($vdoc->param('user'));
-my $annotation;
-# Only get the annotation of $obvius can do it (XXX here temporarily
-# for compability with the trunk):
-$annotation=$obvius->get_annotation($vdoc) if $obvius->UNIVERSAL::can('get_annotation');
+#my $annotation;
+## Only get the annotation of $obvius can do it (XXX here temporarily
+## for compability with the trunk):
+#$annotation=$obvius->get_annotation($vdoc) if $obvius->UNIVERSAL::can('get_annotation');
 </%init>
