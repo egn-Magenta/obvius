@@ -1,0 +1,57 @@
+<% $text %>\
+%
+<%args>
+$text
+$len
+$escape=>''
+</%args>\
+%
+<%init>
+use locale;
+
+$text=$m->scomp('escape_h', text=>$text) if ($escape eq 'h');
+
+if (length($text)<=$len) {
+    # $text is cool
+}
+else {
+    my $before=$text;
+
+    # This is what I wanted to do:
+    #  $text=~s/(.)\1{$len}/$1.../g;
+    # This is how I had to do it (runs out of stack-space on texts
+    # with a large number of repetitions:)
+    my $i=0;
+    my $l='';
+    my $same=0;
+    my $out='';
+    $len--;
+    for($i=0; $i<length($text); $i++) {
+        my $t=substr($text, $i, 1);
+        if ($t eq $l) {
+            $same++;
+        }
+        else { # End of repetition:
+            if ($same>=$len) { # Contract:
+                $out.='...';
+                $out.=$t;
+            }
+            else {
+                $out.=$l x $same;
+                $out.=$t;
+            }
+            $same=0;
+        }
+        $l=$t;
+    }
+
+    $text=$out;
+}
+</%init>\
+%
+<%doc>
+
+This component looks for repetitions of characters of length len or
+more and contracts them to "[First character]..."
+
+</%doc>

@@ -1,0 +1,66 @@
+% if($output->param('mode') eq 'form') {
+<form action="<% $submit_url %>">
+  <input type="hidden" name="mode" value="vote" />
+%     if($redirect_to) {
+  <input type="hidden" name="redirect_to" value="<% $redirect_to |h%>" />
+%     }
+
+%     if ($title and !$embedded) {
+  <h3><% $title %></h3>
+%     }
+
+  <& /shared/htmlize, text=>$text_teaser, class=>$class &>
+
+  <p>
+%    for(@$vote_options) {
+  <input type="radio" name="answer" value="<% $_->{id} %>"><% $_->{answer} %></input><br />
+%    }
+  </p>
+
+  <p class="multichoicesubmit">
+    <input type="submit" value="Stem" />
+  </p>
+</form>
+%}
+
+% if($output->param('mode') eq 'show') {
+%     if ($title and !$embedded) {
+  <h3><% $title %></h3>
+%     }
+  <& /shared/htmlize, text=>$text_teaser, class=>$class &>
+  <table>
+%     for(@$vote_options) {
+    <tr>
+      <td align="left" valign="top"><% $_->{answer} %></td>
+      <td align="right" valign="top">&nbsp;<% $_->{pct} %>%</td>
+% if ($bar) {
+      <td align="left" valign="top"><img src="/grafik/bar.png" width="<% $_->{rel} %>" height="10"></td>
+% }
+    </tr>
+%     }
+  </table>
+
+  <p>(<% $output->Total %> har stemt)</p>
+% }
+%
+%
+<%args>
+$output
+$submit_url => undef
+$redirect_to => undef
+$title=>undef
+$teaser=>undef
+$embedded=>0
+$class => undef
+$bar=>"/grafik/bar.png"
+</%args>
+%
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title teaser)]);
+
+my $text_teaser = $teaser || $vdoc->field('teaser') || '';
+
+my $vote_options = $output->Answers || [];
+$submit_url = $prefix . $uri unless($submit_url);
+</%init>

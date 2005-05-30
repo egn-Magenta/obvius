@@ -4,9 +4,11 @@ package Obvius::DocType::ComboSearch::Parser;
 #
 # Parser.pm - Convert combo_search document search strings
 #
-# Copyright (C) 2000 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2000-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Author: René Seindal (rene@magenta-aps.dk)
+# Authors: René Seindal (rene@magenta-aps.dk)
+#          Peter Makholm (pma@fi.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -381,9 +383,10 @@ sub match_op {
 
     $this->debug("MATCH_OP");
 
+    my @operators = sort { length $b <=> length $a } keys(%operators); # The single char operators should be last.
     unless ($operator_regex) {
 	$operator_regex = ('^\s*('
-			   . join('|', map {quotemeta($_)} keys(%operators))
+			   . join('|', map {quotemeta($_)} @operators)
 			   . ')\s*'
 			  );
     }

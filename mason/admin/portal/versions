@@ -1,0 +1,188 @@
+    <div class="obvius-versions<% $r->notes('inactive_versions') ? ' obvius-inactive' : '' %>">
+       <h3><& /shared/msg, text=>'Versions' &></h3>
+       <form action="./">
+% # I need the side-effect on pnotes:
+% my $versions_html=$m->scomp('versions:display_versions', max=>$max, inactive=>\%inactive, language=>$obvius_language);
+% if ($filter) {
+         <p>
+           <select name="obvius_language"<% $inactive{obvius_language} ? ' disabled="disabled" class="obvius-disabled"' : '' %> onclick="javascript:this.form.submit()">
+             <option value=""><& /shared/msg, text=>'All lang.' &></option>
+%     foreach my $la (@las) {
+%         next unless ($r->pnotes('obvius_versions_langs')->{$la});
+             <option value="<% $la |h %>"<% defined $obvius_language and $obvius_language eq $la ? ' selected="selected"' : '' %>><& /shared/msg, text=>$long{$la} &></option>
+%     }
+           </select>
+         </p>
+% }
+<% $versions_html %>
+% $more=$r->notes('obvius_versions_more');
+% if ($more) {
+         <div><a href="./?obvius_app_versionlist=1&amp;obvius_version=<% $vdoc->Version |h %>" onclick="javascript:return obvius_open_window(this.href, 'obvius_versionlist');"><& /shared/msg, text=>'Show complete list' &> (<% $more |h %>)</a></div>
+% }
+       </form>
+     </div>
+% if ($current_information) {
+     <& information, previous_version=>$r->notes('obvius_versions_previous_version'), public_version=>$r->notes('obvius_versions_public_version') &>
+% }
+   </div>
+%
+%
+<%once>
+my @las=qw(da en fi fr el nl it pt es sv de);
+my %long=qw(da Danish en English fi Finnish fr French el Greek nl Dutch it Italian pt Portuguese
+            es Spanish sv Swedish de German);
+</%once>
+%
+%
+<%method display_versions>
+%
+         <table>
+           <tr>
+             <th><& /shared/msg, text=>'Date' &></th>
+             <th><& /shared/msg, text=>'Time' &></th>
+             <th><& /shared/msg, text=>'La.' &></th>
+             <th><& /shared/msg, text=>'Act.' &></th>
+             <th><& /shared/msg, text=>'Publ.' &></th>
+           </tr>           
+% my $i=0;
+% foreach my $version (@versions) {
+           <tr class="obvius-<% $i++%2 ? 'b' : 'a' %>">
+             <td><% $version->{date} %></td>
+             <td><% $version->{time} %></td>
+             <td><% $version->{lang} %></td>
+             <td><input <% $inactive->{obvius_version} ? 'disabled="disabled" class="obvius-disabled" ' : '' %> type="radio" onclick="<% $onclick %>" name="obvius_version" value="<% $version->{version} |h %>"<% $version->{active} ? ' checked="checked"' : '' %> /></td>
+             <td class="obvius-status"><& .display_status, version=>$version &></td>
+           </tr>
+% }
+% # If the active version hasn't been shown, show it here:
+% if (!$active_seen) {
+%   my $version=$m->comp('.vdoc_to_formatted_version', format_vdoc=>$vdoc, active=>1);
+           <tr class="obvius-<% $i++%2 ? 'b' : 'a' %> obvius-extra">
+             <td><% $version->{date} %></td>
+             <td><% $version->{time} %></td>
+             <td><% $version->{lang} %></td>
+             <td><input <% $inactive->{obvius_version} ? 'disabled="disabled" class="obvius-disabled" ' : '' %> type="radio" name="obvius_version" value="<% $version->{version} |h %>"<% $version->{active} ? ' checked="checked"' : '' %> /></td>
+             <td class="obvius-status"><& .display_status, version=>$version &></td>
+           </tr>
+% }
+         </table>        
+%
+%
+%
+<%args>
+$max
+$inactive
+$onclick=>'javascript:this.form.submit();'
+$language=>undef
+</%args>
+%
+<%init>
+my $vdocs=$obvius->get_versions($doc, '$order'=>'version DESC') || [];
+
+my $active_seen=0;
+my $public_version;
+my $previous_version;
+
+my %langs=();
+
+my @versions=map {
+    $langs{$_->Lang}++;
+    $public_version=$_->Version if ($_->Public);
+
+    if ($active_seen) {
+        $previous_version=$_->Version;
+        $active_seen=undef;
+    }
+    my $active=($_->Version eq $vdoc->Version ? 1 : 0);
+    $active_seen='1' if ($active);
+
+    $m->comp('.vdoc_to_formatted_version', format_vdoc=>$_, active=>$active);
+} @$vdocs;
+$r->pnotes('obvius_versions_langs'=>\%langs); # Pass out
+
+# Filter by language (XXX vdocs are formatted in the loop above, which
+# is slightly pointless for the ones we filter away here):
+@versions=grep { $_->{lang} eq $language } @versions if ($language);
+
+# Limiting is done after the above loop to get previous_version and
+# current_version filled out correctly:
+if ($max and scalar(@versions)>$max) {
+    $r->notes(obvius_versions_more=>scalar(@versions));
+    @versions=@versions[0..$max-1];
+}
+
+# Active version not in list, short it one (if the list is full):
+$active_seen=grep { $_->{active} } @versions;
+pop @versions if (!$active_seen and scalar(@versions)==$max);
+
+$r->notes(obvius_versions_previous_version=>$previous_version) if ($previous_version);
+$r->notes(obvius_versions_public_version=>$public_version) if ($public_version);
+</%init>
+%
+</%method>
+%
+<%def .vdoc_to_formatted_version>
+%
+<%args>
+$format_vdoc
+$active
+</%args>
+%
+<%init>
+# Format date:
+$format_vdoc->Version=~/^\d{2}(\d{2})-(\d{2})-(\d{2})/;
+
+my $date="$3.$2.$1";
+return {
+        version=>$format_vdoc->Version,
+        date=>$date,
+        time=>substr($format_vdoc->Version, 11, 5),
+        lang=>$format_vdoc->Lang,
+        public=>$format_vdoc->Public,
+        active=>$active,
+       };
+</%init>
+%
+</%def>
+%
+<%def .display_status>\
+%
+<%args>
+$version
+</%args>\
+%
+% if ($version->{public}) {
+<img width="12" height="7" src="/pics/icons/publish-on.png" title="<& /shared/msg, text=>'Published' &>" alt="O" />\
+% }
+% else {
+<img width="12" height="7" src="/pics/icons/publish-off.png" title="<& /shared/msg, text=>'Not published' &>" alt="-" />\
+% }
+</%def>
+%
+<%args>
+$filter=>1
+$max=>6
+$current_information=>1
+$obvius_language=>undef
+</%args>
+%
+<%init>
+my $more=0;
+
+my %inactive=(
+              obvius_language=>0,
+              obvius_version=>0,
+             );
+
+if ($r->notes('inactive_versions')) {
+    map { $inactive{$_}=1; } keys (%inactive);
+}
+</%init>
+%
+<%doc>
+      Perhaps better: Show the current version centered surrounded
+      by neighbouring versions, and with a "previous versions" arrow
+      on top, and next versions on bottom?
+
+NOTICE: Changing versions should be possible without javascript!
+</%doc>

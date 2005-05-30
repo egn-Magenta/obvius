@@ -1,5 +1,32 @@
 package WebObvius::Site::MultiMason;
 
+########################################################################
+#
+# MultiMason.pm - ?
+#
+# Copyright (C) 2004-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#
+# Authors: Jørgen Ulrik B. Krag <jubk@magenta-aps.dk>
+#          Adam Sjøgren <asjo@magenta-aps.dk>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
+# $Id$
+
 use strict;
 use warnings;
 
@@ -12,9 +39,10 @@ use Digest::MD5 qw(md5_hex);
 
 use Fcntl ':flock';
 
-
 our @ISA = qw( WebObvius::Site::Mason );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
+# Note that this method is meant to override the one in WebObvius::Site:
 
 sub obvius_connect {
     my ($this, $req, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs) = @_;
@@ -60,6 +88,8 @@ sub obvius_connect {
     return $obvius;
 }
 
+# Note that this method is meant to override the one in WebObvius::Site::Mason:
+
 sub can_use_cache {
     my ($this, $req, $output) = @_;
 
@@ -73,6 +103,9 @@ sub can_use_cache {
                         $this->{WEBOBVIUS_CACHE_DIRECTORY});
     return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
 
+    my $vdoc=$output->param('version');
+    my $lang=$vdoc->Lang || 'UNKNOWN'; # Should always be there
+
     my $content_type = $req->content_type;
     return '' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
                                             # Not really the RFC2045 definition but should work most of the time
@@ -84,15 +117,16 @@ sub can_use_cache {
     $id .= '.gz' if ($req->notes('gzipped_output'));
 
     $req->notes('cache_id' => $id);
-    $req->notes('cache_dir' => join '/', $this->{WEBOBVIUS_CACHE_DIRECTORY}, $req->content_type, substr($id, 0, 2));
+    $req->notes('cache_dir' => join '/', $this->{WEBOBVIUS_CACHE_DIRECTORY}, $lang, $req->content_type, substr($id, 0, 2));
     $req->notes('cache_file' => $req->notes('cache_dir') .  '/' . $id);
-    $req->notes('cache_url' => join '/', '/cache', $req->content_type, substr($id, 0, 2), $id);
+    $req->notes('cache_url' => join '/', '/cache', $lang, $req->content_type, substr($id, 0, 2), $id);
 
     Obvius::log->debug("Cache file name %s\n", $req->notes('cache_file'));
     return 1;
 }
 
 
+# Note that this method is meant to override the one in WebObvius::Site::Mason:
 
 sub save_in_cache {
     my ($this, $req, $s) = @_;
@@ -145,6 +179,7 @@ sub save_in_cache {
             $extra = $qstring;
         }
 
+        # Perhaps move this check up, so nothing is written to disk if the cache is off?
         if (! -e $this->{WEBOBVIUS_CACHE_INDEX} . "-off") {
             # Add to cache-db
             $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
@@ -168,36 +203,25 @@ sub save_in_cache {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
-
 =head1 NAME
 
-WebObvius::Site::MultiMason - Perl extension for blah blah blah
+WebObvius::Site::MultiMason - ?
 
 =head1 SYNOPSIS
 
-  use WebObvius::Site::MultiMason;
-  blah blah blah
+  ?
 
 =head1 DESCRIPTION
 
-Stub documentation for WebObvius::Site::MultiMason, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+?
 
-Blah blah blah.
+=head1 AUTHORS
 
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<WebObvius::Site>, L<WebObvius::Site::Mason>.
 
 =cut

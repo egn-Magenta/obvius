@@ -70,10 +70,11 @@ sub delete_passwordprotectedurl {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Delete passwordprotectedurl ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete passwordprotectedurl ... failed ($ev_error)");
 	return undef;
     }
 
@@ -95,10 +96,11 @@ sub create_new_passwordprotectedurl {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Create new passwordprotectedurl ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Create new passwordprotectedurl ... failed ($ev_error)");
 	return undef;
     }
 
@@ -120,10 +122,11 @@ sub update_passwordprotectedurl {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Update passwordprotectedurl ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Update passwordprotectedurl ... failed ($ev_error)");
 	return undef;
     }
 
@@ -168,10 +171,11 @@ sub delete_synonyms {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Delete synonyms ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete synonyms ... failed ($ev_error)");
 	return undef;
     }
 
@@ -199,10 +203,11 @@ sub create_new_synonyms {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Create new synonyms ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Create new synonyms ... failed ($ev_error)");
 	return undef;
     }
 
@@ -224,10 +229,11 @@ sub update_synonyms {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Update synonyms ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Update synonyms ... failed ($ev_error)");
 	return undef;
     }
 
@@ -501,10 +507,11 @@ sub delete_loginuser {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Delete " . $prefix . "loginuser ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete " . $prefix . "loginuser ... failed ($ev_error)");
 	return undef;
     }
 
@@ -535,10 +542,11 @@ sub create_new_loginuser {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Create new " . $prefix . "loginuser ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Create new " . $prefix . "loginuser ... failed ($ev_error)");
 	return undef;
     }
 
@@ -561,10 +569,11 @@ sub update_loginuser {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Update " . $prefix . "loginuser ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Update " . $prefix . "loginuser ... failed ($ev_error)");
 	return undef;
     }
 

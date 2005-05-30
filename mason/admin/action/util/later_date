@@ -1,0 +1,24 @@
+<img width="7" height="7" src="/pics/icons/right.png" alt="-&gt;" onclick="javascript:return obvius_display_toggle('obvius-later-date')" />
+<span class="obvius-later-date" id="obvius-later-date">
+  <input type="text" name="obvius_later_date" id="obvius_later_date" value="<& format_date &>" size="16" />
+  <button type="reset" id="obvius_internal_calendar_trigger_later_date">...</button>
+  <script type="text/javascript">
+  Calendar.setup({
+                  inputField  : "obvius_later_date",
+                  ifFormat    : "%Y-%m-%d %H:%M",
+                  firstDay    : 1,
+                  showsTime   : true,
+                  button      : "obvius_internal_calendar_trigger_later_date",
+                  singleClick : true,
+                  step        : 1
+                 });
+  </script>
+  <img width="7" height="7" src="/pics/icons/left.png" alt="-&lt;"onclick="javascript:return obvius_display_toggle('obvius-later-date')" />
+</span>
+%
+<%doc>
+
+Default is now (which will be in the past when the user submits the
+command; the past is interpreted as do it now).
+
+</%doc>

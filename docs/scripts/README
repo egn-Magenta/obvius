@@ -1,0 +1,5 @@
+Make a symlink like this:
+
+ ln -s ../js/tiny_mce tiny_mce
+
+to share the Tiny MCE from the old admin with the new.

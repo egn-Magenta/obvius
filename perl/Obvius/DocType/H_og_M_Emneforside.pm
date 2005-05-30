@@ -64,7 +64,7 @@ sub action {
     $where .= " AND (primary_group = '$group' OR category = '$group')";
 
     # Andre interesante felter
-    push(@fields, 'show_pic_list', 'title', 'short_title', 'primary_group', 'docdate');
+    push(@fields, 'title', 'short_title', 'docdate');
 
     # Kun nye artikler.
     my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
@@ -94,11 +94,6 @@ sub action {
         $date =~ s/^\d\d(\d\d)-(\d\d)-(\d\d).*/$3.$2.$1/;
         $data->{date} = $date;
 
-        if($_->Show_Pic_List) {
-            my $pic_path = $obvius->get_version_field($_, 'fp_picture');
-            $data->{picture} = $pic_path if($pic_path and $pic_path ne '/');
-        }
-
         my $teaser = $obvius->get_version_field($_, 'teaser');
         $data->{teaser} = $teaser if($teaser);
 
@@ -122,7 +117,7 @@ sub action {
                     'category',
                     'docdate',
                     'title',
-                    'primary_group'
+                    'primary_group',
                 ];
 
     my $infopaq_doctype = $obvius->get_doctype_by_name('InfopaqNyhed');
@@ -150,12 +145,15 @@ sub action {
                         title => $_->Title,
                         url => $url,
                         date => $date,
-                        group => $_->Primary_Group
+                        group => $_->Primary_Group,
+                        teaser => $_->{TEASER},
                     }
                 );
     }
 
     $output->param(otherdocs => \@docs) if(scalar(@docs));
+
+    $output->param(primary_group => $primary_group);
 
     $output->param('override_last_changed' => $last_changed) if($last_changed);
 

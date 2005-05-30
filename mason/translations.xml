@@ -2876,7 +2876,7 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Bjælkeoverskrift</translation>
   </text>
 
-  <text key="Choose the appropriate classificationand keywords for this document:">
+  <text key="Choose the appropriate classification and keywords for this document:">
     <translation lang="en">Choose appropriate classifications codes and keywords for this document.</translation>
     <translation lang="da">Vælg relevante klassifikationskoder og nøgleord til dette dokument</translation>
   </text>
@@ -4414,6 +4414,43 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Min. X valgte værdier</translation>
   </text>
 
+
+  <text key="Document already exists">
+    <translation lang="en">Document already exists</translation>
+    <translation lang="da">Dokumentet findes i forvejen</translation>
+  </text>
+  <text key="Copying done">
+    <translation lang="en">Copying done</translation>
+    <translation lang="da">Kopiering udført</translation>
+  </text>
+  <text key="does not exist!">
+    <translation lang="en">does not exist!</translation>
+    <translation lang="da">eksisterer ikke!</translation>
+  </text>
+  <text key="Cannot copy from a predecessor document">
+    <translation lang="en">Cannot copy from a predecessor document</translation>
+    <translation lang="da">Der kan ikke kopieres fra et højereliggende dokument</translation>
+  </text>
+  <text key="Recursive copying of ">
+    <translation lang="en">Recursive copying of </translation>
+    <translation lang="da">Rekursiv kopiering af </translation>
+  </text>
+  <text key=" documents?">
+    <translation lang="en"> documents?</translation>
+    <translation lang="da"> dokumenter?</translation>
+  </text>
+  <text key="Copy">
+    <translation lang="en">Copy</translation>
+    <translation lang="da">Kopier</translation>
+  </text>
+  <text key="All subdocuments (recursive copying)?">
+    <translation lang="en">All subdocuments (recursive copying)?</translation>
+    <translation lang="da">Alle underdokumenter (rekursiv kopiering)?</translation>
+  </text>
+  <text key="Copy document">
+    <translation lang="en">Copy document</translation>
+    <translation lang="da">Kopier dokument</translation>
+  </text>
 
   <text key="">
     <translation lang="en"></translation>

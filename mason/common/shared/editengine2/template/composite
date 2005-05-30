@@ -1,0 +1,52 @@
+%   if (defined $editscheme->{label}) {
+<h2><& /shared/msg, text=>$editscheme->{label} &></h2>
+%   }
+% unless (defined $style->{open} and $style->{open}) {
+     <form action='./' method='post' enctype="multipart/form-data">
+     <div>
+     <input type='hidden' name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
+% }
+
+% foreach my $item (@{$editscheme->{display}}) {
+    <div<% !(defined $style->{open} and $style->{open}) ? ' class="obvius-editengine-confirmation"' : '' %>>
+      <& '../display', layout=>$item, style=>{context=>'block', open=>'1'}, editscheme=>$editscheme, history=>$history &>
+    </div>
+% }
+
+% unless (defined $style->{open} and $style->{open}) {
+%#   # if a function already has been selected use this
+%#   if (scalar(keys %{$m->comp('../toolbox:access_function')})) {
+%#      <& '../commit:execute', history=>$history, editscheme=>$editscheme &>
+%#   }
+%#   # otherwise use the functions given in the storage section
+%#   else {
+%#     my $functions = $editscheme->{storage}->{functions};
+%#     foreach my $function (keys %$functions) {
+        <& '../select:function', function=>'execute', editscheme=>$editscheme, history=>$history &>
+        <& '../commit:execute', history=>$history, editscheme=>$editscheme &>
+%#     }
+%#   }
+    <& '../commit:cancel', history=>$history &>
+    </div>
+    </form>
+% }
+<%args>
+# Mandatory arguments
+$history
+$session
+$editscheme
+$storage
+
+# The scheme's style parameter:
+#  » 'block':  the current implementation
+#$style=>'block'
+$style
+
+</%args>
+%
+<%init>
+print STDERR "template/<composite>\thistory = '$history'\n" if $session->{cesi_debug_recursion};
+
+my %object = %{$m->comp('../toolbox:access_object')};
+
+</%init>

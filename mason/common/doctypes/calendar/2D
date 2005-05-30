@@ -34,18 +34,20 @@
 	  <tr>
 	    <td align="center">
 %   if(scalar(@$docs)) {
-%   for my $doc(@$docs) {
+%       for my $doc(@$docs) {
 	      <p align="left">
-		<a class="nounderline" href="<% $prefix .$doc->{url} %>" title="<% $doc->{title} %>">
-%if ($show_event eq 'type') {
-		  <span class="tekstLille"><% $doc->{eventtype} %></span>
-%} else {
-		  <span class="tekstLille"><% $doc->{title} %></span>
-%}
+		<a href="<% $prefix .$doc->{url} %>" title="<% $doc->{title} %>">
+%           if ($show_event eq 'type') {
+		  <span class="kalarrangement"><% $doc->{eventtype} %></span>
+%           }
+%           else {
+		  <span class="kalarrangement"><% $doc->{title} %></span>
+%           }
 		</a>
 	      </p>
+%       }
 %   }
-%   } else {
+%   else {
 	      <p align="left">&nbsp;</p>
 %   }
 	    </td>

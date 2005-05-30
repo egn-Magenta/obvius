@@ -1,0 +1,84 @@
+<%method pipe>
+<%args>
+$relation
+</%args>
+<%init>
+my $map = $relation->{mappings};
+# Copy ("pipe") contents of the existing protocol and overwrite
+# entries as described i the mappings section.  The copy step need
+# not be done i practice since we already have saved the content
+# of the incoming protocol.  Hence only the requested remapping of
+# object identifiers needs to be performed.
+my $new_protocol = $r->pnotes('obvius_editengine_protocol');
+my $objects = $new_protocol->{object};
+my @object_ids = keys %$objects;
+foreach my $id (@object_ids) {
+    # If a mapping of the identifier has been requested...
+    if ($map->{$id}) {
+        # skip the identity mapping ($id -> $id)
+        next if $id eq $map->{$id};
+        # make a new entry retaining the old entry's value
+        $objects->{$map->{$id}} = $objects->{$id};
+        # and delete the old object
+        delete $objects->{$id};
+    }
+}
+
+# [!] Consider..
+#undef $new_protocol->{mappings};
+</%init>
+</%method>
+
+
+
+<%method object_filter>
+<%args>
+$relation
+</%args>
+<%init>
+my %old_protocol = $m->comp('toolbox:get_protocol');
+my $map = $relation->{mappings};
+
+# Clear the protocol and create only entries corresponding to
+# requested mappings.  Unrequested entries of the existing
+# protocol are sorted out ("filtered").
+undef $r->pnotes('obvius_editengine_protocol')->{object};
+foreach my $id (keys %$map) {
+    # If the identifier was present on the incoming protocol...
+    my $old_value = $old_protocol{object}->{$id};
+    if ($old_value) {
+        $r->pnotes('obvius_editengine_protocol')->{object}->{$map->{$id}} = $old_value;
+    }
+}
+
+# [!] Consider..
+#undef $r->pnotes('obvius_editengine_protocol')->{mappings};
+</%init>
+</%method>
+
+
+
+<%method filter>
+<%args>
+$relation
+</%args>
+<%init>
+my %old_protocol = %{$r->pnotes('obvius_editengine_protocol')};
+my $map = $relation->{mappings};
+
+# Clear the protocol and create only entries corresponding to
+# requested mappings.  Unrequested entries of the existing
+# protocol are sorted out ("filtered").
+undef $r->pnotes('obvius_editengine_protocol')->{object};
+foreach my $id (keys %$map) {
+    # If the entry was present on the incoming protocol...
+    my $old_value = $old_protocol{mappings}->{$id};
+    if ($old_value) {
+        $r->pnotes('obvius_editengine_protocol')->{object}->{$map->{$id}} = $old_value->{value};
+    }
+}
+
+# [!] Consider..
+#undef $r->pnotes('obvius_editengine_protocol')->{mappings};
+</%init>
+</%method>

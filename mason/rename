@@ -31,10 +31,12 @@ $new_name
 <%perl>
 my $message="Couldn't rename document";
 my $ok=0;
+my $old_uri=$obvius->get_doc_uri($doc);
 if ($obvius->rename_document($doc, $new_name)) {
     $message="Document renamed";
     $uri=$new_name . '/';
     $ok=1;
+    $m->comp('/dirty_url_in_cache', url=>$old_uri);
     $m->comp('/dirty_url_in_cache', url=>$uri);
 }
 </%perl>

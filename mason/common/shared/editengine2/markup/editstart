@@ -1,0 +1,2 @@
+<& editend, %ARGS, javascript_init=>0, add_html=>'<span><input type="submit" name="obvius_editengine_protocol_confirmation:save" value="' . $m->scomp('/shared/msg', text=>'Save') . '" class="obvius-command-do" />
+  <input type="submit" name="obvius_editengine_protocol_confirmation:CANCEL" value="' . $m->scomp('/shared/msg', text=>'Cancel') . '" class="obvius-command-cancel"/></span>' &>

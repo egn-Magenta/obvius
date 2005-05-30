@@ -120,9 +120,33 @@ sub action {
         push(@fields, 'eventtype');
         $where .= "eventtype = '" . $vdoc->S_Event_Type . "' and ";
     }
-    if($vdoc->field('startdate') and $vdoc->field('enddate')) {
-        $where .= "docdate >= '" . $vdoc->Startdate . "' and ";
-        $where .= "docdate <= '" . $vdoc->Enddate . "' and ";
+
+    my ($startdate, $enddate)=($vdoc->field('startdate'), $vdoc->field('enddate'));
+
+    # If there's no start- and enddate set:
+    unless ($startdate and $enddate) {
+        # If there's a month, year-parameter use those, otherwise current:
+        my $month=$input->param('month') || strftime('%m', localtime());
+        my $year=$input->param('year') || strftime('%Y', localtime());
+
+        my $time=timelocal(0, 0, 12, 15, $month-1, $year);
+
+        # I'm not subtracting from Days_in_Month, because localtime gives 0-11 for month:
+        # (and I'm using that december always has 31 days):
+        my $days_in_prev_month=($month==1 ? '31' : Days_in_Month((localtime($time))[5,4]));
+
+        # Last day in the previous month:
+        $startdate=strftime('%Y-%m-' . $days_in_prev_month, localtime($time-(30*24*60*60)));
+        # First day in the next month:
+        $enddate=strftime('%Y-%m-01', localtime($time+(30*24*60*60)));
+
+        $output->param(month=>$month);
+        $output->param(year=>$year);
+    }
+
+    if($startdate and $enddate) {
+        $where .= "docdate > '" . $startdate . "' and ";
+        $where .= "docdate < '" . $enddate . "' and ";
     }
     if($vdoc->field('s_event_place')) {
         push(@fields, 'eventplace');
@@ -258,12 +282,12 @@ sub action {
 
         my ($weekmin, $weekmax);
 
-        my ($min_year, $min_month, $min_day) = ($vdoc->Startdate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
+        my ($min_year, $min_month, $min_day) = ($startdate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
         ($min_year, $min_month, $min_day) = adjust_ymd($min_year, $min_month, $min_day);
         ($weekmin, $min_year) = Week_of_Year($min_year, $min_month, $min_day);
         $weekmin = sprintf("%4.4d%2.2d", $min_year, $weekmin);
 
-        my ($max_year, $max_month, $max_day) = ($vdoc->Enddate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
+        my ($max_year, $max_month, $max_day) = ($enddate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
         ($max_year, $max_month, $max_day) = adjust_ymd($max_year, $max_month, $max_day);
         ($weekmax, $max_year) = Week_of_Year($max_year, $max_month, $max_day);
         $weekmax = sprintf("%4.4d%2.2d", $max_year, $weekmax);

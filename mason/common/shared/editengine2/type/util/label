@@ -1,0 +1,20 @@
+% if (defined $subtitle) {
+<h4><& /shared/msg, text=>$subtitle &></h4>
+% }
+% if (defined $name) {
+<label for="<% $name |h %>"><& /shared/msg, text=>$label &></label><br />\
+% }
+% else {
+<& /shared/msg, text=>$label &><br />\
+% }
+%
+<%args>
+$label
+$field
+$name=>undef
+</%args>
+%
+<%init>
+my $subtitle=undef;
+$subtitle=$field->{options}->{subtitle} if (exists $field->{options});
+</%init>

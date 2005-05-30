@@ -1,0 +1,301 @@
+<& /shared/editengine2/init, editscheme=>$users, relation=>'users', edges=>$edges &>
+<%once>
+my $groups = {
+              type => 'scheme/table',
+              display => [
+                          {name=>'name', content=>'data', label=>'Name'},
+                         ],
+              storage => {
+                          organization => {
+                                           class => 'DbTable',
+                                           source=>'groups',
+                                           identifiers=>[qw(id)],
+                                          },
+                          data => {
+                                   id   => { type => 'integer' },
+                                   name => { type => 'line'    },
+                                  },
+                         },
+             };
+
+my $memberships = {
+                type => 'scheme/table',
+                storage => {
+                            organization => {
+                                             class => 'DbTable',
+                                             source=>'grp_user',
+                                             identifiers=>[qw(user grp)],
+                                            },
+                            data => {
+                                     grp  => { type => 'integer' },
+                                     user => { type => 'integer' },
+                                    },
+                           },
+               };
+
+
+my $group_membership = {
+                    type => 'template/subset',
+#                    label=>'Groups',
+                    arguments => {
+                                   set => 'set',
+                                   subset => 'checks',
+                                   subset_mappings => {
+                                                       id => 'grp',
+                                                      },
+                                   add_function => 'create',
+                                   subtract_function => 'remove',
+
+                                 },
+                    storage => {
+                                organization => {
+                                                 class => 'Template',
+                                                 identifiers => [qw(uid)],
+                                                },
+                                functions => {
+                                              execute => {
+                                                         label => 'Update',
+                                                        },
+                                             },
+                                data => {
+                                         uid => { type => 'integer' },
+                                        },
+                               },
+                    relations => {
+                                  set => {
+                                          scheme => $groups,
+                                          projection => 'filter',
+                                          mappings => {},
+                                         },
+                                  checks => {
+                                             scheme => $memberships,
+                                             projection => 'pipe',
+                                             mappings => {uid => 'user'},
+                                            },
+                                 },
+                   };
+
+my $user_storage = {
+                    organization => {
+                                     class => 'DbTable',
+                                     source=>'users',
+                                     identifiers=>[qw(id)],
+                                     reuse => [qw(passwd)],
+                                    },
+                    data => {
+                             id     => { type => 'integer'  },
+                             login  => { type => 'line'     },
+                             name   => { type => 'line'     },
+                             notes  => { type => 'text'     },
+                             email  => { type => 'email'    },
+                             passwd => { type => 'password' },
+                            },
+                   };
+
+
+my $input_display = [
+                     { name=>'name',   content=>'data',   label=>'Name'     },
+                     { name=>'login',  content=>'data',   label=>'Login'    },
+                     { name=>'email',  content=>'data',   label=>'E-mail'   },
+                     { name=>'passwd', content=>'data',   label=>'Password' },
+                     { name=>'notes',  content=>'data',   label=>'Notes'    },
+                    ];
+
+
+my $create_user = {
+                   type => 'scheme/editsheet',
+                   display => $input_display,
+                   storage => {
+                               %$user_storage,
+                               functions => {
+                                             create => { label => 'Create' }
+                                            },
+                              }
+                  };
+
+
+my $update_user = {
+                   type => 'scheme/editsheet',
+                   display => $input_display,
+                   storage => {
+                               %$user_storage,
+                               functions => {
+                                             update => { label => 'Update' }
+                                            },
+                              }
+                  };
+
+
+my $delete_user = {
+                   type => 'scheme/editsheet',
+                   display => [
+                               { name=>'name',   content=>'data', label=>'Name',   style=>{context=>'block',disabled=>'1'} },
+                               { name=>'login',  content=>'data', label=>'Login',  style=>{context=>'block',disabled=>'1'} },
+                               { name=>'email',  content=>'data', label=>'E-mail', style=>{context=>'block',disabled=>'1'} },
+                              ],
+                   storage => {
+                               %$user_storage,
+                               functions => {
+                                             remove => { label => 'Delete' }
+                                            },
+                              }
+                  };
+
+my $input_form = {
+              type => 'template/composite',
+              label => 'User data',
+              display => [
+                          {name=>'user',   content=>'scheme', style=>{context=>'block', open=>'1'} },
+                          {name=>'groups', content=>'scheme', style=>{context=>'block', open=>'1'}, label=>'Groups', },
+                         ],
+             };
+
+
+my $groups_relation = {
+                       scheme => $group_membership,
+                       projection => 'pipe',
+                       mappings => {
+                                    uid => 'uid',
+                                   },
+                      };
+
+
+my $input_storage = {
+                     organization => {
+                                      class => 'Template',
+                                      identifiers=>[qw(uid)]
+                                     },
+                     data => {
+                              uid => { type => 'integer' },
+                             },
+                    };
+
+my $create = {
+              %$input_form,
+              storage => {
+                          %$input_storage,
+                          functions => {
+                                        execute => {
+                                                    label => 'Create',
+                                                   },
+                                       },
+                         },
+              relations => {
+                            groups => $groups_relation,
+                            user => {
+                                     scheme => $create_user,
+                                     projection => 'pipe',
+                                     mappings => {
+                                                  uid => 'id',
+                                                 },
+                                    },
+                           },
+             };
+
+
+my $update = {
+              %$input_form,
+              storage => {
+                          %$input_storage,
+                          functions => {
+                                        execute => {
+                                                    label => 'Update',
+                                                   },
+                                       },
+                         },
+              relations => {
+                            groups => $groups_relation,
+                            user => {
+                                     scheme => $update_user,
+                                     projection => 'pipe',
+                                     mappings => {
+                                                  uid => 'id',
+                                                 },
+                                    },
+                           },
+             };
+
+my $users = {
+             type => 'scheme/table',
+             label => 'Users',
+             display => [
+                         {name=>'id',     content=>'data',   label=>'Id'     },
+                         {name=>'name',   content=>'data',   label=>'Name'   },
+                         {name=>'login',  content=>'data',   label=>'Login'  },
+                         {name=>'email',  content=>'data',   label=>'E-mail' },
+                         {name=>'groups', content=>'scheme', label=>'Groups' },
+                        ],
+             storage => {
+                         %$user_storage,
+                         functions => {
+                                       create => {
+                                                  label => 'Create new',
+                                                  relation => 'create',
+                                                  anonymous => '1',
+                                                 },
+                                       update => {
+                                                  label => 'Edit',
+                                                  relation => 'edit',
+                                                 },
+                                       remove => {
+                                                  label => 'Delete',
+                                                  relation => 'delete',
+                                                 }
+                                      },
+                        },
+             relations => {
+                           create => {
+                                      scheme => $create,
+                                      projection => 'pipe',
+                                      mappings => {
+                                                   id => 'uid',
+                                                  },
+                                     },
+                           edit => {
+                                    scheme => $update,
+                                    projection => 'pipe',
+                                    mappings => {
+                                                 id => 'uid',
+                                                },
+                                   },
+
+                           delete => {
+                                      scheme => $delete_user,
+                                      projection => 'pipe',
+                                     },
+                           groups => {
+                                      scheme => $group_membership,
+                                      projection => 'pipe',
+                                      mappings => {
+                                                   id => 'uid',
+                                                  },
+                                     },
+                          },
+            };
+
+
+
+my $edges = {
+             'users:create:user[create]store' => {
+                                                  'users:create:groups[execute]store' => {
+                                                                                          merge     => 'insert',
+                                                                                          obj_maps  => {id=>'uid'},
+                                                                                          data_maps => {id=>'user'},
+                                                                                         },
+                                                 },
+            };
+</%once>
+%
+<%init>
+$m->comp('/default/check_access', can=>'can_create_new_user');
+
+$r->pnotes('obvius_session')->{action}='editengine';
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>

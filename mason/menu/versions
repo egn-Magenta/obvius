@@ -33,8 +33,11 @@ foreach (@$versions) {
 		   title => ($m->comp('SELF:format_date', date=>$_->Version)),
 		   markerlast=>1,
 		   tooltip=>'(' . $_->Lang . ')',
+                   lang=>$_->Lang,
 		  );
     $version{marker}=$markers{latest} if $i==0;
+
+    $version{public}=$_->Public;
 
     if( $public_version and
 	$_->DocId eq $public_version->DocId and

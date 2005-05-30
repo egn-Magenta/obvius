@@ -1,0 +1,80 @@
+<%method block>\
+% if (scalar(@choices)) {
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+% }
+% else {
+<& util/label, label=>$field->{label}, field=>$field &>
+% }
+<div class="obvius-type-category">
+<script type="text/javascript">
+var obvius_internal_data_<% $field->{name} |h %>=[
+% my %selected=map { $_=>1 } @selected;
+% my $i=0;
+% my $last=scalar(@categories);
+% foreach my $category (@categories) {
+%     $i++;
+  { id: "<% $category->{id} %>", name: "<% $category->{name} %>", selected: <% $selected{$category->{id}} ? 1 : 0 %> }<% $i != $last ? ',' : '' %>
+% }
+];
+obvius_insert_category_subcategory_widget("<% $prefix |h %>", "<% $field->{name} |h %>", obvius_internal_data_<% $field->{name} |h %>, "<& /shared/msg, text=>'Add' &>", "<& /shared/msg, text=>'Remove' &>");
+</script>
+%
+<noscript>
+  <div>
+% if ($validation->{repeatable}) {
+<& util/multiple, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>\@selected, &>
+% }
+% else {
+<& util/dropdown, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>\@selected, &>
+% }
+  </div>
+</noscript>
+</div>
+%
+<%args>
+$prefix
+$field
+$validation
+$value=>[]
+$disabled=>0
+</%args>
+%
+<%init>
+my @categories=sort { lc($a->{id}) cmp lc($b->{id}) } @{ $obvius->get_table_data('categories') || [] };
+
+my @choices=map { $_->{id} } @categories;
+my %labels=map { $_->{id} => $_->{id} . ' ' . $_->{name} } @categories;
+
+my @selected=();
+@selected=@{$value->{value}} if (ref($value->{value}) eq 'ARRAY');
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+<% $value->{value} |h %>\
+%
+<%args>
+ $value
+</%args>
+%
+</%method>
+%
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK'; # XXX
+</%init>

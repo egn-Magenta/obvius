@@ -1,5 +1,3 @@
-# $Id$
-
 package WebObvius::Template::MCMS;
 
 ########################################################################
@@ -27,6 +25,8 @@ package WebObvius::Template::MCMS;
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 ########################################################################
+
+# $Id$
 
 use 5.006;
 use strict;
@@ -1590,9 +1590,8 @@ WebObvius::Template::MCMS - Methods that convert MCMS-encoded text to
 
 =head1 DESCRIPTION
 
-=head2 EXPORT
-
-None by default.
+Please note that this module is obsolete. No Obvius websites use
+MCMS-coding in their text-fields.
 
 =head1 AUTHORS
 
@@ -1602,6 +1601,6 @@ Adam Sjøgren.
 
 =head1 SEE ALSO
 
-L<perl>.
+L<WebObvius::Template>.
 
 =cut

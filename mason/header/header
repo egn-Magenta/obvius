@@ -60,7 +60,7 @@ function obvius_go_edit_page(pagenr) {
 </table>
 <% $our_table_start %>
     <tr>
-      <td colspan="4" height="1" style="border-top-style: solid; border-top-width: 1">
+      <td class="obviuspathinfo" colspan="4" height="1" style="border-top-style: solid; border-top-width: 1">
         <& pathinfo, ghosted=>$ghosted &>
       </td>
     </tr>
@@ -139,6 +139,7 @@ function obvius_go_edit_page(pagenr) {
           <& divider &>
           <& SELF:link, tabindex=>$tabindex, text=>"Print", link=>"javascript:OpenWinFull('$prefix$uri?obvius_op=print&stamdata=1')", ghosted=>($ghosted or (defined $obvius_op and $obvius_op eq 'print')), ghosted_clas=>'normal', bold=>(defined $obvius_op and $obvius_op eq 'print') &>
 % }
+<& after_header, tabindex=>$tabindex, ghosted=>$ghosted, obvius_op=>$obvius_op &>
           &nbsp;
 % #       <img border="0" src="/grafik/admin/question.gif" alt="?" width="11" height="12">
       </td>

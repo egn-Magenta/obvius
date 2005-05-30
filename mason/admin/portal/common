@@ -1,0 +1,4 @@
+
+   <div class="obvius-common">
+<% $r->pnotes('common_data') %>
+   </div>

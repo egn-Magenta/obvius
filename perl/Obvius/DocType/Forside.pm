@@ -4,7 +4,7 @@ package Obvius::DocType::Forside;
 #
 # Forside.pm - Forside Document Type
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 aparte A/S, Denmark (http://www.aparte.dk/)
 #
 # Author: Adam Sjøgren (asjo@magenta-aps.dk)
 #
@@ -42,148 +42,83 @@ sub action {
 
     $obvius->get_version_fields($vdoc, 64);
 
-    my $nyhed_doctype=$obvius->get_doctype_by_name("Nyhed");
-    my $artikel_doctype=$obvius->get_doctype_by_name("Artikel");
-
-    my @already_added;
-
-    my $nowdate = strftime('%Y-%m-%d 00:00:00', localtime);
-    my $where = "(type=" . $nyhed_doctype->Id . " or type=" . $artikel_doctype->Id . ") and docdate <= \'" . $nowdate . "\'",
-    my %search_options =    (
-			     notexpired=>1,
-			     nothidden=>1,
-			     order => 'docdate DESC',
-			     public=>1,
-			     append=>'limit 10'
-			    );
-
-    my $all_docs = $obvius->search([qw(docdate)], 
-				 $where,
-				 %search_options);
-
-    # den tværgående nyhed
-    if (defined $vdoc->Big_news and $vdoc->Big_news ne '/') {
-	my $linktop_doc = $obvius->lookup_document($vdoc->Big_news);
-	my $linkvdoc;
-	$linkvdoc = $obvius->get_public_version($linktop_doc) || $obvius->get_latest_version($linktop_doc) if($linktop_doc);
-	$obvius->get_version_fields($linkvdoc, [qw (short_title title teaser content picture author docdate)]);
-	
-	my $linktop_hash_doc = { 
-				title => $linkvdoc->Short_Title ? $linkvdoc->Short_Title : $linkvdoc->Title,
-				teaser => $linkvdoc->Teaser || '',
-				content => $linkvdoc->Content || '',
-				docdate => &convert_date($linkvdoc->DocDate),
-				url => $vdoc->Big_news,
-				author => (defined $linkvdoc->field('author') ? $linkvdoc->field('author') : ''),
-				picture => (defined $linkvdoc->field('picture') ? $linkvdoc->field('picture') : '')
-			       };
-	$output->param(top_vdoc=>$linktop_hash_doc);
-	push (@already_added, $linktop_doc->Id);
-    }
-
-    # find nyhederne til venstre på siden
-    my @left_news;
-    my $already_pushed = 0;
-    if (defined $vdoc->News_1 and $vdoc->News_1 ne '/') {
-	push_news_item($vdoc->News_1, \@left_news, \@already_added, $obvius);
-    } else {
-	push_news_item($$all_docs[$already_pushed], \@left_news, \@already_added, $obvius);
-	$already_pushed++;
-    }
-
-    if (defined $vdoc->News_2 and $vdoc->News_2 ne '/') {
-	push_news_item($vdoc->News_2, \@left_news, \@already_added, $obvius);
-    } else {
-	push_news_item($$all_docs[$already_pushed], \@left_news, \@already_added, $obvius);
-	$already_pushed++;
-    }
-
-    if (defined $vdoc->News_3 and $vdoc->News_3 ne '/') {
-	push_news_item($vdoc->News_3, \@left_news, \@already_added, $obvius);
-    } else {
-	push_news_item($$all_docs[$already_pushed], \@left_news, \@already_added, $obvius);
-	$already_pushed++;
-    }
-
-    if (defined $vdoc->News_4 and $vdoc->News_4 ne '/') {
-	push_news_item($vdoc->News_4, \@left_news, \@already_added, $obvius);
-    } else {
-	push_news_item($$all_docs[$already_pushed], \@left_news, \@already_added, $obvius);
-	$already_pushed++;
-    }
-
-    if (defined $vdoc->News_5 and $vdoc->News_5 ne '/') {
-	push_news_item($vdoc->News_5, \@left_news, \@already_added, $obvius);
-    } else {
-	push_news_item($$all_docs[$already_pushed], \@left_news, \@already_added, $obvius);
-    }
-
-    # sørg for at fylde left_news op
-    for (my $i = 0; scalar @left_news < 5; $i++) {
-	push_news_item($$all_docs[$i], \@left_news, \@already_added, $obvius);
-    }
-
-    $output->param(left_news=>\@left_news);
-
-
-
-    # find de nyeste nyheder
-    my $news_docs = $obvius->search([qw(docdate)], 
-				  "type = " . $nyhed_doctype->Id . " and docdate <= \'" . $nowdate . "\'",, 
-				  %search_options);
-
-    $news_docs = [] unless ($news_docs);
-
-    my @right_news;
-    for (@$news_docs) {
-	$obvius->get_version_fields($_, [qw(title short_title teaser content)]);
-	my $docid = $_->DocId || '';
-	my $already_added_test = \@already_added;
-	unless(is_already_added($already_added_test, $docid)) {
-	    my $doc = $obvius->get_doc_by_id($_->DocId);
-	    my $url = $obvius->get_doc_uri($doc);
-	    push(@right_news, {
-			       title => $_->Short_Title ? $_->Short_Title : $_->Title,
-			       docdate => &convert_date($_->DocDate),
-			       url => $url
-			      }
-		);
-	}
-    }
-
-    $output->param(right_news=>\@right_news);
-
-    # find de nyeste artikler
-    my $article_docs = $obvius->search([qw(docdate)], 
-				     "type = " . $artikel_doctype->Id . " and docdate <= \'" . $nowdate . "\'",, , 
-				     %search_options);
-
-    $article_docs = [] unless($article_docs);
-    my @right_articles;
-    for (@$article_docs) {
-	my $docid = $_->DocId || '';
-	my $already_added_test = \@already_added;
-	unless(is_already_added($already_added_test, $docid)) {
-	    $obvius->get_version_fields($_, [qw(title short_title teaser content)]);
-	    my $doc = $obvius->get_doc_by_id($_->DocId);
-	    my $url = $obvius->get_doc_uri($doc);
-	    push(@right_articles, {
-				   title => $_->Short_Title ? $_->Short_Title : $_->Title,
-				   docdate => &convert_date($_->DocDate),
-				   url => $url
-				  }
-		);
-	}
-    }
-
-    $output->param(right_articles=>\@right_articles);
-
     return OBVIUS_OK;
 }
 
 
+sub get_news {
+    my ($this, $vdoc, $obvius)=@_;
 
+    my $doctype=$obvius->get_doctype_by_name("Nyhed");
+    $obvius->get_version_fields($vdoc, [qw(news_1 news_2)]);
 
+    return $this->get_em($vdoc, $doctype, [$vdoc->News_1, $vdoc->News_2], $obvius);
+}
+
+sub get_articles {
+    my ($this, $vdoc, $obvius)=@_;
+
+    my $doctype=$obvius->get_doctype_by_name("Artikel");
+    $obvius->get_version_fields($vdoc, [qw(news_3 news_4)]);
+
+    return $this->get_em($vdoc, $doctype, [$vdoc->News_3, $vdoc->News_4], $obvius);
+}
+
+sub get_em {
+    my ($this, $vdoc, $doctype, $fields, $obvius)=@_;
+
+    my %search_options = (
+                          notexpired=>1,
+                          nothidden=>1,
+                          order => 'docdate DESC',
+                          public=>1,
+                          append=>'limit 13'
+                         );
+
+    my $nowdate = strftime('%Y-%m-%d 00:00:00', localtime);
+
+    # find de nyeste
+    my $vdocs = $obvius->search([qw(docdate)],
+                              "type = " . $doctype->Id . " and docdate <= \'" . $nowdate . "\'",, ,
+                              %search_options) || [];
+
+    # XXX Handle big_news exclusion:
+
+    # fields:
+    foreach my $field_value (@$fields) {
+        unshift @$vdocs, ($obvius->get_public_version($obvius->lookup_document($field_value))) if (defined $field_value and $field_value ne '/' and $obvius->lookup_document($field_value) and $obvius->get_public_version($obvius->lookup_document($field_value)));
+    }
+
+    my %already_added=();
+    my @list=();
+    for (@$vdocs) {
+	my $docid = $_->DocId;
+	unless($already_added{$docid}) {
+	    $obvius->get_version_fields($_, [qw(title short_title teaser content author docdate)]);
+	    my $doc = $obvius->get_doc_by_id($_->DocId);
+	    my $url = $obvius->get_doc_uri($doc);
+	    push(@list, {
+                         title => $_->field('short_title') ? $_->Short_Title : $_->Title,
+                         teaser => $_->field('teaser') || '',
+                         author => $_->field('author') || '',
+                         picture => $_->field('picture') || '',
+                         docdate => &convert_date($_->DocDate),
+                         content => $_->field('content') || '',
+                         url => $url
+                        }
+                );
+            $already_added{$docid}=1;
+	}
+    }
+
+    my @top=();
+    for(my $i=scalar(@top); $i<2; $i++) {
+        push @top, shift @list;
+    }
+    @list=@list[0..9] if (scalar(@list)>10);
+
+    return (\@top, \@list);
+}
 
 sub push_news_item {
     my ($news_item, $left_news, $already_added, $obvius) = @_;
@@ -206,7 +141,7 @@ sub push_news_item {
 
 
 
-	push (@$left_news, { 
+	push (@$left_news, {
 			    title => $linkvdoc->Short_Title ? $linkvdoc->Short_Title : $linkvdoc->Title,
 			    teaser => $linkvdoc->field('teaser') || '',
 			    docdate => &convert_date($linkvdoc->DocDate),
@@ -236,60 +171,51 @@ sub is_already_added  {
     return 0;
 }
 
+sub get_big_news {
+    my ($this, $vdoc, $obvius)=@_;
 
-#    sub get_image_properties {
-#	my $imageurl = shift;
+    $obvius->get_version_fields($vdoc, [qw(big_news)]);
 
-#	my  @path = $obvius->get_doc_by_path($imageurl);
-#	my $image_doc;
-#	$image_doc = $path[-1] if (@path);
+    # den tværgående nyhed
+    if (defined $vdoc->Big_news and $vdoc->Big_news ne '/') {
+	my $linktop_doc = $obvius->lookup_document($vdoc->Big_news);
+	my $linkvdoc;
+	$linkvdoc = $obvius->get_public_version($linktop_doc) || $obvius->get_latest_version($linktop_doc) if($linktop_doc);
+	$obvius->get_version_fields($linkvdoc, [qw (short_title title teaser content picture author docdate header)]);
+	
+	my $linktop_hash_doc = {
+				title => $linkvdoc->field('short_title') ? $linkvdoc->Short_Title : $linkvdoc->Title,
+                                header => $linkvdoc->field('header') || '',
+				teaser => $linkvdoc->field('teaser') || '',
+				content => $linkvdoc->Content || '',
+				docdate => &convert_date($linkvdoc->DocDate),
+				url => $vdoc->Big_news,
+				author => (defined $linkvdoc->field('author') ? $linkvdoc->field('author') : ''),
+				picture => (defined $linkvdoc->field('picture') ? $linkvdoc->field('picture') : '')
+			       };
+	#$output->param(top_vdoc=>$linktop_hash_doc);
+        return $linktop_hash_doc;
+    }
 
-#	my $image_vdoc;
-#	$image_vdoc = $obvius->get_public_version($image_doc) if (defined $image_doc);
-#	$obvius->get_version_fields($image_vdoc, [qw(width height)]) if (defined $image_vdoc);
-
-#	my $height=$image_vdoc->Height;
-#	my $width = $image_vdoc->Width;
-
-#	if ($width > 150) {
-#	    my $cut = $width - 150;
-#	    my $cut_percentage = ($cut/$width);
-#	    $height = int($height*(1-$cut_percentage));
-#	    $width = int($width*(1-$cut_percentage));
-#	}
-
-#	if ($height > 150) {
-#	    my $cut = $height - 150;
-#	    my $cut_percentage = ($cut/$height);
-#	    $height = int($height*(1-$cut_percentage));
-#	    $width = int($width*(1-$cut_percentage));
-#	}
-#
-#	return {width=>$width, height=>$height}
-#    }
-
+    return undef;
+}
 
 
 1;
 __END__
-    # Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::Forside - Perl extension for blah blah blah
+Obvius::DocType::Forside - Perl extension for the Sportsfiskeren frontpage.
 
 =head1 SYNOPSIS
 
-    use Obvius::DocType::Forside;
-blah blah blah
+    use'd automatically.
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::Forside, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+Provide functions for the Mason-components to call (so each part can
+be cached separately).
 
 =head2 EXPORT
 
@@ -298,10 +224,11 @@ None by default.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Mads Kristensen,
+Adam Sjøgren <asjo@aparte-test.dk>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius>.
 
 =cut

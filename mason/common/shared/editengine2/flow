@@ -1,0 +1,261 @@
+<%method insert>
+<%args>
+ $execute
+ $objects
+ $history
+ $parent=>''
+ $session
+</%args>
+<%init>
+
+ # [!] Confer topology during insertion!
+
+ my $vertex = {
+               execute => $execute,
+               objects => $objects,
+               history => $history,
+               parent  => $parent,
+              };
+ push @{$session->{cesi}->{queue}}, $vertex;
+#  print STDERR "<flow:insert> ";
+#  use Data::Dumper; print STDERR '$session->{cesi}: ' . Dumper($session->{cesi});
+</%init>
+</%method>
+
+
+
+<%method extract>
+<%args>
+ $session
+</%args>
+<%init>
+
+ #print STDERR "<flow:extract>\t";
+
+ # [!] Remember to handle pooled overwritings, translations
+ #     etc. before extraction!
+
+ my $node = shift @{$session->{cesi}->{queue}};
+ return (undef, undef, undef) unless $node;
+
+ my $vertex = $m->comp('history:extract_vertex', history=>$node->{history}) . "[$node->{execute}]" . 'store';
+#use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
+
+ # Check for dependencies by "Round Robin"; modify later to use eg. topological sorting if necessary
+ while (defined $session->{cesi}->{pool}->{$vertex} and scalar(grep { !$_ } values %{$session->{cesi}->{pool}->{$vertex}})) {
+     #print STDERR "...skipping ";
+     #use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
+
+     my $n2 = $node;
+
+     push @{$session->{cesi}->{queue}}, $node;
+     $node = shift @{$session->{cesi}->{queue}};
+     $vertex = $m->comp('history:extract_vertex', history=>$node->{history}) . "[$node->{execute}]" . 'store';
+
+     use Data::Dumper;
+     die "unsatisfied node " . Dumper($node) if $node eq $n2;
+ }
+
+#use Data::Dumper; print STDERR '$node: ' . Dumper($node);
+# use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
+
+
+  if (defined $session->{cesi}->{pool}->{$vertex}) {
+      #use Data::Dumper; print STDERR '$session->{cesi}->{pool}->{$vertex}: ' . Dumper($session->{cesi}->{pool}->{$vertex});
+      foreach my $source ( keys %{$session->{cesi}->{pool}->{$vertex}} ) {
+          # Integrate the pooled data from $source as described in $edges
+          $m->comp('flow:source', node=>$node, source => $session->{cesi}->{edges}->{$source}->{$vertex}, pool=>$session->{cesi}->{pool}->{$vertex}->{$source});
+          # Clear pooled data after use
+          $session->{cesi}->{pool}->{$vertex}->{$source} = undef;
+      }
+  }
+
+ return ($node->{execute}, $node->{objects}, $node->{history}, $node->{parent});
+</%init>
+</%method>
+
+
+
+
+<%method route>
+<%args>
+ $session
+ $vertex
+ $data
+</%args>
+<%init>
+#use Data::Dumper; print STDERR "\t" . '<flow:route> $vertex: ' . "$vertex";
+
+ if (exists $session->{cesi}->{edges}->{$vertex}) {
+   #print STDERR "\t»»» routing...\n";
+
+   # Store $data in target pools
+   foreach my $target (keys %{$session->{cesi}->{edges}->{$vertex}}) {
+#     print STDERR "\tStoring data in pool for $target\n";
+     # Also use appropriate projection here!!
+     $session->{cesi}->{pool}->{$target}->{$vertex} = $data;
+   }
+
+#use Data::Dumper; print STDERR '$session->{cesi}->{pool}: ' . Dumper($session->{cesi}->{pool});
+
+
+   # Check for a redirection request
+   if (exists $session->{cesi}->{edges}->{$vertex}->{sink}) {
+     my $action = $session->{cesi}->{actions}->{$vertex};
+     if ($action) {
+         #print STDERR "\n\tREDIRECTING TO ", $action, "\n";
+         # [?]  Don't rely on something that is ONLY possible from the
+         #      'admin' side of the site.  Multiple $do's, or only one
+         #      'do' and method on $session?  The last case forces the
+         #      existence of a method named 'do' onto the component!?
+         #      What are the possibilities from the 'public' side?
+         my ($act, $do) = $action =~ /^(.+):(.+)$/;
+         #print STDERR "\t\tact: $act, do: $do\n";
+         if ($do) {
+             # XXX Why use pnotes here, when $session is available?
+             $r->pnotes('obvius_session')->{action}=$act;
+             $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}&obvius_perform_$do=1");
+         }
+         else {
+             # XXX Why use pnotes here, when $session is available?
+             $r->pnotes('obvius_session')->{action}=$action;
+             $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}");
+         }
+     }
+     else {
+         print STDERR "\tNo action for $vertex->sink\n";
+     }
+   }
+ }
+ else {
+   #print STDERR "\t    no routing!\n";
+ }
+
+</%init>
+</%method>
+
+
+
+<%method clear>
+<%args>
+ $session
+</%args>
+<%init>
+ delete $session->{cesi}->{queue};
+</%init>
+</%method>
+
+
+
+<%method initialize>
+<%args>
+ $session
+ $edges
+ $actions
+</%args>
+<%init>
+ # Don't overwrite previous $edges and $actions!
+ $session->{cesi}->{edges} = {} unless $session->{cesi}->{edges};
+ $session->{cesi}->{edges}= { %{$session->{cesi}->{edges}}, %$edges };
+ $session->{cesi}->{actions} = {} unless $session->{cesi}->{actions};
+ $session->{cesi}->{actions}= { %{$session->{cesi}->{actions}}, %$actions };
+
+#use Data::Dumper; print STDERR '$session->{cesi}: ' . Dumper($session->{cesi});
+
+ # Setup additional pools
+ foreach my $vertex (keys %$edges) {
+
+     map { $session->{cesi}->{pool}->{$_}->{$vertex} = undef } keys %{$edges->{$vertex}}
+ }
+
+#use Data::Dumper; print STDERR '$session->{cesi}: ' . Dumper($session->{cesi});
+</%init>
+<%doc>
+
+ Init takes a graph as input; the format is that of a neighbour list
+ (with a corresponding projection for each edge):
+
+ COMMENT OUT OF DATE!!
+
+ » Eg. $edges => {
+                  1:user_edit:user[store] => {
+                                              1:user_edit:groups[store] => '(pipe|input|transfer)',
+                                              sink => 'pipe',
+                                             },
+                  2:survey:user[edit]     => {
+                                              sink => 'pipe',
+                                             }                
+                 }
+
+ » $actions redirecting to a named component may also be specified in
+   connection with the use of the special 'sink' vertex
+
+ » Likewise flows targeted at [edit] vertices might pass control to
+   the corresponding editscheme
+
+</%doc>
+</%method>
+
+
+
+
+<%method source>
+<%args>
+ $node
+ $source
+ $pool
+</%args>
+<%init>
+#print STDERR "<flow:source>";
+ if ($source->{merge} eq 'insert') {
+#    use Data::Dumper; print STDERR '$node: ' . Dumper($node);
+# use Data::Dumper; print STDERR '$pool: ' . Dumper($pool);
+
+   # Note: This assumes only one object
+   my ($source_object_id) = keys %$pool;
+   my %source_object = %{$m->comp('toolbox:unescape_object', object_description=>$source_object_id)};
+
+   # Unescape and rename the object prior to "insertion"
+   my %data_object = %source_object;
+   foreach my $id (keys %{$source->{data_maps}}) {
+         $data_object{$source->{data_maps}->{$id}} = $pool->{$source_object_id}->{$id};
+         delete $data_object{$id};
+   }
+
+   # Merge (insert) source object description into each of the objects in question
+   my %new_node_objects;
+   foreach my $object_id (keys %{$node->{objects}->{$node->{history}}}) {
+     my $object = $m->comp('toolbox:unescape_object', object_description=>$object_id);
+     my $new_object_id = $m->comp('toolbox:escape_object', object=> { %$object, %data_object});
+
+     # Note: Only identifiers has beed added here
+     $new_node_objects{$new_object_id} = $node->{objects}->{$node->{history}}->{$object_id};
+   }
+
+
+   # Modify current $history to reflect "insertion"
+   my %input_object = %source_object;
+   foreach my $id (keys %{$source->{obj_maps}}) {
+         $input_object{$source->{obj_maps}->{$id}} = $pool->{$source_object_id}->{$id};
+         delete $input_object{$id};
+   }
+   my $present = $m->comp('history:modify_current_event', history=>$node->{history}, object=>\%input_object);
+   delete $node->{objects}->{$node->{history}};
+   $node->{history} = $present;
+
+   # Store modifications
+   $node->{objects}->{$node->{history}} = \%new_node_objects;
+
+ }
+ else {
+   warn '$source->{merge}=', "'$source->{merge}' unknown\n";
+ }
+</%init>
+</%method>
+
+<%args>
+ $session
+</%args>
+<%init>
+ return scalar(@{$session->{cesi}->{queue}});
+</%init>

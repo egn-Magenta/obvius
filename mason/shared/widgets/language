@@ -14,8 +14,7 @@
 </tr>
 %
 <%init>
-my @langs=qw(da en fi fr gr nl it pt es se de);
-my %long=qw(da Danish en English fi Finnish fr French gr Greek nl Dutch it Italian pt Portuguese
-            es Spanish se Swedish de German);
-
+my @langs=qw(da en fi fr el nl it pt es sv de);
+my %long=qw(da Danish en English fi Finnish fr French el Greek nl Dutch it Italian pt Portuguese
+            es Spanish sv Swedish de German);
 </%init>

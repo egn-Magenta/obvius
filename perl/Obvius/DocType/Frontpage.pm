@@ -4,7 +4,7 @@ package Obvius::DocType::Frontpage;
 #
 # Frontpage.pm - Frontpage Document Type
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
 # Author: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #
@@ -38,7 +38,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-    my $cookies = $input->Obvius_COOKIES;
+    my $cookies = $input->param('OBVIUS_COOKIES');
 
     my $in_profile = $input->param('profile');
     my $profile = $in_profile || 1; # Links etc. defaults to profile 1
@@ -83,7 +83,7 @@ sub action {
                             teaser => $linkvdoc->Teaser || '',
                             url => $url,
                             from => $from,
-                            picture => $linkvdoc->Picture || '',
+                            picture => $linkvdoc->field('picture') || '',
                             version => $linkvdoc->Version
                     });
 

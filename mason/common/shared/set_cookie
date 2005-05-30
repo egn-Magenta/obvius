@@ -1,7 +1,7 @@
 <%args>
 $cookie
 $value=>undef
-$expires=>undef
+$expires=>'+3M'
 $path=>'/'
 </%args>
 %
@@ -9,8 +9,8 @@ $path=>'/'
 my $c=Apache::Cookie->new($r,
 		          -name => $cookie,
                           -value => $value,
-                          -expires => $expires,
 			  -path => $path,
                          );
+$c->expires($expires) if ($expires);
 $c->bake;
 </%perl>

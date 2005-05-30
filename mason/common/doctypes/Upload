@@ -5,10 +5,10 @@
 </p>
 
 <p>
-Title:     <% $vdoc->Title %><br>
-Short title: <% $vdoc->field('short_title') %><br>
-Mimetype:  <% $vdoc->Mimetype %><br>
-Size:      <% $vdoc->Size %> bytes<br>
+Title:     <% $vdoc->Title %><br />
+Short title: <% $vdoc->field('short_title') %><br />
+Mimetype:  <% $vdoc->Mimetype %><br />
+Size:      <% $vdoc->Size %> bytes<br />
 File:      <a href="<% $linkuri %>" title="Download file"><% $doc->Name %></a>
 </p>
 %

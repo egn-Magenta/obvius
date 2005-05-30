@@ -1,0 +1,232 @@
+%   if (defined $editscheme->{label}) {
+<h2><& /shared/msg, text=>$editscheme->{label} &></h2>
+%   }
+
+ <table class='obvius-editengine-list'>
+% if ($style->{context} eq 'block') {
+    <& '.display_pagelist', page=>$page, max=>$obvius_max, total=>$total, history=>$history, numberofcolumns=>scalar(@columns) &>
+% }
+%
+    <tr>
+%   foreach my $column (@columns) {
+      <th>
+        <& '.display_label', column=>$column, sort=>$sort, reverse=>$reverse, history=>$history  &>
+      </th>
+%   }
+    </tr>
+%
+% my $i=0;
+% foreach my $row (@$table) {
+    <& '../select:object', editscheme=>$editscheme, object=>$row &>
+    <tr class="obvius-<% $i++%2 ? 'b' : 'a' %>">
+%    foreach my $column (@columns) {
+%     my $content_class = ($column->{content} eq 'data') ? "$editscheme->{storage}->{data}->{$column->{name}}->{type}" : "$column->{content}"; 
+      <td class="<% $content_class %>">
+%       # The style of embedded elements defaults to 'inline'
+        <& '../display', layout=>$column, value=>$row, style=>{context=>'inline'}, editscheme=>$editscheme, history=>$history &>
+      </td>
+%    }
+%    # Add clickable functions (if there are any):
+%    if (scalar(@obj_functions) and !$style->{open}) {
+      <td>
+%       foreach my $function (@obj_functions) {
+         <& '../select:function', function=>$function, editscheme=>$editscheme, history=>$history &>
+         <& '../transfer:function', label=>$editscheme->{storage}->{functions}->{$function}->{label}, history=>$history &>
+%       }
+      </td>
+%    }
+    </tr>
+% }
+%
+ </table>
+%
+  <& '../select:clear' &>
+%# If an object was passed, return to this for partial object creation
+  <& '../select:object', editscheme=>$editscheme, object=> {map {$_ => {value=>$object{$_}}} keys %object} &>
+% foreach my $function (@new_obj_functions) {
+  <div class="obvius-editengine-anonymous-functions">
+   <& '../select:function', function=>$function, editscheme=>$editscheme, history=>$history &>
+   <& '../transfer:function', label=>$editscheme->{storage}->{functions}->{$function}->{label}, history=>$history &>
+  </div>
+% }
+%
+%
+<%args>
+ # Mandatory arguments
+ $history
+ $editscheme
+ $storage
+ $session
+
+ # The scheme's style parameter:
+ #  » 'block':  "stand alone" display
+ #    'inline': show as (full) table without header and pages (usefull for embeddings etc.)
+ #    'raw':    return data as array (of arrays?)
+# $style=>'block'
+ $style
+
+</%args>
+%
+<%init>
+$history='' unless $history; # Just to avoid 'use of uninitialized value in string' warning
+print STDERR "scheme/<table>\thistory = '$history'\n" if $session->{cesi_debug_recursion};
+
+# Process parameters
+map {
+    $session->{editscheme_parameters}->{$history}->{$_} = $session->{editscheme_requests}->{$history}->{$_}
+} keys %{$session->{editscheme_requests}->{$history}};
+
+# Determine parameters controlling table diplay
+my $page = $session->{editscheme_parameters}->{$history}->{page} || 1;
+my $sort = $session->{editscheme_parameters}->{$history}->{sort};
+my $reverse = $session->{editscheme_parameters}->{$history}->{reverse};
+
+# Options controlling table display.
+my $obvius_max = (defined $editscheme->{arguments} and defined $editscheme->{arguments}->{max}) ? $editscheme->{arguments}->{max} : 10;
+
+my $start_num=(($page-1)*$obvius_max); # 0-indexed
+
+my $options = {
+               sort=>$sort,
+               reverse=>$reverse,
+              };
+$options = {
+            %$options,
+            start=>$start_num,
+            max=>$obvius_max,
+           } if ($style->{context} eq 'block');
+
+my %object = %{$m->comp('../toolbox:access_object')};
+
+if ($style->{context} eq 'raw') {
+    my ($table, $total)=$storage->list(\%object);
+    return $table;
+}
+
+# Fix: Currently $total is the total number of rows in the table, and
+# not the total number of found records, as it ought to be: If an
+# object is passed to the scheme only entries (ie. the subset)
+# matching this object identification are wanted
+my ($table, $total)=$storage->list(\%object, $options);
+
+my @columns = @{$editscheme->{display}};
+
+my $functions = $editscheme->{storage}->{functions};
+#use Data::Dumper; print STDERR '$functions: ' . Dumper($functions);
+my @obj_functions = grep {!defined $functions->{$_}->{anonymous} or !$functions->{$_}->{anonymous}} keys %$functions;
+my @new_obj_functions = grep {$functions->{$_}->{anonymous}} keys %$functions;
+#use Data::Dumper; print STDERR '\@new_obj_functions: ' . Dumper(\@new_obj_functions);
+
+</%init>
+%
+<%def .display_label>\
+%
+% if ($column->{content} eq 'data') {
+<& '../toolbox:transfer_scheme_parameters', options=>\%extra_params, label=>$label . $arrow, history=>$history &>\
+% }
+% else {
+<% $label |h %>\
+% }
+%
+<%args>
+ $column
+ $sort=>''
+ $reverse=>1
+ $history
+</%args>\
+%
+<%init>
+my %extra_params;
+my $arrow='';
+
+$sort = '' unless $sort; # Just to avoid 'use of uninitialized value in string eq' warning
+if ($column->{content} eq 'data') {
+    %extra_params=(sort=>$column->{name}, reverse=>0);
+
+    if ($sort eq $column->{name}) {
+        if ($reverse) {
+            $extra_params{sort}=''; # Click again for no sort
+            $extra_params{reverse}=0;
+        }
+        else {
+            $extra_params{reverse}=1; # Click for reverse
+        }
+        $arrow='<img width="7" height="6" src="/pics/icons/sort-' . ($reverse ? 'up' : 'down') . '.png" alt="' . ($reverse ? '^' : '_') . '" />';
+    }
+}
+my $label = $m->scomp('/shared/msg', text=>$column->{label});
+</%init>\
+%
+</%def>
+%
+%
+<%def .display_pagelist>
+%
+<%args>
+ $page=>undef
+ $max=>undef
+ $total=>undef
+ $history
+ $numberofcolumns
+</%args>
+    <tr class='obvius-editengine-pagelist'>
+      <td colspan='<% $numberofcolumns |h %>'>
+% if ($page ne '1') {
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>1}, label=>'«', history=>$history &>\
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$page-1}, label=>'&lt;', history=>$history &>\
+% }
+% else {
+« &lt;
+% }
+
+% for(my $i=1; $i<=$pages; $i++) {
+%   if ($i eq $page) {
+<% $i %>
+%   }
+%   else {
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$i}, label=>$i, history=>$history &>\
+%   }    
+% }
+
+% if ($page ne $pages) {
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$page+1}, label=>'&gt;', history=>$history &>\
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$pages}, label=>'»', history=>$history &>\
+% }
+% else {
+&gt; »
+% }
+      </td>
+    </tr>
+<%init>
+return unless (defined $max);
+return unless (defined $total);
+$page=1 unless (defined $page);
+
+my $pages=ceil($total/$max);
+return unless ($pages>1);
+</%init>
+</%def>
+%
+%
+<%def .compose_parameters>\
+%
+?<% join '&amp;', map { $_ . '=' . $m->scomp('/shared/escape_u', text=>$parameters{$_}) } (keys %parameters) %>\
+%
+<%init>
+my %parameters=((map { $_=>$r->param($_) } $r->param()), (%ARGS));
+return unless (scalar(keys %parameters));
+</%init>\
+%
+</%def>
+%
+%
+
+<%doc>
+
+ » Consider declaring mandatory arguments in a <%shared>-block in
+   order to allow closure of the different display styles.
+
+</%doc>
+<%once>
+use POSIX qw(ceil);
+</%once>

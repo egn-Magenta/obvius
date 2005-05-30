@@ -1,0 +1,20 @@
+<% $data %>\
+%
+<%init>
+my $data=$m->comp('/default/generate_subsite');
+
+if (!defined $data or $data eq "") {
+    print STDERR scalar localtime(), " generate_subsite failed to produce any output ($uri)\n";
+    $r->no_cache(1);
+}
+
+if (defined $r->notes('http_return_code')) {
+    $m->clear_buffer;
+    $r->method('GET');
+    $r->headers_in->unset('Content-length');
+    $r->content_type('text/html');
+    $m->abort($r->notes('http_return_code'));
+}
+</%init>
+%
+<%doc> Same as public/subsite - factor out! </%doc>

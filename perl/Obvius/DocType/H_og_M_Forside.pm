@@ -59,7 +59,7 @@ sub action {
     $where = "type = '" . $article_type->Id . "'";
 
     # Andre interesante felter
-    push(@fields, 'show_pic_fp', 'title', 'short_title', 'primary_group', 'docdate');
+    push(@fields, 'title', 'short_title', 'primary_group', 'docdate', 'seq');
 
     # Kun nye artikler.
     my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
@@ -67,32 +67,41 @@ sub action {
     $where .= " and expire_fp > '$now'";
 
     # Kun artikler, der faktisk har en primary_group
-    $where .= " and primary_group IS NOT NULL and primary_group != ''";
+    $where .= " and primary_group IS NOT NULL";
+
+    # Christian vil max. have 10 nyheder på forsiden
+    $search_options{'append'} = " limit 10";
 
     my $docs = $obvius->search(\@fields, $where, %search_options) || [];
 
+    @$docs = sort {$a->Seq <=> $b->Seq } @$docs;
+
     # Minimum 6 dokumenter..
     my $num_docs = scalar @$docs;
-    if($num_docs < 10) {
+    if($num_docs < 8) {
         $where =~ s/expire_fp >/expire_fp <=/;
-        $search_options{'append'} = " limit " . (10 - $num_docs);
+        $search_options{'append'} = " limit " . (8 - $num_docs);
         my $extra_docs = $obvius->search(\@fields, $where, %search_options) || [];
-        push(@$docs, @$extra_docs);
+        push(@$docs, sort {$a->Seq <=> $b->Seq } @$extra_docs);
     }
 
-    $last_changed = $docs->[0]->Docdate if($docs->[0]);
+    if($docs->[0]) {
+        $last_changed = $docs->[0]->Docdate;
+        my ($year, $month, $day) = ($last_changed =~ /^(\d+).(\d+).(\d+)/);
+        my ($weeknr, $weekyear) = Week_of_Year($year, $month, $day);
+        $output->param('ugenr' => $weeknr);
 
-    # Prøv at finde den samlede version:
-    if($docs->[1]) {
-        my $docdate = $docs->[1]->DocDate;
-        my $result = $obvius->search(
-                                    \@fields,
-                                    "docdate = '$docdate' and (primary_group IS NULL or primary_group = '')",
-                                    %search_options,
-                                    append => 'limit 1'
-                                ) || [];
-        # Tilføj sidst i listen hvis vi finder den.
-        push(@$docs, $result->[0]) if($result->[0]);
+        my $ugenr2 = '';
+
+        # Get the monday of the week
+        ($year, $month, $day) = Monday_of_Week($weeknr, $weekyear);
+        $ugenr2 = "$day/$month";
+
+        # Get the monday of next week
+        ($year, $month, $day) = Add_Delta_Days($year, $month, $day, 7);
+        $ugenr2 .= " - $day/$month";
+
+        $output->param('ugenr2' => $ugenr2);
     }
 
 
@@ -105,11 +114,6 @@ sub action {
         $date =~ s/^\d\d(\d\d)-(\d\d)-(\d\d).*/$3.$2.$1/;
         $data->{date} = $date;
 
-        if($_->Show_Pic_Fp) {
-            my $pic_path = $obvius->get_version_field($_, 'fp_picture');
-            $data->{picture} = $pic_path if($pic_path and $pic_path ne '/');
-        }
-
         my $teaser = $obvius->get_version_field($_, 'teaser');
         $data->{teaser} = $teaser if($teaser);
 
@@ -120,6 +124,8 @@ sub action {
 
         $data->{country} = $obvius->get_version_field($_, 'country');
 
+        $data->{docid} = $_->DocId;
+
         push(@out_docs, $data);
     }
 
@@ -127,10 +133,10 @@ sub action {
 
 
     my $fields = [
-                    'category',
                     'docdate',
                     'title',
-                    'primary_group'
+                    'primary_group',
+                    'teaser',
                 ];
 
     my $infopaq_doctype = $obvius->get_doctype_by_name('InfopaqNyhed');
@@ -157,12 +163,51 @@ sub action {
                         title => $_->Title,
                         url => $url,
                         date => $date,
-                        group => $_->Primary_Group
+                        group => $_->Primary_Group,
+                        teaser => $_->{TEASER},
+                        docid => $_->DocId,
                     }
                 );
     }
 
     $output->param(otherdocs => \@docs) if(scalar(@docs));
+
+
+    my $biotiknyt_doctype = $obvius->get_doctype_by_name('NytFraBioTIK');
+
+    my $biotik_where = "type = " . $biotiknyt_doctype->Id;
+    $biotik_where .= " and expire_self > '$now'";
+
+
+    my $biotik_docs = $obvius->search(['docdate', 'title', 'teaser', 'expire_self', 'content'], $biotik_where,
+                                public => 1,
+                                notexpired => 1,
+                                nothidden => 1,
+                                order => 'docdate DESC, title',
+                                append => 'LIMIT 10'
+                            ) || [];
+
+    $last_changed = $biotik_docs->[0]->Docdate if($biotik_docs->[0] and (! $last_changed or $biotik_docs->[0]->Docdate gt $last_changed));
+
+    my @bdocs;
+    for(@$biotik_docs) {
+        my $doc = $obvius->get_doc_by_id($_->DocId);
+        my $url = $obvius->get_doc_uri($doc);
+        my $date = $_->Docdate;
+        $date =~ s/^\d\d(\d\d)-(\d\d)-(\d\d).*/$3.$2.$1/;
+        push(@bdocs, {
+                        title => $_->Title,
+                        url => $url,
+                        date => $date,
+                        teaser => $_->{TEASER},
+                        biotiknyt => 1,
+                        docid => $_->DocId,
+                        content => $_->{CONTENT}
+                    }
+                );
+    }
+
+    $output->param(biotikdocs => \@bdocs) if(scalar(@bdocs));
 
     $output->param('override_last_changed' => $last_changed) if($last_changed);
 

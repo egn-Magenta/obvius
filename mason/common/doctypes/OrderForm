@@ -1,6 +1,6 @@
 % # No where near complete - needs an "Thanks"-section when submitted to...
 <& headline &>
-%if($op and $op eq 'mail_order') {
+%if($op eq 'mail_order') {
 % if($mail_error) {
     <H1>Der var en fejl ved afsending af din henvendelse:</H1>
 
@@ -29,7 +29,7 @@
 $output
 </%args>
 <%init>
-my $op = $output->param('_incoming_op');
+my $op = $output->param('_incoming_op') || '';
 my $english_frontpage = $obvius->config->{ENGLISH_FRONTPAGE};
 my $mail_error;
 
@@ -42,8 +42,8 @@ if($op eq 'mail_order') {
 
     $mail_error = "Kunne ikke generere mail besked" unless($mailtxt);
 
-    my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => 1);
-    my $from = 'contact@obvius.org';
+    my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => 0);
+    my $from = 'contact@obvius.org'; # XXX Why this hardcoded sender?
 
     $mail_error = "Failed to specify a sender [$from]\n"        unless ($mail_error or $smtp->mail($from));
     $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));

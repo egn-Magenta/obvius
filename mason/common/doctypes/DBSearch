@@ -1,4 +1,4 @@
-<script language="javascript">
+<script type="text/javascript">
     // This function sets the obvius_op to 'dbsearch'.
     // It is only usefull in the admin system.
     function set_dbsearch_obvius_op() {
@@ -28,7 +28,7 @@
             <td><% $counter++ %>.</td>
 %}
         <td width="100%">
-            <a href="<% $_->{url} %>"><% $_->{short_Title} ? $_->{short_Title} : $_->{title} %></a>
+            <a href="<% $prefix . $_->{url} %>"><% $_->{short_Title} ? $_->{short_Title} : $_->{title} %></a>
         </td>
     </tr>
 %   if($_->{teaser} and $_->{teaser} !~ /^\s+$/) {
@@ -59,8 +59,10 @@
 <% $form %>
 %     }
 %     else {
-<form method="post" action="<% $prefix . $uri %>">
-<input type="hidden" name="op" value="dbsearch">
+% # GET makes Microsoft Internet Explorer happier when clicking "Back". Perhaps.
+<form method="get" action="<% $prefix . $uri %>">
+<div>
+<input type="hidden" name="op" value="dbsearch" />
 
 <table border="0" cellpadding="0" cellspacing="0">
 
@@ -68,27 +70,27 @@
 
 <tr>
 <td><small><select name="field1">
-<option <% $field1 eq 'title'        ? 'selected' : '' %> value="title"        >Titel
-<option <% $field1 eq 'content'      ? 'selected' : '' %> value="content"      >Tekst
-<option <% $field1 eq 'author'       ? 'selected' : '' %> value="author"       >Forfatter
-<option <% $field1 eq 'docdate'      ? 'selected' : '' %> value="docdate"      >Dato (åååå-mm-dd)
-<option <% $field1 eq 'docref'       ? 'selected' : '' %> value="docref"       >Reference
-<option <% $field1 eq 'teaser'       ? 'selected' : '' %> value="teaser"       >Kort beskrivelse
-<option <% $field1 eq 'url'          ? 'selected' : '' %> value="url"          >Web-adresse
-<option <% $field1 eq 'source'       ? 'selected' : '' %> value="source"       >Kilde
-<option <% $field1 eq 'category'     ? 'selected' : '' %> value="category"     >Klassifikation
+<option <% $field1 eq 'title'        ? 'selected="selected"' : '' %> value="title"    >Titel</option>
+<option <% $field1 eq 'content'      ? 'selected="selected"' : '' %> value="content"  >Tekst</option>
+<option <% $field1 eq 'author'       ? 'selected="selected"' : '' %> value="author"   >Forfatter</option>
+<option <% $field1 eq 'docdate'      ? 'selected="selected"' : '' %> value="docdate"  >Dato (åååå-mm-dd)</option>
+<option <% $field1 eq 'docref'       ? 'selected="selected"' : '' %> value="docref"   >Reference</option>
+<option <% $field1 eq 'teaser'       ? 'selected="selected"' : '' %> value="teaser"   >Kort beskrivelse</option>
+<option <% $field1 eq 'url'          ? 'selected="selected"' : '' %> value="url"      >Web-adresse</option>
+<option <% $field1 eq 'source'       ? 'selected="selected"' : '' %> value="source"   >Kilde</option>
+<option <% $field1 eq 'category'     ? 'selected="selected"' : '' %> value="category" >Klassifikation</option>
 </select></small>
 </td>
 
 <td><small><select name="how1">
-<option <% $how1 eq 'equal' ?   'selected' : '' %> value="equal"   >er lig
-<option <% $how1 eq 'prefix' ?  'selected' : '' %> value="prefix"  >begynder med
-<option <% $how1 eq 'contain' ? 'selected' : '' %> value="contain" >indeholder
+<option <% $how1 eq 'equal' ?   'selected="selected"' : '' %> value="equal"   >er lig</option>
+<option <% $how1 eq 'prefix' ?  'selected="selected"' : '' %> value="prefix"  >begynder med</option>
+<option <% $how1 eq 'contain' ? 'selected="selected"' : '' %> value="contain" >indeholder</option>
 </select></small>
 </td>
 
 <td>
-<small><input name="data1" size="16" value="<% $data1 |h %>"></small>
+<small><input name="data1" size="16" value="<% $data1 |h %>" /></small>
 </td>
 
 </tr>
@@ -97,34 +99,35 @@
 
 <tr>
 <td colspan="3" class="DBSearchText">
-<input type="radio" name="op2" value="and"     <% $op2 eq 'and'     ? 'checked' : '' %> >og
-<input type="radio" name="op2" value="or"      <% $op2 eq 'or'      ? 'checked' : '' %> >eller
-<input type="radio" name="op2" value="and not" <% $op2 eq 'and not' ? 'checked' : '' %> >ikke
-</td></small>
+<input type="radio" name="op2" value="and"     <% $op2 eq 'and'     ? 'checked="checked"' : '' %>  />og
+<input type="radio" name="op2" value="or"      <% $op2 eq 'or'      ? 'checked="checked"' : '' %>  />eller
+<input type="radio" name="op2" value="and not" <% $op2 eq 'and not' ? 'checked="checked"' : '' %>  />ikke
+</td>
 </tr>
 
 <tr>
 <td><small><select name="field2">
-<option <% $field2 eq 'title'        ? 'selected' : '' %> value="title"        >Titel
-<option <% $field2 eq 'content'      ? 'selected' : '' %> value="content"      >Tekst
-<option <% $field2 eq 'author'       ? 'selected' : '' %> value="author"       >Forfatter
-<option <% $field2 eq 'docdate'      ? 'selected' : '' %> value="docdate"      >Dato (åååå-mm-dd)
-<option <% $field2 eq 'docref'       ? 'selected' : '' %> value="docref"       >Reference
-<option <% $field2 eq 'teaser'       ? 'selected' : '' %> value="teaser"       >Kort beskrivelse
-<option <% $field2 eq 'url'          ? 'selected' : '' %> value="url"          >Web-adresse
-<option <% $field2 eq 'source'       ? 'selected' : '' %> value="source"       >Kilde
-<option <% $field2 eq 'category'     ? 'selected' : '' %> value="category"     >Klassifikation
+<option <% $field2 eq 'title'        ? 'selected="selected"' : '' %> value="title"     >Titel</option>
+<option <% $field2 eq 'content'      ? 'selected="selected"' : '' %> value="content"   >Tekst</option>
+<option <% $field2 eq 'author'       ? 'selected="selected"' : '' %> value="author"    >Forfatter</option>
+<option <% $field2 eq 'docdate'      ? 'selected="selected"' : '' %> value="docdate"   >Dato (åååå-mm-dd)</option>
+<option <% $field2 eq 'docref'       ? 'selected="selected"' : '' %> value="docref"    >Reference</option>
+<option <% $field2 eq 'teaser'       ? 'selected="selected"' : '' %> value="teaser"    >Kort beskrivelse</option>
+<option <% $field2 eq 'url'          ? 'selected="selected"' : '' %> value="url"       >Web-adresse</option>
+<option <% $field2 eq 'source'       ? 'selected="selected"' : '' %> value="source"    >Kilde</option>
+<option <% $field2 eq 'category'     ? 'selected="selected"' : '' %> value="category"  >Klassifikation</option>
 </select></small>
 </td>
 
 <td><small><select name="how2">
-<option <% $how2 eq 'equal' ?   'selected' : '' %> value="equal"   >er lig
-<option <% $how2 eq 'prefix' ?  'selected' : '' %> value="prefix"  >begynder med
-<option <% $how2 eq 'contain' ? 'selected' : '' %> value="contain" >indeholder
+<option <% $how2 eq 'equal' ?   'selected="selected"' : '' %> value="equal"   >er lig</option>
+<option <% $how2 eq 'prefix' ?  'selected="selected"' : '' %> value="prefix"  >begynder med</option>
+<option <% $how2 eq 'contain' ? 'selected="selected"' : '' %> value="contain" >indeholder</option>
+
 </select></small>
 </td>
 
-<td><small><input name="data2" size="16" value="<% $data2 |h %>"></small>
+<td><small><input name="data2" size="16" value="<% $data2 |h %>" /></small>
 </td>
 
 </tr>
@@ -133,47 +136,47 @@
 
 <tr>
 <td colspan="3" class="DBSearchText">
-<input type="radio" name="op3" value="and"     <% $op3 eq 'and'     ? 'checked' : '' %> >og
-<input type="radio" NAME="op3" value="or"      <% $op3 eq 'or'      ? 'checked' : '' %> >eller
-<input type="radio" name="op3" value="and not" <% $op3 eq 'and not' ? 'checked' : '' %> >ikke
-</td></small>
+<input type="radio" name="op3" value="and"     <% $op3 eq 'and'     ? 'checked="checked"' : '' %>  />og
+<input type="radio" name="op3" value="or"      <% $op3 eq 'or'      ? 'checked="checked"' : '' %>  />eller
+<input type="radio" name="op3" value="and not" <% $op3 eq 'and not' ? 'checked="checked"' : '' %>  />ikke
+</td>
 </tr>
 
 <tr>
 <td><small><select name="field3">
-<option <% $field3 eq 'title'        ? 'selected' : '' %> value="title"        >Titel
-<option <% $field3 eq 'content'      ? 'selected' : '' %> value="content"      >Tekst
-<option <% $field3 eq 'author'       ? 'selected' : '' %> value="author"       >Forfatter
-<option <% $field3 eq 'docdate'      ? 'selected' : '' %> value="docdate"      >Dato (åååå-mm-dd)
-<option <% $field3 eq 'docref'       ? 'selected' : '' %> value="docref"       >Reference
-<option <% $field3 eq 'teaser'       ? 'selected' : '' %> value="teaser"       >Kort beskrivelse
-<option <% $field3 eq 'url'          ? 'selected' : '' %> value="url"          >Web-adresse
-<option <% $field3 eq 'source'       ? 'selected' : '' %> value="source"       >Kilde
-<option <% $field3 eq 'category'     ? 'selected' : '' %> value="category"     >Klassifikation
+<option <% $field3 eq 'title'        ? 'selected="selected"' : '' %> value="title"      >Titel</option>
+<option <% $field3 eq 'content'      ? 'selected="selected"' : '' %> value="content"    >Tekst</option>
+<option <% $field3 eq 'author'       ? 'selected="selected"' : '' %> value="author"     >Forfatter</option>
+<option <% $field3 eq 'docdate'      ? 'selected="selected"' : '' %> value="docdate"    >Dato (åååå-mm-dd)</option>
+<option <% $field3 eq 'docref'       ? 'selected="selected"' : '' %> value="docref"     >Reference</option>
+<option <% $field3 eq 'teaser'       ? 'selected="selected"' : '' %> value="teaser"     >Kort beskrivelse</option>
+<option <% $field3 eq 'url'          ? 'selected="selected"' : '' %> value="url"        >Web-adresse</option>
+<option <% $field3 eq 'source'       ? 'selected="selected"' : '' %> value="source"     >Kilde</option>
+<option <% $field3 eq 'category'     ? 'selected="selected"' : '' %> value="category"   >Klassifikation</option>
 </select></small>
 </td>
 
 <td><small><select name="how3">
-<option <% $how3 eq 'equal' ?   'selected' : '' %> value="equal"   >er lig
-<option <% $how3 eq 'prefix' ?  'selected' : '' %> value="prefix"  >begynder med
-<option <% $how3 eq 'contain' ? 'selected' : '' %> value="contain" >indeholder
+<option <% $how3 eq 'equal' ?   'selected="selected"' : '' %> value="equal"   >er lig</option>
+<option <% $how3 eq 'prefix' ?  'selected="selected"' : '' %> value="prefix"  >begynder med</option>
+<option <% $how3 eq 'contain' ? 'selected="selected"' : '' %> value="contain" >indeholder</option>
 </select></small>
 </td>
 
-<td><small><input name="data3" size="16" value="<% $data3 |h %>"></small>
+<td><small><input name="data3" size="16" value="<% $data3 |h %>" /></small>
 </td>
 
 </tr>
 
-<tr><td colspan="3" height="15"></td></tr>
-
-<input type="hidden" name="op4" value="and">
-<input type="hidden" name="how4" value="equal">
-<input type="hidden" name="field4" value="category">
+<tr><td colspan="3" height="15">
+<input type="hidden" name="op4" value="and" />
+<input type="hidden" name="how4" value="equal" />
+<input type="hidden" name="field4" value="category" />
+</td></tr>
 
 <tr>
 <td colspan="3" valign="middle">
-Vælg eventuel klassifikationskode:<br/>
+Vælg eventuel klassifikationskode:<br />
 <select name="data4">
     <option value="">Ingen</option>
     <option value="">-------------------</option>
@@ -184,7 +187,7 @@ Vælg eventuel klassifikationskode:<br/>
             <option value="">-------------------</option>
 %           $old_nr = $nr;
 %       }
-    <option value="<% $_->{id} %>" <% $data4 eq $_->{id} ? 'selected' : '' %>><% $_->{id} . " " . $_->{name} %></option>
+    <option value="<% $_->{id} %>" <% $data4 eq $_->{id} ? 'selected="selected"' : '' %>><% $_->{id} . " " . $_->{name} %></option>
 %   }
     <option value="">-------------------</option>
 </select>
@@ -198,15 +201,15 @@ Vælg eventuel klassifikationskode:<br/>
 <tr>
 <td colspan="3">
 
-<input type="hidden" name="op8" value="and">
-<input type="hidden" name="field8" value="lang">
-<input type="hidden" name="how8" value="one-of">
+<input type="hidden" name="op8" value="and" />
+<input type="hidden" name="field8" value="lang" />
+<input type="hidden" name="how8" value="one-of" />
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
-<td width="33%" class="DBSearchText"><nobr><input type="checkbox" name="data8" value=da <% (grep{ $_ eq 'da' } @$data8) ? 'checked' : '' %> >Dansk</nobr></td>
-<td width="33%" class="DBSearchText"><nobr><input type="checkbox" name="data8" value=en <% (grep{ $_ eq 'en' } @$data8) ? 'checked' : '' %> >Engelsk</nobr></td>
-<td width="33%" class="DBSearchText"><nobr><input type="checkbox" name="data8" value=fr <% (grep{ $_ eq 'fr' } @$data8) ? 'CHECKED' : '' %> >Fransk</nobr></td>
+<td width="33%" class="DBSearchText">&nbsp;<input type="checkbox" name="data8" value="da" <% (grep{ $_ eq 'da' } @$data8) ? 'checked="checked"' : '' %>  />Dansk&nbsp;</td>
+<td width="33%" class="DBSearchText">&nbsp;<input type="checkbox" name="data8" value="en" <% (grep{ $_ eq 'en' } @$data8) ? 'checked="checked"' : '' %>  />Engelsk&nbsp;</td>
+<td width="33%" class="DBSearchText">&nbsp;<input type="checkbox" name="data8" value="fr" <% (grep{ $_ eq 'fr' } @$data8) ? 'CHECKED="CHECKED"' : '' %>  />Fransk&nbsp;</td>
 </tr>
 </table>
 
@@ -222,11 +225,11 @@ Vælg eventuel klassifikationskode:<br/>
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
-<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value=10  <% $pagesize eq '10'  ? 'checked' : '' %> >10</td>
-<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value=20  <% $pagesize eq '20'  ? 'checked' : '' %> >20</td>
-<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="50"  <% $pagesize eq '50'  ? 'checked' : '' %> >50</td>
-<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="100" <% $pagesize eq '100' ? 'checked' : '' %> >100</td>
-<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value=0   <% $pagesize eq '0'   ? 'checked' : '' %> >Alle</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="10"  <% $pagesize eq '10'  ? 'checked="checked"' : '' %>  />10</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="20"  <% $pagesize eq '20'  ? 'checked="checked"' : '' %>  />20</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="50"  <% $pagesize eq '50'  ? 'checked="checked"' : '' %>  />50</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="100" <% $pagesize eq '100' ? 'checked="checked"' : '' %>  />100</td>
+<td width="20%" class="DBSearchText"><input type="radio" name="pagesize" value="0"   <% $pagesize eq '0'   ? 'checked="checked"' : '' %>  />Alle</td>
 </tr>
 </table>
 
@@ -242,9 +245,9 @@ Vælg eventuel klassifikationskode:<br/>
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
-<td class="DBSearchText"><input type="radio" name="sortorder" value="docdate" <% $sortorder eq 'docdate' ? 'checked' : '' %> >nyeste først</td>
-<td class="DBSearchText"><input type="radio" name="sortorder" value="version" <% $sortorder eq 'version' ? 'checked' : '' %> >sidst ændrede først</td>
-<td class="DBSearchText"><input type="radio" name="sortorder" value="title"   <% $sortorder eq 'title'   ? 'checked' : '' %> >alfabetisk ordnet</td>
+<td class="DBSearchText"><input type="radio" name="sortorder" value="docdate" <% $sortorder eq 'docdate' ? 'checked="checked"' : '' %>  />nyeste først</td>
+<td class="DBSearchText"><input type="radio" name="sortorder" value="version" <% $sortorder eq 'version' ? 'checked="checked"' : '' %>  />sidst ændrede først</td>
+<td class="DBSearchText"><input type="radio" name="sortorder" value="title"   <% $sortorder eq 'title'   ? 'checked="checked"' : '' %>  />alfabetisk ordnet</td>
 </tr>
 </table>
 
@@ -258,9 +261,9 @@ Vælg eventuel klassifikationskode:<br/>
 
 <tr>
 <td colspan="3" class="DBSearchText">
-<input type="radio" name="format" value="short" <% $format eq 'short' ? 'checked' : '' %> >kun titel
+<input type="radio" name="format" value="short" <% $format eq 'short' ? 'checked="checked"' : '' %>  />kun titel
 &nbsp;&nbsp;&nbsp;
-<input type="radio" name="format" value="long"  <% $format eq 'long'  ? 'checked' : '' %> >med resumé og alder
+<input type="radio" name="format" value="long"  <% $format eq 'long'  ? 'checked="checked"' : '' %>  />med resumé og alder
 </td>
 </tr>
 
@@ -269,11 +272,12 @@ Vælg eventuel klassifikationskode:<br/>
 
 <tr>
 <td align="center" colspan="3">
-<input class="button" type="submit" value="  Start søgning  " onclick="javascript:set_dbsearch_obvius_op()">
+<input class="button" type="submit" value="  Start søgning  " onclick="javascript:set_dbsearch_obvius_op()" />
 </td>
 </tr>
 
 </table>
+</div>
 </form>
 %     }
 %}

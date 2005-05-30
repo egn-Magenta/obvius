@@ -63,16 +63,16 @@ sub get_table_data {
     $search_options{'$where'}=$options{where} if (defined $options{where});
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => $table,
+                                            '!Table'      => $table,
                                             '!TieRow'     => 0,
-					   } );
+                                           } );
 
     $set->Search(\%search_options);
 
     my @records;
     while (my $rec = $set->Next) {
-	my %new=(%$rec);
-	push(@records, \%new);
+        my %new=(%$rec);
+        push(@records, \%new);
     }
     $set->Disconnect;
 
@@ -100,31 +100,31 @@ sub get_table_data_hash {
     $type ||= '';
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => $table,
-					    '!TieRow'     => 0,
-					   } );
+                                            '!Table'      => $table,
+                                            '!TieRow'     => 0,
+                                           } );
     $set->Search;
 
     my %records;
     while (my $rec = $set->Next) {
-	my %new=(%$rec);
-	foreach my $colname (@$cols) {
-	    my $key=$rec->{$colname};
-	    if (defined $key) {
-		if ($type eq 'ARRAY') {
-		    defined $records{$key} ? (push @{$records{$key}}, \%new)
-			: ($records{$key}=[\%new]);
-		}
-		else {
-		    warn("Duplicate key $colname:$key in table, wrong use of get_table_data_hash.")
-			if (defined $records{$key});
-		    $records{$key}=\%new;
-		}
-	    }
-	    else {
-		warn("No key $colname in record in table $table, wrong use of get_table_data_hash.");
-	    }
-	}
+        my %new=(%$rec);
+        foreach my $colname (@$cols) {
+            my $key=$rec->{$colname};
+            if (defined $key) {
+                if ($type eq 'ARRAY') {
+                    defined $records{$key} ? (push @{$records{$key}}, \%new)
+                        : ($records{$key}=[\%new]);
+                }
+                else {
+                    warn("Duplicate key $colname:$key in table, wrong use of get_table_data_hash.")
+                        if (defined $records{$key});
+                    $records{$key}=\%new;
+                }
+            }
+            else {
+                warn("No key $colname in record in table $table, wrong use of get_table_data_hash.");
+            }
+        }
     }
     $set->Disconnect;
 
@@ -137,6 +137,8 @@ sub get_table_data_hash {
 #                    If called in array-context: returns an array of
 #                    the matches. In scalar context the first is
 #                    returned.
+#
+#                    XXX add type (ref) check on $how?
 sub get_table_record {
     my ($this, $table, $how) = @_;
 
@@ -146,9 +148,9 @@ sub get_table_record {
     my $wantarray=wantarray; # Changes inside the eval!
     eval {
         my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					        '!Table'      => $table,
+                                                '!Table'      => $table,
                                                 '!TieRow'     => 0,
-					   } );
+                                           } );
         $set->Search($how);
 
         if ($wantarray) {
@@ -172,6 +174,7 @@ sub get_table_record {
 
     return ($wantarray ? @records : $rec);
 }
+
 # insert_table_record ($table, $rec) - Inserts a row into a database table. 
 #                                      $rec should be a hash, or a reference to a hash,
 #                                      of fieldnames and values to be inserted into
@@ -185,12 +188,19 @@ sub insert_table_record {
     $this->db_begin;
     my $ret;
     eval {
-        my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					        '!Table'      => $table,
-                                                '!TieRow'     => 0,
-					   } );
+        my %conf=(
+                  '!DataSource' => $this->{DB},
+                  '!Table'      => $table,
+                  '!TieRow'     => 0,
+                  '!Serial'     => 'id', # Does this break, if the table has no id-column?
+                 );
+        my $set = DBIx::Recordset->SetupObject(\%conf);
 
         $ret=$set->Insert($rec);
+
+        my $last_serial=$set->LastSerial;
+        $ret=(defined $last_serial ? $last_serial : $ret);
+
         $set->Disconnect;
 
         $this->db_commit;
@@ -204,7 +214,6 @@ sub insert_table_record {
 
     return $ret;
 }
-
 
 # XXX asjo TODO: clean up this method, and adjust callers appropriately.
 
@@ -228,7 +237,7 @@ sub delete_table_record {
         $err=$set->Delete($where); # XXX - Changed, is delete table record in use anywhere? Anyone? Someone? Speak up!
         $set->Disconnect;
 
-	$this->db_commit;
+        $this->db_commit;
     };
 
     my $ev_error=$@;
@@ -328,7 +337,7 @@ This module contains functions dealing with extra database tables in Obvius,
 typically used by the TableList documenttype.
 It is not intended for use as a standalone module.
 
-This module is a bit of a code-bastard - it doesn't follow the lead
+This module is a bit of a code-bastard - it does not follow the lead
 from Obvius and Obvius::DB where only the db_*-functions in Obvius::DB
 directly use DBIx::RecordSet to manipulate the database, while the non
 db_*-functions in Obvius package their call to db_*s in eval.
@@ -351,6 +360,6 @@ Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<Obvius>.
+L<Obvius>, L<Obvius::DB>.
 
 =cut

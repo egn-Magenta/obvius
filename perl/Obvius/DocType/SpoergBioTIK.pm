@@ -227,11 +227,16 @@ sub action {
         }
         $where =~ s/ AND $//;
 
-        my $limit = '';
+        # No longer limit the search, but do so below so we only get
+        # questions with answers.
+        my $limit = 0;
         if(my $numhits = $input->param('numhits')) {
-            $limit = "LIMIT $numhits" if($numhits =~ /\d+/);
+            $limit = $numhits if($numhits =~ /\d+/);
         }
-        my $docs = $obvius->search(\@fields, $where, public => 1, notexpired => 1, append => $limit);
+
+        my $docs = $obvius->search(\@fields, $where, public => 1, notexpired => 1);
+
+        my $nr_results = 0;
 
         if($docs) {
             my @docs;
@@ -254,21 +259,24 @@ sub action {
                                             "type = " . $answer_doctype->Id . " AND parent = " . $_->DocId,
                                             public => 1,
                                             notexpired => 1,
-                                            needs_document_fields => ['parent']
+                                            needs_document_fields => ['parent'],
+                                            straight_documents_join => 1
                                         ) || [];
                 $answers = scalar(@$answers);
 
-                push(@docs, {
-                                spoergsmaal => $_->Spoergsmaal,
-                                answers => $answers,
-                                url => $url,
-                                categories => $categories
+                if($answers) {
+                    push(@docs, {
+                                    spoergsmaal => $_->Spoergsmaal,
+                                    answers => $answers,
+                                    url => $url,
+                                    categories => $categories
 
-                            });
+                                });
+                    $nr_results++;
+                    last if($limit and $nr_results == $limit);
+                }
 
             }
-            use Data::Dumper;
-            print STDERR Dumper(\@docs);
 
             $output->param(result => \@docs);
         } else {

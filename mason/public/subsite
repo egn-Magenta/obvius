@@ -18,3 +18,5 @@ if (defined $r->notes('http_return_code')) {
     $m->abort($r->notes('http_return_code'));
 }
 </%init>
+%
+<%doc> Same as admin/action/view - factor out! </%doc>

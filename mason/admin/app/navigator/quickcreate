@@ -1,0 +1,122 @@
+<div class="obvius-quickcreate">
+  <h2><& /shared/msg, text=>'New ' . $type &></h2> 
+  <input type="hidden" name="obvius_app_navigator" value="1" />
+  <input type="hidden" name="obvius_quickcreate_<% lc($type) %>" value="1" />
+%
+% foreach my $field (@{$fields{$type}}) {
+  <div>
+    <label for="<% $field->{name} %>"><& /shared/msg, text=>$field->{label} &></label>
+    <input type="<% $field->{type} %>" name="<% $field->{name} %>" size="45" />
+  </div>
+% }
+  <p>
+    <& /action/util/do_cancel, do_text=>'Create', name_prefix=>'obvius_quickcreate_', no_later_date=>1 &>
+  </p>
+%
+</div>
+%
+%
+<%once>
+use POSIX qw(strftime);
+
+# XXX 'group' should be a drop-down here!!
+my %fields=(
+            Image=>[
+                    { name=>'title',       label=>'Title',       type=>'text', },
+                    { name=>'short_title', label=>'Short title', type=>'text', },
+                    { name=>':data',       label=>'Image-file',  type=>'file', },
+#                    { name=>'group',       label=>'Group',       type=>'text', },
+                   ],
+            Upload=>[
+                     { name=>'title',       label=>'Title',       type=>'text', },
+                     { name=>'short_title', label=>'Short title', type=>'text', },
+#                     { name=>'teaser',      label=>'Teaser',      type=>'text', },
+                     { name=>':file',       label=>'File',        type=>'file', },
+#                     { name=>'group',       label=>'Group',       type=>'text', },
+                    ],
+           );
+</%once>
+%
+<%args>
+$path=>undef
+$fieldname=>undef
+$type
+$obvius_quickcreate_do=>0
+$obvius_quickcreate_cancel=>0
+</%args>
+%
+<%init>
+# Report error if there is no such type:
+if (!exists $fields{$type}) {
+    my $session_id=$m->comp('/default/setup_session');
+    $m->comp('/shared/set_status_message', status=>'ERROR', message=>['No such type', ': ', $type, ', ', 'for quick creation']);
+    $m->comp('/shared/redirect', location=>'./' . $m->scomp('util/args', %ARGS) . '&obvius_session_id=' . $session_id)
+}
+
+# Cancel pressed:
+if ($obvius_quickcreate_cancel) {
+    my $session_id=$m->comp('/default/setup_session');
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Creation cancelled']);
+    $m->comp('/shared/redirect', location=>'./' . $m->scomp('util/args', %ARGS) . '&obvius_session_id=' . $session_id)
+}
+
+# Create pressed:
+if ($obvius_quickcreate_do) {
+    my $session_id=$m->comp('/default/setup_session');
+
+    # XXX Gather information (should get default values from doctype; or Queue should do that):
+    my $field_values=Obvius::Data->new(docdate=>strftime('%Y-%m-%d', localtime), seq=>-10);
+    map {
+         $field_values->param($_->{name} => $ARGS{$_->{name}});
+    } grep {$_->{name} !~ /group/} @{$fields{$type}};
+
+    my $data={ %ARGS }; # Do not modify ARGS, grab a copy.
+    my $name;
+    if (defined $ARGS{':data'}) {
+        $name=$ARGS{':data'};
+        $m->comp('/shared/editengine2/type/image', data=>$data, id=>'data', validation=>{type=>'image'});
+        $field_values->param(data=>$data->{data});
+        $field_values->param(width=>$data->{width});
+        $field_values->param(height=>$data->{height});
+        $field_values->param(mimetype=>$data->{mimetype});
+        $field_values->param(size=>$data->{size});
+    }
+
+    if (defined $ARGS{':file'}) {
+        $name=$ARGS{':file'};
+        $m->comp('/shared/editengine2/type/file', data=>$data, id=>'file', validation=>{type=>'file'});
+        $field_values->param(uploaddata=>$data->{file});
+        $field_values->param(mimetype=>$data->{mimetype});
+        $field_values->param(size=>$data->{size});
+    }
+
+    # Normalize name:
+    $name=$1 if ($name=~m!([^/\\]+)$!);
+    $name=~s/[^a-zA-Z0-9._-]//g;
+
+    # Set grpid (XXX this should, perhaps, be selectable):
+    my $grpid=$obvius->get_user_groups($obvius->get_userid($obvius->user))->[0];
+
+    my %args=(
+              name=>$name,
+              grpid=>$grpid,
+              lang=>$vdoc->Lang,
+              doctypeid=>$obvius->get_doctype_by_name($type)->Id,
+              fields=>$field_values,
+             );
+
+    # XXX Send order:
+    my ($status, $message)=$obvius->send_order(
+                                               docid=>$doc->Id,
+                                               user=>$obvius->user,
+                                               command=>'new_document',
+                                               args=>\%args,
+                                              );
+    # XXX Report result (perhaps create a session and pass it on the redirect):
+    $m->comp('/shared/set_status_message', status=>$status, message=>$message);
+
+    # Return:
+    my %redirect_args=(%ARGS, obvius_quickcreate_image=>0, obvius_quickcreate_upload=>0);
+    $m->comp('/shared/redirect', location=>'./', args=>\%redirect_args);
+}
+</%init>

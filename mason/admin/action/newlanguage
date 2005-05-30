@@ -1,0 +1,68 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'New language' &></h2>
+
+  <form action="./">
+    <div>
+      <label><& /shared/msg, text=>'Language' &></label>
+      <& newlanguage:language_dropdown, %ARGS &>
+    </div>
+
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_newlanguage=>1 } &>
+      <& util/do_cancel, no_later_date=>1, do_text=>'Start editing' &>
+    </p>
+  </form>
+</div>
+%
+<%once>
+my @langs=qw(da en fi fr el nl it pt es sv de);
+my %long=qw(da Danish en English fi Finnish fr French el Greek nl Dutch it Italian pt Portuguese
+            es Spanish sv Swedish de German);
+</%once>
+%
+<%init>
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+%
+<%method language_dropdown>
+%
+<%args>
+$obvius_new_language=>''
+</%args>
+%
+<& /shared/editengine2/type/util/dropdown, name=>'obvius_new_language', choices=>\@langs, labels=>\%long, value=>$obvius_new_language || $vdoc->Lang &>
+%
+</%method>
+%
+%
+%
+<%method cancel>
+%
+<& /shared/set_status_message, message=>'New language cancelled' &>
+%
+</%method>
+%
+%
+%
+<%method do>
+%
+<%args>
+$obvius_new_language=>undef
+</%args>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+$session->{action}='edit';
+$session->{obvius_new_language}=$obvius_new_language;
+$session->{obvius_version}=$vdoc->Version;
+return ''; # Let us redirect to edit...
+</%init>
+%
+</%method>

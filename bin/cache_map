@@ -1,0 +1,159 @@
+#!/usr/bin/perl
+
+# cache_map - a language-aware cacheindex. Takes one argument, the
+#             full name of the relevant document_cache.txt file.
+
+# Copyright (C) 2003-2004, Adam Sjøgren (asjo@magenta-aps.dk). Under the GPL.
+
+use strict;
+use warnings;
+
+use CGI::Cookie;
+use WebObvius::Admin;
+
+use IO::Handle;
+
+# Configuration: languages we support:
+my %supported_lang=(
+                    'da'=>1,
+                    'en'=>1,
+                    'fi'=>1,
+                    'is'=>1,
+                    'no'=>1,
+                    'sv'=>1,
+                   );
+
+my $error_file='/tmp/cache_map.error';
+my $debug=0;
+
+my $mapfile=shift @ARGV;
+die "Please supply an existing map-file; stopping" unless ($mapfile and -f $mapfile);
+
+$|=1; # Do not buffer in/output
+
+my $map={};
+while (<STDIN>) {
+    my $line=$_;
+    chomp $line;
+    log_error("INCOMING LINE: [$line]") if ($debug);
+    my ($cookie_string, $accept_language, $uri)=split /[!]/, $line, 3;
+    # If this check fails, then it's because Apache isn't configured
+    # to send the correct string to cache_map:
+    next unless check_undef("cookie_string, accept_language, uri: ", $cookie_string, $accept_language, $uri);
+
+    my $image=0;
+    $image=1 if ($uri=~m!.(png|jpg|gif|bmp|svg)/?$!i);
+
+    my %lang=WebObvius::Admin::split_language_preferences($accept_language);
+
+    my $cookies=parse CGI::Cookie($cookie_string);
+    next unless check_undef("cookies", $cookies);
+
+    my $lang_cookie=$cookies->{lang};
+    next if ($lang_cookie and !check_undef("lang_cookie->value", $lang_cookie->value));
+    $lang{$lang_cookie->value}=2000 if ($lang_cookie and $lang_cookie->value); # Override
+    # I get a mysterious Apache-says nothing, does nothing-thing, if I
+    # do not check that the language cookie has a value (as above). I
+    # can't understand why.
+
+    $lang{da}=1 unless (scalar(%lang)); # Fall back to danish
+
+    $map=check_map($map, $mapfile);
+    my $found=0;
+    foreach my $l (sort { $lang{$b} <=> $lang{$a} } keys %lang) {
+        if (exists $map->{"$l!$uri"}) {
+            log_error("FOUND:", $map->{"$l!$uri"}) if ($debug);
+            print $map->{"$l!$uri"}, "\n";
+            $found=1;
+            last;
+        }
+        else {
+            # If the language we are trying to find is not in the
+            # cache, but is one of the supported languages, we'd
+            # better not serve from the cache, but go to through (the
+            # page could exist in that language and not be cached
+            # yet!) Ideally we would here check if the language
+            # existed in the system, but I don't want to access Obvius
+            # from here, I think.
+            if (!$image and $supported_lang{$l}) {
+                last;
+            }
+        }
+    }
+
+    not_found() unless ($found);
+}
+
+exit 0;
+
+sub check_map {
+    my ($map, $mapfile)=@_;
+
+    my $mtime=(stat($mapfile))[9];
+
+    if ($mtime > ($map->{__internal_mtime} || 0)) { # Re-read map
+        my $fh;
+        if (open $fh, $mapfile) {
+            $map={ __internal_mtime=>$mtime }; # Reset map
+            my $i=1;
+            while (my $line=<$fh>) {
+                chomp $line;
+                my ($key, $value)=split /\t/, $line, 2;
+                if (defined $key and defined $value) {
+                    # Prefix key with language:
+                    if ($value=~m|^/[^/]+/([^/]+)/|) {
+                        my $lang=$1;
+                        $map->{"$lang!$key"}=$value;
+                    }
+                    else {
+                        log_error("Couldn't parse value $i: [$line]");
+                    }
+                }
+                else {
+                    log_error("Couldn't parse line $i: [$line]");
+                }
+                $i++;
+            }
+            close $fh;
+        }
+        else {
+            log_error("Couldn't read file", $mapfile);
+        }
+    }
+
+    return $map;
+}
+
+sub not_found {
+    log_error('NOT FOUND') if ($debug);
+    print "NULL\n";
+}
+
+# check_undef(@list) - checks each entry in the list if it is defined,
+#                      if it isn't NULL\n is printed (to let Apache
+#                      know that it should just go on) and the @list
+#                      is output to the error_file.
+sub check_undef {
+    my ($text, @data)=@_;
+
+    if( grep { !defined $_ } @data ) {
+        not_found();
+        log_error($text, @data);
+        return 0;
+    }
+
+    return 1;
+}
+
+# log_error(@list) - writes the name of the mapfile and the @list to
+#                    the error_file.
+sub log_error {
+    my (@texts)=@_;
+
+    my $fh;
+    open $fh, ">>$error_file" or warn "Couldn't write $error_file";
+    if ($fh) {
+        print $fh (join " ", scalar(localtime), $mapfile, (map { defined $_ ? $_ : '[undef]' } @texts)), "\n";
+    }
+    close ($fh);
+}

@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# mysql - run CHECK, OPTIMIZE, ANALYZE TABLE on all tables in all databases
+#         (names found by looking at dirs in /var/lib/mysql...)
+#
+#         This could perhaps be run once per month, from cron, like
+#         this:
+#
+#         30 4 2 * * nice /var/www/obvius/cron/mysql 2>&1 | grep -v 'Table is already up to date' | grep -v 'OK' | /var/www/obvius/cron/squeeze
+#
+#         Also: the script can take a database as argument, and then
+#         only the tables of that database are processed.
+#
+# Copyright (C) 2003-2004, aparte, Magenta. By Adam Sjøgren <asjo@magenta-aps.dk>.
+# Under the GPL.
+#
+# $Id$
+
+MY_MYSQL_DIR=/var/lib/mysql
+MY_MYSQL_BIN=/usr/bin/mysql
+
+# If an argument is given, only run on the database (subdir)
+# specified. No argument means run on all databases.
+SITE=${1:-*}
+SITE="/${SITE}"
+
+for d in ${MY_MYSQL_DIR}${SITE}; do
+    if [ -d $d ]; then
+        db=${d/${MY_MYSQL_DIR}\//}
+        echo "#Database $db"
+        for t in $(${MY_MYSQL_BIN} $db --silent --batch -e 'show tables;'); do
+            # OPTIMIZE TABLE $t; - skip for now
+            ${MY_MYSQL_BIN} $db --silent --batch -e "CHECK TABLE $t; ANALYZE TABLE $t"
+        done
+    fi
+done

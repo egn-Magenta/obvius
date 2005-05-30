@@ -19,7 +19,7 @@
           <td valign="top" nowrap class="navtop">&nbsp;</td>
 %}
         </tr>
-%for(sort {$a->Seq <=> $b->Seq} @special_docs) {
+%for(sort { $a->Seq!=$b->Seq ? $a->Seq <=> $b->Seq : $a->Title cmp $b->Title } @special_docs) {
         <tr>
 %        if($_->{icon}) {
           <td valign="top"><img src="<% $_->{icon} %>" border="0" width="10" height="13"></td>
@@ -50,7 +50,7 @@
 %   }
         </tr>
 %}
-%for(sort {$a->Seq <=> $b->Seq} @docs) {
+%for(sort {$a->Seq!=$b->Seq ? $a->Seq <=> $b->Seq : $a->Title cmp $b->Title } @docs) {
         <tr>
 %        if($_->{icon}) {
           <td valign="top"><img src="<% $_->{icon} %>" border="0" width="10" height="13"></td>
@@ -192,6 +192,6 @@ my %icons = (
                 Standard => '/grafik/admin/nav_ikoner/standard.png',
                 HTML => '/grafik/admin/nav_ikoner/html.png'
             );
+
 my $image_doctype = $obvius->get_doctype_by_name('Image');
 </%once>
-

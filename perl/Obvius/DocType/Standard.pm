@@ -4,7 +4,7 @@ package Obvius::DocType::Standard;
 #
 # Standard.pm - Standard Document Type
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
 # Author: Adam Sjøgren (asjo@magenta-aps.dk)
 #
@@ -35,12 +35,16 @@ use Obvius::DocType;
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+# action - simply returns 'everything is fine'.
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
     return OBVIUS_OK;
 }
 
+# alternate_location - checks if the content-field is empty and the
+#                      url-field is non-empty, and if so returns the
+#                      url to which redirection should take place.
 sub alternate_location {
     my ($this, $doc, $vdoc, $obvius) = @_;
 
@@ -57,36 +61,33 @@ sub alternate_location {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::Standard - Perl extension for blah blah blah
+Obvius::DocType::Standard - Perl module implementing the Standard document type
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::Standard;
-  blah blah blah
+  use'd automatically.
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::Standard, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+The Standard document type doesn't do anything, it merely holds data -
+which is then displayed by the templating system.
 
-Blah blah blah.
+For backwards compability with the original MCMS-system, there is one
+exception though: if the field "content" is empty and there is a field
+called "url" that isn't, the document redirects to that url.
 
-=head2 EXPORT
-
-None by default.
-
+Note that this special behaviour is for backwards compability only,
+redirection should be done by using the document type "Link".
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::DocType::Link>, L<Obvius::DocType>.
 
 =cut

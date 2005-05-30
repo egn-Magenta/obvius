@@ -1,0 +1,10 @@
+<%method cancel></%method>
+%
+<%doc>
+
+If an action-component doesn't define the methods it can, we fall back
+to these no-ops.
+
+(Called from default/perform_action).
+
+</%doc>

@@ -9,8 +9,8 @@ $path=>'/'
 my $c=Apache::Cookie->new($r,
 		          -name => $cookie,
                           -value => $value,
-                          -expires => $expires,
 			  -path => $path,
                          );
+$c->expires($expires) if ($expires);
 $c->bake;
 </%perl>

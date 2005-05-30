@@ -1,0 +1,158 @@
+#!/usr/bin/perl
+
+# perform_order - checks if the order identified by the id in the
+#                 argument is (still) pending, and if so, executes it
+#                 and updates the table with the return-values.
+#
+#                 Example usage (usually given to at):
+#
+#                   $ /var/www/obvius/bin/perform_order --site testobvius 17
+#
+# Copyright (C) 2005, Magenta ApS. By Adam Sjøgren. Under the GPL.
+#
+# $Id$
+
+use strict;
+use warnings;
+
+use Net::SMTP;
+
+use Obvius;
+use Obvius::Config;
+use Obvius::Log;
+use Obvius::Queue;
+
+use Getopt::Long;
+
+# Try to set effective user id to www-data:
+my $www_data_uid=scalar(getpwnam('www-data'));
+$> = $www_data_uid;
+# If it wasn't possible, die:
+die "Please run as user www-data, not as $ENV{USER}. Stopping" unless ($> eq $www_data_uid);
+
+my ($site, $help)=(undef, undef);
+GetOptions('site=s'=>\$site, 'help'=>\$help);
+
+if ($help) {
+    print <<EOT;
+Usage: perform_order --site=sitename id
+Perform order on sitename identified by id.
+
+  --site    the name of the site (mandatory)
+  --help    list options
+EOT
+}
+
+die "No site given, stopping" unless ($site);
+
+my $id=shift @ARGV;
+die "No id given, stopping" unless ($id);
+
+my $conf = new Obvius::Config($site);
+die "Could not get config for $site" unless(defined($conf));
+
+my $log=Obvius::Log->new('notice');
+die "Could not get logging" unless(defined($log));
+
+my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
+die "Could not get Obvius object for $site" unless(defined($obvius));
+$obvius->{USER} = 'admin';
+
+# XXX Handle this path some other way? (.conf?)
+require '/var/www/' . $conf->Sitename . '/conf/setup.pl';
+my $adminsite=eval "\$" . $conf->Perlname . "::Site::Admin";
+die "Could not instantiate Site::Admin-object" unless (ref $adminsite);
+
+my $order=$obvius->get_table_record('queue', { id=>$id });
+
+if (!$order) {
+    # This is perfectly fine, the order was deleted:
+    $obvius->log->notice($obvius->config->Sitename . ": Couldn't find order $id on site $site");
+    exit 0;
+}
+
+# Examine order-status and see if it is still to be run:
+if (defined $order->{status} and $order->{status} ne '') {
+    $obvius->log->notice($obvius->config->Sitename . ": Status is " . $order->{status} . " for order $id, skipping.");
+    exit 0;
+}
+
+# XXX Examine date?
+
+# Set status to RUNNING-{PID}:
+report_status_message($order, 'RUNNING-' . $$);
+
+# Perform the order:
+my %do_order=%$order;
+
+#  Unflatten arguments:
+$do_order{args}=Obvius::Queue::blowup($order->{args});
+
+#  Set user (XXX):
+my $user=$obvius->get_user($order->{user});
+if (!$user) {
+    my $failure="Could not locate user, id: " . $order->{user} . ", command not performed.";
+    $obvius->log->error($obvius->config->Sitename . ": $failure");
+    report_status_message($order, 'ERROR', $failure);
+    exit 10;
+}
+$obvius->{USER}=$user->{login};
+
+#  Do it:
+my ($status, $message)=$obvius->perform_order(%do_order);
+
+# Set status and message:
+report_status_message($order, $status, $message);
+
+# Handle modified docs (cache):
+$adminsite->handle_modified_docs_cache($obvius);
+
+# Send email:
+my $smtp=Net::SMTP->new('localhost');
+my $from='bitbucket@' . $obvius->config->Sitename;
+my $to=$user->{email};
+my $now=localtime;
+my $subject=$obvius->config->Sitename . ': ' . $order->{command} . ' ' . $order->{status};
+my $doc=$obvius->get_doc_by_id($order->{docid});
+my $url=($doc ? $obvius->get_doc_uri($doc) : '');
+my %status_regards=(
+                    OK=>'Have a nice day',
+                    WARNING=>'Best regards',
+                    ERROR=>"Sorry it didn't work out",
+                   );
+$smtp->mail($from);
+$smtp->to($to);
+$smtp->data();
+$smtp->datasend("From: $from (Obvius Delayed Command Dispatch)\n");
+$smtp->datasend("To: $to\n");
+$smtp->datasend("Subject: $subject\n");
+$smtp->datasend("MIME-Version: 1.0\n");
+$smtp->datasend("Content-Type: text/plain; charset=iso-8859-1\n");
+$smtp->datasend("Content-Transfer-Encoding: 8bit\n");
+$smtp->datasend("\n");
+$smtp->datasend("Command " . $order->{command}. " performed at $now\n");
+$smtp->datasend("on the document: <http://" . $obvius->config->Sitename . "$url>\n");
+$smtp->datasend("with the arguments:\n");
+$smtp->datasend("\n" . $order->{args} . "\n");
+$smtp->datasend("The result was:\n");
+$smtp->datasend("\n");
+$smtp->datasend("  Status: " . $order->{status} . "\n");
+$smtp->datasend(" Message: " . $order->{message}. "\n");
+$smtp->datasend("\n");
+$smtp->datasend("   " . $status_regards{$order->{status}} . ",\n");
+$smtp->datasend("\n");
+$smtp->datasend("    " . $obvius->config->Sitename . "\n");
+$smtp->dataend();
+$smtp->quit;
+
+exit 0;
+
+sub report_status_message {
+    my ($order, $status, $message)=@_;
+
+    $order->{status}=$status;
+    if (defined $message) {
+        $order->{message}=(ref $message ? (join "", @$message) : $message);
+    }
+    return $obvius->update_table_record('queue', $order, { id=>$id });
+}

@@ -19,7 +19,7 @@
 <%method do>
 <%perl>
 my $site=$r->pnotes('site');
-my $ok=$site->clear_cache();
+my $ok=$site->clear_cache($obvius);
 $m->comp('/dirty_url_in_cache', url=>undef);
 my $message="Server cache cleared";
 </%perl>

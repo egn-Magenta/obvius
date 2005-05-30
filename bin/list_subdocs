@@ -1,0 +1,116 @@
+#!/usr/bin/perl
+
+# list_subdocs - small script for Obvius that takes a sitename and
+#                lists subdocs. You can specify where you want the
+#                subdocs listed with the --base option, and whether
+#                --hidden documents should be included and/or
+#                --expired documents. --titles determines whether the
+#                documents titles should be displayed, and levels says
+#                how many levels deep subdocuments should be listed.
+#
+# Copyright (C) 2003-2004 aparte. By Adam Sjøgren (asjo@magenta-aps.dk). Under the GPL.
+#
+# $Id$
+
+use strict;
+use warnings;
+
+use Obvius;
+use Obvius::Config;
+
+use Getopt::Long;
+
+my ($site, $base, $showhidden, $showexpired, $showtitles, $noprefix, $levels, $help, $restrict, $nocache)=(undef, '/', 0, 0, 0, 0, 0, 0, undef, 0);
+GetOptions(
+           'site=s'    =>\$site,
+           'base=s'    =>\$base,
+           'hidden'    =>\$showhidden,
+           'expired'   =>\$showexpired,
+           'titles'    =>\$showtitles,
+           'noprefix' =>\$noprefix,
+           'levels=s'  =>\$levels,
+           'restrict=s'=>\$restrict,
+           'nocache'   =>\$nocache,
+           'help'      =>\$help,
+          );
+
+if ($help) {
+    print <<EOT;
+Usage: list_subdocs --site=sitename [OPTION]...
+List documents (possibly) recursively; defaults to one level.
+
+  --site     the name of the site to list (mandatory)
+  --base     the root of the list (defaults to /)
+  --hidden   list hidden documents as well
+  --expired  list expired documents as well
+  --restrict not implemented yet
+  --titles   show documents titles
+  --noprefix do not include http://www.../ in URI
+  --levels   how deep to recurse (defaults to 1)
+  --nocache  turn off object caching in Obvius
+  --help     list options
+EOT
+    exit 0;
+}
+
+die "No site given, stopping" unless ($site);
+
+my $conf=Obvius::Config->new($site);
+die "Could not get config for $site" unless(defined($conf));
+
+my $obvius=Obvius->new($conf);
+die "Could not get Obvius object for $site" unless(defined($obvius));
+$obvius->cache(1) unless ($nocache);
+$obvius->{USER} = 'admin'; # XXX
+
+list_subdocs($base, $levels);
+
+exit 0;
+
+
+sub list_subdocs {
+    my ($base, $level)=@_;
+    return if ($level<0);
+
+    my $base_doc=$obvius->lookup_document($base);
+    die "Couldn't find document $base" unless ($base_doc);
+
+    my $subvdocs=$obvius->get_document_subdocs($base_doc, notexpired=>(1-$showexpired), nothidden=>(1-$showhidden));
+    map {
+        my $subdoc=$obvius->get_doc_by_id($_->Docid);
+        my $uri=$obvius->get_doc_uri($subdoc);
+        if (check_restriction($subdoc, $_, $uri)) {
+            print "http://", $conf->Sitename unless ($noprefix);
+            print $uri;
+            if ($showtitles) {
+                $obvius->get_version_fields($_, [qw(title short_title)]);
+                if (defined $_->field('short_title') and $_->field('short_title')) {
+                    print " ", $_->field('short_title');
+                }
+                else {
+                    print " ", $_->Title;
+                }
+            }
+            print "\n";
+        }
+        list_subdocs($uri, $level-1);
+    } @$subvdocs;
+}
+
+
+sub check_restriction {
+    my ($subdoc, $subvdoc, $uri)=@_;
+
+    if (defined $restrict) {
+        if ($restrict=~m!doctype=(\w+)!i) {
+            my $doctypename=$1;
+            my $doctype=$obvius->get_doctype_by_name($doctypename);
+            return $subvdoc->Type eq $doctype->Id;
+        }
+        else {
+            die "Unknown restriction: $restrict, stopping";
+        }
+    }
+
+    return 1;
+}

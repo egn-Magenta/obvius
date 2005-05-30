@@ -1,0 +1,278 @@
+<& /shared/editengine2/init,
+     editscheme=>$edit_version,
+     function=>'save',
+     object=>$object,
+     edges=>$edges,
+     actions=>$actions,
+     relation=>'edit',
+ &>
+%
+%
+%
+%
+<%args>
+$obvius_command_edit=>1
+</%args>
+%
+<%once>
+use URI::Escape;
+
+my %text_map=(
+              combinededitor=>'text',
+              htmlarea=>'text',
+              javaeditor=>'text',
+              msie_text=>'text',
+              texteditor=>'text',
+              textwupload=>'text',
+              tinymce=>'text',
+              imageupload=>'image',
+              fileupload=>'file',
+             );
+</%once>
+%
+<%init>
+# This is purely set-up code, the control is then handed off to the
+# edit engine:
+my $session=$r->pnotes('obvius_session');
+$session->{old_action}='edit';
+$session->{action}='editengine';
+
+# New document name given (i.e. we are creating a new document):
+my $new_document=(defined $session->{obvius_new_document_name} ? $session->{obvius_new_document_name} : undef);
+
+# New document type given?
+my $edit_doctype=$doctype;
+$edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid})
+ if ($session->{obvius_new_doctypeid});
+
+my $edit_version={
+                  label=>'Edit',
+                  type=>'scheme/editsheet',
+# XXX Complain if the style is unknown!!
+                  style=>{context=>'editpage'},
+                  storage=>{
+                            organization=>{
+                                           class=>'Temporary',
+                                           source=>'Temporary_Data',
+                                           identifiers=>[qw(key)],
+                                          },
+                            data=>{
+                                   key=>{
+                                         type=>'line',
+                                         mandatory=>1,
+                                        },
+                                   # More added dynamically, from the editpages, below.
+                                  },
+                            functions=>{
+                                        save=>{
+                                               label=>'Save',
+                                               object=>'existing',
+                                              },
+                                       },
+                            },
+                  display=>[], # Filled in dynamically, from the editpages, below.
+                 };
+
+my $edges={
+           'edit[save]store'=>{ sink=>1 },
+           'edit[]cancel'=>{ sink=>1 },
+          };
+my $actions={
+             'edit[save]store'=>'edit:do',
+             'edit[]cancel'=>'edit:cancel',
+            };
+
+my $editpages=$obvius->get_editpages($edit_doctype);
+
+my @all_nums=();
+foreach my $editpage_key (keys %$editpages) {
+    next if ($editpage_key eq 'P');
+    push @all_nums, $editpage_key;
+    my $editpage=$editpages->{$editpage_key};
+
+    push @{$edit_version->{display}}, {
+                                       name=>'startpage',
+                                       content=>'markup',
+                                       label=>$editpage->Title,
+                                       id=>'obvius-edit-page-' . $editpage_key,
+                                       description=>$editpage->Description,
+                                      };
+
+    my $fieldlist=WebObvius::parse_editpage_fieldlist(undef, $editpage->Fieldlist, $edit_doctype, $obvius);
+    foreach my $field (@$fieldlist) {
+        my %start=( type=>$field->{fieldspec}->Fieldtype->Edit, );
+        if (exists $text_map{$start{type}}) {
+            $start{editor}=$start{type};
+            $start{type}=$text_map{$start{type}};
+        }
+        $edit_version->{storage}->{data}->{$field->{fieldspec}->Name}={
+                                                                       %start,
+                                                                       mandatory=>($field->{fieldspec}->Optional ? 0 : 1),
+                                                                       repeatable=>$field->{fieldspec}->Repeatable,
+                                                                       validate_by_fieldspec=>{
+                                                                                               doctypeid=>$field->{fieldspec}->Doctypeid,
+                                                                                               name=>$field->{fieldspec}->Name,
+                                                                                              },
+                                                                      };
+
+        push @{$edit_version->{display}}, {
+                                           name=>$field->{fieldspec}->Name,
+                                           content=>'data',
+                                           label=>$field->{title},
+                                           edit_args=>$field->{fieldspec}->Fieldtype->Edit_args,
+                                           options=>$field->{options},
+                                          };
+    }
+
+    push @{$edit_version->{display}}, {
+                                       name=>'endpage',
+                                       content=>'markup',
+                                      };
+}
+
+unshift @{$edit_version->{display}}, {
+                                      name=>'editstart',
+                                      content=>'markup',
+                                      all_nums=>\@all_nums,
+                                      obvius_command_edit=>$obvius_command_edit,
+                                     };
+
+push @{$edit_version->{display}}, {
+                                   name=>'editend',
+                                   content=>'markup',
+                                   all_nums=>\@all_nums,
+                                   obvius_command_edit=>$obvius_command_edit,
+                                  };
+
+# Identify the object (we only have one "dummy"-object, so it's easy:):
+my $object={ key=>'KRAKOW', };
+
+my $edit_fields;
+if ($new_document) {
+    # Get default values:
+    $edit_fields=Obvius::Data->new($edit_doctype->default_fields); # XXX MISSING!
+    $edit_fields->param(docdate=>substr($r->notes('now'), 0, 10));
+}
+else {
+    # Get the current fields, and make the values flat:
+    my $current_fields=$obvius->get_version_fields($vdoc, $edit_doctype->fields_names());
+    $edit_fields=$m->comp('util/flatten_fields', fields=>$current_fields);
+}
+
+# Transfer the flat values to the temporary storage:
+$session->{Temporary_Data}->{KRAKOW}={ map { lc($_)=>$edit_fields->param($_) } $edit_fields->param };
+# Store a copy of the original data, so we can tell what has been changed later:
+$session->{edit_data_in}={ map { lc($_)=>$edit_fields->param($_) } $edit_fields->param };
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+%
+%
+<%method cancel>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+delete $session->{action}; # Return to nothing (i.e. view)
+delete $session->{obvius_new_doctypeid};
+$m->comp('/shared/set_status_message', message=>'Edit cancelled');
+return '';
+</%init>
+%
+</%method>
+%
+%
+<%method do>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+delete $session->{action}; # Return to nothing (i.e. view)
+
+my $edit_doctype=$doctype;
+$edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid}) if ($session->{obvius_new_doctypeid});
+
+# XXX Temporary place to fish out the values:
+my $values=$session->{Temporary_Data}->{KRAKOW};
+
+my $field_values=Obvius::Data->new();
+foreach my $fieldname (map { lc } @{$edit_doctype->fields_names}) { # Notice we are not transferring excess fields here!
+    my $value=$m->comp('/shared/editengine2/type/util/copy_in', fieldname=>$fieldname, doctype=>$edit_doctype, value=>$values->{$fieldname}, original_value=>$session->{edit_data_in}->{$fieldname});
+    $field_values->param($fieldname=>$value);
+}
+
+my %status=$edit_doctype->validate_fields($field_values, $obvius);
+$obvius->log->warn("Invalid fields, not stored: @{$status{invalid}}") if ($status{invalid});
+$obvius->log->info("Missing fields not stored: @{$status{missing}}\n") if ($status{missing});
+$obvius->log->info("Excess fields not stored: @{$status{excess}}") if ($status{excess});
+$obvius->log->debug("Valid fields: @{$status{valid}}") if ($status{valid});
+
+if ($status{invalid}) {
+    # a) not ok, return to interface
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Invalid data entered, please correct.');
+
+    # XXX Do the values entered stay when we do this? NO! Fix it!
+    return 'edit';
+}
+else {
+    #   b) ok, send order
+    my $command;
+    my %args;
+    if (defined $session->{obvius_new_document_name}) { # It's a whole new document:
+        $command='new_document';
+        %args=(
+               name=>$session->{obvius_new_document_name},
+               grpid=>$session->{obvius_new_grpid},
+               lang=>$session->{obvius_new_language} || $vdoc->Lang,
+               doctypeid=>$edit_doctype->Id,
+               fields=>$field_values,
+              );
+    }
+    else { # It's a new version of an existing document:
+        $command='new_version';
+        %args=(
+               lang=>$session->{obvius_new_language} || $vdoc->Lang,
+               doctypeid=>$edit_doctype->Id,
+               fields=>$field_values,
+              );
+    }
+
+    # Put (XXX perhaps only the valid?) fields into args:
+    my ($status, $message)=$obvius->send_order(
+                                               docid=>$doc->Id,
+                                               user=>$obvius->user,
+                                               command=>$command,
+                                               args=>\%args,
+                                               #date=>'', # Always create now
+                                              );
+    $m->comp('/shared/set_status_message', status=>$status, message=>$message);
+
+    # Do NOT return to the old version:
+    delete $session->{obvius_version};
+    # Remove the doctypeid, so that /portal/editing doesn't display
+    # the new versions tabs, but the current, again:
+    delete $session->{obvius_new_doctypeid};
+
+    if ($status ne 'ERROR') {
+        if ($command eq 'new_document') {
+            # Redirect to the new document
+            $r->notes('obvius_redirect_to'=>$prefix . $uri . $args{name} . '/');
+        }
+        else {
+            # Go to the new version (common does not pick up version from
+            # the session, so we need to specify obvius_version
+            # explicitly, in a redirect):
+            $r->notes('obvius_redirect_to'=>$prefix . $uri . '?obvius_version=' . uri_escape($message->[2]));
+            # XXX This depends on the message set in Obvius::Queue::perform_new_version!
+        }
+    }
+
+    return '';
+}
+</%init>
+%
+</%method>

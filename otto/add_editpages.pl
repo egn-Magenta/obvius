@@ -78,12 +78,20 @@ while( <FH> ) {
 
         die "$doctype, $editpage{page}: No End-line for page" if $key eq 'page' and defined $editpage{page};
 
-        if ($options{add_comment_fields} and $key eq 'fields' and !($value =~ /no_comment_field/ )) {
+        if ($key eq 'fields') {
             my $fieldname=(split /\s+/, $value)[0];
-            $value.="\n" . $fieldname . "_comment Comment;same_line=1";
+
+            if (!exists $doctypes->{$doctype}->{fields}->{$fieldname}) {
+                die "Doctype $doctype, Editpage $editpage{page}: field '$fieldname' does not exist on '$doctype', stopping add_editpages.pl";
+            }
+
+            if ($options{add_comment_fields} and !($value =~ /no_comment_field/ )) {
+                $value.="\n" . $fieldname . "_comment Comment;same_line=1";
+            }
         }
         $value="\n" . $value if defined $editpage{$key};
         $editpage{$key}.=$value;
+
     }
     elsif( /^End/ ) {
         # Check for copy
@@ -150,20 +158,56 @@ sub add_editpage {
 sub read_doctypes {
     my($new)=@_;
 
-    my $doctypes=read_table('doctypes', 'name', $new);
+    my $doctypes=read_table('doctypes', 'name', $new, {});
+
+    # Get fieldspecs too:
+
+    foreach my $doctypename (keys %$doctypes) {
+        $doctypes->{$doctypename}->{fields}=read_fields($doctypename, $doctypes, $new);
+    }
+
+    return $doctypes;
+}
+
+sub read_fields {
+    my ($doctypename, $doctypes, $db)=@_;
+
+    # Find pearl of parents:
+    my @parentids=get_parentids($doctypename, $doctypes);
+
+    my $fields=read_table('fieldspecs', 'name', $db, 'doctypeid IN (' . (join ', ', (@parentids, $doctypes->{$doctypename}->{id})) . ')' );
+
+    return $fields;
+}
+
+
+sub get_parentids {
+    my ($parentdoctypename, $doctypes)=@_;
+
+    my @ids;
+
+    while ($parentdoctypename) {
+        my $parent=$doctypes->{$parentdoctypename}->{parent};
+        push @ids, $parent if ($parent);
+
+        ($parentdoctypename)=grep { $doctypes->{$_}->{id} eq $parent } keys %$doctypes;
+    }
+
+    return @ids;
 }
 
 sub read_table {
-    my($table, $key, $db)=@_;
+    my($table, $key, $db, $searchoptions)=@_;
 
     my $set = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db->{db}",
 					       '!Username'   => $db->{user},
 					       '!Password'   => $db->{password},
 					       '!Table'      => $table,
+                                               '!TieRow'     => 0,
 					       '!Debug'      => $dbi_debug,
 					      });
     my %entries;
-    $set->Search();
+    $set->Search($searchoptions);
     while( my $rec=$set->Next ) {
 	my %fields=( %$rec );
 	$entries{$rec->{$key}}=\%fields;

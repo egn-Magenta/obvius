@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>
+<documentcollection>
+<document>
+  <parent>1</parent>
+  <obvius_dump_owner_login>admin</obvius_dump_owner_login>
+  <grp>1</grp>
+  <accessrules></accessrules>
+  <name>admin</name>
+  <obvius_dump_grp_name>Admin</obvius_dump_grp_name>
+  <obvius_dump_parent_uri>/</obvius_dump_parent_uri>
+  <obvius_dump_doc_uri>/admin/</obvius_dump_doc_uri>
+  <id>3</id>
+  <obvius_dump_type_name>HTML</obvius_dump_type_name>
+  <version>
+    <lang>en</lang>
+    <user>1</user>
+    <fields>
+      <bare>0</bare>
+      <title>Administration</title>
+      <expires>9999-01-01 18:00:00</expires>
+      <sortorder>+seq,+title</sortorder>
+      <pagesize>0</pagesize>
+      <short_title>Administration</short_title>
+      <subscribeable>none</subscribeable>
+      <docdate>2005-05-10 00:00:00</docdate>
+      <html_content>&lt;p&gt;
+Administration af brugere, grupper, abonnenter og nøgleord:
+&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_users=1&quot;&gt;Brugere&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_groups=1&quot;&gt;Grupper&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_subscribers=1&quot;&gt;Abonnenter&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_keywords=1&quot;&gt;Nøgleord&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_queue=1&quot;&gt;Kommando-kø&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;
+Server-cache:
+&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_flushcache=1&quot;&gt;Ryd server-cache&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;
+AdminJump:
+&lt;/p&gt;
+
+&lt;p&gt;
+Højreklik på AdminJump-linket nedenfor og vælg &quot;Føj til foretrukne...&quot;.  Hvis værktøjslinien &quot;Hyperlinks&quot; ikke er slået til, så gør det i menuen &quot;Vis/Værktøjslinier/Hyperlinks&quot; - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen &quot;AdminJump&quot; i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).
+&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;javascript:q=location.href;if(q&amp;&amp;q!=%22%22){q=String(q);r=new RegExp(%22http[s]?(://[^/]*/)(.*)%22);m=q.match(r);if(m){admin=%22admin/%22;ra=new RegExp(%22admin/(.*)%22);ma=m[2].match(ra);if(ma){admin=%22%22;m[2]=ma[1];}location.href=%22http%22+m[1]+admin+m[2];}else{alert(%22Dont know how to admin %22+q+%22, sorry%22);location.href=location.href;}}else{location.href=location.href;}&quot;&gt;AdminJump&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</html_content>
+      <teaser></teaser>
+      <seq>-100</seq>
+    </fields>
+    <obvius_dump_user_login>admin</obvius_dump_user_login>
+    <valid>0</valid>
+    <version>2005-05-10 13:06:15</version>
+    <public>0</public>
+    <obvius_dump_type_name>HTML</obvius_dump_type_name>
+    <type>6</type>
+    <docid>3</docid>
+  </version>
+  <type>6</type>
+  <owner>1</owner>
+</document>
+
+<document>
+  <parent>3</parent>
+  <obvius_dump_owner_login>admin</obvius_dump_owner_login>
+  <grp>1</grp>
+  <accessrules></accessrules>
+  <name>search</name>
+  <obvius_dump_grp_name>Admin</obvius_dump_grp_name>
+  <obvius_dump_parent_uri>/admin/</obvius_dump_parent_uri>
+  <obvius_dump_doc_uri>/admin/search/</obvius_dump_doc_uri>
+  <id>4</id>
+  <obvius_dump_type_name>DBSearch</obvius_dump_type_name>
+  <version>
+    <lang>en</lang>
+    <user>1</user>
+    <fields>
+      <title>Database search</title>
+      <expires>9999-01-01 18:00:00</expires>
+      <form></form>
+      <sortorder>+seq,+title</sortorder>
+      <pagesize>0</pagesize>
+      <short_title>Search</short_title>
+      <subscribeable>none</subscribeable>
+      <show_teaser>0</show_teaser>
+      <docdate>2005-05-10 00:00:00</docdate>
+      <show_title>0</show_title>
+      <seq>10</seq>
+      <teaser></teaser>
+    </fields>
+    <obvius_dump_user_login>admin</obvius_dump_user_login>
+    <valid>0</valid>
+    <version>2005-05-10 13:07:19</version>
+    <public>0</public>
+    <obvius_dump_type_name>DBSearch</obvius_dump_type_name>
+    <type>14</type>
+    <docid>4</docid>
+  </version>
+  <type>14</type>
+  <owner>1</owner>
+</document>
+
+<document>
+  <parent>1</parent>
+  <obvius_dump_owner_login>admin</obvius_dump_owner_login>
+  <grp>1</grp>
+  <accessrules></accessrules>
+  <name>sitemap</name>
+  <obvius_dump_grp_name>Admin</obvius_dump_grp_name>
+  <obvius_dump_parent_uri>/</obvius_dump_parent_uri>
+  <obvius_dump_doc_uri>/sitemap/</obvius_dump_doc_uri>
+  <id>2</id>
+  <obvius_dump_type_name>Sitemap</obvius_dump_type_name>
+  <version>
+    <lang>en</lang>
+    <user>1</user>
+    <fields>
+      <title>Sitemap</title>
+      <expires>9999-01-01 18:00:00</expires>
+      <sortorder>+seq,+title</sortorder>
+      <short_title>Sitemap</short_title>
+      <root>/</root>
+      <subscribeable>none</subscribeable>
+      <levels>2</levels>
+      <docdate>2005-05-10 00:00:00</docdate>
+      <content></content>
+      <seq>-10</seq>
+    </fields>
+    <obvius_dump_user_login>admin</obvius_dump_user_login>
+    <valid>0</valid>
+    <version>2005-05-10 12:56:18</version>
+    <public>1</public>
+    <obvius_dump_type_name>Sitemap</obvius_dump_type_name>
+    <type>10</type>
+    <docid>2</docid>
+  </version>
+  <type>10</type>
+  <owner>1</owner>
+</document>
+
+</documentcollection>

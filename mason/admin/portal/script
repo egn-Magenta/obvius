@@ -1,0 +1,6 @@
+  <script type="text/javascript" src="/scripts/admin.js"></script>
+  <script type="text/javascript" src="/scripts/admin_newsboxes.js"></script>
+  <script type="text/javascript" src="/scripts/admin_categories.js"></script>
+  <script type="text/javascript" src="/scripts/jscalendar/calendar.js"></script>
+  <script type="text/javascript" src="/scripts/jscalendar/lang/calendar-<% $vdoc->Lang %>.js"></script>
+  <script type="text/javascript" src="/scripts/jscalendar/calendar-setup.js"></script>

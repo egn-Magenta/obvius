@@ -43,22 +43,24 @@ our $AUTOLOAD;
 # At least implement the same functions as Apache::Log
 use subs qw(emerg alert crit error warn notice info debug);
 
+# new - returns an Obvius::Log object
 sub new {
     my ($class) = @_;
     my $this;
-    
+
     bless \$this, $class
 }
 
+# AUTOLOAD - this is the actual workhorse, doing the logging according to level
 sub AUTOLOAD {
     my $this = shift;
     return if $AUTOLOAD =~ /::DESTROY$/;
 
     my $name = $AUTOLOAD;
     $name =~ s/.*:://;
-    
+
     my $log;
-    
+
     if (exists $ENV{'MOD_PERL'}) {
         if (my $r = Apache->request) {
             $log = $r->log;
@@ -74,7 +76,7 @@ sub AUTOLOAD {
 
 
     # Force &Apache::Log::debug() to report the file and line number from where we got called
-    # from instead of always just reporting this place. If we start handle debug special for 
+    # from instead of always just reporting this place. If we start handle debug special for
     # some other reason this shouldn't be done for the other functions (emerg, alert, crit &c)
 
     my ($package, $filename, $line) = caller;
@@ -87,36 +89,31 @@ sub AUTOLOAD {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::Log::Apache - Perl extension for blah blah blah
+Obvius::Log::Apache - A wrapper for logging through Apache::Log-objects
 
 =head1 SYNOPSIS
 
   use Obvius::Log::Apache;
-  blah blah blah
+
+  my $log=Obvius::Log::Apache->new;
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::Log::Apache, created by h2xs. It looks
-like the author of the extension was negligent enough to leave the
-stub unedited.
+This module acts as a wrapper around Apache::Log with the same
+interface as Obvius::Log (which this module falls back to).
 
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+It is used in conf/setup.pl on the various websites.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Peter Makholm
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Apache::Log>.
 
 =cut

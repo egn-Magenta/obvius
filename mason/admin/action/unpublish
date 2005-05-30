@@ -1,0 +1,53 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'Hide' &></h2>
+
+  <form action="./">
+    <div>
+      <& /shared/msg, text=>'Hide this version' &>?
+    </div>
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_unpublish=>1 } &>
+      <& util/do_cancel, do_text=>'Hide' &>
+    </p>
+  </form>
+
+</div>
+%
+<%init>
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+<%method cancel>
+%
+<& /shared/set_status_message, message=>'Hide cancelled' &>
+%
+</%method>
+%
+%
+<%method do>
+%
+<%args>
+$obvius_version
+$obvius_later_date
+</%args>
+%
+<%init>
+my ($status, $message)=$obvius->send_order(
+                                           docid=>$doc->Id,
+                                           user=>$obvius->user,
+                                           command=>'unpublish',
+                                           args=>{ version=>$obvius_version },
+                                           date=>$obvius_later_date,
+                                          );
+$m->comp('/shared/set_status_message', status=>$status, message=>$message);
+
+return ''; # Don't go anywhere special.
+</%init>
+%
+</%method>

@@ -1,0 +1,1472 @@
+<?xml version='1.0' encoding='ISO-8859-1' standalone='yes'?>
+<messages>
+  <!-- Handling area buttons: -->
+  <text key="Preview">
+    <translation lang="en">Preview</translation>
+    <translation lang="da">Smugkig</translation>
+  </text>
+  <text key="View public">
+    <translation lang="en">View public</translation>
+    <translation lang="da">Se offentlig</translation>
+  </text>
+  <text key="Publish">
+    <translation lang="en">Publish</translation>
+    <translation lang="da">Offentliggør</translation>
+  </text>
+  <text key="Hide">
+    <translation lang="en">Hide</translation>
+    <translation lang="da">Skjul</translation>
+  </text>
+  <text key="Move">
+    <translation lang="en">Move</translation>
+    <translation lang="da">Flyt</translation>
+  </text>
+  <text key="Rename">
+    <translation lang="en">Rename</translation>
+    <translation lang="da">Omdøb</translation>
+  </text>
+  <text key="Copy">
+    <translation lang="en">Copy</translation>
+    <translation lang="da">Kopier</translation>
+  </text>
+  <text key="Delete">
+    <translation lang="en">Delete</translation>
+    <translation lang="da">Slet</translation>
+  </text>
+  <text key="Send">
+    <translation lang="en">Send</translation>
+    <translation lang="da">Send</translation>
+  </text>
+  <text key="Language">
+    <translation lang="en">Language</translation>
+    <translation lang="da">Sprog</translation>
+  </text>
+  <text key="Type">
+    <translation lang="en">Type</translation>
+    <translation lang="da">Type</translation>
+  </text>
+
+  <!-- Global links: -->
+  <text key="Administration">
+    <translation lang="en">Administration</translation>
+    <translation lang="da">Administration</translation>
+  </text>
+  <text key="Sitemap">
+    <translation lang="en">Sitemap</translation>
+    <translation lang="da">Sitemap</translation>
+  </text>
+  <text key="Search">
+    <translation lang="en">Search</translation>
+    <translation lang="da">Søg</translation>
+  </text>
+  <text key="Help">
+    <translation lang="en">Help</translation>
+    <translation lang="da">Hjælp</translation>
+  </text>
+
+  <!-- Title of page: -->
+  <text key="admin">
+    <translation lang="en">admin</translation>
+    <translation lang="da">admin</translation>
+  </text>
+
+  <!-- Links in head-element: -->
+  <text key="Default look">
+    <translation lang="en">Default look</translation>
+    <translation lang="da">Standard-udseende</translation>
+  </text>
+  <text key="Public">
+    <translation lang="en">Public</translation>
+    <translation lang="da">Offentlig</translation>
+  </text>
+
+  <!-- Notification area: -->
+  <text key="Error">
+    <translation lang="en">Error</translation>
+    <translation lang="da">Fejl</translation>
+  </text>
+
+  <!-- Main area: -->
+  <text key="New document">
+    <translation lang="en">New document</translation>
+    <translation lang="da">Nyt dokument</translation>
+  </text>
+
+  <!-- Navigation, versions, information: -->
+  <text key="Navigation">
+    <translation lang="en">Navigation</translation>
+    <translation lang="da">Navigation</translation>
+  </text>
+  <text key="Navigator">
+    <translation lang="en">Navigator</translation>
+    <translation lang="da">Navigator</translation>
+  </text>
+  <text key="Up">
+    <translation lang="en">Up</translation>
+    <translation lang="da">Op</translation>
+  </text>
+  <text key="Published">
+    <translation lang="en">Published</translation>
+    <translation lang="da">Offentliggjort</translation>
+  </text>
+  <text key="Not published">
+    <translation lang="en">Not published</translation>
+    <translation lang="da">Ikke offentliggjort</translation>
+  </text>
+  <text key="Versions">
+    <translation lang="en">Versions</translation>
+    <translation lang="da">Versioner</translation>
+  </text>
+  <text key="All lang.">
+    <translation lang="en">All lang.</translation>
+    <translation lang="da">Alle sprog</translation>
+  </text>
+  <text key="Date">
+    <translation lang="en">Date</translation>
+    <translation lang="da">Dato</translation>
+  </text>
+  <text key="Time">
+    <translation lang="en">Time</translation>
+    <translation lang="da">Kl.</translation>
+  </text>
+  <text key="La.">
+    <translation lang="en">La.</translation>
+    <translation lang="da">Sp.</translation>
+  </text>
+  <text key="Act.">
+    <translation lang="en">Act.</translation>
+    <translation lang="da">Akt.</translation>
+  </text>
+  <text key="Publ.">
+    <translation lang="en">Publ.</translation>
+    <translation lang="da">Off.</translation>
+  </text>
+  <text key="Show complete list">
+    <translation lang="en">Show complete list</translation>
+    <translation lang="da">Vis hele listen</translation>
+  </text>
+  <text key="Information">
+    <translation lang="en">Information</translation>
+    <translation lang="da">Information</translation>
+  </text>
+  <text key="Created by">
+    <translation lang="en">Created by</translation>
+    <translation lang="da">Oprettet af</translation>
+  </text>
+  <text key="Not registered">
+    <translation lang="en">Not registered</translation>
+    <translation lang="da">Ikke registreret</translation>
+  </text>
+  <text key="Annotation">
+    <translation lang="en">Annotation</translation>
+    <translation lang="da">Kommentar</translation>
+  </text>
+  <text key="None">
+    <translation lang="en">None</translation>
+    <translation lang="da">Ingen</translation>
+  </text>
+  <text key="word(s)">
+    <translation lang="en">word(s)</translation>
+    <translation lang="da">ord</translation>
+  </text>
+  <text key="Compare to">
+    <translation lang="en">Compare to</translation>
+    <translation lang="da">Sammenlign med</translation>
+  </text>
+  <text key="previous">
+    <translation lang="en">previous</translation>
+    <translation lang="da">foregående</translation>
+  </text>
+  <text key="public">
+    <translation lang="en">public</translation>
+    <translation lang="da">offentlig</translation>
+  </text>
+  <text key="Current document">
+    <translation lang="en">Current document</translation>
+    <translation lang="da">Dette dokument</translation>
+  </text>
+  <text key="Subdocuments">
+    <translation lang="en">Subdocuments</translation>
+    <translation lang="da">Underdokumenter</translation>
+  </text>
+  <text key="Author">
+    <translation lang="en">Author</translation>
+    <translation lang="da">Forfatter</translation>
+  </text>
+  <text key="Back">
+    <translation lang="en">Back</translation>
+    <translation lang="da">Tilbage</translation>
+  </text>
+  <text key="Forward">
+    <translation lang="en">Forward</translation>
+    <translation lang="da">Frem</translation>
+  </text>
+  <text key="New">
+    <translation lang="en">New</translation>
+    <translation lang="da">Ny</translation>
+  </text>
+  <text key="Select">
+    <translation lang="en">Select</translation>
+    <translation lang="da">Vælg</translation>
+  </text>
+  <text key="Upload-document">
+    <translation lang="en">Upload-document</translation>
+    <translation lang="da">Upload-dokument</translation>
+  </text>
+  <text key="New Image">
+    <translation lang="en">New image</translation>
+    <translation lang="da">Nyt billede</translation>
+  </text>
+  <text key="New Upload">
+    <translation lang="en">New Upload</translation>
+    <translation lang="da">Nyt upload-dokument</translation>
+  </text>
+  <text key="Create">
+    <translation lang="en">Create</translation>
+    <translation lang="da">Opret</translation>
+  </text>
+  <text key="Creation cancelled">
+    <translation lang="en">Creation cancelled</translation>
+    <translation lang="da">Oprettelse annulleret</translation>
+  </text>
+  <text key="show all">
+    <translation lang="en">show all</translation>
+    <translation lang="da">vis alle</translation>
+  </text>
+  <text key="Select function">
+    <translation lang="en">Select function</translation>
+    <translation lang="da">Vælg funktion</translation>
+  </text>
+  <text key="Perform">
+    <translation lang="en">Perform</translation>
+    <translation lang="da">Udfør</translation>
+  </text>
+  <text key="Please choose a function to perform">
+    <translation lang="en">Please choose a function to perform</translation>
+    <translation lang="da">Vælg venligst en funktion at udføre</translation>
+  </text>
+  <text key="Please select one or more subdocuments for batch operation">
+    <translation lang="en">Please select one or more subdocuments for batch operation</translation>
+    <translation lang="da">Vælg venligst et eller flere underdokumenter</translation>
+  </text>
+  <text key="documents processed successfully">
+    <translation lang="en">documents processed successfully</translation>
+    <translation lang="da">dokumenter behandlet med success</translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <!-- Diff: -->
+  <text key="Removed">
+    <translation lang="en">Removed</translation>
+    <translation lang="da">Fjernet</translation>
+  </text>
+  <text key="Added">
+    <translation lang="en">Added</translation>
+    <translation lang="da">Tilføjet</translation>
+  </text>
+  <text key="Changed">
+    <translation lang="en">Changed</translation>
+    <translation lang="da">Ændret</translation>
+  </text>
+  <text key="HTML::Diff is missing from the server. Version comparison is not available.">
+    <translation lang="en">HTML::Diff is missing from the server. Version comparison is not available.</translation>
+    <translation lang="da">HTML::Diff findes ikke på serveren. Sammenligning af versioner kan ikke foretages.</translation>
+  </text>
+  <text key="No version to compare with specified.">
+    <translation lang="en">No version to compare with specified.</translation>
+    <translation lang="da">Der er ikke angivet nogen version at sammenligne med.</translation>
+  </text>
+  <text key="End comparison">
+    <translation lang="en">End comparison</translation>
+    <translation lang="da">Afslut sammenligning</translation>
+  </text>
+
+  <!-- Field labels: -->
+  <text key="Title">
+    <translation lang="en">Title</translation>
+    <translation lang="da">Titel</translation>
+  </text>
+  <text key="Short title">
+    <translation lang="en">Short title</translation>
+    <translation lang="da">Kort titel</translation>
+  </text>
+
+  <!-- Warning from common: -->
+  <text key="Component not found for document type">
+    <translation lang="en">Component not found for document type</translation>
+    <translation lang="da">Ingen komponent fundet til dokumenttypen</translation>
+  </text>
+
+  <!-- Commands: -->
+  <text key="Hide this version">
+    <translation lang="en">Hide this version</translation>
+    <translation lang="da">Skjul denne version</translation>
+  </text>
+  <text key="Hide cancelled">
+    <translation lang="en">Hide cancelled</translation>
+    <translation lang="da">Skjul annulleret</translation>
+  </text>
+  <text key="Unknown command">
+    <translation lang="en">Unknown command</translation>
+    <translation lang="da">Ukendt kommando</translation>
+  </text>
+  <text key="Command">
+    <translation lang="en">Command</translation>
+    <translation lang="da">Kommando</translation>
+  </text>
+  <text key="unpublish">
+    <translation lang="en">hide</translation>
+    <translation lang="da">skjul</translation>
+  </text>
+  <text key="stored for later execution">
+    <translation lang="en">stored for later execution</translation>
+    <translation lang="da">registreret til senere udførelse</translation>
+  </text>
+  <text key="Command not stored">
+    <translation lang="en">Command not stored</translation>
+    <translation lang="da">Kommando ikke gemt</translation>
+  </text>
+  <text key="Could not get document">
+    <translation lang="en">Could not get document</translation>
+    <translation lang="da">Kunne ikke finde dokument</translation>
+  </text>
+  <text key="Could not get version">
+    <translation lang="en">Could not get version</translation>
+    <translation lang="da">Kunne ikke finde version</translation>
+  </text>
+  <text key="Version hidden">
+    <translation lang="en">Version hidden</translation>
+    <translation lang="da">Version skjult</translation>
+  </text>
+  <text key="Could not hide version">
+    <translation lang="en">Could not hide version</translation>
+    <translation lang="da">Kunne ikke skjule version</translation>
+  </text>
+  <text key="Delete document">
+    <translation lang="en">Delete document</translation>
+    <translation lang="da">Slet dokument</translation>
+  </text>
+  <text key="Instead of deleting the document, you may want to">
+    <translation lang="en">Instead of deleting the document, you may want to</translation>
+    <translation lang="da">I stedet for at slette dokumentet kan du overveje at</translation>
+  </text>
+  <text key="merely hide it">
+    <translation lang="en">merely hide it</translation>
+    <translation lang="da">skjule det</translation>
+  </text>
+  <text key="Please remember that if you delete the document, all versions will be deleted, and it can not be recovered">
+    <translation lang="en">Please remember that if you delete the document, all versions will be deleted, and it can not be recovered</translation>
+    <translation lang="da">Husk at hvis du sletter et dokument, slettes alle versioner af dokumentet og det kan ikke gendannes</translation>
+  </text>
+  <text key="Delete cancelled">
+    <translation lang="en">Delete cancelled</translation>
+    <translation lang="da">Slet annulleret</translation>
+  </text>
+  <text key="delete">
+    <translation lang="en">delete</translation>
+    <translation lang="da">slet</translation>
+  </text>
+  <text key="Document">
+    <translation lang="en">Document</translation>
+    <translation lang="da">Dokument</translation>
+  </text>
+  <text key="deleted">
+    <translation lang="en">deleted</translation>
+    <translation lang="da">slettet</translation>
+  </text>
+  <text key="rename">
+    <translation lang="en">rename</translation>
+    <translation lang="da">omdøb</translation>
+  </text>
+  <text key="Rename cancelled">
+    <translation lang="en">Rename cancelled</translation>
+    <translation lang="da">Omdøb annulleret</translation>
+  </text>
+  <text key="Document names can not contain &quot;/&quot; characters, sorry">
+    <translation lang="en">Document names can not contain &quot;/&quot; characters, sorry</translation>
+    <translation lang="da">Dokumentets navn kan ikke indeholde tegnet &quot;/&quot;, beklager</translation>
+  </text>
+  <text key="Document renamed">
+    <translation lang="en">Document renamed</translation>
+    <translation lang="da">Dokument omdøbt</translation>
+  </text>
+  <text key="Move cancelled">
+    <translation lang="en">Move cancelled</translation>
+    <translation lang="da">Flyt annulleret</translation>
+  </text>
+  <text key="Path must start and end with a &quot;/&quot; character">
+    <translation lang="en">Path must start and end with a &quot;/&quot; character</translation>
+    <translation lang="da">Stien skal have en &quot;/&quot; både først og sidst</translation>
+  </text>
+  <text key="Document moved from">
+    <translation lang="en">Document moved from</translation>
+    <translation lang="da">Dokument flyttet fra</translation>
+  </text>
+  <text key="(here)">
+    <translation lang="en">(here)</translation>
+    <translation lang="da">(her)</translation>
+  </text>
+  <text key="Can not move document under itself">
+    <translation lang="en">Can not move document under itself</translation>
+    <translation lang="da">Kan ikke flytte dokumentet under sig selv</translation>
+  </text>
+  <text key="Also delete subdocuments">
+    <translation lang="en">Also delete subdocuments</translation>
+    <translation lang="da">Skal underdokumenter også slettes</translation>
+  </text>
+  <text key="Could not delete document ">
+    <translation lang="en">Could not delete document </translation>
+    <translation lang="da">Kunne ikke slette dokumentet </translation>
+  </text>
+  <text key="You are about to delete this document and all the documents beneath it, in total">
+    <translation lang="en">You are about to delete this document and all the documents beneath it, in total</translation>
+    <translation lang="da">Du er ved at slette dette dokument og alle dokumenter placeret under det, i alt</translation>
+  </text>
+  <text key="Are you sure you want to delete these">
+    <translation lang="en">Are you sure you want to delete these</translation>
+    <translation lang="da">Er du sikker på at du vil slette disse</translation>
+  </text>
+  <text key="documents">
+    <translation lang="en">documents</translation>
+    <translation lang="da">dokumenter</translation>
+  </text>
+  <text key=" and ">
+    <translation lang="en"> and </translation>
+    <translation lang="da"> og </translation>
+  </text>
+  <text key=" subdocuments">
+    <translation lang="en"> subdocuments</translation>
+    <translation lang="da"> underdokumenter</translation>
+  </text>
+  <text key="Show document address">
+    <translation lang="en">Show document address</translation>
+    <translation lang="da">Vis dokument-adresse</translation>
+  </text>
+  <text key="Link to public website">
+    <translation lang="en">Link to public website</translation>
+    <translation lang="da">Link til offentligt website</translation>
+  </text>
+  <text key="Link to admin">
+    <translation lang="en">Link to admin</translation>
+    <translation lang="da">Link til admin</translation>
+  </text>
+  <text key="No link">
+    <translation lang="en">No link</translation>
+    <translation lang="da">Intet link</translation>
+  </text>
+  <text key="To">
+    <translation lang="en">To</translation>
+    <translation lang="da">Til</translation>
+  </text>
+  <text key="From">
+    <translation lang="en">From</translation>
+    <translation lang="da">Fra</translation>
+  </text>
+  <text key="Subject">
+    <translation lang="en">Subject</translation>
+    <translation lang="da">Emne</translation>
+  </text>
+  <text key="Text">
+    <translation lang="en">Text</translation>
+    <translation lang="da">Tekst</translation>
+  </text>
+  <text key="Email sent to">
+    <translation lang="en">Email sent to</translation>
+    <translation lang="da">Email sendt til</translation>
+  </text>
+  <text key="Copy document">
+    <translation lang="en">Copy document</translation>
+    <translation lang="da">Kopiér dokument</translation>
+  </text>
+  <text key="Destination">
+    <translation lang="en">Destination</translation>
+    <translation lang="da">Til</translation>
+  </text>
+  <text key="Also copy subdocuments">
+    <translation lang="en">Also copy subdocuments</translation>
+    <translation lang="da">Skal underdokumenter også kopieres</translation>
+  </text>
+  <text key="You are about to copy this document and all the documents beneath it, in total">
+    <translation lang="en">You are about to copy this document and all the documents beneath it, in total</translation>
+    <translation lang="da">Du er ved at kopiere dette dokument og alle dokumenter placeret under det, i alt</translation>
+  </text>
+  <text key="Are you sure you want to copy these">
+    <translation lang="en">Are you sure you want to copy these</translation>
+    <translation lang="da">Er du sikker på at du vil kopiere disse</translation>
+  </text>
+  <text key="documents to">
+    <translation lang="en">documents to</translation>
+    <translation lang="da">dokumenter til</translation>
+  </text>
+  <text key="Copy cancelled">
+    <translation lang="en">Copy cancelled</translation>
+    <translation lang="da">Kopiering annulleret</translation>
+  </text>
+  <text key="Copy of">
+    <translation lang="en">Copy of</translation>
+    <translation lang="da">Kopieringen af</translation>
+  </text>
+  <text key="to">
+    <translation lang="en">to</translation>
+    <translation lang="da">til</translation>
+  </text>
+  <text key="succeeded">
+    <translation lang="en">succeeded</translation>
+    <translation lang="da">gennemført</translation>
+  </text>
+  <text key="failed">
+    <translation lang="en">failed</translation>
+    <translation lang="da">mislykkedes</translation>
+  </text>
+  <text key="Destination document">
+    <translation lang="en">Destination document</translation>
+    <translation lang="da">Til-dokumentet</translation>
+  </text>
+  <text key="already has a sub-document called">
+    <translation lang="en">already has a sub-document called</translation>
+    <translation lang="da">har allerede et underdokument der hedder</translation>
+  </text>
+  <text key="does not exist">
+    <translation lang="en">does not exist</translation>
+    <translation lang="da">eksisterer ikke</translation>
+  </text>
+  <text key="documents copied from">
+    <translation lang="en">documents copied from</translation>
+    <translation lang="da">dokumenter kopieret fra</translation>
+  </text>
+  <text key="Can not recursively copy a document underneath itself">
+    <translation lang="en">Can not recursively copy a document underneath itself</translation>
+    <translation lang="da">Kan ikke kopiere et dokument med underdokumenter ned under sig selv</translation>
+  </text>
+  <text key="Send cancelled">
+    <translation lang="en">Send cancelled</translation>
+    <translation lang="da">Send annulleret</translation>
+  </text>
+  <text key="Publish cancelled">
+    <translation lang="en">Publish cancelled</translation>
+    <translation lang="da">Offentliggør annulleret</translation>
+  </text>
+  <text key="Invalid data entered, please correct.">
+    <translation lang="en">Invalid data entered, please correct.</translation>
+    <translation lang="da">Ugyldige data indtastet, ret venligst.</translation>
+  </text>
+  <text key="Edit cancelled">
+    <translation lang="en">Edit cancelled</translation>
+    <translation lang="da">Redigéring annulleret</translation>
+  </text>
+  <text key="Version published">
+    <translation lang="en">Version published</translation>
+    <translation lang="da">Version offentliggjort</translation>
+  </text>
+  <text key="Edit">
+    <translation lang="en">Edit</translation>
+    <translation lang="da">Redigér</translation>
+  </text>
+  <text key="New language">
+    <translation lang="en">New language</translation>
+    <translation lang="da">Nyt sprog</translation>
+  </text>
+  <text key="New language cancelled">
+    <translation lang="en">New language cancelled</translation>
+    <translation lang="da">Nyt sprog annulleret</translation>
+  </text>
+  <text key="Start editing">
+    <translation lang="en">Start editing</translation>
+    <translation lang="da">Begynd redigering</translation>
+  </text>
+  <text key="Change document type">
+    <translation lang="en">Change document type</translation>
+    <translation lang="da">Skift dokumenttype</translation>
+  </text>
+  <text key="Document type">
+    <translation lang="en">Document type</translation>
+    <translation lang="da">Dokumenttype</translation>
+  </text>
+  <text key="Change type cancelled">
+    <translation lang="en">Change type cancelled</translation>
+    <translation lang="da">Skift af dokumenttype annulleret</translation>
+  </text>
+  <text key="Group">
+    <translation lang="en">Group</translation>
+    <translation lang="da">Gruppe</translation>
+  </text>
+  <text key="New document cancelled">
+    <translation lang="en">New document cancelled</translation>
+    <translation lang="da">Nyt dokument annulleret</translation>
+  </text>
+  <text key="The selected name">
+    <translation lang="en">The selected name</translation>
+    <translation lang="da">Det valgte navn</translation>
+  </text>
+  <text key="contains characters that are not allowed, please change the name">
+    <translation lang="en">contains characters that are not allowed, please change the name</translation>
+    <translation lang="da">indeholder tegn der ikke kan benyttes, ret venligst navnet</translation>
+  </text>
+  <text key="A document already exists with the selected name">
+    <translation lang="en">A document already exists with the selected name</translation>
+    <translation lang="da">Der findes allerede et dokument med det valgte navn</translation>
+  </text>
+  <text key="here, please choose another">
+    <translation lang="en">here, please choose another</translation>
+    <translation lang="da">her, vælg venligst et andet</translation>
+  </text>
+  <text key="created under">
+    <translation lang="en">created under</translation>
+    <translation lang="da">oprettet under</translation>
+  </text>
+  <text key="Now editing a new document named">
+    <translation lang="en">Now editing a new document named</translation>
+    <translation lang="da">Redigerer et nyt dokument med navnet</translation>
+  </text>
+  <text key="document">
+    <translation lang="en">document</translation>
+    <translation lang="da">dokument</translation>
+  </text>
+  <text key="Flush cache">
+    <translation lang="en">Flush cache</translation>
+    <translation lang="da">Nulstil cache</translation>
+  </text>
+  <text key="Usually it is not necessary to flush the cache by hand, as the cache is automatically invalidated at the appropriate times. However, sometimes it is nice to be able to do so anyhow.">
+    <translation lang="en">Usually it is not necessary to flush the cache by hand, as the cache is automatically invalidated at the appropriate times. However, sometimes it is nice to be able to do so anyhow.</translation>
+    <translation lang="da">Normalt er det ikke nødvendigt at nulstille cachen manuelt, da den automatisk bliver nulstillet, når det er nødvendigt. Det kan dog være rart at have muligheden alligevel.</translation>
+  </text>
+  <text key="Flush cache now">
+    <translation lang="en">Flush cache now</translation>
+    <translation lang="da">Nulstil cache nu</translation>
+  </text>
+  <text key="Flush">
+    <translation lang="en">Flush</translation>
+    <translation lang="da">Nulstil</translation>
+  </text>
+  <text key="Cache flushed">
+    <translation lang="en">Cache flushed</translation>
+    <translation lang="da">Cache nulstillet</translation>
+  </text>
+  <text key="Cache flush cancelled">
+    <translation lang="en">Cache flush cancelled</translation>
+    <translation lang="da">Nulstilling af cache annulleret</translation>
+  </text>
+  <text key="Owner">
+    <translation lang="en">Owner</translation>
+    <translation lang="da">Ejer</translation>
+  </text>
+  <text key="Address">
+    <translation lang="en">Address</translation>
+    <translation lang="da">Adresse</translation>
+  </text>
+  <text key="Document information">
+    <translation lang="en">Document information</translation>
+    <translation lang="da">Dokumentinformation</translation>
+  </text>
+  <text key="Access rules">
+    <translation lang="en">Access rules</translation>
+    <translation lang="da">Adgangsregler</translation>
+  </text>
+  <text key="Document parameters">
+    <translation lang="en">Document parameters</translation>
+    <translation lang="da">Dokumentparametre</translation>
+  </text>
+  <text key="Document updated">
+    <translation lang="en">Document updated</translation>
+    <translation lang="da">Dokument opdateret</translation>
+  </text>
+  <text key="Inherited document parameters">
+    <translation lang="en">Inherited document parameters</translation>
+    <translation lang="da">Nedarvede dokumentparametre</translation>
+  </text>
+  <text key="Calculated access rules">
+    <translation lang="en">Calculated access rules</translation>
+    <translation lang="da">Beregnede adgangsregler</translation>
+  </text>
+  <text key="Previous page">
+    <translation lang="en">Previous page</translation>
+    <translation lang="da">Foregående side</translation>
+  </text>
+  <text key="Next page">
+    <translation lang="en">Next page</translation>
+    <translation lang="da">Næste side</translation>
+  </text>
+  <text key="Current capabilities">
+    <translation lang="en">Current capabilities</translation>
+    <translation lang="da">Aktuelle rettigheder</translation>
+  </text>
+  <text key="Rule applies">
+    <translation lang="en">Rule applies</translation>
+    <translation lang="da">Regel ikraft</translation>
+  </text>
+  <text key="Rule does not apply">
+    <translation lang="en">Rule does not apply</translation>
+    <translation lang="da">Regel ej ikraft</translation>
+  </text>
+  <text key="Rule invalid">
+    <translation lang="en">Rule invalid</translation>
+    <translation lang="da">Regel ugyldig</translation>
+  </text>
+  <text key="You do not have access to this command. Sorry.">
+    <translation lang="en">You do not have access to this command. Sorry.</translation>
+    <translation lang="da">Du har ikke adgang til denne kommando. Beklager.</translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <!-- Users: -->
+  <text key="User data">
+    <translation lang="en">User data</translation>
+    <translation lang="da">Brugerdata</translation>
+  </text>
+  <text key="Users">
+    <translation lang="en">Users</translation>
+    <translation lang="da">Brugere</translation>
+  </text>
+  <text key="Group data">
+    <translation lang="en">Group data</translation>
+    <translation lang="da">Gruppedata</translation>
+  </text>
+  <text key="Suspended">
+    <translation lang="en">Suspended</translation>
+    <translation lang="da">Suspenderet</translation>
+  </text>
+  <text key="Subscriber">
+    <translation lang="en">Subscriber</translation>
+    <translation lang="da">Abonnent</translation>
+  </text>
+  <text key="Password">
+    <translation lang="en">Password</translation>
+    <translation lang="da">Kodeord</translation>
+  </text>
+  <text key="Re-enter">
+    <translation lang="en">Re-enter</translation>
+    <translation lang="da">Indtast igen</translation>
+  </text>
+  <text key="Wants HTML">
+    <translation lang="en">Wants HTML</translation>
+    <translation lang="da">Ønsker HTML</translation>
+  </text>
+  <text key="Subscriptions">
+    <translation lang="en">Subscriptions</translation>
+    <translation lang="da">Abonnementer</translation>
+  </text>
+  <text key="Edit comment">
+    <translation lang="en">Edit comment</translation>
+    <translation lang="da">Redigér kommentar</translation>
+  </text>
+  <text key="Edit keyword">
+    <translation lang="en">Edit keyword</translation>
+    <translation lang="da">Redigér nøgleord</translation>
+  </text>
+  <text key="Command queue">
+    <translation lang="en">Command queue</translation>
+    <translation lang="da">Kommando-kø</translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <!-- Editengine: -->
+  <text key="Aborted">
+    <translation lang="en">Aborted</translation>
+    <translation lang="da">Annulleret</translation>
+  </text>
+  <text key="Create new">
+    <translation lang="en">Create new</translation>
+    <translation lang="da">Opret ny</translation>
+  </text>
+  <text key="Update">
+    <translation lang="en">Update</translation>
+    <translation lang="da">Opdatér</translation>
+  </text>
+  <text key="Could not create storage object">
+    <translation lang="en">Could not create storage object</translation>
+    <translation lang="da">Kunne ikke oprette lagringsobjekt</translation>
+  </text>
+  <text key="Editor not found">
+    <translation lang="en">Editor not found</translation>
+    <translation lang="da">Tekstredigeringskomponent ikke til stede</translation>
+  </text>
+  <text key="Invalid data">
+    <translation lang="en">Invalid data</translation>
+    <translation lang="da">Ugyldigt indhold</translation>
+  </text>
+  <text key="please correct and try again">
+    <translation lang="en">please correct and try again</translation>
+    <translation lang="da">ret venligst og prøv igen</translation>
+  </text>
+  <text key="Component">
+    <translation lang="en">Component</translation>
+    <translation lang="da">Komponenten</translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <!-- DbTable: -->
+  <text key="Could not create entry">
+    <translation lang="en">Could not create entry</translation>
+    <translation lang="da">Kunne ikke oprette indgang i databasen</translation>
+  </text>
+
+  <!-- Apps: -->
+  <text key="No such application">
+    <translation lang="en">No such application</translation>
+    <translation lang="da">Der findes ingen applikation med navnet</translation>
+  </text>
+  <text key="Validate field">
+    <translation lang="en">Validate field</translation>
+    <translation lang="da">Check feltindhold</translation>
+  </text>
+  <text key="The XHTML in this field will be validated when you save the document">
+    <translation lang="en">The XHTML in this field will be validated when you save the document</translation>
+    <translation lang="da">XHTML-indholdet i dette felt vil blive checket når du gemmer dokumentet</translation>
+  </text>
+  <text key="Sequence number">
+    <translation lang="en">Sequence number</translation>
+    <translation lang="da">Placering</translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <!-- Group-editing: -->
+  <text key="Groups">
+    <translation lang="en">Groups</translation>
+    <translation lang="da">Grupper</translation>
+  </text>
+  <text key="Name">
+    <translation lang="en">Name</translation>
+    <translation lang="da">Navn</translation>
+  </text>
+
+  <!-- Newsboxes: -->
+  <text key="Sort">
+    <translation lang="en">Sort</translation>
+    <translation lang="da">Sortering</translation>
+  </text>
+  <text key="Chronological">
+    <translation lang="en">Chronological</translation>
+    <translation lang="da">Kronologisk</translation>
+  </text>
+  <text key="Reverse chronological">
+    <translation lang="en">Reverse chronological</translation>
+    <translation lang="da">Omvendt kronologisk</translation>
+  </text>
+  <text key="Manual placement">
+    <translation lang="en">Manual placement</translation>
+    <translation lang="da">Angiv placering</translation>
+  </text>
+  <text key="Type updated">
+    <translation lang="en">Type updated</translation>
+    <translation lang="da">Sortering opdateret</translation>
+  </text>
+  <text key="Could not update type">
+    <translation lang="en">Could not update type</translation>
+    <translation lang="da">Kunne ikke ændre sortering</translation>
+  </text>
+  <text key="Type registered">
+    <translation lang="en">Type registered</translation>
+    <translation lang="da">Sortering registreret</translation>
+  </text>
+  <text key="Could not register type">
+    <translation lang="en">Could not register type</translation>
+    <translation lang="da">Kunne ikke registrere sortering</translation>
+  </text>
+  <text key="No.">
+    <translation lang="en">No.</translation>
+    <translation lang="da">Nr.</translation>
+  </text>
+  <text key="News item">
+    <translation lang="en">News item</translation>
+    <translation lang="da">Nyhed</translation>
+  </text>
+  <text key="before start date">
+    <translation lang="en">before start date</translation>
+    <translation lang="da">før startdato</translation>
+  </text>
+  <text key="after end date">
+    <translation lang="en">after end date</translation>
+    <translation lang="da">efter slutdato</translation>
+  </text>
+  <text key="not public">
+    <translation lang="en">not public</translation>
+    <translation lang="da">ikke offentlig</translation>
+  </text>
+  <text key="Changes to box saved">
+    <translation lang="en">Changes to box saved</translation>
+    <translation lang="da">Boksændringer gemt</translation>
+  </text>
+  <text key="Addition">
+    <translation lang="en">Addition</translation>
+    <translation lang="da">Tilføjelse</translation>
+  </text>
+  <text key="Box-status updated">
+    <translation lang="en">Box-status updated</translation>
+    <translation lang="da">Boks-status opdateret</translation>
+  </text>
+  <text key="Could not update box-status">
+    <translation lang="en">Could not update box-status</translation>
+    <translation lang="da">Kunne ikke opdatere boks-status</translation>
+  </text>
+  <text key="added to box">
+    <translation lang="en">added to box</translation>
+    <translation lang="da">tilføjet til boks</translation>
+  </text>
+  <text key="could not be added to box">
+    <translation lang="en">could not be added to box</translation>
+    <translation lang="da">kunne ikke tilføjes til boks</translation>
+  </text>
+  <text key="Add item">
+    <translation lang="en">Add item</translation>
+    <translation lang="da">Tilføj dokument</translation>
+  </text>
+  <text key="Can't move top item up, sorry">
+    <translation lang="en">Can't move top item up, sorry</translation>
+    <translation lang="da">Det øverste dokument kan ikke flyttes op, beklager</translation>
+  </text>
+  <text key="Can't move last item down, sorry">
+    <translation lang="en">Can't move last item down, sorry</translation>
+    <translation lang="da">Det nederste dokument kan ikke flyttes ned, beklager</translation>
+  </text>
+  <text key="moved up">
+    <translation lang="en">moved up</translation>
+    <translation lang="da">flyttet op</translation>
+  </text>
+  <text key="moved down">
+    <translation lang="en">moved down</translation>
+    <translation lang="da">flyttet ned</translation>
+  </text>
+  <text key="removed">
+    <translation lang="en">removed</translation>
+    <translation lang="da">fjernet</translation>
+  </text>
+  <text key="To add newsboxes, create">
+    <translation lang="en">To add newsboxes, create</translation>
+    <translation lang="da">For at tilføje bokse, opret</translation>
+  </text>
+  <text key="Newsbox documents here">
+    <translation lang="en">Newsbox documents here</translation>
+    <translation lang="da">Nyhedsboks dokumenter her</translation>
+  </text>
+
+  <!-- Default document types editpages: -->
+  <text key="Text and pictures">
+    <translation lang="en">Text and pictures</translation>
+    <translation lang="da">Tekst og billeder</translation>
+  </text>
+  <text key="Keywords">
+    <translation lang="en">Keywords</translation>
+    <translation lang="da">Nøgleord</translation>
+  </text>
+  <text key="Display">
+    <translation lang="en">Display</translation>
+    <translation lang="da">Visning</translation>
+  </text>
+  <text key="Image">
+    <translation lang="en">Image</translation>
+    <translation lang="da">Billede</translation>
+  </text>
+  <text key="Publish at">
+    <translation lang="en">Publish at</translation>
+    <translation lang="da">Offentliggør senere</translation>
+  </text>
+  <text key="Date (yyyy-mm-dd)">
+    <translation lang="en">Date (yyyy-mm-dd)</translation>
+    <translation lang="da">Dato (åååå-mm-dd)</translation>
+  </text>
+  <text key="Expiring">
+    <translation lang="en">Expiring</translation>
+    <translation lang="da">Udløber</translation>
+  </text>
+  <text key="Reference">
+    <translation lang="en">Reference</translation>
+    <translation lang="da">Reference</translation>
+  </text>
+  <text key="Contributors">
+    <translation lang="en">Contributors</translation>
+    <translation lang="da">Bidragydere</translation>
+  </text>
+  <text key="Source">
+    <translation lang="en">Source</translation>
+    <translation lang="da">Kilde</translation>
+  </text>
+  <text key="Order of succession">
+    <translation lang="en">Order of succession</translation>
+    <translation lang="da">Dokumentets placering</translation>
+  </text>
+  <text key="Show title">
+    <translation lang="en">Show title</translation>
+    <translation lang="da">Vis titel</translation>
+  </text>
+  <text key="Show teaser">
+    <translation lang="en">Show teaser</translation>
+    <translation lang="da">Vis teaser</translation>
+  </text>
+  <text key="Show date">
+    <translation lang="en">Show date</translation>
+    <translation lang="da">Vis dato</translation>
+  </text>
+  <text key="Show news">
+    <translation lang="en">Show news</translation>
+    <translation lang="da">Vis nyheder</translation>
+  </text>
+  <text key="Show subdocuments">
+    <translation lang="en">Show subdocuments</translation>
+    <translation lang="da">Vis underdokumenter</translation>
+  </text>
+  <text key="Show teaser on subdocuments">
+    <translation lang="en">Show teaser on subdocuments</translation>
+    <translation lang="da">Vis underdokumenternes teasere</translation>
+  </text>
+  <text key="Show date on subdocuments">
+    <translation lang="en">Show date on subdocuments</translation>
+    <translation lang="da">Vis underdokumenternes datoer</translation>
+  </text>
+  <text key="Number of subdocuments on one page">
+    <translation lang="en">Number of subdocuments on one page</translation>
+    <translation lang="da">Antal underdokumenter per side</translation>
+  </text>
+  <text key="No limit">
+    <translation lang="en">No limit</translation>
+    <translation lang="da">Ingen begrænsning</translation>
+  </text>
+  <text key="Display-only">
+    <translation lang="en">Display-only</translation>
+    <translation lang="da">Visning af dette dokument</translation>
+  </text>
+  <text key="Subscription">
+    <translation lang="en">Subscription</translation>
+    <translation lang="da">Abonnement</translation>
+  </text>
+  <text key="Subscription possibility">
+    <translation lang="en">Subscription possibility</translation>
+    <translation lang="da">Mulighed for abonnement hér</translation>
+  </text>
+  <text key="Automatic">
+    <translation lang="en">Automatic</translation>
+    <translation lang="da">Ja, automatisk udsendelse</translation>
+  </text>
+  <text key="Manual">
+    <translation lang="en">Manual</translation>
+    <translation lang="da">Ja, manuel udsendelse</translation>
+  </text>
+  <text key="Sort order of sub documents - sort according to">
+    <translation lang="en">Sort order of sub documents - sort according to</translation>
+    <translation lang="da">Sortér underdokumenter efter</translation>
+  </text>
+  <text key="sequence number (climbing)">
+    <translation lang="en">sequence number (ascending)</translation>
+    <translation lang="da">Efter sekvens-nummer (stigende)</translation>
+  </text>
+  <text key="sequence number (falling)">
+    <translation lang="en">sequence number (descending)</translation>
+    <translation lang="da">Efter sekvens-nummer (faldende)</translation>
+  </text>
+  <text key="sequence number (climbing), then short title">
+    <translation lang="en">sequence number (climbing), then short title</translation>
+    <translation lang="da">Efter sekvens-nummer (stigende), derefter kort titel</translation>
+  </text>
+  <text key="doc date (falling)">
+    <translation lang="en">doc date (descending)</translation>
+    <translation lang="da">Efter dokumentets dato (nyeste først)</translation>
+  </text>
+  <text key="doc date (climbing)">
+    <translation lang="en">doc date (ascending)</translation>
+    <translation lang="da">Efter dokumentets dato (ældste først)</translation>
+  </text>
+  <text key="version date (falling)">
+    <translation lang="en">version date (descending)</translation>
+    <translation lang="da">Efter versionens dato (nyeste først)</translation>
+  </text>
+  <text key="version date (climbing)">
+    <translation lang="en">version date (ascending)</translation>
+    <translation lang="da">Efter versionens dato (ældste først)</translation>
+  </text>
+  <text key="title">
+    <translation lang="en">title</translation>
+    <translation lang="da">Efter dokumentets titel</translation>
+  </text>
+  <text key="title (rev.)">
+    <translation lang="en">title (rev.)</translation>
+    <translation lang="da">Efter dokumentets titel (omvendt)</translation>
+  </text>
+  <text key="date of expiry">
+    <translation lang="en">date of expiry</translation>
+    <translation lang="da">Efter udløbsdato</translation>
+  </text>
+  <text key="date of expiry (rev.)">
+    <translation lang="en">date of expiry (rev.)</translation>
+    <translation lang="da">Efter udløbsdato (omvendt)</translation>
+  </text>
+  <text key="Not on list">
+    <translation lang="en">Not on list</translation>
+    <translation lang="da">Ikke med</translation>
+  </text>
+  <text key="Always last">
+    <translation lang="en">Always last</translation>
+    <translation lang="da">Altid sidst</translation>
+  </text>
+  <text key="Low priority">
+    <translation lang="en">Low priority</translation>
+    <translation lang="da">Lav prioritet</translation>
+  </text>
+  <text key="High priority">
+    <translation lang="en">High priority</translation>
+    <translation lang="da">Høj prioritet</translation>
+  </text>
+  <text key="New version created">
+    <translation lang="en">New version created</translation>
+    <translation lang="da">Ny version oprettet</translation>
+  </text>
+  <text key="Could not create new version">
+    <translation lang="en">Could not create new version</translation>
+    <translation lang="da">Kunne ikke oprette ny version</translation>
+  </text>
+  <text key="Choose the appropriate keywords for this document">
+    <translation lang="en">Choose the appropriate keywords for this document</translation>
+    <translation lang="da">Vælg de relevante nøgleord for dette dokument</translation>
+  </text>
+  <text key="Publish document">
+    <translation lang="en">Publish document</translation>
+    <translation lang="da">Offentliggør dokument</translation>
+  </text>
+  <text key="Image-file">
+    <translation lang="en">Image-file</translation>
+    <translation lang="da">Billed-fil</translation>
+  </text>
+  <text key="ComboSearch">
+    <translation lang="en">ComboSearch</translation>
+    <translation lang="da">Global søgning</translation>
+  </text>
+  <text key="DBSearch">
+    <translation lang="en">Database Search</translation>
+    <translation lang="da">Databasesøgning</translation>
+  </text>
+  <text key="Alternative search-form (leave empty for default)">
+    <translation lang="en">Alternative search-form (leave empty for default)</translation>
+    <translation lang="da">Alternativ søge-form (tom for standard)</translation>
+  </text>
+  <text key="or, upload text-file">
+    <translation lang="en">or, upload text-file</translation>
+    <translation lang="da">eller, upload tekst-fil</translation>
+  </text>
+  <text key="Date (YYYY-MM-DD)">
+    <translation lang="en">Date (YYYY-MM-DD)</translation>
+    <translation lang="da">Dato (ÅÅÅÅ-MM-DD)</translation>
+  </text>
+  <text key="HTML and pictures">
+    <translation lang="en">HTML and pictures</translation>
+    <translation lang="da">HTML og billeder</translation>
+  </text>
+  <text key="KeywordSearch">
+    <translation lang="en">KeywordSearch</translation>
+    <translation lang="da">Lokal søgning</translation>
+  </text>
+  <text key="Base of search">
+    <translation lang="en">Base of search</translation>
+    <translation lang="da">Hvor skal der søges</translation>
+  </text>
+  <text key="keyword">
+    <translation lang="en">keyword</translation>
+    <translation lang="da">Nøgleord</translation>
+  </text>
+  <text key="category">
+    <translation lang="en">category</translation>
+    <translation lang="da">Klassifikation</translation>
+  </text>
+  <text key="month">
+    <translation lang="en">month</translation>
+    <translation lang="da">Måned</translation>
+  </text>
+  <text key="weeks">
+    <translation lang="en">weeks</translation>
+    <translation lang="da">Uger</translation>
+  </text>
+  <text key="Search information">
+    <translation lang="en">Search information</translation>
+    <translation lang="da">Søgning</translation>
+  </text>
+  <text key="Web address">
+    <translation lang="en">Web address</translation>
+    <translation lang="da">Web-adresse</translation>
+  </text>
+  <text key="Notice">
+    <translation lang="en">Notice</translation>
+    <translation lang="da">Bemærk</translation>
+  </text>
+  <text key="ObviusLinkDocumentExplanation">
+    <translation lang="en">This linkdocument isn't shown as a document on
+        the public website as such; if you click on it, you will be automatically
+        transferred to</translation>
+    <translation lang="da">Dette linkdokument ses ikke som et dokument på
+        det offentlige website; hvis man klikker sig ind på det, kommer man
+        automatisk direkte til adressen</translation>
+  </text>
+  <text key="Newsbox">
+    <translation lang="en">Newsbox</translation>
+    <translation lang="da">Nyhedsboks</translation>
+  </text>
+  <text key="Text and options">
+    <translation lang="en">Text and options</translation>
+    <translation lang="da">Tekst og opsætning</translation>
+  </text>
+  <text key="Number of entries in news box">
+    <translation lang="en">Number of entries in news box</translation>
+    <translation lang="da">Antal indgange i nyhedsboksen</translation>
+  </text>
+  <text key="Show dates?">
+    <translation lang="en">Show dates?</translation>
+    <translation lang="da">Vis datoer?</translation>
+  </text>
+  <text key="Show teasers?">
+    <translation lang="en">Show teasers?</translation>
+    <translation lang="da">Vis teasere?</translation>
+  </text>
+  <text key="Maximum length of teasers">
+    <translation lang="en">Maximum length of teasers</translation>
+    <translation lang="da">Maksimum teaserlængde</translation>
+  </text>
+  <text key="OrderForm">
+    <translation lang="en">OrderForm</translation>
+    <translation lang="da">Bestillingsformular</translation>
+  </text>
+  <text key="Send email to">
+    <translation lang="en">Send email to</translation>
+    <translation lang="da">Send email til</translation>
+  </text>
+  <text key="Use email-template">
+    <translation lang="en">Use email-template</translation>
+    <translation lang="da">Via email-skabelon</translation>
+  </text>
+  <text key="Text and levels">
+    <translation lang="en">Text and levels</translation>
+    <translation lang="da">Tekst og niveauer</translation>
+  </text>
+  <text key="Levels">
+    <translation lang="en">Levels</translation>
+    <translation lang="da">Antal niveauer</translation>
+  </text>
+  <text key="Base of sitemap">
+    <translation lang="en">Base of sitemap</translation>
+    <translation lang="da">Udgangspunkt for sitemap</translation>
+  </text>
+  <text key="Subscribe">
+    <translation lang="en">Subscribe</translation>
+    <translation lang="da">Abonnement</translation>
+  </text>
+  <text key="Subscription data and display">
+    <translation lang="en">Subscription data and display</translation>
+    <translation lang="da">Abonnementsdata og visning</translation>
+  </text>
+  <text key="Teaser (filled out)">
+    <translation lang="en">Teaser (if this field is filled out, the text will replace the text above the checkboxes)</translation>
+    <translation lang="da">Resumé (Hvis feltet udfyldes erstatter denne tekst teksten over checkboksene)</translation>
+  </text>
+  <text key="Subscription data">
+    <translation lang="en">Subscription data</translation>
+    <translation lang="da">Abonnementsdata</translation>
+  </text>
+  <text key="Sender in subscription emails">
+    <translation lang="en">Sender in subscription emails</translation>
+    <translation lang="da">Afsenderadresse</translation>
+  </text>
+  <text key="The template used send subscription passwords">
+    <translation lang="en">The template used send subscription passwords (e.g. mail/subscribe_passwd)</translation>
+    <translation lang="da">Skabelon til udsendelse af kodeord (eks.: mail/subscribe_passwd)</translation>
+  </text>
+  <text key="Free text search">
+    <translation lang="en">Free text search</translation>
+    <translation lang="da">Fritekstsøgning</translation>
+  </text>
+  <text key="Classification and keywords">
+    <translation lang="en">Classification and keywords</translation>
+    <translation lang="da">Klassifikation og nøgleord</translation>
+  </text>
+  <text key="Select classification codes">
+    <translation lang="en">Select classification codes</translation>
+    <translation lang="da">Vælg klassifikationskoder</translation>
+  </text>
+  <text key="All fields">
+    <translation lang="en">All fields</translation>
+    <translation lang="da">Alle felter</translation>
+  </text>
+  <text key="CreateDocument">
+    <translation lang="en">CreateDocument</translation>
+    <translation lang="da">Opret dokument</translation>
+  </text>
+  <text key="Document creation">
+    <translation lang="en">Document creation</translation>
+    <translation lang="da">Oprettelse</translation>
+  </text>
+  <text key="Prefix for documents names">
+    <translation lang="en">Prefix for documents names</translation>
+    <translation lang="da">Dokumentnavnspræfix</translation>
+  </text>
+  <text key="Publish mode">
+    <translation lang="en">Publish mode</translation>
+    <translation lang="da">Offentliggørelse</translation>
+  </text>
+  <text key="By moderator">
+    <translation lang="en">By moderator</translation>
+    <translation lang="da">Af moderator</translation>
+  </text>
+  <text key="Include subscription when publishing">
+    <translation lang="en">Include subscription when publishing</translation>
+    <translation lang="da">Inkludér i abonnement ved automatisk offentliggørelse</translation>
+  </text>
+  <text key="Text displayed on successful creation">
+    <translation lang="en">Text displayed on successful creation</translation>
+    <translation lang="da">Tekst der vises ved vellykket oprettelse</translation>
+  </text>
+  <text key="Include in subscription">
+    <translation lang="en">Include in subscription</translation>
+    <translation lang="da">Inkludér i abonnementsudsendelse</translation>
+  </text>
+  <text key="No keywords created yet">
+    <translation lang="en">No keywords created yet</translation>
+    <translation lang="da">Der er ikke oprettet nogen nøgleord endnu</translation>
+  </text>
+  <text key="Choose the appropriate keywords for this document">
+    <translation lang="en">Choose the appropriate keywords for this document</translation>
+    <translation lang="da">Vælg de nøgleord der passer på dette dokument</translation>
+  </text>
+  <text key="Show in menu">
+    <translation lang="en">Show in menu</translation>
+    <translation lang="da">Vises i menu</translation>
+  </text>
+  <text key="Advanced">
+    <translation lang="en">Advanced</translation>
+    <translation lang="da">Avanceret</translation>
+  </text>
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+  <!-- Plain english: -->
+  <text key="Yes">
+    <translation lang="en">Yes</translation>
+    <translation lang="da">Ja</translation>
+  </text>
+  <text key="No">
+    <translation lang="en">No</translation>
+    <translation lang="da">Nej</translation>
+  </text>
+  <text key="Save">
+    <translation lang="en">Save</translation>
+    <translation lang="da">Gem</translation>
+  </text>
+  <text key="Cancel">
+    <translation lang="en">Cancel</translation>
+    <translation lang="da">Annullér</translation>
+  </text>
+  <text key="Start">
+    <translation lang="en">Start</translation>
+    <translation lang="da">Start</translation>
+  </text>
+  <text key="End">
+    <translation lang="en">End</translation>
+    <translation lang="da">Slut</translation>
+  </text>
+  <text key="Save changes">
+    <translation lang="en">Save changes</translation>
+    <translation lang="da">Gem ændringer</translation>
+  </text>
+  <text key="Add">
+    <translation lang="en">Add</translation>
+    <translation lang="da">Tilføj</translation>
+  </text>
+  <text key="Edit">
+    <translation lang="en">Edit</translation>
+    <translation lang="da">Redigér</translation>
+  </text>
+  <text key="Down">
+    <translation lang="en">Down</translation>
+    <translation lang="da">Ned</translation>
+  </text>
+  <text key="Remove">
+    <translation lang="en">Remove</translation>
+    <translation lang="da">Fjern</translation>
+  </text>
+  <text key="Path">
+    <translation lang="en">Path</translation>
+    <translation lang="da">Sti</translation>
+  </text>
+  <text key="Box">
+    <translation lang="en">Box</translation>
+    <translation lang="da">Boks</translation>
+  </text>
+  <text key="none">
+    <translation lang="en">none</translation>
+    <translation lang="da">ingen</translation>
+  </text>
+
+  <!-- Languages: -->
+  <text key="Danish">
+    <translation lang="en">Danish</translation>
+    <translation lang="da">Dansk</translation>
+  </text>
+  <text key="English">
+    <translation lang="en">English</translation>
+    <translation lang="da">Engelsk</translation>
+  </text>
+  <text key="French">
+    <translation lang="en">French</translation>
+    <translation lang="da">Fransk</translation>
+  </text>
+  <text key="Swedish">
+    <translation lang="en">Swedish</translation>
+    <translation lang="da">Svensk</translation>
+  </text>
+  <text key="Finnish">
+    <translation lang="en">Finnish</translation>
+    <translation lang="da">Finsk</translation>
+  </text>
+  <text key="Greek">
+    <translation lang="en">Greek</translation>
+    <translation lang="da">Græsk</translation>
+  </text>
+  <text key="Dutch">
+    <translation lang="en">Dutch</translation>
+    <translation lang="da">Hollandsk</translation>
+  </text>
+  <text key="Italian">
+    <translation lang="en">Italian</translation>
+    <translation lang="da">Italiensk</translation>
+  </text>
+  <text key="Portuguese">
+    <translation lang="en">Portuguese</translation>
+    <translation lang="da">Portugisisk</translation>
+  </text>
+  <text key="Spanish">
+    <translation lang="en">Spanish</translation>
+    <translation lang="da">Spansk</translation>
+  </text>
+  <text key="German">
+    <translation lang="en">German</translation>
+    <translation lang="da">Tysk</translation>
+  </text>
+
+  <text key="">
+    <translation lang="en"></translation>
+    <translation lang="da"></translation>
+  </text>
+
+</messages>

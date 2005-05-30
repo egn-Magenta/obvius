@@ -47,8 +47,8 @@ END {
 my %old=(
 	 db      =>$old_db_name,
 	 dbh     =>undef,
-	 user    =>'rene',
-	 password=>'myindal',
+	 user    =>$ENV{USER},
+	 password=>$ENV{PASSWD},
 	);
 
 my %new=(

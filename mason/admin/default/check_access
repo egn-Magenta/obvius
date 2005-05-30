@@ -1,0 +1,14 @@
+<%args>
+$can
+$document=>undef
+</%args>
+%
+<%init>
+$document=$obvius->get_root_document() if (!defined $document);
+
+if (!$obvius->$can($document)) {
+    $m->comp('/default/setup_session', %ARGS); # Make sure there is a session, for the status message:
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'You do not have access to this command. Sorry.');
+    $m->comp('/shared/redirect', location=>'./', args=>{ obvius_session_id=>$r->pnotes('obvius_session')->{_session_id} });
+}
+</%init>

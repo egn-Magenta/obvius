@@ -15,7 +15,7 @@ if ($r->pnotes('site')->param('is_admin')) {
     if ($obvius_version) {
 	$vdoc=$obvius->get_version($doc, $obvius_version);
     }
-    else {
+    if (!$vdoc) {
 	$vdoc=$r->pnotes('version');
 	$vdoc=$obvius->get_public_version($doc) unless ($vdoc);
 	$vdoc=$obvius->get_latest_version($doc) unless ($vdoc);

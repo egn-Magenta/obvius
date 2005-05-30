@@ -1,6 +1,21 @@
 #!/usr/bin/perl -w
 
-# Assumption: equal signs are rare or more specific neither passwords or domain names contains equal signs.
+# activate_subscriber.pl - a script to activate subscribers in MCMS
+#                          when emails are received to a special address.
+#
+#   Assumption: equal signs are rare or more specific neither
+#   passwords nor domain names contains equal signs.
+#
+#   Example reply-to:
+#
+#    Reply-To: abonnement-www.website.dk+pAssWd=user=domain@www.server.dk
+#
+#   Example entry in /etc/aliases:
+#
+#    abonnement-www.website.dk: |"/var/www/mcms/bin/activate_subscriber.pl --site website"
+#
+#
+# Copyright 2002-2004 (C) FI, Magenta. By Peter Makholm, Adam Sjøgren. Under the GPL.
 
 use Obvius;
 use Obvius::Config;
@@ -42,7 +57,7 @@ print STDERR "email = $email\tKode = $passwd\n" if ($debug);
 my $subscriber = $obvius->get_subscriber( {email => $email, passwd => $passwd} );
 
 if ($subscriber) {
-  $obvius->update_subscriber({suspended => 0},$email);
+  $obvius->update_subscriber({suspended => 0}, email=>$email);
 } else {
   # Do nothing?
 }

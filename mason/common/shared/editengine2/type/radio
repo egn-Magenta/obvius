@@ -1,0 +1,65 @@
+<%method block>
+%
+% # XXX Consider if validation should be called definition, data_definition or similar?
+<%args>
+$prefix
+$field
+$validation
+$value
+</%args>
+%
+<& util/label, label=>$field->{label}, field=>$field &>
+% if ($validation->{repeatable}) {
+<& util/checkboxes, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
+% }
+% else {
+<& util/radiobuttons, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
+% }
+%
+<%init>
+my @choices=split /[\|]/, $field->{edit_args};
+@choices=reverse @choices if ($field->{options}->{reverse_options});
+
+my %labels=$m->comp('util/get_labels_from_field', field=>$field);
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>
+%
+<%args>
+$value
+$field
+</%args>
+%
+<% join ", ", (map { $m->scomp('/shared/msg', text=>$labels{$_->{value}}) } @$value) |h %>
+%
+<%init>
+return unless (defined $value);
+
+$value=[$value] unless (ref $value eq 'ARRAY');
+
+my %labels=$m->comp('util/get_labels_from_field', field=>$field);
+</%init>
+%
+</%method>
+%
+%
+%
+% # Validate:
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK';
+</%init>

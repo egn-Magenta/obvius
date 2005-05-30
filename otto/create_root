@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 
-#
 # create_root - create the root document in a pristine Obvius-base
 #
-# $Id$
+# TODO: Perhaps use obvius/bin/create and an XML-specification instead?
 #
+# $Id$
 
 use lib '/home/httpd/root/perl';
 
@@ -20,6 +20,7 @@ use Data::Dumper;
 
 my ($configname)=shift @ARGV;
 my ($titlename)=shift @ARGV;
+my ($publish)=shift @ARGV;
 die "Usage: create_root <configname> <titlename>\n" unless ($configname and $titlename);
 
 my $conf = new Obvius::Config($configname);
@@ -36,7 +37,7 @@ my $fields = new Obvius::Data(
 			    source=>'Obvius',
 			    mimetype=>'',
 			    docref=>'',
-			    sortorder=>'+seq',
+			    sortorder=>'+seq,+title',
 			    expires=>'9999-01-01 00:00:00',
 			    content=>'This is the frontpage (root-document)',
 			    docdate=>strftime('%Y-%m-%d', localtime),
@@ -44,7 +45,7 @@ my $fields = new Obvius::Data(
 			    url=>'',
 			    teaser=>'Frontpage',
 			    subscribeable=>'none',
-			    seq=>0.0,
+			    seq=>10.0,
 			    contributors=>'',
 			   );
 
@@ -59,6 +60,19 @@ GROUP+create,edit,delete,publish
 ALL+view
 @Admin+admin');
     print "New document $docid, version $version\n";
+
+    if ($publish) {
+        my ($status, $message)=$obvius->send_order(
+                                                   docid=>$docid,
+                                                   user=>1, # XXX Hardcoded
+                                                   command=>'publish',
+                                                   args=>{
+                                                          version=>$version,
+                                                         },
+                                                  );
+        print "Publish: $status ", (ref $message ? join "", @$message : $message) , "\n";
+    }
+
 } else {
     print "ERROR: $obvius->{DB_Error}\n";
     exit;

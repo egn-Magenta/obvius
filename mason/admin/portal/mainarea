@@ -1,0 +1,29 @@
+ <div class="obvius-mainarea">
+
+   <div class="obvius-navigation obvius-link-decor">
+     <div class="obvius-buttons">
+       <form class="obvius-navigation" action="./" method="post">
+         <p>
+           <& util/identifier &>
+           <& util/button, name=>'obvius_command_newdocument', text=>'New document', inactive=>$inactive{obvius_command_newdocument}, accesskey=>'n' &>
+         </p>
+       </form>
+     </div>
+<& subdocs &>
+<& versions, %ARGS &>
+<& editing, %ARGS &>
+<& common &>
+
+ </div>
+%
+<%init>
+my %inactive=(
+              obvius_command_newdocument=>0,
+             );
+if ($r->notes('inactive_handlingarea')) {
+    map { $inactive{$_}=1; } keys (%inactive);
+}
+else {
+    $inactive{obvius_command_newdocument}=1 unless ($obvius->can_create_new_document($doc));
+}
+</%init>

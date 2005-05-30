@@ -1,0 +1,43 @@
+From: <% $sitename %> <bitbucket@<% $sitename %>>
+Subject: New document created
+To: <% $recipient %>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Content-Disposition: inline
+Precedence: bulk
+
+A new document has been created on <% $sitename %>, "<% $new_title %>"
+% if($document_published){
+The document has automatically been published.
+% }
+
+Link:
+% if($document_published){
+Public: http://<% $sitename %><% $new_url %>
+% }
+Admin:  http://<% $sitename %>/admin<% $new_url %>
+% if($publish_error) {
+
+An error occurred during the automatic publishing of the document:
+
+<% $publish_error %>
+% }
+
+  Automatic regards,
+
+   Obvius::CreateDocument on <% $sitename %>
+
+<%args>
+$output
+</%args>
+%
+<%init>
+my $recipient = $output->param('recipient');
+my $new_title = $output->param('new_title');
+my $new_url = $output->param('new_url');
+my $publish_error = $output->param('publish_error');
+my $document_published = $output->param('document_published');
+
+my $sitename=$obvius->config->param('sitename');
+</%init>

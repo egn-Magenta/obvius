@@ -21,7 +21,7 @@
 % if ($modified) {
     <meta name="DC.Date.Modified" scheme="ISO8601" content="<% substr($modified, 0, 10) %>"<% $endtag %>>
 % }
-% if (my $v=$vdoc->param('lang') || 'da') {
+% if (my $v=$vdoc->Lang || 'da') {
     <meta name="DC.Language" scheme="ISO639-1" content="<% $v |h %>"<% $endtag %>>
 % }
 %

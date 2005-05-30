@@ -1,59 +1,59 @@
 <& ../headline &>
-	<table border="0">
-%for(@$events) {
-%if ($show_event eq 'type') {
-%if ($_->{eventtype}) {
+%if (scalar(@$events)) {
+  <table border="0">
+%   for(@$events) {
+%     if ($show_event eq 'type') {
+%       if ($_->{eventtype}) {
 	  <tr>
 	     <td colspan="2"><a href="<% $prefix . $_->{url} %>"><% $_->{eventtype} %></a></td>
 	  </tr>
-%}
+%       }
 	  <tr>
 	    <td valign="top" align="left"><% $language eq 'da' ? 'Titel' : 'Title' %>:</td>
 	    <td valign="top"><% $_->{title} %></td>
 	  </tr>
 
-%} else {
+%     } else {
 	  <tr>
               <td colspan="2"><a href="<% $prefix .  $_->{url} %>"><% $_->{title} %></a></td>
 	  </tr>
-%if ($_->{eventtype}) {
+%       if ($_->{eventtype}) {
 	  <tr>
 	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Kategori' : 'Type' %>:</td>
 	    <td valign="top"><% $_->{eventtype} %></td>
 	  </tr>
-%}
-%}
+%       }
+%     }
 	  <tr>
 	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Dato' : 'Date' %>:</td>
 	    <td valign="top"><& /shared/display_date, date=>$_->{date} &> <% $_->{time} %></td>
 	  </tr>
-%if ($_->{place}) {
+%     if ($_->{place}) {
 	  <tr>
 	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Sted' : 'Place' %>:</td>
 	    <td valign="top"><% $_->{place} %></td>
 	  </tr>
-%}
-%if ($_->{contactinfo}) {
+%     }
+%     if ($_->{contactinfo}) {
 	  <tr>
 	    <td valign="top" align="left" width="90"><% $language eq 'da' ? 'Kontakt' : 'Contact' %>:</td>
 	    <td valign="top"><& /shared/htmlize, text=>$_->{contactinfo} &></td>
 	  </tr>
-%}
-%if ($_->{eventinfo}) {
+%     }
+%     if ($_->{eventinfo}) {
 	  <tr>
 	    <td valign="top" align="left" width="90">Information:</td>
 	    <td valign="top"><& /shared/htmlize, text=>$_->{eventinfo} &></td>
           </tr>
-%}
+%     }
          <tr>
            <td colspan="2" height="6"><img src="/grafik/1x1.gif" height="6"></td>
          </tr>
-%}
-%unless(scalar(@$events)) {
-    <br>
+%   }
+  </table>
+%} else {
       Der er ingen arrangementer i denne periode.
 %}
-  </table>
 <%args>
 $events=>[]
 </%args>

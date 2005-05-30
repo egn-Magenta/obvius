@@ -1,0 +1,200 @@
+<%method create_new_event>
+<%doc>
+
+ The format of an event is
+  <scheme name>[<object identification>]<function name>:<embedding marker>
+
+</%doc>
+<%args>
+ $relation=>''
+ $object=>undef
+ $function=>''
+ $embedding=>''
+</%args>
+<%init>
+ my $object_description = $m->comp('toolbox:escape_object', object=>$object);
+$object_description = '' if $object_description eq 'anonymous';
+ my $event =  $relation . '_.' . $object_description . '._' . ($function?"$function":'') . ':' . ($embedding? 'e':'');
+ return $event;
+</%init>
+</%method>
+
+
+
+<%method extract_event_info>
+<%doc>
+
+ The format of an event is as described in create_new_event
+
+</%doc>
+<%args>
+ $event=>''
+</%args>
+<%init>
+ $event = '' unless $event; # Just to avoid 'use of uninitialized value in m//' warning
+ my ($relation, $object_description, $function, $embedding) = $event =~ /^(.*)_\.(.*)\._(.*):([e]?)$/;
+#use Data::Dumper; print STDERR '<eei> $object_description: ' . Dumper($object_description);
+ # rebuild the object by making a hash of the uri-unescaped name/value pairs
+ my $object = $m->comp('toolbox:unescape_object', object_description=>$object_description);
+ return ($relation, $object, $function, $embedding);
+</%init>
+</%method>
+
+
+
+<%method add_future_event>
+<%args>
+ # The current history
+ $history=>''
+
+ # Description of new event
+ $relation
+ $object=>undef
+ $function=>undef
+ $embedding=>undef
+</%args>
+<%init>
+ $object = $r->pnotes('obvius_editengine_protocol')->{object} unless $object;
+ my $future = $history . '___' . $m->comp('history:create_new_event', relation=>$relation, object=>$object, function=>$function, embedding=>$embedding);
+ return $future;
+</%init>
+</%method>
+
+
+
+<%method modify_current_event>
+<%args>
+ # The current history
+ $history=>''
+
+ # Modifications
+ $object=>undef
+</%args>
+<%init>
+ my $events = $m->comp('history:split_events', history=>$history);
+ my ($rel, $obj, $func, $emb) = $m->comp('history:extract_event_info', event=>pop @$events);
+ if ($object) {
+     $obj = { %$obj, %$object };
+ }
+ my $past = join '___', @$events;
+ my $present = $m->comp('history:add_future_event', history=>$past, relation=>$rel, object=>$obj, function=>$func, embedding=>$emb);
+ return $present;
+</%init>
+</%method>
+
+
+<%method split_events>
+<%args>
+ $history
+</%args>
+<%init>
+ $history='' unless $history; # Just to avoid 'use on uninitialized value in split' warning
+ my @events = split '___', $history;
+ return \@events;
+</%init>
+</%method>
+
+
+
+
+<%method get_current_event>
+<%args>
+ $history
+ $editscheme=>undef
+ $storage=>undef
+</%args>
+<%init>
+ my $current_event = pop @{$m->comp('history:split_events', history=>$history)};
+ my ($relation, $object, $function, $embedding) = $m->comp('history:extract_event_info', event=>$current_event);
+#use Data::Dumper; print STDERR '<gce> $object: ' . Dumper($object);
+
+ my $obj;
+ my $val;
+ if (defined $storage) {
+     ($obj, $val) = $storage->lookup(%$object);
+ }
+# Assign function information to $r->pnotes()
+ $r->pnotes('obvius_editengine_protocol' => {});
+ $r->pnotes('obvius_editengine_protocol')->{object} = $obj ? $obj : $object;
+ $r->pnotes('obvius_editengine_protocol')->{function} = $function ? { $function => "$history" } : undef;
+ $r->pnotes('obvius_editengine_protocol')->{mappings} = $val;
+#use Data::Dumper; print STDERR '$r->pnotes("obvius_editengine_protocol"): ' . Dumper($r->pnotes("obvius_editengine_protocol"));
+
+ return $embedding;
+</%init>
+</%method>
+
+
+
+
+<%method extract_path>
+<%args>
+ $history=>undef
+</%args>
+<%init>
+
+ my $events = $m->comp('history:split_events', history=>$history);
+
+ my @relations = map {
+    my ($relation, $object, $function, $embedding) = $m->comp('history:extract_event_info', event=>$_);
+    $relation;
+ } @$events;
+ my $root = shift @relations;
+ @relations = map {$_ ? $_ . '}->{scheme}' : ''} @relations;
+ my $path = join '->{relations}->{', @relations;
+ $path = $path? "{$root}->{relations}->{$path" : "{$root}";
+
+ return $path;
+
+</%init>
+</%method>
+
+
+
+<%method extract_vertex>
+<%args>
+ $history=>undef
+</%args>
+<%init>
+ my $events = $m->comp('history:split_events', history=>$history);
+
+ my @relations = map {
+    my ($relation, $object, $function, $embedding) = $m->comp('history:extract_event_info', event=>$_);
+    $relation;
+ } @$events;
+ my $path = join ':', @relations;
+
+ return $path;
+</%init>
+</%method>
+
+
+<%method previous_events>
+<%args>
+ $history
+</%args>
+<%init>
+ my $all_events_incl_embeddings = $m->comp('history:split_events', history=>$history);
+ my @event_return_stack;
+ my $past_events = '';
+ map {
+    $past_events .= '___' if $past_events;
+    $past_events .= $_ if $_;
+    my ($relation, $object, $function, $embedding) = $m->comp('history:extract_event_info', event=>$_);
+    push @event_return_stack, $past_events unless $embedding;
+ } @$all_events_incl_embeddings;
+
+ return \@event_return_stack;
+</%init>
+</%method>
+
+
+
+<%method depth>
+<%args>
+ $history
+</%args>
+<%init>
+ return scalar(@{$m->comp('history:split_events', history=>$history)});
+</%init>
+</%method>

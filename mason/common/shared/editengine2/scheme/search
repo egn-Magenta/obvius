@@ -1,0 +1,26 @@
+<%args>
+ # Mandatory arguments
+ $history
+ $editscheme
+ $storage
+ $session
+
+ # The scheme's style parameter:
+ #  » 'block':  "stand alone" display
+ #    'inline': show as (full) table without header and pages (usefull for embeddings etc.)
+ #    'raw':    return data as array (of arrays?)
+ $style
+
+</%args>
+%
+<%init>
+$history='' unless $history; # Just to avoid 'use of uninitialized value in string' warning
+print STDERR "scheme/<search>\thistory = '$history'\n" if $session->{cesi_debug_recursion};
+
+if ($style->{context} eq 'raw') {
+    my $organization = $editscheme->{storage}->{organization};
+    my ($results, $total)=$storage->search($organization);
+    return $results;
+}
+
+</%init>

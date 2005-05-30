@@ -47,7 +47,8 @@ sub action {
                     'category',
                     'published',
                     'title',
-                    'primary_group'
+                    'primary_group',
+                    'docdate',
                 ];
 
     my $h_og_m_doctype = $obvius->get_doctype_by_name('H_og_M_Artikel');
@@ -59,17 +60,17 @@ sub action {
                                 public => 1,
                                 notexpired => 1,
                                 nothidden => 1,
-                                order => 'published DESC',
+                                order => 'docdate DESC',
                                 append => 'LIMIT 6'
                             ) || [];
 
-    $last_changed = $docs->[0]->Published if($docs->[0] and $docs->[0]->Published gt $last_changed);
+    $last_changed = $docs->[0]->DocDate if($docs->[0] and $docs->[0]->DocDate gt $last_changed);
 
     my @docs;
     for(@$docs) {
         my $doc = $obvius->get_doc_by_id($_->DocId);
         my $url = $obvius->get_doc_uri($doc);
-        my $date = $_->Published;
+        my $date = $_->DocDate;
         $date =~ s/^\d\d(\d\d)-(\d\d)-(\d\d).*/$3.$2.$1/;
         push(@docs, {
                         title => $_->Title,

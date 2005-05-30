@@ -73,7 +73,7 @@ $url_opts .= "&short_title=" . $short_title if($short_title);
 
 my $parent = $obvius->get_doc_by_id($parentid);
 my $siblings;
-$siblings = $obvius->get_document_subdocs($parent) if($parent);
+$siblings = $obvius->get_document_subdocs($parent, public=>0) if($parent);
 $siblings = [] unless($siblings);
 
 my $this_doc;

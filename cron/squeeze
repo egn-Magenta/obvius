@@ -1,0 +1,28 @@
+#!/usr/bin/awk -f
+
+# squeeze - lines beginning with # aren't passed, rather the text
+#           after the # is kept as a header, and output as such, if
+#           and only if there is output after it.
+#
+#           So, output is effectively empty if there are only
+#           headerlines, otherwise the header and the following output is
+#           shown. Squeeze.
+#
+# Copyright (C) 2004, Magenta. By René Seindal. Under the GPL.
+#
+# $Id$
+
+BEGIN {
+        header = "Initial output";
+}
+/^#/ {
+        header = substr($0, 2);
+        next;
+}
+header != "" {
+        print "\n\t***", header, "***\n";
+        header = "";
+}
+{
+        print;
+}

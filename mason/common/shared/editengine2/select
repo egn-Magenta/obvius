@@ -1,0 +1,108 @@
+<%method object>\
+<%doc> =========
+
+ Selects the current object by adding its identification to
+ $r->pnotes. Also adds all values to the mappings section.  The
+ mapping part is used for identification of related objects,
+ ie. embedding of other objects (objects with other identifiers)
+
+</%doc>
+<%args>
+ $editscheme
+ $object
+</%args>
+<%init>
+my $identifiers = $editscheme->{storage}->{organization}->{identifiers};
+
+my %object_id;
+map {$object_id{$_} = $object->{$_}->{value} if defined $object->{$_}} @$identifiers;
+#use Data::Dumper; print STDERR '\%object_id: ' . Dumper(\%object_id);
+
+my $prev_object_id = $r->pnotes('obvius_editengine_protocol')->{object} || {};
+#use Data::Dumper; print STDERR '$prev_object_id: ' . Dumper($prev_object_id);
+
+# [!] Consider carefully the order (and hence overwriting of values)
+# of object_id and prev_object_id:
+
+# » Previous values should be overwritten in order to reflect
+#   re-selection (of another object)
+
+# » On the other hand, undefining previously selected values should
+#   not be allowed
+$r->pnotes('obvius_editengine_protocol' => {
+              object => {
+                          %$prev_object_id,
+                          %object_id,
+                        }
+            }
+          );
+
+
+# Check for incomplete (partial) object, ie. missing identifiers
+my @missing_identifiers = grep { !defined $r->pnotes('obvius_editengine_protocol')->{object}->{$_} } @$identifiers;
+$r->pnotes('obvius_editengine_protocol')->{mappings} = scalar(@missing_identifiers) ? undef : $object;
+
+#use Data::Dumper; print STDERR '<select:object> $r->pnotes("obvius_editengine_protocol"): ' . Dumper($r->pnotes("obvius_editengine_protocol"));
+
+</%init>
+</%method>
+
+
+
+<%method function>\
+<%doc> ===========
+
+Selects the current function by
+
+  » assigning its name to the function section of the protocol on $r->pnotes
+    with the corresponding future as value
+
+  » if no relation is specified for the function (as is typically the
+    case when using templates) use the current $history
+
+</%doc>
+<%args>
+ $function
+ $editscheme
+ $history
+</%args>
+<%init>
+#my ($name) = keys %function;
+#my $relation = $function{$name}->{relation};
+
+ my $relation_name = $editscheme->{storage}->{functions}->{$function}->{relation} || '';
+ my $relation = $editscheme->{relations}->{$relation_name};
+
+# Save contents of the existing protocol.  Functions are bound to
+# objects which are in turn subject to projections
+ my %old_protocol = $m->comp('toolbox:get_protocol');
+
+# Assign the right object description for the related editscheme
+# if a projection has been specified
+ $m->comp("projection:$relation->{projection}", relation=>$relation) if defined $relation->{projection};
+
+# Determine future event.  Future object defaults to the current...
+my $future = $m->comp('history:add_future_event', history=>$history, relation=>$relation_name, function=>$function);
+
+$future = $history unless $relation_name;
+
+# Restore the protocol
+$r->pnotes('obvius_editengine_protocol' => \%old_protocol);
+
+# Clear previously selected functions and assign the current
+undef $r->pnotes('obvius_editengine_protocol')->{function};
+$r->pnotes('obvius_editengine_protocol')->{function}->{$function} = "$future";
+
+</%init>
+</%method>
+
+
+
+
+
+<%method clear>\
+<%init>
+ # Clear all selections...
+ $r->pnotes('obvius_editengine_protocol' => {});
+</%init>
+</%method>

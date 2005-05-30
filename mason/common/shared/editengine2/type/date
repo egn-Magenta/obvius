@@ -1,0 +1,14 @@
+<%method block><& datetime:block, %ARGS, time_off=>1 &></%method>
+%
+<%method inline><& datetime:inline, %ARGS, time_off=>1 &></%method>
+%
+<%init>
+return $m->comp('datetime', %ARGS, time_off=>1);
+</%init>
+%
+%
+<%doc>
+
+Stub that calls datetime with an argument, to do the work.
+
+</%doc>

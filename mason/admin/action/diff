@@ -1,0 +1,231 @@
+<table width="100%" class="obvius-diff">
+  <tr>
+% foreach my $headline (@headlines) {
+    <th><% $headline |h%></th>
+% }
+  </tr>
+% foreach my $field (@all_fields) {
+<& .compare_field, current_vdoc=>$current_vdoc, current_doctype=>$current_doctype,
+                   other_vdoc  =>$other_vdoc,   other_doctype  =>$other_doctype,
+                   field=>$field &>
+% }
+</table>
+
+<p class="obvius-diff">
+  <a href="./?obvius_version=<% $vdoc->Version |u %>"><& /shared/msg, text=>'End comparison' &></a>.
+</p>
+
+<div class="obvius-diff-legend">
+  <span class="obvius-diff-removed"><& /shared/msg, text=>'Removed' &></span><br />
+  <span class="obvius-diff-changed"><& /shared/msg, text=>'Changed' &></span><br />
+  <span class="obvius-diff-added"><& /shared/msg, text=>'Added' &></span><br />
+</div>
+
+<%def .compare_field>
+%
+<%args>
+$field
+$current_vdoc
+$current_doctype
+$other_vdoc
+$other_doctype
+</%args>
+%
+  <tr>
+    <th colspan="2"><h3><& /shared/msg, text=>$field->{label} &></h3></th>
+  </tr>
+  <tr>
+    <td width="50%"><% $left_text  || '&nbsp;' %></td>
+    <td width="50%"><% $right_text || '&nbsp;' %></td>
+  </tr>
+%
+<%init>
+my $current_value;
+my $other_value;
+
+if ($field->{binary}) { # Uh-oh! This only compares lengths:
+    $current_value='[Data: ' . length($current_vdoc->field($field->{name})) . ' bytes]';
+    $other_value='[Data: ' . length($other_vdoc->field($field->{name})) . ' bytes]';
+}
+else {
+    $current_value=$m->comp('.stringify_value', value=>$current_vdoc->field($field->{name}));
+    $other_value=$m->comp('.stringify_value', value=>$other_vdoc->field($field->{name}));
+}
+
+return if ($current_value eq $other_value);
+
+my $diffs=html_word_diff($current_value, $other_value);
+
+my $left_text='';
+my $right_text='';
+
+foreach my $diff (@$diffs) {
+    my ($indicator, $left, $right)=@$diff;
+
+    if ($indicator eq '-') {
+        $left_text.="<span class=\"obvius-diff-removed\" title=\"" . $m->scomp('/shared/msg', text=>'Removed') . "\">$left</span>";
+        $right_text.="<span class=\"obvius-diff-added\" title=\"" . $m->scomp('/shared/msg', text=>'Added') . "\">$right</span>";
+    }
+    elsif ($indicator eq '+') {
+        $left_text.="<span class=\"obvius-diff-removed\" title=\"" . $m->scomp('/shared/msg', text=>'Removed') . "\">$left</span>";
+        $right_text.="<span class=\"obvius-diff-added\" title=\"" . $m->scomp('/shared/msg', text=>'Added') . "\">$right</span>";
+    }
+    elsif ($indicator eq 'c') {
+        $left_text.="<span class=\"obvius-diff-changed\" title=\"" . $m->scomp('/shared/msg', text=>'Changed') . "\">$left</span>";
+        $right_text.="<span class=\"obvius-diff-changed\" title=\"" . $m->scomp('/shared/msg', text=>'Changed') . "\">$right</span>";
+    }
+    else {
+        $left_text.=$left;
+        $right_text.=$right;
+    }
+}
+</%init>
+%
+</%def>
+%
+%
+<%def .stringify_value>
+%
+<%args>
+$value=>''
+</%args>
+%
+<%init>
+return '' if (!defined $value);
+
+if (ref $value) {
+    my @values=();
+    foreach my $val (@$value) {
+        my $ref=ref $val;
+        if ($ref=~/::/ and $val->UNIVERSAL::can('param')) { # It's an object(?), with a param-method:
+            push @values, (defined $val->param('name') ? $val->param('name') : $val->param('id')); # Try name or id.
+        }
+        else {
+            push @values, $val;
+        }
+    }
+
+    return join "<br />\n", @values;
+}
+
+return $value;
+</%init>
+%
+</%def>
+%
+%
+<%def .get_fieldnames_from_editpages>
+<%args>
+$editpages
+$doctype
+</%args>
+<%init>
+my @page_numbers=grep { /^\d+$/ } sort keys %$editpages;
+
+my @field_names=();
+foreach my $page_number (@page_numbers) {
+    my $fieldlist=WebObvius::parse_editpage_fieldlist(undef, $editpages->{$page_number}->Fieldlist, $doctype, $obvius);
+    foreach my $field (@$fieldlist) {
+        push @field_names, { name=>$field->{fieldspec}->param('name'), label=>$field->{title}, binary=>$field->{fieldspec}->Fieldtype->Bin };
+    }
+}
+
+return \@field_names;
+</%init>
+</%def>
+%
+<%args>
+$obvius_previous_version=>undef
+$obvius_public_version=>undef
+</%args>
+%
+<%once>
+eval "use HTML::Diff;";
+use WebObvius;
+</%once>
+%
+<%init>
+if (!defined $HTML::Diff::VERSION) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'HTML::Diff is missing from the server. Version comparison is not available.');
+    $m->comp('view', %ARGS); # Fall back to view.
+    return;
+}
+
+my $obvius_other_version=($obvius_previous_version || $obvius_public_version);
+if (!defined $obvius_other_version) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'No version to compare with specified.');
+    return;
+}
+
+my $other_vdoc=$obvius->get_version($doc, $obvius_other_version);
+my $other_doctype=$obvius->get_version_type($other_vdoc);
+
+my $current_vdoc=$vdoc;
+my $current_doctype=$doctype;
+
+$obvius->get_version_fields($current_vdoc, 255);
+$obvius->get_version_fields($other_vdoc, 255);
+
+my $current_editpages=$obvius->get_editpages($current_doctype);
+my $other_editpages=$obvius->get_editpages($other_doctype);
+
+my $current_fields_names=$m->comp('.get_fieldnames_from_editpages', editpages=>$current_editpages, doctype=>$current_doctype);
+my $other_fields_names=$m->comp('.get_fieldnames_from_editpages', editpages=>$other_editpages, doctype=>$other_doctype);
+
+# Merge fields_names:
+my %all_fields=();
+my @all_fields=();
+
+my $current_field=shift @$current_fields_names;
+my $other_field=shift @$other_fields_names;
+
+my $i=0;
+while($current_field or $other_field) {
+    if (defined $current_field and defined $other_field) {
+        my $compare=($current_field->{name} cmp $other_field->{name});
+        if ($compare>=0) {
+            push @all_fields, $current_field;
+            $all_fields{$current_field->{name}}=1;
+            while(defined $current_field and $all_fields{$current_field->{name}}) {
+                $current_field=shift @$current_fields_names;
+            }
+        }
+        if ($compare<=0) {
+            push @all_fields, $other_field if ($compare!=0); # if they are the same, only push one!
+            $all_fields{$other_field->{name}}=1;
+            while(defined $other_field and $all_fields{$other_field->{name}}) {
+                $other_field=shift @$other_fields_names;
+            }
+        }
+    }
+    elsif (defined $current_field) {
+        while (defined $current_field) {
+            push @all_fields, $current_field;
+            $all_fields{$current_field->{name}}=1;
+            while(defined $current_field and $all_fields{$current_field->{name}}) {
+                $current_field=shift @$current_fields_names;
+            }
+        }
+    }
+    elsif (defined $other_field) {
+        while (defined $other_field) {
+            push @all_fields, $other_field;
+            $all_fields{$other_field->{name}}=1;
+            while(defined $other_field and $all_fields{$other_field->{name}}) {
+                $other_field=shift @$other_fields_names;
+            }
+        }
+    }
+}
+
+my @headlines=($current_vdoc->Version, $other_vdoc->Version);
+if ( ($current_vdoc->Version cmp $other_vdoc->Version)>0 ) {
+    # Swap:
+    @headlines=reverse @headlines;
+
+    my $tmp;
+
+    $tmp=$current_vdoc; $current_vdoc=$other_vdoc; $other_vdoc=$tmp;
+    $tmp=$current_doctype; $current_doctype=$other_doctype; $other_doctype=$tmp;
+}
+</%init>

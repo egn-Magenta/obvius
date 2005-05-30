@@ -1,0 +1,18 @@
+<%once>
+use HTML::Mason::Utils;
+</%once>
+%
+<%args>
+$dirty_docids=>{}
+</%args>
+%
+<%init>
+
+</%init>
+%
+<%doc>
+
+Override this with a local copy if you need to handle local
+Mason-components' caches.
+
+</%doc>

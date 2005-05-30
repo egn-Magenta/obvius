@@ -6,7 +6,8 @@
 # TODO: * Perhaps move symlinks to the skeleton directory instead?
 #       * When stuff exists, check permissions anyway.
 #
-# Copyright (C) 2002-2004, by Adam Sjøgren. Under the GPL.
+# Copyright (C) 2002-2005 aparte A/S, Magenta ApS. By Jørgen Ulrik
+#                         B. Krag, Adam Sjøgren. Under the GPL.
 #
 # $Id$
 
@@ -14,6 +15,7 @@ use strict;
 use warnings;
 
 use Getopt::Long;
+my @OPTV=@ARGV;
 
 # Set env for scripts 
 $ENV{'PERL5LIB'} = $ENV{'PERL5LIB'} . ":/home/httpd/obvius/perl_blib";
@@ -66,11 +68,8 @@ my @dirs=(
 	  { dir=>'conf', },
 	  { dir=>'db', },
 	  { dir=>'docs', },
-	  { dir=>'docs/grafik', },
-	  { dir=>'docs/grafik/pager', },
-	  { dir=>'docs/grafik/news', },
-	  { dir=>'docs/grafik/menu', },
-	  { dir=>'docs/css', },
+          { dir=>'docs/style', },
+          { dir=>'docs/pics', },
 	  { dir=>'htdig', },
 	  { dir=>'htdig/db', group=>$options{httpd_group}, },
 	  { dir=>'htdig/common', group=>$options{httpd_group}, },
@@ -98,9 +97,13 @@ my @files=(
 my @symlinks=(
 	      { dir=>'docs', link=>'cache', to=>'var/document_cache', },
 	      { dir=>'docs', link=>'stats', to=>'stats', },
-	      { dir=>'docs', link=>'admin_js', to=>"$options{wwwroot}/obvius/docs/js", },
-	      { dir=>'docs/grafik', link=>'admin', to=>"$options{wwwroot}/obvius/docs/grafik/admin", },
-	      { dir=>'docs/grafik', link=>'navigator', to=>"$options{wwwroot}/obvius/docs/grafik/admin/navigator", },
+              { dir=>'docs', link=>'scripts', to=>"$options{wwwroot}/obvius/docs/scripts", },
+              { dir=>'docs/pics', link=>'icons', to=>"$options{wwwroot}/obvius/docs/pics/icons", },
+              { dir=>'docs/style', link=>'admin.css', to=>"$options{wwwroot}/obvius/docs/style/admin.css", },
+              { dir=>'docs/style', link=>'common.css', to=>"$options{wwwroot}/obvius/docs/style/common.css", },
+              { dir=>'docs/style', link=>'editor.css', to=>"$options{wwwroot}/obvius/docs/style/editor.css", },
+              { dir=>'docs/style', link=>'public.css', to=>"$options{wwwroot}/obvius/docs/style/public.css", },
+              { dir=>'docs/style', link=>'validation.xsl', to=>"$options{wwwroot}/obvius/docs/style/validation.xsl", },
 	     );
 
 my @db_files=qw(structure.sql perms.sql);
@@ -109,6 +112,7 @@ my @db_files=qw(structure.sql perms.sql);
 print "Directories ...\n";
 die "wwwroot ($options{wwwroot}) doesn't exists, stopping" unless (-d $options{wwwroot});
 make_dir("$options{wwwroot}/$options{website}", $options{staff_group});
+store_cmdline("$options{wwwroot}/$options{website}/.new_website.pl");
 
 foreach my $dir (@dirs) {
     my $absdir="$options{wwwroot}/$options{website}/$dir->{dir}";
@@ -156,11 +160,11 @@ make_conf("$obvius_conf_dir$options{dbname}.conf");
 # Create database:
 make_db($options{dbname});
 
-print "Do you want to import some basic documents (Y/n)? ";
-my $test = <STDIN>;
-unless($test and $test =~ /^n/i) {
-    system("cat $options{wwwroot}/$options{website}/db/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
-}
+# print "Do you want to import some basic documents (Y/n)? ";
+# my $test = <STDIN>;
+# unless($test and $test =~ /^n/i) {
+#     system("cat $options{wwwroot}/$options{website}/db/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
+# }
 
 exit 0;
 
@@ -275,8 +279,10 @@ sub make_db {
 	system "cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname -u $options{dbuser} --password=$options{dbpasswd}";
 	# Put doctypes, editpages, fieldspecs and fieldtypes in the database:
 	system "(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh $options{dbuser} $options{dbpasswd})";
-	# Make root document:
-	system "$options{wwwroot}/obvius/otto/create_root ${dbname} Forside";
+	# Make root document, and publish it:
+	system "$options{wwwroot}/obvius/otto/create_root ${dbname} Forside --publish";
+        # Import initial documents (XXX httpd_user here:):
+        system "sudo -u www-data $options{wwwroot}/obvius/bin/create --site ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml"
     }
 }
 
@@ -284,7 +290,7 @@ sub db_exists {
     my ($dbname)=@_;
 
     my $command = "mysql $dbname -u $options{dbuser} --password=$options{dbpasswd} -e 'show tables;' 2> /dev/null";
-    
+
     my $o=`$command`;
     if ($o eq "") {
 	return 0;
@@ -385,10 +391,23 @@ sub read_conf {
     print "Ok, proceeding.\n";
 }
 
+sub store_cmdline {
+    my ($filename)=@_;
+
+    my $fh;
+    open($fh, ">>$filename") or die "Couldn't write $filename, crying, ahem, stopping";
+    print $fh "# $ENV{USER} " . localtime() . "\n";
+    print $fh "$0 @OPTV\n\n";
+
+    close $fh;
+}
+
 sub usage {
     print <<EOT;
 
 Usage: new_website.pl --website <website> --dbname <dbname>
+
+(You probably need to specifiy dbuser and dbpasswd as well)
 
 Further options:
                            default:

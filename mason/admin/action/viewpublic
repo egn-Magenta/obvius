@@ -1,0 +1,3 @@
+<%init>
+$m->comp('/shared/redirect/', location=>$uri);
+</%init>

@@ -1,0 +1,82 @@
+   <form class="obvius-newsboxes" action="./" method="get">
+     <div class="obvius-newsboxes<% $r->notes('inactive_newsboxes') ? ' obvius-inactive' : '' %> obvius-link-decor">
+       <& util/identifier &>
+       <input type="hidden" name="obvius_command_update_newsboxes" value="1" />
+% #    Do this directly, not extra input, no Yes/Cancel-thing:
+       <input type="hidden" name="obvius_perform_do" value="1" />
+% if (@newsboxes) {
+       <ul>
+%     my $class=' class="obvius-first-child"';
+%     foreach my $newsbox (@newsboxes) {
+%        my $start=$r->notes('now');
+%        $start=$on{$newsbox->{id}}->{start} if (exists $on{$newsbox->{id}});
+%        my $end=$expires;
+%        $end=$on{$newsbox->{id}}->{end} if (exists $on{$newsbox->{id}});
+%        my $link_args=''; # (!exists $on{$newsbox->{id}} ? '?docid=' . $doc->Id : '');
+         <li<% $class %>><input<% $newsbox->{inactive} ? ' disabled="disabled"' : '' %> type="checkbox" name="obvius_newsboxes" value="<% $newsbox->{id} |h %>"<% exists $on{$newsbox->{id}} ? ' checked="checked"' : '' %> id="obvius_newsboxes_<% $newsbox->{id} |h %>" onclick="javascript:newsbox_click('obvius_newsboxes_<% $newsbox->{id} |h %>');" /><a href="<% $prefix . $newsbox->{uri} %><% $link_args %>"><& /shared/shorten, text=>$newsbox->{title}, len=>14 &></a>
+           <div id="obvius_newsboxes_<% $newsbox->{id} |h %>_info">
+             Start: <input type="text" name="obvius_newsboxes_start_<% $newsbox->{id} %>" value="<% $start |h %>" size="19" /><br />
+             Slut:  <input type="text" name="obvius_newsboxes_end_<% $newsbox->{id} %>" value="<% $end |h %>" size="19" />
+           </div>
+         </li>
+         <%doc> class="obvius-current" </%doc>
+%     $class='';
+%     }
+%        # Ok, putting the submit-button in the list is cheating a little/a lot:
+         <li><input<% $r->notes('inactive_newsboxes') ? ' disabled="disabled" class="obvius-disabled"' : '' %> type="submit" value="<& /shared/msg, text=>'Save' &>" /></li>
+       </ul>
+% }
+% else {
+       <div>
+<& /shared/msg, text=>'To add newsboxes, create' &> <a href="<% $prefix %>/admin/newsboxes/"><& /shared/msg, text=>'Newsbox documents here' &></a>.
+       </div>
+% }
+     </div>
+   </form>
+%
+<%init>
+$r->notes(inactive_newsboxes=>1) if ($obvius->get_docparam_value_recursive($doc, 'admin_no_newsboxes'));
+
+$obvius->get_version_fields($vdoc, [qw(expires)]);
+my $expires=$vdoc->field('expires') || '9999-01-01 10:10:10';
+
+my @newsboxes=();
+my $newsboxes_base_doc=$obvius->lookup_document('/admin/newsboxes/'); # XXX Hardcoded.
+my $subdocs;
+$subdocs=$obvius->get_docs_by_parent($newsboxes_base_doc->Id) if ($newsboxes_base_doc);
+foreach my $subdoc (@$subdocs) {
+    my $subvdoc=$obvius->get_public_version($subdoc);
+    next unless ($subvdoc);
+
+    $obvius->get_version_fields($subvdoc, [qw(title)]);
+
+    push @newsboxes, { title=>$subvdoc->Title, id=>$subdoc->Id, uri=>$obvius->get_doc_uri($subdoc), inactive=>0 };
+}
+
+my %on=();
+my $newsbox_doctype=$obvius->get_doctype_by_name('Newsbox');
+if (!$newsbox_doctype) {
+    $obvius->log->notice('admin/portal/newsboxes: No document type Newsbox found');
+    return;
+}
+
+my $newsboxes=$newsbox_doctype->get_newsboxes($doc, $obvius);
+%on=map { $_->{newsboxid}=>$_ } @$newsboxes;
+
+if ($r->notes('inactive_newsboxes')) {
+    map { $_->{inactive}=1; } @newsboxes;
+}
+</%init>
+%
+%
+%
+<%doc>
+
+Newsboxes are found in the hardcoded path /admin/newsboxes/ -
+documents that have been published are chosen, non-public documents
+are silently ignored.
+
+If the document parameter 'admin_no_newsboxes' is set, the newsbox-box
+isn't displayed. Practical for /admin/, and other places.
+
+</%doc>

@@ -1,0 +1,35 @@
+ <div class="obvius-path<% $r->notes('inactive_path') ? ' obvius-inactive' : '' %> obvius-link-decor">
+   <& .display_crumb, %ARGS, crumb=>$frontpage &>
+% foreach my $crumb (@path) {
+   &#8594; <& .display_crumb, %ARGS, crumb=>$crumb &>
+% }
+ </div>\
+%
+<%def .display_crumb>\
+<%args>
+$crumb
+$append_args=>''
+</%args>\
+% if ($uri ne $crumb->{url}) {
+%     my $title=$m->scomp('/shared/shorten', text=>$crumb->{title}, len=>21);
+%     my $tooltip=($title eq $crumb->{title} ? '' : ' title="' . $crumb->{title} . '"');
+<a href="<% $prefix %><% $crumb->{url} %><% $append_args %>"<% $tooltip %>><% $title |h %></a>\
+% }
+% else {
+<% $crumb->{title} |h %>\
+% }
+</%def>
+%
+%
+%
+<%init>
+my @path=map { { doc=>$_, name=>$_->Name, vdoc=>$obvius->get_public_version($_) || $obvius->get_latest_version($_)} } $obvius->get_doc_path($doc);
+map { $obvius->get_version_fields($_->{vdoc}, [qw(title short_title)]) } @path;
+map { $_->{title}=$_->{vdoc}->field('short_title') || $_->{vdoc}->field('title') } @path;
+
+my $frontpage=shift @path;
+$frontpage->{url}='/';
+
+my $link='/';
+map { $_->{url}=$link.=$_->{name} . '/' } @path;
+</%init>

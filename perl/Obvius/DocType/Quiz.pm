@@ -4,12 +4,12 @@ package Obvius::DocType::Quiz;
 #
 # Quiz.pm - Quiz and Game Document Type
 #
-# Copyright (C) 2001-2002 FI, aparte, Denmark
+# Copyright (C) 2001-2004 FI, aparte, Magenta; Denmark.
 #
 # Authors: Jason Armstrong <jar@fi.dk>
 #          Jørgen Ulrik Balslev Krag <jubk@magenta-aps.dk>
 #          Peter Makholm <pma@fi.dk>
-#          Adam Sjøgren <asjo@aparte-test.dk>
+#          Adam Sjøgren <asjo@magenta-aps.dk>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,8 @@ sub action {
     my $mode = $input->param('mode') || 'form';
 
     $output->param(Obvius_DEPENCIES => 1);
-    my $questions = $obvius->get_document_subdocs($doc);
+    my $is_admin=($input->param('is_admin') ? 1 : 0);
+    my $questions = $obvius->get_document_subdocs($doc, public=>(1-$is_admin));
 
     my $questions_doctype = $obvius->get_doctype_by_name('QuizQuestion');
 
@@ -298,7 +299,7 @@ sub handle_game {
     $this->handle_answer($input, $output, $doc, $vdoc, $obvius, $questions, $session);
 
     # Determine next page:
-    if (my $q=$this->find_next_page($input, $output, $doc, $vdoc, $obvius, $questions, $session)) {
+    if (!$input->param('ENDGAMENOW') and my $q=$this->find_next_page($input, $output, $doc, $vdoc, $obvius, $questions, $session)) {
         # Look up stuff, so the page can be displayed:
         my $question_doc=$obvius->get_doc_by_id($q);
         my $question_vdoc=$obvius->get_public_version($question_doc) if ($question_doc);
@@ -322,6 +323,10 @@ sub handle_game {
         $session->{current}=0;
         $output->param('game_over'=>1);
         $output->param('quiz_msg'=>$this->get_quiz_msg($vdoc, $session->{total}, $obvius));
+
+        # Do some statistics:
+        $output->param('answers_with_positive_scores'=>scalar( grep { $session->{scores}->{$_}>0 } (keys %{$session->{scores}}) ));
+        $output->param('questions_answered'=>scalar( grep { $session->{answered}->{$_}>=2 } (keys %{$session->{answered}}) ));
     }
 
     return OBVIUS_OK;
@@ -330,7 +335,7 @@ sub handle_game {
 sub handle_answer {
     my ($this, $input, $output, $doc, $vdoc, $obvius, $questions, $session)=@_;
 
-    return if ($session->{current}==0); # The frontpage
+    return if ($input->param('current_check') and ($session->{current} != $input->param('current_check')));
 
     #print STDERR " HANDLE ANSWER\n";
 
@@ -370,7 +375,9 @@ sub handle_answer {
                 }
             }
             else { # guessathing
-                if (lc($answer) eq lc($subq->{correct_answer})) {
+                # Multiple correct answers can be given, comma-separated:
+                my @correct_answers=split /\s*,\s*/, $subq->{correct_answer};
+                if (grep { lc($answer) eq lc($_) } @correct_answers) {
                     #print STDERR "====> ANSWER IS CORRECT!\n";
                     # Mark the last option with shown as chosen:
                     my $lastone=0;
@@ -380,7 +387,7 @@ sub handle_answer {
                     }
                     $subq->{options}->{$lastone}->{chosen}=1;
                     $subq->{answered}=1;
-                    $subq->{message}='Rigtigt besvaret: ' . $answer . '!';
+                    $subq->{message}='Rigtigt besvaret: ' . $correct_answers[0] . '!';
                 }
                 else {
                     #print STDERR "====> NAH, WRONG ANSWER\n";
@@ -390,7 +397,7 @@ sub handle_answer {
                     if ($#keys-$#shown<3) {
                         $subq->{options}->{$keys[$#keys]}->{chosen}=1;
                         $subq->{answered}=1;
-                        $subq->{message}='Du gættede ikke det rigtige svar, som var: ' . $subq->{correct_answer} . '.';
+                        $subq->{message}='Du gættede ikke det rigtige svar, som var: ' . $correct_answers[0] . '.';
                     }
                     else {
                         $subq->{message}='Forkert svar, du har fået en ledetråd mere ovenfor. Gæt igen:';
@@ -417,7 +424,7 @@ sub handle_answer {
                 $subq_score+=$subq->{options}->{$_}->{value}
                     if ($subq->{options}->{$_}->{chosen}
                         and $subq->{options}->{$_}->{value}
-                        and $subq->{options}->{$_}->{value}=~/^\d+$/);
+                        and $subq->{options}->{$_}->{value}=~/^[-]?\d+$/);
               } sort keys %{$subq->{options}};
             $subq->{score}=$subq_score;
             $q_score+=$subq_score;
@@ -435,9 +442,15 @@ sub handle_answer {
         # Display result (button moves to next answer)
         #print STDERR "===> SETTING QUESTION_ANSWERED TO TRUE!\n";
         $output->param('question_answered'=>1);
+
+        my $guessathings=scalar grep { $_->{type} eq 'guessathing' } @$subqs;
+        $output->param('guessathing_exclusively'=>1) if ($guessathings == scalar @$subqs);
+
+        $output->param('all_questions_answered'=>1) if (scalar(@{$session->{sequence}}) == scalar(keys %{$session->{scores}}));
     }
     else {
         #print STDERR "SUBQS MISSING AN ANSWER!\n";
+        $output->param('question_not_fully_answered'=>1) if ($subqs_answered>0);
     }
 
     $session->{NOW}=localtime(); # Touch the session
@@ -482,6 +495,11 @@ sub find_next_page {
                 last;
             }
         }
+    }
+
+    # If we don't stay on the same question, don't set fully-answered info:
+    if ($next_q and ($next_q != $session->{current})) {
+        $output->delete('question_not_fully_answered');
     }
 
     if ($next_q) {
@@ -540,7 +558,7 @@ sub parse_subqs {
 
                 $subq={};
                 $subq->{text}=$lead; $lead='';
-                $subq->{type}=( $info=~/^::\d+$/ ? 'guessathing' : 'choose' );
+                $subq->{type}=( $info=~/^::[-]?\d+$/ ? 'guessathing' : 'choose' );
                 $subq->{options}={};
             }
 

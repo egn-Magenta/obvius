@@ -1,0 +1,31 @@
+<%method block>\
+%
+<& tinymce:block, %ARGS &>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+%
+<& tinymce:inline, %ARGS &>
+%
+</%args>
+%
+</%method>
+%
+%
+%
+% # Validation:
+%
+<%init>
+return $m->comp('tinymce', %ARGS);
+</%init>
+%
+%
+%
+<%doc>
+
+Stub calling tinymce.
+
+</%doc>

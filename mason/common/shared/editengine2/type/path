@@ -1,0 +1,65 @@
+<%method block>\
+% my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<input <% $disabled ? 'disabled="disabled" ' : '' %>type="text" size="50" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" value="<% $display_value |h %>" />
+<input onclick="<& /portal/util/navigator_link_start:onclick, path=>$display_value, fieldname=>$prefix . $field->{name} &>" type="button" value="<& /shared/msg, text=>'Find' &> ..." />
+%
+<%args>
+$prefix
+$field
+$validation
+$value=>{ value=>'' }
+$style
+</%args>
+%
+<%init>
+# The path is stored as a docid in the database, but for
+# representation in HTML we use the text-path, so we need to copy in
+# here:
+my $edit_doctype=$obvius->get_doctype_by_id($validation->{validate_by_fieldspec}->{doctypeid});
+my $display_value=$m->comp('/shared/editengine2/type/util/copy_in', fieldname=>$field->{name}, doctype=>$edit_doctype, value=>$value->{value}, original_value=>$value->{value});
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+<% $value->{value} |h %>\
+%
+<%args>
+ $value
+</%args>
+%
+</%method>
+%
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+if (exists $validation->{validate_by_fieldspec}) {
+    # Ok, this is slightly backwards. Usually stuff in the
+    # HTML-input-elements are of the type that is in the database
+    # (typically ids), but for path this is not so: The stuff in the
+    # HTML-input-element is what we show (the path), but not what we store
+    # (the docid).
+    # So, to check it, we need to do a copy_out:
+    my $validate_doctype=$obvius->get_doctype_by_id($validation->{validate_by_fieldspec}->{doctypeid});
+    my $fspec=$obvius->get_fieldspec($id, $validate_doctype);
+    my $ftype=$fspec->Fieldtype;
+    $data->{$id}=$ftype->copy_out($obvius, $fspec, $value); # Overwrite for validation
+    my $status=$m->comp('util/validate_by_fieldspec', %ARGS);
+    $data->{id}=$value; # Reinstate value after validation
+
+    return $status;
+}
+
+return 'OK';
+</%init>

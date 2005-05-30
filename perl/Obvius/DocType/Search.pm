@@ -143,8 +143,11 @@ sub do_search_page {
     my $partvdoc = $obvius->get_public_version($partdoc);
     $partvdoc->param('name'=>$partdoc->param('name'));
 
-    my $lines = read_htdig_output(scalar($input), $partvdoc || $partdoc, 1, 0, $obvius);
+    my $pass_part=$partvdoc || $partdoc;
 
+    my $lines = read_htdig_output(scalar($input), $pass_part, 1, 0, $obvius);
+
+    $output->param(results=>$pass_part->param('count'));
     $output->param(do_search_page => 1);
     $output->param(htdig_results => join('', @$lines));
 
@@ -160,7 +163,7 @@ sub action {
     my $config = $obvius->OBVIUS_CONFIG;
 
     # Just show the page if we're not doing a search
-    my $op = $input->param('op');
+    my $op = $input->param('op') || ($input->param('q') ? 'search' : '');
     if($op) {
         unless($op eq 'search') {
             if($op eq 'search_page') {
@@ -215,7 +218,7 @@ sub action {
 
 	$search_method = 'boolean';
     } else {
-	my @words = $this->get_search_words($input->param('words'));
+	my @words = get_search_words($input->param('words') || $input->param('q'));
 	return OBVIUS_OK unless (@words); # XXX Orig. HTTP_NO_CONTENT
 
 	$search_term = join(' and ', @words);
@@ -226,7 +229,14 @@ sub action {
     # Add _substring to the search_type if it's defined (backwards compability) _and_ there
     # is a truncation marker (*) in there (doesn't work as one would expect truncation to
     # but it's as close as we'll ever get with htdig):
-    $search_type .= '_substring' if (defined $search_type and ($input->param('words') =~ /\*/));
+    my $raw_words=join " ", map { defined $_ ? $_ : '' } (
+                                                          $input->param('words'),
+                                                          $input->param('words1'),
+                                                          $input->param('words2'),
+                                                          $input->param('words3'),
+                                                          $input->param('words3')
+                                                         );
+    $search_type .= '_substring' if (defined $search_type and ($raw_words =~ /\b[*]/));
 
     # print STDERR ("Search words _${search_term}_\n");
     $output->param(search_term => $search_term);
@@ -238,7 +248,7 @@ sub action {
 		method => $search_method,
 		format => 'short',
 		matchesperpage => 10,
-		config => $this->htdig_config_name($obvius) . (defined $search_type ? '_' . $search_type : ''),
+		config => $this->htdig_config_name($obvius, $input) . (defined $search_type ? '_' . $search_type : ''),
 		restrict => '',
 		exclude => '',
 	       );
@@ -256,20 +266,24 @@ sub action {
 
 	$args{restrict} = 'http://' . ($config->param('HTDIG_SITENAME') || $config->param('SITENAME')) . $base;
 
-	$output->param(Obvius_SIDE_EFFECTS => 1); # htdig could do anything....
-        my $lines = read_htdig_output(\%args, $part, 1, 0, $obvius);
-
 	my $vpart=$obvius->get_public_version($part);
 	$obvius->get_version_fields($vpart, [ 'title' ]);
+        # Pass name (for read_htdig_output):
+        $vpart->param(name=>$part->Name);
+
+        my $pass_part=$vpart || $part;
+
+	$output->param(OBVIUS_SIDE_EFFECTS => 1); # htdig could do anything....
+        my $lines = read_htdig_output(\%args, $pass_part, 1, 0, $obvius);
 
 	push(@data, ({
 		      title => $vpart->Title,
-		      section => $part->Name,
+		      section => $pass_part->Name,
 		      htdig_results => join('', @$lines),
-		      count => $part->param('count'),
+		      count => $pass_part->param('count'),
 		     })
 	    );
-	$results += $part->param('count');
+	$results += $pass_part->param('count');
 
 	$output->param(restrict=>$base);
     } else {
@@ -350,32 +364,25 @@ __END__
 
 =head1 NAME
 
-Obvius::DocType::Search - Perl extension for blah blah blah
+Obvius::DocType::Search - Interface to htdig
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::Search;
-  blah blah blah
+  use'd by Obvius automatically.
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::Search, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+This module is due for a rewrite. It's incoherent and utterly
+incomprehensible. Somebody do a rewrite. Soon. Please.
 
 =head2 EXPORT
 
 None by default.
 
-
 =head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius>.
 
 =cut

@@ -21,12 +21,21 @@ function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface,
             // And open the validator window:
             var instance = tinyMCE.getInstanceById(editor_id);
             if(instance) {
-                window.open('/admin/?obvius_op=check_editor_xhtml&fieldname=' + instance.formElement.name);
+                if (tinyMCE.settings['obvius_w3c_check_via_xmlhttprequest']) {
+                  obvius_tinymce_plugin_w3c_validate_html(instance.formElement);
+                }
+                else {
+                    window.open('/admin/?obvius_op=check_editor_xhtml&fieldname=' + instance.formElement.name);
+                }
             }
        return true;
    }
    // Pass to next handler in chain
    return false;
+}
+
+function obvius_tinymce_plugin_w3c_validate_html(formelt) {
+  obvius_validator_validate(formelt.value);
 }
 
 function TinyMCE_obvius_handleNodeChange(editor_id, node, undo_index, undo_levels, visual_aid, any_selection) {

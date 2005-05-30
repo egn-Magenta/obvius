@@ -1,0 +1,59 @@
+<%method block>\
+% my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+% if (exists $value->{value} and defined $value->{value}) {
+[<% length($value->{value}) |h %> bytes]<br />
+% }
+<input <% $disabled ? 'disabled="disabled" ' : '' %>type="file" size="50" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" />
+%
+<%args>
+$prefix
+$field
+$value=>{}
+$style
+</%args>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+% if (exists $value->{value} and defined $value->{value}) {
+[length($value->{value}) bytes]\
+% }
+%
+<%args>
+ $value
+</%args>
+%
+</%method>
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+# Change _if_ there is a new file:
+my @uploads=$r->upload;
+my $match=':' . $id . "\$";
+foreach my $upload (@uploads) {
+    my $name=$upload->name;
+    next unless ($name=~/$match/o); # XXX This is editengine-naming dependent, since I do not get prefix here...
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
+	local $/ = undef;
+	my $value=<$fh>;
+        $data->{$id}=$value;
+        # Set other fields:
+	$data->{mimetype}=$upload->type;
+	$data->{size}=$upload->size;
+    }
+}
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK';
+</%init>

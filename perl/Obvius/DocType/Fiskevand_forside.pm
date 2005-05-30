@@ -274,6 +274,8 @@ sub format_date {
     return $3 . "-" . $2 . "-" . $1;
 }
 
+# escape_html - escapes the chars &, <, > and " in the string to
+#               HTML-character entities, and returns the string.
 sub escape_html {
     $_ = shift;
     s/&/&amp;/g;
@@ -325,7 +327,10 @@ return $mail_error;
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
+
+=head1 NOTICE
+
+This module should be moved to the local website.
 
 =head1 NAME
 

@@ -1,0 +1,19 @@
+<%init>
+my $obvius_session_id=undef;
+if ($r->pnotes('obvius_session')) {
+    # Release session, so common->generate_subsite can use it:
+    $obvius_session_id=$r->pnotes('obvius_session')->{_session_id};
+    $m->comp('/default/release_session');
+}
+
+my $admin=$r->pnotes('site');
+my $common=$admin->Subsite;
+my $data=$common->generate_subsite($common, $r, $doc, $vdoc, $doctype, $obvius, is_admin=>1);
+
+if ($obvius_session_id) {
+    # Get the session again:
+    $m->comp('/default/setup_session', obvius_session_id=>$obvius_session_id);
+}
+
+return $data;
+</%init>

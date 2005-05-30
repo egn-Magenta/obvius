@@ -1,0 +1,203 @@
+<& /shared/editengine2/init,
+     editscheme=>$publish_scheme,
+     object=>$object,
+     function=>'save',
+     edges=>$edges,
+     actions=>$actions,
+     relation=>'publish',
+ &>
+%
+%
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+$session->{action}='editengine';
+
+my $edges={
+           'publish[save]store'=>{ sink=>1 },
+           'publish[]cancel'=>{ sink=>1 },
+          };
+my $actions={
+             'publish[save]store'=>'publish:do',
+             'publish[]cancel'=>'publish:cancel',
+            };
+my $publish_scheme={
+                    label=>'Publish',
+                    type=>'scheme/editsheet',
+                    style=>{context=>'editpage'},
+                    storage=>{
+                              organization=>{
+                                             class=>'Temporary',
+                                             source=>'Temporary_Data',
+                                             identifiers=>[qw(key)],
+                                            },
+                              data=>{
+                                     obvius_later_date=>{
+                                                         type=>'datetime',
+                                                         mandatory=>1,
+                                                        },
+                                     key=>{
+                                           type=>'line',
+                                           mandatory=>1,
+                                          },
+                                     # More added dynamically, from the editpage, below.
+                                    },
+                              functions=>{
+                                          save=>{
+                                                 label=>'Publish',
+                                                 object=>'existing',
+                                                },
+                                         },
+                             },
+                    display=>[],
+                             # Filled in dynamically, from the editpage, below.
+                   };
+
+my $editpage=$obvius->get_editpage($doctype, 'P');
+
+push @{$publish_scheme->{display}}, {
+                                     name=>'startpage',
+                                     content=>'markup',
+                                     label=>$editpage->Title,
+                                     description=>$editpage->Description,
+                                    };
+
+my $fieldlist=WebObvius::parse_editpage_fieldlist(undef, $editpage->Fieldlist, $doctype, $obvius);
+foreach my $field (@$fieldlist) {
+    my $type=$field->{fieldspec}->Fieldtype->Edit;
+    $publish_scheme->{storage}->{data}->{$field->{fieldspec}->Name}={
+                                                                     type=>$type,
+                                                                     mandatory=>($field->{fieldspec}->Optional ? 0 : 1),
+
+                                                                     repeatable=>$field->{fieldspec}->Repeatable,
+
+                                                                     validate_by_fieldspec=>{
+                                                                                             doctypeid=>$field->{fieldspec}->Doctypeid,
+                                                                                             name=>$field->{fieldspec}->Name,
+                                                                                            },
+                                                                    };
+    push @{$publish_scheme->{display}}, {
+                                         name=>$field->{fieldspec}->Name,
+                                         content=>'data',
+                                         label=>$field->{title},
+
+                                         edit_args=>$field->{fieldspec}->Fieldtype->Edit_args,
+                                         options=>$field->{options},
+                                        };
+}
+
+push @{$publish_scheme->{display}}, {
+                                     name=>'obvius_later_date',
+                                     content=>'data',
+                                     label=>'Publish at',
+                                    };
+
+push @{$publish_scheme->{display}}, {
+                                     name=>'endpage',
+                                     content=>'markup',
+                                    };
+
+push @{$publish_scheme->{display}}, {
+                                     name=>'editend',
+                                     content=>'markup',
+                                  };
+
+# Identify the object (we only have one "dummy"-object, so:):
+my $object={ key=>'WARSZAWA', };
+
+# 1) Get current publish-fields (get_version_fields sets default values!):
+my $current_publish_fields=$obvius->get_version_fields($vdoc, $doctype->publish_fields_names(), 'PUBLISH_FIELDS');
+my $edit_publish_fields=$m->comp('util/flatten_fields', fields=>$current_publish_fields);
+
+# 2) in_subscription is always reset to 0:
+$edit_publish_fields->param(in_subscription=>0);
+
+# XXX Put data into the storage on the session object:
+$session->{Temporary_Data}->{WARSZAWA}={ map { lc($_)=>$edit_publish_fields->param($_) } $edit_publish_fields->param };
+# Store a copy of the original data, so we can tell what has been changed later:
+$session->{publish_data_in}={ map { lc($_)=>$edit_publish_fields->param($_) } $edit_publish_fields->param };
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+%
+<%method cancel>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+delete $session->{action}; # Return to nothing (i.e. view)
+$m->comp('/shared/set_status_message', message=>'Publish cancelled');
+return '';
+</%init>
+%
+</%method>
+%
+%
+<%method do>
+%
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+delete $session->{action}; # XXX Cancel the action; I wonder if default/perform_action should do this?
+
+# 0) Get input, and put it in $values
+#     (XXX This is where :cook was called)
+my $obvius_version=$vdoc->Version;
+
+# XXX Temporary place to fish out the values:
+my $values=$session->{Temporary_Data}->{WARSZAWA};
+my $obvius_later_date=$values->{obvius_later_date};
+
+# Copy in:
+my $publish_fields_values=Obvius::Data->new();
+foreach my $fieldname (map { lc } @{$doctype->publish_fields_names}) { # Notice we are not transferring excess fields here!
+    my $value=$m->comp('/shared/editengine2/type/util/copy_in', fieldname=>$fieldname, doctype=>$doctype, value=>$values->{$fieldname}, original_value=>$session->{publish_data_in}->{$fieldname});
+    $publish_fields_values->param($fieldname=>$value);
+}
+
+# published is always set to now():
+$publish_fields_values->param(published=>$r->notes('now'));
+
+# sec is always automagically set to the second-level parent (XXX
+#  notice that this does NOT get updated on move and copy!)
+my @path=$obvius->get_doc_path($doc);
+$publish_fields_values->param(sec=>$path[1]->Id) if (scalar(@path)>1);
+
+# 1) Validate input XXX This is kind of double work, the editengine
+#    already checked for validity:
+my %status=$doctype->validate_publish_fields($publish_fields_values, $obvius);
+warn "Invalid fields, not stored: @{$status{invalid}}\n" if ($status{invalid});
+warn "Missing fields not stored: @{$status{missing}}\n" if ($status{missing});
+warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+#warn "Valid fields: @{$status{valid}}\n" if ($status{valid});
+
+if ($status{invalid}) {
+    #   a) not ok, return to interface
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Invalid data entered, please correct.');
+
+    # XXX Do the values entered stay when we do this? NO! Fix it!
+    return 'publish';
+}
+else {
+    #   b) ok, send order
+
+    # Put (XXX perhaps only the valid?) publish fields into args:
+    my ($status, $message)=$obvius->send_order(
+                                               docid=>$doc->Id,
+                                               user=>$obvius->user,
+                                               command=>'publish',
+                                               args=>{ version=>$obvius_version, publish_fields=>$publish_fields_values },
+                                               date=>$obvius_later_date,
+                                              );
+    $m->comp('/shared/set_status_message', status=>$status, message=>$message);
+    return ''; # Don't go anywhere else.
+}
+</%init>
+%
+</%method>

@@ -15,6 +15,13 @@
 % #        <& divider &>
         <& link, text=>'Move/rename', link=>"$prefix$uri?obvius_op=rename", ghosted=>$ghosted{moverename}||$ghosted, id=>"renamebutton", accesskey=>'R' &>
 % #        <& divider &>
+<%doc>
+
+XXX copy-component has not been merged from MCMSv2_otto:
+
+        <& link, text=>'Copy', link=>"$prefix$uri?obvius_op=copy", ghosted=>$ghosted{moverename}||$ghosted, id=>"copybutton", accesskey=>'C' &>
+% #        <& divider &>
+</%doc>
         <& link, text=>'New language', link=>"$prefix$uri?obvius_op=new_version&obvius_new=language&obvius_version=".$docversion, ghosted=>$ghosted{new_language}||$ghosted, id=>'newlanguagebutton' &>
 % #        <& divider &>
         <& link, text=>"Change documenttype", link=>"$prefix$uri?obvius_op=new_version&obvius_new=doctype&obvius_version=".$docversion, ghosted=>$ghosted{change_doctype}||$ghosted, id=>"newdoctypebutton" &>
@@ -39,7 +46,7 @@ $ghosted=>0
 %
 <%init>
 my $public=$obvius->get_public_version($doc);
-my $displayed_version_is_public=($public and $public->Version eq $vdoc->Version);
+my $displayed_version_is_public=($vdoc->Public);
 
 my $docversion = uri_escape($vdoc->Version);
 

@@ -1,0 +1,53 @@
+<%once>
+my @all=(
+ "+seq,+short_title" => "sequence number (climbing), then short title",
+ "+seq,+title" => "sequence number (climbing)",
+ "-seq,+title" => "sequence number (falling)",
+ "-docdate,+title"    => "doc date (falling)",
+ "+docdate,+title"    => "doc date (climbing)",
+# Sorting on version doesn't work, because it's not a vfield, it is
+# part of the versions-table. Obvius::search() needs to be fixed for
+# this to function:
+# "-version,+title"    => "version date (falling)",
+# "+version,+title"    => "version date (climbing)",
+ "+title,+seq"      => "title",
+ "-title,+seq"      => "title (rev.)",
+ "-expires,+title"    => "date of expiry",
+ "+expires,+title" => "date of expiry (rev.)",
+);
+
+my $i=0;
+my @choices=grep { ++$i%2 } @all;
+my %labels=@all;
+</%once>
+%
+%
+<%method block>
+%
+<%args>
+$prefix
+$field
+$validation
+$value
+</%args>
+%
+<& util/label, label=>$field->{label}, field=>$field &>
+<& util/dropdown, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
+%
+</%method>
+%
+%
+%
+<%method inline>
+
+XXX
+
+</%method>
+%
+%
+%
+% # Validate:
+%
+<%init>
+return 'OK'; # XXX
+</%init>

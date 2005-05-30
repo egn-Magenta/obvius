@@ -1,0 +1,40 @@
+<%method do>
+%
+<%args>
+$obvius_newsboxes=>[]
+</%args>
+%
+<%init>
+$obvius_newsboxes=[$obvius_newsboxes] unless (ref $obvius_newsboxes eq 'ARRAY');
+
+my $newsbox_doctype=$obvius->get_doctype_by_name('Newsbox');
+if (!$newsbox_doctype) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['No document type', ' ', 'Newsbox', ' ', 'found']);
+    return '';
+}
+
+my @newsboxes;
+foreach my $newsboxid (@$obvius_newsboxes) {
+    push @newsboxes, {
+                      newsboxid=>$newsboxid,
+                      docid=>$doc->Id,
+                      start=>$r->param('obvius_newsboxes_start_' . $newsboxid),
+                      end=>$r->param('obvius_newsboxes_end_' . $newsboxid),
+                     };
+}
+if ($newsbox_doctype->replace_newsboxes($doc, \@newsboxes, $obvius)) {
+    $m->comp('/shared/set_status_message', status=>'OK', message=>'Box-status updated');
+}
+else {
+    $m->comp('/shared/set_status_message', status=>'ERROR', message=>'Could not update box-status');
+}
+
+# We don't know what documents in the cache are affected by this
+# update. Sadly.  Pass a note on so people will know, though (they can
+# handle it in /admin/default/perform_action_local):
+$r->notes('obvius_newsboxes_updated'=>1);
+
+return '';
+</%init>
+%
+</%method>

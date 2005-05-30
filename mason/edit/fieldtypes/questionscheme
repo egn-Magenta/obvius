@@ -134,7 +134,7 @@ function <% $name %>_fields_to_text() {
 }
 
 function <% $name %>_load_from_text(text) {
-    var splitted = text.split(/¤/);
+    var splitted = text.split("¤");
 
     var type = splitted[1];
     var heading = splitted[2];

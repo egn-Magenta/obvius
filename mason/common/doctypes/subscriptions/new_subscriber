@@ -108,7 +108,7 @@ Email.<br>
 <tr>
 <td>
 <br>
-<input type="SUBMIT" value=" Opret ">
+<input type="submit" class="subscriptionbutton" value=" Opret ">
 </td>
 </tr>
 </table>

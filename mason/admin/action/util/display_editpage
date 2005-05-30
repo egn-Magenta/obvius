@@ -1,0 +1,44 @@
+<h2><& /shared/msg, text=>$editpage->Title &></h2>
+
+% my $i=0;
+% foreach my $field (@$fieldlist) {
+<& .display_field, field=>$field, values=>$values, class=>($i%2==0 ? 'a' : 'b') &>
+%     $i++;
+% }
+%
+%
+<%def .display_field>
+%
+<%args>
+$field
+$values
+$class=>'a'
+</%args>
+%
+% if (exists $field->{options}->{subtitle}) {
+<h3><& /shared/msg, text=>$field->{options}->{subtitle} &> </h3>
+% }
+<div class="obvius-field obvius-<% $class |h %>">
+  <label><& /shared/msg, text=>$field->{title} &></label>
+  <% $value |h %>
+</div>
+%
+<%init>
+my $value=$values->param($field->{fieldspec}->Name);
+</%init>
+%
+</%def>
+%
+%
+<%args>
+$page=>'P'
+$values=>undef
+</%args>
+%
+<%init>
+# Get editpage
+my $editpage=$obvius->get_editpage($doctype, $page);
+my $fieldlist=WebObvius::parse_editpage_fieldlist(undef, $editpage->Fieldlist, $doctype, $obvius);
+
+$values=Obvius::Data->new() unless (defined $values);
+</%init>

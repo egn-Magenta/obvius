@@ -1,0 +1,121 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'Delete document' &></h2>
+
+
+  <form action="./">
+% if ($obvius_delete_recursive) {
+    <p>
+      <& /shared/msg, text=>'You are about to delete this document and all the documents beneath it, in total' &> <% $num %> <& /shared/msg, text=>'documents' &>.
+    </p>
+    <div>
+      <& /shared/msg, text=>'Are you sure you want to delete these' &> <% $num %> <& /shared/msg, text=>'documents' &>?
+      <input type="hidden" name="obvius_delete_recursive" value="1" />
+      <input type="hidden" name="obvius_delete_recursive_confirm" value="1" />
+    </div>
+% }
+% else {
+    <p>
+      <& /shared/msg, text=>'Please remember that if you delete the document, all versions will be deleted, and it can not be recovered' &>.
+    </p>
+% if ($obvius->is_public_document($doc)) {
+    <p>
+      <& /shared/msg, text=>'Instead of deleting the document, you may want to' &>
+      <a href="./?obvius_command_unpublish=1"><& /shared/msg, text=>'merely hide it' &></a>.
+    </p>
+% }
+    <div<% $r->notes('inactive_recursive_delete') ? ' class="obvius-inactive"' : '' %>>
+      <& /shared/msg, text=>'Also delete subdocuments' &>?<br />
+%     my $inactive_string=$r->notes('inactive_recursive_delete') ? ' disabled="disabled" class="obvius-inactive"' : '';
+      <input type="radio" name="obvius_delete_recursive" value="1" id="yes" <% $inactive_string %>/><label for="yes" style="display: inline"><& /shared/msg, text=>'Yes' &></label>
+      <input type="radio" name="obvius_delete_recursive" value="0" id="no" checked="checked" <% $inactive_string %>/><label for="no" style="display: inline"><& /shared/msg, text=>'No' &></label>
+    </div>
+% }
+
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_delete=>1 } &>
+      <& util/do_cancel, do_text=>'Delete' &>
+    </p>
+  </form>
+
+</div>
+%
+<%args>
+$obvius_delete_recursive=>0
+</%args>
+%
+<%init>
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+
+my $num;
+if ($obvius_delete_recursive) {
+    # Find total number of documents in sub-hierarchy:
+    $num=$m->comp('delete:count_docs_recursive', doc=>$doc);
+}
+else {
+    my $subdocs=$obvius->get_docs_by_parent($doc->Id) || [];
+    $r->notes(inactive_recursive_delete=>1) if (scalar(@$subdocs)==0);
+}
+</%init>
+%
+<%method count_docs_recursive>
+%
+<%args>
+$doc
+</%args>
+%
+<%init>
+my $count=1;
+my $subdocs=$obvius->get_docs_by_parent($doc->Id) || [];
+foreach my $subdoc (@$subdocs) {
+    $count+=$m->comp('delete:count_docs_recursive', doc=>$subdoc);
+}
+return $count;
+</%init>
+%
+</%method>
+%
+%
+<%method cancel>
+<& /shared/set_status_message, message=>'Delete cancelled' &>
+%
+</%method>
+%
+%
+<%method do>
+%
+<%args>
+$obvius_version
+$obvius_delete_recursive=>0
+$obvius_delete_recursive_confirm=>0
+$obvius_later_date
+</%args>
+%
+<%init>
+if (!$obvius_delete_recursive or ($obvius_delete_recursive and $obvius_delete_recursive_confirm)) {
+    my ($status, $message)=$obvius->send_order(
+                                               docid=>$doc->Id,
+                                               user=>$obvius->user,
+                                               command=>'delete',
+                                               args=>{ recursive=>$obvius_delete_recursive },
+                                               date=>$obvius_later_date,
+                                              );
+    $m->comp('/shared/set_status_message', status=>$status, message=>$message);
+
+    if ($status eq 'OK') {
+        $r->notes('obvius_redirect_to'=>'../');
+    }
+}
+else {
+    return 'delete';
+}
+
+return ''; # Stay put
+</%init>
+%
+</%method>

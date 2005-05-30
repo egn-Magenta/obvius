@@ -1,0 +1,90 @@
+% if ($style->{context} eq 'block') {
+%   if (defined $editscheme->{label}) {
+<h2><& /shared/msg, text=>$editscheme->{label} &></h2>
+%   }
+%   unless (defined $style->{open} and $style->{open} ) {
+      <form action="./" method="post" enctype="multipart/form-data">
+      <div class="obvius-editengine-confirmation">
+      <input type='hidden' name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
+%   }
+    <& '../commit:scheme', history=>$history &>
+    <& '../commit:object', history=>$history &>
+%   foreach my $item (@items) {
+%     my $class = $item->{content};
+%     $class = $element->{$item->{name}}->{status} if ($class eq 'data' && defined $element->{$item->{name}}->{status});
+      <div class="obvius-status-<% $class %>">
+        <& '../display', layout=>$item, value=>$element, style=>{context=>'block'}, editscheme=>$editscheme, history=>$history &>
+      </div>
+%   }
+%   unless (defined $style->{open} and $style->{open}) {
+      </div>
+      <div>
+        <& '../commit:execute', history=>$history, editscheme=>$editscheme &>
+        <& '../commit:cancel', history=>$history &>
+      </div>
+      </form>
+%   }
+% }
+%
+% if ($style->{context} eq 'inline') {
+%   foreach my $item (@items) {
+      <div>
+        <& '../display', layout=>$item, value=>$element, style=>{context=>'inline'}, editscheme=>$editscheme, history=>$history &>
+      </div>
+%   }
+% }
+%
+%
+% if ($style->{context} eq 'editpage') {
+  <form action="./" method="post" enctype="multipart/form-data">
+  <div>
+    <input type='hidden' name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
+    <& '../commit:scheme', history=>$history &>
+    <& '../commit:object', history=>$history &>
+%   foreach my $item (@{$editscheme->{display}}) {
+%     my $class = $element->{$item->{name}}->{status} if ($item->{content} eq 'data' && defined $element->{$item->{name}}->{status});
+%     if ($class) {
+        <div class="obvius-status-<% $class %>">
+%     }
+%     elsif ($item->{content} ne 'markup') {
+        <div>
+%     }
+        <& '../display', layout=>$item, value=>$element, style=>{context=>'block'}, editscheme=>$editscheme, history=>$history &>
+%     if ($item->{content} ne 'markup') {
+        </div>
+%     }
+%   }
+  <div class="obvius-edit-navigation">
+   <span>
+    <& '../commit:execute', history=>$history, editscheme=>$editscheme &>
+    <& '../commit:cancel', history=>$history &>
+   </span>
+  </div>
+  </div>
+  </form>
+% }
+<%args>
+# Mandatory arguments
+ $history
+ $session
+ $editscheme
+ $storage
+
+# Options
+#$style=>'block'
+$style
+
+</%args>
+<%init>
+print STDERR "scheme<editsheet>\thistory = '$history'\n" if $session->{cesi_debug_recursion};
+
+my @items = @{$editscheme->{display}};
+
+my $object = $m->comp('../toolbox:access_object');
+my $element = $storage->element(%$object);
+
+if (defined $session->{editengine_errors} and defined $session->{editengine_errors}->{$history}) {
+  my $object_prefix = $m->comp('../toolbox:escape_object', object=>$object);
+  $element = $session->{editengine_errors}->{$history}->{$object_prefix};
+}
+</%init>

@@ -4,14 +4,14 @@ package Obvius;
 #
 # Obvius.pm - Content Manager, database handling
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
-#                    aparte A/S, Denmark (http://www.aparte.dk/),
-#                    FI, Denmark (http://www.fi.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
-#          Peter Makholm (pma@fi.dk),
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          Peter Makholm (pma@fi.dk)
+#          René Seindal,
 #          Adam Sjøgren (asjo@magenta-aps.dk),
-#          René Seindal.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@ our @ISA = qw(  Obvius::Data
                 Obvius::Comments
                 Obvius::Utils
                 Obvius::Pubauth
+                Obvius::Annotations
+                Obvius::Queue
                 Exporter
             );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -65,6 +67,8 @@ use POSIX qw(strftime);
 
 use DBIx::Recordset;
 use Params::Validate qw(validate);
+
+use Data::Dumper;
 
 use Obvius::Data;
 use Obvius::Config;
@@ -86,12 +90,10 @@ use Obvius::VoteSystem;
 use Obvius::Comments;
 use Obvius::Utils;
 use Obvius::Pubauth;
+use Obvius::Annotations;
+use Obvius::Queue;
 
-
-use Data::Dumper;
-
-
-
+
 ########################################################################
 #
 #	Construction and connection
@@ -115,6 +117,7 @@ sub new {
 				  FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
 				  FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
 				  LANGUAGES   => {},
+                                  MODIFICATIONS=>[],
 				 );
 
     $this->tracer($obvius_config, $user||'', $password||'') if ($this->{DEBUG});
@@ -201,6 +204,7 @@ sub user {
     return $this->{USER};
 }
 
+
 ########################################################################
 #
 #	Object cache
@@ -209,8 +213,6 @@ sub user {
 
 sub cache {
     my ($this, $onoff) = @_;
-
-    $this->tracer($onoff) if ($this->{DEBUG});
 
     if ($onoff) {
 	$this->{CACHE} = new Obvius::Cache unless ($this->{CACHE});
@@ -233,6 +235,7 @@ sub cache_find {
     return ($this->{CACHE}) ? $this->{CACHE}->find($domain, \%key) : undef;
 }
 
+
 ########################################################################
 #
 #       Error logging
@@ -254,6 +257,7 @@ sub log {
 }
 
 
+
 ########################################################################
 #
 #	Path to document mapping and vice versa
@@ -285,7 +289,6 @@ sub lookup_document {
     return undef;
 }
 
-#
 # Overveje at tilføje stiens id'er til Obvius::Document når de alligevel slås op hér
 # (så er get_doc_path triviel):
 #
@@ -365,7 +368,23 @@ sub get_doc_uri {
     return $uri;
 }
 
+# is_doc_below_doc - given two document-objects, returns true if the
+#                    first document is in the second documents
+#                    subtree. If not returns false.
+sub is_doc_below_doc {
+    my ($this, $first, $second)=@_;
 
+    my $root_id=$this->get_root_document()->Id;
+
+    my $parent_doc=$first;
+    while ($parent_doc=$this->get_doc_by_id($parent_doc->Parent)) {
+        return 1 if ($parent_doc->Id eq $second->Id);
+    }
+
+    return 0;
+}
+
+
 ########################################################################
 #
 #	Look up documents by id or (name,parent)
@@ -442,6 +461,7 @@ sub get_docs_by {
 }
 
 
+
 ########################################################################
 #
 #	Public document check
@@ -486,13 +506,16 @@ sub is_public_document {
 }
 
 
+
 ########################################################################
 #
 #	Multilingual helpers
 #
 ########################################################################
 
-# Select best version for same document
+# select_best_language_match - selects the best match of the versions
+#                              in vdocs, considering the
+#                              language-preferences.
 sub select_best_language_match {
     my ($this, $vdocs) = @_;
 
@@ -552,6 +575,7 @@ sub select_best_language_match_multiple {
 }
 
 
+
 ########################################################################
 #
 #	Look up versions of a document
@@ -592,6 +616,9 @@ sub get_latest_version {
     return $versions->[0];
 }
 
+# get_version - given a document-object and a string identifying a
+#               version, returns a version-object representing that
+#               version.
 sub get_version {
     my ($this, $doc, $version) = @_;
 
@@ -627,6 +654,9 @@ sub get_versions {
 
     $this->tracer($doc) if ($this->{DEBUG});
 
+    croak "doc not an Obvius::Document\n"
+        unless (ref $doc and $doc->UNIVERSAL::isa('Obvius::Document'));
+
     # Måske noget tilsvarende nedenstående linie for samtlige
     # versions? Måske i virkeligheden kun for samtlige versions, og så
     # kan get_public_versions filtrere i den fuldstændige liste?
@@ -639,7 +669,7 @@ sub get_versions {
     $set->Search({ docid=>$doc->_id, %options });
     my @versions;
     while (my $rec = $set->Next) {
-	push(@versions, new Obvius::Version($rec));
+        push @versions, Obvius::Version->new($rec);
     }
     $set->Disconnect;
 
@@ -647,6 +677,7 @@ sub get_versions {
 }
 
 
+
 ########################################################################
 #
 #	Look up document public subdocs (returns array of Obvius::Version)
@@ -684,6 +715,8 @@ sub get_document_subdocs {
 }
 
 # Jason: I need this one to get the latest version for the EtikSubthemes
+# asjo: You could've just passed sortvdoc=>$obvius->get_latest_version($doc)
+# to get_document_subdocs :-)
 
 sub get_document_subdocs_latest {
   my ($this, $doc, %options) = @_;
@@ -738,6 +771,8 @@ sub get_nr_of_subdocs {
 
 }
 
+
+
 ########################################################################
 #
 #	Search for documents (returns array of Obvius::Version)
@@ -869,6 +904,16 @@ sub search {
         }
 
         my $fspec = $this->get_fieldspec($_);
+        unless ($fspec) {
+            # XXX It would perhaps be nicer if we just ignored the
+            #     part about the unknown field, but it is not that
+            #     easy to do with the limited amount of parsing we do.
+            my $message='No fieldspec exists for field "' . $_ . '", returning empty result of Obvius::search on unknown field';
+            carp $message;
+            $this->log->error($message);
+            return [];
+        }
+
         next if (defined $seen{$_} and (!$fspec->Repeatable or $options{override_repeatable}->{$_})); # Duplicate skippage
         $seen{$_}++;
 
@@ -923,6 +968,9 @@ sub search {
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
 
+    # XXX This is still problematic, if someone searches for
+    #     %fieldnamewhatever%, 'fieldnamewhatever' or
+    #     "fieldnamewhatever":
     my $regex = '(^|[^\w])(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
     $where =~ s/$regex/$1 . $map{$2}/gie;
 
@@ -1024,7 +1072,7 @@ sub get_distinct_vfields {
 }
 
 
-
+
 ########################################################################
 #
 #	Methods to get fields of versions
@@ -1050,13 +1098,13 @@ sub get_version_fields_by_threshold {
 	    $doctype->field($_, undef, $type)->Threshold <= $threshold
 	} @{$doctype->fields_names($type)};
     }
-    local $, = ',';
-    $this->{LOG}->debug("First list of fields: @fields");
+    #local $, = ',';
+    #$this->{LOG}->debug("First list of fields: @fields");
 
     if (my $fields = $version->fields($type)) {
 	@fields = grep { not $fields->exists($_) } @fields;
     }
-    $this->{LOG}->debug("Second list of fields: @fields");
+    #$this->{LOG}->debug("Second list of fields: @fields");
 
     return @fields ? \@fields : undef;
 }
@@ -1087,6 +1135,9 @@ sub get_version_fields {
 					    '!Table'     =>'vfields',
 					   });
 
+    #printf STDERR " get_version_fields %5d %s", $version->Docid, $version->Version;
+    #print STDERR " ", (join ", ", @$needed), "\n";
+
     $set->Search({docid	     => $version->_docid,
 		  version    => $version->_version,
 		  name       => $needed,
@@ -1101,7 +1152,7 @@ sub get_version_fields {
 	my $value = $fields->param($rec->{name});
 	# Apparantly the db returns -1.0 as -1, which is not what we want:
 	my $field_value = $rec->{$field};
-	$field_value=sprintf "%1.1lf", $field_value if ($field eq 'double_value' and
+	$field_value=sprintf "%1.1f", $field_value if ($field eq 'double_value' and
 							defined $field_value and $field_value eq '-1');
 	if ((ref $value || '') eq 'ARRAY') {
 	    push(@$value, $field_value);
@@ -1119,17 +1170,17 @@ sub get_version_fields {
 	my $ftype = $fspec->param('fieldtype');
 
 	my $value;
-	if ($fspec->Repeatable) {
-	    $value = [
-		      grep {
-			  defined $_
-		      } map {
-			  $ftype->copy_in($this, $fspec, $_)
-		      } @{$fields->param($_)}
-		     ];
-	} else {
-	    $value = $ftype->copy_in($this, $fspec, $fields->param($_));
-	}
+        if ($fspec->Repeatable) {
+            $value = [
+                      grep {
+                          defined $_
+                      } map {
+                          $ftype->copy_in($this, $fspec, $_)
+                      } @{$fields->param($_)}
+                     ];
+        } else {
+            $value = $ftype->copy_in($this, $fspec, $fields->param($_));
+        }
 	# $value='' unless (defined $value); # This is questionable...?
 	# 20020112 asjo Indeeeeeed so. It messes up prepare_edit so that empty fields becomes ''
 	# become 0! But does changing this break all sorts of other things? XXX MUST TEST!
@@ -1155,6 +1206,7 @@ sub get_version_field {
 }
 
 
+
 ########################################################################
 #
 #	Look up document and field types
@@ -1167,9 +1219,15 @@ sub get_document_type {
     return $this->get_doctype($doc->_type);
 }
 
+# get_version_type - given a version object, returns the
+#                    doctype-object corresponding to the type of the
+#                    version.
 sub get_version_type {
     my ($this, $version) = @_;
     #$this->tracer($version) if ($this->{DEBUG});
+    croak "get_version_type called without a version-object"
+        unless (ref $version eq 'Obvius::Version');
+
     return $this->get_doctype($version->_type);
 }
 
@@ -1222,6 +1280,9 @@ sub set_fieldtype {
     return $this->{FIELDTYPES}->[$id] = $type;
 }
 
+# get_fieldspec - given a string with the name of a field and a
+#                 doctype object, returns the related fieldspec
+#                 object, if one exists. Returns undef on failure.
 sub get_fieldspec {
     my ($this, $name, $doctype) = @_;
     #$this->tracer($name) if ($this->{DEBUG});
@@ -1254,6 +1315,7 @@ sub set_fieldspec {
 }
 
 
+
 ########################################################################
 #
 #	Document parameters
@@ -1399,6 +1461,8 @@ sub set_docparams {
 
 }
 
+
+
 ########################################################################
 #
 #	Read and validate all info about doctypes, fieldtypes etc.
@@ -1458,6 +1522,7 @@ sub read_doctypes_table {
 
 	my $doctype;
 	my $tester;
+        my $ev_error='';
 	for (@types) {
 	    #$this->log->debug("TESTING $_");
 
@@ -1471,6 +1536,7 @@ sub read_doctypes_table {
 		#$this->log->debug("LOADING $_");
 
 		eval "use $_";
+                $ev_error=$@;
 		if (defined $$tester) {
 		    #$this->log->debug("LOADING $_ SUCCESS");
 		    $doctype = $_;
@@ -1494,7 +1560,7 @@ sub read_doctypes_table {
 		$doctype=$doctypename;
 	    }
 	    else {
-		$this->log->warn(" FALLBACK FAILED: $@");
+		$this->log->warn(" FALLBACK FAILED: $ev_error");
 	    }
 	}
 
@@ -1658,6 +1724,7 @@ sub read_type_info {
 }
 
 
+
 ########################################################################
 #
 #	Create a new document or a new version.
@@ -1697,18 +1764,18 @@ sub create_new_document {		# RS 20010819 - ok
 
         if($doctype->UNIVERSAL::can('create_new_version_handler')) {
             my $retval = $doctype->create_new_version_handler($fields, $this);
-            die "Doctype specific new_version handler failed" unless($retval == OBVIUS_OK);
+            die "Doctype specific new_version handler failed\n" unless($retval == OBVIUS_OK);
         }
 
-	die "Language code invalid\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
+	die "Language code invalid: $lang\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
 
 	die "Fields object has no param() method\n"
 	    unless (ref $fields and $fields->UNIVERSAL::can('param'));
 
 	my %status = $doctype->validate_fields($fields, $this);
-	warn "Invalid fields stored anyway: @{$status{invalid}}\n" if ($status{invalid});
-	warn "Missing fields stored undef: @{$status{missing}}\n" if ($status{missing});
-	warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+	$this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
+	$this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
+	$this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
 
 	my @fields = @{$status{valid}};
 	# Same as new_version:
@@ -1732,16 +1799,20 @@ sub create_new_document {		# RS 20010819 - ok
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Inserting new document ... failed ($@)");
-	($$error) = ($@ =~ /^(.*)\n/) if(defined($error));
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	my $error_msg = $ev_error;
+        ($error_msg) = ($error_msg =~ m/^(.*?)\n/) if $error_msg;
+        $this->{DB_Error} = $error_msg;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Inserting new document ... failed ($error_msg)");
+	$$error = $error_msg if ($error_msg and defined($error));
 	return wantarray ? () : undef;
     }
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new document ... done");
+    $this->register_modified(docid=>$docid);
     return wantarray ? ($docid, $version) : [$docid, $version];
 }
 
@@ -1776,15 +1847,15 @@ sub create_new_version {
             die "Doctype specific new_version handler failed" unless($retval == OBVIUS_OK);
         }
 
-	die "Language code invalid\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
+	die "Language code invalid: $lang\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
 
 	die "Fields object has no param() method\n"
 	    unless (ref $fields and $fields->UNIVERSAL::can('param'));
 
 	my %status = $doctype->validate_fields($fields, $this);
-	warn "Invalid fields stored anyway: @{$status{invalid}}\n" if ($status{invalid});
-	warn "Missing fields stored undef: @{$status{missing}}\n" if ($status{missing});
-	warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+	$this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
+	$this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
+	$this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
 
 	my @fields = @{$status{valid}};
 	# Equivalent to new_document:
@@ -1805,19 +1876,22 @@ sub create_new_version {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Inserting new version ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Inserting new version ... failed ($ev_error)");
 	return undef;
     }
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new version ... done");
+    $this->register_modified(docid=>$doc->Id);
     return $version;
 }
 
 
+
 ########################################################################
 #
 #	Delete a document, rename a document
@@ -1829,6 +1903,9 @@ sub delete_document {
 
     die "User $this->{USER} does not have access to delete the document."
 	unless $this->can_delete_document($doc);
+
+    my $doc_uri=$this->get_doc_uri($doc);
+    my $doc_parent_id=$doc->Parent;
 
     $this->db_begin;
     eval {
@@ -1865,20 +1942,29 @@ sub delete_document {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
 	$this->db_rollback;
-	$this->{LOG}->error("====> Deleting document ... failed ($@)");
+	$this->{LOG}->error("====> Deleting document ... failed ($ev_error)");
 	return undef;
     }
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Deleting document ... done");
+    # The document doesn't exist any more, so we say the uri of it is
+    # modified, and its parent:
+    $this->register_modified(url=>$doc_uri);
+    $this->register_modified(docid=>$doc->Parent);
     return 1;
 }
 
 sub rename_document {
-    my ($this, $doc, $new_uri) = @_;
+    my ($this, $doc, $new_uri, $errmsg) = @_;
+
+    unless ($this->can_rename_document($doc)) {
+        $$errmsg = 'User $this->{USER} does not have access to rename/move the document.' if(defined $errmsg);
+    }
 
     die "User $this->{USER} does not have access to rename/move the document."
 	unless $this->can_rename_document($doc);
@@ -1890,6 +1976,7 @@ sub rename_document {
     my @new_path=grep {defined $_ and $_ ne ''} split m!/!, $new_uri;
     foreach (@new_path) {
 	unless (/^[a-zA-Z0-9._-]+$/) {
+            $$errmsg = 'Bad characters in name' if(defined $errmsg);
 	    $this->log->warn("Bad characters in name");
 	    return undef;
 	}
@@ -1897,10 +1984,18 @@ sub rename_document {
     my $new_name=pop @new_path;
     my $new_path='/' . join '/', @new_path;
 
+    my $old_uri=$this->get_doc_uri($doc);
+    my $old_parent_id=$doc->Parent;
+
     # Find the new parent:
     my $new_parent=$this->lookup_document($new_path);
     unless ($new_parent) {
-	warn "Parent does not exist";
+        $$errmsg = 'Parent does not exist' if(defined $errmsg);
+        warn "Parent does not exist";
+	return undef;
+    }
+    unless ($this->can_rename_document_create($new_parent)) {
+        $$errmsg = 'You do not have access to move the document to this location.' if(defined $errmsg);
 	return undef;
     }
 
@@ -1915,7 +2010,8 @@ sub rename_document {
     foreach (@new_path_docs) {
 	next unless defined $_;
 	if ($_->Id eq $doc->Id) {
-	    $this->log->warn("Won't move document under itself");
+            $$errmsg = "It is not possible to move the document under itself" if(defined $errmsg);
+	    $this->log->warn("It is not possible to move the document under itself");
 	    return undef;
 	}
     }
@@ -1931,15 +2027,19 @@ sub rename_document {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Renaming/moving document ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Renaming/moving document ... failed ($ev_error)");
 	return undef;
     }
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Renaming/moving document ... done");
+    $this->register_modified(docid=>$old_parent_id);
+    $this->register_modified(url=>$old_uri); # Because the doc does no longer refers to this
+    $this->register_modified(docid=>$doc->Id);
     return 1;
 }
 
@@ -2002,16 +2102,18 @@ sub publish_version {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Publishing version ... failed ($@)");
-	($$error) = ($@ =~ /^(.*)\n/) if(defined($error));
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Publishing version ... failed ($ev_error)");
+	($$error) = ($ev_error =~ /^(.*)\n/) if(defined($error));
 	return undef;
     }
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done");
+    $this->register_modified(docid=>$vdoc->Docid);
 
     if($delayed_publish) {
 	$this->{LOG}->info("====> Setting 'at' autopublishing job...");
@@ -2033,11 +2135,24 @@ sub publish_version {
     return 1;
 }
 
+# unpublish_version - given a version object, attempts to unpublish
+#                     it. If the argument is not an object or if the
+#                     user does not have permissions to unpublish the
+#                     version a fatal error is triggered.
+#
+#                     (Unpublishing consists of deleting all publish
+#                     vfields and marking the version non-public in
+#                     the versions table).
 sub unpublish_version {
     my ($this, $vdoc) = @_;
 
+    croak "vdoc not an Obvius::Version\n"
+        unless (ref $vdoc and $vdoc->UNIVERSAL::isa('Obvius::Version'));
+
     die "User $this->{USER} does not have access to hide the document."
 	unless $this->can_unpublish_version($vdoc);
+
+    # XXX Should unpublish the public version on the same language as vdoc, if vdoc isn't the public one!!
 
     $this->db_begin;
     eval {
@@ -2062,19 +2177,21 @@ sub unpublish_version {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Unpublishing version ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Unpublishing version ... failed ($ev_error)");
 	return undef;
     }
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Unpublishing version ... done");
+    $this->register_modified(docid=>$vdoc->Docid);
     return 1;
 }
 
-
+
 ########################################################################
 #
 #                       Deleting a single version
@@ -2126,9 +2243,45 @@ sub delete_single_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Deleting single version ... done");
+    $this->register_modified(docid=>$vdoc->Docid);
     return 1;
 }
 
+
+
+########################################################################
+#
+#	Registering modifications
+#
+########################################################################
+
+# register_modified(%options) - register that a document was modified,
+#                               for later retrieval and processing.
+#                               %options can be url=>$string,
+#                               docid=>$number, or what have you -
+#                               it's up the the reader of the list to
+#                               decide whether it's useful information
+#                               or not. Please do not pass objects in;
+#                               keep the information simple scalars.
+sub register_modified {
+    my ($this, %options)=@_;
+
+    push @{$this->{MODIFICATIONS}}, \%options;
+}
+
+# list_modified() - returns a ref to a chronological list of hash-refs
+#                   containing the modifications registered on this
+#                   $obvius instance.
+#                   Notice that the referred docs can be brand new, deleted
+#                   (no longer existing!) or docs already present.
+#                   Do not remove or change information the list returned, please.
+sub list_modified {
+    my ($this)=@_;
+
+    return $this->{MODIFICATIONS};
+}
+
+
 ########################################################################
 ########################################################################
 #
@@ -2235,6 +2388,13 @@ sub get_fieldspecs_XXX {
     return $doctype->{FIELDSPECS};
 }
 
+sub get_editpage {
+    my ($this, $doctype, $pagename)=@_;
+
+    my $editpages=$this->get_editpages($doctype);
+    return (exists $editpages->{$pagename} ? $editpages->{$pagename} : undef);
+}
+
 sub get_editpages {
     my ($this, $doctype) = @_;
 
@@ -2283,9 +2443,13 @@ Obvius - Content Manager, database handling.
 
     $obvius->sanity_check($config); # Obsolete, not used.
 
+    my $vdoc=$obvius->get_version($doc, '2003-04-05 16:27:13');
+
     my $aref=$obvius->get_public_version($doc);
 
     my $value=$obvius->get_version_field($vdoc, 'title');
+
+    my $fieldspec=$obvius->get_fieldspec('keyword', $doctype);
 
 =head1 DESCRIPTION
 

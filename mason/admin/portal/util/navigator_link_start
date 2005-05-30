@@ -1,0 +1,36 @@
+<a onclick="<& navigator_link_start:onclick &>" href="<& navigator_link_start:href, %ARGS &>">\
+%
+%
+<%method href>\
+%
+<%args>
+$path=>undef
+$fieldname=>undef
+</%args>
+%
+./?obvius_app_navigator=1<% defined $fieldname ? '&amp;fieldname=' . $fieldname : '' %><% defined $path ? '&amp;path=' . $path : '' %>\
+%
+</%method>
+%
+%
+<%method onclick>\
+%
+<%args>
+$fieldname=>undef
+</%args>
+%
+javascript:return obvius_open_window(<% $href %>, 'obvius_navigator', 'width=700', 'height=432', 'status=yes');\
+%
+%
+<%init>
+my $href='this.href';
+$href="'" . $m->scomp('navigator_link_start:href', %ARGS) . "'" if (defined $fieldname);
+</%init>
+%
+</%method>
+%
+%
+<%args>
+$path=>undef
+$fieldname=>undef
+</%args>

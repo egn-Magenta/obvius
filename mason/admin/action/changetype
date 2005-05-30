@@ -1,0 +1,86 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'Change document type' &></h2>
+
+  <form action="./">
+    <div>
+      <label><& /shared/msg, text=>'Document type' &></label>
+      <& changetype:doctype_dropdown, %ARGS &>
+    </div>
+
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_changetype=>1 } &>
+      <& util/do_cancel, no_later_date=>1, do_text=>'Start editing' &>
+    </p>
+  </form>
+</div>
+%
+%
+<%method doctype_dropdown>
+%
+<& /shared/editengine2/type/util/dropdown, name=>'obvius_new_doctypeid', choices=>\@choices, labels=>\%labels, value=>$value || $doctype->Id &>
+%
+<%args>
+$limit=>undef
+$value=>undef
+</%args>
+%
+<%init>
+# XXX Needs to be limited by the docparms thing... (see obvius/mason/shared/widgets/doctype).
+
+my %labels=();
+my @choices=();
+
+my @doctypes;
+foreach my $type (@{$obvius->{DOCTYPES}}) {
+    next unless $type;
+    if ($obvius->get_editpages($type)) {
+        next if (defined $limit and !($type->{NAME} =~ /$limit/));
+        my %doctype = (
+                       id=>$type->{ID},
+                       name=>$type->{NAME},
+                       translated_name=> $m->scomp('/shared/msg', text=>$type->{NAME}),
+                      );
+        push @doctypes, \%doctype if $doctype{id};
+    }
+}
+@doctypes = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
+
+@choices=map { $labels{$_->{id}}=$_->{name}; $_->{id} } @doctypes;
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+</%method>
+%
+%
+%
+%
+<%method cancel>
+%
+<& /shared/set_status_message, message=>'Change type cancelled' &>
+%
+</%method>
+%
+%
+%
+<%method do>
+%
+<%args>
+$obvius_new_doctypeid=>undef
+</%args>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+$session->{action}='edit';
+$session->{obvius_new_doctypeid}=$obvius_new_doctypeid;
+$session->{obvius_version}=$vdoc->Version;
+return ''; # Let us redirect to edit...
+</%init>
+%
+</%method>

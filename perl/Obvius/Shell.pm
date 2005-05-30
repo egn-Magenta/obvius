@@ -53,6 +53,8 @@ use Obvius::Data;
 use Getopt::Std;
 use Getopt::Long;
 
+use Carp;
+
 use Data::Dumper;
 
 

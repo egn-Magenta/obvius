@@ -1,0 +1,81 @@
+<div class="obvius-tree obvius-link-decor">
+<& .display_subs, %ARGS, base_doc=>$root_doc, base_vdoc=>$root_vdoc, path=>\@path &>
+</div>
+
+%
+<%def .display_subs>
+%
+<%args>
+$base_doc
+$base_vdoc
+$path
+$fieldname=>undef
+$i=>undef
+$len=>34
+</%args>
+%
+  <ul>
+% $i=0 unless (defined $i);
+% my $top=shift @$path;
+% foreach my $sub (@$subs) {
+%     my $current=(defined $top and $top->Id eq $sub->{doc}->Id);
+%     my $post='';
+%     my $class=undef;
+%     if ($current) {
+%         $post=$m->scomp('.display_subs', %ARGS, base_doc=>$sub->{doc}, base_vdoc=>$sub->{vdoc}, path=>$path, i=>$i+1, len=>$len-3);
+%     }
+<& /portal/subdocs:display_sub,
+ sub=>$sub,
+ id=>'obvius-tree-' . $sub->{doc}->Id,
+ pre=>$m->scomp('.arrow', sub=>$sub, current=>$current),
+ args=>$m->scomp('util/args', %ARGS),
+ i=>$i++,
+ hide_icons=>1,
+ post=>$post,
+ len=>$len,
+&>
+% }
+  </ul>
+%
+<%init>
+my $subs=$m->comp('/portal/subdocs:get_subs', base_doc=>$base_doc, base_vdoc=>$base_vdoc);
+</%init>
+%
+</%def>
+%
+%
+<%def .arrow>\
+%
+<%args>
+$sub
+$current=>0
+</%args>
+%
+<img \
+%     if ($has_subs>0) {
+onclick="javascript:obvius_navigator_toggle('<% $obvius->get_doc_uri($sub->{doc}) %>', 'obvius-tree-<% $sub->{doc}->Id %>');" src="/pics/icons/<% $current ? 'down.png' : 'right.png' %>" alt="-&gt;" \
+%     }
+%     else {
+src="/pics/icons/none.png" alt="" \
+%     }
+width="7" height="7" />\
+%
+<%init>
+my $has_subs=scalar(@{$m->comp('/portal/subdocs:get_subs', base_doc=>$sub->{doc}, base_vdoc=>$sub->{vdoc})});
+</%init>
+%
+</%def>
+%
+%
+<%args>
+$fieldname=>undef
+</%args>
+%
+<%init>
+# XXX Plan: show root doc; unfold down to current doc
+
+my $root_doc=$obvius->get_root_document();
+my $root_vdoc=$obvius->get_public_version($root_doc) || $obvius->get_latest_version($root_doc);
+my @path=$obvius->get_doc_path($doc);
+shift @path; # Root
+</%init>

@@ -1,0 +1,267 @@
+% if ($r->notes('is_admin')) {
+<& .newsbox_admin, %ARGS &>\
+% }
+% else {
+<p>
+  <& /shared/msg, text=>'Sorry, nothing here.' &>
+</p>
+% }
+%
+%
+%
+<%def .newsbox_admin>\
+%
+<& headline &>
+
+<h2><& /shared/msg, text=>'Sort' &></h2>
+
+<form action="./" method="get">
+  <p>
+    <input type="hidden" name="mode" value="change_type" />
+% foreach my $option (@sort_options) {
+%     my $label='sort_' . $option->{name};
+    <input onclick="javascript:this.form.submit();" type="radio" name="type" value="<% $option->{name} |h %>" id="<% $label |h %>"<% $option->{name} eq $type ? ' checked="checked"': '' %> /><label for="<% $label %>"><& /shared/msg, text=>$option->{title} &></label><br />
+% }
+  </p>
+
+  <p>
+    <input id="sort_submit" type="submit" value="<& /shared/msg, text=>'Save' &>" />
+  </p>
+  <script type="text/javascript">
+    obvius_display_off('sort_submit');
+  </script>
+</form>
+
+% if ($entries) {
+%     if ($type eq 'manual_placement') {
+<& .newsitem_list_interface, output=>$output, entries=>$entries &>
+%     }
+%     else {
+<& .newsitem_list_interface, output=>$output, entries=>$entries, no_up_down=>1 &>
+%     }
+<h2><& /shared/msg, text=>'Box' &></h2>
+%     $obvius->get_version_fields($vdoc, [qw(max_entries)]);
+<& .display_newsbox, entries=>$entries, max=>$vdoc->field('max_entries') &>
+% }
+<%args>
+$output
+</%args>
+%
+<%init>
+my $type=$output->param('type');
+my $entries=$output->param('entries');
+
+# We don't know what documents in the cache are affected by an
+# update. Sadly. Pass a note on so people will know, though (they can
+# handle it in /admin/default/perform_action_local):
+# XXX This ought only to be set if an actual change is done:
+$r->notes('obvius_newsboxes_updated'=>1);
+
+# If there is a message, create a session, put it there, and redirect:
+if ($output->param('message') or $output->param('status')) {
+    # Create session:
+    my $session=$r->pnotes('site')->get_session();
+    $r->pnotes('obvius_session'=>$session);
+    $m->comp('/shared/set_status_message',
+             status=>$output->param('status') || 'OK',
+             message=>$output->param('message'))
+        if $output->param('message');
+    $r->pnotes('site')->release_session($session) if (defined $session);
+    $m->comp('/shared/redirect', location=>'./?obvius_session_id=' . $session->{_session_id});
+}
+</%init>
+%
+</%def> <%doc> .newsbox_admin </%doc>
+%
+%
+%
+%
+<%def .newsitem_list_interface>\
+%
+<h2><& /shared/msg, text=>$headline &></h2>
+
+<form class="obvius-manual-placement" action="./" method="get">
+  <div>
+    <input type="hidden" name="mode" value="change_placements" />
+    <table>
+      <tr>
+        <th><& /shared/msg, text=>'No.' &></th>
+        <th><& /shared/msg, text=>'Item' &></th>
+        <th></th>
+        <th><& /shared/msg, text=>'Start' &></th>
+        <th><& /shared/msg, text=>'End' &></th>
+      </tr>
+% my ($i, $on, $last)=(0, 0, 0);
+% my @list=@$entries;
+% push @list, { seq=>-1 } while(scalar(@list)<$vdoc->field('max_entries')); # Fill up to at least max
+% foreach my $entry (@list) {
+%     $i++;
+%     my ($add_message, $ignore_start, $ignore_end)=$m->comp('.entry_message', entry=>$entry);
+%     $on++ unless ($add_message);
+%     $last=$i if (!$last and $on==$vdoc->field('max_entries'));
+%     my @class=();
+%     push @class, ($i%2 ? "obvius-a" : "obvius-b");
+%     push @class, "obvius-last" if ($last==$i and $entry->{doc});
+%     push @class, "obvius-inactive" if ($add_message);
+      <tr<% scalar(@class) ? ' class="' . (join " ", @class) . '"' : '' %>>
+        <td><% $i %></td>
+        <td>
+          <& .newsitem_chooser, entries=>$entries, entry=>$entry, num=>$i, add_message=>$add_message &>
+        </td>
+        <td>
+% if ($no_up_down) {
+          <img class="obvius-inactive" width="7" height="6" src="/pics/icons/sort-down-inactive.png" alt="(<& /shared/msg, text=>'Down' &>)" />
+          <img class="obvius-inactive" width="7" height="6" src="/pics/icons/sort-up-inactive.png" alt="(<& /shared/msg, text=>'Up' &>)" />
+% }
+% else {
+          <a onclick="javascript:return news_down(<% $i %>);" href="./?mode=move_down&amp;newsitem=<% $i %>"><img width="7" height="6" src="/pics/icons/sort-down.png" alt="<& /shared/msg, text=>'Down' &>" /></a>
+          <a onclick="javascript:return news_up(<% $i %>);" href="./?mode=move_up&amp;newsitem=<% $i %>"><img width="7" height="6" src="/pics/icons/sort-up.png" alt="<& /shared/msg, text=>'Up' &>" /></a>
+% }
+        </td>
+        <td><& .display_newsitem_field, field=>'start', entries=>$entries, num=>$i &></td>
+        <td><& .display_newsitem_field, field=>'end', entries=>$entries, num=>$i &></td>
+        <td>
+          <a onclick="javascript:return news_delete(<% $i %>);" href="./?mode=delete&amp;newsitem=<% $i %>"><img class="delete" width="7" height="10" src="/pics/icons/delete.png" alt="<& /shared/msg, text=>'Delete' &>" title="<& /shared/msg, text=>'Remove' &>" /></a>
+        </td>
+      </tr>
+% }
+    </table>
+
+    <div>
+      <h3><& /shared/msg, text=>'Add item' &></h3>
+      <& /shared/msg, text=>'Path' &>: <input type="text" name="path" id="path" value="<% $output->param('path') || '' |h %>" />
+      <input onclick="javascript:return obvius_open_window('./?obvius_app_navigator=1&amp;path=/&amp;fieldname=path', 'obvius_navigator', 'width=700', 'height=432', 'status=yes');" type="button" value="Find ..." />
+      <input type="submit" name="add_item" value="<& /shared/msg, text=>'Add' &>" />
+    </div>
+
+    <input type="submit" value="<& /shared/msg, text=>'Save changes' &>" />
+  </div>
+</form>
+%
+<%args>
+$output
+$entries
+$headline=>'Edit'
+$no_up_down=>0
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(max_entries)]);
+</%init>
+%
+</%def> <%doc> .newsitem_list_interface </%doc>
+%
+%
+<%def .display_newsitem_field>\
+%
+<%args>
+$field
+$entries
+$num
+</%args>
+%
+<input type="text" name="<% $field %>_<% $num |h %>" id="<% $field %>_<% $num |h %>" value="<% $value %>" size="19" />\
+%
+<%init>
+my $value='';
+if ($num<=scalar(@$entries)) {
+    my $entry=$entries->[$num-1];
+    $value=$entry->{$field};
+}
+</%init>
+%
+</%def> <%doc> .display_newsitem_field </%doc>
+%
+%
+<%def .newsitem_chooser>\
+%
+<%args>
+$entries
+$num
+$entry
+$add_message=>''
+</%args>
+%
+% my $uri=($entry->{doc} ? $obvius->get_doc_uri($entry->{doc}) : '');
+<input type="hidden" name="newsitem_<% $num %>" id="newsitem_<% $num %>" value="<% $entry->{docid} |h %>" />
+% $obvius->get_version_fields($entry->{vdoc}, [qw(short_title)]) if ($entry->{vdoc});
+<a href="<% $prefix %><% $uri %>" id="newsitem_label_<% $num %>" title="<% $add_message %>">\
+<% $add_message ? '(' : '' %><& /shared/shorten, text=>($entry->{vdoc} ? ($entry->{vdoc}->field('short_title') || $entry->{vdoc}->Title) : ' ' ), len=>20, escape=>'h' &>\
+<% $add_message ? ')' : '' %>
+</a>\
+%
+</%def> <%doc> .newsitem_chooser </%doc>
+%
+%
+<%def .entry_message>\
+%
+<%args>
+$entry
+</%args>
+%
+<%init>
+my @add_messages=();
+my ($add_message, $add_start, $add_end)=('', '', '');
+push @add_messages, $m->scomp('/shared/msg/', text=>'before start date') if ($entry->{before_start});
+push @add_messages, $m->scomp('/shared/msg/', text=>'after end date') if ($entry->{expired});
+push @add_messages, $m->scomp('/shared/msg/', text=>'not public') if ($entry->{not_public});
+if (scalar(@add_messages)) {
+    $add_message=join ", ", @add_messages;
+    $add_start="<em><span title=\"$add_message\">(";
+    $add_end=' ' . $add_message . ')</span></em>';
+}
+
+return ($add_message, $add_start, $add_end);
+</%init>
+%
+</%def> <%doc> .entry_message </%doc>
+%
+%
+%
+<%def .display_newsbox>\
+%
+<%args>
+$entries
+$max=>5
+</%args>
+%
+%# <h3><% $vdoc->Title |h %></h3>
+
+% if (scalar(@$entries)) {
+<ul>
+%     my $i=0;
+%     foreach my $entry (@$entries) {
+%         my ($add_message, $add_start, $add_end)=$m->comp('.entry_message', entry=>$entry);
+%         $i++ unless ($add_message); # It counts - it's actually on the box. Whoa!
+  <li><% $add_start %><a href="<% $prefix %><% $obvius->get_doc_uri($entry->{doc}) %>"><% ($entry->{vdoc}->field('short_title') || $entry->{vdoc}->Title) |h %></a><% $add_end %>
+%         if ($vdoc->field('show_date')) {
+    <div class="date"><& /shared/display_date, date=>$entry->{vdoc}->field('docdate') || '' &></div>
+%         }
+%         if ($vdoc->field('show_teaser')) {
+    <div class="teaser"><& /shared/shorten_html, text=>$entry->{vdoc}->field('teaser') || '', length=>$vdoc->field('max_teaser') &></div>
+%         }
+  </li>
+%         last if ($i==$max);
+%     }
+</ul>
+% }
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title show_teaser show_date max_teaser)]);
+</%init>
+%
+</%def> <%doc> .display_newsbox </%doc>
+%
+%
+<%args>
+$output
+</%args>
+%
+%
+<%once>
+my @sort_options=(
+          { name=>'chronological',         title=>'Chronological', },
+          { name=>'reverse_chronological', title=>'Reverse chronological', },
+          { name=>'manual_placement',      title=>'Manual placement', },
+);
+</%once>

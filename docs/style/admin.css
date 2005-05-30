@@ -1,0 +1,1230 @@
+body {
+  margin: 0;
+  padding: 0;
+  color: #222;
+  background-color: #ddd;
+  border-bottom: 1px solid #aaa;
+
+  /* Is this problematic? Should we make divs that do not contain the
+     common-area, and style them instead? */
+  font-family: "Bitstream Vera Sans", Verdana, sans-serif;
+}
+
+div.obvius-link-decor a:link, div.obvius-link-decor a:visited {
+  color: #e06651;
+  text-decoration: none;
+}
+
+div.obvius-link-decor a:hover {
+  color: #f9715e;
+}
+
+
+div.obvius-link-decor a:active {
+   color: #a54b3d;
+}
+
+div.obvius-path a:active, div.obvius-path a:hover,
+ div.obvius-navigation a:active, div.obvius-subdocs a:hover,
+ div.obvius-newsboxes a:active, div.obvius-newsboxes a:hover,
+ div.obvius-tree a:active, div.obvius-tree a:hover,
+ div.obvius-command a:active, div.obvius-command a:hover { 
+  text-decoration: underline;
+}
+
+table.obvius {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.obvius, table.obvius tr, table.obvius td {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  vertical-align: top;
+}
+
+div.obvius-notificationarea {
+  color: #222;
+  background-color: #ddd;
+  padding-top: 0.4em;
+  padding-left: 210px;
+  padding-bottom: 0.2em;
+  border-bottom: 1px solid #aaa;
+  font-size: small;
+}
+
+div.obvius-notificationarea a:link, div.obvius-notificationarea a:visited {
+  color: #705900;
+  text-decoration: none;
+}
+
+div.obvius-notificationarea a:hover {
+  color: #916f00;
+  text-decoration: underline;
+}
+
+div.obvius-notificationarea a:active {
+  color: #a57f00;
+}
+
+div.obvius-message {
+  color: #222;
+  background-color: #fffcb8; /* Very saturated, draws attention. */
+}
+
+div.obvius-status-error {
+  font-weight: bold;
+}
+
+div.obvius-status-warning {
+  background-color: #f6f6e0; /* More saturated */
+}
+
+div.obvius-status-ok {
+  background-color: #f4f4eb; /* Less saturated */
+}
+
+div.obvius-handlingarea {
+  height: 80px;
+  font-size: small;
+}
+
+div.obvius-handlingarea, div.obvius-mainarea {
+  background-color: #eee;
+  font-size: small;
+}
+
+div.obvius-common {
+  font-size: medium;
+  min-height: 440px; /* Chosen somewhat arbitrarily; short pages should look nice */
+}
+
+h1.obvius-logo {
+  float: left;
+  margin: 0;
+  padding: 0;
+}
+
+h1.obvius-logo img {
+  display: block;
+  border: 0;
+}
+
+div.obvius-handling {
+  margin-left: 200px;
+  padding: 0.5em;
+}
+
+/* These classes on form-elements are slightly objectional, because
+   they are only here because the div-elements that surrounded them
+   was moved inside to validate.  Maybe they shouldn't have been,
+   maybe a block-element should have been added inside the form,
+   instead? */
+form.obvius-handling, form.obvius-navigation, form.obvius-editing, form.obvius-newsboxes {
+  margin: 0;
+}
+
+div.obvius-handling button, div.obvius-buttons button,
+div.obvius-handling input, div.obvius-buttons input,
+ div.obvius-command input, div.obvius-newsboxes input {
+  color: #222;
+  padding: 0;
+  margin-bottom: 2px;
+}
+
+div.obvius-handling button, div.obvius-buttons button,
+div.obvius-handling input, div.obvius-buttons input,
+ div.obvius-newsboxes input, form.obvius-navigator input {
+  border-width: 1px;
+  font-size: small;
+}
+
+div.obvius-handling button, div.obvius-buttons button,
+div.obvius-handling input, div.obvius-buttons input {
+  background-color: #ccc;
+}
+
+div.obvius-handling button.obvius-disabled, div.obvius-buttons button.obvius-disabled,
+div.obvius-editengine button.obvius-disabled,
+div.obvius-handling input.obvius-disabled, div.obvius-buttons input.obvius-disabled,
+div.obvius-newsboxes input.obvius-disabled {
+  color: #999;
+  background-color: #ddd; 
+  border-top: 1px solid #f2f2f2;
+  border-left: 1px solid #f2f2f2;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
+}
+
+span.obvius-accesskey {
+  text-decoration: underline;
+}
+
+div.obvius-command button.obvius-command-do,
+ div.obvius-edit button.obvius-command-do,
+ div.obvius-editengine button.obvius-command-do,
+ form.obvius-navigator button.obvius-command-do,
+div.obvius-command input.obvius-command-do,
+ div.obvius-edit input.obvius-command-do,
+ div.obvius-editengine input.obvius-command-do,
+ form.obvius-navigator input.obvius-command-do {
+  background-color: #90ce9f; /* Green */
+}
+
+div.obvius-command button.obvius-command-cancel,
+ div.obvius-edit button.obvius-command-cancel,
+ div.obvius-editengine button.obvius-command-cancel,
+ form.obvius-navigator button.obvius-command-cancel,
+div.obvius-command input.obvius-command-cancel,
+ div.obvius-edit input.obvius-command-cancel,
+ div.obvius-editengine input.obvius-command-cancel,
+ form.obvius-navigator input.obvius-command-cancel {
+  background-color: #d67d71; /* Red */
+}
+
+span.obvius-later-date {
+  display: none;
+}
+
+div.obvius-links {
+  float: right;
+  padding-top: 1em;
+  padding-right: 0.5em;
+}
+
+div.obvius-links ul {
+  list-style: none;
+  text-align: right;
+  padding: 0;
+  margin: 0;
+}
+
+div.obvius-links a {
+  color: #222;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+div.obvius-links a:hover, div.obvius-links a:active {
+  text-decoration: underline;
+}
+
+div.obvius-path {
+  clear: both;
+  background-color: white;
+  font-size: x-small;
+  padding: 0.5em;
+  border-top: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+}
+
+div.obvius-navigation {
+  float: left; /* This is for MSIE (see next css-rule) [otherwise mainarea gets put below navigation] */
+  width: 200px;
+  background-color: #f8f8f8;
+  padding-bottom: 0.5em;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  z-index: 20;
+}
+
+div[class].obvius-navigation { /* This is for standards compliant browsers */
+  float: none;
+  position: absolute;
+}
+
+div.obvius-common {
+  padding-top: 0.5em;
+  padding-left: 0.75em;
+  padding-right: 0.75em;
+  padding-bottom: 0.75em;
+}
+
+
+/* MSIE doesn't do child selectors: 
+div.obvius-navigation > div {
+  padding-left: 0.5em;
+}
+*/
+
+div.obvius-buttons, div.obvius-subdocs, div.obvius-versions, div.obvius-information {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-top: 0.75em;
+  padding-bottom: 0.5em;
+  border-top: 1px dashed #ddd;
+}
+
+div.obvius-buttons {
+  border: 0; /* Override */
+}
+
+div.obvius-buttons form p {
+  margin: 0;
+}
+
+div.obvius-buttons form p button, div.obvius-buttons form p input {
+  width: 100%;
+}
+
+div.obvius-editmenu {
+  float: right;
+  width: 115px;
+  padding-right: 8px;
+  margin-top: 1em;
+  clear: right;
+}
+
+div.obvius-editing, div.obvius-newsboxes {
+  background-color: #eee;
+}
+
+div.obvius-editing {
+}
+
+div.obvius-newsboxes {
+}
+
+div.obvius-editmenu div.obvius-filler {
+  height: 5em;
+  border-left: 1px solid #aaa;
+}
+
+div.obvius-editing ul, div.obvius-newsboxes ul {
+  margin-top: 0;
+  margin-left: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+div.obvius-editing ul li:first-child, div.obvius-newsboxes ul li:first-child { /* See below for MSIE */
+  border-top: 1px solid #aaa;
+}
+
+div.obvius-editing ul li, div.obvius-newsboxes ul li {
+  background-color: #f8f8f8;
+  padding-top: 5px;
+  padding-left: 5px;
+  padding-right: 0;
+  padding-bottom: 5px;
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  list-style: none;
+}
+
+div.obvius-newsboxes ul {
+  border-bottom: 1px solid #aaa;
+}
+
+div.obvius-newsboxes ul li {
+  border-bottom: none;
+}
+
+div.obvius-newsboxes ul li div {
+  display: none;
+  border: 0;
+  font-size: small;
+  padding-bottom: 0;
+}
+
+div.obvius-newsboxes ul li div input {
+  width: 90px;
+}
+
+div.obvius-editing ul a {
+  display: block;
+}
+
+div.obvius-editing ul li:hover {
+  background-color: white;
+}
+
+div.obvius-editing ul li.obvius-current, div.obvius-newsboxes ul li.obvius-current {
+  background-color: white;
+  border-left: 1px solid white;
+  padding-left: 0;
+  padding-right: 5px; /* Compensate for the lower left-padding, so total width is unchanged */
+}
+
+div.obvius-editing ul li.obvius-current a, div.obvius-newsboxes ul li.obvius-current a {
+  color: #592821;
+}
+
+div.obvius-newsboxes div {
+  background: #f8f8f8;
+  border: 1px solid #aaa;
+  padding: 5px 5px 5px;
+}
+
+div.obvius-newsboxes ul li input {
+  margin-left: 0;
+  margin-bottom: 0;
+}
+
+div.obvius-common {
+  background-color: white;
+  margin-left: 200px;
+  margin-right: 122px; /* +7 */
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+}
+
+div.obvius-subdocs img, div.obvius-tree img {
+  border: 0;
+}
+
+div.obvius-subdocs ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+div.obvius-subdocs ul ul {
+  padding: 0;
+}
+
+div.obvius-subdocs ul li {
+  margin: 0;
+}
+
+div.obvius-subdocs ul li a {
+  margin-left: 0.5em;
+}
+
+div.obvius-subdocs ul li a+a.obvius-current { /* See below for MSIE */
+  color: white; /* invert */
+  background-color: #d67d71;
+  padding-left: 0.2em;
+  padding-right: 0.1em;
+}
+
+div.obvius-subdocs ul li a+a.obvius-inactive { /* See below for MSIE */
+  background-color: #ccc;
+}
+
+div.obvius-subdocs ul li ul li {
+  padding-left: 0.4em;
+}
+
+.obvius-a {
+  background-color: #ededed;
+}
+
+.obvius-b {
+  background-color: #f4f4f4;
+}
+
+
+div.obvius-subdocs h3, div.obvius-versions h3, div.obvius-information h3 {
+  margin: 0;
+  margin-bottom: 0.5em;
+  font-size: small;
+}
+
+div.obvius-versions h3 {
+  display: inline;
+}
+
+div.obvius-versions form p select {
+  margin-left: 0.5em;
+  font-size: smaller;
+}
+
+div.obvius-information h4 {
+  margin: 0;
+  padding-top: 0.125em;
+  font-weight: normal;
+  font-size: small; /* For MSIE */
+}
+
+div.obvius-information div.obvius-version-info {
+  padding-left: 0.5em;
+}
+
+div.obvius-versions form, div.obvius-versions form p {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+div.obvius-versions table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+div.obvius-versions td, div.obvius-versions th {
+  margin: 0;
+  border: 0;
+}
+
+div.obvius-versions table th {
+  text-align: left;
+  font-weight: normal;
+  border-bottom: 1px dotted #aaa;
+}
+
+div.obvius-versions td.obvius-status {
+  text-align: center;
+}
+
+div.obvius-versions tr.obvius-extra td { /* MSIE won't put a border on top of a table row */
+  border-top: 1px dashed #aaa;
+}
+
+#obvius-annotation-text {
+  display: none;
+  color: #888;
+  padding-top: 0.2em;
+  padding-left: 0.4em;
+  padding-bottom: 0.4em;
+}
+
+span.obvius-diff-links {
+  color: #aaa;
+}
+
+div.obvius-inactive, span.obvius-inactive, p.obvius-inactive {
+  color: #aaa;
+}
+
+div.obvius-inactive a:link, div.obvius-inactive a:visited, p.obvius-inactive a:visited {
+  color: #aaa;
+}
+
+div.obvius-inactive ul li a:link, div.obvius-inactive ul li a:visited, p.obvius-inactive ul li a:visited {
+  color: #aaa;
+}
+
+table.obvius-diff th {
+  background: #ffffff;
+  text-align: left;
+}
+
+table.obvius-diff th h3 {
+  margin-bottom: 0;
+}
+
+table.obvius-diff td {
+  border: 2px solid white;
+  background: #f2f2f2;
+  vertical-align: top;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  font-family: monospace;
+}
+
+span.obvius-diff-changed { background-color: #ffefd5; } /* Yellow */
+span.obvius-diff-removed { background-color: #ffcabf; } /* Red    */
+span.obvius-diff-added { background-color: #c2f9c2; }   /* Green  */
+
+div.obvius-diff-legend {
+  width: 5em;
+  background: white;
+  border: 1px solid #aaa;
+  margin-top: 2em;
+  margin-left: auto;
+  margin-right: 0.5em;
+  padding: 1em;
+  line-height: 1.5;
+  font-family: monospace;
+}
+
+div.obvius-editengine h2, div.obvius-command h2 {
+  margin-top: 0;
+  margin-left: 0.25em;
+  margin-bottom: 0.25em;
+  font-size: medium;
+}
+
+div.obvius-editengine input, div.obvius-command input, div.obvius-command textarea { 
+  border-width: 1px;
+}
+
+div.obvius-editengine-field label {
+  font-size: small;
+}
+
+table.obvius-editengine-list {
+  font-size: small;
+  border-collapse: collapse;
+}
+
+table.obvius-editengine-list tr.obvius-editengine-pagelist td {
+  color: #aaa;
+  text-align: center;
+}
+
+table.obvius-editengine-list th {
+  text-align: left;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.25em;
+  white-space: nowrap;
+}
+
+table.obvius-editengine-list tr td ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+table.obvius-editengine-list th a img {
+  border: none;
+  padding-left: 0.5em;
+  padding-bottom: 0.1em;
+}
+
+table.obvius-editengine-list td {
+  vertical-align: top;
+  padding: 0.5em;
+  border-right: 1px solid white; /* MSIE interprets 'transparent' as black - so hardcode white */
+}
+
+table.obvius-editengine-list td.obvius-editengine-datetime, table.obvius-editengine-list td.obvius-editengine-line {
+  white-space: nowrap;
+}
+
+table.obvius-editengine-list td.obvius-editengine-integer {
+  text-align: right;
+}
+
+div.obvius-editengine-a, div.obvius-editengine-b {
+  background: #f2f2f2;
+  padding-left: 0.5em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  margin: 2px;
+}
+
+div.obvius-editengine-confirm {
+  padding-left: 0.5em;
+  padding-top: 0.25em;
+}
+
+div.obvius-editengine-immutable {
+  color: #888;
+}
+
+div.obvius-editengine textarea {
+  width: 95%;
+}
+
+div.obvius-editengine form button, div.obvius-editengine form input {
+  border-width: 1px;
+  font-size: small;
+}
+
+div.obvius-editengine form div.obvius-type-category {
+  margin: 0;
+  padding: 0;
+}
+
+div.obvius-editengine form div.obvius-type-category select {
+  width: 30em;
+}
+
+div.obvius-editengine form div.obvius-type-category div.obvius-field-shadow {
+  display: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+div.obvius-editengine form div, div.obvius-command form div {
+  padding-bottom: 0.75em;
+  font-size: small;
+}
+
+div.obvius-editengine form div.obvius-editengine-embedded-scheme {
+  margin-top: -0.75em;
+}
+
+div.obvius-editengine form div.obvius-editengine-embedded-scheme div {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+div.obvius-command form p {
+  padding-bottom: 0.5em;
+  margin-top: 0.75em;
+  margin-bottom: 0;
+  font-size: small;
+}
+
+div.obvius-command h2 {
+  font-size: medium;
+}
+
+div.obvius-command form div, form.obvius-navigator div.obvius-quickcreate div,
+div.obvius-command form div div {
+  background-color: #f7f7ef;
+  padding-top: 0.5em;
+  padding-left: 0.5em;
+  margin-bottom: 1px;
+}
+
+div.obvius-editengine form div.obvius-editengine-confirmation div {
+  background-color: #f7f7ef;
+  padding-top: 0.5em;
+  padding-left: 0.5em;
+  margin-bottom: 1px;
+}
+
+div.obvius-editengine form div.obvius-editengine-confirmation div div {
+  padding: 0; /* Don't do double indent */
+  margin: 0;
+}
+
+div.obvius-editengine form div.obvius-editengine-confirmation div div table {
+  padding-top: 0.5em; /* Do double indent tables */
+  padding-left: 0.5em;
+}
+
+div.obvius-editengine div.obvius-editengine-anonymous-functions {
+  margin-top: 0.5em;
+}
+
+div.obvius-editengine div.obvius-editengine-anonymous-functions a,
+ div.obvius-editengine div.obvius-editengine-anonymous-functions a:hover,
+ div.obvius-editengine div.obvius-editengine-anonymous-functions a:visited {
+  color: #222;
+  background-color: #ddd;
+  border-top: 1px solid #f4f4f4;
+  border-left: 1px solid #f4f4f4;
+  border-right: 1px solid #797979;
+  border-bottom: 1px solid #797979;
+  padding-top: 0.1em;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  padding-bottom: 0.1em;
+  font-size: small;
+}
+
+div.obvius-editengine div.obvius-editengine-anonymous-functions a:active {
+  border-top: 1px solid #797979;
+  border-left: 1px solid #797979;
+  border-right: 1px solid #f4f4f4;
+  border-bottom: 1px solid #f4f4f4;
+}
+
+
+div.obvius-command form div, form.obvius-navigator div.obvius-quickcreate div {
+  padding-right: 0.25em;
+  padding-bottom: 0.5em;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+div.obvius-command form div label {
+  display: block;
+  font-size: small;
+}
+
+div.obvius-editengine form div h3 {
+  margin-top: 0;
+  margin-left: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+div.obvius-editengine form div h4 {
+  margin-top: 0.1em;
+  margin-bottom: 0.5em;
+}
+
+div.obvius-editengine form div div.obvius-status-not-valid label {
+  font-weight: bold;
+}
+
+div.obvius-editengine form div div.obvius-status-not-valid input {
+  background-color: #fffeea;
+  border-width: 2px;
+}
+
+div.obvius-editengine form div div select {
+  margin-top: 0.5em;
+}
+
+div.obvius-editengine form div.obvius-edit-navigation {
+  float: right;
+  background: transparent;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+div.obvius-editengine form div.obvius-edit-navigation button {
+  margin: 0;
+  margin-left: 0.15em;
+  margin-right: 0.15em;
+  padding: 0;
+  padding-left: 0.15em;
+  padding-right: 0.15em;
+}
+
+div.obvius-editengine form div.obvius-edit-navigation span {
+  padding-right: 0.5em;
+}
+
+div.obvius-command button {
+  border-width: 1px;
+}
+
+div.obvius-command-document-information {
+  font-size: smaller;
+}
+
+div.obvius-command-document-information div {
+  padding-left: 0.25em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+div.obvius-command-document-information div form {
+  margin: 0;
+  padding-top: 0.5em;
+}
+
+div.obvius-command-document-information label {
+  display: block;
+}
+
+div.obvius-command-document-information span {
+  color: #888;
+}
+
+div.obvius-command-document-information span.obvius-rule-used {
+  color: black;
+}
+
+div.obvius-command-document-information span.obvius-rule-invalid {
+  color: red; /* red */
+  font-style: italic;
+}
+
+p.obvius-warning {
+  color: #220000;
+  background: #f6f6e0;
+  border: 1px solid #dec348;
+  margin-top: 1em;
+  padding: 0.75em;
+  width: 40em;
+}
+
+/* The Newsbox document type is for admin only, so it gets to use the
+   'obvius-' prefix on its classes: */
+form.obvius-manual-placement div table {
+  border-collapse: collapse;
+}
+
+form.obvius-manual-placement div table th {
+  text-align: left;
+  padding-bottom: 0.25em;
+}
+
+form.obvius-manual-placement div table td {
+  padding: 0.125em;
+  padding-right: 1em;
+  vertical-align: baseline; /* Back to default */
+}
+
+/* For other browsers than MSIE, set the first columns text-align to right: */
+form[class].obvius-manual-placement div table td {
+  text-align: right;
+}
+
+form[class].obvius-manual-placement div table td+td {
+  text-align: left;
+}
+
+form.obvius-manual-placement div table td img, table.obvius-app-seqlist tr td ul li.current img {
+  background-color: #ddd;
+  border-width: 1px;
+  border-style: outset;
+  border-color: #333;
+  padding: 3px;
+  vertical-align: middle;
+}
+
+form.obvius-manual-placement div table td img.obvius-inactive {
+  border-style: outset;
+  border-color: #999;
+}
+
+form.obvius-manual-placement div table td img.delete {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+form.obvius-manual-placement div table tr.obvius-a td {
+  background-color: #f6f6f6;
+}
+
+form.obvius-manual-placement div table tr.obvius-b td {
+  background-color: #fcfcfc;
+}
+
+form.obvius-manual-placement div table tr.obvius-inactive td {
+  background-color: #eaeaea;
+}
+
+form.obvius-manual-placement div table tr.obvius-inactive td input {
+  background-color: #eaeaea;
+}
+
+form.obvius-manual-placement table tr.obvius-last td {
+  border-bottom: 1px dashed #aaa;
+}
+
+form.obvius-manual-placement div div h3 {
+  margin-top: 0.25em;
+}
+
+form.obvius-manual-placement div div {
+  margin-bottom: 0.75em;
+}
+
+/* Navigator style: */
+body.obvius-navigator {
+  background-color: white;
+  background-image: url(/pics/icons/navigator-background.png);
+  background-repeat: repeat-y;
+  border: 0;
+}
+
+form.obvius-navigator {
+  margin: 0;
+  padding: 0;
+}
+
+form.obvius-navigator div.obvius-toolbar {
+  background-color: #eee;
+  padding: 0.25em;
+}
+
+form.obvius-navigator div.obvius-toolbar fieldset {
+  display: inline;
+  border: 0;
+  padding: 0;
+  margin-left: 3em;
+  vertical-align: bottom;
+}
+
+form.obvius-navigator div.obvius-toolbar span.obvius-search {
+  float: right;
+}
+
+form.obvius-navigator div.obvius-toolbar input.obvius-new {
+  margin-left: 1em;
+}
+
+form.obvius-navigator div.obvius-toolbar div {
+  position: relative;
+  display: inline;
+}
+
+form.obvius-navigator #obvius-toolbar-new {
+  display: none;
+  position: absolute;
+  top: 1.85em;
+  left: -1.8em;
+  background: white;
+  border-bottom: 1px solid #666;
+  border-right: 1px solid #666;
+  font-size: small;
+  padding: 0;
+}
+
+form.obvius-navigator #obvius-toolbar-new ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.25em;
+  border: 1px solid #aaa;
+}
+
+form.obvius-navigator #obvius-toolbar-new ul li {
+  padding: 0.1em;
+}
+
+form.obvius-navigator #obvius-toolbar-new ul li a:hover {
+  background-color: #eee;
+}
+
+form.obvius-navigator div.obvius-current-document {
+  background-color: white;
+  margin-left: 15em; /* obvius-tree width */
+  padding-left: 0.25em;
+  border-left: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+}
+
+form.obvius-navigator div.obvius-current-document table tr {
+  font-size: small;
+}
+
+form.obvius-navigator div.obvius-current-document input {
+  float: right;
+  margin-top: 0.2em;
+  margin-right: 0.2em;
+}
+
+form.obvius-navigator div.obvius-current-document table tr,
+  form.obvius-navigator div.obvius-subdocs table tr {
+  vertical-align: top;
+}
+
+form.obvius-navigator div.obvius-current-document table tr th {
+  text-align: left;
+}
+
+form.obvius-navigator div.obvius-subdocs {
+  background-color: white;
+  margin-top: 0;
+  margin-left: 15em; /* width of obvius-tree */
+  border: 0;
+  border-left: 1px solid #aaa;
+}
+
+form.obvius-navigator div.obvius-subdocs table {
+  font-size: small;
+  border-collapse: collapse;
+  width: 99%; /* 100% makes Microsoft Internet Explorer moved the tabel down under the left menu */
+}
+
+form.obvius-navigator div.obvius-subdocs table tr td {
+  padding: 0.2em;
+}
+
+form.obvius-navigator div.obvius-subdocs table tr.obvius-a {
+  background-color: #f8f8f8;
+}
+
+form.obvius-navigator div.obvius-subdocs table tr.obvius-b {
+  background-color: #fff;
+}
+
+/* Maybe this is just confusing? */
+/*
+form.obvius-navigator div.obvius-subdocs table tr.obvius-a:hover,
+  form.obvius-navigator div.obvius-subdocs table tr.obvius-b:hover {
+  background-color: #eee;
+}
+*/
+
+form.obvius-navigator div.obvius-subdocs table tr th {
+  text-align: left;
+}
+
+form.obvius-navigator div.obvius-tree {
+  float: left;
+  background-color: #f8f8f8;
+  border-right: 1px solid #aaa;
+  margin-top: 0;
+  width: 15em; /* obvius-tree width */
+}
+
+form.obvius-navigator div.obvius-tree ul {
+  list-style: none;
+  margin: 0;
+  padding-top: 0.5em;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  padding-bottom: 0.5em;
+  font-size: small;
+}
+
+form.obvius-navigator div.obvius-tree ul ul {
+  padding: 0;
+  margin-left: 1em;
+}
+
+form.obvius-navigator div.obvius-tree ul li {
+  padding-top: 0.15em;
+  padding-bottom: 0.1em;
+}
+
+form.obvius-navigator div.obvius-tree ul li.obvius-current a {
+  color: white; /* Invert */
+  background-color: #d67d71;
+  padding-left: 0.2em;
+  padding-right: 0.1em;
+}
+
+/* Undo obvius-current for lower level documents (lists): */
+form.obvius-navigator div.obvius-tree ul li.obvius-current ul li a {
+  color: #e06651; /* Same colour as links usually are */
+  background-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+form.obvius-navigator div.obvius-tree ul li img {
+  margin-top: 0.2em;
+  margin-right: 0.5em;
+}
+
+form.obvius-navigator div.obvius-quickcreate {
+  background-color: white;
+  padding-top: 0.5em;
+  padding-left: 0.75em;
+  padding-right: 2em;
+  padding-bottom: 1em;
+}
+
+form.obvius-navigator div.obvius-quickcreate h2 {
+  margin: 0;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  font-size: smaller;
+}
+
+form.obvius-navigator div.obvius-quickcreate label {
+  display: block;
+  font-size: smaller;
+}
+
+
+/* Assignment of sequence number */
+table.obvius-app-seqlist {
+  width: 100%;
+  font-size: small;
+  background-color: #eee;
+  border-collapse: separate;
+}
+
+table.obvius-app-seqlist tr td.seq  {
+  padding-right: 1em;
+  text-align: right;
+  border-right: 2px solid #aaa;
+}
+
+table.obvius-app-seqlist tr td ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+table.obvius-app-seqlist tr td ul li {
+  padding: 0.2em;
+}
+
+table.obvius-app-seqlist tr td ul li.current {
+  color: white;
+  background: #d67d71;
+}
+
+table.obvius-app-seqlist tr td ul li.current span {
+  position: absolute;
+  right: 0.75em;
+}
+
+/* Versionlist style: */
+div.obvius-app-versionlist {
+  font-size: small;
+}
+
+div.obvius-app-versionlist form p {
+  display: block;
+  padding-top: 0.5em;
+}
+
+/* TinyMCE editor: */
+div.obvius-editengine table.mceEditor td.mceToolbarTop {
+  color: #222;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #ccc;
+}
+
+div.obvius-editengine table.mceEditor {
+  color: #222;
+  background-color: white;
+}
+
+/* Hacks for Microsoft Internet Explorer: */
+
+/* MSIE does not support first-child: */
+div.obvius-editing ul li.obvius-first-child, div.obvius-newsboxes ul li.obvius-first-child {
+  border-top: 1px solid #aaa;
+}
+
+/* Microsoft Internet Explorer does not understand adjacent siblings: */
+div.obvius-subdocs ul li a.obvius-current {
+  background-color: #d67d71;
+  padding-left: 0.2em;
+  padding-right: 0.1em;
+}
+
+div.obvius-subdocs ul li a.obvius-current:link, div.obvius-subdocs ul li a.obvius-current:visited {
+  color: white; /* invert */
+}
+
+div.obvius-subdocs ul li a.obvius-inactive {
+  background-color: #ccc;
+}
+
+/* This coaxes Microsoft Internet Explorer into placing the eye-icons
+   in the version-box on the baseline: */
+div.obvius-versions form table tr td img {
+  vertical-align: 0;
+}
+
+/* MSIE puts obvius-mainarea in front of obvius-editing when
+   obvius-common has a height (and that's needed for the workaround
+   below: */
+div.obvius-mainarea {
+  background-image: url(/pics/icons/tabborder-right.png);
+  background-repeat: repeat-y;
+  background-position: right;
+}
+
+div.obvius-common {
+  height: 440px;
+}
+
+div[class].obvius-common { /* Set height back to auto (MSIE doesnt */
+  height: auto;            /* understandd attribute-selectors): */
+}
+
+div.obvius-common p.obvius-notice {
+ color: gray;
+ background: inherit;
+ border: 1px solid lightgray;
+ margin-top: 2em;
+ padding: 0.75em;
+ width: 40em;
+}
+
+/* Hide from MSIE5-mac. Only MSIE-win sees this. \*/
+ 
+* html div.obvius-navigation {
+  margin-right: -4px;
+  }
+
+* html div.obvius-editmenu {
+  margin-left: -4px;
+  width: 115px;
+  }
+
+* html div.obvius-common {
+  margin-left: 0;
+  margin-right: 120px;
+  border-right: 0;
+  }
+ 
+
+.missing {
+ background: orange;
+}
+
+.malformated {
+ background: red;
+}
+/* End hide from IE5/mac */
+
+/*
+ Local Variables: ***
+ mode: c ***
+ End: ***
+*/

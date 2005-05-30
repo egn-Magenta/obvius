@@ -51,6 +51,9 @@ use Digest::MD5 qw(md5_hex);
 
 use POSIX qw(strftime);
 
+use XML::Simple;
+use Unicode::String qw(utf8 latin1);
+
 
 ########################################################################
 #
@@ -94,6 +97,58 @@ sub report_benchmarks {
 
 ########################################################################
 #
+#	Language handling
+#
+########################################################################
+
+# get_languages - returns a hash with keys being languages and values
+# being their priority. The higher value the more preferred
+
+sub get_language_preferences {
+    my ($this, $req)=@_;
+
+    my %lang;
+    my $accept_language = $req->headers_in->{'Accept-Language'};
+    if ($accept_language) {
+        %lang = split_language_preferences($accept_language);
+
+        # Add "Accept-Language" to the "Vary" header:
+        # See: <http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44>
+        my @vary;
+        push(@vary, $req->header_out('Vary')) if $req->header_out('Vary');
+        push @vary, "Accept-Language";
+        $req->header_out('Vary', join(', ', @vary));
+    }
+
+    # The cookie "lang" overrides browser-settings:
+    my $cookies=Apache::Cookie->fetch; # XXX Called in create_input_object as well...
+    my $lang_cookie=$cookies->{lang};
+    my $lang=($lang_cookie ? $lang_cookie->value() : undef);
+
+    if ($lang) {
+        my %user_pref = split_language_preferences($lang, 2000); # Override
+        for (keys %user_pref) {
+            $lang{$_} = $user_pref{$_};
+        }
+    }
+
+    # Find out if somebody specified ?lang=XX on the URL, if so, give it even more weight:
+    my %args=$req->args;
+    if ($args{lang}) {
+        my %user_pref = split_language_preferences($args{lang}, 4000); # Override
+        for (keys %user_pref) {
+            $lang{$_} = $user_pref{$_};
+        }
+    }
+
+    return \%lang;
+}
+
+
+
+
+########################################################################
+#
 #	Obvius interface methods
 #
 ########################################################################
@@ -103,6 +158,9 @@ sub report_benchmarks {
 #                  and fieldspecs returns an obvius-object if a
 #                  connection could be made. The object is also put on
 #                  notes, key 'obvius'. Returns undef on error.
+#
+#                  Note that this method is also present in
+#                  WebObvius::Site::MultiMason.
 sub obvius_connect {
     my ($this, $req, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs) = @_;
 
@@ -113,6 +171,7 @@ sub obvius_connect {
 
     $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs, log => $this->{LOG});
     return undef unless ($obvius);
+    $obvius->param(LANGUAGES=>$this->get_language_preferences($req));
 
     $obvius->cache(1);
     $req->register_cleanup(sub { $obvius->cache(0); $obvius->{DB}=undef; 1; } );
@@ -238,7 +297,10 @@ sub redirect {
 }
 
 sub set_expire_header {
-    my ($this, $req, $output) = @_;
+    my ($this, $req, %options) = @_;
+
+    my $output=$options{output};
+    my $ttl=$options{expire_in} || 15*60; # 15 minutes time to live default
 
     if ($req->no_cache) {
 	my $agent = $req->headers_in->{'User-Agent'};
@@ -260,21 +322,19 @@ sub set_expire_header {
 				       ]);
 	}
     } else {
-	# 15 minutes time to live
-	$req->header_out('Expires', ht_time($req->request_time + 15*60));
+	$req->header_out('Expires', ht_time($req->request_time + $ttl));
 
 	# If another Cache-Control header was specified, use that one:
-	my $cache_control = $req->header_out('Cache-Control');
-
-	unless($cache_control) {
-	    $req->header_out('Cache-Control', "max-age=" . 15*60);
-	    $cache_control="max-age=" . 15*60;
-	}
+        my $cache_control=$req->header_out('Cache-Control');
+        unless ($cache_control) {
+            $cache_control="max-age=" . $ttl;
+            $req->header_out('Cache-Control', $cache_control);
+        }
 
 	if (defined $output) {
 	    $output->param(http_equiv=>[
 					{ name=>'Expires',
-					  value=>ht_time($req->request_time + 15*60),
+					  value=>ht_time($req->request_time + $ttl),
 					},
 					{ name=>'Cache-Control',
 					  value=>$cache_control,
@@ -317,7 +377,12 @@ sub create_input_object {
     }
     $input->param('OBVIUS_HEADERS_IN'=>{ $req->headers_in() });
     if (my $obvius_session_id=$req->param('obvius_session_id')) {
-	my $session=$this->get_session($obvius_session_id);
+        # Notice that the admin/public-Mason must have released the
+        # session for the common-part to grab it here. Symptoms of
+        # this not happening is a browser that keeps spinning, the
+        # webserver not returning anything.
+        warn "The session $obvius_session_id has not been released by admin/public-Mason; WebObvius::Site->create_input_object hangs now!" if ($req->pnotes('obvius_session'));
+        my $session=$this->get_session($obvius_session_id);
 	$input->param(SESSION=>$session);
     }
     my @uploads = $req->upload;
@@ -335,6 +400,7 @@ sub create_input_object {
                 $data->param(width => $w);
                 $data->param(height => $h);
             }
+            # XXX This naming, _incoming_, is questionable, to say the least:
             $input->param("_incoming_" . $_->name => $data);
         }
     }
@@ -444,9 +510,18 @@ sub generate_page {
 
 	$output->param('IS_ADMIN'=>$input->param('IS_ADMIN'));
 
+        # If there was a session on the input object, release it now
+        # that the operation, for which $input is input, has run:
 	if (my $session=$input->param('SESSION')) {
 	    $this->release_session($session);
 	}
+
+        # If the operation has put data in the output-objects
+        # SESSION-param (which does not correspond to a real session),
+        # create a session for them to be stored in, release it, and
+        # set SESSION_ID, so the id can be used by the template system
+        # for making links etc.: See
+        #  <http://cvs.magenta-aps.dk/cgi-bin/viewcvs.cgi/mcms/perl/WebMCMS/Site/Site.pm?rev=1.2.2.20&content-type=text/vnd.viewcvs-markup>
 	if (my $session_data=$output->param('SESSION')) {
 	    my $session=$this->get_session();
 	    foreach (keys %$session_data) {
@@ -470,7 +545,7 @@ sub generate_page {
 	}
 
 	$req->no_cache(1) unless ($doctype->is_cacheable);
-	$this->set_expire_header($req, $output);
+	$this->set_expire_header($req, output=>$output);
     }
     print STDERR "GENERATE_PAGE: expanding site outputs\n" if ($this->{DEBUG});
 
@@ -584,8 +659,9 @@ sub get_session {
 		   LockDirectory => $this->{EDIT_SESSIONS} . '/LOCKS',
 		 };
     };
-    if ($@) {
-	warn "Can't get session data $id: $@\n\t";
+    my $error=$@;
+    if ($error) {
+	warn "Can't get session data $id: $error\n\t";
 	return undef;
     }
 
@@ -689,6 +765,163 @@ sub expire_public_login_cookie {
     $cookie->bake;
 }
 
+
+########################################################################
+#
+#	Translations
+#
+########################################################################
+
+sub utf8_to_latin1 {
+    return utf8(shift || '')->latin1;
+}
+
+sub split_language_preferences {
+    my ($lang, $default) = @_;
+
+    my %weights;
+    for (split(/\s*,\s*/, $lang)) {
+        if (/^(.+);\s*q=(.*)/) {
+            $weights{$1} ||= int($2*1000);
+        } else {
+            $weights{$_} ||= $default || 1000;
+        }
+    }
+
+    return %weights;
+}
+
+sub read_translations {
+    my ($this, $r, $file, $lang, $obvius) = @_;
+
+    return if ($obvius->{TRANSLATIONS});
+
+    my %lang;
+    if ($lang =~ /^=/) {
+        %lang = split_language_preferences(substr($lang, 1));
+    } else {
+        if ($r) {
+            my $accept_language = $r->headers_in->{'Accept-Language'};
+            #print STDERR "Accept-Language = $accept_language\n";
+            if ($accept_language) {
+                %lang = split_language_preferences($accept_language);
+
+                my @vary;
+                push(@vary, $r->header_out('Vary')) if $r->header_out('Vary');
+                push @vary, "Accept-Language";
+                $r->header_out('Vary', join(', ', @vary));
+
+            }
+
+	    my %site_pref = split_language_preferences($lang, 1);
+	    for (keys %site_pref) {
+		$lang{$_} ||= $site_pref{$_};
+	    }
+        }
+	
+    }
+
+#    for (keys %lang) {
+#        print STDERR "LANG WEIGHT $_ => $lang{$_}\n";
+#    }
+
+    my @path;
+    foreach (@{$r->pnotes('site')->{COMP_ROOT}}) {
+	foreach my $a ($_) {
+	    push @path, $a->[1];
+	}
+    }
+
+    # If the translation cache-index doesn't exist, create an empty one:
+    if (!defined $r->pnotes('site')->{TRANSLATIONS}) {
+        $r->pnotes('site')->{TRANSLATIONS}={ '_internal_obvius_timestamp'=>time() };
+    }
+    else { # Check if cache is up-to date:
+        my $changed=0;
+        my $timestamp=$r->pnotes('site')->{TRANSLATIONS}->{_internal_obvius_timestamp};
+
+        # Check if the files have been changed on disk; .xml and _local.xml postfixes:
+        foreach my $postfix qw(.xml _local.xml) {
+            foreach my $path (@path) {
+                if (-e "$path/$file$postfix" and (stat "$path/$file$postfix")[9]>$timestamp) {
+                    $changed=1;
+                    last;
+                }
+            }
+            last if ($changed);
+        }
+
+        if ($changed) { # If not; reset cache to nothing:
+            $r->pnotes('site')->{TRANSLATIONS}={ '_internal_obvius_timestamp'=>time() };
+        }
+    }
+
+    # Determine key to cache-index:
+    my $lang_fingerprint=join ":", map { "$_:$lang{$_}" } sort (keys %lang);
+
+    if($r->pnotes('site')->{TRANSLATIONS}->{$lang_fingerprint}) {
+        $obvius->{TRANSLATIONS} = $r->pnotes('site')->{TRANSLATIONS}->{$lang_fingerprint};
+        return;
+    }
+
+    my $xmldata = eval {
+        XMLin($file . ".xml",
+              searchpath=>\@path,
+              keyattr=>{translation=>'lang'},
+              parseropts => [ ProtocolEncoding => 'ISO-8859-1' ]
+             );
+    };
+    if ($@) {
+        warn "Translation file $file: XML error: $@";
+        return;
+    }
+    $xmldata->{text}=[$xmldata->{text}] if (ref $xmldata->{text} eq 'HASH');
+
+    # Read the _local.xml if it's there:
+    my $local_xmldata = eval {
+        XMLin($file . "_local.xml",
+              searchpath=>\@path,
+              keyattr=>{translation=>'lang'},
+              parseropts => [ ProtocolEncoding => 'ISO-8859-1' ]
+             );
+    };
+    unless ($@) {
+	if (my $ref=ref $local_xmldata->{text}) {
+	    # Merge it:
+	    my $local=($ref eq 'HASH' ? [$local_xmldata->{text}] : $local_xmldata->{text});
+	    $xmldata->{text}=[ @{$xmldata->{text}}, @{$local} ];
+	}
+    }
+
+    $obvius->{TRANSLATIONS} = {} unless defined($obvius->{TRANSLATIONS});
+    my $translations = $obvius->{TRANSLATIONS};
+
+    for my $text (@{$xmldata->{text}}) {
+        next unless ($text->{key});
+
+        my $weight = 0;
+        my $language;
+
+        for (keys %lang) {
+            if ($lang{$_} > $weight and exists $text->{translation}->{$_}) {
+                $weight = $lang{$_};
+                $language = $_;
+            }
+        }
+
+        if (defined $language and exists $text->{translation}->{$language}) {
+            my $s = utf8_to_latin1($text->{translation}->{$language}->{content});
+            $s =~ tr/{}/<>/;
+            $translations->{utf8_to_latin1($text->{key})} = $s;
+        } else {
+            $obvius->log->debug("Translation file $file: no translation for $text->{key} " .
+		(defined $language ? $language : ''));
+        }
+    }
+
+    $r->pnotes('site')->{TRANSLATIONS}->{$lang_fingerprint} = $translations;
+}
+
 1;
 __END__
 
@@ -700,9 +933,60 @@ WebObvius::Site - General site object.
 
   use WebObvius::Site;
 
+  $site->read_translations($r, $filename, $language, $obvius);
+
 =head1 DESCRIPTION
 
-=head1 AUTHOR
+Please notice that external redirects performed on port 80 _and_ 81 do
+not append the port-number to the redirect-URL.
+
+This is to allow having a bunch of cache/static-serving light-weight
+Apache's on port 80, and the mod_perl ones on port 81 - without
+redirecting people directly to port 81 (NOTE: Isn't this what
+ProxyPassReverse is supposed to fix by itself?).
+
+
+The least simple one is read_translations() that allows the
+administration system to read translations from the
+XML-files. comp_root is searched for "$filename.xml" and
+"$filename_local.xml" - the resulting translations are used (and
+cached on a per language-prefs basis (reading it on every hit is very
+time consuming)).
+
+Usually you would have a "translations.xml" in the global mason/admin,
+and then you could have an optional "translations_local.xml" in
+website/mason/admin.
+
+Overriding the global file is possible by placing a "$filename.xml" in
+the website dir. (Provided the search-path is searched in the proper
+direction).
+
+Translations are cached, but read_translations checks the filestamp of
+the files to see if the cache needs updating, so it is no longer
+necessary to restart Apache when updating translations.
+
+=head2 SESSIONS
+
+If obvius_session_id has a value in the request, WebObvius::Site
+retrieves the session and makes it available on the $input-object as
+'SESSION'.
+
+If the output-object has a SESSION-hashref, a session is created with
+the contents, and the session id is added to the output-object as
+SESSION_ID.
+
+Remember that for Apache::Session to notice that a session has been
+updated (and therefore needs to be stored) a first-level key must be
+changed. Usually one keeps a timestamp and updates that, to let
+Apache::Session know. See the 'Behavior'-section of the documentation
+for L<Apache::Session>.
+
+=head1 EXPORT
+
+None by default.
+
+
+=head1 AUTHORS
 
 Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
 Peter Makholm E<lt>pma@fi.dk<gt>
@@ -711,6 +995,6 @@ Adam Sjøgren E<lt>asjo@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 
-L<WebObvius>.
+L<WebObvius>, L<WebObvius::Site::Mason>, L<Apache::Session>.
 
 =cut

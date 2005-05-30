@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+% if ($subs) {
+<documents>
+%     foreach my $sub (@$subs) {
+%         my $type=$obvius->get_version_type($sub->{vdoc})->Name;
+%         my $subsubnum=scalar(@{$m->comp('/portal/subdocs:get_subs', base_doc=>$sub->{doc}, base_vdoc=>$sub->{vdoc})});
+  <document>
+    <id><% $sub->{doc}->Id |h %></id>
+    <name><% $sub->{name} |h %></name>
+    <url><% $canonical_url . $sub->{name} . '/' |h %></url>
+    <title><& /shared/shorten, text=>$sub->{title}, len=>21, escape=>'h' &></title>
+% # XXX Send fulltitle as well?
+    <type><% $type |h %></type>
+    <subnum><% $subsubnum |h %></subnum>
+  </document>
+%     }
+</documents>
+% }
+%
+<%args>
+$url=>'/'
+</%args>
+%
+<%init>
+$r->content_type('text/xml');
+
+my $subs;
+my $canonical_url;
+
+my $url_doc=$obvius->lookup_document($url);
+my $url_vdoc;
+$url_vdoc=$obvius->get_public_version($url_doc) || $obvius->get_latest_version($url_doc) if ($url_doc);
+if ($url_vdoc) {
+    $subs=$m->comp('/portal/subdocs:get_subs', base_doc=>$url_doc, base_vdoc=>$url_vdoc);
+    $canonical_url=$obvius->get_doc_uri($url_doc);
+}
+</%init>
+%
+<%doc>
+
+This is a simple "webservice"-like app for getting subdocs. Call with
+url=/some/where/ and get, in simple XML, the subdocs of /some/where/
+back.
+
+Here is an example of the output:
+
+  <?xml version="1.0" encoding="ISO-8859-1"?>
+  <documents>
+    <document>
+      <id>13412</id>
+      <name>abonner</name>
+      <url>/abonner/</url>
+      <title>Abonner</title>
+      <type>Link</type>
+      <subnum>0</subnum>
+    </document>
+    <document>
+      <id>5</id>
+      <name>sandkasse</name>
+      <url>/sandkasse/</url>
+      <title>Sandkasse</title>
+      <type>Standard</type>
+      <subnum>4</subnum>
+    </document>
+  </documents>
+
+</%doc>

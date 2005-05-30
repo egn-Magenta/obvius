@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# stats - small shell-script to update the stats of all websites on
+#         the machine. To be run as the pre-rotate-script defined in
+#         /etc/apache-perl/cron.conf. stdout and stderr should be
+#         (combined and) piped through squeeze (stats 2>&1 | squeeze).
+#
+#         All dirs in /var/www/ are considered - dirs are skipped if
+#         they do not contain a subdir called conf, and within that
+#         subdir a file called webalizer.conf.
+#
+# Copyright (C) 2003-2004, aparte, Magenta. By Adam Sjøgren <asjo@magenta-aps.dk>.
+# Under the GPL.
+#
+# $Id$
+
+HOSTNAME="$(hostname)"
+
+for d in /var/www/*/; do
+    test -d ${d}conf || continue
+    test -e ${d}conf/webalizer.conf || continue
+
+    site="$(basename $d)"
+    echo "#Generating statistics for ${site} on ${HOSTNAME}"
+    /usr/bin/webalizer "$@" -c ${d}conf/webalizer.conf
+done

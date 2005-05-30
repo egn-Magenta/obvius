@@ -310,13 +310,16 @@ sub action {
                 if($obvius->get_subscriber( { email => $new_email} ));
         }
 
+        my $wantshtml = $input->param('wantshtml') ? 1 : 0;
+
         if(@errors) {
             $output->param(errors => \@errors);
         } else {
             my @chars = (0..9, 'A'..'Z', 'a'..'z');
             my $passwd = $input->param('passwd');
             unless($passwd) { $passwd .= $chars[rand scalar(@chars)] for (1..8); }
-            $obvius->add_subscriber({email => $new_email, name => $name, passwd => $passwd, suspended => 1}, categories=>$chosen_categories);
+            #print STDERR "WantsHTML: $wantshtml\n";
+            $obvius->add_subscriber({email => $new_email, name => $name, passwd => $passwd, suspended => 1, wantshtml => $wantshtml}, categories=>$chosen_categories);
 	    my $subscriber = $obvius->get_subscriber( { email => $new_email} );
 	    $obvius->add_subscription( { docid => $_, subscriber => $subscriber->{id}, last_update => 0 } ) foreach (@$chosen);
             $output->param('password' => $passwd);
@@ -331,6 +334,7 @@ sub action {
         $email = $subscriber->{email}; # Email is exported at the end of the function
         $output->param(company => $subscriber->{company});
         $output->param(name => $subscriber->{name});
+        $output->param(wantshtml => $subscriber->{wantshtml});
     } elsif ($mode eq 'edit_subscriber_submit') {
         return OBVIUS_ERROR unless($subscriber);
 
@@ -352,12 +356,15 @@ sub action {
             }
         }
 
+        my $wantshtml = $input->param('wantshtml') ? 1 : 0;
+
         if(@errors) {
             $output->param(errors => \@errors);
         } else {
             $obvius->update_subscriber( { company => $company,
                                         name => $name,
-                                        passwd => $passwd1 ? $passwd1 : $subscriber->{passwd}
+                                        passwd => $passwd1 ? $passwd1 : $subscriber->{passwd},
+                                        wantshtml => $wantshtml
                                     },
                                     email=>$subscriber->{email});
             if($password_changed) {

@@ -392,8 +392,16 @@ sub _action {
         print "  </binary>\n";
 
       } else {
-        # XXX This needs to be fixed for some of the image thumbnails
-        print "  <binary dt='binary.base64' name='$k' xmlns:xlink='http://www.w3.org/1999/xlink' xlink:type='locator' xlink:href='$path'/>\n";
+        # XXX 260203: Jason
+        #             This is a hack to get the correct path to a thumbnail image
+        #             the name of the image will be DATA_WXH, and the querystring
+        #             ?size=WXH needs to be appended to the link
+        # XXX
+
+        my $tmppath = $path;
+        $tmppath .= "?size=$1" if ($k =~ /^DATA_(\d+X\d+)$/);
+
+        print "  <binary dt='binary.base64' name='$k' xmlns:xlink='http://www.w3.org/1999/xlink' xlink:type='locator' xlink:href='$tmppath'/>\n";
       }
       next;
     }

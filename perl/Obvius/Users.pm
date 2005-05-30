@@ -2,15 +2,16 @@ package Obvius::Users;
 
 ########################################################################
 #
-# Obvius.pm - Content Manager, database handling
+# Users.pm - User/Group handling methods for L<Obvius>.
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
-#                    aparte A/S, Denmark (http://www.aparte.dk/),
-#                    FI, Denmark (http://www.fi.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/),
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: René Seindal (rene@magenta-aps.dk),
-#          Adam Sjøgren (asjo@magenta-aps.dk),
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #          Peter Makholm (pma@fi.dk)
+#          René Seindal,
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,6 +44,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #            of the corresponding user, if any.
 sub get_user {
     my ($this, $userid) = @_;
+    return undef unless (defined $userid);
 
     return $this->{USERS}->{$userid};
 }
@@ -51,6 +53,7 @@ sub get_user {
 #              the user.
 sub get_userid {
     my ($this, $user) = @_;
+    return undef unless (defined $user);
 
     #my($userid)=grep { $this->{USERS}->{$_}->{login} eq $user } keys %{$this->{USERS}};
     #return $userid;
@@ -59,6 +62,7 @@ sub get_userid {
 
 sub get_group {
     my ($this, $grpid) = @_;
+    return undef unless (defined $grpid);
 
     return $this->{GROUPS}->{$grpid};
 }
@@ -155,10 +159,11 @@ sub delete_user {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Delete user ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete user ... failed ($ev_error)");
 	return undef;
     }
 
@@ -187,10 +192,11 @@ sub create_new_user {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Create new user ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Create new user ... failed ($ev_error)");
 	return undef;
     }
 
@@ -227,10 +233,11 @@ sub update_user {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Update user ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete group ... failed ($ev_error)");
 	return undef;
     }
 
@@ -255,10 +262,11 @@ sub delete_group {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Delete group ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete group ... failed ($ev_error)");
 	return undef;
     }
 
@@ -289,10 +297,11 @@ sub create_new_group {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Create new group ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Create new group ... failed ($ev_error)");
 	return undef;
     }
 
@@ -319,10 +328,11 @@ sub update_group {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Update group ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Update group ... failed ($ev_error)");
 	return undef;
     }
 
@@ -333,7 +343,6 @@ sub update_group {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -374,9 +383,8 @@ None.
 
 =head1 AUTHOR
 
-Adam Sjøgren, E<lt>adam@aparte.dkE<gt>
-
 Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
+Adam Sjøgren, E<lt>asjo@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 

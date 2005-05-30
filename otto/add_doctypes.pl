@@ -149,7 +149,7 @@ sub add_doctype {
 sub add_fieldspec {
     my($new_fieldspec, $db, $doctype, $fieldspec)=@_;
 
-    print " $fieldspec->{name}\n";
+    #print " $fieldspec->{name}\n";
 
     my $doctypes=read_table('doctypes', 'name', $db);
     $fieldspec->{doctypeid}=$doctypes->{$doctype->{name}}->{id};
@@ -157,7 +157,7 @@ sub add_fieldspec {
     my $type=$fieldspec->{type};
     my $fieldtypes=read_table('fieldtypes', 'name', \%db);
     $fieldspec->{type}=$fieldtypes->{$fieldspec->{type}}->{id};
-    print STDERR "Waah, no such fieldtype $type\n" unless $fieldspec->{type};
+    print STDERR "Waah, no such fieldtype $type for $fieldspec->{name}\n" unless $fieldspec->{type};
 
     # Check if there's any existing entries with the same name and different type
     # (the database should be normalized instead!)

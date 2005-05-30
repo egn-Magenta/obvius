@@ -1,0 +1,74 @@
+<%args>
+$html=>undef
+</%args>
+%
+<%once>
+use URI::Escape;
+my $w3_check='/usr/lib/cgi-bin/check';
+my $start_html=<<EOT;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da">
+  <head>
+    <title>Validation</title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  </head>
+  <body>
+    <div>
+EOT
+my $end_html=<<EOT;
+    </div>
+  </body>
+</html>
+EOT
+</%once>
+%
+<%init>
+my ($status, $validator_error_count, $warnings, $errors, $result)=('Unknown', undef, undef, undef, '');
+
+if (-x $w3_check) {
+    my $xml;
+    {
+        local %ENV;
+        $ENV{PATH}='/usr/bin:/bin/';
+        $ENV{REQUEST_METHOD}='GET';
+        $ENV{QUERY_STRING}='fragment=' . uri_escape($start_html . $html . $end_html) .
+            '&output=xml&charset=iso-8859-1'; # XXX charset
+        $xml=`$w3_check`;
+    }
+
+
+    # The outputs XML is subject to change, and sometimes it ain't even
+    # XML, so we need to scrub the output a little:
+    if ($xml=~/X-W3C-Validator-Status: (\w+)/i) {
+        $status=$1;
+    }
+
+    if ($xml=~/X-W3C-Validator-Errors: (\d+)/i) {
+        $validator_error_count=$1;
+    }
+
+    if ($xml=~m!(<result>.*</result>)!s) {
+        $result=$1;
+    }
+}
+else {
+    warn "For validation to work, you need to install w3-markup-validator ($w3_check)";
+}
+
+return ($status, $validator_error_count, $warnings, $errors, $result);
+</%init>
+%
+%
+<%doc>
+
+You need the w3c-markup-validator package installed. There is a
+backport for Debian/woody here:
+
+ deb http://www.mathgen.ch/debian/woody ./
+
+(may require some dependency-fiddling. Or not).
+
+NOTICE: This component assumes that the html-blurbs are supposed to be
+        XHTML 1.0 and that the charset is ISO-8859-1.
+
+</%doc>

@@ -4,9 +4,9 @@ package Obvius::DocType::Fangstrapport;
 #
 # Fangstrapport.pm - Sportsfiskeren
 #
-# Copyright (C) 2002 aparte, Denmark (http://www.aparte.dk/)
+# Copyright (C) 2002-2004 aparte, Denmark (http://www.aparte.dk/)
 #
-# Author: Adam Sjøgren <asjo@aparte-test.dk>
+# Author: Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,7 +62,11 @@ sub createdocument {
 
     my $session=$input->param('session');
     if (ref $session) {
-        map { $input->param($_=>$session->{$_}) } keys %$session;
+        # defined?!
+        map {
+            $input->param($_=>$session->{$_}) if ($session->{$_} or
+                                                  (exists $session->{$_} and $session->{$_} eq '0'));
+                                              } keys %$session;
     }
 
     #  Join special field fangst:
@@ -86,36 +90,26 @@ sub createdocument {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::Fangstrapport - Perl extension for blah blah blah
+Obvius::DocType::Fangstrapport - Perl module for Sportsfiskerens fangstrapport
 
 =head1 SYNOPSIS
 
-  action is called automatically by WebObvius during construction of
-  the content area
+  (used automatically by Obvius)
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::Fangstrapport, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+Obvius::DocType::Fangstrapport uses methods from
+Obvius::DocType::CreateDocument and Obvius::DocType::FiskeKalenderOpret.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Adam Sjøgren (asjo@magenta-aps.dk)
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::DocType::CreateDocument>, L<Obvius::DocType::FiskeKalenderOpret>.
 
 =cut

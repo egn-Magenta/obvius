@@ -43,6 +43,16 @@ sub action {
     my $do_new_search = 0;
     my $session = $input->param('SESSION');
     my $newstype=$input->param('newstype');
+
+    unless(defined($newstype)) {
+        my $cookies = $input->param('OBVIUS_COOKIES');
+        my $cookie_newstype = $cookies->{nyhedstype};
+        if(defined($cookie_newstype)) {
+            # Translate to (all, international, infopaq, biotik) from (international, infopaq, biotik)
+            $newstype = $cookie_newstype += 1;
+        }
+    }
+
     if($session) {
         if(defined($newstype)) {
             $do_new_search = 1 unless(defined($session->{newstype}) and $session->{newstype} == $newstype);
@@ -68,20 +78,24 @@ sub action {
 
         my $hm_type = $obvius->get_doctype_by_name('H_og_M_Artikel');
         my $other_type = $obvius->get_doctype_by_name('InfopaqNyhed');
-
+        my $biotik_type = $obvius->get_doctype_by_name('NytFraBioTIK');
 
         if($newstype) {
             if($newstype == 1) {
                 $where = "type = '" . $hm_type->Id . "'";
                 $title .= " - Internationalt overblik";
                 $session->{newstype} = 1;
-            } else {
+            } elsif($newstype == 2) {
                 $where = "type = '" . $other_type->Id ."'";
                 $title .= " - Dansk presse";
                 $session->{newstype} = 2;
+            } else {
+                $where = "type = '" . $biotik_type->Id ."'";
+                $title .= " - Nyt fra BioTIK";
+                $session->{newstype} = 3;
             }
         } else {
-            $where = "type IN ('" . $hm_type->Id . "','" . $other_type->Id . "')";
+            $where = "type IN ('" . $hm_type->Id . "','" . $other_type->Id . "', '" . $biotik_type->Id . "')";
             $newstype = 0;
             $title .= " - Alle nyheder";
             $session->{newstype} = 0;

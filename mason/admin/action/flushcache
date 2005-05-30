@@ -1,0 +1,48 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'Flush cache' &></h2>
+
+  <form action="./">
+    <p>
+      <& /shared/msg, text=>'Usually it is not necessary to flush the cache by hand, as the cache is automatically invalidated at the appropriate times. However, sometimes it is nice to be able to do so anyhow.' &>
+    </p>
+    <div>
+      <& /shared/msg, text=>'Flush cache now' &>?
+    </div>
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_flushcache=>1 } &>
+      <& util/do_cancel, do_text=>'Flush' &>
+    </p>
+  </form>
+
+</div>
+%
+<%init>
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+%
+%
+%
+<%method cancel>
+%
+<& /shared/set_status_message, message=>'Cache flush cancelled' &>
+%
+</%method>
+%
+%
+%
+<%method do>
+%
+<%init>
+$r->pnotes('site')->clear_cache($obvius);
+$m->comp('/shared/set_status_message', message=>'Cache flushed');
+return '';
+</%init>
+%
+</%method>

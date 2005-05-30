@@ -233,6 +233,8 @@ sub create_image {
     $fields->param('expires'=>'9999-01-01 00:00:00');
     $fields->param('seq'=>'-10.00');
     $fields->param('data' => $imagedata);
+    $fields->param('size' => length($imagedata));
+    $fields->param('align' => 'center');
     $fields->param('mimetype'=>$data->param('mimetype'));
     $fields->param('height'=>$image_height);
     $fields->param('width'=>$image_width);

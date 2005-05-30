@@ -1,0 +1,56 @@
+<%method function>\
+<%doc> ===========
+
+Commit the current function (and object) by linking to the relation
+named in the function's description
+
+</%doc>
+<a href="<% $xref . '?' . $link_params %>"><& '/shared/msg', text=>$label &></a>
+<%args>
+ $history
+
+# Options
+ $xref=>'./'
+ $command=>'obvius_command_editengine'
+ $label=>'Commit function'
+ $options=>{}
+
+</%args>
+<%init>
+
+ my $functions = $r->pnotes('obvius_editengine_protocol')->{function};
+ my ($function) = keys %$functions;
+
+
+# Link to the "future" by adding the future event to the history.
+#
+# [!] If the function was selected "previously", ie. during an
+#     earlier event, the current history should be recorded.
+#
+# But this ought to be assigned by <history:access_current_event>!!
+#
+#     Otherwise the function's own future should be used.
+
+ my $future = $functions->{$function} ? $functions->{$function} : $history;
+
+ my @params = (
+               $command,
+               "obvius_session_id=" . $r->pnotes('obvius_session')->{'_session_id'},
+               "history=$future",
+               join '&amp;', map {"$_=$options->{$_}"} keys %$options,
+              );
+ my $link_params = join '&amp;', @params;
+
+</%init>
+</%method>
+
+
+
+
+<%method relation>\
+<%doc> =========
+
+ Commit the current object by linking to a named relation.
+
+</%doc>
+</%method>

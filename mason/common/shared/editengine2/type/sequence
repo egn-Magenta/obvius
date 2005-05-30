@@ -1,0 +1,57 @@
+% # XXX Ought to update the hidden field from clicks on Yes/No:
+%
+<%method block>\
+% my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<& util/radiobuttons, name=>$prefix . $field->{name} . '_radio', choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
+<input type="hidden" name="<% $prefix . $field->{name} %>" size="5" value="<% $value->{value} %>" />
+<button onclick="javascript:return obvius_open_window('./?obvius_app_seqlist=1&amp;fieldname=<% $prefix . $field->{name}  %>&amp;value='+this.form['<% $prefix . $field->{name} %>'].value, 'obvius_sequence', 'width=300', 'height=400', 'status=yes');"><& /shared/msg, text=>'Advanced' &>...</button>
+%
+<%args>
+$prefix
+$field
+$value=>''
+$style
+</%args>
+%
+<%init>
+my $chosen_value=$value->{value};
+my $other_value=($chosen_value>=0 ? -10 : 10);
+my @choices=reverse sort ($chosen_value, $other_value);
+my %labels=(
+            $chosen_value=>($chosen_value>=0 ? 'Yes' : 'No'),
+            $other_value =>($other_value>=0  ? 'Yes' : 'No')
+           );
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+<% $value->{value} |h %>\
+%
+<%args>
+ $value
+</%args>
+%
+</%method>
+%
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+# The radiobuttons overrule the hidden field:
+my $value=(defined $data->{$id.'_radio'} ? $data->{$id.'_radio'} : $data->{$id});
+$data->{$id}=$value;
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK';
+</%init>

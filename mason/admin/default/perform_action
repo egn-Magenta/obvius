@@ -1,0 +1,58 @@
+<%args>
+$obvius_session_id=>undef
+$obvius_perform_cancel=>0
+$obvius_perform_do=>0
+</%args>
+%
+<%init>
+my $command;
+
+if ($r->pnotes('obvius_session')) {
+    $command=$r->pnotes('obvius_session')->{action};
+}
+
+my $extract_command=$m->comp('/util/extract_value', %ARGS, prefix=>'obvius_command');
+$command=$extract_command if (defined $extract_command);
+
+if (!defined $command) {
+    $command='view';
+}
+elsif (!$m->comp_exists("/action/$command")) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Unknown command', ' "', $command, '".']);
+    $command='view';
+}
+
+if (!$obvius_session_id and $command!~m/^(view|diff)$/) { # No session exists, and we need one:
+    $m->comp('setup_session', %ARGS);                     # XXX Handle in the components?
+}
+my $session=$r->pnotes('obvius_session');
+
+# If a command command should be done, call the do method and fall
+# back to view if it doesn't return somewhere to go:
+if ($obvius_perform_do) {
+    my $new_command=$m->comp("/action/$command:do", %ARGS);
+    # Redirect if no new_command:
+    if ($new_command) {
+        $command=$new_command;
+    }
+    else {
+        $m->comp('perform_action_local', %ARGS);
+        my $redirect_to=$r->notes('obvius_redirect_to') || './';
+        my $joiner=($redirect_to=~/[?]/ ? '&' : '?');
+        $m->comp('/shared/redirect', location=>$redirect_to . $joiner . 'obvius_session_id=' . $session->{_session_id});
+    }
+}
+
+# If a command was cancelled, call the cancel-method of the command
+# and fall back to view:
+if ($obvius_perform_cancel) {
+    $m->comp("/action/$command:cancel", %ARGS);
+    $m->comp('perform_action_local', %ARGS);
+    # Always redirect:
+    $m->comp('/shared/redirect', location=>'./?obvius_session_id=' . $session->{_session_id});
+}
+
+
+$r->pnotes('common_data'=>$m->scomp("/action/$command", %ARGS));
+$m->comp('perform_action_local', %ARGS); # Notice the calls, on redirect above, as well.
+</%init>

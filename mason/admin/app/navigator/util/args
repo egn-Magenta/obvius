@@ -1,0 +1,5 @@
+?obvius_app_navigator=1<% join "&amp;", grep { defined } map { defined $ARGS{$_} ? "&amp;$_=$ARGS{$_}" : undef } @names %>\
+%
+<%once>
+my @names=qw(fieldname doctypeid doctype fields);
+</%once>

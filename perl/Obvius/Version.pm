@@ -61,6 +61,14 @@ sub new {
     return $self;
 }
 
+sub list_valid_keys {
+    my ($this) = @_;
+
+    return [
+	    { docid=>$this->{DOCID}, version=>$this->{VERSION}, lang=>$this->{LANG} },
+	   ];
+}
+
 
 #
 # AUTOLOAD - special for fetching the fields

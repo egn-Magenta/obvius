@@ -1,0 +1,50 @@
+  <link rel="stylesheet" type="text/css" href="/style/admin.css" title="<& /shared/msg, text=>'Default look' &>" />
+  <link rel="stylesheet" type="text/css" href="/style/admin_local.css" title="<& /shared/msg, text=>'Default look' &>" />
+  <link rel="stylesheet" type="text/css" href="/scripts/jscalendar/calendar-obvius.css" title="<& /shared/msg, text=>'Default look' &>" />
+%
+% # These, common*.css, should be included here, but they should be parsed so that they only
+% # affect div.obvius-common!
+  <link rel="stylesheet" type="text/css" href="/style/common.css" title="<& /shared/msg, text=>'Default look' &>" />
+  <link rel="stylesheet" type="text/css" href="/style/common_local.css" title="<& /shared/msg, text=>'Default look' &>" />
+
+  <link rel="icon" href="/pics/icon.png" type="image/png" />\
+%
+% foreach my $link (qw(top up first prev next last)) {
+%     if ($r->notes('obvius_' . $link . '_link')) {
+  <link rel="<% $link %>"  href="<% $r->notes('obvius_' . $link . '_link') %>" />
+%     }
+% }
+%
+  <link rel="bookmark" href="<% $prefix %>/admin/"  title="Administration" />
+%
+% if ($obvius->is_public_document($doc)) {
+  <link rel="alternate" href="<% $uri %>" title="<& /shared/msg, text=>'Public' &>" />
+% }
+%
+<%doc>
+  <link rel="help" href="/help/" title="Help ..." />
+  <link rel="search" href="/search/" title="Search ..." />
+  <link rel="made" href="/about/" title="About ..." />
+  <link rel="copyright" href="/about/copyright/" title="Copyright ..." />
+
+  <!-- start and top are the same: -->
+  <link rel="start" href="<% $prefix %>/" title="Obvius administration" />
+
+  <link rel="contents"   href="./#contents"    title="Content" />
+  <link rel="chapter"    href="./#chapter1"    title="Chapter 1" />
+  <link rel="chapter"    href="./#chapter2"    title="Chapter 2" />
+  <link rel="chapter"    href="./#chapter3"    title="Chapter 3" />
+  <link rel="section"    href="./#sectionI"    title="Section I" />
+  <link rel="subsection" href="./#subsectiona" title="Subsection A" />
+  <link rel="appendix"   href="./#appendix1"   title="Appendix 1" />
+  <link rel="appendix"   href="./#appendix2"   title="Appendix 2" />
+  <link rel="glossary"   href="./#glossary"    title="Glossary" />
+  <link rel="index"      href="./#index"       title="Index" />
+
+  <link rel="bookmark" href="./#dos"  title="Dos" />
+  <link rel="bookmark" href="./#dres" title="Dres" />
+
+  <!-- In the public part, this can be used with hreflang for different languages: -->
+  <link rel="alternate" href="./?obvius_version=2004-05-05T15:39:45+0200" title="2004-05-05T15:39:45+0200 en" />
+  <link rel="alternate" href="./?obvius_version=2004-05-05T15:39:33+0200" title="2004-05-05T15:39:33+0200 da" />
+</%doc>

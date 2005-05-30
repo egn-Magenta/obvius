@@ -4,9 +4,14 @@ package Obvius::DocType;
 #
 # DocType.pm - Document Types
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#                         aparte A/S, Denmark (http://www.aparte.dk/)
+#                         FI, Denmark (http://www.fi.dk/)
 #
-# Author: Adam Sjøgren (asjo@magenta-aps.dk)
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          Peter Makholm
+#          René Seindahl
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +36,6 @@ use warnings;
 
 use Obvius;
 use Obvius::Data;
-
 
 our @ISA = qw( Obvius::Data );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -58,23 +62,59 @@ sub new {
     return $this;
 }
 
+# action - the action method in the document type is called by Obvius
+#          when a document perform its function. Obvius provides data
+#          for the document type to use on the input-object and the
+#          document type is supposed to leave relevant outgoing data
+#          on the output-object. This is then used by the template
+#          system to display what ever is relevant, to the user.
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
     $this->tracer($input, $output, $doc, $vdoc, $obvius) if ($this->{DEBUG});
 
-    return 1;
+    return 1; # OBVIUS_OK
 }
 
+# is_cacheable - should return true if the document type in general is
+#                cachable and false if not.
 sub is_cacheable { return 1; }
 
+# alternate_location - if this method returns a string, Obvius
+#                      redirects to the location given in the
+#                      string. Return undef to avoid redirection.
 sub alternate_location { return undef; }
+
+# raw_document_data - if this document returns binary data, this
+#                     method must return a list with the mimetype, the
+#                     raw data (as a string) an optionally a
+#                     filename. If the document is a "normal"
+#                     document, this method must return undef.
 sub raw_document_data { return undef; }
 
-# handle_path_info - returns true if the document type wants to handle
-#                    excess $path_info itself.
+# handle_path_info - return true if the document type wants to handle
+#                    excess $path_info itself. Return undef otherwise.
 sub handle_path_info { return undef; }
 
+# # create_new_version_handler - if a document type provides a create_new_version_handler
+# #                              method, it is called with the fields (an Obvius::Data object)
+# #                              and the $obvius object. If the handler returns OBVIUS_OK
+# #                              the creation continues, otherwise it is aborted.
+# #                              If special action needs to be taken when a new version of
+# #                              a specific document type is needed, it can be plugged in
+# #                              here.
+# #                              Note that this method is called before both language-check
+# #                              and before verification of field-values, so the creation
+# #                              of the version can fail on those accounts after this method
+# #                              has been called. (The actual database-calls can fail too,
+# #                              obviusly.)
+# sub create_new_version_handler {
+#     my ($this, $fields, $obvius)=@_;
+#
+#     # ...
+#
+#     return OBVIUS_OK;
+# }
 
 #########################################################################
 #
@@ -119,6 +159,8 @@ use POSIX qw(strftime);
 
 # Return document list to an Output object
 # vdoclist is really an array of Obvius::Version objects
+#
+# XXX These are legacy functions for the aging Magenta::Template-system:
 sub export_doclist {
     my ($this, $vdoclist, $output, $obvius, %options) = @_;
 
@@ -465,6 +507,9 @@ sub validate_publish_fields {
 }
 
 
+# XXX I'm not sure why this is here, perhaps it predates Obvius::Data,
+# perhaps there is a reason:
+
 package Obvius::DocType::HashParam;
 
 sub new {
@@ -490,11 +535,10 @@ sub delete {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType - Base class for Obvius doctypes.
+Obvius::DocType - container for the specific Obvius document type classes.
 
 =head1 SYNOPSIS
 
@@ -505,28 +549,29 @@ Obvius::DocType - Base class for Obvius doctypes.
 
   $obj->publish_fields() # Returns Obvius::Data object
 
-  
   %obj->publish_field(field_name, field_value) #Returns field_value
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+This module basically defines defaults for document types. The
+stub-methods here define the interface that Obvius::DocType::* have.
 
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+ * alternate_location
+ * action
+ * raw_document_data
+ * handle_path_info
+ * is_cacheable
+ * create_new_version_handle
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+ Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+ Peter Makholm
+ René Seindahl
+ Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius::DocType::Standard>, L<Obvius::DocType::Link>, L<Obvius::DocType::Upload>.
 
 =cut

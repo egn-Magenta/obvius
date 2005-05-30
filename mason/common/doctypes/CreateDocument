@@ -1,0 +1,57 @@
+<& headline &>
+
+% unless($create) {
+<% $obvius->get_version_field($vdoc, qw(form)) %>
+% }
+% else {
+%     if($create_error) {
+        <p>Der opstod problemer under oprettelsen af dokumentet:</p>
+        <p><% $create_error %></p>
+%     }
+%     else {
+%         if($publish_error) {
+            <p>Dokumentet kunne ikke offentliggøres:</p>
+            <p><% $publish_error %></p>
+%         }
+%         else {
+%             my $successtext=$obvius->get_version_field($vdoc, qw(successtext));
+%             if ($output->param('document_published')) {
+%                 if ($successtext) {
+<% $successtext %>
+%                 }
+%                 else {
+            <p>Dokument <a href="<% $new_url %>"><% $new_title %></a> oprettet. Tak!</p>
+%                 }
+%             }
+%             else {
+%                 if ($successtext) {
+<% $successtext %>
+%                 }
+%                 else {
+            <p>Dokument oprettet. Administrator har modtaget besked om dokumentet, og offentliggører det snarest muligt.</p>
+%                 }
+%             }
+%         }
+%     }
+% }
+<%args>
+$output
+</%args>
+<%init>
+my $create = $output->param('create');
+my $create_error = $output->param('create_error');
+my $publish_error = $output->param('publish_error');
+my $new_title = $output->param('new_title');
+my $new_url = $output->param('new_url');
+my $recipient = $output->param('recipient');
+if($recipient) {
+    my $mail_error;
+    my $mailmsg = $m->scomp('/mail/createdocument', output=>$output);
+    my $from = 'bitbucket@' . $obvius->config->param('sitename');
+    my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug =>0);
+    $mail_error = "Failed to specify a sender [$from]\n"            unless ($smtp->mail($from));
+    $mail_error = "Failed to specify a recipient [$recipient]\n"    unless ($mail_error or $smtp->to($recipient));
+    $mail_error = "Failed to send a message\n"                      unless ($mail_error or $smtp->data([$mailmsg]));
+    $mail_error = "Failed to quit\n"                                unless ($mail_error or $smtp->quit);
+}
+</%init>

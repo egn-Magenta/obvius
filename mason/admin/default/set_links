@@ -1,0 +1,6 @@
+<%init>
+if ($uri ne '/') {
+    $r->notes('obvius_top_link'=>$prefix . '/');
+    $r->notes('obvius_up_link'=>'../');
+}
+</%init>

@@ -1,0 +1,24 @@
+<& ../top, title=>$title . ' - versionlist', javascript=>'admin_versionlist.js' &>
+%
+<div class="obvius-versions">
+  <h3><& /shared/msg, text=>'Versions' &></h3>
+  <div class="obvius-app-versionlist">
+    <form action="./" onsubmit="javascript:return obvius_open_selected('obvius_version', this.obvius_version);">
+% # max=>0 means all:
+      <& /portal/versions:display_versions, max=>0, inactive=>{}, onclick=>'javascript: return obvius_open_selected(\'obvius_version\', this.form.obvius_version);' &>
+      <p>
+        <input type="submit" value="<& /shared/msg, text=>'Ok' &>" />
+      </p>
+    </form>
+  </div>
+</div>
+<& ../bottom &>
+%
+<%args>
+$obvius_version=>''
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title)]);
+my $title=$vdoc->Title;
+</%init>

@@ -1,0 +1,40 @@
+<%once>
+my @choices = qw[0 3 5 8 10 15 20 30 50 75 100 200];
+my %labels=(
+            0=>'No limit',
+           );
+</%once>
+%
+%
+<%method block>
+%
+<%args>
+$prefix
+$field
+$validation
+$value
+</%args>
+%
+<& util/label, label=>$field->{label}, field=>$field &>
+% if ($validation->{repeatable}) {
+<& util/multiple, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
+% }
+% else {
+<& util/dropdown, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
+% }
+%
+</%method>
+%
+%
+%
+<%method inline>
+
+</%method>
+%
+%
+%
+% # Validate:
+%
+<%init>
+return 'OK'; # XXX
+</%init>

@@ -4,9 +4,10 @@ package Obvius::Data;
 #
 # Data.pm - Generic data container.
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: René Seindal (rene@magenta-aps.dk)
+# Authors: René Seindal (rene@magenta-aps.dk)
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -119,10 +120,9 @@ sub delete {
     return $oldvalue;
 }
 
-# params(param1, param2, .. ) - returns a hash with the values of the
-#   requested parameters.  According to context either the hash itself
-#   or a reference to it is returned
-#
+# params(@keys) - returns a hash(-ref) of keys/values. Notice that
+#                 this is not the same as calling param() with no
+#                 arguments.
 sub params {
     my $this = shift;
     my %values = map { $_ => $this->{uc $_} } @_;

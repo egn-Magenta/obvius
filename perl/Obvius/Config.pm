@@ -4,9 +4,11 @@ package Obvius::Config;
 #
 # Config.pm - Obvius configuration parameters.
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: René Seindal (rene@magenta-aps.dk)
+# Authors: René Seindal (rene@magenta-aps.dk)
+#          Jørgen Ulrik Balslev Krag (jubk@magenta-aps.dk)
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,7 +72,10 @@ sub new {
     my ($class, $name) = @_;
 
     my $data = read_config_file($name);
-    return undef unless ($data);
+    unless ($data) {
+        print STDERR "Couldn't read $confdir/$name.conf\n";
+        return undef;
+    }
 
     my $this = $class->SUPER::new($data);
     $this->param(name => $name);

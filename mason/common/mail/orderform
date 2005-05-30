@@ -1,0 +1,36 @@
+From: <% $name %> <<% $email %>>
+Subject: <% $subject %>
+To: <% $recipient %>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Content-Disposition: inline
+Precedence: bulk
+
+On http://<% $obvius->config->Sitename %><% $uri %> the following data was submitted:
+
+% foreach my $key (sort $output->param()) {
+%     next unless ($key=~/_INCOMING_ORDERFORM_/);
+%     my $value=$output->param($key);
+<% $key %><% ' ' x (30-length($key)) %><% ref $value ? Dumper($value) : $value %>
+% }
+
+% use Data::Dumper; $Data::Dumper::Maxdepth=2;
+<% Dumper($output) %>
+
+<%args>
+$output
+</%args>
+%
+<%once>
+use Data::Dumper;
+</%once>
+%
+<%init>
+my $recipient=$output->param('recipient');
+
+my $name=$output->param('_incoming_orderform_name') || 'None given';
+my $email=$output->param('_incoming_orderform_email') || 'None given';
+
+my $subject=$output->param('_incoming_orderform_subject') || 'None given';
+</%init>

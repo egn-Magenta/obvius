@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<& /portal/meta &>
+  <title><% $title |h %></title>
+<& /portal/link &>
+% if ($javascript) {
+%     $javascript=[$javascript] unless (ref($javascript) eq 'ARRAY');
+%     map {
+  <script type="text/javascript" src="/scripts/<% $_ %>"></script>
+%     } @$javascript;
+% }
+</head>
+<body class="obvius-<% $app |h %>">
+<& /portal/notificationarea, invisible_when_empty=>1 &>
+%
+<%args>
+$title=>'App'
+$app=>'app'
+$javascript=>undef
+</%args>

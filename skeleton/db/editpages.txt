@@ -31,10 +31,6 @@
 # Page: P
 #  Title: Publish document
 #  Desc: Publish now?
-#  Fields: sec_prio Section news inclusion
-#  Fields: sec_dura Section news duration 
-#  Fields: front_prio Frontpage news inclusion
-#  Fields: front_dura Frontpage news duration 
 #  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
 ##  Fields: publish_on Publish later
 # End
@@ -78,8 +74,6 @@ DocType: Standard
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=News, nopagenav=1
-  Fields: front_dura News duration
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -119,8 +113,6 @@ DocType: KeywordSearch
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -144,8 +136,6 @@ DocType: ComboSearch
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -170,8 +160,6 @@ DocType: HTML
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration 
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -247,8 +235,6 @@ DocType: Upload
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration 
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -298,8 +284,6 @@ DocType: Link
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration 
   #Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -350,8 +334,6 @@ DocType: OrderForm
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration 
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -419,8 +401,6 @@ DocType: CalendarEvent
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura News duration 
   Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -428,7 +408,7 @@ DocType: Calendar
  Page: 1
   Title: Titel og visning
   Fields: show_as How to show calendar
-  Fields: Show_event Show event by;label_type=Type, label_title=Title, reverse_options=1
+  Fields: show_event Show event by;label_type=Type, label_title=Title, reverse_options=1
   Fields: title Title
   Fields: show_title Show title;label_0=No, label_1=Yes, reverse_options=1
   Fields: seq Order of succession
@@ -459,8 +439,6 @@ DocType: Calendar
  End
  Page: P
   Title: Publish document
-  Fields: front_prio Priority;label_0=Not_on_list, label_1=Always_last, label_2=Low_priority, label_3=High_priority, subtitle=Forside nyt, nopagenav=1
-  Fields: front_dura Frontpage news duration
   Fields: in_subscription Include in subscription?;label_0=No, label_1=Yes, reverse_options=1
  End
 
@@ -476,4 +454,71 @@ DocType: RSSFeed
  End
  Page: P
   Copy: ComboSearch (P)
+ End
+
+DocType: Newsbox
+ Page: 1
+  Title: Text and options
+  Fields: title Title
+  Fields: short_title Short title
+  Fields: max_entries Number of entries in news box
+  Fields: show_date Show dates?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_teaser Show teasers?;label_0=No, label_1=Yes, reverse_options=1
+  Fields: max_teaser Maximum length of teasers
+  Fields: docdate Date (yyyy-mm-dd)
+  Fields: expires Expiring
+ End
+ Page: 2
+  Title: Display
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
+ End
+ Page: P
+  Title: Publish document
+ End
+
+DocType: Proxy
+ Page: 1
+  Title: Text and options
+  Fields: title Title
+  Fields: short_title Short title
+  Fields: url URL
+  Fields: prefixes Prefixes
+  Fields: show_title Show title?
+  Fields: show_news Show news?
+  Fields: docdate Date (yyyy-mm-dd)
+  Fields: expires Expiring
+ End
+ Page: 2
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
+ End
+ Page: 3
+  Title: Display
+  Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
+ End
+ Page: P
+  Title: Publish document
+ End
+
+DocType: CreateDocument
+ Page: 1
+  Title: Basic information
+  Fields: title Title
+  Fields: form Create form (HTML)
+  Fields: successtext Text displayed on successful creation
+  Fields: docdate Date
+ End
+ Page: 2
+  Title: Document creation information
+  Fields: doctype What doctype the created documents should have
+  Fields: language What language the created documents should have;size=2
+  Fields: where Where the documents should be created
+  Fields: name_prefix Prefix for names of the created documents
+  Fields: publish_mode How to publish create documents;label_immediate=Immediate, label_moderator=Using a moderator
+  Fields: subscribe_include Include created documents in subscription when publishing;label_0=No, label_1=Yes, reverse_options=1
+  Fields: email Moderator email
+ End
+ Page: P
+  Title: Publishing
+  Desc: Publish now?
  End

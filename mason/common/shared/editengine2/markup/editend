@@ -1,0 +1,35 @@
+<div class="obvius-edit-navigation">
+<% $add_html %>
+<button class="obvius-prev" type="button" onclick="javascript:this.blur(); return(obvius_goto_prevpage(obvius_all_ids));" title="<& /shared/msg, text=>'Previous page' &>">«</button>
+<button class="obvius-next" type="button" onclick="javascript:this.blur(); return(obvius_goto_nextpage(obvius_all_ids));" title="<& /shared/msg, text=>'Next page' &>">»</button>
+</div>
+%
+%
+% if ($javascript_init) {
+<script type="text/javascript">
+var obvius_all_ids=new Array();
+var obvius_hidden_ids=new Array();
+% foreach my $num (@$all_nums) {
+%     my $id='obvius-edit-page-' . $num;
+  obvius_all_ids[obvius_all_ids.length]='<% $id |h %>';
+%    next if  ($num eq $obvius_command_edit or $obvius_command_edit eq 'A');
+  obvius_hidden_ids[obvius_hidden_ids.length]='<% $id |h %>';
+% }
+obvius_display_off(obvius_hidden_ids);
+obvius_set_inactive_prevnext_buttons('obvius-edit-page-<% $obvius_command_edit %>', obvius_all_ids);
+%
+</script>
+% }
+%
+<%args>
+$layout
+$add_html=>''
+$javascript_init=>1
+</%args>
+%
+<%init>
+my $all_nums=$layout->{all_nums};
+my $obvius_command_edit=$layout->{obvius_command_edit};
+
+return unless (ref($all_nums) eq 'ARRAY');
+</%init>

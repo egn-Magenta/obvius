@@ -1,0 +1,134 @@
+<& ../top, javascript=>'admin_seqlist.js' &>
+
+<table class="obvius-app-seqlist">
+  <tr>
+    <td colspan="2">
+     <form>
+         <& /shared/msg, text=>'Sequence number' &>:
+         <input type="text" name="seq" size="5" value="<% $value %>" />
+         <input onclick="javascript:return obvius_seqlist_save_and_close(this.form.seq.value, '<% $fieldname %>')" type="submit" value="<& /shared/msg, text=>'Save' &>" />
+     </form>
+     <hr />
+    </td>
+  </tr>
+% foreach my $seq (@seqs) {
+  <tr>
+    <td class="seq">
+      <% $seq->{seq} |h %>
+    </td>
+    <td>
+      <ul>
+%     foreach my $sib (@{$seq->{sibs}}) {
+%         if ($sib->{doc}->Id eq $doc->Id) {
+        <li class="current"><% $sib->{title} |h %>
+          <span>
+%             if ($inactive) {
+            <img class="obvius-inactive" width="7" height="6" src="/pics/icons/sort-down-inactive.png" alt="(<& /shared/msg, text=>'Down' &>)" />
+            <img class="obvius-inactive" width="7" height="6" src="/pics/icons/sort-up-inactive.png" alt="(<& /shared/msg, text=>'Up' &>)" />
+%             }
+%             else {
+            <a href="./?obvius_app_seqlist=1&amp;value=<% $next %>&amp;fieldname=<% $fieldname |u %>"><img width="7" height="6" src="/pics/icons/sort-down.png" alt="(<& /shared/msg, text=>'Down' &>)" /></a>
+            <a href="./?obvius_app_seqlist=1&amp;value=<% $prev %>&amp;fieldname=<% $fieldname |u %>"><img width="7" height="6" src="/pics/icons/sort-up.png" alt="(<& /shared/msg, text=>'Up' &>)" /></a>
+%             }
+          </span>
+        </li>
+%         }
+%         else {
+        <li><% $sib->{title} |h %></li>
+%         }
+%     }
+      </ul>
+    </td>
+  </tr>
+% }
+</table>
+
+<& ../bottom &>
+%
+<%args>
+$fieldname
+$value=>undef
+</%args>
+%
+<%init>
+$value=$obvius->get_version_field($vdoc, qw(seq)) if (!defined $value);
+
+my $inactive=1;
+
+my $sibs;
+
+my $parent_doc=$obvius->get_doc_by_id($doc->Parent);
+my $parent_vdoc;
+$parent_vdoc=$obvius->get_public_version($parent_doc) || $obvius->get_latest_version($parent_doc) if ($parent_doc);
+if ($parent_vdoc) {
+    $sibs=$m->comp('/portal/subdocs:get_subs', base_doc=>$parent_doc, base_vdoc=>$parent_vdoc);
+    # Active only if the sortorder starts with [+-]seq:
+    my $sortorder=$obvius->get_version_field($parent_vdoc, qw(sortorder));
+    $inactive=0 if (defined $sortorder and $sortorder=~/^[+\-]seq/i);
+}
+
+my $current;
+my @seqs=();
+my $seq={};
+if ($sibs) {
+    foreach my $sib (@$sibs) {
+        if ($sib->{doc}->Id==$doc->Id) {
+            $sib->{value}=$value;
+            $current=$sib;
+            next;
+        }
+        else {
+            $sib->{value}=$sib->{vdoc}->Seq;
+        }
+
+        if (!exists $seq->{seq} or $seq->{seq}!=$sib->{value}) {
+            $seq={ seq=>$sib->{value}, sibs=>[ $sib ] };
+            push @seqs, $seq;
+        }
+        else {
+            push @{$seq->{sibs}}, $sib;
+        }
+    }
+}
+
+if ($current) {
+    # Put in in place.
+    # XXX Note that this "insertion in place" does not take
+    #     the original/real sort into account.
+    my ($current_seq)=grep { $_->{seq}==$current->{value} } @seqs;
+    if ($current_seq) {
+        # Find out where to put it:
+        my $before=0;
+        for(my $i=0; $i<scalar(@{$current_seq->{sibs}}); $i++) {
+            $before=$i+1 if (lc($current->{title}) gt lc($current_seq->{sibs}->[$i]->{title}));
+        }
+        # Nudge it in place:
+        splice @{$current_seq->{sibs}}, $before, 0, ($current);
+    }
+    else {
+        $current_seq={ seq=>$current->{value}, sibs=>[ $current ] };
+
+        my $before=0;
+        for(my $i=0; $i<scalar(@seqs); $i++) {
+            $before=$i+1 if ($current_seq->{seq}>$seqs[$i]->{seq});
+        }
+        splice @seqs, $before, 0, ($current_seq);
+    }
+}
+
+# Find prev_value/next_value:
+my $prev_seq;
+my ($current_seq)=grep { $_->{seq}==$current->{value} } @seqs;
+my $next_seq;
+foreach (@seqs) {
+    $prev_seq=$_ if ($_->{seq}<$current_seq->{seq});
+    $next_seq=$_ if (!defined $next_seq and $_->{seq}>$current_seq->{seq});
+}
+
+my $prev=$current_seq->{seq}-10;
+$prev=(scalar(@{$current_seq->{sibs}})==1 ? $prev_seq->{seq} : $prev_seq->{seq}+($current_seq->{seq}-$prev_seq->{seq})/2) if ($prev_seq);
+
+my $next=$current_seq->{seq}+10;
+$next=(scalar(@{$current_seq->{sibs}})==1 ? $next_seq->{seq} : $current_seq->{seq}+($next_seq->{seq}-$current_seq->{seq})/2) if ($next_seq);
+
+</%init>

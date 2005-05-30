@@ -1,0 +1,80 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'Move' &></h2>
+
+  <form action="./">
+%     my $parent=$obvius->get_doc_by_id($doc->Parent);
+%     my $parent_uri='';
+%     $parent_uri=$obvius->get_doc_uri($parent) if ($parent);
+    <div>
+      <label><& /shared/msg, text=>'From' &></label>
+      <% $parent_uri |h %>
+    </div>
+    <div>
+      <label><& /shared/msg, text=>'Destination' &></label>
+      <input type="text" name="obvius_parent_uri" value="<% $parent_uri |h %>" size="35" /><input onclick="<& /portal/util/navigator_link_start:onclick, path=>$parent_uri, fieldname=>'obvius_parent_uri' &>" type="button" value="<& /shared/msg, text=>'Find' &> ..." />
+      <input type="hidden" name="obvius_new_name" value="<% $doc->Name |h %>" />
+    </div>
+
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_move=>1 } &>
+      <& util/do_cancel, do_text=>'Move' &>
+    </p>
+  </form>
+</div>
+%
+<%init>
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+<%method cancel>
+%
+<& /shared/set_status_message, message=>'Move cancelled' &>
+%
+</%method>
+%
+%
+<%method do>
+%
+<%args>
+$obvius_version
+$obvius_new_name=>''
+$obvius_parent_uri=>''
+$obvius_later_date
+</%args>
+%
+<%init>
+# Check for (one type of) stupid input:
+if ($obvius_parent_uri!~m!^/! or $obvius_parent_uri!~m!/$!) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Path must start and end with a "/" character');
+    return 'move';
+}
+
+my $old_uri=$obvius->get_doc_uri($doc);
+if ("$obvius_parent_uri$obvius_new_name/"=~m/^$old_uri/i) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Can not move document under itself');
+    return 'move';
+}
+
+my ($status, $message)=$obvius->send_order(
+                                           docid=>$doc->Id,
+                                           user=>$obvius->user,
+                                           command=>'move',
+                                           args=>{ new_uri=>$obvius_parent_uri . $obvius_new_name },
+                                           date=>$obvius_later_date,
+                                          );
+$m->comp('/shared/set_status_message', status=>$status, message=>$message);
+
+if ($status eq 'OK') {
+    # XXX Only redirect if moved now!
+    $r->notes('obvius_redirect_to'=>$prefix . $obvius_parent_uri . $obvius_new_name . '/');
+}
+return ''; # Stay here
+</%init>
+%
+</%method>

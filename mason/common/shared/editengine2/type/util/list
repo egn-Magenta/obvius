@@ -1,0 +1,25 @@
+% foreach my $choice (@$choices) {
+%     my $id="obvius-$type-$name-$choice";
+%     $id=~s/[^\w-]//g;
+<input id="<% $id %>" type="<% $type |h %>" name="<% $name |h %>" value="<% $choice |h %>" <% $values{$choice} ? 'checked="checked" ' : '' %>/><label for="<% $id %>"><& /shared/msg, text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice) &></label>
+% }
+%
+<%args>
+$name
+$choices
+$labels=>undef
+$value=>undef
+$type=>'radio'
+</%args>
+%
+<%init>
+$labels={} if (!defined $labels);
+
+my %values=();
+if (defined $value) {
+    $value=[$value] unless (ref($value) eq 'ARRAY');
+    %values=map { $_=>1 } @$value;
+    # XXX Perhaps complain if more than one value is there if type is
+    # radio? Radiobuttons can have only one...
+}
+</%init>

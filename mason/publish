@@ -132,6 +132,7 @@ $m->comp(
 	 sec=>$session->{fields_out}->{SEC},
 	 front_prio=>$session->{fields_out}->{FRONT_PRIO},
 	 sec_prio=>$session->{fields_out}->{SEC_PRIO},
+         vdoc=>$session->{version},
 	);
 return $ret;
 </%perl>

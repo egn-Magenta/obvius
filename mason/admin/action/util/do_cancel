@@ -1,0 +1,12 @@
+    <& /portal/util/button, name=>$name_prefix . 'do', text=>$do_text, accesskey=>'s', class=>'obvius-command-do' &>
+% unless ($no_later_date) {
+    <& later_date &>
+% }
+    <& /portal/util/button, name=>$name_prefix . 'cancel', text=>$cancel_text, accesskey=>'z', class=>'obvius-command-cancel' &>
+%
+<%args>
+$do_text=>'Ok'
+$cancel_text=>'Cancel'
+$no_later_date=>0
+$name_prefix=>'obvius_perform_'
+</%args>

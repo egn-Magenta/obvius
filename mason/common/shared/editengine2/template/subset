@@ -1,0 +1,194 @@
+% if ($style->{context} eq 'block') {
+%   if (defined $editscheme->{label}) {
+<h2><& /shared/msg, text=>$editscheme->{label} &></h2>
+%   }
+%  unless (defined $style->{open} and $style->{open}) {
+     <form action='./' method='get' enctype="multipart/form-data">
+     <input type='hidden' name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
+%  }
+   <& '../commit:scheme', history=>$history &>
+%  if (scalar(@$set)) {
+   <div>
+   <table>
+%    foreach my $element (@$set) {
+%      my $element_renamed = shift @$set_renamed;
+       <& '../select:object', editscheme=>$subset_scheme, object=>$element_renamed &>
+       <tr>
+%        foreach my $item (@set_display) {
+          <td>
+            <& '../display', layout=>$item, value=>$element, style=>{context=>'inline'}, editscheme=>$set_scheme, history=>$history &>
+          </td>
+%        }
+%#       Display the checkbox:
+%#       [!] CONSIDER DOING THIS USING <toolbox:escape_object> or something similar!!!
+%        my $element_key = join '·', map {$element->{$_}->{value}} @correspondances;
+          <td>\
+%           my $check = $subset_lookup{$element_key} ? "checked" : ""; 
+            <& '../commit:object', history=>$history, type=>'checkbox', tag=>'checked', tag_value=>$check &>
+          </td>
+       </tr>
+%    }
+   </table>
+   </div>
+%  }
+%# Function selection and commission
+%#  foreach my $function (keys %{$editscheme->{storage}->{functions}}) {
+     <& '../select:function', function=>'execute', editscheme=>$editscheme, history=>$history &>
+%    unless (defined $style->{open} and $style->{open}) {
+       <& '../commit:execute', history=>$history, editscheme=>$editscheme &>
+%#    }
+%  }
+%  unless (defined $style->{open} and $style->{open}) {
+     <& '../commit:cancel', history=>$history &>
+     </form>
+%  }
+% }
+%
+% if ($style->{context} eq 'inline') {
+   <ul>
+%   foreach my $element (@$set) {
+%     my $element_key = join '·', map {$element->{$_}->{value}} @correspondances;
+%     if ($subset_lookup{$element_key}) { 
+        <li>
+%        foreach my $item (@set_display) {
+          <div>
+           <& '../display', layout=>$item, value=>$element, style=>{context=>'inline'}, editscheme=>$set_scheme, history=>$history &>
+          </div>
+%        }
+        </li>
+%     }
+%   }
+   </ul>
+% }
+<%args>
+# Mandatory arguments
+$history
+$session
+$editscheme
+$storage
+
+# The scheme's style parameter:
+#  » 'block':  the implementation above
+#    'inline': show as table without header and pages
+#    'raw':    return data as array of (array|hash)?
+#$style=>'block'
+$style
+
+</%args>
+%
+<%init>
+print STDERR "template/<subset>\thistory = '$history'\n" if $session->{cesi_debug_recursion};
+
+my %object = %{$m->comp('../toolbox:access_object')};
+
+my $set_relation = $editscheme->{arguments}->{set};
+my $subset_relation = $editscheme->{arguments}->{subset};
+
+# Create a fictious display element for describing the set as a scheme
+# and save the output.  $set is used to display the elements
+# correctly, ie. according to the display section on the set scheme.
+my %set = (
+           name=>$set_relation,
+           content=>'scheme',
+           style=>{context=>'raw'},
+          );
+my $set = $m->comp('../display', layout=>\%set, editscheme=>$editscheme, history=>$history);
+#use Data::Dumper; print STDERR '$set: ' . Dumper($set);
+
+# Rename set identifiers to match those of the subset.  $set_renamed
+# is used to select the correct values, ie. with identifiers that
+# correspond to those in the subset.
+my $subset_mappings = $editscheme->{arguments}->{subset_mappings};
+my @correspondances = keys %$subset_mappings;
+
+my $set_renamed;
+foreach my $element (@$set) {
+    my $new_element;
+    foreach my $identifier (@correspondances) {
+        $new_element->{$subset_mappings->{$identifier}} = $element->{$identifier};
+    }
+#     foreach my $identifier (@correspondances) {
+#         push @$set_renamed, {$subset_mappings->{$identifier} => $element->{$identifier}};
+#     }
+    push @$set_renamed, $new_element;
+}
+#use Data::Dumper; print STDERR '$set_renamed: ' . Dumper($set_renamed);
+
+# Create a fictious display element describing the checks as a scheme
+# and save the output
+my $subset;
+if (defined $session->{editengine_errors} and defined $session->{editengine_errors}->{$history}) {
+    my $subset_errors = $session->{editengine_errors}->{$history};
+    foreach my $selection (keys %$subset_errors) {
+        my $unescaped_description = $m->comp('../toolbox:unescape_object', object_description=>$selection);
+        my $entry = {
+                     map {
+                         $_ => { value => $unescaped_description->{$_} }
+                     } keys %$unescaped_description
+                    };
+        push @$subset, $entry;
+    }
+}
+elsif ( !scalar(keys %object)) {
+    $subset = [];
+}
+else {
+    my %subset = (
+                  name=>$editscheme->{arguments}->{subset},
+                  content=>'scheme',
+                  style=>{context=>'raw'},
+                 );
+    $subset = $m->comp('../display', layout=>\%subset, editscheme=>$editscheme, history=>$history);
+}
+#use Data::Dumper; print STDERR '$subset: ' . Dumper($subset);
+
+# Reorganize the list of checks into a form more suitable for lookup.
+# The subset_mappings section of "arguments" describes how
+# objects in the 'set' and 'subset' schemes correspond.  More precisely,
+# it is a list of 'set identifier' => 'subset identifier' correspondances
+# used to determine subset membership
+
+my %subset_lookup;
+foreach my $subset_element (@$subset) {
+    my $subset_key = join '·', map {$subset_element->{$subset_mappings->{$_}}->{value}} @correspondances;
+    $subset_lookup{$subset_key} = 'defined';
+}
+
+#use Data::Dumper; print STDERR '\%subset_lookup: ' . Dumper(\%subset_lookup);
+
+my $set_scheme = $editscheme->{relations}->{$set_relation}->{scheme};
+my @set_display = @{$set_scheme->{display}};
+my $subset_scheme = $editscheme->{relations}->{$subset_relation}->{scheme};
+
+my $relation = $editscheme->{relations}->{$subset_relation};
+$m->comp("../projection:$relation->{projection}", relation=>$relation);
+# [!] Consider accessing object here..
+
+</%init>
+
+<%doc>
+
+ About the algorithm.
+ ====================
+
+ Two sets are managed:
+
+   1) The (full) set of elements
+
+   2) The selected (subset) elements
+
+
+ The algorithm works as follows:
+
+   i) Extract $subset and rename identifiers to match those of the subset
+
+      · $set -> $set_renamed
+
+  ii) Extract the subset and reorganize to a more useful form
+
+      · $subset -> $subset_lookup
+
+ iii) Determine membership by (for each element of $set_renamed)
+      trying to look it up in $subset_lookup
+
+</%doc>

@@ -10,8 +10,8 @@ $field=>'teaser'
 <%init>
 
 $obvius->get_version_fields($vdoc, [$field, 'docdate', 'show_date', 'show_teaser']);
-$show_date = $vdoc->Show_date;
-$show_teaser = $vdoc->Show_teaser;
+$show_date = $vdoc->field('show_date') || 0;
+$show_teaser = $vdoc->field('show_teaser') || 0;
 my $teaser='';
 my $date='';
 

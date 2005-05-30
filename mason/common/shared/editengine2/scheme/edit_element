@@ -1,0 +1,32 @@
+%
+% my $i=0;
+% foreach my $field (@{$editscheme->{display}}) {
+%     my $field_name=$field->{name}; 
+%     my $data=$editscheme->{storage}->{data};
+%     if ($data->{$field_name}) {
+%         if ($field->{hidden}) {
+        <input type="hidden" name="<% $field->{name} |h %>" value="<% $element->{$field->{name}} |h %>" />
+%         }
+%     elsif ($field->{immutable}) {
+<div class="obvius-editengine-<% $i++%2 ? 'b' : 'a' %> obvius-editengine-immutable">
+        <& "../editschemedatatypes/" . $data->{$field->{name}} . ":edit", field=>$field, value=>$element->{$field->{name}}, disabled=>1 &>
+</div>
+%     }
+%     else {
+<div class="obvius-editengine-<% $i++%2 ? 'b' : 'a' %>">
+        <& "../editschemedatatypes/" . $data->{$field->{name}} . ":edit", field=>$field, value=>$element->{$field->{name}} &>
+</div>
+%     }
+%   
+%   } 
+%   else {
+      (editscheme)
+%   }
+% }
+%
+<%args>
+$editscheme
+$storage
+$func_h
+$element
+</%args>

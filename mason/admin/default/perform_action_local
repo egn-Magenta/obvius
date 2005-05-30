@@ -1,0 +1,6 @@
+<%doc>
+
+Override this with a local copy if you need to handle local
+stuff at the end of an/each action.
+
+</%doc>

@@ -1,0 +1,39 @@
+<%args>
+$fieldname
+$doctype
+$value
+$original_value
+</%args>
+%
+<%init>
+my $fspec=$obvius->get_fieldspec($fieldname, $doctype);
+my $ftype=$fspec->Fieldtype;
+
+my $value_out;
+if (ref $value eq 'ARRAY') {
+    $value_out=[ map { $ftype->copy_in($obvius, $fspec, $_) } @{$value} ];
+}
+else {
+    $value_out=$ftype->copy_in($obvius, $fspec, $value);
+    # If it is repeatable, we must make it an array-ref:
+    $value_out=[ $value_out ] if (defined $value_out and $fspec->Repeatable);
+}
+
+# This repeatable value has been cleared by the user, signal that by
+# setting it's value to an empty array-ref instead of undef:
+if (!defined $value_out and defined $original_value and $fspec->Repeatable) {
+    $value_out=[];
+}
+
+# Non-optional, non-repeatable values are handled in a special way
+# here - if a new value is not defined (that means that the user was
+# not ABLE to change it, i.e. there was no field for her (at least for
+# text-fields)) and there is an original value, we assume that no
+# change is wanted, and keep the old value. Oh, and also do this if
+# the field is a binary one and the value was empty:
+if (!$fspec->Repeatable and !$fspec->Optional and defined $original_value and (!defined $value or ($ftype->Bin and $value eq ''))) {
+    $value_out=$original_value;
+}
+
+return $value_out;
+</%init>

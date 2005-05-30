@@ -1,0 +1,40 @@
+<% $string %>\
+%
+<%args>
+$time=>undef
+$format=>'iso-like'
+</%args>
+%
+<%once>
+use POSIX qw(strftime);
+
+# Note that year and month are not exact:
+my %secs_per=(Y=>365*24*60*60, M=>30*24*60*60, d=>24*60*60, h=>60*60, m=>60, s=>1);
+</%once>
+%
+<%init>
+if (defined $time) {
+    if ($time=~/^\s*([+-])\s*(\d+)\s*([YMdhms])\s*$/) {
+        my ($op, $val, $unit)=($1, $2, $3);
+
+        $time=time();
+
+        my $delta=$val*$secs_per{$unit};
+        if ($op eq '+') {
+            $time+=$delta;
+        }
+        else {
+            $time-=$delta;
+        }
+    }
+    elsif ($time!~/^\s*\d+\s*$/) {
+        warn "Can't parse time: $time; using 0";
+        $time=undef;
+    }
+}
+else {
+    $time=time(); # Now
+}
+
+my $string=(defined $time ? strftime('%Y-%m-%d %H:%M', localtime($time)) : 'Error');
+</%init>

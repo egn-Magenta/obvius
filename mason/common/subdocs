@@ -8,11 +8,13 @@
 %if ($show_subdoc_teaser == 1) {
 %  if ($_->{teaser} !~ /^\s+$/) {
       <br /><% $_->{teaser} %>
+% # XXX What kind of mushrooms did inspire this conditional:
 %  if ($date == 1) {
         <br />
 %  }
 %  }
 %}
+% # XXX ... and what kind of organic seeds made this go:
       <% $date != 0 ? '<br />'.$date .'<br /><br />' : '<br /><br />' %></li>
 %     }
     </ul>

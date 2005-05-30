@@ -16,17 +16,17 @@ sub action {
     my $nyheds_uri = $uri . "nyheder/";
     my $arrangement_uri = $uri . "arrangementer/";
 
-    my $nyheder = $this->get_subdocs($obvius, $nyheds_uri);
+    my $nyheder = $this->get_subdocs($obvius, $nyheds_uri, 'docdate desc');
     $output->param('nyheder'=>$nyheder);
 
-    my $arrangementer = $this->get_subdocs($obvius, $arrangement_uri);
+    my $arrangementer = $this->get_subdocs($obvius, $arrangement_uri, 'docdate');
     $output->param('arrangementer'=>$arrangementer);
 
     return OBVIUS_OK;
 }
 
 sub get_subdocs {
-    my ($this, $obvius, $url) = @_;
+    my ($this, $obvius, $url, $sort) = @_;
 
     my @doc = $obvius->get_doc_by_path($url);
     return undef unless @doc;
@@ -39,7 +39,7 @@ sub get_subdocs {
 				notexpired => 1,
 				nothidden => 1,
 				needs_document_fields => ['parent'],
-				order => 'docdate desc ');
+				order => "$sort ");
 
     my @subdocs;
 

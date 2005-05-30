@@ -1,0 +1,35 @@
+<%args>
+$to
+$cc=>undef
+$bcc=>undef
+$from
+$subject
+$text
+$smtpserver=>'localhost'
+$timeout=>30
+$debug=>0
+</%args>
+%
+<%once>
+use Net::SMTP;
+</%once>
+%
+<%init>
+my $smtp = Net::SMTP->new($smtpserver, Timeout=>$timeout, Debug=>$debug);
+$smtp->mail($from);
+map { $smtp->to($_) } split /\s*,\s*/, $to;
+map { $smtp->to($_) } split /\s*,\s*/, $cc if ($cc);
+map { $smtp->to($_) } split /\s*,\s*/, $bcc if ($bcc);
+$smtp->data();
+$smtp->datasend("From: $from\n");
+$smtp->datasend("To: $to\n");
+$smtp->datasend("Cc: $cc\n") if ($cc);
+$smtp->datasend("Subject: $subject\n");
+$smtp->datasend("MIME-Version: 1.0\n");
+$smtp->datasend("Content-Type: text/plain; charset=iso-8859-1\n");
+$smtp->datasend("Content-Transfer-Encoding: 8bit\n");
+$smtp->datasend("\n");
+$smtp->datasend($text);
+$smtp->dataend();
+$smtp->quit();
+</%init>

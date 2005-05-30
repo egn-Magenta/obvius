@@ -1,0 +1,6 @@
+<%init>
+if (defined $r->pnotes('obvius_session')) {
+    $r->pnotes('site')->release_session($r->pnotes('obvius_session'));
+    $r->pnotes('obvius_session'=>undef);
+}
+</%init>

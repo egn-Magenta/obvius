@@ -1,5 +1,5 @@
 <!-- subdocs: -->
-  <table border="0" cellspacing="0" bordercolor="#111111" width="100%">
+  <table class="obviussubdocs" border="0" cellspacing="0" bordercolor="#111111" width="100%">
     <!-- path: -->
 % my $indent=1;
 % foreach (@$outpath) {

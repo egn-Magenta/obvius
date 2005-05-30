@@ -1,0 +1,92 @@
+<%method block>\
+%
+% my $name=$prefix . $field->{name};
+<& util/label, name=>$field->{name}, label=>$field->{label}, field=>$field &>
+<input <% $disabled ? 'disabled="disabled" ' : '' %>type="text" size="<% $size %>" name="<% $name |h %>" id="<% $field->{name} |h %>" value="<% $start_value |h %>" />
+% unless ($disabled) {
+<button type="reset" id="obvius_internal_calendar_trigger_<% $field->{name} |h %>">...</button>
+<script type="text/javascript">
+Calendar.setup({
+                inputField  : "<% $field->{name} |h %>",
+                ifFormat    : "%Y-%m-%d<% $time_off ? '' : ' %H:%M:%S' %>",
+                firstDay    : 1,
+                showsTime   : <% $time_off ? 'false' : 'true' %>,
+                button      : "obvius_internal_calendar_trigger_<% $field->{name} |h %>",
+                singleClick : true,
+                step        : 1
+               });
+</script>
+% }
+<%args>
+$prefix
+$field
+$value=>{ value=>'' }
+$disabled=>0
+$time_off=>0
+</%args>
+%
+<%init>
+$value->{value}='' unless (exists $value->{value} and defined $value->{value});
+my $size=($time_off ? 10 : 19);
+my $start_value=($time_off ? substr($value->{value}, 0, $size) : substr($value->{value}, 0, $size));
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+%
+<% $show_value |h %>\
+%
+<%args>
+$prefix
+$field
+$value=>''
+$time_off=>0
+</%args>
+%
+<%init>
+my $size=($time_off ? 10 : 19);
+my $show_value=($time_off ? substr($value->{value}, 0, $size) : substr($value->{value}, 0, $size));
+</%init>
+%
+</%method>
+%
+%
+% # Validate: XXX
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK'; # XXX
+</%init>
+%
+%
+%
+<%doc>
+
+Note that for the calendar to work, the following JavaScript-files
+must be loaded:
+
+ /scripts/jscalendar/calendar.js
+ /scripts/jscalendar/lang/calendar-LL.js
+ /scripts/jscalendar/calendar-setup.js
+
+Also, for the calendar to look nice, this stylesheet should be
+included:
+
+ /scripts/jscalendar/calendar-obvius.css
+
+(or something similar).
+
+</%doc>

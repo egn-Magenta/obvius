@@ -1,0 +1,23 @@
+<%args>
+$obvius_version=>undef
+</%args>\
+%
+<%init>
+$vdoc=undef; # Be sure to look up a vdoc
+
+# Check if there's an argument saying what version to use:
+if ($obvius_version) {
+    $vdoc=$obvius->get_version($doc, $obvius_version);
+}
+elsif (my $session=$r->pnotes('obvius_session')) { # Otherwise, check if it's given in a sesssion:
+    $vdoc=$obvius->get_version($doc, $session->{obvius_version}) if (exists $session->{obvius_version});
+}
+
+# Fall back to public then latest version.
+unless ($vdoc) {
+    $vdoc=$obvius->get_public_version($doc);
+    $vdoc=$obvius->get_latest_version($doc) unless ($vdoc);
+    $obvius_version = $vdoc->Version;
+}
+$doctype=$obvius->get_version_type($vdoc);
+</%init>

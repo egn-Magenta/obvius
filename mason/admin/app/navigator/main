@@ -1,0 +1,129 @@
+<& ../top, title=>$uri  . ' - navigator', app=>($obvius_quickcreate_image || $obvius_quickcreate_upload ? undef : 'navigator'), javascript=>[qw(admin.js admin_navigator.js)] &>
+  <script type="text/javascript">
+    var obvius_navigator_fieldname='';
+% if (defined $fieldname) {
+    obvius_navigator_fieldname='<% $fieldname |h %>';
+% }
+  </script>
+  <form class="obvius-navigator" action="./" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="obvius_app_navigator" value="1" />
+
+<& toolbar, %ARGS, obvius_navigator_batch_function=>$obvius_navigator_batch_function &>
+
+<& /portal/path, append_args=>$m->scomp('util/args', %ARGS) &>
+
+<% $content %>
+
+  </form>
+<& ../bottom &>
+%
+%
+<%def .content>
+%
+<%args>
+$path=>undef
+$fieldname=>undef
+$obvius_quickcreate_image=>0
+$obvius_quickcreate_upload=>0
+$selected=>[]
+</%args>
+%
+% if ($obvius_quickcreate_image) {
+<& quickcreate, %ARGS, type=>'Image' &>
+% }
+% elsif ($obvius_quickcreate_upload) {
+<& quickcreate, %ARGS, type=>'Upload' &>
+% }
+% else {
+<& tree, %ARGS &>
+
+<& current_document &>
+<& subdocs, %ARGS, selected=>$selected &>
+% }
+%
+</%def>
+%
+%
+%
+<%once>
+my %batch_functions=(publish=>1, unpublish=>1, delete=>1);
+</%once>
+%
+%
+<%args>
+$path=>undef
+$fieldname=>undef
+$doctype=>undef
+$doctypeid=>undef
+$obvius_quickcreate_image=>0
+$obvius_quickcreate_upload=>0
+$fields=>undef
+$obvius_navigator_batch_function=>undef
+$obvius_navigator_batch_selected=>undef
+$obvius_navigator_perform_function_on_selected=>undef
+</%args>
+%
+<%init>
+if (defined $path) {
+    # Try to find the document, and use it:
+    my $path_doc=$obvius->lookup_document($path);
+    if ($path_doc) {
+        # Set globals:
+        $doc=$path_doc;
+        $uri=$obvius->get_doc_uri($doc);
+        $m->comp('/default/vdoc', %ARGS);
+    }
+}
+
+my $selected=[];
+$selected=$obvius_navigator_batch_selected if (defined $obvius_navigator_batch_selected);
+$selected=[ $selected ] unless (ref $selected eq 'ARRAY');
+
+# Batch processing:
+if ($obvius_navigator_perform_function_on_selected) {
+    my $session_id=$m->comp('/default/setup_session'); # For the messages
+    if (!$obvius_navigator_batch_function) {
+        $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Please choose a function to perform');
+    }
+    elsif (!$batch_functions{$obvius_navigator_batch_function}) {
+        $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Batch function', ' ', $obvius_navigator_batch_function, ' ', 'unknown']);
+    }
+    elsif (!defined $obvius_navigator_batch_selected) {
+        $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Please select one or more subdocuments for batch operation');
+    }
+    else {
+        # Perform the batch-action:
+        my ($ok, $batch_status, $batch_message)=(0, 'OK', []);
+        foreach my $docid (@$selected) {
+            # Lookup the document in question:
+            my $selected_doc=$obvius->get_doc_by_id($docid);
+            my %args=();
+            if ($selected_doc) {
+                # Lookup the public version (for unpublish) or the latest version (for publish):
+                my $selected_vdoc=$obvius->get_public_version($selected_doc) || $obvius->get_latest_version($selected_doc);
+                $args{version}=$selected_vdoc->Version if ($selected_vdoc);
+            }
+            my ($status, $message)=$obvius->send_order(
+                                           docid=>$docid,
+                                           user=>$obvius->user,
+                                           command=>$obvius_navigator_batch_function,
+                                           args=>\%args,
+                                          );
+            if ($status eq 'OK') {
+                $ok++;
+            }
+            else {
+                $batch_status=$status;          # Takes the last status that is not OK
+                push @$batch_message, '. ', (ref $message ? @$message : $message); # Push not ok messages
+            }
+        }
+        unshift @$batch_message, $ok, '/', scalar(@$selected), ' ', 'documents processed successfully';
+        $m->comp('/shared/set_status_message', status=>$batch_status, message=>$batch_message);
+        $obvius_navigator_batch_function=undef;
+    }
+    # Redirect to show message (and allow the cache to update):
+    $m->comp('/shared/redirect', location=>'./', args=>{ %ARGS, obvius_navigator_perform_function_on_selected=>'', obvius_navigator_batch_function=>$obvius_navigator_batch_function, obvius_session_id=>$session_id });
+}
+
+my $content=$m->scomp('.content', %ARGS, selected=>$selected); # Create before top is run.
+</%init>

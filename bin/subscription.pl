@@ -3,8 +3,6 @@
 use strict;
 use warnings;
 
-use lib '/home/httpd/obvius/perl_blib', '/usr/lib/perl/5.6.1', '/usr/lib/perl/5.6.0';
-
 use Obvius;
 use Obvius::Config;
 use Obvius::Log;
@@ -51,8 +49,7 @@ croak ("Could not get Obvius object for $site")
     unless(defined($obvius));
 
 croak ("Must have a sitename") unless($sitename);
-my $base_dir = '/home/httpd/'. $sitename;
-
+my $base_dir = '/var/www/'. $sitename;
 
 ## "Main" program part
 
@@ -271,13 +268,15 @@ sub get_subdocs_recursive {
         }
 
         $obvius->get_version_fields($vdoc, [ 'published', 'in_subscription' ], 'PUBLISH_FIELDS');
-        $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category' ]);
+        $obvius->get_version_fields($vdoc, [ 'title', 'teaser', 'category', 'seq' ]);
 
         push(@result, {
                         published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
                         title => $vdoc->Title,
                         teaser => $vdoc->field('teaser'),
                         category => $vdoc->field('category'),
+                        type => $vdoc->Type,
+                        seq => $vdoc->field('seq')
                         url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
                     }
                 ) if($vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION} and $vdoc->{PUBLISH_FIELDS}->{PUBLISHED});

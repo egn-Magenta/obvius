@@ -3,7 +3,7 @@ $content
 $obvius_session=>undef
 $obvius_page=>undef
 $obvius_version=>undef
-$obvius_versions_lang=>''
+$obvius_versions_lang=>undef
 $session=>undef
 $obvius_op=>undef
 $ghosted=>0
@@ -38,7 +38,7 @@ $obvius_show_hidden=>undef
 <!-- left column: -->
       <table cellpadding="0" cellspacing="0" width="<% $left_cell_width %>">
 	<tr>
-	  <td width="<% $left_cell_width %>" style="border-right: 1px black solid">
+	  <td class="obviusmakenewdocument" width="<% $left_cell_width %>" style="border-right: 1px black solid">
 	    <& subdocs, session=>$session, obvius_show_hidden=>$obvius_show_hidden &>
 	  </td>
 	</tr>
@@ -73,7 +73,7 @@ $obvius_show_hidden=>undef
 <!-- content column: -->
       <table cellpadding="7" cellspacing="0" width="100%">
 	<tr>
-	  <td>
+	  <td class="obviuscontent">
 	    <% $content_html %>
 	  </td>
 	</tr>
@@ -111,6 +111,16 @@ if (defined $obvius_show_hidden) {
 else {
     $obvius_show_hidden=$m->comp('/shared/get_cookie', cookie=>'obvius_show_hidden');
 }
+
+# Remember obvius_versions_lang:
+if (defined $obvius_versions_lang) {
+    $m->comp('/shared/set_cookie', cookie=>'obvius_versions_lang', value=>$obvius_versions_lang);
+    $m->comp('/shared/set_cookie', cookie=>'lang', value=>$obvius_versions_lang);
+}
+else {
+    $obvius_versions_lang=$m->comp('/shared/get_cookie', cookie=>'obvius_versions_lang');
+}
+$obvius_versions_lang='' unless (defined $obvius_versions_lang);
 
 my $content_html=$m->scomp($content, %ARGS); # This has side-effects, which we use.
 $session=$r->pnotes('session') unless ($session);

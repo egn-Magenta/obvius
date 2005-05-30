@@ -1,0 +1,29 @@
+% if (scalar(@$choices)) {
+<select id="<% $name |h %>" name="<% $name |h %>"<% $multiple ? ' multiple="multiple"' : '' %><% $multiple ? ' size="' . $size . '"' : '' %>>
+% foreach my $choice (@$choices) {
+%     my $text=$m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice));
+  <option value="<% $choice |h %>"<% $values{$choice} ? ' selected="selected"' : '' %>><% $text |h %></option>
+% }
+</select>
+% }
+%
+<%args>
+$name
+$choices
+$labels=>undef
+$value=>undef
+$multiple=>0
+$size=>8
+</%args>
+%
+<%init>
+$labels={} if (!defined $labels);
+
+my %values=();
+if (defined $value) {
+    $value=[$value] unless (ref($value) eq 'ARRAY');
+    %values=map { $_=>1 } @$value;
+    # XXX Perhaps complain if more than one value is there if type is
+    # not multiple? Dropdowns can have only one...
+}
+</%init>

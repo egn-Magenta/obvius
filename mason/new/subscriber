@@ -59,7 +59,7 @@ foreach my $field (@fieldlist) {
     if ($field->{fieldspec}->Name eq 'docid') {
 	$field->{fieldspec}->param('fieldtype')->param(edit=>'subscriptions');
     }
-    if ($field->{fieldspec}->Name eq 'suspended') {
+    if ($field->{fieldspec}->Name eq 'suspended' or $field->{fieldspec}->Name eq 'wantshtml') {
 	$field->{fieldspec}->param('fieldtype')->param(edit=>'radio');
 	$field->{fieldspec}->param('fieldtype')->param(edit_args=>'0|1');
 	$field->{fieldspec}->param('fieldtype')->param(validate=>'regexp');

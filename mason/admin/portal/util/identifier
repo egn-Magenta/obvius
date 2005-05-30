@@ -1,0 +1,16 @@
+<input type="hidden" name="obvius_version" value="<% $vdoc->Version |h %>" />\
+% foreach my $key (keys %$pass) {
+
+<input type="hidden" name="<% $key |h %>" value="<% $pass->{$key} |h %>" />\
+% }
+%
+<%args>
+$pass=>{}
+</%args>
+%
+<%doc>
+
+Inserts identification of the current version in a form. If a hash-ref
+called "pass" is supplied, those values are inserted as well.
+
+</%doc>

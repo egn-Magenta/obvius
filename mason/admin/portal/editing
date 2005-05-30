@@ -1,0 +1,49 @@
+   <div class="obvius-editmenu obvius-link-decor">
+     <div class="obvius-editing<% $r->notes('inactive_editing') ? ' obvius-inactive' : '' %>">
+       <& util/identifier &>
+       <ul>
+% my $class='obvius-first-child ';
+% foreach my $pagenum (sort {$a <=> $b} grep { $_ =~ /^\d+$/ } keys %$editpages) {
+%     my $editpage=$editpages->{$pagenum};
+%     $class.='obvius-current' if ($pagenum eq $obvius_command_edit or $obvius_command_edit eq 'A');
+         <li<% $class ? ' class="' . $class . '"' : '' %> id="obvius-edit-tab-<% $pagenum |h %>">\
+% if (!$r->notes('inactive_editing')) {
+<a title="Alt-<% $pagenum |h %>" accesskey="<% $pagenum |h %>" href="./?obvius_command_edit=<% $pagenum |h %>&amp;obvius_version=<% $vdoc->Version |u %>" onclick="javascript:this.blur(); return(obvius_goto_editpage('obvius-edit-page-<% $pagenum |h %>', obvius_all_ids));">\
+% }
+<& /shared/msg, text=>$editpage->Title &><% $r->notes('inactive_editing') ? '' : '</a>' %></li>
+%     $class='';
+% }
+         <li>\
+% if (!$r->notes('inactive_editing')) {
+<a title="Alt-A" accesskey="a" href="./?obvius_command_edit=A&amp;obvius_version=<% $vdoc->Version |u %>" onclick="javascript:this.blur(); return(obvius_goto_editpage('obvius-edit-page-A', obvius_all_ids));">
+% }
+<& /shared/msg, text=>$m->scomp('/shared/msg', text=>'All fields') &><% $r->notes('inactive_editing') ? '' : '</a>' %></li>
+       </ul>
+     </div>
+     <script type="text/javascript">
+       var obvius_all_ids=false; /* Define the variable - if we are inside edit, it will be filled in there. */
+     </script>
+% # XXX Why this filler?
+     <div class="obvius-filler">&nbsp;</div>
+     <& newsboxes &>
+   </div>
+%
+<%args>
+$obvius_command_edit=>0
+$current=>''
+</%args>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+my $edit_doctype=$doctype;
+
+# We are changing doctypes:
+if ($session->{obvius_new_doctypeid}) {
+    $edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid});
+    $obvius_command_edit||=1; # Set to 1 if unset
+}
+
+my $editpages=$obvius->get_editpages($edit_doctype);
+
+$r->notes('inactive_editing'=>1) if (!$obvius->can_create_new_version($doc));
+</%init>

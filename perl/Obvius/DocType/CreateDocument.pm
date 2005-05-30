@@ -1,5 +1,29 @@
 package Obvius::DocType::CreateDocument;
 
+########################################################################
+#
+# CreateDocument.pm - Create documents from the public website
+#
+# Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+#
+# Author: Adam Sjøgren (asjo@magenta-aps.dk)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+########################################################################
+
 # $Id$
 
 use strict;
@@ -56,7 +80,13 @@ sub action {
 	if (defined $value) { # copy_in:
 	    my $fieldspec=$obvius->get_fieldspec($_, $doctype);
 	    my $fieldtype=$fieldspec->param('fieldtype');
-	    $value = $fieldtype->copy_in($obvius, $fieldspec, $value);
+            if (ref ($value) eq 'ARRAY') {
+                $value = [map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value];
+            }
+            else {
+                $value = $fieldtype->copy_in($obvius, $fieldspec, $value);
+                $value = [ $value ] if ($fieldspec->Repeatable);
+            }
 	}
 
         $docfields->param($_ => $value)  if(defined($value));
@@ -157,36 +187,28 @@ sub action {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::CreateDocument - Perl extension for blah blah blah
+Obvius::DocType::CreateDocument - document type for creating documents from public forms
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::CreateDocument;
-  blah blah blah
+  use'd automatically by Obvius
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::CreateDocument, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+When the user fills in a form and submits it, CreateDocument creates a
+document with the data from the form filled in and optionally
+publishes it. An email is sent to the email-address specified to
+notify of the event.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Obvius>.
 
 =cut

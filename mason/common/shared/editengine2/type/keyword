@@ -1,0 +1,70 @@
+<%method block>\
+% if (scalar(@choices)) {
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+% }
+% else {
+<& util/label, label=>$field->{label}, field=>$field &>
+<p><em>(<& /shared/msg, text=>'No keywords created yet' &>)</em></p>
+% }
+% if ($validation->{repeatable}) {
+<& util/multiple, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>\@selected, &>
+% }
+% else {
+<& util/dropdown, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>\@selected, &>
+% }
+<%doc>
+  XXX Possibility to add new keywords? Perhaps it is better to actually add
+      a command for editing keywords... Where you can add and rename
+      keywords, and perhaps delete them IF THEY ARE NOT USED. Which
+      is, like, impossible to check.
+</%doc>
+%
+<%args>
+$prefix
+$field
+$validation
+$value=>[]
+$style
+</%args>
+%
+<%init>
+my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
+
+my @keywords=sort { lc($a->{name}) cmp lc($b->{name}) } @{ $obvius->get_table_data('keywords') || [] };
+
+my @choices=map { $_->{id} } @keywords;
+my %labels=map { $_->{id} => $_->{name} } @keywords;
+
+my @selected=();
+@selected=@{$value->{value}} if (ref($value->{value}) eq 'ARRAY');
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+<% $value->{value} |h %>\
+%
+<%args>
+ $value
+</%args>
+%
+</%method>
+%
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK'; # XXX
+</%init>

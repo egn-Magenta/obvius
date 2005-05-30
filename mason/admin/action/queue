@@ -1,0 +1,147 @@
+<& /shared/editengine2/init, %ARGS, editscheme=>$queue &>
+%
+%
+%
+<%once>
+
+# Needs to take any relevant Obvius::Access::can_* into account.
+
+my $user_storage = {
+                    organization => {
+                                     class => 'DbTable',
+                                     source => 'users',
+                                     identifiers => [qw(id)],
+                                    },
+                    data => {
+                             id => { type=>'integer', mandatory=>1, },
+                             name => { type=>'line', },
+                            },
+                   };
+
+my $user_inline = {
+                   type => 'scheme/editsheet',
+                   display => [
+                               {name=>'name', content=>'data', label=>'User name', style=>{context=>'inline'} },
+                              ],
+                   storage => $user_storage,
+                  };
+
+my $user = {
+            type => 'scheme/editsheet',
+            display => [
+#                        {name=>'name', content=>'data', label=>'User name', style=>{context=>'block',disabled=>'1'} },
+                        {name=>'name', content=>'data', label=>'User name', style=>{context=>'block',disabled=>'1'} },
+                       ],
+            storage => $user_storage,
+           };
+
+
+my $relation = {
+                 user => {
+                          scheme => $user,
+                          projection => 'filter',
+                          mappings => {
+                                       user => 'id',
+                                      },
+                         },
+               };
+
+my $storage = {
+               organization=>{
+                              class=>'DbTable',
+                              source=>'queue',
+                              identifiers=>[qw(id)],
+                             },
+               functions=>{
+                           update=>{ label=>'Edit',   relation=>'entry'  },
+                           remove=>{ label=>'Delete', relation=>'delete' },
+                          },
+               data=>{
+                      id     =>{ type=>'integer', },
+                      date   =>{ type=>'line',    },
+                      docid  =>{ type=>'integer', },
+                      user   =>{ type=>'integer', },
+                      command=>{ type=>'line',    },
+                      args   =>{ type=>'text',    },
+                      status =>{ type=>'line',    },
+                      message=>{ type=>'line',    },
+                     },
+              };
+
+my $entry={
+           label=>'Command',
+           type=>'scheme/editsheet',
+           display=>[
+                     { name=>'date',    content=>'data',   label=>'Date',        },
+# The docid should be displayed as a path instead of the number:
+                     { name=>'docid',   content=>'data',   label=>'Document id', style=>{ disabled=>1, },   },
+# The user should be displayed as a full name, instead of a number:
+                     { name=>'user',    content=>'scheme', label=>'User',        style=>{context=>'inline'} },
+                     { name=>'command', content=>'data',   label=>'Command',     style=>{ disabled=>1, },   },
+                     { name=>'args',    content=>'data',   label=>'Arguments',   style=>{ disabled=>1, },   },
+                     { name=>'status',  content=>'data',   label=>'Status',      style=>{ disabled=>1, },   },
+                     { name=>'message', content=>'data',   label=>'Message',     style=>{ disabled=>1, },   },
+                    ],
+           storage=>$storage,
+           relations=> $relation,
+          };
+
+my $deleting={
+           label=>'Command',
+           type=>'scheme/editsheet',
+           display=>[
+                     { name=>'date',    content=>'data', label=>'Date',        style=>{disabled=>'1'}     },
+# The docid should be displayed as a path instead of the number:
+                     { name=>'docid',   content=>'data', label=>'Document id', style=>{disabled=>'1'}     },
+                     { name=>'user',    content=>'scheme', label=>'User',      style=>{context=>'inline'} },
+                     { name=>'command', content=>'data',   label=>'Command',   style=>{disabled=>'1'}     },
+                    ],
+           storage=>$storage,
+           relations=>$relation,
+          };
+
+my $queue={
+           name=>'queue_list',
+           label=>'Command queue',
+           type=>'scheme/table',
+           display=>[
+                     { name=>'date',    content=>'data',   label=>'Date',        },
+# The docid should be displayed as a path instead of the number:
+                     { name=>'docid',   content=>'data',   label=>'Document id', },
+                     { name=>'user',    content=>'scheme', label=>'User Name',   },
+                     { name=>'command', content=>'data',   label=>'Command',     },
+                     { name=>'status',  content=>'data',   label=>'Status',      },
+                     { name=>'message', content=>'data',   label=>'Message',     },
+                    ],
+           storage=>$storage,
+           relations=>{
+                       entry=>{
+                               scheme=>$entry,
+                               projection=>'pipe',
+                              },
+                       delete=>{
+                                scheme=>$deleting,
+                                projection=>'pipe',
+                               },
+                       user=>{
+                              scheme => $user_inline,
+                              projection => 'filter',
+                              mappings => {
+                                           user => 'id',
+                                          },
+                             },
+                      },
+          };
+</%once>
+%
+<%init>
+$r->pnotes('obvius_session')->{action}='editengine';
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>

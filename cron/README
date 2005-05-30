@@ -1,0 +1,16 @@
+How to use the Debian-woody apache-perl package log-rotation-script.
+
+
+ 1) Edit /etc/apache-perl/cron.conf, so that APACHE_OLD_LOGS is large enough.
+    52000 is thousand years (if the logs are rotated once a week,
+    Sunday is default).
+
+ 2) Set APACHE_PRE_SCRIPT to /var/www/obvius/cron/stats_wrapped
+
+ 3) Apply /var/www/obvius/cron/cron.daily-apache-perl.patch to
+    /etc/cron.daily/apache-perl
+
+ 4) Consider using stats_wrapped every night for webalizer processing.
+
+
+Enjoy!

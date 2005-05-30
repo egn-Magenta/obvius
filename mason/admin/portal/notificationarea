@@ -1,0 +1,65 @@
+% if ($message_text) {
+ <div class="obvius-notificationarea obvius-message<% defined $status ? ' obvius-status-' . lc($status) : '' %>"><% $message_prefix %><% $message_text %></div>
+% }
+% elsif (!$invisible_when_empty) {
+ <div class="obvius-notificationarea">&nbsp;</div>
+% }
+%
+<%args>
+$message=>undef
+$status=>undef
+$invisible_when_empty=>0
+</%args>
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+
+if (defined $session) {
+    if (defined $session->{message}) {
+        $message=$session->{message};
+        delete $session->{message};
+    }
+    if (defined $session->{status}) {
+        $status=$session->{status};
+        delete $session->{status};
+    }
+}
+else {
+    $status=$r->pnotes('status') if (defined $r->pnotes('status'));
+    $message=$r->pnotes('message') if (defined $r->pnotes('message'));
+}
+
+my $message_text;
+if (defined $message and $message) {
+    if (ref $message eq 'ARRAY') {
+        $message_text=join "", map { $m->scomp('/shared/msg', text=>$_) } @$message;
+    }
+    else {
+        $message_text=$m->scomp('/shared/msg', text=>$message);
+    }
+}
+elsif (defined $status) {
+    $obvius->log->warn('admin/portal/notificationarea called with status but no message (status: ' . ($status || 'undef') . ')');
+}
+
+my $message_prefix='';
+if (defined $status and $status eq 'ERROR') {
+    $message_prefix=$m->scomp('/shared/msg', text=>'Error') . ': ';
+}
+</%init>\
+%
+%
+<%doc>
+
+notificationarea display status and message stored in the session (if
+it's there) or on pnotes (checked otherwise).
+
+status is a text-string, OK, WARNING or ERROR, corresponding to the
+       classes obvius-status-ok, -warning and -error, which can be
+       used to style the area differently according to the status.
+
+message is a text-string in the simple case, it is translated and
+        shown. If message is a reference to an array, each part is
+        translated and then they are joined.
+
+</%doc>

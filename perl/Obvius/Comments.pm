@@ -4,8 +4,8 @@ package Obvius::Comments;
 #
 # Obvius.pm - Content Manager, page comments handling
 #
-# Copyright (C) 2001 aparte A/S, Denmark (http://www.aparte.dk/)
-#                    FI, Denmark (http://www.fi.dk/)
+# Copyright (C) 2001-2004 aparte A/S, Denmark (http://www.aparte.dk/)
+#                         FI, Denmark (http://www.fi.dk/)
 #
 # Authors: Adam Sjøgren (asjo@magenta-aps.dk),
 #          Peter Makholm (pma@fi.dk)
@@ -91,10 +91,11 @@ sub update_comment {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Update comment ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Update comment ... failed ($ev_error)");
 	return undef;
     }
 
@@ -117,10 +118,11 @@ sub delete_comment {
 	$this->db_commit;
     };
 
-    if ($@) {			# handle error
-	$this->{DB_Error} = $@;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Delete comment ... failed ($@)");
+    my $ev_error=$@;
+    if ($ev_error) {			# handle error
+	$this->{DB_Error} = $ev_error;
+ 	$this->db_rollback;
+	$this->{LOG}->error("====> Delete comment ... failed ($ev_error)");
 	return undef;
     }
 
@@ -131,7 +133,6 @@ sub delete_comment {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
@@ -154,10 +155,6 @@ Obvius::Comments - Comment functions for L<Obvius>.
 This module contains functions for the page commenting system
 in L<Obvius>.
 It is not intended for use as a standalone module.
-
-=head2 EXPORT
-
-None.
 
 =head1 AUTHOR
 

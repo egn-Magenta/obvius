@@ -41,7 +41,7 @@ herunder og klik på send.</p>
 <tr>
 <td>
 <br>
-<input type="submit" value="Send">
+<input type="submit" class="subscriptionbutton" value="Send">
 </td>
 </tr>
 </table>

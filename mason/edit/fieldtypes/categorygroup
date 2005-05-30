@@ -67,6 +67,16 @@ $session
 $value=>undef
 </%args>
 <%perl>
+$value='' unless(defined $value);
 return $value;
 </%perl>
 </%method>
+%
+<%doc>
+
+This component should be taking advantage of the whole xref-system,
+but alas, it's not.
+
+Use categoryrestrict instead. You know you want to :-)
+
+</%doc>

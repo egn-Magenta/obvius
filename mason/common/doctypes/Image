@@ -14,7 +14,7 @@
 
 <p>
 <img width="<% $vdoc->Width %>" height="<% $vdoc->Height %>" src="<% $linkuri %>"
- alt="Picture: <% $vdoc->Short_title %>"><br>
+ alt="Picture: <% $vdoc->field('short_title') %>" /><br />
 </p>
 %
 % #####################

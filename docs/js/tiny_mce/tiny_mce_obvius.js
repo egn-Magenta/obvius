@@ -28,6 +28,24 @@ function obvius_tinymce_get_dialogfield(field_name) {
 }
 
 function obvius_tinymce_navigator_callback(field_name, url, type) {
+  var nav_features = ('toolbar=0,location=0,directories=0,status=0,'
+      +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
+      +'width=750,height=550');
+
+  return obvius_tinymce_navigator_callback_p(field_name, url, type, 'obvius_op=navigator', nav_features);
+}
+
+/* This function performs the same task as the one above, only for the
+   new administration system. Notice that Tiny MCE passes the
+   window-object of the opening window as the last argument. (This is
+   because window.opener is an odd thing, referring to the window that
+   loaded the javascript that called open, not to the window that called
+   the function that called open(!)) */
+function obvius_tinymce_new_navigator_callback(field_name, url, type, win) {
+  return obvius_tinymce_navigator_callback_p(field_name, url, type, 'obvius_app_navigator=1', 'width=700, height=432, status=yes', win); /* See mason/admin/portal/util/navigator_link_start */
+}
+
+function obvius_tinymce_navigator_callback_p(field_name, url, type, arg, options, win) {
 
     var start_url = tinyMCE.getParam('document_base_url');
 
@@ -49,12 +67,13 @@ function obvius_tinymce_navigator_callback(field_name, url, type) {
         doctype_extra = "&doctype=Image";
     }
 
-    var nav_features = ('toolbar=0,location=0,directories=0,status=0,'
-        +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
-        +'width=750,height=550');
-
-
-    window.open('/admin/?obvius_op=navigator' + doctype_extra + '&fieldname=' + field_name + '&path=' + start_url, '', nav_features); return false;
+    /* The win argument - window object of the opening window - is
+       optional for compability with the previous use of Tiny MCE in
+       Obvius: */
+    if (!win) {
+      win=window;
+    }
+    win.open('/admin/?' +arg + doctype_extra + '&fieldname=' + field_name + '&path=' + start_url, '', options); return false;
 
 }
 

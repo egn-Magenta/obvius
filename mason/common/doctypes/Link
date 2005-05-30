@@ -8,7 +8,7 @@ Link: <a href="<% $url %>" title="<% $title %>"><% $url |h %></a>
 </p>
 % }
 
-<p class="obviusnotice">
+<p class="obvius-notice">
 <strong><& /shared/msg, text=>'Notice' &>:</strong>
 <& /shared/msg, text=>'ObviusLinkDocumentExplanation' &>
 <% $url |h %>.

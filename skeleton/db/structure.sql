@@ -19,7 +19,8 @@ CREATE TABLE docparms (
   docid int(8) unsigned NOT NULL,
   name varchar(127) DEFAULT '' NOT NULL,
   value longtext DEFAULT '',
-  type int(8) unsigned NOT NULL
+  type int(8) unsigned NOT NULL # What is this for?
+  # No indexes/primary key?
 ) type=MyISAM;
 
 DROP TABLE IF EXISTS versions;
@@ -30,8 +31,10 @@ CREATE TABLE versions (
   public tinyint(8) DEFAULT '0' NOT NULL,
   valid tinyint(8) DEFAULT '0' NOT NULL,
   lang char(2) DEFAULT 'da' NOT NULL,
+  user smallint(5) unsigned, # References users.id
   PRIMARY KEY (docid, version),
-  INDEX (type)
+  INDEX (type),
+  INDEX (public, type) # Check JUs home-machine
 ) type=MyISAM;
 
 DROP TABLE IF EXISTS vfields;
@@ -198,6 +201,7 @@ CREATE TABLE comments (
 	date datetime NOT NULL,
 	name varchar(127) NOT NULL,
 	email varchar(63) NOT NULL,
+  show_email BOOL NOT NULL DEFAULT 0,
 	text text NOT NULL,
 	PRIMARY KEY (docid,date),
 	INDEX (date)
@@ -209,6 +213,51 @@ CREATE TABLE synonyms (
 	synonyms text NOT NULL,
   PRIMARY KEY (id)
 ) TYPE=MyISAM PACK_KEYS=1;
+
+DROP TABLE IF EXISTS queue;
+CREATE TABLE queue (
+  id int(8) unsigned NOT NULL auto_increment,
+  date datetime NOT NULL,               # When
+  docid int(8) unsigned NOT NULL,       # Where,   references documents.id
+  user smallint(5) unsigned NOT NULL,   # By whom, references users.id
+  command varchar(127) NOT NULL,        # What
+  args text,
+  status varchar(63),
+  message text,
+  PRIMARY KEY (id),
+  INDEX (date)
+) TYPE=MyISAM;
+
+DROP TABLE IF EXISTS annotations;
+CREATE TABLE annotations (
+  id int(8) unsigned NOT NULL auto_increment,
+  docid int(8) unsigned NOT NULL,                          # References versions
+  version datetime DEFAULT '0000-00-00 00:00:00' NOT NULL, #    -"-       -"-
+  date timestamp NOT NULL,
+  user smallint(5) unsigned NOT NULL, # References users.id
+  text text,
+  PRIMARY KEY (id),
+  INDEX (docid, version)
+) TYPE=MyISAM;
+
+DROP TABLE IF EXISTS newsboxes;
+CREATE TABLE newsboxes (
+  docid int(8) unsigned NOT NULL, # References documents.id
+	type enum('chronological', 'reverse_chronological', 'manual_placement') DEFAULT 'chronological' NOT NULL,
+  PRIMARY KEY (docid)
+) TYPE=MyISAM;
+
+DROP TABLE IF EXISTS news;
+CREATE TABLE news (
+  newsboxid int(8) unsigned NOT NULL, # References newsboxes.docid
+  seq int(8) unsigned NOT NULL,       # Notice that higher seq means should be first here!
+  docid int(8) unsigned NOT NULL,     # References documents.id,
+  start datetime NOT NULL,
+  end datetime NOT NULL,
+  PRIMARY KEY (newsboxid, seq),
+  INDEX (start),
+  INDEX (end)
+) TYPE=MyISAM;
 
 
 # Default data:

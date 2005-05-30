@@ -36,12 +36,11 @@ my $value=$session->{fields_out}->param(uc($name));
 my @choices=split /[\|]/, $fieldtype->Edit_args;
 @choices=reverse @choices if ($ARGS{'reverse_options'});
 
-# XXX This is old cruft to be removed, right?! Or what?!
 my %selected;
-if ($fieldspec->Repeatable) { # This is quite o/gperms specific:
+if ($fieldspec->Repeatable and ref($value) eq 'ARRAY') {
     map {
 	$selected{$_}++;
-    } split /,/, $value;
+    } @$value;
 }
 </%init>
 </%method>

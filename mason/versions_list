@@ -1,5 +1,5 @@
 <!-- versions list: -->
-  <table border="0" cellpadding="4" cellspacing="0" style="border-collapse: collapse"
+  <table class="obviusversionslist" border="0" cellpadding="4" cellspacing="0" style="border-collapse: collapse"
 	 bordercolor="#111111" width="<% $left_cell_width %>">
     <tr>
       <td class="lys" nowrap style="border-top: 1px black solid; border-bottom: 1px black solid">
@@ -31,7 +31,7 @@
 %     }
 	  <tr>
 % my $greyclass=($ghosted ? 'ghostedgraa' : 'graa');
-	    <td nowrap align="center" class="<% $greyclass %>"><% $_->{date} %></td>
+	    <td nowrap align="center" class="<% $greyclass %>" title="<% $_->{lang} %>"><% $_->{date} %></td>
 	    <td align="center" class="<% $greyclass %>"><% $_->{time} %></td>
 	    <td align="center" class="<% $greyclass %>">
 % if ($ghosted) {
@@ -43,7 +43,7 @@
         </td>
 	    <td align="center" class="graa">
 % if ($_->{public}) {
-	      <img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-">
+	      <img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-" title="<% $_->{lang} %>">
 % }
 % else {
 	      &nbsp;
@@ -73,6 +73,9 @@ $left_cell_width
 $ghosted=1 if ($session);
 
 my ($versions, $langs, $i, $total)=$m->comp('/versions_list:get_versions_for_display', max=>6);
+
+# Ignore a chosen language, if there are no such versions:
+$obvius_versions_lang='' unless (grep { $_ eq $obvius_versions_lang } keys %$langs);
 </%init>
 %
 <%method get_versions_for_display>

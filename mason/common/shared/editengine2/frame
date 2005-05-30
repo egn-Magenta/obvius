@@ -1,0 +1,3 @@
+<div class="obvius-editengine obvius-link-decor">
+<& main, %ARGS &>
+</div>

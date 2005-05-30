@@ -3,19 +3,18 @@
 DocType: Base basis searchable sortorder_field_is=sortorder
  title         title                        searchable sortable threshold=0
  short_title   line                         searchable sortable threshold=0
+ category      category repeatable optional searchable sortable
  keyword       keyword  repeatable optional searchable sortable
  docdate       date                         searchable sortable threshold=0
- seq           double                                  sortable threshold=0 default_value=10.00
+ seq           double                                  sortable threshold=0 default_value=10
  pagesize      pagesize              optional
  sortorder     sortorder                                        default_value=+seq,+title
  subscribeable subscribeable                searchable          default_value=none
- expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_00:00:00
+ expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_18:00:00
  published     datetime                     searchable sortable publish
  publish_on    publish_on                   searchable sortable publish default_value=0000-00-00_00:00:00
  in_subscription bool			    searchable sortable publish default_value=0
  mimetype      line			    searchable sortable threshold=0
- front_prio    priority			    searchable sortable publish default_value=0
- front_dura    int>=0			    searchable sortable publish default_value=0
  sec	       int	           optional searchable sortable publish default_value=0
  show_title    bool                         default_value=1
  show_teaser   bool                         default_value=1
@@ -62,7 +61,8 @@ DocType: HTML parent=Base basis searchable
  docref        line                         searchable sortable threshold=64
  contributors  line                         searchable sortable threshold=64
  source        line                         searchable sortable threshold=64
- html_content       textwupload                  searchable sortable threshold=128
+ html_content  textwupload                  searchable sortable threshold=128
+ bare          bool                         default_value=0
 
 DocType: Upload parent=Base basis
  author        line                         searchable sortable threshold=64
@@ -103,6 +103,7 @@ DocType: CreateDocument parent=Base basis searchable
  publish_mode       publishmode             searchable sortable threshold=128 default_value=moderator
  subscribe_include  bool                    searchable sortable threshold=128 default_value=0
  email              email                   searchable sortable optional threshold=128
+ successtext        text                    searchable optional
 
 DocType: Sitemap parent=Standard basis searchable
  levels            priority6    default_value=2
@@ -117,8 +118,9 @@ DocType: Subscribe parent=Standard basis searchable
 DocType: Image basis
  title         title              searchable sortable threshold=0
  short_title   line               searchable sortable threshold=0
+ category      category           repeatable optional searchable sortable
  docdate       date               searchable sortable threshold=0
- expires       datetime           searchable sortable threshold=0 default_value=9999-01-01_00:00:00
+ expires       datetime           searchable sortable threshold=0 default_value=9999-01-01_18:00:00
  published     datetime           searchable sortable threshold=0 publish
  width	       int>=0				      threshold=0
  height	       int>=0				      threshold=0
@@ -126,7 +128,7 @@ DocType: Image basis
  data	       imagedata			      threshold=192
  size	       int>=0				      threshold=0
  mimetype      line		  searchable sortable threshold=0
- seq           double                        sortable threshold=0 default_value=-10.00
+ seq           double                        sortable threshold=0 default_value=-10
  keyword       keyword  repeatable optional searchable sortable
 
 DocType: Link parent=Base basis searchable
@@ -151,10 +153,10 @@ DocType: TableList basis
  short_title   line                         searchable sortable threshold=0
  teaser        text                         searchable threshold=64
  docdate       date                         searchable sortable threshold=0
- seq           double                                  sortable threshold=0 default_value=10.00
+ seq           double                                  sortable threshold=0 default_value=10
  pagesize      pagesize              optional
  sortorder     sortorder                                        default_value=+id
- expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_00:00:00
+ expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_18:00:00
  published     datetime                     searchable sortable publish
  table         line                                             threshold=64
  fields	       text						threshold=64
@@ -169,8 +171,8 @@ DocType: CalendarEvent parent=Base basis searchable
  eventinfo         text                     searchable sortable threshold=128
 
 DocType: Calendar parent=Base basis searchable
- startdate          date
- enddate            date                    
+ startdate          date                    optional
+ enddate            date                    optional
  s_event_type       line
  s_event_title      line
  s_event_contact    line
@@ -193,3 +195,13 @@ DocType: SubDocuments parent=Base basis searchable
  show_teasers  bool                         searchable sortable threshold=128 default_value=0
 
 DocType: RSSFeed parent=ComboSearch basis
+
+DocType: Newsbox parent=Base basis
+ max_entries     int>0                      default_value=10
+ show_date       bool                       default_value=1
+ show_teaser     bool                       default_value=1
+ max_teaser      int>0                      default_value=60
+
+DocType: Proxy parent=Base basis
+ url           line                         searchable sortable
+ prefixes      text                         optional

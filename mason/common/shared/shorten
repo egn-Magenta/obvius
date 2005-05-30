@@ -1,20 +1,46 @@
-<% $m->comp('/shared/shorten:shorten_q', text=>$text, len=>$len, post=>$post) %><%args>
-$text
-$len
-$post=>'...'
-</%args>
+% if ($escape eq 'h') {
+<% $text |h %>\
+% }
+% else {
+<% $text %>\
+% }
 %
-<%method shorten_q><%args>
+<%args>
 $text
 $len
 $post=>'...'
-</%args>
-<%perl>
+$escape=>''
+</%args>\
+%
+<%init>
 use locale;
-  unless( length($text) <= $len ) {
-    substr($text, $len) = '';
-    $text =~ s/\W+\w+$/$post/;
-  }
-  return $text;
-</%perl>
-</%method>
+
+if ($len<length($post)) {
+    $text=$post;
+}
+elsif (length($text)<=$len) {
+    # $text is cool
+}
+else {
+    $text=substr($text, 0, $len-length($post));
+    if (length($post)>0) {
+        $text.=$post;
+    }
+    else {
+        # Special case, when nothing is added, cut down to a
+        # whitespace, if possible:
+        $text=~s/\s[^\s]+$//;
+    }
+}
+</%init>\
+%
+<%doc>
+
+Shortens $text down to at most $len chars, adding $post if anything is
+cut.
+
+If $post is the empty string, then shorten tries to go back to the
+nearest whitespace when cutting - the shortened strings length is less
+to or equal $maxlen.
+
+</%doc>

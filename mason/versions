@@ -19,7 +19,7 @@
 % }
 </td>
             <td width="14">\
-% if ($_->{marker}=~/blue.gif/) { # Ugly hachis
+% if ($_->{public}) {
 <img border="0" src="/grafik/admin/navigator/vis.png" width="12" height="7" alt="-O-">\
 % }
 </td>

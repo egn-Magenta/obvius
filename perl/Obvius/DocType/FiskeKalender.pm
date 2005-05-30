@@ -4,9 +4,10 @@ package Obvius::DocType::FiskeKalender;
 #
 # FiskeKalender.pm - FiskeKalender Document Type
 #
-# Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2004 aparte A/S, Denmark (http://www.aparte.dk/)
 #
-# Author: Mads Kristensen (mads@magenta-aps.dk)
+# Authors: Mads Kristensen
+#          Adam Sjøgren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,12 +38,25 @@ use locale;
 use Carp;
 use POSIX qw(strftime);
 
-
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
+
+    my ($date_docs, $weeks)=$this->get_date_docs_weeks($input->param('date'), $input->param('IS_ADMIN'), $vdoc, $obvius);
+
+    $output->param(date_docs=>$date_docs);
+    $output->param(weeks=>$weeks);
+
+    return OBVIUS_OK;
+}
+
+sub get_date_docs_weeks {
+    my ($this, $date, $is_admin, $vdoc, $obvius)=@_;
+
+    my $date_docs;
+    my $weeks;
 
     my $event_doctype = $obvius->get_doctype_by_name('FiskeKalenderArrangement');
 
@@ -50,29 +64,36 @@ sub action {
 
     $obvius->get_version_fields($vdoc, 256);
 
-    my $date = $input->param('date');
+    my $enddate=$vdoc->field('enddate');
+
+    # Note: $date is only used in the if-clause below, while $enddate
+    # is used in the rest of the function. Instead of $date,
+    # $vdoc->field('startdate') is used later, and it's value is not
+    # "the same" as $date, because of the comparison with $now_date
+    # below.
     $date='' unless ($date and ($date =~ /^[0-9 :.-]*$/)); # Throw away bad dates
     if ($date) {
-	$output->param('date_docs' => $this->get_docs_by_date($date, $obvius, $event_doctype));
-    } else {
-	$date = $vdoc->Startdate unless $date;
+        $enddate=sprintf('%4.4d-%2.2d-%2.2d',  Add_Delta_YMD(Add_Delta_YM((split /[-]/, $date), 0, 1), 0, 0, -1)) unless ($enddate);
+	$date_docs = $this->get_docs_by_date($date, $obvius, $event_doctype);
+    }
+    else {
+	$date = $vdoc->field('startdate');
 
 	my $comp_date = make_date_comparable($date);
 	my $now_date = strftime('%Y%m%d', localtime);
 	if ($comp_date < $now_date) {
 	    $date = strftime('%Y-%m-%d', localtime);
 	}
-	$output->param('date_docs' => $this->get_docs_by_date($date, $obvius, $event_doctype, $vdoc->field('enddate')));
+        $enddate=sprintf('%4.4d-%2.2d-%2.2d',  Add_Delta_YMD(Add_Delta_YM((split /[-]/, $date), 0, 1), 0, 0, -1)) unless ($enddate);
+	$date_docs = $this->get_docs_by_date($date, $obvius, $event_doctype, $enddate);
     }
 
     my $where = "type = " . $event_doctype->param('ID') . " and ";
 
-    if($vdoc->Startdate and $vdoc->Enddate) {
-        $where .= "fradato >= '" . $vdoc->Startdate . "' and ";
-        $where .= "fradato <= '" . $vdoc->Enddate . "' and ";
+    if($vdoc->field('startdate') and $enddate) {
+        $where .= "fradato >= '" . $vdoc->field('startdate') . "' and ";
+        $where .= "fradato <= '" . $enddate . "' and ";
     }
-
-    my $is_admin = $input->param('IS_ADMIN');
 
     my %options = (
 		   order=>" fradato ",
@@ -109,29 +130,41 @@ sub action {
 
     for my $e (@events) {
 	my $time = $e->{date};
-	my ($e_year, $e_month, $e_day) = ($time =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
+
+        if ($time =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/) {
+            my ($e_year, $e_month, $e_day) = ($1, $2, $3);
 	
-	$timemin = $time unless (defined($timemin) and $timemin le $time);
-	$timemax = $time unless (defined($timemax) and $timemax ge $time);
-	
-	my $weekno;
-	($weekno, $e_year) = Week_of_Year($e_year, $e_month, $e_day);
-	$weekno = sprintf("%4.4d%2.2d", $e_year, $weekno);
-	my $weekday = Day_of_Week($e_year, $e_month, $e_day);
-	
-	$event_hash->{$weekno}->{$weekday} = [] unless (defined($event_hash->{$weekno}->{$weekday}));
-	
-	push(@{$event_hash->{$weekno}->{$weekday}}, $e);
+            $timemin = $time unless (defined($timemin) and $timemin le $time);
+            $timemax = $time unless (defined($timemax) and $timemax ge $time);
+
+            my $weekno;
+            eval { ($weekno, $e_year) = Week_of_Year($e_year, $e_month, $e_day); };
+
+            unless ($@) {
+                $weekno = sprintf("%4.4d%2.2d", $e_year, $weekno);
+                my $weekday = Day_of_Week($e_year, $e_month, $e_day);
+                $event_hash->{$weekno}->{$weekday} = [] unless (defined($event_hash->{$weekno}->{$weekday}));
+                push(@{$event_hash->{$weekno}->{$weekday}}, $e);
+            }
+            else {
+                print STDERR "WARNING: FiskeKalender.pm skipped an event; couldn't find week for date: '$time'\n";
+            }
+        }
+        else {
+            print STDERR "WARNING: FiskeKalender.pm skipped an event; couldn't parse date: '$time'\n";
+        }
     }
 
     my ($weekmin, $weekmax);
 
-    my ($min_year, $min_month, $min_day) = ($vdoc->Startdate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
+    # $vdoc->Startdate
+    my $a=$vdoc->field('startdate') || $date;
+    my ($min_year, $min_month, $min_day) = ($a =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
     ($min_year, $min_month, $min_day) = adjust_ymd($min_year, $min_month, $min_day);
     ($weekmin, $min_year) = Week_of_Year($min_year, $min_month, $min_day);
     $weekmin = sprintf("%4.4d%2.2d", $min_year, $weekmin);
 
-    my ($max_year, $max_month, $max_day) = ($vdoc->Enddate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
+    my ($max_year, $max_month, $max_day) = ($enddate =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/);
     ($max_year, $max_month, $max_day) = adjust_ymd($max_year, $max_month, $max_day);
     ($weekmax, $max_year) = Week_of_Year($max_year, $max_month, $max_day);
     $weekmax = sprintf("%4.4d%2.2d", $max_year, $weekmax);
@@ -174,9 +207,9 @@ sub action {
 		       weekdays => \@weekdays
 		      });
     }
-    $output->param(weeks => \@result);
+    $weeks=\@result;
 
-    return OBVIUS_OK;
+    return ($date_docs, $weeks);
 }
 
 sub adjust_ymd {
@@ -250,46 +283,39 @@ sub get_docs_by_date {
     return $all_docs;
 }
 
+# make_date_comparable - supplied with a string, removes any dashes,
+#                        whitespaces an occurrances of the string
+#                        '00:00:00'.
 sub make_date_comparable {
     my $date = shift;
     $date =~ s/-|(00:00:00)|\s//g;
     return $date;
 }
 
-
-
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
-Obvius::DocType::FiskeKalender - Perl extension for blah blah blah
+Obvius::DocType::FiskeKalender - a calendar for www.sportsfiskeren.dk
 
 =head1 SYNOPSIS
 
-  use Obvius::DocType::FiskeKalender;
-  blah blah blah
+  use'd automatically by Obvius
 
 =head1 DESCRIPTION
 
-Stub documentation for Obvius::DocType::FiskeKalender, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+This module is used by www.sportsfiskeren.dk and
+www.fiskeskolen.dk. Never the less it's quite website specific, and
+should not be placed in Obvius proper.
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Mads Kristensen
+Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<Sportsfiskeren::DocType>, L<Fiskeskolen::DocType>.
 
 =cut

@@ -1,0 +1,100 @@
+ <div class="obvius-handlingarea<% $r->notes('inactive_handlingarea') ? ' obvius-inactive' : '' %>">
+   <h1 class="obvius-logo"><a href="<% $prefix %>/"><img width="200" height="80" src="/pics/logo.png" alt="Obvius admin" /></a></h1>
+
+   <div class="obvius-links">
+     <ul>
+       <li><a href="<% $prefix %>/admin/"><& /shared/msg, text=>'Administration' &></a></li>
+       <li><a href="<% $prefix %>/sitemap/"><& /shared/msg, text=>'Sitemap' &></a></li>
+% my $help_link='http://' . $obvius->config->param('help_server') . '/default/general';
+       <li><a href="<% $prefix %>/admin/search/"><& /shared/msg, text=>'Search' &></a> · <a onclick="javascript:return obvius_open_window('<% $help_link %>', 'obvius_help', 'width=500', 'height=400', 'status=yes')" href="<% $help_link %>"><& /shared/msg, text=>'Help' &></a></li>
+     </ul>
+   </div>
+
+   <div class="obvius-handling">
+     <form class="obvius-handling" action="./" method="get">
+       <p>
+         <& util/identifier &>
+% foreach my $button (@buttons) {
+         <& util/button, name=>$button->{name}, text=>$button->{title}, inactive=>$inactive{$button->{name}}, accesskey=>$button->{accesskey} &>
+% }
+       </p>
+     </form>
+   </div>
+
+ </div>
+%
+<%once>
+my @buttons=(
+# Not implemented yet: { name=>'obvius_command_preview',     title=>'Preview',     accesskey=>'v', },
+             { name=>'obvius_command_viewpublic',  title=>'View public', accesskey=>'v', },
+             { name=>'obvius_command_publish',     title=>'Publish',     accesskey=>'p', },
+             { name=>'obvius_command_unpublish',   title=>'Hide',,       accesskey=>'h', },
+             { name=>'obvius_command_move',        title=>'Move',        accesskey=>'m', },
+             { name=>'obvius_command_rename',      title=>'Rename',      accesskey=>'r', },
+             { name=>'obvius_command_copy',        title=>'Copy',        accesskey=>'c', },
+             { name=>'obvius_command_delete',      title=>'Delete',      accesskey=>'d', },
+             { name=>'obvius_command_send',        title=>'Send',        accesskey=>'s', },
+             { name=>'obvius_command_newlanguage', title=>'Language',    accesskey=>'l', },
+             { name=>'obvius_command_changetype',  title=>'Type',        accesskey=>'t', },
+            );
+</%once>
+%
+<%init>
+my %inactive=(
+              'obvius_command_preview'=>0, # Not implemented yet
+              'obvius_command_viewpublic'=>0,
+              'obvius_command_publish'=>0,
+              'obvius_command_unpublish'=>0,
+              'obvius_command_move'=>0,
+              'obvius_command_rename'=>0,
+              'obvius_command_copy'=>0,
+              'obvius_command_delete'=>0,
+              'obvius_command_send'=>0,
+              'obvius_command_newlanguage'=>0,
+              'obvius_command_changetype'=>0,
+             );
+
+if ($r->notes('inactive_handlingarea')) {
+    map { $inactive{$_}=1; } keys (%inactive);
+}
+else {
+    # Not implemented yet:
+    $inactive{obvius_command_preview}=1;
+
+    $inactive{obvius_command_viewpublic}=1 unless ($obvius->is_public_document($doc));
+
+    $inactive{obvius_command_publish}=1 unless ($obvius->can_publish_version($vdoc));
+    $inactive{obvius_command_publish}=1 if ($vdoc->Public);
+
+    $inactive{obvius_command_unpublish}=1 unless ($obvius->can_unpublish_version($vdoc));
+    $inactive{obvius_command_unpublish}=1 if (!$vdoc->Public);
+
+    $inactive{obvius_command_move}=1 unless ($obvius->can_rename_document($doc));
+    $inactive{obvius_command_move}=1 if ($uri eq '/');
+
+    $inactive{obvius_command_rename}=1 unless ($obvius->can_rename_document($doc));
+    $inactive{obvius_command_rename}=1 if ($uri eq '/');
+
+    $inactive{obvius_command_copy}=1 if ($uri eq '/'); # XXX View?
+
+    # Notice that this check is inappropriate, because
+    # can_delete_document checks for subdocuments:
+    #  $inactive{obvius_command_delete}=1 unless ($obvius->can_delete_document($doc));
+    # So we directly check for the delete-capability (until
+    # can_delete_document can be changed (the old admin has been
+    # phased out):
+    $inactive{obvius_command_delete}=1 unless ($obvius->user_has_capabilities($doc, qw(delete)));
+    $inactive{obvius_command_delete}=1 if ($uri eq '/');
+
+    $inactive{obvius_command_newlanguage}=1 unless ($obvius->can_create_new_version($doc));
+
+    $inactive{obvius_command_changetype}=1 unless ($obvius->can_create_new_version($doc));
+}
+</%init>
+%
+%
+<%doc>
+
+New document is located in the mainarea-component.
+
+</%doc>

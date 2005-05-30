@@ -1,0 +1,107 @@
+<div class="obvius-subdocs obvius-link-decor">
+    <table>
+      <tr>
+% unless ($fieldname) {
+        <th></th>
+% }
+% foreach my $field (@$show_fields) {
+%     if (defined $filter_doctype and $field->{unfilter_link}) {
+        <th><a title="Remove document type filter" href="./<& util/args, %ARGS, doctype=>undef, doctypeid=>undef &>"><& /shared/msg, text=>$field->{label} &></a></th>
+%     }
+%     else {
+        <th><& /shared/msg, text=>$field->{label} &></th>
+%     }
+% }
+      </tr>
+% my $i=0;
+% foreach my $sub (@$subs) {
+%     next if (defined $filter_doctype and $filter_doctype->Id ne $obvius->get_version_type($sub->{vdoc})->Id);
+%     my $type=$m->scomp('/shared/msg', text=>$obvius->get_version_type($sub->{vdoc})->Name);
+%     $obvius->get_version_fields($sub->{vdoc}, [qw(docdate)]);
+%     my $url=$obvius->get_doc_uri($sub->{doc});
+%     # Default values:
+%     my %values=(title=>$sub->{title}, docdate=>'', docdate=>$m->scomp('/shared/display_date', date=>$sub->{vdoc}->field('docdate'), month=>'short'), type=>$type);
+%     # Fill in any missing values:
+%     map { $values{$_->{name}}=$obvius->get_version_field($sub->{vdoc}, $_->{name}) if (!exists $values{$_->{name}}); } @$show_fields;
+      <tr class="obvius-<% $i++%2 ? 'b' : 'a' %>">
+% unless ($fieldname) {
+        <td><input type="checkbox" <% $is_selected{$sub->{doc}->Id} ? 'checked="checked" ' : '' %>name="obvius_navigator_batch_selected" value="<% $sub->{doc}->Id |h %>" /></td>
+% }
+%     foreach my $field (@$show_fields) {
+%         my $value=(defined $field->{len} ? $m->scomp('/shared/shorten', text=>$values{$field->{name}}, len=>$field->{len}) : $values{$field->{name}});
+        <td>\
+%         if ($field->{link}) {
+<a href="<% $prefix . $url %>?obvius_app_navigator=1<& util/args, %ARGS &>" onclick="javascript:return obvius_navigator_done('<% $url |h %>')"<% length($values{$field->{name}}) ne length($value) ? ' title="' . $values{$field->{name}} . '"' : '' %>>\
+%         }
+%         if ($field->{icons}) {
+<& /portal/subdocs:display_icons, doc=>$sub->{doc}, vdoc=>$sub->{vdoc} &> \
+%         }
+<% $value |h %><% $field->{link} ? '</a>' : '' %></td>
+%     }
+      </tr>
+% }
+    </table>
+</div>
+%
+<%once>
+my %default_fields=(
+                    title=>  { name=>'title',   label=>'Subdocuments', link=>1, icons=>1, len=>40, },
+                    docdate=>{ name=>'docdate', label=>'Date', },
+                    type=>   { name=>'type',    label=>'Type', unfilter_link=>1, },
+                   );
+
+my @default_fields=map { $default_fields{$_} } qw(title docdate type);
+</%once>
+%
+<%args>
+$doctype=>undef
+$doctypeid=>undef
+$fieldname=>undef
+$fields=>undef
+$selected=>[]
+</%args>
+%
+<%init>
+my $subs=$m->comp('/portal/subdocs:get_subs', base_doc=>$doc, base_vdoc=>$vdoc);
+
+my $filter_doctype=undef;
+if (defined $doctype or defined $doctypeid) {
+    $filter_doctype=$obvius->get_doctype_by_id($doctypeid) if (defined $doctypeid);
+    $filter_doctype=$obvius->get_doctype_by_name($doctype) if (!defined $filter_doctype && defined $doctype);
+}
+
+my $show_fields;
+if (defined $fields) {
+    # Always show title:
+    $show_fields=[$default_fields[0]];
+    # After that, add user-determined fields:
+    $fields=[split ',', $fields] unless (ref($fields) eq 'ARRAY');
+    foreach my $f (@$fields) {
+        # Take the description from default_fields, if there is one:
+        my $desc=$default_fields{$f};
+        # XXX Ugh, to find the label of the field, we need to find
+        # the/an editpage and look in that :-/ Uppercasing for now:
+        $desc={ name=>$f, label=>ucfirst($f) } if (!defined $desc);
+        push @$show_fields, $desc;
+    }
+}
+else {
+    $show_fields=\@default_fields;
+}
+
+my %is_selected=map { $_=>1 } @$selected;
+
+# XXX Sort (?)
+</%init>
+%
+%
+<%doc>
+
+Arguments:
+
+ doctype   - name of doctype to filter subdocs with (only display documents of this type)
+ doctypeid - id of doctype to filter subdocs with
+ fieldname - name of html-form field to return the selected path into
+ fields    - fields to display for each subdocs. Can be comma-separated or multiple times.
+
+</%doc>

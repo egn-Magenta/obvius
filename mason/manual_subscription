@@ -120,10 +120,9 @@ use Date::Calc qw(Today_and_Now Add_Delta_DHMS);
 use Data::Dumper;
 my $subscriber_docs;
 
-my $sender = 'jubk@magenta-aps.dk';
-
-my $site = $obvius->{OBVIUS_CONFIG}->{NAME};
 my $sitename = $obvius->{OBVIUS_CONFIG}->{SITENAME};
+
+my $sender = 'bitbucket@' . $sitename;
 
 my ($year, $month, $day, $hour, $min, $sec) = Today_and_Now();
 my $now = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year, $month, $day, $hour, $min, $sec);
@@ -140,6 +139,7 @@ if($delayed and $delayed gt $now) {
     ($year, $month, $day, $hour, $min, $sec) = Add_Delta_DHMS($year, $month, $day, $hour, $min, $sec, -7, 0, 0, 0);
     my $seven_days_ago = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year, $month, $day, $hour, $min, $sec);
 
+    my $site=$r->pnotes('site');
     $subscriber_docs = get_subdocs_recursive($vdoc, $seven_days_ago);
 }
 </%init>
@@ -159,21 +159,18 @@ sub get_subdocs_recursive {
             unshift(@worklist, @$subdocs);
         }
         $obvius->get_version_fields($vdoc, [ 'published', 'in_subscription' ], 'PUBLISH_FIELDS');
-        $obvius->get_version_fields($vdoc, [ 'title', 'teaser' ]);
-
-        push(@result, {
-                        published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
-                        title => $vdoc->Title,
-                        teaser => $vdoc->field('teaser'),
-                        url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
-                    }
-                ) if(
-                        $vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION}
-                        and
-                        $vdoc->{PUBLISH_FIELDS}->{PUBLISHED}
-                        and
-                        $vdoc->{PUBLISH_FIELDS}->{PUBLISHED} gt $date_limit
-                    );
+        if($vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION} and
+           $vdoc->{PUBLISH_FIELDS}->{PUBLISHED} and
+           $vdoc->{PUBLISH_FIELDS}->{PUBLISHED} gt $date_limit) {
+            $obvius->get_version_fields($vdoc, [ 'title', 'teaser' ]);
+            push(@result, {
+                           published => $vdoc->{PUBLISH_FIELDS}->{PUBLISHED},
+                           title => $vdoc->Title,
+                           teaser => $vdoc->field('teaser'),
+                           url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
+                          }
+                );
+        }
     }
 
     return \@result;
@@ -198,7 +195,7 @@ sub get_future_docs_recursive {
                                     " and publish_on > '$now'" .
                                     " and publish_on < '$future'",
                                     order => 'publish_on DESC',
-                                    append => 'limit 1'
+                                    append => 'limit 1',
                                 );
         for(@$vdocs) {
             print STDERR Dumper($_);

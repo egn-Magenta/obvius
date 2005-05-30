@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# rundig - run htdig on a website, called by htdig. First argument is
+#          the path of the website, e.g. /var/www/www.website.dk/
+#          (including the last "/").
+#
+# Copyright (C) 2003-2004, aparte, Magenta. By Adam Sjøgren <asjo@magenta-aps.dk>.
+# Under the GPL.
+#
+# $Id$
+
+export LANG=da_DK
+
+site=$1
+shift
+
+cd ${site}htdig/db || exit 1
+
+CONF=${site}conf/htdig.conf
+
+TMP="${site}var/email-$(date +%Y%m%d-%H%M%S).txt"
+TMPEMAIL="${site}var/email-$(date +%Y%m%d-%H%M%S).email"
+
+nice -10 htdig -a -c $CONF -i "$@" -s | tee -a $TMP
+nice -10 htmerge -a -c $CONF "$@" -s | tee -a $TMP
+nice -10 htfuzzy -c $CONF "$@" synonyms | tee -a $TMP
+nice -10 htfuzzy -c $CONF "$@" soundex | tee -a $TMP
+
+# Create endings if they aren't there:
+if [ ! -s ../common/root2word.db ]; then
+    nice -10 htfuzzy -c $CONF "$@" endings | tee -a $TMP
+fi
+
+if [ -e ../email ]; then
+    # Don't care if the bad url has +"/ in it (that's likely to be javascript):
+    grep '^Not found' $TMP | egrep -v '\+"/ ' > $TMPEMAIL
+    test -s $TMPEMAIL && (cat ../email $TMPEMAIL | /usr/sbin/sendmail -i -t)
+    rm $TMPEMAIL
+fi
+rm $TMP
+
+#ls -l
+
+if [ -s db.docdb.work -a -s db.docs.index.work -a \
+	-s db.wordlist.work -a -s db.words.db.work ]; then
+    echo Installing new database
+    mv -f db.docdb.work db.docdb
+    mv -f db.docs.index.work db.docs.index
+    mv -f db.wordlist.work db.wordlist
+    mv -f db.words.db.work db.words.db
+fi
+exit 0

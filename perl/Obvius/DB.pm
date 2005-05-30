@@ -2,7 +2,7 @@ package Obvius::DB;
 
 ########################################################################
 #
-# Obvius.pm - Content Manager, database handling
+# DB.pm - database access
 #
 # Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/),
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
@@ -104,6 +104,12 @@ sub db_insert_document {
     return $set->LastSerial;
 }
 
+# db_update_document - given a document object and an Obvius::Data
+#                      object with values for one or more of the field
+#                      in the documents table (name parent type owner
+#                      grp accessrules), updates the table
+#                      accordingly. Returns the return-value from the
+#                      database.
 sub db_update_document {
     my ($this, $doc, $fields) = @_;
 
@@ -159,9 +165,22 @@ sub db_delete_versions {
     return;
 }
 
-# sub db_delete_single_version - Deletes a single version of a document from the database.
-#                                XXX: No check is done on input values before the command is run. 
-#                                     What would happen if this method is called only with $lanf defined?
+# db_delete_single_version - given a docid, a version (string, i.e. a
+#         datetime-stamp) and a language deletes the corresponding
+#         entry in the versions table in the database. Does not return
+#         anything.
+#
+#         Please notice that this violates the entire notion of
+#         versioning within Obvius.
+#
+#         XXX: No check is done on input values before the command is run. 
+#              What would happen if this method is called only with $lanf defined?
+#
+#         (Note that the db_*-methods are internal to Obvius, the
+#         calling methods are supposed to make sure that the arguments
+#         are valid. Not that it makes this method much less of an
+#         abomination).
+#
 sub db_delete_single_version {
     my ($this, $docid, $version, $lang) = @_;
 
@@ -178,6 +197,13 @@ sub db_delete_single_version {
     return;
 }
 
+# db_delete_single_version_vfields - given a docid and a version
+#         (string, i.e. a datetime-stamp) deletes all vfields in the
+#         database. Does not return anything.
+#
+#         Please notice that this violates the entire notion of
+#         versioning within Obvius.
+#
 sub db_delete_single_version_vfields {
     my ($this, $docid, $version) = @_;
 
@@ -242,11 +268,19 @@ sub db_delete_subscriptions {
     return;
 }
 
-# db_insert_version - Creates a new entry in the versions table based on the supplied docid.
-#                     Returns version which is a string of the format "%Y-%m-%d %H:%M:%S".
+# db_insert_version - given a docid, a doctype-id and a
+#                     language-string, creates a new version on the
+#                     database-table "versions".
+#                     The version is created with a current timestamp,
+#                     and that is also what the method returns.
+#                     Only used internally. See Obvius::create_new_version.
+#
 #                     TODO:
-#                     Check that the supplied arguments are correct (eg. does docid and type make sense).
+#                     Check that the supplied arguments are correct
+#                     (eg. does docid and type make sense).
+#                     [Not necessary].
 #                     Handle when the insert goes wrong.
+#                     [Should be added].
 sub db_insert_version {
     my ($this, $docid, $type, $lang) = @_;
 
@@ -262,6 +296,7 @@ sub db_insert_version {
 		version	 => $version,
 		type	 => $type,
 		lang	 => $lang,
+                user     => $this->get_userid($this->user),
 	       };
 
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
@@ -763,7 +798,9 @@ Obvius::DB - Database functions for L<Obvius>.
   my $config = new Obvius::Config("configname");
   my $obvius = new Obvius($config);
 
-  $obvius->db_error();
+  my $err=$obvius->db_error();
+
+  my $count=$obvius->db_number_of_rows_in_table('comments');
 
   $obvius->db_insert_comment({
                               docid=>$doc->Id,
@@ -776,6 +813,11 @@ Obvius::DB - Database functions for L<Obvius>.
   $obvius->db_update_table(table=>'docparms', key=>'docid', name=>'fancy_box', value=>'NO!', type=>0);
 
   $obvius->db_insert_docparams($doc, $paramobj);
+
+  $obvius->db_delete_single_version($doc->Docid, $vdoc->Version, $vdoc->Lang); # Do not use.
+  $obvius->db_delete_single_version_vfields($doc->Docid, $vdoc->Version);      # Do not use.
+
+  my $version=$obvius->db_insert_version($doc->Id, $doctype->Id, $lang);
 
 =head1 DESCRIPTION
 

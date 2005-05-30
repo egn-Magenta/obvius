@@ -1,0 +1,4 @@
+<%init>
+# Default language 'da':
+$r->pnotes('site')->read_translations($r, 'translations', 'da', $obvius);
+</%init>

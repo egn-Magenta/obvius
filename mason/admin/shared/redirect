@@ -1,0 +1,36 @@
+<%args>
+$content_type=>'text/html'
+$location=>$prefix . $uri . '/'
+$args=>{}
+$http_status=>301
+</%args>
+%
+<%once>
+use URI::Escape;
+use Carp;
+</%once>
+%
+<%init>
+$m->comp('/default/release_session'); # Specialized for admin (make a redirect_local_pre component?)
+
+my $args_string='';
+if (scalar(keys(%$args))) {
+    my @parts=();
+    foreach my $key (keys %$args) {
+        my $value=$args->{$key};
+        next if (!defined $value);
+        $value=[ $value ] unless (ref $value eq 'ARRAY');
+        carp "Value of $_ is neither scalar nor array" if (!ref $value eq 'ARRAY');
+        push @parts, map { uri_escape($key) . '=' . uri_escape($_) } @$value;;
+    }
+
+    $args_string='?' . join '&', @parts;
+}
+
+$m->clear_buffer;
+$r->method('GET');
+$r->headers_in->unset('Content-length');
+$r->content_type($content_type);
+$r->header_out('Location'=>$location . $args_string);
+$m->abort($http_status);
+</%init>

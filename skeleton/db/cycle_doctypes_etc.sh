@@ -2,6 +2,8 @@
 
 DBNAME=${dbname}
 WWWROOT=${wwwroot}
+DBHOST=${DBHOST:-localhost}
+DSN="database=$DBNAME;host=$DBHOST"
 DBUSER=$1
 DBPASSWD=$2
 if [ "$1" != "" ]; then
@@ -11,6 +13,6 @@ else
 fi
 
 
-$WWWROOT/obvius/otto/add_fieldtypes.pl $DBNAME fieldtypes.txt $DBUSER $DBPASSWD
-$WWWROOT/obvius/otto/add_doctypes.pl $DBNAME doctypes.txt $DBUSER $DBPASSWD
-$WWWROOT/obvius/otto/add_editpages.pl $DBNAME editpages.txt $DBUSER $DBPASSWD
+$WWWROOT/obvius/otto/add_fieldtypes.pl $DSN fieldtypes.txt $DBUSER $DBPASSWD
+$WWWROOT/obvius/otto/add_doctypes.pl $DSN doctypes.txt $DBUSER $DBPASSWD
+$WWWROOT/obvius/otto/add_editpages.pl $DSN editpages.txt $DBUSER $DBPASSWD

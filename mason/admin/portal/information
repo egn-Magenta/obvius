@@ -1,0 +1,68 @@
+     <div class="obvius-information<% $r->notes('inactive_information') ? ' obvius-inactive' : '' %>">
+       <h3><& /shared/msg, text=>'Information' &></h3>
+
+       <h4><a href="./?obvius_command_document_information=1&amp;obvius_version=<% $vdoc->Version |u %>"><& /shared/msg, text=>'Document' &></a></h4>
+       <div class="obvius-version-info">
+% my $owner=$obvius->get_user($doc->Owner);
+         <& /shared/msg, text=>'Owner' &>: <span title="login: <% $owner->{login} |h %>, email: <% $owner->{email} |h %>"><% $owner->{name} |h %></span><br />
+% my $group=$obvius->get_group($doc->Grp);
+         <& /shared/msg, text=>'Group' &>: <% $group->{name} |h %><br />
+       </div>
+
+       <h4><& /shared/msg, text=>'Version' &>:</h4>
+       <div class="obvius-version-info">
+       <& /shared/msg, text=>'Type' &>: <span title="<% $doctype->Name |h %>"><& /shared/msg, text=>$doctype->Name &></span><br />
+       <& /shared/msg, text=>'Created by' &>:
+% if ($user) {
+<a href="mailto:<% $user->{email} |h %>" title="Send email"><% $user->{name} |h %></a>
+% }
+% else {
+<span class="obvius-inactive"><& /shared/msg, text=>'Not registered' &></span>
+% }
+<br/>
+       <& /shared/msg, text=>'Annotation' &>:
+% if ($annotation) {
+%     my $annotation_user=$obvius->get_user($annotation->{user});
+%     my @hep=split /\s+/, $annotation->{text};
+%     my $number_of_words=scalar(@hep);
+ <a onclick="javascript:return display_toggle('obvius-annotation-text');" href="./" title="<% $annotation_user->{name} |h %>: <& /shared/shorten, len=>40, text=>$annotation->{text}, escape=>'h' &>"><% $number_of_words |h %> <& /shared/msg, text=>'word(s)' &></a><br/>
+ <div id="obvius-annotation-text">
+   <% $annotation->{text} |h %>
+ </div>
+% }
+% else {
+<span class="obvius-inactive"><& /shared/msg, text=>'None' &></span><br/>
+% }
+       <& /shared/msg, text=>'Compare to' &>:
+       <span class="obvius-diff-links">\
+% if ($previous_version) {
+<a href="./?obvius_command_diff=diff&amp;obvius_version=<% $vdoc->Version |u %>&amp;obvius_previous_version=<% $previous_version |u %>">\
+% }
+<& /shared/msg, text=>'previous' &>\
+% if ($previous_version) {
+</a>\
+% }
+, \
+% if ($public_version and $vdoc->Version ne $public_version) {
+ <a href="./?obvius_command_diff=diff&amp;obvius_version=<% $vdoc->Version |u %>&amp;obvius_public_version=<% $public_version |u %>">\
+% }
+<& /shared/msg, text=>'public' &>\
+% if ($public_version and $vdoc->Version ne $public_version) {
+</a>.\
+% }
+       </span>
+       </div>
+     </div>
+%
+<%args>
+$previous_version=>undef
+$public_version=>undef
+</%args>
+%
+<%init>
+my $user=$obvius->get_user($vdoc->param('user'));
+my $annotation;
+# Only get the annotation of $obvius can do it (XXX here temporarily
+# for compability with the trunk):
+$annotation=$obvius->get_annotation($vdoc) if $obvius->UNIVERSAL::can('get_annotation');
+</%init>

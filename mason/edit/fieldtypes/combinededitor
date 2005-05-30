@@ -243,5 +243,5 @@ my $p = HTML::Parser->new(api_version=>3,
                                         my ($this, $text)=@_;
                                         $out.=$text;
                                         },
-                                        "self, text" ]);
+                                        "self, dtext" ]);
 </%once>

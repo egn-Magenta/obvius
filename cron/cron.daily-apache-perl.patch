@@ -1,0 +1,18 @@
+--- /etc/cron.daily/apache-perl Tue Nov  5 07:44:08 2002
++++ cron.daily-apache-perl      Tue Apr  1 10:32:47 2003
+@@ -61,8 +61,13 @@
+     fi
+ 
+     # This looks for lines in the conf files like: FooLog /some/where
+-    CONFS=$(awk '$1 ~ /^\s*[Ii]nclude$/ && $2 ~ /^\// {print $2}' \
+-        /etc/apache-perl/*.conf | sort -u)
++    # recursively
++    RCONFS=$(ls /etc/apache-perl/*.conf | sort -u)
++    while [ "$RCONFS" != "" ]; do
++        CONFS="$CONFS $RCONFS"
++        RCONFS=$(awk '$1 ~ /^\s*[Ii]nclude$/ && $2 ~ /^\// {print $2}' \
++            $RCONFS | sort -u)
++    done
+     LOGS=$(awk '$1 ~ /^\s*[A-Za-z]*Log$/ && $2 ~ /^\// {print $2}' \
+         /etc/apache-perl/*.conf $CONFS | sort -u)
+ 

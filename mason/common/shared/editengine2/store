@@ -1,0 +1,196 @@
+<%method subset>
+<%args>
+ $history
+ $objects
+ $session
+ $obvius
+</%args>
+<%init>
+#print STDERR "<store:subset>\thistory = $history\n";#\n\t$execute [$confirmation]\n";
+
+my %old_protocol = $m->comp('toolbox:get_protocol');
+
+$m->comp('history:get_current_event', history=>$history);
+my %object = %{$m->comp('toolbox:access_object')};
+
+my $path = $m->comp('history:extract_path', history=>$history);
+my $editscheme = eval $m->comp('toolbox:setup_editscheme', path=>$path) or die "$path does not correspond to an editscheme";
+
+my $subset_relation = $editscheme->{arguments}->{subset};
+
+
+# Create a fictious display element describing the subset as a scheme
+# and save the output
+my %subset = (
+           name=>$subset_relation,
+           content=>'scheme',
+           style=>{context=>'raw'},
+          );
+my $old_subset_lookup = $m->comp('display', layout=>\%subset, editscheme=>$editscheme, history=>$history);
+#use Data::Dumper; print STDERR '$old_subset_lookup: ' . Dumper($old_subset_lookup);
+my $old_subset = [];
+foreach my $subset_element (@$old_subset_lookup) {
+    push @$old_subset, {
+                        map {
+                            $_ => $subset_element->{$_}->{value}
+                        } keys %$subset_element
+                       };
+}
+
+my $identifiers = $editscheme->{relations}->{$subset_relation}->{scheme}->{storage}->{organization}->{identifiers};
+
+$old_subset = sort_by_identifiers($old_subset, $identifiers);
+
+my $new_subset = [
+                  map {
+                      $m->comp('toolbox:unescape_object', object_description=>$_)
+                  } keys %{$objects->{$history}}
+
+                 ];
+
+$new_subset = sort_by_identifiers($new_subset, $identifiers);
+
+my @add;
+my @subtract;
+
+# Intrepret the sorted subsets as stacks and retrieve (pop) the top
+# (largest) elements of each for comparison
+my $old = pop @$old_subset;
+my $new = pop @$new_subset;
+while (defined $old and defined $new) {
+    my $update_action = compare_by_identifiers($old, $new, $identifiers);
+    if ($update_action == 0) {
+        # The element is in both sets so no update needs to take place
+        $old = pop @$old_subset;
+        $new = pop @$new_subset;
+    }
+    elsif ($update_action == 1) {
+        # $old is no longer in the set and should be removed
+        push @subtract, $old;
+        $old = pop @$old_subset;
+    }
+    elsif ($update_action == -1) {
+        # $new is new in the set and should be added
+        push @add, $new;
+        $new = pop @$new_subset;
+    }
+}
+
+# Add remaining elements (including the newly popped one) to the
+# corresponding update set, ie. $new/$new_subset to @add, and
+# $old/$old_subset to @subtract
+push @add, $new if defined $new;
+push @add, @$new_subset;
+
+push @subtract, $old if defined $old;
+push @subtract, @$old_subset;
+
+# Consider: If mappings is cleared escape_object assumes incomplete
+# object and adds trailing 'anonymous'?
+$r->pnotes('obvius_editengine_protocol')->{mappings} = {};
+
+# Perform additions as requested
+my %add;
+foreach my $element (@add) {
+    my $object_id = $m->comp('toolbox:escape_object', object=>$element);
+    $add{$object_id} = $element;
+}
+
+my $function = $editscheme->{arguments}->{add_function};
+# Very much consider using the projection here to get the object right!!!
+my $future = $m->comp('history:add_future_event', history=>$history, relation=>$subset_relation, object=>{}, function=>$function, embedding=>1);
+#use Data::Dumper; print STDERR '$future: ' . Dumper($future);
+
+my $additions;
+$additions->{$future} = \%add;
+
+#print STDERR "Inserting from <store:subset>\n";
+#use Data::Dumper; print STDERR '$additions: ' . Dumper($additions);
+$m->comp('flow:insert', execute=>$function, objects=>$additions, history=>$future, parent=>$history, session=>$session);
+
+# Perform subtractions as requested
+my %subtract;
+foreach my $element (@subtract) {
+    my $object_id = $m->comp('toolbox:escape_object', object=>$element);
+    $subtract{$object_id} = $element;
+}
+
+$function = $editscheme->{arguments}->{subtract_function};
+$future = $m->comp('history:add_future_event', history=>$history, relation=>$subset_relation, object=>{}, function=>$function, embedding=>1);
+
+my $subtractions;
+$subtractions->{$future} = \%subtract;
+
+#print STDERR "Inserting from <store:subset>\n";
+#use Data::Dumper; print STDERR '$subtractions: ' . Dumper($subtractions);
+$m->comp('flow:insert', execute=>$function, objects=>$subtractions, history=>$future, parent=>$history, session=>$session);
+
+$r->pnotes("obvius_editengine_protocol" => \%old_protocol);
+
+return;
+
+#---------------------------------------------------------------------------------------------
+
+# Comparison by identifiers is used more than once and should
+# therefore be taken care of by a subroutine
+sub compare_by_identifiers {
+    my ($A, $B, $identifiers) = @_;
+
+    my @ids = @$identifiers;
+    my $id = shift @ids;
+    while (defined $id) {
+        # [!] Introduction of anonymous objects may cause comparisons on undefined values here
+        $id = shift @ids unless (defined $A->{$id} and defined $B->{$id});
+        return -1 if $A->{$id} lt $B->{$id};
+        return  1 if $A->{$id} gt $B->{$id};
+        $id = shift @ids;
+    }
+    return 0;
+}
+# Sorting (descending) by identifiers is used more than once and
+# should therefore be taken care of by a subroutine
+sub sort_by_identifiers {
+    my ($set, $identifiers) = @_;
+
+    my @sorted_set = sort {
+        compare_by_identifiers($a, $b, $identifiers);
+    } @$set;
+    return \@sorted_set;
+}
+
+</%init>
+</%method>
+
+%#------------------------------------------------------------------------------------------------------------------------
+
+<%method composite>
+<%args>
+ $history
+ $objects
+ $session
+ $obvius
+</%args>
+<%init>
+#print STDERR "<store:composite>";#\n$execute [$confirmation]\n";
+
+# Perform the appropriate functions for all elements in objects
+# matching the editscheme, ie. all its subschemes:
+
+use URI::Escape;
+my $history_match = uri_escape($history, "^A-Za-z0-9");
+
+foreach my $event (keys %$objects) {
+  next unless uri_escape($event, "^A-Za-z0-9") =~ /^$history_match/;
+
+#  my $path = $m->comp('history:extract_path', history=>$history);
+  my $path = $m->comp('history:extract_path', history=>$event);
+
+  my $editscheme = eval $m->comp('toolbox:setup_editscheme', path=>$path) or die "$path does not correspond to an editscheme";
+  my ($execute) = keys %{$editscheme->{storage}->{functions}};
+
+#  print STDERR "Inserting from <store:composite>\n";
+  $m->comp('flow:insert', execute=>$execute, objects=>{$event => $objects->{$event}}, history=>$event, parent=>$history, session=>$session);
+}
+return;
+</%init>
+</%method>

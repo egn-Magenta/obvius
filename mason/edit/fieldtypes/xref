@@ -18,7 +18,7 @@ $size=>60
 % map {
 %   my $selected=($selected{$_->{$idfield}} ? ' SELECTED' : '');
 <option value="<% $_->{$idfield} %>"<% $selected %>><% $_->{name} %></option>
-% } @$choices;
+% } sort { $a->{name} cmp $b->{name} } @$choices;
 </select>
 <%init>
 my $value=$session->{fields_out}->param(uc($name));

@@ -257,7 +257,7 @@ sub escape_html {
 }
 
 
-;
+1;
 __END__
 # Below is stub documentation for your module. You better edit it!
 

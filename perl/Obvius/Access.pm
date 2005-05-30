@@ -4,7 +4,7 @@ package Obvius::Access;
 #
 # Access.pm - access to functionality; capability-handling
 #
-# Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
+# Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
@@ -103,8 +103,7 @@ sub user_capabilities {
     $this->{CAPABILITIES}={} unless (defined $this->{CAPABILITIES});
     return $this->{CAPABILITIES}->{$doc->Id} if (defined $this->{CAPABILITIES}->{$doc->Id});
 
-    my $user=$this->{USER};
-    my $userid=$this->get_userid($user);
+    my $userid=$this->get_userid($this->user);
     my $user_groups=$this->get_user_groups($userid);
 
     my @rules=$this->get_capability_rules($doc);
@@ -116,40 +115,8 @@ sub user_capabilities {
 	#print STDERR "  deny: " . Dumper(\@deny);
 	#print STDERR " zee rule: $_\n";
 
-	if (/^([^=+\-]+)(=|=!|[+]|-)\s*([^=+!\-]+)$/) {
-	    my ($who_list, $how, $capabilities)=($1, $2, $3);
-
-	    my $apply=0;
-	    if (defined $userid) {
-		my @who_list=split /\s*,\s*/, $who_list;
-		# ALL or username:
-		if (grep { $user eq $_ or $_ eq 'ALL' } @who_list) {
-		    $apply=1;
-		}
-		# OWNER:
-		elsif ($doc->Owner == $userid and grep { $_ eq 'OWNER' } @who_list) {
-		    $apply=1
-		}
-		# GROUP:
-		elsif (grep { $_ eq 'GROUP' } @who_list and
-		       grep { $doc->Grp == $_ } @$user_groups ) {
-		    $apply=1;
-		}
-		# @group:
-		else {
-		    my %groups = map {
-			my $grp=substr($_, 1);
-			$this->get_grpid($grp)=>$grp
-		    } grep { /^@/ } @who_list;
-		    foreach (@$user_groups) {
-			$apply=1 if (defined $groups{$_});
-		    }
-		}
-	    }
-	    elsif ($who_list =~ /(^|,|\s)PUBLIC(,|\s|)/) {
-		$apply=1;
-	    }
-
+        my ($apply, $who_list, $how, $capabilities)=$this->parse_access_rule($_, $doc, $userid);
+        if (defined $apply) {
 	    if ($apply) {
 		#print STDERR " applying rule $_\n";
 		my @capabilities=split /\s*,\s*/, $capabilities;
@@ -166,12 +133,12 @@ sub user_capabilities {
 		    push @deny, @capabilities;
 		}
 	    }
-	    else {
-		#print STDERR " not applying rule $_\n";
-	    }
+	    #else {
+            #    print STDERR " not applying rule $_\n";
+	    #}
 	}
 	else {
-	    $this->{LOG}->warn("UNRECOGNIZED RULE: [$_]");
+	    $this->log->warn("Unrecognized access rule '$_' for docid " . $doc->Id);
 	}
     }
 
@@ -193,6 +160,82 @@ sub user_capabilities {
     return \%capabilities;
 }
 
+# access_rule_applies - given a string with an access rule and a
+#                       document object, returns 1 if the rule applies
+#                       to the current user, 0 if it doesn't apply and
+#                       undef if the rule is invalid.
+sub access_rule_applies {
+    my ($this, $line, $doc)=@_;
+
+    my ($apply)=$this->parse_access_rule($line, $doc);
+
+    return $apply;
+}
+
+# parse_access_rule - given a string with an access rule, a document
+#                     object and optionally a numeric user id and an
+#                     array-ref to the groups the user is in, returns
+#                     a list with the values: apply which is undef if
+#                     the rule wasn't valid, 0 if the rule is not to
+#                     be applied to the user and 1 if it is, who_list
+#                     which is the left-hand side of the rule, how
+#                     which is the operator from the rule and finally
+#                     capabilities which is the right-hand side of the
+#                     rule.
+sub parse_access_rule {
+    my ($this, $line, $doc, $userid, $user_groups)=@_;
+
+    $userid=$this->get_userid($this->user) if (!defined $userid);
+    $user_groups=$this->get_user_groups($userid) if (!defined $user_groups);
+
+    if (/^([^=+\-]+)(=|=!|[+]|-)\s*([^=+!\-]+)$/) {
+        my ($who_list, $how, $capabilities)=($1, $2, $3);
+
+        my $apply=0;
+        if (defined $userid) {
+            my @who_list=split /\s*,\s*/, $who_list;
+            # ALL or username:  XXX add check for valid username!
+            if (grep { $this->user eq $_ or $_ eq 'ALL' } @who_list) {
+                $apply=1;
+            }
+            # OWNER:
+            elsif ($doc->Owner == $userid and grep { $_ eq 'OWNER' } @who_list) {
+                $apply=1
+            }
+            # GROUP:
+            elsif (grep { $_ eq 'GROUP' } @who_list and
+                   grep { $doc->Grp == $_ } @$user_groups ) {
+                $apply=1;
+            }
+            # @group:
+            else {
+                my %groups=();
+                map {
+                    my $groupname=substr($_, 1);
+                    my $groupid=$this->get_grpid($groupname);
+                    if ($groupid) {
+                        $groups{$groupid}=$groupname;
+                    }
+                    else {
+                        $this->log->warn("Access rule for unknown group '$groupname' encountered for docid " . $doc->Id);
+                        $apply=undef;
+                    }
+                } grep { /^@/ } @who_list;
+                foreach (@$user_groups) {
+                    $apply=1 if (defined $groups{$_});
+                }
+            }
+        }
+        elsif ($who_list =~ /(^|,|\s)PUBLIC(,|\s|)/) {
+            $apply=1;
+        }
+
+        return ($apply, $who_list, $how, $capabilities);
+    }
+
+    return undef;
+}
+
 # set_access_data - given a document object, a numerical owner id, a
 #                   numerical group id and a string with accessrules,
 #                   updates the database with them if the user has
@@ -203,6 +246,7 @@ sub set_access_data {
     die "User $this->{USER} does not have access to change the accessrules for this document."
 	unless $this->can_set_access_data($doc);
 
+    # XXX Check validity of owner, grp and accessrules!
     $doc->param(owner=>$owner);
     $doc->param(grp=>$grp);
     $doc->param(accessrules=>$accessrules);
@@ -210,6 +254,11 @@ sub set_access_data {
     return $this->db_update_document($doc, [qw(owner grp accessrules)]);
 }
 
+sub can_view_document {
+    my ($this, $doc)=@_;
+
+    return $this->user_has_capabilities($doc, qw(view));
+}
 
 # can_create_new_document - Return true if the user can create a new document.
 #                           Always returns true for 'admin'.
@@ -238,10 +287,26 @@ sub can_create_new_version {
 sub can_delete_document {
     my ($this, $doc) = @_;
 
+    # Sneaky, this _also_ checks for subdocs, which makes the
+    # error-message from below wrong when there are subdocs...
+
+    # asjo: XXX We should change this, so only capabilities are
+    # checked by can_delete_document, I think (then admin can use it
+    # to determine whether to make the delete-button inactive or not
+    # (now that there's recursive delete).  Or perhaps
+    # can_delete_document should recursively check capabilities. That
+    # would make more sense, come to think of it.
     return (
 	    (!$this->get_docs_by_parent($doc->Id)) and
 	    $this->user_has_capabilities($doc, qw(delete))
 	   );
+}
+
+sub can_rename_document_create {
+    my ($this, $doc) = @_;
+
+    # Check if you are able to create at the destination point.
+    return ($this->user_has_capabilities($doc, qw(create)));
 }
 
 sub can_delete_single_version {
@@ -307,6 +372,9 @@ sub can_delete_comment {
     return $this->user_has_capabilities($doc, qw(delete));
 }
 
+# can_set_docparams - given a document-object returns true if the user
+#                     is allowed to set document parameters on the
+#                     document, false otherwise.
 sub can_set_docparams {
     my ($this, $doc) = @_;
 
@@ -341,6 +409,8 @@ Obvius::Access - Access related functions for L<Obvius>.
   $ret=$obvius->user_has_any_capability($doc, qw (edit delete create));
 
   $obvius->set_access_data($doc, $new_owner->Id, $new_grp->Id, accessrules=>$str);
+
+  $ret=$obvius->can_set_docparams($doc);
 
 =head1 DESCRIPTION
 

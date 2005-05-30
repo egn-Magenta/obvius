@@ -21,7 +21,7 @@ Firma.<br>
 <input class="INPUT" type="text" size="32" name='company' VALUE="<% $company %>">
 
 <br><br>
-<input type="submit" value="Ændr">
+<input type="submit" class="subscriptionbutton" value="Ændr">
 </form>
 <%args>
 $output

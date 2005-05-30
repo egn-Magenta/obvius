@@ -1,0 +1,189 @@
+%# Call the appropriate method according to the
+%# overall type of the content
+% if ($content eq 'data') {
+%   if (ref $value and ref $value eq 'HASH') {
+      <& '.data', editscheme=>$editscheme, history=>$history, layout=>$layout, value=>$value->{$layout->{name}}, style=>$style &>\
+%   }
+%   else {
+%     use Data::Dumper; print STDERR '$layout: ' . Dumper($layout);
+%     print STDERR '$value should be of the form:' . "\n" . '$value => {' . "\n\tid1=>{value=>'1', status=>'OK'}\n\tid2=>{value=>'2', status=>'OK'}\n}";
+%     die 'display/data: $value is not a hash: [' . (defined $value ? $value : 'undef') . ']';
+%   }
+% }
+% elsif ($content eq 'scheme') {
+%   if ($style->{context} eq 'raw') {
+%       my $raw = $m->comp('.scheme', editscheme=>$editscheme, history=>$history, layout=>$layout, style=>{context=>'raw'});
+%       return $raw;
+%   }
+%   else {
+      <& '.scheme', editscheme=>$editscheme, history=>$history, layout=>$layout, style=>$style &>\
+%   }
+% }
+% elsif ($content eq 'markup') {
+      <& '.markup', layout=>$layout &>\
+% }
+% else {
+%    warn "Unknown content '$content'\n";
+% }
+%
+%
+%
+%
+<%def .data>\
+<%doc> =====
+
+ Display an element from the editscheme->{storage}->{data} section
+ according to its type and the selected display style.
+
+ Used almost all the time.
+
+ [!] It should be possible to specify sub-style variations,
+     eg. 'block:ghosted', 'inline:labeled' etc.
+
+</%doc>
+<& 'type/' . $call_type . ":$style->{context}", field=>$layout, style=>$style, value=>$value, prefix=>$history, validation=>$validation &>\
+<%args>
+ $layout
+ $value
+ $style
+ $editscheme
+ $history
+</%args>
+<%init>
+
+ # Construct a prefix for later determination of the object when
+ # handling confirmations.  Note that this is only required for display
+ # styles allowing for modification of the value
+
+ # The new prefix should just be the $history, since this also contains
+ # the necessary information on the current object
+
+ my $object_prefix = $m->comp('toolbox:escape_object');
+ $history .= 'editengine_value:' . ($object_prefix?"$object_prefix":'') . ':';
+
+ # Validation parameters
+ my $validation = $editscheme->{storage}->{data}->{$layout->{name}};
+
+ # Determine type
+ my ($type, $mandatory) = $validation->{type} =~ /^(\w+)([*]?)$/;
+
+
+ my $call_type=$type;
+ unless ($m->comp_exists("type/$type")) {
+    warn "No component for type '$type' (type/$type:$style->{context}) found";
+    $call_type='not_found';
+ }
+</%init>
+</%def>
+%
+%
+%
+%
+%
+<%def .scheme>\
+<%doc> =======
+Display an editscheme according to the
+display style selected on the $item.
+
+</%doc>
+
+% if (exists $layout->{label} and $style->{context} ne 'inline') {
+<div class="obvius-editengine-embedded-scheme">
+  <label><& /shared/msg, text=>$layout->{label} &></label>
+  <& 'main', history=>$history, style=>$style &>
+</div>
+% }
+% else {
+  <& 'main', history=>$history, style=>$style &>
+% }
+%# Restore protocol
+% $r->pnotes('obvius_editengine_protocol' => \%old_protocol);
+<%args>
+ $layout
+ $style
+ $editscheme
+ $history
+</%args>
+<%init>
+# Identify the requested scheme and and save the content of the
+# existing protocol
+my $relation = $editscheme->{relations}->{$layout->{name}};
+
+my %old_protocol = $m->comp('toolbox:get_protocol');
+
+# Modify the protocol according to the given projection
+$m->comp("projection:$relation->{projection}", relation=>$relation);
+
+# add_future_event defaults to the current object
+$history = $m->comp('history:add_future_event', history=>$history, relation=>$layout->{name}, embedding=>1);
+
+# Return raw data for template use
+if ($style->{context} eq 'raw') {
+    my $raw = $m->comp('main', history=>$history, style=>{context=>'raw'});
+    # Restore protocol
+    $r->pnotes('obvius_editengine_protocol' => \%old_protocol);
+    return $raw;
+}
+
+# Determine $style
+if ($relation->{scheme}->{style}) {
+    $style = $relation->{scheme}->{style}; # Style requested on the scheme
+}
+else {
+    $style->{context} = 'inline' unless $style; # Style defaults to inline
+}
+$style = $layout->{style} if $layout->{style}; # Style from layout element overrules all
+</%init>
+</%def>
+%
+%
+%
+<%def .markup>\
+<& $comp, layout=>$layout &>
+<%args>
+ $layout
+</%args>
+%
+<%init>
+my $comp="markup/$layout->{name}";
+
+if (!$m->comp_exists($comp)) {
+    carp "Component \"$comp\" does not exist";
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Component', ' "', $comp, '" ', 'does not exist']);
+    return;
+}
+</%init>
+%
+</%def>
+%
+%
+%
+%
+<%doc>
+ Displays an item from the list described in the display section on
+ the editscheme according to the selected display style.
+
+ The display style defaults to "inline", so this should probably be
+ present in the describtion of each type.
+
+</%doc>
+%
+<%args>
+ $layout
+ $value=>''
+# $style=>'inline'
+ $style=>{context=>'inline'}
+ $editscheme
+ $history
+</%args>
+%
+<%once>
+use Carp;
+</%once>
+%
+<%init>
+ my $content=$layout->{content};
+ if ($layout->{style}) {
+     $style = {%$style, %{$layout->{style}}};
+ }
+</%init>

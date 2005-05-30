@@ -1,0 +1,48 @@
+<h2><% $editscheme->{label} |h %></h2>
+
+% if ($style =~ /^block/) {
+%   unless ($style =~ /:open/) {
+      <form action="./" method="get">
+      <input type='hidden' name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
+%   }
+    <& ../commit:scheme, path=>$path, initializers=>$object &>
+    <& ../commit:object, path=>$path, initializers=>$object &>
+%   foreach my $item (@items) {
+      <div>
+        <& ../display, editscheme=>$editscheme, path=>$path, initializers=>$object, item=>$item, value=>$element, style=>'block' &>
+      </div>
+%   }
+%   unless ($style =~ /:open/) {
+      <& ../commit:execute, editscheme=>$editscheme, initializers=>$object &>
+      <& ../commit:cancel &>
+      </form>
+%   }
+% }
+%
+%# Restore the incoming protocol
+%# $r->pnotes('obvius_editengine_protocol' => \%original_protocol);
+%#use Data::Dumper; print STDERR '$r->pnotes("obvius_editengine_protocol"): ' . Dumper($r->pnotes("obvius_editengine_protocol"));
+<%args>
+# Mandatory arguments
+$path
+$session
+$editscheme
+$storage
+
+# Options
+$style=>'block'
+
+</%args>
+<%init>
+#print STDERR "editsheet\n";
+
+#my %original_protocol = %{$r->pnotes('obvius_editengine_protocol')};
+
+my @items = @{$editscheme->{display}};
+
+# Retrieve the element from storage
+my $object = $r->pnotes("obvius_editengine_protocol")->{object};
+my %object_id = map {$_ => $r->pnotes("obvius_editengine_protocol")->{object}->{$_}} @{$storage->param('identifiers')};
+my $element = $storage->get_element(%object_id);
+
+</%init>

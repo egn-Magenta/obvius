@@ -61,7 +61,9 @@ sub action {
 	
         $output->param(Obvius_DEPENCIES => 1); # search
 	my $question_docs = $obvius->search([qw(docdate seq)],
-					  "type = " . $question_id,
+					  "type = " . $question_id . " AND parent = " . $doc->Id,
+					  needs_document_fields => ['parent'],
+					  straight_documents_join => 1,
 					  %search_options);
 	
 	

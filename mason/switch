@@ -16,12 +16,12 @@ $invalid=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /switch (obvius_page: " .
-    (defined $obvius_page ? $obvius_page : 'undef') . ")\n";
-print STDERR ">>> /switch (obvius_op: " .
-    (defined $obvius_op ? $obvius_op : 'undef') . ")\n";
-print STDERR ">>> /switch (obvius_session: " .
-    (defined $obvius_session ? $obvius_session : 'undef') . ")\n";
+#print STDERR ">>> /switch (obvius_page: " .
+#    (defined $obvius_page ? $obvius_page : 'undef') . ")\n";
+#print STDERR ">>> /switch (obvius_op: " .
+#    (defined $obvius_op ? $obvius_op : 'undef') . ")\n";
+#print STDERR ">>> /switch (obvius_session: " .
+#    (defined $obvius_session ? $obvius_session : 'undef') . ")\n";
 
 if ($uri=~/[^\/]$/ or $uri eq '') { # Sneaky: Show the raw if there isn't a trailing slash:
     my ($mime_type, $data) = $doctype->raw_document_data($doc, $vdoc, $obvius, $r);
@@ -76,7 +76,8 @@ my %ops = (
             htmlarea_linkdialog => '/htmlarea/linkdialog',
             formdata_edit => '/formdata/edit',
             formdata_edit_option => '/formdata/edit_option',
-            formdata_edit_validaterule => '/formdata/edit_validaterule'
+            formdata_edit_validaterule => '/formdata/edit_validaterule',
+            copy => '/copy',
         );
 
 my %contents = (

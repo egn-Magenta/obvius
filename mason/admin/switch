@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<& portal/meta &>
+<& portal/title &>
+<& portal/script &>
+<& portal/link &>
+</head>
+<body>
+<table class="obvius">
+  <tr>
+    <td>
+<& portal/notificationarea &>
+<& portal/handlingarea &>
+<& portal/path &>
+    </td>
+  </tr>
+  <tr>
+    <td>
+<& portal/mainarea, %ARGS &>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+%
+%
+<%init>
+# Check if the user has the 'view' capability, return Forbidden if not:
+if (!$obvius->can_view_document($doc)) {
+    $m->clear_buffer;
+    $r->method('GET');
+    $r->headers_in->unset('Content-length');
+    $r->content_type('text/html');
+    $m->abort(403); # Forbidden
+}
+
+# This is for images and other raw-things to work in admin; no
+# trailing slash means show the raw thing:
+if ($uri!~m!/$! or $uri eq '') {
+    my ($mime_type, $data) = $doctype->raw_document_data($doc, $vdoc, $obvius, $r);
+
+    if ($data) {
+	$mime_type ||= 'application/octet-stream';
+
+	$r->content_type($mime_type);
+	$r->set_content_length(length($data));
+	$r->send_http_header;
+	return 200 if $r->header_only;
+	# XXX should be \$data
+	$r->print($data);
+	$m->abort;
+    }
+    elsif ($uri !~ /[.]html$/) {
+	$m->clear_buffer;
+	$r->method('GET');
+	$r->headers_in->unset('Content-length');
+	$r->content_type('text/html');
+	$r->header_out('Location' => $prefix . $uri . '/');
+	$m->abort(301);
+    }
+}
+else {
+   $r->content_type('text/html');
+   $r->no_cache(1); # admin-pages are not allowed to be cached by the browser (things
+                    # are likely to have changed).
+   $m->comp('default/read_translations', %ARGS);
+   # Handling of "applications" (navigator and such things that
+   # by-pass the usual admin-interface):
+   my $obvius_app=$m->comp('/util/extract_value', %ARGS, prefix=>'obvius_app');
+   if (defined $obvius_app) {
+       my $app_component="app/$obvius_app/main";
+       if ($m->comp_exists($app_component)) {
+           $m->comp($app_component, %ARGS);
+           return;
+       }
+       else {
+           $m->comp('/shared/set_status_message', status=>'WARNING', message=>[ 'No such application', ': "', $m->scomp('/shared/escape_h', text=>$obvius_app), '"']);
+       }
+   }
+   $m->comp('default/set_links', %ARGS);
+   $m->comp('default/perform_action', %ARGS);
+}
+</%init>
+%
+<%perl> # Post-request clean-up (must also be run in redirect!):
+$m->comp('default/release_session');
+</%perl>
+%
+<%filter>
+$r->headers_out->set('Content-Length'=>length $_);
+</%filter>

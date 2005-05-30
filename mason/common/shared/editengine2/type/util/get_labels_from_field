@@ -1,0 +1,14 @@
+<%args>
+$field
+</%args>
+%
+<%init>
+# Get "label_{choice}" from options, labels get '_' replaced by ' ':
+return map {
+    /^label_(.*)/;
+    my $c=$1;
+    my $v=$field->{options}->{$_};
+    $v=~s/(^|[^\\])_/$1 /g;
+    $c=>$v }
+        grep { /^label_/ } keys %{$field->{options}};
+</%init>

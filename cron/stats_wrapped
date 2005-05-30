@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# stats_wrapped - /etc/apache-perl/cron.conf does not allow the script
+#                 being called to have any arguments, so this wrapper
+#                 is used for # calling stats.
+#
+# Copyright (C) 2003-2004, aparte, Magenta. by Adam Sjøgren <asjo@magenta-aps.dk>.
+# Under the GPL.
+#
+# $Id$
+
+/var/www/obvius/cron/stats 2>&1 | /var/www/obvius/cron/squeeze

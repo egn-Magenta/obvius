@@ -1,0 +1,18 @@
+<%args>
+$status=>'OK'
+$message=>''
+</%args>\
+%
+<%init>
+my $session=$r->pnotes('obvius_session');
+
+if (defined $session) {
+    $session->{status}=$status;
+    $session->{message}=$message;
+}
+else {
+    $r->pnotes(status=>$status);
+    $r->pnotes(message=>$message);
+
+}
+</%init>

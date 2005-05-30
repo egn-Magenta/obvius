@@ -1,0 +1,200 @@
+%# Save previous content of the protocol.  This might be handled
+%# differently later on, if there are different types of relations
+% my $original_protocol = $r->pnotes('obvius_editengine_protocol');
+
+<h2><% $editscheme->{label} |h %></h2>
+
+  <table class='obvius-editengine-list'>
+% if ($style =~ /^block/) {
+    <tr class='obvius-editengine-pagelist'>
+      <td colspan='<% scalar(@columns) |h %>'>
+        <& .display_pagelist, page=>$obvius_page, max=>$obvius_max, total=>$total &>
+      </td>
+    </tr>
+% }
+    <tr>
+%   foreach my $column (@columns) {
+      <th>
+        <% $column->{label} |h %>
+      </th>
+%   }
+    </tr>
+%   my $i=0;
+%   foreach my $row (@$table) {
+      <& '../select:object', editscheme=>$editscheme, object=>$row &>
+      <tr class="obvius-<% $i++%2 ? 'b' : 'a' %>">
+%      foreach my $cell (@columns) {
+        <td>
+%#        The style of embedded elements defaults to 'inline'
+          <& '../display', editscheme=>$editscheme, path=>$path, item=>$cell, value=>$row, style=>'inline' &>
+        </td>
+%      }
+%      # Add clickable functions (if there are any):
+%      if (scalar(@obj_functions)) {
+        <td>
+%        foreach my $function (@obj_functions) {
+          <& '../select:function', editscheme=>$editscheme, path=>$path, function=>{$function => $functions->{$function}}, session=>$session &>
+          <& '../transfer:function', relation=>$editscheme->{relations}->{$editscheme->{storage}->{functions}->{$function}->{relation}}, label=>$editscheme->{storage}->{functions}->{$function}->{label} &>
+%        }
+        </td>
+%      }
+      </tr>
+%   }
+  </table>
+
+%# Restore the incoming protocol
+% $r->pnotes('obvius_editengine_protocol' => $original_protocol);
+
+%  foreach my $function (@new_obj_functions) {
+     <& '../select:function', editscheme=>$editscheme, path=>$path, function=>{$function => $functions->{$function}}, session=>$session &>
+     <& '../transfer:function', relation=>$editscheme->{relations}->{$editscheme->{storage}->{functions}->{$function}->{relation}},  label=>$editscheme->{storage}->{functions}->{$function}->{label} &>
+%  }
+%
+%
+<%def .display_pagelist>
+%
+<%args>
+$page=>undef
+$max=>undef
+$total=>undef
+</%args>
+%
+% $r->notes('obvius_up_link'=>'./');
+%
+% if ($page ne '1') {
+%     $r->notes('obvius_first_link'=>'./' . $m->scomp('.compose_parameters', obvius_page=>1));
+<a href="<% $r->notes('obvius_first_link') %>" title="<& /shared/msg, text=>'First' &>">\
+% }
+«\
+% if ($page ne '1') {
+</a>\
+% }
+
+% if ($page ne '1') {
+%     $r->notes('obvius_prev_link'=>'./' . $m->scomp('.compose_parameters', obvius_page=>$page-1));
+<a href="<% $r->notes('obvius_prev_link') %>" title="<& /shared/msg, text=>'Previous' &>">\
+% }
+&lt;\
+% if ($page ne '1') {
+</a>\
+% }
+
+% for(my $i=1; $i<=$pages; $i++) {
+%     unless ($i eq $page) {
+<a href="./<& .compose_parameters, obvius_page=>$i &>">\
+%     }
+<% $i %>\
+%     unless ($i eq $page) {
+</a>\
+%     }
+
+% }
+
+% if ($page ne $pages) {
+%     $r->notes('obvius_next_link'=>'./' . $m->scomp('.compose_parameters', obvius_page=>$page+1));
+<a href="<% $r->notes('obvius_next_link') %>" title="<& /shared/msg, text=>'Next' &>">\
+% }
+&gt;\
+% if ($page ne $pages) {
+</a>\
+% }
+
+% if ($page ne $pages) {
+%     $r->notes('obvius_last_link'=>'./' . $m->scomp('.compose_parameters', obvius_page=>$pages));
+<a href="<% $r->notes('obvius_last_link') %>" title="<& /shared/msg, text=>'Last' &>">\
+% }
+»\
+% if ($page ne $pages) {
+</a>\
+% }
+%
+<%init>
+return unless (defined $max);
+return unless (defined $total);
+$page=1 unless (defined $page);
+
+my $pages=ceil($total/$max);
+return unless ($pages>1);
+</%init>
+%
+</%def>
+%
+%
+<%def .compose_parameters>\
+%
+?<% join '&amp;', map { $_ . '=' . $m->scomp('/shared/escape_u', text=>$parameters{$_}) } (keys %parameters) %>\
+%
+<%init>
+my %parameters=((map { $_=>$r->param($_) } $r->param()), (%ARGS));
+return unless (scalar(keys %parameters));
+</%init>\
+%
+</%def>
+%
+%
+<%once>
+use POSIX qw(ceil);
+</%once>
+%
+%
+<%args>
+# Mandatory arguments
+$path
+$session
+$editscheme
+$storage
+
+# The scheme's style parameter:
+#  » 'block':  "stand alone" display
+#    'inline': show as table without header and pages (usefull for embeddings etc.)
+#    'raw':    return data as array (of arrays?)
+$style=>'block'
+
+# Options controlling table diplay
+$obvius_page=>1
+$obvius_sort=>undef
+$obvius_reverse=>undef
+$obvius_max=>10
+
+</%args>
+%
+<%init>
+#print STDERR "\n" . 'table: $editscheme = ' . "$editscheme\n";
+#use Data::Dumper; print STDERR '$session: ' . Dumper($session);
+
+#print STDERR "\n".'table: path = ' . "$path\n";
+
+my $start_num=(($obvius_page-1)*$obvius_max); # 0-indexed
+my $options = {
+               start=>$start_num,
+               max=>$obvius_max,
+              };
+
+# Fix: This transfers the entire object but only entries from
+# $storage->param('identifiers') are wanted!
+my %object = %{$r->pnotes('obvius_editengine_protocol')->{object}};
+
+#use Data::Dumper; print STDERR 'table: \%object: ' . Dumper(\%object);
+
+if ($style eq 'raw') {
+    my ($table, $total)=$storage->list(\%object);
+    return $table;
+}
+
+# Fix: Currently $total is the total number of rows in the table, and
+# not the total number of found records, as i ought to be
+my ($table, $total)=$storage->list(\%object, $options);
+my @columns = @{$editscheme->{display}};
+
+my $functions = $editscheme->{storage}->{functions};
+my @obj_functions = grep {$functions->{$_}->{object} eq 'existing'} keys %$functions;
+my @new_obj_functions = grep {$functions->{$_}->{object} eq 'new'} keys %$functions;
+
+</%init>
+
+<%doc>
+
+Consider declaring $editscheme in a <%shared>-block in order to allow
+closure of the different display styles.
+
+</%doc>

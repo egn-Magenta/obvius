@@ -1,0 +1,176 @@
+<div class="obvius-command">
+  <h2><& /shared/msg, text=>'New document' &></h2>
+
+  <form action="./">
+    <div>
+      <label for="obvius_new_document_name"><& /shared/msg, text=>'Name' &></label>
+      <% $uri |h %><input type="text" id="obvius_new_document_name" name="obvius_new_document_name" value="<% $obvius_new_document_name |h %>" size="30" />
+    </div>
+
+    <div>
+      <label for="obvius_new_document_name"><& /shared/msg, text=>'Document type' &></label>
+      <& changetype:doctype_dropdown, %ARGS, value=>$obvius_new_doctypeid &>
+    </div>
+
+    <div>
+      <label for="obvius_new_grpid"><& /shared/msg, text=>'Group' &></label>
+      <& /shared/editengine2/type/util/dropdown, name=>'obvius_new_grpid', choices=>\@dropdown_groups, labels=>\%group_labels, value=>$obvius_new_grpid &>
+    </div>
+
+    <div>
+      <label for="obvius_new_language"><& /shared/msg, text=>'Language' &></label>
+      <& newlanguage:language_dropdown, %ARGS &>
+    </div>
+
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_newdocument=>1 } &>
+      <& util/do_cancel, no_later_date=>1, do_text=>'Start editing' &>
+    </p>
+  </form>
+</div>
+%
+<%args>
+$obvius_new_document_name=>undef
+$obvius_new_doctypeid=>undef
+$obvius_new_grpid=>undef
+$obvius_new_language=>undef
+</%args>
+%
+<%init>
+# Get data for group dropdown:
+my $current_userid=$obvius->get_userid($obvius->{USER});
+
+my $groups;
+if ($obvius->user_has_capabilities($doc, 'modes')) {
+    $groups=[ map { $obvius->{GROUPS}->{$_} } sort keys %{$obvius->{GROUPS}} ];
+}
+else {
+    $groups=[ map { $obvius->get_group($_) } @{$obvius->get_user_groups($current_userid)} ];
+}
+
+# XXX Default to admin, what *is* that?!
+#if(! (ref $groups) or ! scalar(@$groups)) {
+#    $groups= [ { id => 'admin', 'name' => 'Administration' } ];
+#}
+
+unless (defined $obvius_new_grpid) {
+    if (grep { $_->{id} == $doc->Grp } @$groups) {
+        $obvius_new_grpid=$doc->Grp;
+    }
+}
+
+my @dropdown_groups=map { $_->{id} } @$groups;
+my %group_labels=map { $_->{id}=>$_->{name} } @$groups;
+
+# Select a default name and a default doctype:
+my $fallback_name=$m->scomp('/shared/msg', text=>'document');
+my %doctypes;
+unless ($obvius_new_document_name) {
+    # No name was given, so let's try to be clever about one:
+    $obvius_new_document_name=$fallback_name;
+
+    # Get the names of all the subdocs, and count the number of each type:
+    my @names=map {
+        $doctypes{$_->{TYPE}}++;
+        $obvius->get_doc_by_id($_->{DOCID})->Name
+    } @{($obvius->get_document_subdocs($doc, sortvdoc=>$vdoc, public=>0) || [])};
+
+    # Find out what names end in numbers:
+    my @with_numbers=sort { (length($b->{num}) <=> length($a->{num})) ||
+				($b->{num} <=> $a->{num}) ||
+				    ($a->{base} cmp $b->{base}) }
+	grep { $_ }
+	    map {
+		if (m!^([^\d]*)(\d+)$!) {
+		    { base=>$1, num=>$2, }
+		}
+		else {
+		    ''
+		}
+	    } @names;
+
+    # If there are any names with numbers, let the new name be one number higher:
+    if (scalar(@with_numbers)>0 or (@with_numbers and scalar(@with_numbers)==scalar(@names))) {
+	my $width=length($with_numbers[0]->{num});
+	$obvius_new_document_name=sprintf "%s%*.*d", $with_numbers[0]->{base}, $width, $width, $with_numbers[0]->{num}+1;
+    }
+    else {
+        # Otherwise fall back to the default:
+        my %names=map { $_=>1 } @names;
+	$obvius_new_document_name=$fallback_name . (exists $names{$fallback_name} ? '2' : '');
+    }
+}
+
+#my $selected_doctype; # XXX This component is messed up inside: $m->scomp('/defaults/doctype_during_new', %ARGS);
+#$selected_doctype=~s/\n//g if($selected_doctype);  # XXX What is this?
+#$selected_doctype=undef unless($selected_doctype); # XXX Set to undef if false, huh?
+
+unless ($obvius_new_doctypeid) { # If there is no default, go with the flow:
+    my @sorted_keys=sort { $doctypes{$b} <=> $doctypes{$a} } keys %doctypes;
+    $obvius_new_doctypeid=$sorted_keys[0] if (@sorted_keys);
+}
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+<%method cancel>
+%
+<& /shared/set_status_message, message=>'New document cancelled' &>
+%
+</%method>
+%
+%
+%
+<%method do>
+%
+<%args>
+$obvius_new_document_name=>''
+$obvius_new_doctypeid
+$obvius_new_grpid
+$obvius_new_language
+</%args>
+%
+<%init>
+# Check input (name)
+#  Change danish chars and spaces
+if($obvius_new_document_name) {
+    $obvius_new_document_name=~s/æ/ae/g;
+    $obvius_new_document_name=~s/ø/oe/g;
+    $obvius_new_document_name=~s/å/aa/g;
+    $obvius_new_document_name=~s/Æ/AE/g;
+    $obvius_new_document_name=~s/Ø/OE/g;
+    $obvius_new_document_name=~s/Å/AA/g;
+    $obvius_new_document_name=~s/ /_/g;
+}
+
+if ($obvius_new_document_name!~/^[a-zA-Z0-9._-]+$/) {
+    # Unacceptable name, sorry:
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['The selected name', ', ', $obvius_new_document_name, ', ', 'contains characters that are not allowed, please change the name']);
+    return 'newdocument';
+}
+
+if ($obvius->get_doc_by_name_parent($obvius_new_document_name, $doc->Id)) {
+    # A document with that name already exists, sorry:
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['A document already exists with the selected name', ', <a href="./', $obvius_new_document_name, '/">', $obvius_new_document_name, '</a>, ', 'here, please choose another']);
+    return 'newdocument';
+}
+
+# All set? Lets go:
+my $session=$r->pnotes('obvius_session');
+$session->{action}='edit';
+$session->{obvius_new_document_name}=$obvius_new_document_name;
+$session->{obvius_new_doctypeid}=$obvius_new_doctypeid;
+$session->{obvius_new_grpid}=$obvius_new_grpid;
+$session->{obvius_new_language}=$obvius_new_language;
+
+$m->comp('/shared/set_status_message', message=>['Now editing a new document named', ': ', $obvius_new_document_name]);
+return ''; # Let us redirect into edit...
+</%init>
+%
+</%method>

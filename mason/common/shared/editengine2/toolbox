@@ -1,0 +1,277 @@
+<%method access_object>
+<%init>
+ return $r->pnotes('obvius_editengine_protocol')->{object};
+</%init>
+</%method>
+
+
+
+
+<%method access_function>
+<%init>
+ return $r->pnotes('obvius_editengine_protocol')->{function} || {};
+</%init>
+</%method>
+
+
+
+
+<%method escape_object>
+<%doc>
+
+Translates the current object (from the protocol) to a nice,
+'::/--' -separated form usefull for identifying objects in forms etc.
+
+[!] Note, that this disallows '::' and '--' in identifier
+    names _and_ values!
+
+For instance, the object
+  {
+   id   => 5          becomes   'id::5--name::jensk'
+   name => jensk
+  }
+
+
+
+</%doc>
+<%args>
+ $object=>undef
+</%args>
+<%init>
+ $object = $r->pnotes("obvius_editengine_protocol")->{object} unless $object;
+#use Data::Dumper; print STDERR '$object: ' . Dumper($object);
+ return 'anonymous' unless keys %$object;
+
+ # Order identifiers to ensure uniqueness (one object, one escaped description)
+ my @object_identifiers = $m->comp('toolbox:order_object_ids', object=>$object);
+
+ my @escaped_identifier_value_pairs = map {
+#      uri_escape($_, "^A-Za-z0-9") . '»' . uri_escape($object->{$_}, "^A-Za-z0-9");
+      $_ . '::' . $object->{$_};
+ } @object_identifiers;
+
+ my $escaped_object_description = join '--', @escaped_identifier_value_pairs;
+#use Data::Dumper; print STDERR '$escaped_object_description: ' . Dumper($escaped_object_description);
+
+ # If the 'mappings' section on the protocol is undefined only a partial object is in question
+ if (defined $r->pnotes('obvius_editengine_protocol')){
+     $escaped_object_description .= '--anonymous' unless $r->pnotes('obvius_editengine_protocol')->{mappings};
+ };
+ return $escaped_object_description;
+</%init>
+</%method>
+
+
+
+
+<%method unescape_object>
+<%args>
+ $object_description=>''
+</%args>
+<%init>
+#use Data::Dumper; print STDERR '<une_o> $object_description: ' . Dumper($object_description);
+ return {} unless ($object_description && $object_description ne 'anonymous');
+
+ # Remove trailing 'anonymous'
+ my ($new_desc) = $object_description =~ /^(.+)--anonymous$/;
+ $object_description = $new_desc if $new_desc;
+
+ # Restore initializers
+ my @identifier_value_pairs = split /--/, $object_description;
+ my %object;
+ map {
+      my($identifier, $value) = $_ =~ /^(.*)::(.*)$/;
+#      $object{uri_unescape($identifier)}=uri_unescape($value);
+      $object{$identifier}=$value;
+     } @identifier_value_pairs;
+ return \%object;
+</%init>
+</%method>
+
+
+
+
+<%method order_object_ids>
+<%args>
+ $object
+</%args>
+<%init>
+ return sort keys %$object;
+</%init>
+</%method>
+
+
+
+
+<%method setup_editscheme>
+<%args>
+ $path
+</%args>
+<%init>
+ my $root = "->{editscheme}->";
+ my $full_path = $path? "$root$path" : "$root";
+ my $editscheme = '$session' . "$full_path";
+
+ return $editscheme;
+
+</%init>
+</%method>
+
+
+
+
+<%method get_protocol>
+<%init>
+my %old_protocol;
+return %old_protocol unless defined $r->pnotes('obvius_editengine_protocol');
+foreach my $section (keys %{$r->pnotes('obvius_editengine_protocol')}) {
+  next if $section eq 'confirmation';
+  foreach my $value (keys %{$r->pnotes('obvius_editengine_protocol')->{$section}}) {
+    $old_protocol{$section}->{$value}=$r->pnotes('obvius_editengine_protocol')->{$section}->{$value};
+  }
+}
+return %old_protocol;
+</%init>
+</%method>
+
+
+
+
+
+<%method transfer_scheme_parameters>
+<a href="?<% join '&amp;', @$parameters %>"><%$label%></a>
+<%args>
+ $options
+ $label
+ $history
+</%args>
+<%init>
+ my $parameters = [ map {$history . 'local_scheme_parameter_' . "$_=$options->{$_}"} grep {defined $options->{$_}} keys %$options];
+ push @$parameters, "obvius_session_id=" . $r->pnotes('obvius_session')->{'_session_id'};
+
+# Determine return $history.  Note that this is not the current
+# $history in case of embeddings, cf. the return stack determination
+# in <main>
+ my $previous_events = $m->comp('history:previous_events', history=>$history);
+ my $return_history = pop @$previous_events || '';
+ push @$parameters, "history=$return_history";
+</%init>
+</%method>
+
+
+
+<%method test_editscheme>
+<%args>
+ $editscheme # ref HASH
+</%args>
+<%init>
+
+ # Initial check of the $editscheme
+ unless (ref $editscheme eq 'HASH') {
+     print STDERR '$editscheme: ' . Dumper($editscheme);
+     die '$editscheme is not a HASH reference; cf. the error_log';
+ }
+
+
+ # Test type
+ unless (defined $editscheme->{type} and not ref $editscheme->{type}) {
+  print STDERR '$editscheme: ' . Dumper($editscheme);
+  die '$editscheme: missing or invalid scheme type; cf. the error_log';
+ }
+
+ # Test storage description
+ unless (defined $editscheme->{storage} and ref $editscheme->{storage} eq 'HASH') {
+  print STDERR '$editscheme: ' . Dumper($editscheme);
+  die '$editscheme: missing or invalid storage description; cf. the error_log';
+ }
+ elsif (not defined $editscheme->{storage}->{organization} or ref $editscheme->{storage}->{organization} ne 'HASH') {
+  print STDERR '$editscheme: ' . Dumper($editscheme);
+  die '$editscheme: missing or invalid description of storage organization; cf. the error_log';
+ }
+ elsif (not defined $editscheme->{storage}->{data} or ref $editscheme->{storage}->{data} ne 'HASH') {
+  print STDERR '$editscheme: ' . Dumper($editscheme);
+  die '$editscheme: missing or invalid description of storage data; cf. the error_log';
+ }
+
+ # Test display description
+ unless (defined $editscheme->{display}) {
+  warn '$editscheme: missing display description' . "\n";
+ }
+ elsif (ref $editscheme->{display} ne 'ARRAY') {
+  print STDERR '$editscheme: ' . Dumper($editscheme);
+  die '$editscheme: invalid display description; cf. the error_log';
+ }
+ else {
+   foreach my $layout (@{$editscheme->{display}}) {
+     unless (ref $layout eq 'HASH') {
+       print STDERR '$layout: ' . Dumper($layout);
+       die '$editscheme: invalid layout in display; cf. the error_log';
+     }
+     elsif (not defined $layout->{name} or ref $layout->{name}) {
+       print STDERR '$layout: ' . Dumper($layout);
+       die '$editscheme: missing or invalid name in layout; cf. the error_log';
+     }
+     elsif (not defined $layout->{content} or ref $layout->{content}) {
+       print STDERR '$layout: ' . Dumper($layout);
+       die '$editscheme: missing or invalid content in layout; cf. the error_log';
+     }
+   }
+ }
+
+ # Test description of relations
+ unless (defined $editscheme->{relations}) {
+  warn '$editscheme: no relations' . "\n";
+ }
+ elsif (ref $editscheme->{relations} ne 'HASH') {
+  print STDERR '$editscheme: ' . Dumper($editscheme);
+  die '$editscheme: invalid description of relations; cf. the error_log';
+ }
+ else {
+  my $relations = $editscheme->{relations};
+  foreach my $relation (keys %$relations) {
+    unless (ref $relations->{$relation} eq 'HASH') {
+      print STDERR '$relations->{$relation}: ' . Dumper($relations->{$relation});
+      die '$editscheme: invalid description of relation; cf. the error_log';
+    }
+    elsif (not defined $relations->{$relation}->{scheme} or ref $relations->{$relation}->{scheme} ne 'HASH') {
+      print STDERR "$relation: " . Dumper($relations->{$relation});
+      die '$editscheme: related scheme missing or invalid; cf. the error_log';
+    }
+    elsif (not defined $relations->{$relation}->{projection} or ref $relations->{$relation}->{projection}) {
+      print STDERR "$relation: " . Dumper($relations->{$relation});
+      die '$editscheme: missing or invalid projection in relation; cf. the error_log';
+    }
+  }
+ }
+
+ # Warn about unknown fields
+ my %known_fields = (map {$_ => 1} qw(type storage display relations label style arguments));
+#use Data::Dumper; print STDERR '\@known_fields: ' . Dumper(\%known_fields);
+foreach my $field (keys %$editscheme) {
+     print STDERR '$editscheme: field ',"'" , $field, "'", " unreckognized\n" unless defined $known_fields{$field};
+ }
+
+</%init>
+</%method>
+
+
+
+<%method setup_storage>
+<%args>
+ $editscheme
+ $obvius
+ $session
+</%args>
+<%init>
+  my $storage_class;
+  $storage_class="WebObvius::Storage::" . $editscheme->{storage}->{organization}->{class};
+  eval "use $storage_class";
+  return $storage_class->new($editscheme->{storage}->{organization}, $obvius, $session);
+</%init>
+</%method>
+
+
+<%once>
+ use Data::Dumper;
+ use URI::Escape;
+</%once>

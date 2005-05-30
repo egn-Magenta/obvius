@@ -1,0 +1,152 @@
+<div class="obvius-command obvius-command-document-information obvius-link-decor">
+  <h2><& /shared/msg, text=>'Document information' &></h2>
+
+  <form action="./" method="get">
+% my $i=0;
+% foreach my $show (@info) {
+    <div>
+      <label><& /shared/msg, text=>$show->{title} &></label>
+% if ($show->{pre}) {
+      <div>
+        <% $show->{pre} %>
+      </div>
+% }
+% if (defined $show->{type} and $show->{type} eq 'text') {
+%     my $rows=($show->{value}=~tr/\n//)+1;
+%     $rows=5 if ($rows<5);
+      <textarea <% $show->{inactive} ? 'disabled="disabled" ' : '' %>cols="68" rows="<% $rows |h %>" name="<% $show->{name} |h %>"><% $show->{value} |h %></textarea>
+% }
+% elsif (defined $show->{type} and $show->{type} eq 'dropdown') {
+      <select <% $show->{inactive} ? 'disabled="disabled" ' : '' %>name="<% $show->{name} |h %>">
+%     foreach my $option (@{$show->{choices}}) {
+        <option value="<% $option->{id} |h %>"<% $option->{id} eq $show->{value} ? ' selected="selected"' : '' %>><% $option->{name} |h %></option>
+%     }
+      </select>
+% }
+% else {
+      <% $show->{value} %>
+% }
+% if ($show->{post}) {
+      <div>
+        <% $show->{post} %>
+      </div>
+% }
+    </div>
+% }
+
+    <p>
+      <& /portal/util/identifier, pass=>{ obvius_command_document_information=>1 } &>
+      <& util/do_cancel, do_text=>'Opdatér', no_later_date=>1 &>
+    </p>
+  </form>
+</div>
+
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title)]);
+my $url='http://' . $r->hostname . $uri;
+my $docparams=$obvius->get_docparams($doc);
+my $docparams_show=join "\n", map {
+    my $docparam=$docparams->param($_);
+    lc($_) . '=' . $docparam->param('value') }
+      sort $docparams->param();
+
+my $parent_doc=$obvius->get_doc_by_id($doc->Parent) || $doc; # Fall back to doc itself (for root :-))
+my $inherited_docparams=$obvius->get_docparams_recursive($parent_doc);
+my $inherited_docparams_show=join "<br />\n", map {
+    my $docparam=$inherited_docparams->param($_);
+    lc($_) . '=' . $docparam->param('value') }
+      sort $inherited_docparams->param();
+
+my $current_access_rules=join '<br />', map {
+    my $status=$obvius->access_rule_applies($_, $doc);
+    defined $status ? ($status ? "<span title=\"" . $m->scomp('/shared/msg', text=>'Rule applies') . "\" class=\"obvius-rule-used\">$_</span>" : "<span title=\"" . $m->scomp('/shared/msg', text=>'Rule does not apply') . "\">$_</span>") : "<span title=\"" . $m->scomp('/shared/msg', text=>'Rule invalid') . "\" class=\"obvius-rule-invalid\">$_</span>" }
+      $obvius->get_capability_rules($doc);
+
+my $can_access=$obvius->can_set_access_data($doc);
+my $can_docparams=$obvius->can_set_docparams($doc);
+
+my @info=(
+          { title=>'Title', value=>$vdoc->Title, },
+          { title=>'Address', value=>'<a href="' . $url . '">' . $url . '</a> (' . $doc->Id . ')', },
+          { title=>'Owner', value=>$doc->Owner, name=>'owner', type=>'dropdown', inactive=>1-$can_access,
+            choices=>[ sort { $a->{name} cmp $b->{name} } map { $obvius->{USERS}->{$_} } grep { /^\d+$/ } keys %{$obvius->{USERS}} ], },
+          { title=>'Group', value=>$doc->Grp, name=>'group', type=>'dropdown', inactive=>1-$can_access,
+            choices=>[ map { my $group=$obvius->get_group($_); { id=>$group->{id}, name=>$group->{name}, } } @{$obvius->get_user_groups($obvius->get_userid($obvius->user))} ], },
+          {
+           title=>'Access rules', value=>$doc->Accessrules || '', name=>'accessrules', type=>'text', inactive=>1-$can_access,
+           pre=>$m->scomp('/shared/msg', text=>'Calculated access rules') . ':<div>' . $current_access_rules . '</div>' .
+                $m->scomp('/shared/msg', text=>'Current capabilities') . ' (' . $obvius->user . '):<div>' . (join ", ", keys %{$obvius->user_capabilities($doc)}) . '</div>',
+          },
+          {
+           title=>'Document parameters', value=>$docparams_show || '', name=>'docparams', type=>'text',
+           inactive=>1-$can_docparams,
+           pre=>$m->scomp('/shared/msg', text=>'Inherited document parameters') . ':<div>' . ($inherited_docparams_show || '<em>' . $m->scomp('/shared/msg', text=>'none') . '</em>') . '</div>' },
+
+         );
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+%
+%
+<%method cancel>
+<& /shared/set_status_message, message=>'CANCEL' &>
+</%method>
+%
+%
+%
+<%method do>
+%
+<%args>
+$owner=>undef
+$group=>undef
+$accessrules=>undef
+$docparams=>undef
+</%args>
+%
+<& /shared/set_status_message, message=>'OK' &>
+%
+<%init>
+my @success_messages=();
+if ($obvius->can_set_access_data($doc)) {
+    if (!$obvius->set_access_data($doc, $owner, $group, $accessrules)) {
+        $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Could not update document');
+        return '';
+    }
+}
+
+if ($obvius->can_set_docparams($doc)) {
+    my $new_docparams=Obvius::Data->new(grep { defined } map { my ($n, $v)=/^([^=]+)=(.*)$/; $n=>$v } split /[\r\n]/, $docparams);
+
+    my $error='';
+    if (!$obvius->set_docparams($doc, $new_docparams, \$error)) {
+        $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Could not update document parameters', ' (', $error, ')']);
+        return '';
+    }
+}
+
+$m->comp('/shared/set_status_message', message=>'Document updated');
+return '';
+</%init>
+%
+</%method>
+%
+%
+%
+%
+<%doc>
+
+TO DO: Validate access rules syntax.
+       Add fancy access rules-editing.
+       Add fancy document parameters-editing.
+
+(We should take a long hard look at what kinds of general widgets to
+ add to the editengine, and then use that here as well).
+
+</%doc>

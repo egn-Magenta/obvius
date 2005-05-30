@@ -1,0 +1,29 @@
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+# Convert the value to Obvius' own preferred format:
+my $validate_doctype=$obvius->get_doctype_by_id($validation->{validate_by_fieldspec}->{doctypeid});
+my $fspec=$obvius->get_fieldspec($validation->{validate_by_fieldspec}->{name}, $validate_doctype);
+my $value=$m->comp('copy_in', fieldname=>$validation->{validate_by_fieldspec}->{name}, doctype=>$validate_doctype, value=>$data->{$id}, original_value=>$data->{$id}); # XXX I don't know the original value!
+
+# Then validate it:
+my $dummy_type_fields=Obvius::Data->new( $fspec->Name=>$fspec );
+
+# XXX An undef value here means that validate_data thinks the field is
+#     missing, which is wrong. Perhaps this is NOT the correct place
+#     to patch this up.
+$value='' if (!defined $value and !$fspec->Repeatable and !$fspec->Optional);
+
+my $dummy_fields=Obvius::Data->new( $id=>$value );
+
+my %status=$validate_doctype->validate_data($dummy_type_fields, $dummy_fields, $obvius);
+
+return 'not-valid' if (scalar($status{invalid}));
+return 'missing' if (scalar($status{missing}));
+
+return 'OK';
+</%init>

@@ -30,7 +30,7 @@ document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
 document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
 document.write('<option>MMMMMMMMMMMMMMMMMMM</option>');
 document.write('</select>&nbsp;&nbsp;');
-document.write('<input type="button" class="normalknap" name="plus" value=" <& SELF:msg, text=>'Add' &> " onclick="add_selected_categories(this.form.sub<% $name %>, this.form.sel<% $name %>)" tabindex="10">');
+document.write('<input type="button" class="normalknap" name="plus" value=" <& SELF:msg, text=>'Add' &> " onclick="add_selected_categories_<% $name %>(this.form.sub<% $name %>, this.form.sel<% $name %>)" tabindex="10">');
 document.write('<br><br>');
 
 document.write('<br>');
@@ -39,7 +39,7 @@ document.write('<input type="hidden" name="<% $name %>">');
 
 % # add_help('sel<% $name %>');
 document.write('<BR><BR>');
-document.write('<input type="button" class="normalknap" name="minus" value=" <& SELF:msg, text=>'Remove' &> " onclick="remove_selected_categories(this.form.sel<% $name %>)">');
+document.write('<input type="button" class="normalknap" name="minus" value=" <& SELF:msg, text=>'Remove' &> " onclick="remove_selected_categories_<% $name %>(this.form.sel<% $name %>)">');
 document.write('&nbsp;&nbsp;');
 document.write('<input class="normalknap" type="button" value="<& SELF:msg, text=>'Regret' &>" onclick="populate_categories(this.form.sel<% $name %>)">');
 
@@ -134,7 +134,7 @@ function is_already_selected(trove, value) {
     return 0;
 }
 
-function add_selected_categories(menu, trove) {
+function add_selected_categories_<% $name %>(menu, trove) {
     if (menu.selectedIndex >= 0
 	&& !is_already_selected(trove, menu.options[menu.selectedIndex].value)) {
 	var old = menu.options[menu.selectedIndex];
@@ -148,7 +148,7 @@ function add_selected_categories(menu, trove) {
     update_<% $name %>_stored_value();
 }
 
-function remove_selected_categories(trove) {
+function remove_selected_categories_<% $name %>(trove) {
     var done;
 
     do {

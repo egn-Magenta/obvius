@@ -15,7 +15,6 @@ $frontpage_name=>'Forside'
 <%init>
 $obvius->get_version_fields($vdoc);
 my @path=$obvius->get_doc_path($doc);
-pop @path;
 my $sofar="/";
 my @outpath;
 map {
@@ -25,5 +24,6 @@ map {
  $sofar.=$_->Name . "/" unless $_->Id == 1;
  push @outpath, { sofar=>$sofar, title=>$title, long_title=>$vdoc->Title };
 } @path;
-shift @outpath;
+my $frontpage=shift @outpath;
+pop @outpath;
 </%init>

@@ -1,0 +1,47 @@
+<div class="obvius-toolbar">
+  <span class="obvius-search">
+    <input type="text" name="obvius-navigator-q" value="" />
+    <input onclick="javascript:return obvius_navigator_search(this.form['obvius-navigator-q'].value);" type="submit" name="obvius-navigator-search" value="<& /shared/msg, text=>'Search' &>" />
+  </span>
+  <input onclick="javascript:history.back(); return false;" type="submit" name="obvius-navigator-back" value="<& /shared/msg, text=>'Back' &>" />
+  <input onclick="javascript:history.forward(); return false;;" type="submit" name="obvius-navigator-forward" value="<& /shared/msg, text=>'Forward' &>" />
+  <input onclick="javascript:document.location.href='../<& util/args, %ARGS &>'; return false;" <% $uri eq '/' ? 'disabled="disabled" ' : '' %>type="submit" name="obvius-navigator-up" value="<& /shared/msg, text=>'Up' &>" />
+  <input onclick="javascript:return obvius_display_toggle('obvius-toolbar-new');" class="obvius-new" type="button" name="obvius-navigator-new" value="<& /shared/msg, text=>'New' &>" />
+  <div>
+    <div id="obvius-toolbar-new" class="obvius-link-decor">
+      <ul>
+        <li><a href="./<& util/args, %ARGS &>&amp;obvius_quickcreate_image=1"><& /shared/msg, text=>'Image' &> ...</a></li>
+        <li><a href="./<& util/args, %ARGS &>&amp;obvius_quickcreate_upload=1"><& /shared/msg, text=>'Upload-document' &> ...</a></li>
+      </ul>
+    </div>
+  </div>
+% unless ($fieldname) {
+  <fieldset>
+    <select name="obvius_navigator_batch_function">
+%     foreach my $function (@functions) {
+      <option <% $function->{name} eq $selected_function ? 'selected="selected" ' : '' %>value="<% $function->{name} |h %>"><& /shared/msg, text=>$function->{title} &></option>
+%     }
+    </select>
+    <input type="submit" name="obvius_navigator_perform_function_on_selected" value="<& /shared/msg, text=>'Perform' &>" />
+  </fieldset>
+% }
+</div>
+%
+%
+<%once>
+my @functions=(
+               { name=>'',          title=>'Select function', },
+               { name=>'publish',   title=>'Publish', },
+               { name=>'unpublish', title=>'Hide', },
+               { name=>'delete',    title=>'Delete', },
+              );
+</%once>
+%
+<%args>
+$fieldname=>undef
+$obvius_navigator_batch_function=>undef
+</%args>
+%
+<%init>
+my $selected_function=$obvius_navigator_batch_function || '';
+</%init>

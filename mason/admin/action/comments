@@ -1,0 +1,93 @@
+<& /shared/editengine2/init, editscheme=>$comments, relation=>'comments' &>
+%
+%
+%
+<%once>
+
+# Needs to take any relevant Obvius::Access::can_* into account.
+
+my $storage = {
+               organization => {
+                                class=>'DbTable',
+                                source=>'comments',
+                                identifiers=>[qw(docid date)]
+                               },
+               data=>{
+                      docid=> { type => 'integer'  },
+                      date => { type => 'datetime' },
+                      name => { type => 'line'     },
+                      email=> { type => 'email'    },
+                      text => { type => 'text'     },
+                     },
+              };
+
+my $entry={
+           label=>'Edit comment',
+           type=>'scheme/editsheet',
+           display=>[
+                     { name=>'docid', content=>'data', label=>'Docid', style=>{context=>'block',disabled=>'1'} },
+                     { name=>'date',  content=>'data', label=>'Date', style=>{context=>'block',disabled=>'1'} },
+                     { name=>'name',  content=>'data', label=>'Name',  },
+                     { name=>'email', content=>'data', label=>'Email', },
+                     { name=>'text',  content=>'data', label=>'Text',  },
+                    ],
+           storage=>{
+                     %$storage,
+                     functions=>{
+                                 update=> { label=>'Update' },
+                                },
+                    },
+          };
+
+
+my $delete={
+           label=>'Delete comment',
+           type=>'scheme/editsheet',
+           display=> [
+                      { name=>'docid', content=>'data', label=>'Docid', style=>{context=>'block',disabled=>'1'} },
+                      { name=>'date',  content=>'data', label=>'Date',  style=>{context=>'block',disabled=>'1'} },
+                      { name=>'name',  content=>'data', label=>'Name',  style=>{context=>'block',disabled=>'1'} },
+                      { name=>'email', content=>'data', label=>'Email', style=>{context=>'block',disabled=>'1'} },
+                      { name=>'text',  content=>'data', label=>'Text',  style=>{context=>'block',disabled=>'1'} },
+                     ],
+           storage=>{
+                     %$storage,
+                     functions=>{
+                                 remove=> { label=>'Delete' },
+                                },
+                    },
+          };
+
+my $comments={
+              label=>'Comments',
+              type=>'scheme/table',
+              display=> [
+                         { name=>'docid', content=>'data', label=>'Docid', },
+                         { name=>'date',  content=>'data', label=>'Date',  },
+                         { name=>'name',  content=>'data', label=>'Name',  },
+                         { name=>'email', content=>'data', label=>'Email', },
+                         { name=>'text',  content=>'data', label=>'Text',  },
+                        ],
+              storage=>{
+                        %$storage,
+                        functions=>{
+                                    update=>{ label=>'Edit',   relation=>'entry'  },
+                                    remove=>{ label=>'Delete', relation=>'delete' },
+                                   },
+                       },
+              relations=>{
+                          entry=>{
+                                  scheme=>$entry,
+                                  projection=>'pipe',
+                                 },
+                          delete=>{
+                                   scheme=>$delete,
+                                   projection=>'pipe',
+                                  },
+                         },
+             };
+</%once>
+%
+<%init>
+$r->pnotes('obvius_session')->{action}='editengine';
+</%init>

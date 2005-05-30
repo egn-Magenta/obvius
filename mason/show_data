@@ -15,6 +15,10 @@
 <TR><td class="sublevel"><& SELF:msg, text=>'Order of succession' &></TD><TD class="sublevel">: <% $seq %></td></tr>
 %    }
 
+%    if (defined $in_subscription) {
+<TR><td class="sublevel"><& SELF:msg, text=>'Include in subscription' &></TD><TD class="sublevel">: <& SELF:msg, text=>$in_subscription &></td></tr>
+%    }
+
 %    if (my $comments=$obvius->get_comments($doc->Id)) {
 <tr><td class="sublevel"><& SELF:msg, text=>'Comments' &></td><td class="sublevel">: <a href="/admin/admin/comments/?docid=<% $doc->Id %>&mode=form"><% scalar(@$comments) %></a></td></tr>
 %    }
@@ -110,6 +114,9 @@ else {
 my $title  =($public ? $public->Title   : $latest->Title);
 my $expires=($public ? $public->field('expires') : $latest->field('expires'));
 my $seq    =($public ? $public->Seq     : $latest->Seq);
+
+# This should be looked over, I think the above is fishy.
+my $in_subscription=($obvius->get_version_field($vdoc, qw(in_subscription), 'PUBLISH_FIELDS') ? 'Yes' : 'No');
 
 my $delete_version;
 if($obvius->can_delete_single_version($doc)) {

@@ -117,14 +117,14 @@ sub action {
                         "laegemiddel_opt" => 'gk_laegemiddel_opt'
                     );
         my %gk_names = (
-                        "foder" => 'Foder',
-                        "teknisk_anvendelse" => 'Teknisk anvendelse',
-                        "dyrkning" => 'Dyrkning',
+                        "teknisk_anvendelse" => 'Teknisk brug',
+                        "dyrkning" => 'Dyrkning (miljøgodkendelse)',
+                        "dyrkning_opt" => 'Godkendte sorter',
                         "dyrkning_opt" => 'Dyrkning - ikke sortsgodkendt',
                         "foedevare" => 'Fødevarer',
-                        "foedevare_opt" => 'Fødevarer - kun i forarbejdet form',
+                        "foedevare_opt" => 'Fødevarer (forarbejdet)',
                         "laegemiddel" => 'Lægemiddel',
-                        "laegemiddel_opt" => 'Lægemiddel - kun miljøgodkendt'
+                        "laegemiddel_opt" => 'Lægemiddel - kun miljøgodkendt' # Not used any more.
                     );
         # Make sure we have an array
         $godkendt = [ $godkendt ] unless(ref($godkendt));
@@ -160,7 +160,7 @@ sub action {
 
     $output->param('searchedon' => \@searchedon);
 
-    my $docs = $this->fullsearch($obvius, $where, fields => 'distinct id, betegnelse, produktnavn', order => 'gk_organismer.produktnavn, gk_organismer.betegnelse');
+    my $docs = $this->fullsearch($obvius, $where, fields => 'distinct id, betegnelse, unik_kode, produktnavn', order => 'gk_organismer.produktnavn, gk_organismer.betegnelse');
 
     if($docs) {
         my @result;
@@ -168,6 +168,7 @@ sub action {
             my $data;
 
             $data->{betegnelse} = $d->{betegnelse};
+            $data->{unik_kode} = $d->{unik_kode};
             $data->{produkt} = $d->{produktnavn};
             $data->{id} = $d->{id};
 
@@ -257,6 +258,18 @@ sub fullsearch {
 
 }
 
+sub multiple_search_where {
+    my ($fieldname, $value, $title)=@_;
+
+    $value = [ $value ] unless(ref($value));
+
+    my $searchedon .= $title . ': ';
+    my $where = "$fieldname IN ('" . join("', '", @$value) . "')";
+    $searchedon .= "'" . join("', '", @$value) . "'";
+    $searchedon =~ s/, ([^,]+)$/ eller $1/;
+
+    return ($where, $searchedon);
+}
 
 sub adv_search {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
@@ -271,6 +284,7 @@ sub adv_search {
 
     my %stuff = (
                     betegnelse => {},
+                    unik_kode => {},
                     produkt => {},
                     godkendelsesnr => {},
                     godkendelsesdato => {},
@@ -280,6 +294,7 @@ sub adv_search {
 
     for my $s (@$stuff) {
         $stuff{betegnelse}->{ $s->{betegnelse} } = 1;
+        $stuff{unik_kode}->{ $s->{unik_kode} } = 1;
         $stuff{produkt}->{ $s->{produktnavn} } = 1;
         $stuff{godkendelsesnr}->{ $s->{ansoegningsnr} } = 1;
         $stuff{ansoeger}->{ $s->{ansoeger} } = 1;
@@ -306,13 +321,9 @@ sub adv_search {
     my @searchedon;
 
     if(my $produkt = $input->param('produkt')) {
-        $produkt = [ $produkt ] unless(ref($produkt));
-
-        my $searchedon .= 'Produkt: ';
-        $where .= "produktnavn IN ('" . join("', '", @$produkt) . "')";
-        $searchedon .= "'" . join("', '", @$produkt) . "'";
-        $searchedon =~ s/, ([^,]+)$/ eller $1/;
-        push(@searchedon, $searchedon);
+        my ($w, $s)=multiple_search_where('produktnavn', $produkt, 'Produkt');
+        $where.=$w;
+        push @searchedon, $s;
     }
 
     if(my $betegnelse = $input->param('betegnelse')) {
@@ -320,19 +331,27 @@ sub adv_search {
         push(@searchedon, "Betegnelse: $betegnelse");
     }
 
+    if(my $unik_kode = $input->param('unik_kode')) {
+        $where .= " AND unik_kode = '$unik_kode'";
+        push(@searchedon, "Unik kode: $unik_kode");
+    }
+
     if(my $gk_nr = $input->param('gk_nr')) {
-        $where .= " AND ansoegningsnr = '$gk_nr'";
-        push(@searchedon, "Godkendelsesnr: $gk_nr");
+        my ($w, $s)=multiple_search_where('ansoegningsnr', $gk_nr, 'Godkendelsesnr');
+        $where.=" AND $w";
+        push @searchedon, $s;
     }
 
     if(my $ansoeger = $input->param('ansoeger')) {
-        $where .= " AND ansoeger = '$ansoeger'";
-        push(@searchedon, "Ansøger: $ansoeger");
+        my ($w, $s)=multiple_search_where('ansoeger', $ansoeger, 'Ansøger');
+        $where.=" AND $w";
+        push @searchedon, $s;
     }
 
     if(my $land = $input->param('land')) {
-        $where .= " AND ansoegerland = '$land'";
-        push(@searchedon, "Ansøgerland: $land");
+        my ($w, $s)=multiple_search_where('ansoegerland', $land, 'Ansøgerland');
+        $where.=" AND $w";
+        push @searchedon, $s;
     }
 
     if(my $indsigelse = $input->param('indsigelse')) {
@@ -388,15 +407,16 @@ sub adv_search {
                     'laegemiddel',
                     'laegemiddel_opt',
                 );
+    # XXX Why is this duplicated?
     my %gk_names = (
-                    "foder" => 'Foder',
-                    "teknisk" => 'Teknisk anvendelse',
-                    "dyrkning" => 'Dyrkning',
+                    "teknisk" => 'Teknisk brug',
+                    "dyrkning" => 'Dyrkning (miljøgodkendelse)',
+                    "dyrkning_opt" => 'Godkendte sorter',
                     "dyrkning_opt" => 'Dyrkning - ikke sortsgodkendt',
                     "foedevarer" => 'Fødevarer',
-                    "foedevarer_opt" => 'Fødevarer - kun i forarbejdet form',
+                    "foedevarer_opt" => 'Fødevarer (forarbejdet)',
                     "laegemiddel" => 'Lægemiddel',
-                    "laegemiddel_opt" => 'Lægemiddel - kun miljøgodkendt'
+                    "laegemiddel_opt" => 'Lægemiddel - kun miljøgodkendt' # Not used any more
                 );
 
     my $gk_where = '';
@@ -417,7 +437,7 @@ sub adv_search {
     }
 
     # Only get each organisme once
-    $options{fields} = 'distinct id, betegnelse, produktnavn, gk_godkendelser.*';
+    $options{fields} = 'distinct id, betegnelse, unik_kode, produktnavn, gk_godkendelser.*';
     $options{order} = 'produktnavn, betegnelse, id';
 
     $where =~ s/^\s*AND\s*//i;
@@ -436,6 +456,7 @@ sub adv_search {
                 $data = {};
                 $data->{godkendelser} = [];
                 $data->{betegnelse} = $d->{betegnelse};
+                $data->{unik_kode} = $d->{unik_kode};
                 $data->{produkt} = $d->{produktnavn};
                 $data->{id} = $d->{id};
                 $last_id = $d->{id};
@@ -490,6 +511,10 @@ sub admin_action {
                 return OBVIUS_OK;
             }
 
+            if(my $unik_kode = $input->param('unik_kode')) {
+                $data->{unik_kode} = $unik_kode;
+            }
+
             if(my $produktnavn = $input->param('produktnavn')) {
                 $data->{produktnavn} = $produktnavn;
             } else {
@@ -542,6 +567,10 @@ sub admin_action {
             } else {
                 $output->param('error' => 'Du skal angive en betegnelse');
                 return OBVIUS_OK;
+            }
+
+            if(my $unik_kode = $input->param('unik_kode')) {
+                $data->{unik_kode} = $unik_kode;
             }
 
             if(my $produktnavn = $input->param('produktnavn')) {
@@ -710,7 +739,7 @@ sub admin_action {
                     $data->{ansoegningsnr} = $nr;
                 }
             } else {
-                $output->param('error' => 'Du skal angive en betegnelse');
+                $output->param('error' => 'Du skal angive et ansøgningsnummer');
                 return OBVIUS_OK;
             }
 
@@ -772,14 +801,26 @@ sub admin_action {
             $gk = 'Ikke godkendt' unless($gk and $gk =~ /^(Ikke godkendt|Godkendt|Under behandling)$/);
             $data->{'gk_laegemiddel_opt'} = $gk;
 
+            # Sortsgodkendelse
+	    my $sort = $input->param('sortsgodk');
+            $data->{'sortsgodk'} = (defined($sort) ? $sort : 0);
+
+            # Sortsgodkendelse - text
+            $data->{'sortsgodk_text'} = $input->param('sortsgodk_text') || '';
+
+            # Sortsgodkendelse - url
+            my $sortgk_url = $input->param('sortsgodk_url') || '';
+            $sortgk_url =~ s!^www!http://www!;
+            $data->{'sortsgodk_url'} = $sortgk_url;
+
             # Dansk indsigelse
 	    my $dk_ind = $input->param('dk_indsigelse');
             $data->{'dk_indsigelse'} = (defined($dk_ind) ? $dk_ind : 2);
 
-            # Dansk indsigelse - text
+            # Godkendte sorter - text
             $data->{'dk_indsigelse_text'} = $input->param('dk_indsigelse_text') || '';
 
-            # Dansk indsigelse - url
+            # Godkendte sorter - url
             my $dk_url = $input->param('dk_indsigelse_url') || '';
             $dk_url =~ s!^www!http://www!;
             $data->{'dk_indsigelse_url'} = $dk_url;
@@ -794,6 +835,22 @@ sub admin_action {
             my $sort_url = $input->param('gk_sorter_url') || '';
             $sort_url =~ s!^www!http://www!;
             $data->{'gk_sorter_url'} = $sort_url;
+
+            # Videnskabelig udtalelse - text
+            $data->{'udtalelse_text'} = $input->param('udtalelse_text') || '';
+
+            # Videnskabelig udtalelse - url
+            my $udt_url = $input->param('udtalelse_url') || '';
+            $udt_url =~ s!^www!http://www!;
+            $data->{'udtalelse_url'} = $udt_url;
+
+            # Oprindelige ansøgere - text
+            $data->{'opr_ans_text'} = $input->param('opr_ans_text') || '';
+
+            # Oprindelige ansøgere - url
+            my $ans_url = $input->param('opr_ans_url') || '';
+            $ans_url =~ s!^www!http://www!;
+            $data->{'opr_ans_url'} = $ans_url;
 
             unless($this->insert_godkendelse($obvius, $data)) {
                 $output->param('error' => 'Der opstod en databasefejl ved oprettelse af godkendelsen');
@@ -819,7 +876,7 @@ sub admin_action {
             if(my $nr = $input->param('ansoegningsnr')) {
                 $data->{ansoegningsnr} = $nr;
             } else {
-                $output->param('error' => 'Du skal angive en betegnelse');
+                $output->param('error' => 'Du skal angive et ansøgningsnummer');
                 return OBVIUS_OK;
             }
 
@@ -881,13 +938,24 @@ sub admin_action {
             $gk = 'Ikke godkendt' unless($gk and $gk =~ /^(Ikke godkendt|Godkendt|Under behandling)$/);
             $data->{'gk_laegemiddel_opt'} = $gk;
 
+            # Sortsgodkendelse
+            $data->{'sortsgodk'} = $input->param('sortsgodk') || 0;
+
+            # Sortsgodkendelse - text
+            $data->{'sortsgodk_text'} = $input->param('sortsgodk_text') || '';
+
+            # Sortsgodkendelse - url
+            my $sortgk_url = $input->param('sortsgodk_url') || '';
+            $sortgk_url =~ s!^www!http://www!;
+            $data->{'sortsgodk_url'} = $sortgk_url;
+
             # Dansk indsigelse
             $data->{'dk_indsigelse'} = $input->param('dk_indsigelse') || 2;
 
-            # Dansk indsigelse - text
+            # Godkendte sorter - text
             $data->{'dk_indsigelse_text'} = $input->param('dk_indsigelse_text') || '';
 
-            # Dansk indsigelse - url
+            # Godkendte sorter - url
             my $dk_url = $input->param('dk_indsigelse_url') || '';
             $dk_url =~ s!^www!http://www!;
             $data->{'dk_indsigelse_url'} = $dk_url;
@@ -903,6 +971,22 @@ sub admin_action {
             $sort_url =~ s!^www!http://www!;
             $data->{'gk_sorter_url'} = $sort_url;
 
+            # Videnskabelig udtalelse - text
+            $data->{'udtalelse_text'} = $input->param('udtalelse_text') || '';
+
+            # Videnskabelig udtalelse - url
+            my $udt_url = $input->param('udtalelse_url') || '';
+            $udt_url =~ s!^www!http://www!;
+            $data->{'udtalelse_url'} = $udt_url;
+
+            # Oprindelige ansøgere - text
+            $data->{'opr_ans_text'} = $input->param('opr_ans_text') || '';
+
+            # Oprindelige ansøgere - url
+            my $ans_url = $input->param('opr_ans_url') || '';
+            $ans_url =~ s!^www!http://www!;
+            $data->{'opr_ans_url'} = $ans_url;
+
            unless($this->update_godkendelse($obvius, $o, $ansoeg_nr, $data)) {
                 $output->param('error' => 'Der opstod en databasefejl ved redigering af godkendelsen');
                 return OBVIUS_OK;
@@ -916,18 +1000,26 @@ sub admin_action {
                 $output->param('error' => 'Kunne ikke finde den angivne godkendelse');
             }
         }
-    } elsif($input->param('godkendelse_delete')) {
+    } elsif($input->param('godkendelse_delete') or $input->param('godkendelse_archive')) {
+        my $what_to_do=($input->param('godkendelse_delete') ? 'godkendelse_delete' : 'godkendelse_archive');
+
         my $o = $input->param('o');
         return OBVIUS_OK unless($o and $o =~ /^\d+$/);
 
         my $ansoeg_nr = $input->param('g');
         return OBVIUS_OK unless($ansoeg_nr);
 
-        $output->param('mode' => 'godkendelse_delete');
+        $output->param('mode' => $what_to_do);
 
         if($input->param('confirm')) {
-            $this->delete_godkendelser($obvius, { 'organisme' => $o, 'ansoegningsnr' => $ansoeg_nr });
-            $output->param('deleted' => 1);
+            if ($what_to_do eq 'godkendelse_delete') {
+                $this->delete_godkendelser($obvius, { 'organisme' => $o, 'ansoegningsnr' => $ansoeg_nr });
+                $output->param('deleted' => 1);
+            }
+            else {
+                $this->archive_godkendelser($obvius, { 'organisme' => $o, 'ansoegningsnr' => $ansoeg_nr });
+                $output->param('archived' => 1);
+            }
         } else {
             my $godkendelser = $this->get_godkendelser($obvius, {'ansoegningsnr' => $ansoeg_nr, 'organisme' => $o});
             if($godkendelser->[0]) {
@@ -1069,7 +1161,6 @@ sub update_godkendelse {
     my ($this, $obvius, $organisme, $nr, $data) = @_;
 
     $DBIx::Recordset::Debug = 18;
-    print STDERR "organisme: $organisme, nr: $nr, data: $data\n";
 
     my $set=DBIx::Recordset->SetupObject( {
                                             '!DataSource'   => $obvius->{DB},
@@ -1090,6 +1181,20 @@ sub delete_godkendelser {
                                             '!Table'        => 'gk_godkendelser',
                                         } );
     my $retval = $set->Delete($where);
+    $set->Disconnect;
+
+    return $retval;
+}
+
+sub archive_godkendelser {
+    my ($this, $obvius, $where) = @_;
+
+    my $set=DBIx::Recordset->SetupObject( {
+                                            '!DataSource'   => $obvius->{DB},
+                                            '!Table'        => 'gk_godkendelser',
+                                        } );
+
+    my $retval = $set->Update( { archived=>1 }, $where );
     $set->Disconnect;
 
     return $retval;

@@ -25,8 +25,8 @@
 </p>
 
 <p>
-<input class="okknap" type="submit" value="<& SELF:msg, text=>'Delete document' &>">
-<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>">
+<input class="okknap" type="submit" value="<& SELF:msg, text=>'Delete document' &>" accesskey="S">
+<input class="cancelknap" type="button" onclick="javascript:this.form.obvius_page.value='abort'; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
 </p>
 
 % # </form>

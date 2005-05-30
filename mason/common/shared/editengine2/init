@@ -1,0 +1,116 @@
+<& frame, history=>$history &>
+%#<div class="obvius-editengine obvius-link-decor">
+%#<& main, history=>$history &>
+%#</div>
+<%args>
+ # Editscheme desctiption
+ $editscheme        # ref HASH
+ $relation => undef # SCALAR
+
+ # Initial object and function selections
+ $object   => undef # ref HASH
+ $function => undef # SCALAR
+
+ # Flow description
+ $edges    => undef # ref HASH
+ $actions  => undef # ref HASH
+
+ # Options controlling debug and log
+ $trace_recursion  => undef # BOOL
+ $validate_schemes => undef # BOOL
+ $log_data         => undef # BOOL
+</%args>
+<%init>
+
+ use Data::Dumper;
+ #print STDERR "<init>\n";
+
+ my $session = $r->pnotes('obvius_session') or die ("<init> 'obvius_session' undefined on pnotes\n");
+
+ # Trace scheme recursion and history?
+ $session->{cesi_debug_recursion} = $trace_recursion ? '1' : '0';
+
+ # Validate editscheme description before accessing from <main>?
+ $session->{cesi_validate} = $validate_schemes ? '1' : '0';
+
+ # Log incoming data along with failure on validation
+ $session->{cesi_log_data} = $log_data ? '1' : '0';
+
+ # A relation name ($relation) is required as the $editscheme is
+ # loaded onto the $session object using this name:
+ # $session->{editscheme}->{$relation}
+ unless (defined $relation and $relation ne '') {
+     print STDERR "  relation name undefined or empty; defaulting to 'root'\n";
+     $relation='root';
+ }
+ elsif (ref $relation) {
+     print STDERR '$relation: ' . Dumper($relation);
+     die '<init> $relation is not a SCALAR; cf. the error_log';
+ }
+
+ # Check for initial function
+ unless (defined $function and $function ne '') {
+     print STDERR "  function selection undefined or empty; defaulting to ''\n";
+     $function='';
+ }
+ elsif (ref $function) {
+     print STDERR '$function: ' . Dumper($function);
+     die '<init> $function is not a SCALAR; cf. the error_log';
+ }
+ elsif (not defined $object) {
+     print STDERR "  function request without object specification; missing object?\n";
+ }
+
+ # Check for initial object
+ unless (defined $object) {
+     print STDERR "  object specification undefined; defaulting to '{}'\n";
+     $object={};
+ }
+ elsif (ref $object ne 'HASH') {
+     print STDERR '$object: ' . Dumper($object);
+     die '<init> $object is not a HASH; cf. the error_log';
+ }
+
+ # Pass current version on the $session object
+ $session->{obvius_version}=$vdoc->Version;
+
+ # Save the scheme on the $session object
+ # Note that this overwrites existing schemes!
+ # Warn about overwritings!
+ print STDERR "  overwriting existing scheme!\n" if exists $session->{editscheme}->{$relation};
+ $session->{editscheme}->{$relation} = $editscheme;
+
+ # Handle initial object and function selections
+ my $history = $m->comp('history:create_new_event', relation=>$relation, object=>$object, function=>$function);
+
+
+ # Check for actions
+ unless (defined $actions) {
+     print STDERR "  no actions defined; defaulting to {}\n";
+     $actions={};
+ }
+ elsif (ref $actions ne 'HASH') {
+     print STDERR '$actions: ' . Dumper($actions);
+     die '<init> $actions is not a HASH; cf. the error_log';
+ }
+ elsif (not defined $edges) {
+     print STDERR "  action request without edge specification; missing edges?\n";
+ }
+
+ # Check for edges
+ unless (defined $edges) {
+     print STDERR "  edges undefined; defaulting to '{}'\n";
+     $edges={};
+ }
+ elsif (ref $edges ne 'HASH') {
+     print STDERR '$edges: ' . Dumper($edges);
+     die '<init> $edges is not a HASH; cf. the error_log';
+ }
+
+ # Initialize flow
+ $m->comp('flow:initialize', edges=>$edges, actions=>$actions, session=>$session);
+
+
+ print STDERR "<init>\t\t\thistory = '$history'\n" if $session->{cesi_debug_recursion};
+
+</%init>

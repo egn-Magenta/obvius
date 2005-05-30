@@ -36,7 +36,18 @@ foreach my $fieldlist (@fieldlists) {
 			       %ARGS,
 			       fieldspec=>$fieldspec, fieldtype=>$fieldtype, name=>$name,
 			       session=>$session, value=>$ARGS{$name}, fields=>$fields);
-	    $fields->param($name=>$value);
+            # Only set the field, if it doesn't exist; i.e. hasn't
+            # been set before (this means that if for instance
+            # edit/fieldtypes/uploaddata sets fields->param(mimetype)
+            # before the incoming mimetype-field is processed,
+            # edit/fieldtypes/line won't "accidentally" clobber the
+            # value with ''):
+            if ($fields->exists($name) and $value eq '') {
+                warn " FIELDS->PARAM $name ALREADY EXIST - NOT SETTING IT TO [$value]!\n";
+            }
+            else {
+                $fields->param($name=>$value);
+            }
 	}
 	else {
 	    warn "Field $name has NO INCOMING VALUE\n";

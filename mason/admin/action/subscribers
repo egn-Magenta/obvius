@@ -1,0 +1,302 @@
+<& /shared/editengine2/init, editscheme=>$subscribers, relation=>'subscribers', edges=>$edges, &>
+<%once>
+
+# Needs to take any relevant Obvius::Access::can_* into account.
+
+my $documents = {
+                 type => 'scheme/search',
+                 label => 'Versions',
+                 display => [
+                             {name=>'short_title', content=>'data' },
+                            ],
+                 storage => {
+                             organization => {
+                                              class   => 'Version',
+                                              fields  => ['subscribeable'],
+                                              where   => "subscribeable != '' and subscribeable != 'none'",
+                                              options => { notexpired=>'1', public=>'1' },
+#                                              identifiers => [qw(docid version)],
+                                             },
+                             data => {
+                                      docid        => { type => 'integer' },
+                                      version      => { type => 'date'    },
+                                      short_title  => { type => 'line'    },
+                                     },
+                            },
+                };
+
+my $subscriptions = {
+                     type => 'scheme/table',
+                     display => [],
+                     storage => {
+                                 organization => {
+                                                  class => 'DbTable',
+                                                  source=> 'subscriptions',
+                                                  identifiers=>[qw(docid subscriber)],
+                                                 },
+                                 data => {
+                                          docid      => { type => 'integer' },
+                                          subscriber => { type => 'integer' },
+                                         },
+                               },
+                    };
+
+
+my $document_subscriptions = {
+                              type => 'template/subset',
+                              arguments => {
+                                            set => 'set',
+                                            subset => 'checks',
+                                            subset_mappings => {
+                                                                docid => 'docid',
+                                                               },
+                                            add_function => 'create',
+                                            subtract_function => 'remove',
+                                           },
+                              storage => {
+                                          organization => {
+                                                           class => 'Template',
+                                                           identifiers => [qw(uid)],
+                                                          },
+                                          functions => {
+                                                        execute => {},
+                                                       },
+                                          data => {
+                                                   uid => { type => 'integer' },
+                                                  },
+                                         },
+                              relations => {
+                                            set => {
+                                                    scheme => $documents,
+                                                    projection => 'filter',
+                                                    mappings => {},
+                                                   },
+                                            checks => {
+                                                       scheme => $subscriptions,
+                                                       projection => 'pipe',
+                                                       mappings => {uid => 'subscriber'},
+                                                      },
+                                           },
+                             };
+
+
+
+my $subscriber_storage = {
+                          organization => {
+                                           class       => 'DbTable',
+                                           source      =>'subscribers',
+                                           identifiers =>[qw(id)],
+                                           reuse       => [qw(passwd)]
+                                          },
+                          data => {
+                                   id        => { type => 'integer'  },
+                                   name      => { type => 'line'     },
+                                   company   => { type => 'line'     },
+                                   passwd    => { type => 'password' },
+                                   suspended => { type => 'radio',   },
+                                   email     => { type => 'email'    },
+                                   cookie    => { type => 'line'     },
+                                   wantshtml => { type => 'radio'    },
+                                  },
+                         };
+
+my $edit_display = [
+                    {name=>'name',      content=>'data',   label=>'Name'                                                       },
+                    {name=>'company',   content=>'data',   label=>'Company'                                                    },
+                    {name=>'passwd',    content=>'data',   label=>'Password'                                                   },
+                    {name=>'email',     content=>'data',   label=>'E-mail'                                                     },
+#                    {name=>'cookie',    content=>'data',   label=>'Cookie'                                                     },
+                    {name=>'wantshtml', content=>'data',   label=>'Wants HTML', options=>{ label_0 => 'No', label_1 => 'Yes' }, edit_args=>'0|1' },
+                    {name=>'suspended', content=>'data',   label=>'Suspended',  options=>{ label_0 => 'No', label_1 => 'Yes' }, edit_args=>'0|1' },
+                   ];
+
+my $new_subscriber = {
+                      type => 'scheme/editsheet',
+                      label => 'Subscriber',
+                      display => $edit_display,
+                      storage => {
+                                  %$subscriber_storage,
+                                  functions => {
+                                                create => {},
+                                               },
+                                 },
+                     };
+
+my $update_subscriber = {
+                         type => 'scheme/editsheet',
+                         label => 'Subscriber',
+                         display => $edit_display,
+                         storage => {
+                                     %$subscriber_storage,
+                                     functions => {
+                                                   update => {},
+                                                  },
+                                    },
+                        };
+
+my $delete_subscriber = {
+                         type => 'scheme/editsheet',
+                         label => 'Subscriber',
+                         display => [
+                                     {name =>'name',     content=>'data',   label=>'Name',    style=>{context=>'block',disabled=>'1'} },
+                                     {name=>'company',   content=>'data',   label=>'Company', style=>{context=>'block',disabled=>'1'} },
+                                     {name=>'email',     content=>'data',   label=>'E-mail',  style=>{context=>'block',disabled=>'1'} },
+                                    ],
+                         storage => {
+                                     %$subscriber_storage,
+                                     functions => {
+                                                   remove => {label=>'Delete'},
+                                                  },
+                                    },
+                        };
+
+
+my $input_storage = {
+                     organization => {
+                                      class => 'Template',
+                                      identifiers=>[qw(uid)]
+                                     },
+                     data => {
+                              uid => { type => 'integer' },
+                             },
+                    };
+
+
+my $input_form = {
+              type => 'template/composite',
+              display => [
+                          {name=>'subscriber',    content=>'scheme', style=>{context=>'block',open=>'1'} },
+                          {name=>'subscriptions', content=>'scheme', style=>{context=>'block',open=>'1'}, label=>'Subscriptions', },
+                         ],
+             };
+
+
+my $subscriptions_relation = {
+                              scheme => $document_subscriptions,
+                              projection => 'pipe',
+                             };
+
+
+my $new = {
+           %$input_form,
+           storage => {
+                       %$input_storage,
+                       functions => {
+                                     execute => {label=>'Create new'},
+                                    },
+                      },
+
+           relations => {
+                         subscriptions => $subscriptions_relation,
+                         subscriber => {
+                                        scheme => $new_subscriber,
+                                        projection => 'pipe',
+                                        mappings => {
+                                                     uid => 'id',
+                                                    },
+                                       },
+                          },
+          };
+
+my $update = {
+              %$input_form,
+              storage => {
+                          %$input_storage,
+                          functions => {
+                                        execute => {label=>'Update'},
+                                       },
+                         },
+              relations => {
+                            subscriptions => $subscriptions_relation,
+                            subscriber => {
+                                           scheme => $update_subscriber,
+                                           projection => 'pipe',
+                                           mappings => {
+                                                        uid => 'id',
+                                                       },
+                                          },
+                           },
+             };
+
+
+my $subscribers = {
+                   type => 'scheme/table',
+                   label => 'Subscribers',
+                   arguments => {
+                                 max => '20',
+                                },
+                   display => [
+                               {name=>'name',      content=>'data',   label=>'Name'                                    },
+                               {name=>'email',     content=>'data',   label=>'E-mail'                                  },
+#                               {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_1 => 'Yes'} },
+                               {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_0=>'No', label_1 => 'Yes'} },
+                              ],
+                   storage => {
+                               %$subscriber_storage,
+                               functions => {
+                                             create => {
+                                                        label     => 'Create new',
+                                                        relation  => 'new_subscriber',
+                                                        anonymous => '1',
+                                                       },
+                                             update => {
+                                                        label    => 'Edit',
+                                                        relation => 'update_subscriber',
+                                                       },
+                                             remove => {
+                                                        label    => 'Delete',
+                                                        relation => 'delete_subscriber',
+                                                       },
+                                            },
+                              },
+                   relations => {
+                                 new_subscriber => {
+                                                    scheme => $new,
+                                                    projection => 'pipe',
+                                                    mappings => {
+                                                                 id => 'uid',
+                                                                },
+                                                   },
+                                 update_subscriber => {
+                                                       scheme => $update,
+                                                       projection => 'pipe',
+                                                       mappings => {
+                                                                    id => 'uid',
+                                                                   },
+                                                      },
+                                 delete_subscriber => {
+                                                       scheme => $delete_subscriber,
+                                                       projection => 'pipe',
+#                                                        mappings => {
+#                                                                     id => 'uid',
+#                                                                    },
+                                                      },
+                                },
+                  };
+
+
+
+
+my $edges = {
+             'subscribers:new_subscriber:subscriber[create]store' => {
+                                                                      'subscribers:new_subscriber:subscriptions[execute]store' => {
+                                                                                                                                   merge     => 'insert',
+                                                                                                                                   obj_maps  => {id=>'uid'},
+                                                                                                                                   data_maps => {id=>'subscriber'},
+                                                                                                                                  },
+                                                                     },
+            };
+
+</%once>
+%
+<%init>
+$r->pnotes('obvius_session')->{action}='editengine';
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>

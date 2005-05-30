@@ -10,7 +10,7 @@ $prefix=>''
 print STDERR ">>> /new/loginuser\n";
 
 my @novals;
-@novals = qw(email kontakt address tlf cvr niveau ansatte diverse branche indbetaling) if ($prefix eq 'etik');
+@novals = qw(email kontakt address tlf cvr niveau ansatte diverse branche indbetaling lang) if ($prefix eq 'etik');
 
 my $session;
 

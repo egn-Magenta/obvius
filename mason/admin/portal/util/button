@@ -1,0 +1,45 @@
+<input <% defined $class ? "class=\"$class \" " : '' %><% $inactive ? 'disabled="disabled" ' : '' %>type="submit" name="<% $name |h %>" value="<% $show_text %>"\
+% if ($accesskey) {
+%        $show_text=~s!($accesskey)!<span class="obvius-accesskey">$1</span>!i;
+ title="Alt-<% uc($accesskey) %>" accesskey="<% $accesskey %>"\
+% }
+ />\
+%
+%
+<%args>
+$name
+$text
+$inactive=>0
+$accesskey=>undef
+$class=>undef
+</%args>
+%
+<%init>
+my $show_text=$m->scomp('/shared/msg', text=>$text);
+
+if ($inactive) {
+    $class='' if (!defined $class);
+    $class.=' obvius-disabled';
+}
+</%init>
+%
+%
+<%doc>
+
+Unfortunately, Microsoft Internet Explorer does not implement buttons
+of type "submit" correctly (the ones not pressed are active), so we
+can't use button-elements to mark the accesskeys:
+
+ <button <% defined $class ? "class=\"$class \" " : '' %><% $inactive ? 'disabled="disabled" ' : '' %>type="submit" name="<% $name |h %>" value="<% $show_text %>"\
+ % if ($accesskey) {
+ %        $show_text=~s!($accesskey)!<span class="obvius-accesskey">$1</span>!i;
+  title="Alt-<% uc($accesskey) %>" accesskey="<% $accesskey %>"\
+ % }
+ ><% $show_text %></button>\
+
+I've put a test here:
+ <http://www.koldfront.dk/misc/browsers/button.html>
+
+Sigh.
+
+</%doc>

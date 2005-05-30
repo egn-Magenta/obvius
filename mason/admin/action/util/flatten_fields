@@ -1,0 +1,25 @@
+<%args>
+$fields
+</%args>
+%
+<%init>
+my $edit_fields=Obvius::Data->new();
+foreach my $fieldname ($fields->param()) {
+    my $fspec=$obvius->get_fieldspec($fieldname, $doctype);
+    my $ftype=$fspec->Fieldtype;
+
+    my $values=$fields->param($fieldname);
+    $values=[ $values ] unless (ref $values eq 'ARRAY');
+
+    my $flat_values=[];
+    foreach my $value (@$values) {
+        push @$flat_values, $ftype->copy_out($obvius, $fspec, $value);
+    }
+
+    # Not repeatable? Singletonify:
+    $flat_values=join ", ", @$flat_values unless ($fspec->Repeatable);
+    $edit_fields->param($fieldname=>$flat_values);
+}
+
+return $edit_fields;
+</%init>

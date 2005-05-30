@@ -47,7 +47,7 @@ sub action {
                     'category',
                     'docdate',
                     'title',
-                    'primary_group'
+                    'primary_group',
                 ];
 
     my $infopaq_doctype = $obvius->get_doctype_by_name('InfopaqNyhed');
@@ -81,6 +81,8 @@ sub action {
     }
 
     $output->param(otherdocs => \@docs) if(scalar(@docs));
+
+    $output->param('primary_group' => $primary_group);
 
     $output->param('override_last_changed' => $last_changed);
 

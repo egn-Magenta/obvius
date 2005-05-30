@@ -1,7 +1,13 @@
 <& headline &>
 <& teaser &>
 <& content &>
-
+%
+% if (my $error_message=$output->param('error_message')) {
+<p style="color: red">
+  <% $error_message |h %>
+</p>
+% }
+%
 % if ($kwdocs) {
 
 <table border="0" class="content">

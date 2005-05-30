@@ -1,0 +1,76 @@
+<%method block>\
+%
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<textarea <% $disabled ? 'disabled="disabled" ' : '' %>cols="<% $cols |h %>" rows="<% $rows |h %>" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>"><% $value->{value} |h %></textarea>
+%
+<%args>
+$prefix
+$field
+$value
+$validation
+$style
+$cols=>50
+$rows=>10
+</%args>
+%
+<%init>
+my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
+
+# If rows/cols have been specified, heed them:
+if (exists $field->{options} and exists $field->{options}->{rows}) {
+    $rows=$field->{options}->{rows};
+}
+if (exists $field->{options} and exists $field->{options}->{cols}) {
+    $cols=$field->{options}->{cols};
+}
+
+# If an editor is wanted, call it instead:
+if (exists $validation->{editor}) {
+    return $m->comp('editors/' . $validation->{editor} . ':block', %ARGS, rows=>$rows, cols=>$cols) if ($m->comp_exists('editors/' . $validation->{editor} ));
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Editor not found', ': ', $validation->{editor}]);
+}
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+%
+<& /shared/contract, len=>20, text=>$value->{value}, escape=>'h' &>\
+%
+<%args>
+$prefix
+$field
+$validation
+$value=>''
+</%args>
+</%method>
+%
+%
+%
+% # XXX Validate
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+# If an editor is wanted, call it instead:
+if (exists $validation->{editor}) {
+    return $m->comp('editors/' . $validation->{editor}, %ARGS) if ($m->comp_exists('editors/' . $validation->{editor} ));
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Editor not found', ': ', $validation->{editor}]);
+}
+
+return 'OK';
+</%init>
+%
+%
+%
+<%doc>
+
+Do notice that 'text' in this case means 'XHTML-snippet'!
+
+</%doc>

@@ -15,7 +15,15 @@ if ( (ref $doctype) =~ /::([^:]+)$/ ) {
 $obvius->get_version_fields($vdoc, [qw(title show_subdocs)]);
 my $title = $vdoc->Title;
 
-my $content=$m->scomp("/doctypes/$doctypename", output=>$output);
+my $content=undef;
+$content=$m->scomp("/doctypes/$doctypename", output=>$output) if ($m->comp_exists("/doctypes/$doctypename"));
 
-my $show_subdocs=$vdoc->Show_subdocs || 0;
+unless (defined $content) {
+    $m->comp('/shared/set_status_message',
+             status=>'WARNING',
+             message=>[ 'Component not found for document type', ' "', $doctypename, '"' ]);
+    $content=''
+}
+
+my $show_subdocs=$vdoc->field('show_subdocs') || 0;
 </%init>

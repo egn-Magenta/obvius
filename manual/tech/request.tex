@@ -1,0 +1,244 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphicx}
+
+\usepackage{array}
+
+\usepackage{fancyheadings}
+\pagestyle{fancy}
+\lhead{}
+\rhead{}
+\lfoot{{\tiny \today}}
+\rfoot{{\tiny asjo@magenta-aps.dk}}
+\setlength{\headrulewidth}{0pt}
+
+%\linespread{1.1}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\newcommand{\obvius}{\textsc{Obvius}}
+\newcommand{\modperl}{\texttt{mod\_perl}}
+\newcommand{\modrewrite}{\texttt{mod\_rewrite}}
+\newcommand{\modproxy}{\texttt{mod\_proxy}}
+\newcommand{\notfound}{\texttt{NOT\_FOUND}}
+\newcommand{\forbidden}{\texttt{FORBIDDEN}}
+
+\newenvironment{quirk}{\begin{quote}\emph{Quirk:}}{\end{quote}}
+
+\title{\obvius\\{\Large The journey of a request}}
+\date{}
+\author{}
+
+\begin{document}
+
+\maketitle 
+
+\begin{abstract}
+  This document describes the typical flow of a request through the
+  \obvius\ Content Management system.
+\end{abstract}
+
+\pagebreak
+\tableofcontents
+\pagebreak
+
+
+\section{Introduction}
+
+The \obvius\ content management system is based primarily on the
+webserver Apache\footnote{http://httpd.apache.org/} with the {\modperl}
+module\footnote{http://perl.apache.org/} for perl-integration,
+Mason\footnote{http://masonhq.com/} as a template-system -- and for
+implementing the administration system -- and
+MySQL\footnote{http://mysql.com/ -- Please note
+  that due to the use of the perl DBI abstraction layer and
+  DBIx::RecordSet, using another database consists primarily of
+  converting the schema.} for storage.
+
+This document describes the transfer of control through \obvius\ during
+a request, hopefully making it easier to pinpoint where to look when
+developing with \obvius, and when debugging.
+
+
+\section{Apache}
+
+\subsection{A browser makes a request}
+
+When a browser makes a request, Apache locates a non-occupied
+child-process and passes the request on to that.
+
+The child-Apache looks at the supplied \texttt{Host:}-header and
+decides what virtual host to serve the request from.
+
+Each website is included in the Apache-configuration by its
+\texttt{conf/site.conf}-file.
+
+\subsubsection{site.conf}
+
+An Apache-configuration file that defines the \texttt{ServerName} and
+any \texttt{ServerAliases}, ``runs'' the perl-file \texttt{setup.pl}
+(once, on start) and includes the Apache-configurationfile
+\texttt{setup.conf}.
+
+\subsubsection{setup.conf / cache}
+
+\texttt{setup.conf} contains mainly the required
+\modrewrite-directives to serve static files, serve files from the
+cache and invoke the correct perl-methods according to what part of
+the website the request is destined for (admin or public).
+
+It also contains the boring details of log-files, expires-information
+for static-files and so on.
+
+\subsubsection{setup.pl}
+
+This perl startup-file reads the configuration-file located in
+\texttt{/etc/obvius/example.conf} and creates the three
+website-specific objects that each \obvius\ website uses:
+
+\begin{description}
+\item[\texttt{Example::Site::Public}] --- used for handling the public website.
+\item[\texttt{Example::Site::Admin}]  --- used for handling the administration interface.
+\item[\texttt{Example::Site::Common}] --- used by both for generating the common
+  content.
+\end{description}
+
+
+\section{Perl}
+
+If the request isn't for a static file or can be served from the
+cache, the request is handled by either the \texttt{/public-}, or the
+\texttt{/admin} \texttt{Location}-block in \texttt{setup.conf}.
+
+Using the {\modperl} directives \texttt{PerlAccessHandler},
+\texttt{PerlAuthenHandler}, \texttt{PerlAuthzHandler} and
+\texttt{PerlHandler}, control is passed to the appropriate methods on
+one of the websites two site-objects, \texttt{Example::Site::Public}
+or \texttt{Example::Site::Admin}.
+
+
+\subsection{Handlers}
+
+Usually\footnote{That is, on all websites.} the websites objects
+inherit from the global \texttt{WebObvius::Site::Mason} class.
+
+\subsubsection{authen\_handler (admin)}
+
+Checks whether the user is logged in, and if not uses http basic
+authentification to allow the user to do so.
+
+Whether the username/password is correct is checked by calling the
+\texttt{obvius\_connect}-method on the site object.
+
+% \subsubsection{authz\_handler (admin)}
+% Isn't used, just calls the access_handler... don't ask me why (I
+% don't know).
+
+\subsubsection{access\_handler (admin and public)}
+
+This is where missing trailing slashes are added (by way of
+redirection).
+
+\begin{quirk}
+  If the URI ends in \texttt{.html/}, the trailing slash is \emph{removed!}
+\end{quirk}
+
+% Too detailed?
+%   The \obvius\ object is obtained by calling the
+%   \texttt{obvius\_connect} method on the siteobject.
+
+The document is looked up
+% Too much detail?
+%   using the \texttt{obvius\_document} method on the site-object
+and a {\notfound} message is returned to Apache if the
+lookup fails.
+
+% Too detailed?
+%   If the document is found it is stored on \texttt{pnotes} along with
+%   the site object, for further access.
+
+\subsubsection{handler (admin and public)}
+
+This is the main attraction, where a page or some data are generated
+and returned to the browser.
+
+\textbf{public}
+
+If the document isn't public, {\notfound} is returned.
+
+If the document is expired, {\forbidden} is returned.
+
+If the document-type-object's \texttt{alternate\_location}-method
+returns something, the browser is immediately redirected to that
+something.
+
+If the document-type-object's \texttt{raw\_document\_data}-method
+returns something, then \obvius\ sets the appropriate headers, cache
+the raw data, if possible, and returns the raw data directly to the
+browser.
+
+(This part isn't executed for admin, because in admin we need to be
+able to edit documents that redirect or return raw data -- so these
+special cases are handled in the admin-Mason application instead).
+
+\textbf{both}
+
+Mason is executed.
+
+If everything went okay, various headers are added, the page is added
+to the cache, if possible (it never is in admin), and the HTML is then
+returned to the browser.
+
+
+\section{Mason}
+
+\emph{input- and output-objects, overall doctype/template-concept}
+
+\subsection{switch}
+
+\subsubsection{subsite}
+
+
+\section{Cache}
+
+
+\section{Headers}
+
+
+\pagebreak
+\appendix
+\section{Proxying}
+
+In anything but the most basic, low-traffic setup, it is highly
+recommended to follow the recommendations of the \modperl-developers,
+and set up a large number of tiny Apache-processes to handle the
+simple tasks and proxy more complicated tasks through to a much lower
+number of large \modperl-equipped
+Apache-processes\footnote{http://perl.apache.org/docs/1.0/guide/strategy.html
+  -- especially the section ``Adding a Proxy Server in http Accelerator Mode''.}
+
+Fortunately this is relatively easy with \obvius. In the
+\texttt{conf/}-dir of each website is a configuration-file called
+\texttt{front.conf} that the tiny Apache-setup uses for configuring
+the proxying.
+
+The tiny Apache's listen on port 80 and the large Apache's are then
+configured to listen on port 81.
+
+The tiny Apache's will handle static files found in the
+\texttt{docs/}-dir and pages present in the cache -- thus typically
+serving more than two thirds of the total number of hits on a website.
+If the request can't be handled by the tiny Apache (the page is not in
+the cache, or can't be cached), {\modproxy} passes the request to one
+of the large processes, which then handles the request.
+
+By default logging is doubled -- the tiny as well as the large
+Apache's log requests. The large Apache's logfiles are not that
+interesting, because they register the IP-address of the tiny
+Apache's; always the same. Statistics should be generated from the
+tiny Apache's logs (\texttt{front\_custom.log}).
+
+
+\end{document}

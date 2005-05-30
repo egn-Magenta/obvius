@@ -1,0 +1,57 @@
+<%method block>\
+%
+<& ../util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<textarea <% $disabled ? 'disabled="disabled" ' : '' %>cols="<% $cols |h %>" rows="<% $rows |h %>" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>"><% $value->{value} |h %></textarea><br />
+<& /shared/msg, text=>'or, upload text-file' &>: <input type="file" name="<% $prefix . $field->{name} . '_upload' |h %>" size="40" />
+<%args>
+$prefix
+$field
+$value
+$validation
+$disabled=>0
+$cols
+$rows
+</%args>
+%
+%
+</%method>
+%
+%
+%
+<%method inline>\
+%
+<& ../text:inline, %ARGS &>
+%
+</%args>
+%
+</%method>
+%
+%
+%
+% # Validation:
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+# Use uploaded file, if there is one:
+my @uploads=$r->upload;
+my $match=':' . $id . "_upload\$";
+foreach my $upload (@uploads) {
+    my $name=$upload->name;
+    next unless ($name=~/$match/o); # XXX This is editengine-naming dependent, since I do not get prefix here...
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
+	local $/ = undef;
+	my $value=<$fh>;
+        $data->{$id}=$value;
+    }
+}
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('../util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK';
+</%init>

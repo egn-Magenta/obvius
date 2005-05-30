@@ -1,0 +1,56 @@
+<%method block>
+%
+<%args>
+$prefix
+$field
+$value
+$validation
+</%args>
+%
+% my $type=$validation->{type};
+% # XXX This should be a class, but it's just while testin':
+<span style="color: #f9715e; background: #efeeda;"><& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &></span>
+<& .output_error_and_value, type=>$type, value=>$value &>
+%
+</%method>
+%
+%
+<%method inline>
+%
+<%args>
+$value
+$validation
+</%args>
+% my $type=$validation->{type};
+%
+<& .output_error_and_value, value=>$value, type=>$type &>
+%
+</%method>
+%
+%
+<%def .output_error_and_value>
+%
+<%args>
+$value
+$type
+</%args>
+%
+% # XXX ditto:
+&nbsp;<em><& /shared/msg, text=>'Component missing for type' &>:</em> <% $type |h %>, <em><& /shared/msg, text=>'value' &>:</em> <% $value->{value} %>
+%
+</%def>
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+my $type=$validation->{type};
+warn 'Component missing for type ' . $type . ' returning undef for ' . $value;
+return;
+</%init>

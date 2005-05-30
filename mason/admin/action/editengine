@@ -1,0 +1,25 @@
+<& /shared/editengine2/frame, %ARGS &>
+%#<div class="obvius-editengine obvius-link-decor">
+%#<& /shared/editengine2/main, %ARGS &>
+%#</div>
+<%init>
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+# XXX Editing should be inactive *unless* we are editing a version:
+#$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+
+if (not defined $ARGS{history}) {
+ my @confirmation = grep {/^obvius_editengine_protocol_confirmation:/} keys %ARGS;
+ #use Data::Dumper; print STDERR '@confirmation: ' . Dumper(@confirmation);
+ unless (scalar(@confirmation)) {
+   my $session=$r->pnotes('obvius_session') or die ("obvius_command_editengine: Undefined obvius_session\n");
+   $session->{action} = $session->{old_action};
+   $m->comp('/shared/redirect/', location=>"./?obvius_session_id=$session->{_session_id}");
+   return;
+ }
+}
+</%init>

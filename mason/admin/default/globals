@@ -1,0 +1,5 @@
+<%init>
+$prefix=$r->notes('prefix');
+$uri=$r->notes('uri');
+$obvius=$r->pnotes('obvius');
+</%init>

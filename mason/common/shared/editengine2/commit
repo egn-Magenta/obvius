@@ -1,0 +1,72 @@
+<%method scheme>
+<%doc>
+ Used for marking schemes committing own data
+</%doc>
+<input type='hidden' name='<% "$history" %>' />
+<%args>
+ $history
+</%args>
+<%init>
+ $history = "editengine_scheme:$history";
+</%init>
+</%method>
+%
+%#----------------------------------------------------------------------------------
+%
+<%method object>
+<input type='<% $type %>' name='<% $history . $object %>' <% $tag_value ? "$tag='$tag_value'" : '' %> />\
+<%args>
+ $history
+
+# Options
+ $type => 'hidden'
+ $tag => ''
+ $tag_value => ''
+</%args>
+<%init>
+ my $object = $m->comp('toolbox:escape_object');
+ $history .= "editengine_object:";
+</%init>
+</%method>
+%
+%#----------------------------------------------------------------------------------
+%
+<%method execute>\
+<%doc>
+Commission of the function on the protocol:
+
+  » Add hidden input-form with name obvius_editengine_protocol_function and
+    value 'function name'='editscheme path'
+
+  » Add submit input-form with name obvius_editengine_protocol_confirmation
+    and value 'function name'
+
+This should allow multiple commissions through multiple calls to
+select:execute with different functions on the protocol
+
+</%doc>
+<input type='hidden' name='obvius_editengine_protocol_function' value='<% "$function_name=$history" %>' />
+<input type='submit' name='obvius_editengine_protocol_confirmation:<% "$function_name" %>' value='<& /shared/msg, text=>$function_label &>' class="obvius-command-do" />
+<%args>
+ $editscheme
+ $history=>''
+</%args>
+<%init>
+my $function = $r->pnotes('obvius_editengine_protocol')->{function};
+my ($function_name) = keys %$function;
+my $function_reference = $function->{$function_name};
+
+my $function_label = $m->scomp('/shared/msg', text=>$editscheme->{storage}->{functions}->{$function_name}->{label});
+
+</%init>
+</%method>
+%
+%#----------------------------------------------------------------------------------
+%
+<%method cancel>
+<input type='hidden' name='obvius_editengine_protocol_function' value='<% "CANCEL=$history" %>' />
+<input type='submit' name='obvius_editengine_protocol_confirmation:CANCEL' value='<& '/shared/msg', text=>'Cancel' &>' class="obvius-command-cancel"/>
+<%args>
+ $history
+</%args>
+</%method>

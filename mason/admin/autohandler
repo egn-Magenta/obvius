@@ -1,0 +1,15 @@
+<% $m->call_next %>\
+%
+<%init>
+# Set up stuff for any admin-page:
+$m->comp('default/globals', %ARGS);
+
+# Only get the session if there is a session id in args (we don't want
+# to create a new one here):
+$m->comp('default/setup_session', %ARGS) if (defined $ARGS{obvius_session_id});
+# The session is fetched here, so the default/vdoc-component called below can
+# check it.
+
+$m->comp('default/doc', %ARGS);
+$m->comp('default/vdoc', %ARGS);
+</%init>

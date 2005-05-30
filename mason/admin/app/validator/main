@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="/style/validation.xsl"?>
+<validation>
+  <status><% $status |h %></status>
+% if (defined $validator_error_count) {
+  <errorcount><% $validator_error_count |h %></errorcount>
+% }
+% if (defined $warnings and scalar(@$warnings)) {
+  <warnings>
+%     foreach my $warning (@$warnings) {
+    <warning><% $warning |h %></warning>
+%     }
+  </warnings>
+% }
+% if (defined $errors and scalar(@$errors)) {
+  <errors>
+%     foreach my $error (@$errors) {
+    <error><% $error |h %></error>
+%     }
+  </errors>
+% }
+% if ($result) {
+  <w3ccheckoutput>
+    <% $result %>
+  </w3ccheckoutput>
+% }
+</validation>
+%
+%
+%
+<%args>
+$html=>undef
+$fromeditor=>0
+</%args>
+%
+<%init>
+$r->content_type('text/xml');
+
+$html=$m->scomp('/shared/editorhtml2xhtml', html=>$html) if ($fromeditor);
+
+my ($status, $validator_error_count, $warnings, $errors, $result)=$m->comp('/shared/validator/validate', html=>$html);
+</%init>
+%
+%
+<%doc>
+
+This is a simple "webservice"-like app for validation snippets of
+XHTML. Call with html=snippet and get a simple XML-blurb back with the
+result.
+
+If fromeditor is set, the html is run through the component that
+converts from the HTML that the editor uses to XHTML.
+
+See the component obvius/mason/common/shared/validator/validate for
+more information.
+
+The output is a simple XML-format, that looks like this:
+
+ <?xml version="1.0" encoding="ISO-8859-1"?>
+ <validation>
+   <status>Valid</status>
+   <errorcount>0</errorcount>
+   <w3ccheckoutput>
+     <result>
+   <meta>
+     <uri>upload://Form Submission</uri>
+     <modified></modified>
+     <server></server>
+     <size></size>
+     <encoding>iso-8859-1</encoding>
+     <doctype>-//W3C//DTD XHTML 1.0 Strict//EN</doctype>
+   </meta>
+   <warnings>
+     <warning>  &#60;em&#62;Note&#60;/em&#62;: The Validator XML support has
+   &#60;a href=&#34;http://openjade.sf.net/doc/xml.htm&#34;
+      title=&#34;Limitations in Validator XML support&#34;&#62;some limitations&#60;/a&#62;.
+ </warning>
+     <warning>      This interface is highly experimental and the output *will* change
+       -- probably even several times -- before finished. Do *not* rely on it!
+       See http://validator.w3.org:8001/docs/users.html#api-warning
+ </warning>
+   </warnings>
+ </result>
+   </w3ccheckoutput>
+ </validation>
+
+The output from w3c-markup-validator is included in the
+w3ccheckoutput-part. There are five valid top-level tags:
+
+ status     - Valid, Invalid or Unknown; always present.
+
+ errorcount - 0 or larger; only there is the validation yielded a
+              result.
+
+ warnings   - contains warning-tags for each relevant warning; optional,
+              not implemented yet
+
+ errors     - contains error-tags for each relevant error; optional,
+              not implemented yet
+
+ w3ccheckoutput - contains the result-tag from the
+                  w3c-markup-validator output, if possible.
+
+
+</%doc>

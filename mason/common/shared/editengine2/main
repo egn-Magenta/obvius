@@ -1,0 +1,361 @@
+<%perl>
+  print STDERR ' ' x $m->comp('history:depth', history=>$history) if $session->{cesi_debug_recursion};
+# [?] Protocol isn't saved and restored here, WHY? (or why not?)
+# [?] Do %ARGS need to be passed or is only the $style required?
+# <& $scheme . '/' . $type, %{$editscheme->{options}}, %ARGS, editscheme=>$editscheme, session=>$session, storage=>$storage, history=>$history &>
+  unless (defined $style) {
+    if (defined $editscheme->{style}) {
+      $style = $editscheme->{style};
+    }
+    else {
+#      $style = 'block';
+      $style = { context=>'block' };
+    }
+  }
+  my ($scheme, $type) = $editscheme->{type} =~ m!^(scheme|template)/(.+)$!;
+  # If a minor style of raw (eg. a non-flat, recursive one) need to be
+  # provided, the check should be modified to a matching for raw as
+  # the main style (ie. something similar to '$ARGS{style} =~ /^raw/')
+#  if (defined $style and $style eq 'raw') {
+  if ($style->{context} eq 'raw') {
+    my %old_protocol = $m->comp('toolbox:get_protocol');
+    my $raw = $m->comp($scheme . '/' . $type, %ARGS, editscheme=>$editscheme, session=>$session, storage=>$storage, history=>$history, style=>{context=>'raw'});
+    $r->pnotes('obvius_editengine_protocol' => \%old_protocol);
+    return $raw;
+  }
+</%perl>
+<& $scheme . '/' . $type, editscheme=>$editscheme, session=>$session, storage=>$storage, history=>$history, style=>$style &>
+<%args>
+ # Edit session history of previous selections etc.
+ # $history is undefined on confirmation
+ $history=>undef # SCALAR
+
+ # Requested display style
+ $style=>undef   # ref->HASH
+
+ # Possibly executed functions
+ $obvius_editengine_protocol_function=>''
+
+</%args>
+%
+<%init>
+# Setup session
+my $session=$r->pnotes('obvius_session') or die ("editengine main: Undefined obvius_session\n");
+
+#use Data::Dumper; print STDERR '$history: ' . Dumper($history);
+my $possibly_executed_functions = {
+                                       map {
+                                           split /=/, $_, 2
+                                       } (ref $obvius_editengine_protocol_function ? @$obvius_editengine_protocol_function : ($obvius_editengine_protocol_function))
+};
+
+# Check for confirmation:
+my @confirmations = grep /^obvius_editengine_protocol_confirmation:/, keys %ARGS;
+
+my $path;
+my $editscheme;
+my $storage;
+if (!scalar(@confirmations)) {
+
+  #use Data::Dumper; print STDERR '$r->pnotes("obvius_editengine_protocol"): ' . Dumper($r->pnotes("obvius_editengine_protocol"));
+
+  # Setup editscheme
+  $path = $m->comp('history:extract_path', history=>$history);
+  $editscheme = eval $m->comp('toolbox:setup_editscheme', path=>$path)
+    or die "<main> $path does not correspond to an editscheme";
+
+  # Quick validation
+  $m->comp('toolbox:test_editscheme', editscheme=>$editscheme) if (defined $session->{cesi_validate} and $session->{cesi_validate});
+
+  # Set up a new storage object based on the description in
+  # $editscheme->{storage}:
+  $storage = $m->comp('toolbox:setup_storage', editscheme=>$editscheme, obvius=>$obvius, session=>$session);
+
+  # Setup transfered object and function information
+  # Consider: $editscheme isn't necessary since identifiers are on the $storage object?
+  my $embedding = $m->comp('history:get_current_event', history=>$history, editscheme=>$editscheme, storage=>$storage);
+
+  # Delete previously requested parameters
+  delete $session->{editscheme_requests} unless $embedding;
+
+  # Extract scheme parameters.  Only do this once for each request;
+  # otherwise parameters will be overwritten.
+  my %scheme_parameters;
+  map {
+    my ($event, $parameter) = split /local_scheme_parameter_/, $_;
+    $scheme_parameters{$event}->{$parameter} = $ARGS{$_};
+  } grep {/local_scheme_parameter_/} keys %ARGS;
+  $session->{editscheme_requests} = \%scheme_parameters if scalar(keys %scheme_parameters);
+}
+else {
+    my $confirmation = pop @confirmations;
+    $confirmation =~ s/obvius_editengine_protocol_confirmation://;
+    #use Data::Dumper; print STDERR '<main> $confirmation: ' . Dumper($confirmation);
+    my $execute = $confirmation;
+    if ($execute) {
+        # If we got one, try calling it, and then redirect back after
+        # putting the status in the session for the notification-area to
+        # pick out.
+
+        # Setup a hash for all objects subject to the confirmation
+        my %objects;
+
+        # 1) Retrieve all schemes
+        my @editengine_schemes = grep {$_ =~ /^editengine_scheme:/} keys %ARGS;
+        foreach my $scheme (@editengine_schemes) {
+            # Remove the leading 'editengine_scheme:'
+            $scheme =~ s/editengine_scheme://;
+            $objects{$scheme} = {};
+        }
+
+        # 2) Retrieve all objects and regroup them by scheme/initializers
+        my @editengine_objects = grep {$_ =~ /editengine_object:/} keys %ARGS;
+        foreach my $object (@editengine_objects) {
+            my ($history, $object_id) = $object =~ /^(.*)editengine_object:(.*)$/;
+#            $objects{$history}->{$object_id} = $m->comp('toolbox:unescape_object', object_description=>$object_id);
+            $objects{$history}->{$object_id} = {};
+        }
+
+        # 3) Retrieve all values and regroup them by scheme/initializers and object
+        my @editengine_values = grep {$_ =~ /editengine_value:/} keys %ARGS;
+        my %values;
+        foreach my $value (@editengine_values) {
+            my ($history, $object_id, $value_id) = $value =~ /^(.*)editengine_value:(.*):(.*)$/;
+            $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
+        }
+
+        if (defined $session->{cesi_log_data} and $session->{cesi_log_data}) {
+            use Data::Dumper; print STDERR '\%objects: ' . Dumper(\%objects);
+        }
+
+        my $confirmation_path = $possibly_executed_functions->{$execute};
+        if ($execute eq 'CANCEL') {
+            my $vertex = $m->comp('history:extract_vertex', history=>$confirmation_path);
+            # Flow: the vertex has "cancel" status here
+            $m->comp('flow:route', vertex=>$vertex.'[]cancel', data=>\%objects, session=>$session);
+
+            # Update status bar here, cf. $storage->cancel(..)
+            $session->{status}='OK';
+            $session->{message}='Aborted';
+
+            # Clear previously detected errors
+            delete $session->{editengine_errors};
+
+        }
+        else {
+            # Perform type checking etc. for all objects.  Start by clearing previous errors.
+            delete $session->{editengine_errors};
+            my %errors;
+            my $accumulated_errors;
+            my @invalid_field_titles=();
+            foreach my $history (keys %objects) {
+                # 1) Lookup the data description in the storage section of the editscheme
+                my $scheme_path = $m->comp('history:extract_path', history=>$history);
+                my $editscheme = eval $m->comp('toolbox:setup_editscheme', path=>$scheme_path) or die "<main:confirmation> $path does not correspond to an editscheme";
+                my $data_description = $editscheme->{storage}->{data};
+                my %labels=();
+                map { $labels{$_->{name}}=$_->{label} } @{$editscheme->{display}};
+
+                # 2) Check all objects of the current scheme
+                $errors{$history} = {};
+                foreach my $object (keys %{$objects{$history}}) {
+                    my %object_errors;
+                    my $any_errors_detected;
+                    foreach my $data (keys %{$objects{$history}->{$object}}) {
+                        # Templates handle data from other schemes,
+                        # eg. selection/deselection as on the subset
+                        # template, and might therefore request data in an
+                        # internal format.
+                        #
+                        # [!] Consider further....
+                        # Determine type
+                        my ($type) = $data_description->{$data}->{type} =~ /^(\w+)$/ if $data_description->{$data};
+                        my $status;
+                        if (!$type) {
+                            #                        warn 'missing $type; template use?';
+                            $status = '(internal)';
+                        }
+                        else {
+                            $status = $m->comp("type/$type", data => $objects{$history}->{$object}, id=>$data, validation=>$data_description->{$data}) if $data_description->{$data};
+                        }
+                        $object_errors{$data} = { value => $objects{$history}->{$object}->{$data}, status => $status };
+                        push @invalid_field_titles, $labels{$data} unless (!defined $status or $status eq 'OK' or $status eq '(internal)');
+                        # Further reporting should go here...
+
+                        $any_errors_detected++ unless (!defined $status or $status eq 'OK' or $status eq '(internal)');
+                    }
+
+                    $errors{$history}->{$object} = \%object_errors;
+                    $accumulated_errors++ if $any_errors_detected;
+                }
+            }
+
+            # Determine and perform actions and redirections.
+
+            # 1) If any errors was detected return to the corresponding
+            # scheme
+
+            # [!] Work still needs to be done here: The scheme might have
+
+            #  · returned to the firstcoming nonembedded predecessor
+
+            if ($accumulated_errors) {
+                # Assign the %errors hash to the $session object
+                $session->{editengine_errors} = \%errors;
+                if (defined $session->{cesi_log_data} and $session->{cesi_log_data}) {
+                    use Data::Dumper; print STDERR '$session->{editengine_errors}: ' . Dumper($session->{editengine_errors});
+                }
+                # Add object and function information to $r->pnotes prior
+                # to the call to main
+                my $return_stack = $m->comp('history:previous_events', history=>$confirmation_path);
+                my $return_history = pop @$return_stack || '';
+
+                $m->comp('history:get_current_event', history=>$return_history);
+                $m->comp('main', history=>$return_history);
+
+                $session->{status}='WARNING';
+                $session->{message}=['Invalid data', ' (', ((map { $_, ', ' } @invalid_field_titles[0..scalar(@invalid_field_titles)-2]), $invalid_field_titles[-1]), '), ', 'please correct and try again'];
+                # (the mumbo-jumbo above just serves the purpose of putting ', ' between the field titles).
+
+                return;
+            }
+
+            # 2) Else perform actions required for confirmation handling.
+
+            # Handling the confirmation is dealt with in a separate method as
+            # this also needs to be done in eg. multiple submission templates
+
+            # Finishing multiple edit sessions before any updating takes
+            # place requires the flow NOT to be cleared here!
+            #        $m->comp('flow:clear', session=>$session);
+
+
+            # Flow: The vertex has [edit] status here...
+
+            #            print STDERR "Inserting from <main>\n";
+            $m->comp('flow:insert', execute=>$execute, objects=>\%objects, history=>$confirmation_path, session=>$session);
+            $m->comp('main:confirmation', obvius=>$obvius, session=>$session);
+        }
+
+        my $return_stack = $m->comp('history:previous_events', history=>$confirmation_path);
+
+        pop @$return_stack unless (scalar(@$return_stack) < 2);
+        my $return_history = pop @$return_stack;
+        # Clear the protocol
+        $r->pnotes('obvius_editengine_protocol' => {});
+
+        # Some sort of redirection might go here to avoid re-updates due to reload
+#        $m->comp('main', history=>$return_history);
+        $m->comp('/shared/redirect/', location=>"./?obvius_session_id=$session->{_session_id}&history=$return_history");
+
+        return;
+    }
+}
+</%init>
+%
+%
+%
+%
+%
+%
+<%method confirmation>
+<%args>
+# Mandatory arguments
+ $obvius  # the obvius object for system access
+ $session # the session object with the editscheme description
+</%args>
+<%init>
+##print STDERR "<main:confirmation>\thistory = '$history'\n";
+
+my $status;
+my $message;
+my $results;
+
+my $status_report;
+my $predecessors;
+# Retrieve $execute, $objects, and $history and $execute and continue
+# to perform updatings
+while ($m->comp('flow', session=>$session)) {
+
+  my ($execute, $objects, $history, $parent) = $m->comp('flow:extract', session=>$session);
+
+  my $vertex = $m->comp('history:extract_vertex', history=>$history);
+
+  # Flow: the vertex has "edit" status here
+  $m->comp('flow:route', vertex=>$vertex."[$execute]edit", data=>$objects->{$history}, session=>$session);
+
+  my $path = $m->comp('history:extract_path', history=>$history);
+  my $editscheme = eval $m->comp('toolbox:setup_editscheme', path=>$path) or die "<main:confirmation> $path does not correspond to an editscheme";
+
+  # Set up a new storage object based on the description i $editscheme->{storage}:
+  my $storage = $m->comp('toolbox:setup_storage', editscheme=>$editscheme, obvius=>$obvius, session=>$session);
+
+  # If the scheme is of a template type go through a special
+  # template component. Outdated: This should probably be done in all cases to
+  # allow for type and range checking (and the succeding user
+  # interaction in case of failure) etc.
+  my ($maintype, $minortype) = $editscheme->{type} =~ m!^(scheme|template)/(.*)$!;
+  if ($maintype eq 'template') {
+    ($status, $message, $results)=$m->comp("store:$minortype", history=>$history, objects=>$objects, session=>$session, obvius=>$obvius);
+  }
+  else {
+    if ($execute !~ /^CANCEL$/) {
+      # Note that $path needs to be extracted _before_ control is
+      # passed to the perl modules (since they don't have easy access
+      # to the mason components)
+      ($status, $message, $results)=$storage->execute($execute, $objects, $session, $history);
+    }
+    else {
+        # This should no longer be possible
+        die "confirmation CANCEL uncaught?!\n";
+      ($status, $message, $results)=$storage->cancel($execute, $objects, $session, $path, $history);
+    }
+  }
+
+  # Collect data for the status report
+  $status_report->{$history} = {status=>$status, message=>$message};
+  if ($parent) {
+      push @{$predecessors->{$parent}}, $history;
+  }
+  else {
+      push @{$predecessors->{''}}, $history;
+  }
+
+  # Flow: the vertex has "store" status now
+  $m->comp('flow:route', vertex=>$vertex."[$execute]store", data=>$results, session=>$session);
+
+}
+
+# Construct the status report
+($status, $message) = get_status('', $predecessors, $status_report);
+$session->{status}=$status;
+$session->{message}=$message;
+
+</%init>
+</%method>
+%
+<%once>
+
+sub get_status {
+ my ($element, $predecessors, $status_report) = @_;
+
+ return ($status_report->{$element}->{status}, $status_report->{$element}->{message}) unless defined $predecessors->{$element};
+
+ my @errors = grep {
+     my ($stat, $msg) = get_status($_, $predecessors, $status_report);
+     $stat eq 'ERROR';
+ } @{$predecessors->{$element}};
+
+ if (scalar(@errors)) {
+     return ('ERROR', "Storage error; cf. the error_log");
+     print STDERR "STORAGE ERROR:\n";
+     use Data::Dumper; print STDERR '\@errors: ' . Dumper(\@errors);
+ }
+ else {
+     return ('OK', 'Storage updated');
+ }
+}
+
+use URI::Escape;
+
+</%once>

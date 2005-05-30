@@ -1,10 +1,10 @@
 <!-- Calendar: -->
 %if($show_as eq 'list') {
 %   my $events = $output->param('events');
-    <& calendar/list, events=>$events &>
+    <& calendar/list, events=>$events, output=>$output &>
 %} else {
 %   my $weeks = $output->param('weeks');
-    <& calendar/2D, weeks=>$weeks &>
+    <& calendar/2D, weeks=>$weeks, output=>$output &>
 %}
 <!-- :Calendar -->
 <%args>

@@ -1,0 +1,45 @@
+<div class="obvius-current-document obvius-link-decor">
+  <input onclick="javascript:return obvius_navigator_done('<% $uri |h %>')" type="submit" value="<& /shared/msg, text=>'Select' &>" />
+
+  <table>
+    <tr>
+% foreach my $field (@fields) {
+      <th><& /shared/msg, text=>$field->{label} &></th>
+% }
+    </tr>
+    <tr>
+% foreach my $field (@fields) {
+      <td>\
+%     if ($field->{translate_value}) {
+<& /shared/msg, text=>$values{$field->{name}} &>\
+%     }
+%     else {
+<% $values{$field->{name}} %>\
+%     }
+</td>
+% }
+    </tr>
+
+  </table>
+</div>
+%
+<%once>
+my @fields=(
+            { name=>'public_icon', label=>'' },
+            { name=>'title',       label=>'Current document'  },
+            { name=>'docdate',     label=>'Date'   },
+            { name=>'type',        label=>'Type', translate_value=>1 },
+            { name=>'author',      label=>'Author' },
+           );
+</%once>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(title docdate author)]);
+
+my %values=(
+            title=>$m->scomp('/portal/subdocs:display_icons', doc=>$doc, vdoc=>$vdoc) . ' ' . $vdoc->field('title'),
+            docdate=>$m->scomp('/shared/display_date', date=>$vdoc->field('docdate'), month=>'short'),
+            author=>$vdoc->field('author'),
+            type=>$doctype->Name,
+           );
+</%init>

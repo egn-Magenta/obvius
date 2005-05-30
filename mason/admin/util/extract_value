@@ -1,0 +1,33 @@
+<%args>
+$prefix=>undef
+$all=>0
+</%args>
+%
+<%init>
+return undef unless (defined $prefix);
+
+my @matches=();
+foreach my $key (keys %ARGS) {
+    if ($key=~/^${prefix}_(\w*)$/) {
+        my $match=$1;
+        if ($all) {
+            push @matches, $match;
+        }
+        else {
+            return $match;
+        }
+    }
+}
+
+return ($all ? \@matches : undef);
+</%init>
+%
+<%doc>
+
+extract_value looks at all the keys in %ARGS and extracts the last
+part of the ones that match $prefix_.
+
+If the optional argument all is true, all matches are returnes in an
+array-ref. Default is to return the first match as a string.
+
+</%doc>

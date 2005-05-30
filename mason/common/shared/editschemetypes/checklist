@@ -1,0 +1,42 @@
+% unless ($ARGS{display_style}) {
+<h2><% $editscheme->{label} |h %></h2>
+% }
+% #  and 
+% if ($func_h and ($func_h->{object} eq 'new' or $func_h->{object} eq 'existing')) {
+%     # Find element from $storage->param('identifier') in parameters:
+%     my $element=($func_h->{object} eq 'new' ? {} : $storage->get_element(%{$r->pnotes('obvius_object_identifier')}));
+%
+<form action="./" method="get">
+  <input type="hidden" name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
+%     foreach my $identifier (@{$storage->param('identifiers')}) {
+  <input type="hidden" name="obvius_object_identifier" value="<% $identifier |h %>=<% $r->pnotes('obvius_object_identifier')->{$identifier} |h %>" />
+% }
+%
+%     if (!defined $func_h->{edit} or $func_h->{edit} ne '') {
+<& edit_element, %ARGS, element=>$element, func_h=>$func_h &>
+%     }
+<& confirm, func_h=>$func_h &>
+</form>
+%
+% }
+% else {
+<& display_checklist, %ARGS, editscheme=>$editscheme, storage=>$storage, mappings=>$mappings &>
+% }
+%
+<%args>
+$editscheme
+$storage
+$function=>''
+$mappings=>''
+</%args>
+%
+<%init>
+$mappings = $r->pnotes("obvius_editengine_protocol")->{mappings};
+my $func_h;
+foreach my $func (@{$editscheme->{storage}->{functions}}) {
+    if ($func->{name} eq $function) {
+        $func_h=$func;
+        last;
+    }
+}
+</%init>

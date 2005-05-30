@@ -1,0 +1,125 @@
+<%flags>
+inherit=>undef
+</%flags>
+%
+<%once>
+use HTML::Mason::Utils;
+</%once>
+%
+<%args>
+$sitebase
+$dirty_docids=>undef
+</%args>
+%
+<%def .keys>
+%
+<%args>
+$base
+$component
+$method=>''
+</%args>
+%
+<%init>
+if ($HTML::Mason::VERSION<1.10) {
+    $component=~s!/!+2f!g;
+    return HTML::Mason::Utils::access_data_cache(cache_file=>$base . '/ADMINCOMP' . $component, action=>'keys');
+}
+else {
+    use Cache::FileCache;
+    # XXX Shouldn't data_cache_namespace do this?
+    my $namespace=($method ? "[method '$method' of /admincomp$component]" : "/admincomp$component");
+    my $cache=Cache::FileCache->new( {
+                                      namespace=>HTML::Mason::Utils::data_cache_namespace($namespace),
+                                      cache_root=>$base,
+                                     } );
+
+    return $cache->get_keys;
+}
+</%init>
+%
+</%def>
+%
+%
+<%def .expire>
+%
+<%args>
+$base
+$component
+$method=>''
+$keys
+</%args>
+%
+<%init>
+if ($HTML::Mason::VERSION<1.10) {
+    $component=~s!/!+2f!g;
+    return HTML::Mason::Utils::access_data_cache(cache_file=>$base . '/ADMINCOMP' . $component, action=>'expire', key=>$keys);
+}
+else {
+    use Cache::FileCache;
+    # XXX See above in .keys:
+    my $namespace=($method ? "[method '$method' of /admincomp$component]" : "/admincomp$component");
+    my $cache=Cache::FileCache->new( {
+                                      namespace=>HTML::Mason::Utils::data_cache_namespace($namespace),
+                                      cache_root=>$base,
+                                     } );
+
+    map { $cache->remove($_) } @$keys;
+}
+</%init>
+%
+</%def>
+%
+%
+%
+<%init>
+# Find cache-files:
+my $base=$sitebase . '/var/admin/cache';
+unless (-d $base) {
+    warn "Couldn't expire admin Mason-components in $base";
+    return undef;
+}
+
+# /portal/subdocs - key is docid|version - evict all docids matching the dirty ones:
+my @dirty_keys=();
+my @keys=$m->comp('.keys', component=>'/portal/subdocs', method=>'get_subs', base=>$base);
+if (defined $dirty_docids) {
+    # Only expire the keys that are in dirty_docids:
+    foreach my $key (@keys) {
+        my ($docid, $version)=split /[|]/, $key, 2;
+        push @dirty_keys, $key if ($dirty_docids->{$docid});
+    }
+}
+else {
+    # Expire everything when dirty_docids isn't defined:
+    @dirty_keys=@keys;
+}
+$m->comp('.expire', keys=>\@dirty_keys, component=>'/portal/subdocs', method=>'get_subs', base=>$base) if (scalar(@dirty_keys));
+
+$m->comp('/default/dirty_cache_local', %ARGS);
+</%init>
+%
+%
+<%perl>
+return 1; # The very last thing
+</%perl>
+%
+<%doc>
+
+Get the list of documents changes, and invalidate admin-caches
+accordingly.
+
+If the argument dirty_docids is undef, all cache-entries are
+expired. All. If dirty_docids is defined, only the matching ones are
+expired.
+
+Note that this component is not meant to be called from other
+Mason-components.
+
+See WebObvius::Site::Mason::handle_modified_docs_cache where this
+components is called from (exclusively).
+
+NOTICE: This component DOES NOT inherit from autohandler as all other
+        components do (as it ss called directly from
+        WebObvius::Site::Mason).
+
+</%doc>
