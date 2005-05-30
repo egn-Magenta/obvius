@@ -4,7 +4,7 @@
 #                  stuff for a new Obvius website.
 #
 # TODO: * Perhaps move symlinks to the skeleton directory instead?
-#       * When stuff exists, check permissions anyway.
+#       * When stuff exists, the script should check permissions anyway.
 #
 # Copyright (C) 2002-2005 aparte A/S, Magenta ApS. By Jørgen Ulrik
 #                         B. Krag, Adam Sjøgren. Under the GPL.
@@ -35,6 +35,7 @@ my %options=(
     staff_group=>'staff',
     skeleton_dir=>'/var/www/obvius/skeleton',
     fromconf=>undef,
+    new_admin=>0,
    );
 # Remember to update sub usage below, when updating options.
 
@@ -51,6 +52,7 @@ GetOptions(
 	   'staff_group=s'=>\$options{staff_group},
 	   'skeleton_dir=s'=>\$options{skeleton_dir},
            'fromconf:s'   =>\$options{fromconf},
+           'new_admin'    =>\$options{new_admin},
 	  ) or usage("Couldn't understand options, stopping");
 
 usage("Please supply website, stopping") unless ($options{website});
@@ -88,6 +90,13 @@ my @dirs=(
 	  { dir=>'var/user_sessions', group=>$options{httpd_group}, },
 	  { dir=>'var/user_sessions/LOCKS', group=>$options{httpd_group}, },
 	 );
+push @dirs, (
+             { dir=>'docs/grafik', },
+             { dir=>'docs/grafik/pager', },
+             { dir=>'docs/grafik/news', },
+             { dir=>'docs/grafik/menu', },
+             { dir=>'docs/css', },
+            ) if (!$options{new_admin}); # Legacy dirs
 
 my @files=(
 	   { dir=>'var', file=>'document_cache.txt', perms=>'0664', group=>$options{httpd_group} },
@@ -105,6 +114,11 @@ my @symlinks=(
               { dir=>'docs/style', link=>'public.css', to=>"$options{wwwroot}/obvius/docs/style/public.css", },
               { dir=>'docs/style', link=>'validation.xsl', to=>"$options{wwwroot}/obvius/docs/style/validation.xsl", },
 	     );
+push @symlinks, (
+                 { dir=>'docs', link=>'admin_js', to=>"$options{wwwroot}/obvius/docs/js", },
+                 { dir=>'docs/grafik', link=>'admin', to=>"$options{wwwroot}/obvius/docs/grafik/admin", },
+                 { dir=>'docs/grafik', link=>'navigator', to=>"$options{wwwroot}/obvius/docs/grafik/admin/navigator", },
+                ) if (!$options{new_admin}); # Legacy symlinks
 
 my @db_files=qw(structure.sql perms.sql);
 
@@ -424,6 +438,8 @@ Further options:
  --dbpasswd <password>
 
  --fromconf [confname]
+
+ --new_admin               defaults to false, use if the website uses the new admin
 EOT
     exit(1);
 }
