@@ -35,3 +35,4 @@ fileupload2 text    fileupload2         none                            none
 priority6       int     radio (1|2|3|4|5)               regexp (^[12345]$)                              none
 showevent       text    radio (type|title)              regexp (^(type|title)$)                         none
 condisp         text    radio (attachment|inline)       regexp (^(attachment|inline)$)                  none
+sequence        double  sequence                        regexp (^-?\d+(\.\d+)?)				none
