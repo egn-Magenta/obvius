@@ -218,7 +218,7 @@ sub action {
 
 	$search_method = 'boolean';
     } else {
-	my @words = get_search_words($input->param('words') || $input->param('q'));
+	my @words = $this->get_search_words($input->param('words') || $input->param('q'));
 	return OBVIUS_OK unless (@words); # XXX Orig. HTTP_NO_CONTENT
 
 	$search_term = join(' and ', @words);
