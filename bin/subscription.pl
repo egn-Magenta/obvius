@@ -276,7 +276,7 @@ sub get_subdocs_recursive {
                         teaser => $vdoc->field('teaser'),
                         category => $vdoc->field('category'),
                         type => $vdoc->Type,
-                        seq => $vdoc->field('seq')
+                        seq => $vdoc->field('seq'),
                         url => $obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
                     }
                 ) if($vdoc->{PUBLISH_FIELDS}->{IN_SUBSCRIPTION} and $vdoc->{PUBLISH_FIELDS}->{PUBLISHED});
