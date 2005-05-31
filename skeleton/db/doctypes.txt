@@ -6,7 +6,7 @@ DocType: Base basis searchable sortorder_field_is=sortorder
  category      category repeatable optional searchable sortable
  keyword       keyword  repeatable optional searchable sortable
  docdate       date                         searchable sortable threshold=0
- seq           double                                  sortable threshold=0 default_value=10
+ seq           sequence                                sortable threshold=0 default_value=10
  pagesize      pagesize              optional
  sortorder     sortorder                                        default_value=+seq,+title
  subscribeable subscribeable                searchable          default_value=none
@@ -128,7 +128,7 @@ DocType: Image basis
  data	       imagedata			      threshold=192
  size	       int>=0				      threshold=0
  mimetype      line		  searchable sortable threshold=0
- seq           double                        sortable threshold=0 default_value=-10
+ seq           sequence                      sortable threshold=0 default_value=-10
  keyword       keyword  repeatable optional searchable sortable
 
 DocType: Link parent=Base basis searchable
@@ -153,7 +153,7 @@ DocType: TableList basis
  short_title   line                         searchable sortable threshold=0
  teaser        text                         searchable threshold=64
  docdate       date                         searchable sortable threshold=0
- seq           double                                  sortable threshold=0 default_value=10
+ seq           sequence                                sortable threshold=0 default_value=10
  pagesize      pagesize              optional
  sortorder     sortorder                                        default_value=+id
  expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_18:00:00
