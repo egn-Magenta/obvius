@@ -77,10 +77,17 @@ Each website is included in the Apache-configuration by its
 
 \subsubsection{site.conf}
 
-An Apache-configuration file that defines the \texttt{ServerName} and
-any \texttt{ServerAliases}, ``runs'' the perl-file \texttt{setup.pl}
+An Apache-configuration file that defines the site. Includes
+\texttt{names.conf}, ``runs'' the perl-file \texttt{setup.pl}
 (once, on start) and includes the Apache-configurationfile
 \texttt{setup.conf}.
+
+\subsubsection{names.conf}
+
+Defines the \texttt{ServerName} and any \texttt{ServerAliases}. In a
+file by itself, so if the server is set up in a two-layer
+Apache-configuration the \texttt{front.conf} can share the names
+easily (see also appendix \ref{proxying}).
 
 \subsubsection{setup.conf / cache}
 
@@ -104,6 +111,12 @@ website-specific objects that each \obvius\ website uses:
 \item[\texttt{Example::Site::Common}] --- used by both for generating the common
   content.
 \end{description}
+
+\subsubsection{front.conf}
+
+Is used to run a bunch of small \modproxy-enabled Apache-processes
+that serve static files and cached files, while proxying other
+requests to another bunch of \modperl\ enabled Apache-processes.
 
 
 \section{Perl}
@@ -209,7 +222,7 @@ returned to the browser.
 
 \pagebreak
 \appendix
-\section{Proxying}
+\section{Proxying}\label{proxying}
 
 In anything but the most basic, low-traffic setup, it is highly
 recommended to follow the recommendations of the \modperl-developers,
