@@ -7,6 +7,8 @@
  * @copyright Copyright © 2004, Moxiecode Systems AB, All rights reserved.
  */
 
+var tinymce_dialogrefs = new Object;
+
 function TinyMCE() {
 	this.instances = new Array();
 	this.stickyClassesLookup = new Array();
