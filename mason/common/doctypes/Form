@@ -1,11 +1,16 @@
-<!-- Standard doctype: -->
+<!-- Form doctype: -->
+%if($output->param('flush_xml')) {
+<& form_files/flush_xml, %ARGS &>
+%} else {
 
 %if($prefix) {
 %   my $uri2 = $uri;
 %   $uri2 =~ s!/$!!;
 <div class="obviusformdownload">
-    <div><a href="<% $prefix . $uri2 %>?get_file=1">Click here to download collected form data in XML format</a>.</div>
-    <div><a href="<% $prefix . $uri2 %>?get_file=1&format=excel">Click here to download collected form data in Excel format</a>.</div>
+    <div><a href="<% $prefix . $uri2 %>?get_file=1"><& /shared/msg, text=>"Click here to download collected form data in XML format" &></a>.</div>
+    <div><a href="<% $prefix . $uri2 %>?get_file=1&format=excel"><& /shared/msg, text=>"Click here to download collected form data in Excel format" &></a>.</div>
+    <br />
+    <div><a href="<% $prefix . $uri %>?flush_xml=1"><& /shared/msg, text=>"Flush XML file" &></a></div>
 </div>
 %}
 
@@ -32,14 +37,17 @@ Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette
 <br />
 %}
 
-
+%$r->notes('fieldsets' => 0);
 %unless($prefix) {
 <form name="pageform" action="<% $uri %>" method="get">
 %}
 <input type="hidden" name="obvius_form_submitted" value="1" />
 %for(@$fields) {
+%unless($_->{type} eq 'fieldset') {
+<label for="<% $_->{name} %>">
 <a name="<% $_->{name} %>"></a>
-<h2><% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %></h2>
+<% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
+%}
 %if($_->{invalid}) {
 <p class="error">
 Fejl: <% $_->{invalid} %>
@@ -53,11 +61,19 @@ Fejl: <% $_->{invalid} %>
 %   } else {
     <& 'form_files/fieldtypes/default', fielddata=>$_ &>
 %   }
+%   unless($_->{type} eq 'fieldset') {
+    <br />
+</label>
+%   }
+%}
+%if($r->notes('fieldsets')) {
+</fieldset>
 %}
 
 <br />
 <div>
-<input type="submit" value="Submit" />
+<input type="submit" value="Send" />
+Felter markeret med <span class="mandatory">*</span> skal udfyldes.
 </div>
 %unless($prefix) {
 </form>
@@ -66,7 +82,9 @@ Fejl: <% $_->{invalid} %>
 %
 %}
 %
+%}
 %
+<!-- /Form Doctype -->
 <%args>
 $output
 </%args>

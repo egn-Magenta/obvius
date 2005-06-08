@@ -1,0 +1,14 @@
+%if($current_fieldsets) {
+</fieldset>
+%}
+<fieldset>
+<legend><% $_->{title} %></legend>
+%
+%
+<%args>
+$fielddata
+</%args>
+<%init>
+my $current_fieldsets = $r->notes('fieldsets') || 0;
+$r->notes('fieldsets' => ($current_fieldsets + 1));
+</%init>

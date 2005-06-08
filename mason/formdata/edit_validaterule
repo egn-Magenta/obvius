@@ -1,8 +1,8 @@
 %unless($r->param('jsXMLparser_loaded')) {
+<& /edit/fieldtypes/formdata:translations &>
 <script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlw3cdom.js"></script>
 <script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlsax.js"></script>
 <script type="text/javascript" src="/admin_js/formdata/formdata.js"></script>
-<& /edit/fieldtypes/formdata:translations &>
 %$r->param('jsXMLparser_loaded' => 1);
 %}
 <script type="text/javascript">
@@ -12,10 +12,26 @@ function Init() {
 }
 
 onload_array[onload_array.length] = Init;
+document.pageform.onsubmit = function () {
+    formdata_validate_and_<% defined($r->param('rulenr')) ? 'save_valrule' : 'add_valrule' %>('<% $r->param('rulenr') %>');
+    return false;
+}
 </script>
 <table border="0" style="margin: 20px;">
     <tr>
         <td colspan="2"><strong><& SELF:msg, text=>"Edit validaterule" &></strong></td>
+    </tr>
+    <tr id="predefined" style="display: none;">
+        <th><& SELF:msg, text=>"Predefined validations" &></th>
+        <td>
+            <select name="predefined" onchange="formdata_set_predefined_valrule(this.options[this.selectedIndex])">
+                <option value=""></option>
+                <option value="valid_email"><& SELF:msg, text=>"Valid e-mail address" &></option>
+                <option value="numbers_only"><& SELF:msg, text=>"Numbers only" &></option>
+                <option value="postal_code"><& SELF:msg, text=>"Valid postal code" &></option>
+                <option value="phone_number"><& SELF:msg, text=>"Valid phone number" &></option>
+            </select>
+        </td>
     </tr>
     <tr>
         <th><& SELF:msg, text=>"formdata_type" &></th>
@@ -24,6 +40,10 @@ onload_array[onload_array.length] = Init;
                 <option></option>
                 <option value="regexp"><& SELF:msg, text=>"validate_type_regexp" &></option>
                 <option value="min_checked"><& SELF:msg, text=>"validate_type_min_checked" &></option>
+                <option value="max_checked"><& SELF:msg, text=>"validate_type_max_checked" &></option>
+                <option value="x_checked"><& SELF:msg, text=>"validate_type_x_checked" &></option>
+                <option value="max_length"><& SELF:msg, text=>"validate_type_max_length" &></option>
+                <option value="min_length"><& SELF:msg, text=>"validate_type_min_length" &></option>
             </select>
         </td>
     </tr>

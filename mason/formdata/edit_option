@@ -12,6 +12,10 @@ function Init() {
 }
 
 onload_array[onload_array.length] = Init;
+document.pageform.onsubmit = function () {
+    formdata_validate_and_<% defined($r->param('rulenr')) ? 'save_option' : 'add_option' %>('<% $r->param('rulenr') %>');
+    return false;
+}
 </script>
 <table border="0" style="margin: 20px;">
     <tr>

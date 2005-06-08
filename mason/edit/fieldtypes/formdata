@@ -55,6 +55,7 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
     <option value="checkbox"><& SELF:msg, text=>"Checkboxes" &></option>
     <option value="select"><& SELF:msg, text=>"Dropdown" &></option>
     <option value="selectmultiple"><& SELF:msg, text=>"Select multiple" &></option>
+    <option value="fieldset"><& SELF:msg, text=>"Fieldset" &></option>
 </select>
 <strong>[</strong>
 <a href="<% $prefix . $uri %>" onclick="formdata_add_new(document.pageform.<% $name %>); return false;"><& SELF:msg, text=>"Create" &></a>
@@ -63,8 +64,7 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
 <br />
 <br />
 %
-<textarea cols="<% $cols %>" rows="<% $rows %>"<% $wrap %>name="<% $name %>" tabindex="10"><% $value |h %></textarea>
-<& /shared/add_reset_field, name=>$name &>
+<input type="hidden" name="<% $name %>" value="<% $value |h %>" />
 %
 <%init>
 my $value=$session->{fields_out}->param(uc($name));
@@ -108,8 +108,8 @@ var formdata_translations = {
                                 'must_specify_mandatory_depends': "<& SELF:msg, text=>'You must specify which other field makes this field mandatory' &>",
                                 'must_specify_value': "<& SELF:msg, text=>'You must specify a value' &>",
                                 'must_specify_validation_type': "<& SELF:msg, text=>'You must specify a validation type' &>",
-                                'must_specify_arg_regexp': "<& SELF:msg, text=>'You must specify an argument for regexp validation type' &>",
-                                'must_specify_arg_min_checked': "<& SELF:msg, text=>'You must specify a number as argument for min_checked validationtype' &>",
+                                'must_specify_arg': "<& SELF:msg, text=>'You must specify an argument for that validation type' &>",
+                                'must_specify_integer_arg': "<& SELF:msg, text=>'You must specify a number as argument for that validationtype' &>",
                                 'must_specify_errormessage': "<& SELF:msg, text=>'You must specify an errormessage' &>",
                                 'cant_depend_on_self': "<& SELF:msg, text=>"A field can't depend on itself" &>",
                                 'cant_delete_option': "<& SELF:msg, text=>"Couldn't delete option with nr." &>",
@@ -126,8 +126,17 @@ var formdata_translations = {
                                 "field_type_checkbox" : "<& SELF:msg, text=>"Checkboxes" &>",
                                 "field_type_select" : "<& SELF:msg, text=>"Dropdown" &>",
                                 "field_type_selectmultiple" : "<& SELF:msg, text=>"Select multiple" &>",
+                                "field_type_fieldset" : "<& SELF:msg, text=>"Fieldset" &>",
                                 "validate_type_regexp" : "<& SELF:msg, text=>"validate_type_regexp" &>",
                                 "validate_type_min_checked" : "<& SELF:msg, text=>"validate_type_min_checked" &>",
+                                "validate_type_max_checked" : "<& SELF:msg, text=>"validate_type_max_checked" &>",
+                                "validate_type_x_checked" : "<& SELF:msg, text=>"validate_type_x_checked" &>",
+                                "validate_type_min_length" : "<& SELF:msg, text=>"validate_type_min_length" &>",
+                                "validate_type_max_length" : "<& SELF:msg, text=>"validate_type_max_length" &>",
+                                "predef_valrule_valid_email" : "<& SELF:msg, text=>"predef_valrule_valid_email" &>",
+                                "predef_valrule_numbers_only" : "<& SELF:msg, text=>"predef_valrule_numbers_only" &>",
+                                "predef_valrule_postal_code" : "<& SELF:msg, text=>"predef_valrule_postal_code" &>",
+                                "predef_valrule_phone_number" : "<& SELF:msg, text=>"predef_valrule_phone_number" &>",
                                 'dummy': ''
                             };
 </script>

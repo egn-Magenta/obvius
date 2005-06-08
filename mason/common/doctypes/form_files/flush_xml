@@ -1,0 +1,21 @@
+%if($output->param('flushed_ok')) {
+<p>
+XML-filen er nu flushed.
+</p>
+<p>
+    <a href="<% $prefix . $uri %>">Klik her for at fortsætte</a>.
+</p>
+%} else {
+<p>
+Advarsel! Hvis du vælger at flushe XML-filen vil du miste alle data, der er blevet samlet op i formularen indtil nu.
+</p>
+<p>
+<a href="<% $prefix . $uri %>?flush_xml=1&confirm=1">Klik her for at flushe XML-filen</a>.
+</p>
+<p>
+<a href="<% $prefix . $uri %>">Klik her for at gå tilbage uden at flushe XML-filen</a>.
+</p>
+%}
+<%args>
+$output
+</%args>

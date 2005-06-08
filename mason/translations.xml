@@ -4224,14 +4224,14 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Du skal angive en valideringstype</translation>
   </text>
 
-  <text key="You must specify an argument for regexp validation type">
-    <translation lang="en">You must specify an argument for regexp validation type</translation>
-    <translation lang="da">Du skal angive et argument til regexp valideringstypen</translation>
+  <text key="You must specify an argument for that validation type">
+    <translation lang="en">You must specify an argument for that validation type</translation>
+    <translation lang="da">Du skal angive et argument til denne valideringstype</translation>
   </text>
 
-  <text key="You must specify a number as argument for min_checked validationtype">
-    <translation lang="en">You must specify a number as argument for min_checked validationtype</translation>
-    <translation lang="da">Du skal angive et nummer som argument til min_checked valideringstypen</translation>
+  <text key="You must specify a number as argument for that validationtype">
+    <translation lang="en">You must specify a number as argument for that validationtype</translation>
+    <translation lang="da">Du skal angive et nummer som argument til denne valideringstype</translation>
   </text>
 
   <text key="You must specify an errormessage">
@@ -4408,10 +4408,25 @@ abonnement på samme email-adresse.</translation>
     <translation lang="en">Regular expression</translation>
     <translation lang="da">Regulært udtryk</translation>
   </text>
-
   <text key="validate_type_min_checked">
     <translation lang="en">Min. X chosen items</translation>
     <translation lang="da">Min. X valgte værdier</translation>
+  </text>
+  <text key="validate_type_max_checked">
+    <translation lang="en">Max. X chosen items</translation>
+    <translation lang="da">Max. X valgte værdier</translation>
+  </text>
+  <text key="validate_type_x_checked">
+    <translation lang="en">Precisely X chosen items</translation>
+    <translation lang="da">Præcist X valgte værdier</translation>
+  </text>
+  <text key="validate_type_min_length">
+    <translation lang="en">Min. length</translation>
+    <translation lang="da">Min. antal tegn</translation>
+  </text>
+  <text key="validate_type_max_length">
+    <translation lang="en">Max. length</translation>
+    <translation lang="da">Maks. antal tegn</translation>
   </text>
 
 
@@ -4452,11 +4467,48 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Kopier dokument</translation>
   </text>
 
+
+  <text key="Predefined validations">
+    <translation lang="en">Predefined validations</translation>
+    <translation lang="da">Prædefinerede valideringsregler</translation>
+  </text>
+  <text key="Valid e-mail address">
+    <translation lang="en">Valid e-mail address</translation>
+    <translation lang="da">Gyldig e-mail-adresse</translation>
+  </text>
+  <text key="Numbers only">
+    <translation lang="en">Numbers only</translation>
+    <translation lang="da">Kun tal</translation>
+  </text>
+  <text key="Valid postal code">
+    <translation lang="en">Valid postal code</translation>
+    <translation lang="da">Gyldigt postnummer</translation>
+  </text>
+  <text key="Valid phone number">
+    <translation lang="en">Valid phone number</translation>
+    <translation lang="da">Gyldigt telefonnummer</translation>
+  </text>
+  <text key="predef_valrule_valid_email">
+    <translation lang="en">You must specify a valid email adress</translation>
+    <translation lang="da">Du skal angive en korrekt formateret e-mail-adresse</translation>
+  </text>
+  <text key="predef_valrule_numbers_only">
+    <translation lang="en">You must only input numbers in this field</translation>
+    <translation lang="da">Du må kun indtaste tal i dette felt</translation>
+  </text>
+  <text key="predef_valrule_postal_code">
+    <translation lang="en">You must specify a correctly formatted postal code</translation>
+    <translation lang="da">Du skal angive et firecifret postnummer</translation>
+  </text>
+  <text key="predef_valrule_phone_number">
+    <translation lang="en">You must specify a valid phone number</translation>
+    <translation lang="da">Du skal angive et gyldigt telefonnummer</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
   </text>
-
 
 
 </messages>

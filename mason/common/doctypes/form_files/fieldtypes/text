@@ -1,5 +1,5 @@
 <div>
-    <input type="text" name="<% $fielddata->{name} %>" size="40" value="<% $value |h %>" />
+    <input type="text" name="<% $fielddata->{name} %>" size="<% $fielddata->{params}->{param_size} || 40 %>" value="<% $value |h %>"<% $maxlength %> />
 </div>
 %
 %
@@ -8,4 +8,8 @@ $fielddata
 </%args>
 <%init>
 my $value = $fielddata->{_submitted_value} || $fielddata->{defaultvalue} || '';
+my $maxlength = '';
+if($fielddata->{params}->{param_maxlength}) {
+    $maxlength = ' maxlength="' . $fielddata->{params}->{param_maxlength} . '"';
+}
 </%init>

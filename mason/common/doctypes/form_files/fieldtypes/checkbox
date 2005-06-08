@@ -1,11 +1,9 @@
-<div>
 %for(@$options) {
 <div>
 <input type="checkbox" name="<% $fielddata->{name} %>" value="<% $_->{optionvalue} %>"<% $selected{$_->{optionvalue}} ? ' checked="checked"': '' %> />
 <% $_->{optiontitle} %>
 </div>
 %}
-</div>
 %
 %
 <%args>
