@@ -79,7 +79,7 @@ function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface,
             var instance = tinyMCE.getInstanceById(editor_id);
             if(instance) {
                 instance.execCommand("mceAddUndoLevel");
-                instance.execCommand("mceInsertContent", null, "<a href=\"#top\"><img src=\"" + window.obvius_addtoplink_src + "\" alt=\"Til Top\" /></a>");
+                instance.execCommand("mceInsertContent", null, "<a href=\"#top\" title=\"Til toppen\" style=\"float: right;\"><img src=\"" + window.obvius_addtoplink_src + "\" alt=\"Til toppen\" /></a>");
             }
             return true;
 
