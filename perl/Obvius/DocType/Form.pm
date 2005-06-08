@@ -170,6 +170,31 @@ sub raw_document_data {
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
+
+    # Flushing of XML-file in admin:
+    if($input->param('is_admin')) {
+        if($input->param('flush_xml')) {
+            $output->param('flush_xml' => 1);
+            if($input->param('confirm')) {
+                my $data_dir = $obvius->config->param('forms_data_dir') || '/tmp';
+                $data_dir .= "/" unless($data_dir =~ m!/$!);
+
+                my $data_file = $data_dir . $doc->Id . ".xml";
+
+                if(open(FH, ">$data_file")) {
+                    print FH '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
+                    print FH "<entries></entries>\n";
+                    close(FH);
+                    $output->param('flushed_ok' => 1);
+                } else {
+                    print STDERR "Couldn't flush datafile $data_file. Permission problem?\n";
+                    return OBVIUS_OK;
+                }
+            }
+        }
+    }
+
+
     $obvius->get_version_fields($vdoc, ['formdata' ]);
 
     my $formdata = XMLin(
@@ -181,7 +206,6 @@ sub action {
 
     $formdata=$this->unutf8ify($formdata); # XMLin automatically generates utf8 data.
                                            # We want the data as latin1, so converting here.
-
 
     unless($input->param('obvius_form_submitted')) {
         # Form not submitted yet, just output the form:
@@ -241,6 +265,22 @@ sub action {
                 }
             } elsif($type eq 'min_checked') {
                 if(scalar(@$value) < $arg) {
+                    $field->{invalid} = $_->{errormessage};
+                }
+            } elsif($type eq 'max_checked') {
+                if(scalar(@$value) > $arg) {
+                    $field->{invalid} = $_->{errormessage};
+                }
+            } elsif($type eq 'x_checked') {
+                if(scalar(@$value) != $arg) {
+                    $field->{invalid} = $_->{errormessage};
+                }
+            } elsif($type eq 'min_length') {
+                if(length($value) < $arg) {
+                    $field->{invalid} = $_->{errormessage};
+                }
+            } elsif($type eq 'max_length') {
+                if(length($value) > $arg) {
                     $field->{invalid} = $_->{errormessage};
                 }
             }
