@@ -17,9 +17,6 @@ function formdata_init(elem) {
     var edit_elem = document.getElementById("obvius_" + elem.name + "_advanced_editing");
     edit_elem.style.display = 'block';
 
-    // Hide the normal editing element:
-    elem.style.display = "none";
-
     // Setup data:
     formdata_load_rootDoc_data(elem);
     formdata_populate_fieldtable(elem.name);
@@ -31,7 +28,7 @@ function formdata_save(elem) {
 
     var xml = rootDoc.getXML();
 
-    xml = xml.replace(/></g, ">\n<");
+    xml = xml.replace(/<\/([^>]+)></g, "</$1>\n<");
 
     elem.value = xml;
 
@@ -215,6 +212,8 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         tmpXML += "     <title></title>";
         tmpXML += "     <type>" + is_new + "</type>";
         tmpXML += "     <mandatory>0</mandatory>";
+        tmpXML += "     <imagepath></imagepath>";
+        tmpXML += "     <description></description>";
         tmpXML += "     <validaterules>";
         tmpXML += "     </validaterules>";
         tmpXML += "     <options>";
@@ -243,7 +242,35 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 
     document.pageform.title.value = fieldObj.title || "";
     document.pageform.name.value = fieldObj.name || "";
+    document.pageform.description.value = fieldObj.description || "";
+    document.pageform.imagepath.value = fieldObj.imagepath || "";
+
     document.getElementById('type_field').innerHTML = formdata_translations['field_type_' + fieldObj.type] || 'unknown fieldtype';
+
+
+    var type = fieldObj.type || '';
+
+    if(type == 'text' || type == 'password' || type == 'textarea' || type == 'fieldset') {
+        // Hide options and validaterules:
+        document.getElementById('options').style.display = 'none';
+    }
+
+    if(type == 'fieldset') {
+        // Only edit name on title on fieldset:
+        document.getElementById('validaterules').style.display = 'none';
+        document.getElementById('mandatory').style.display = 'none';
+        document.getElementById('image').style.display = 'none';
+        document.getElementById('description').style.display = 'none';
+    }
+
+    if(type == 'text' || type == 'password') {
+        document.getElementById('maxlength').style.display = 'table-row';
+        document.getElementById('size').style.display = 'table-row';
+    }
+
+    if(type == 'textarea') {
+        document.getElementById('ta_dimensions').style.display = 'table-row';
+    }
 
     if(fieldObj.mandatory == 0 || ! fieldObj.mandatory) {
         document.getElementById('mand_yes').checked = 0;
@@ -285,6 +312,21 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
             name_dropdown.selectedIndex = name_dropdown.options.length - 1;
         }
     }
+
+    // Populate params:
+    var paramsNode = fieldNode.getElementsByTagName('params').item(0);
+    if(paramsNode) {
+        var params = formdata_objectify_node(paramsNode);
+
+        var form = document.pageform;
+        for(var i=0;i<form.length;i++) {
+            var formElem = form[i];
+            if(formElem.name.match(/^param_/)) {
+                formElem.value = params[formElem.name] || "";
+            }
+        }
+    }
+
 
     formdata_populate_validaterules(fieldNode);
     formdata_populate_options(fieldNode);
@@ -475,17 +517,10 @@ function formdata_validate_and_save_field(form_fieldname, old_name) {
 
     window.opener.formdata_populate_fieldtable(form_fieldname);
 
-
     window.close();
 }
 
 function formdata_validate_and_add_field(form_fieldname, old_name) {
-    if(! formdata_validate_field_dialog(fieldNode)) {
-        return false;
-    }
-
-    formdata_save_field_form_data(fieldNode);
-
     var rootDoc;
     if(window.opener.formdata_get_rootDoc_by_name) {
         rootDoc = window.opener.formdata_get_rootDoc_by_name(form_fieldname);
@@ -493,6 +528,39 @@ function formdata_validate_and_add_field(form_fieldname, old_name) {
         alert(formdata_translations['parent_connection_lost']);
         return false;
     }
+
+    // First make sure we have a name value:
+    if(! document.pageform.name.value) {
+        var nameValue = document.pageform.title.value || '';
+        nameValue = nameValue.replace(/[^a-zA-Z0-9]/g, "_");
+
+        // Test if that name is already used and if it is
+        // make a new name by adding an integer at the end
+        // of the name.
+        var names = rootDoc.getElementsByTagName('name');
+
+        var namesObj = new Object;
+        for(var i=0;i<names.getLength();i++) {
+            var nameItem = names.item(i);
+            namesObj[formdata_get_node_text(nameItem)] = 1;
+        }
+
+        var orgName = nameValue;
+        var count_up = 1;
+        while(namesObj[nameValue]) {
+            nameValue = orgName + "_" + count_up;
+            count_up++;
+        }
+
+        document.pageform.name.value = nameValue;
+    }
+
+
+    if(! formdata_validate_field_dialog(fieldNode)) {
+        return false;
+    }
+
+    formdata_save_field_form_data(fieldNode);
 
     // First import the fieldNode into the rootDoc
     var newNode = rootDoc.importNode(fieldNode, true);
@@ -556,6 +624,77 @@ function formdata_save_field_form_data(fieldNode) {
         mandNode.replaceChild(newMand, mandNode.getFirstChild());
     } else {
         mandNode.appendChild(newMand);
+    }
+
+    // Imagepath:
+    var imgNode = fieldNode.getElementsByTagName('imagepath').item(0);
+    if(! imgNode) {
+        // Create an imagepath node if none was present
+        imgNode = fieldNode.getOwnerDocument().createElement('imagepath');
+        fieldNode.appendChild(imgNode);
+    }
+    var img_value = document.pageform.imagepath.value || "";
+    var newImg = imgNode.getOwnerDocument().createTextNode(img_value);
+    if(imgNode.getFirstChild()) {
+        imgNode.replaceChild(newImg, imgNode.getFirstChild());
+    } else {
+        imgNode.appendChild(newImg);
+    }
+
+    // Description/explanation:
+    var descNode = fieldNode.getElementsByTagName('description').item(0);
+    if(! descNode) {
+        descNode = fieldNode.getOwnerDocument().createElement('description');
+        fieldNode.appendChild(descNode);
+    }
+    var desc_value = document.pageform.description.value || "";
+    var newDesc = descNode.getOwnerDocument().createTextNode(desc_value);
+    if(descNode.getFirstChild()) {
+        descNode.replaceChild(newDesc, descNode.getFirstChild());
+    } else {
+        descNode.appendChild(newDesc);
+    }
+
+    // Check for params from the form. Params are defined
+    // as form elements whose name start with "param_".
+    var form = document.pageform;
+    var params = new Array();
+    for(var i=0;i<form.length;i++) {
+        var formElem = form[i];
+        if(formElem.name.match(/^param_/) && formElem.value) {
+            params[params.length] = { name: formElem.name, value: formElem.value };
+        }
+    }
+
+    if(params.length) {
+        // Check for existing params node. If none exists, create one.
+        var paramsNode = fieldNode.getElementsByTagName('params').item(0);
+        if(! paramsNode) {
+            paramsNode = fieldNode.getOwnerDocument().createElement('params');
+            fieldNode.appendChild(paramsNode);
+        }
+
+        // Set the params given from the form:
+        for(var i=0;i<params.length;i++) {
+            var paramElem = paramsNode.getElementsByTagName(params[i].name).item(0);
+            if(! paramElem) {
+                paramElem = paramsNode.getOwnerDocument().createElement(params[i].name);
+                paramsNode.appendChild(paramElem);
+            }
+
+            var newValue = paramsNode.getOwnerDocument().createTextNode(params[i].value);
+            if(paramElem.getFirstChild()) {
+                paramElem.replaceChild(newValue, paramElem.getFirstChild());
+            } else {
+                paramElem.appendChild(newValue);
+            }
+        }
+    } else {
+        // No params, so remove whole params block from the XML:
+        var paramsNode = fieldNode.getElementsByTagName('params').item(0);
+        if(paramsNode) {
+            paramsNode.getParentNode().removeChild(paramsNode);
+        }
     }
 
     // Validationrules and options should always be up to date, so
@@ -707,8 +846,6 @@ function formdata_validate_and_save_option(ruleNr) {
 
     var options = fieldNode.getElementsByTagName('option');
     var replaceOption = options.item(ruleNr);
-    alert(replaceOption);
-    alert(optionNode);
     if(replaceOption) {
         replaceOption.getParentNode().replaceChild(optionNode, replaceOption);
     }
@@ -774,15 +911,72 @@ function formdata_init_valrule_edit(ruleNr) {
         valruleNode = tmpRootDoc.getElementsByTagName('validaterule').item(0);
     }
 
+    var typeVal = "";
     var typeNode = valruleNode.getElementsByTagName('validationtype').item(0);
     if(typeNode) {
-        var typeVal = formdata_get_node_text(typeNode);
-        if(typeVal == "regexp") {
-            document.pageform.type.selectedIndex = 1;
-        } else if(typeVal == "min_checked") {
-            document.pageform.type.selectedIndex = 2;
+        typeVal = formdata_get_node_text(typeNode);
+    }
+
+    var fieldType = '';
+    var fieldTypeNode = fieldNode.getElementsByTagName('type').item(0);
+    if(fieldTypeNode) {
+        fieldType = formdata_get_node_text(fieldTypeNode);
+    }
+
+    var rulesByFieldType = {
+                            'checkbox': {
+                                            'min_checked':  1,
+                                            'max_checked':  1,
+                                            'x_checked':    1,
+                                            'dummy':        0
+                                        },
+                            'text': {
+                                        'regexp':       1,
+                                        'min_length':   1,
+                                        'max_length':   1,
+                                        'dummy':        0
+                                    },
+                            'select': {
+                                        'min_checked':  1,
+                                        'dummy':        0
+                                    },
+                            'fieldset': {},
+                            'dummy': {}
+                        };
+    rulesByFieldType['selectmultiple'] = rulesByFieldType['checkbox'];
+    rulesByFieldType['password'] = rulesByFieldType['text'];
+    rulesByFieldType['textarea'] = rulesByFieldType['text'];
+    rulesByFieldType['radio'] = rulesByFieldType['select'];
+
+    var enabledTypes = rulesByFieldType[fieldType] || {};
+
+    // Show predefined validationrules only if the regexp type
+    // is enabled:
+    if(enabledTypes['regexp']) {
+        document.getElementById('predefined').style.display = 'table-row';
+    }
+
+
+    var types = document.pageform.type.options;
+
+    // Loop over contents of the type dropdown and remove types
+    // that we do not want. Must loop backwards since we'll be
+    // removing stuff as we go.
+    for(var i=types.length - 1;i>=0;i--) {
+        if(! enabledTypes[types[i].value]) {
+            types[i] = null;
         }
     }
+
+    // And then loop over the options now present and set
+    // selectedIndex:
+    for(var i=0;i<types.length;i++) {
+        if(typeVal == types[i].value) {
+            document.pageform.type.selectedIndex = i;
+            break;
+        }
+    }
+
 
     var argNode = valruleNode.getElementsByTagName('validationargument').item(0);
     if(argNode) {
@@ -794,6 +988,44 @@ function formdata_init_valrule_edit(ruleNr) {
         document.pageform.errormessage.value = formdata_get_node_text(errNode);
     }
 }
+
+var predefined_valrules = {
+                            'valid_email': ['regexp', '^.+\\@.+\\.\\w+$', formdata_translations['predef_valrule_valid_email']],
+                            'numbers_only': ['regexp', '^\\d+$', formdata_translations['predef_valrule_numbers_only']],
+                            'postal_code': ['regexp', '^\\d\\d\\d\\d$', formdata_translations['predef_valrule_postal_code']],
+                            'phone_number': ['regexp', '^([+0]\\d\\d)?\\d\\d[- ]*\\d\\d[- ]*\\d\\d[- ]*\\d\\d$', formdata_translations['predef_valrule_phone_number']],
+                            'dummy': []
+                        };
+
+
+function formdata_set_predefined_valrule(optionElem) {
+    if(! optionElem) {
+        return false;
+    }
+
+    if(! optionElem.value) {
+        return true;
+    }
+
+    var data = predefined_valrules[optionElem.value];
+
+    if(! data) {
+        return true;
+    }
+
+
+    var typeDropDown = document.pageform.type;
+    for(var i=0;i<typeDropDown.options.length;i++) {
+        if(typeDropDown.options[i].value == data[0]) {
+            typeDropDown.selectedIndex = i;
+            break;
+        }
+    }
+
+    document.pageform.argument.value = data[1];
+    document.pageform.errormessage.value = data[2];
+}
+
 
 function formdata_validate_valrule_dialog() {
     var typeSelect = document.pageform.type;
@@ -809,12 +1041,12 @@ function formdata_validate_valrule_dialog() {
 
     if(typeVal == 'regexp') {
         if(! arg) {
-            alert(formdata_translations['must_specify_arg_regexp']);
+            alert(formdata_translations['must_specify_arg']);
             return false;
         }
-    } else if(typeVal == 'min_checked') {
+    } else if(typeVal == 'min_checked' || typeVal == 'max_checked' || typeVal == 'x_checked' || typeVal == 'min_length' || typeVal == 'max_length') {
         if(! arg || ! arg.match(/^\d+$/)) {
-            alert(formdata_translations['must_specify_arg_min_checked']);
+            alert(formdata_translations['must_specify_integer_arg']);
             return false;
         }
     } else {
