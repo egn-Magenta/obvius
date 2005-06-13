@@ -33,8 +33,7 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
 <div style="display: none" id="obvius_<% $name %>_advanced_editing">
 <table border="1" id="obvius_<% $name %>_displaylist" width="600">
     <tr>
-        <th><& SELF:msg, text=>"formdata_name" &></th>
-        <th><& SELF:msg, text=>"Title" &></th>
+        <th><& SELF:msg, text=>"Fieldname" &></th>
         <th><& SELF:msg, text=>"formdata_type" &></th>
         <th><& SELF:msg, text=>"Mandatory" &></th>
         <th><& SELF:msg, text=>"Edit" &></th>
@@ -56,6 +55,7 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
     <option value="select"><& SELF:msg, text=>"Dropdown" &></option>
     <option value="selectmultiple"><& SELF:msg, text=>"Select multiple" &></option>
     <option value="fieldset"><& SELF:msg, text=>"Fieldset" &></option>
+    <option value="fieldset_end"><& SELF:msg, text=>"Fieldset End" &></option>
 </select>
 <strong>[</strong>
 <a href="<% $prefix . $uri %>" onclick="formdata_add_new(document.pageform.<% $name %>); return false;"><& SELF:msg, text=>"Create" &></a>
@@ -127,6 +127,7 @@ var formdata_translations = {
                                 "field_type_select" : "<& SELF:msg, text=>"Dropdown" &>",
                                 "field_type_selectmultiple" : "<& SELF:msg, text=>"Select multiple" &>",
                                 "field_type_fieldset" : "<& SELF:msg, text=>"Fieldset" &>",
+                                "field_type_fieldset_end" : "<& SELF:msg, text=>"Fieldset End" &>",
                                 "validate_type_regexp" : "<& SELF:msg, text=>"validate_type_regexp" &>",
                                 "validate_type_min_checked" : "<& SELF:msg, text=>"validate_type_min_checked" &>",
                                 "validate_type_max_checked" : "<& SELF:msg, text=>"validate_type_max_checked" &>",
