@@ -64,16 +64,13 @@ function formdata_populate_fieldtable(name) {
 
             var tr = document.createElement('tr');
 
-            var name_td = document.createElement('td');
-            name_td.innerHTML = obj.name;
-            tr.appendChild(name_td);
-
             var title_td = document.createElement('td');
             title_td.innerHTML = obj.title;
             tr.appendChild(title_td);
 
             var type_td = document.createElement('td');
-            type_td.innerHTML = obj.type;
+            var translated_type = formdata_translations['field_type_' + obj.type] || 'Unknown fieldtype';
+            type_td.innerHTML = translated_type;
             tr.appendChild(type_td);
 
             var man_td = document.createElement('td');
@@ -250,13 +247,14 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 
     var type = fieldObj.type || '';
 
-    if(type == 'text' || type == 'password' || type == 'textarea' || type == 'fieldset') {
+    if(type == 'text' || type == 'password' || type == 'textarea') {
         // Hide options and validaterules:
         document.getElementById('options').style.display = 'none';
     }
 
-    if(type == 'fieldset') {
+    if(type == 'fieldset' || type == 'fieldset_end') {
         // Only edit name on title on fieldset:
+        document.getElementById('options').style.display = 'none';
         document.getElementById('validaterules').style.display = 'none';
         document.getElementById('mandatory').style.display = 'none';
         document.getElementById('image').style.display = 'none';
