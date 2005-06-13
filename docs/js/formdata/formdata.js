@@ -264,12 +264,12 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
     }
 
     if(type == 'text' || type == 'password') {
-        document.getElementById('maxlength').style.display = 'table-row';
-        document.getElementById('size').style.display = 'table-row';
+        document.getElementById('maxlength').style.display = '';
+        document.getElementById('size').style.display = '';
     }
 
     if(type == 'textarea') {
-        document.getElementById('ta_dimensions').style.display = 'table-row';
+        document.getElementById('ta_dimensions').style.display = '';
     }
 
     if(fieldObj.mandatory == 0 || ! fieldObj.mandatory) {
@@ -953,7 +953,7 @@ function formdata_init_valrule_edit(ruleNr) {
     // Show predefined validationrules only if the regexp type
     // is enabled:
     if(enabledTypes['regexp']) {
-        document.getElementById('predefined').style.display = 'table-row';
+        document.getElementById('predefined').style.display = '';
     }
 
 
