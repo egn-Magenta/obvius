@@ -1,0 +1,10 @@
+%if($current_fieldsets) {
+</fieldset>
+%}
+<%args>
+$fielddata
+</%args>
+<%init>
+my $current_fieldsets = $r->notes('fieldsets') || 0;
+$r->notes('fieldsets' => 0);
+</%init>

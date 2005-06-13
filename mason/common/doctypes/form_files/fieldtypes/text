@@ -1,6 +1,4 @@
-<div>
     <input type="text" name="<% $fielddata->{name} %>" size="<% $fielddata->{params}->{param_size} || 40 %>" value="<% $value |h %>"<% $maxlength %> />
-</div>
 %
 %
 <%args>

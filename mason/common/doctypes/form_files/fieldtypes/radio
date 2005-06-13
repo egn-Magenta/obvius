@@ -1,9 +1,7 @@
-<div>
 %for(@$options) {
 <input type="radio" name="<% $fielddata->{name} %>" value="<% $_->{optionvalue} %>"<% $_->{optionvalue} eq $value ? ' checked="checked"': '' %> />
 <% $_->{optiontitle} %>
 %}
-</div>
 %
 %
 <%args>

@@ -43,28 +43,42 @@ Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette
 %}
 <input type="hidden" name="obvius_form_submitted" value="1" />
 %for(@$fields) {
-%unless($_->{type} eq 'fieldset') {
-<label for="<% $_->{name} %>">
-<a name="<% $_->{name} %>"></a>
-<% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
-%}
+%if($_->{type} =~ m!^fieldset!) {
+<& 'form_files/fieldtypes/' . $_->{type}, fielddata=>$_ &>
+%} else {
+<div class="formfield">
+    <a name="<% $_->{name} %>"></a>
+    <label for="<% $_->{name} %>">
+        <% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
+    </label>
+%
 %if($_->{invalid}) {
-<p class="error">
-Fejl: <% $_->{invalid} %>
-</p>
+    <p class="error">
+        Fejl: <% $_->{invalid} %>
+    </p>
 %}
+%
+%if($_->{imagepath} or $_->{description}) {
+    <p class="formfielddescription">
+        <& Form:display_form_image, path=>$_->{imagepath} &>
+        <% $_->{description} %>
+    </p>
+%}
+%
+%
 %if($_->{mandatory_failed}) {
-<& Form:show_mandatory_error, field=>$_, fields_by_name=>\%fields_by_name &>
+    <& Form:show_mandatory_error, field=>$_, fields_by_name=>\%fields_by_name &>
 %}
+    <div class="inputfield">
 %   if($m->comp_exists('form_files/fieldtypes/' . $_->{type})) {
-    <& 'form_files/fieldtypes/' . $_->{type}, fielddata=>$_ &>
+        <& 'form_files/fieldtypes/' . $_->{type}, fielddata=>$_ &>
 %   } else {
-    <& 'form_files/fieldtypes/default', fielddata=>$_ &>
+        <& 'form_files/fieldtypes/default', fielddata=>$_ &>
 %   }
-%   unless($_->{type} eq 'fieldset') {
+    </div>
     <br />
-</label>
-%   }
+</div>
+%}
 %}
 %if($r->notes('fieldsets')) {
 </fieldset>
@@ -120,4 +134,37 @@ $fields_by_name
 %    }
 %}
 </p>
+</%method>
+%
+%
+%
+<%method display_form_image>\
+%if($src) {
+<a href="<% $src %>" title="Se billedet '<% $alt %>' i fuld størrelse" onclick="this.target='_blank'"><!--
+--><img src="<% $src %>?size=<% $width %>x<% $height %>" width="<% $width %>" height="<% $height %>" alt="<% $alt %>" class="formimage" style="vertical-align: top;"/><!--
+--></a>\
+%}
+<%args>
+$path
+</%args>
+<%init>
+my $src;
+my $width;
+my $height;
+my $alt;
+if(my $doc = $obvius->lookup_document($path)) {
+    if(my $vdoc = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc)) {
+        $src = $path;
+
+        $obvius->get_version_fields($vdoc, ['width', 'height', 'title', 'short_title']);
+
+        my $org_width = $vdoc->field('width');
+        my $org_height = $vdoc->field('height');
+        $alt = $vdoc->field('short_title') || $vdoc->field('title');
+
+        $width = 100;
+        $height = int((100 / $org_width) * $org_height);
+    }
+}
+</%init>
 </%method>

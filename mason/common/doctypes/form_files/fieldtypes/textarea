@@ -1,6 +1,4 @@
-<div>
 <textarea name="<% $fielddata->{name} %>" wrap="wrap" cols="<% $cols %>" rows="<% $rows %>"><% $value |h %></textarea>
-</div>
 %
 %
 <%args>
