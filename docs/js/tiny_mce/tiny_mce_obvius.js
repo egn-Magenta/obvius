@@ -27,12 +27,12 @@ function obvius_tinymce_get_dialogfield(field_name) {
     return field_ref;
 }
 
-function obvius_tinymce_navigator_callback(field_name, url, type) {
+function obvius_tinymce_navigator_callback(field_name, url, type, win) {
   var nav_features = ('toolbar=0,location=0,directories=0,status=0,'
       +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
       +'width=750,height=550');
 
-  return obvius_tinymce_navigator_callback_p(field_name, url, type, 'obvius_op=navigator', nav_features);
+  return obvius_tinymce_navigator_callback_p(field_name, url, type, 'obvius_op=navigator', nav_features, win);
 }
 
 /* This function performs the same task as the one above, only for the
