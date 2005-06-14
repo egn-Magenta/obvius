@@ -163,7 +163,11 @@ if(my $doc = $obvius->lookup_document($path)) {
         $alt = $vdoc->field('short_title') || $vdoc->field('title');
 
         $width = 100;
-        $height = int((100 / $org_width) * $org_height);
+        if($org_width) {
+            $height = int((100 / $org_width) * $org_height);
+        } else {
+            $height = $org_height;
+        }
     }
 }
 </%init>
