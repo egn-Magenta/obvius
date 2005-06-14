@@ -13,7 +13,7 @@ function Init() {
 
     if(window.opener) {
         parent_url = window.opener.location.href;
-        parent_url = parent_url.replace(/^https?:\/\/[^/]+\/admin/, "");
+        parent_url = parent_url.replace(/^https?:\/\/[^\/]+\/admin/, "");
     } else {
         parent_url = '<% $uri %>';
     }
