@@ -152,6 +152,7 @@ my $src;
 my $width;
 my $height;
 my $alt;
+if($path) {
 if(my $doc = $obvius->lookup_document($path)) {
     if(my $vdoc = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc)) {
         $src = $path;
@@ -169,6 +170,7 @@ if(my $doc = $obvius->lookup_document($path)) {
             $height = $org_height;
         }
     }
+}
 }
 </%init>
 </%method>
