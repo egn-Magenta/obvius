@@ -105,7 +105,7 @@ $output
 %
 <%init>
 $obvius->get_version_fields($vdoc, ['formtext']);
-my $formdata = $output->param('formdata');
+my $formdata = $output->param('formdata') || {};
 my $fields = $formdata->{field} || [];
 
 my $invalid = $output->param('invalid') || [];
