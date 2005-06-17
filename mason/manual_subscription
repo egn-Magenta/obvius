@@ -120,6 +120,8 @@ use Date::Calc qw(Today_and_Now Add_Delta_DHMS);
 use Data::Dumper;
 my $subscriber_docs;
 
+my $site = $obvius->config->param('name');
+
 my $sitename = $obvius->{OBVIUS_CONFIG}->{SITENAME};
 
 my $sender = 'bitbucket@' . $sitename;
