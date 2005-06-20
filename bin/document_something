@@ -23,9 +23,8 @@ use Getopt::Long;
 my $path='/home/magenta/asjo/udvikling/document_something/obvius/perl';
 my @ignore_paths=qw( WebObvius/Template/ );
 my @default_emails=(
-                   'asjo@magenta-aps.dk',
                    'jubk@magenta-aps.dk',
-                   'jensk@magenta-aps.dk',
+                   'ole@magenta-aps.dk',
                    'martin@magenta-aps.dk'
                   );
 my @emails;
