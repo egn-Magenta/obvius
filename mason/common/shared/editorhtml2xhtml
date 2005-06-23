@@ -153,6 +153,35 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         push(@$attrseq, 'style') unless($existing_attr{'style'});
                                                     }
 
+                                                    # strike, s => del
+                                                    elsif($tagname eq 'strike' or $tagname eq 's') {
+                                                        $tagname = 'del';
+                                                    }
+
+                                                    # u => em
+                                                    elsif($tagname eq 'u') {
+                                                        $tagname = 'span';
+                                                        $attr->{style} ||='';
+                                                        $attr->{style} .= 'text-decoration: underline;';
+
+                                                        push(@$attrseq, 'style') unless($existing_attr{'style'});
+                                                    }
+
+                                                    # Fixup for align attribute on block elements:
+                                                    if($tagname =~ m!^h\d|p|div! and $attr->{align}) {
+                                                        $remove_attr{'align'} = 1;
+
+                                                        unless($existing_attr{'style'}) {
+                                                            $attr->{'style'} = '';
+                                                            push(@$attrseq, 'style');
+                                                        }
+
+                                                        $attr->{style} =~ s/text-align:[^;]+;//;
+                                                        $attr->{style} .= "text-align: " . $attr->{'align'} . ";";
+
+                                                    }
+
+
                                                     # Remove attributes
                                                     @$attrseq = grep {
                                                                         ! $remove_attr{$_} # skip tags that were removed above:
@@ -174,6 +203,14 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 }, "self, tagname, attr, attrseq" ],
                             end_h=> [sub {
                                             my($this, $tagname, $text, $attr)=@_;
+
+                                            if($tagname eq 'strike') {
+                                                $text =~ s!</(strike|s)!</del!i;
+                                            }
+
+                                            elsif($tagname eq 'u') {
+                                                $text =~ s!</u!</span!i;
+                                            }
                                             $out.=lc($text);
                                         }, "self, tagname, text, attr" ],
                             text_h=> [ sub {

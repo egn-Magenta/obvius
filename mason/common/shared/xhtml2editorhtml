@@ -126,12 +126,32 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         }
                                                     }
 
+                                                    # del => strike:
+                                                    elsif($tagname eq 'del') {
+                                                        $tagname = 'strike';
+                                                        $adjust = 1;
+                                                    }
+
+                                                    if($tagname eq 'span' and $attr->{style} and $attr->{style} =~ s!text-decoration:\s+underline;?!!) {
+                                                        $tagname = 'u';
+                                                        $adjust = 1;
+                                                        $this->{open_u_span} = 1;
+                                                    }
+
+                                                    # Fixup for align attribute on block elements:
+                                                    if($tagname =~ m!^h\d|p|div! and $attr->{style} and $attr->{style} =~ s!text-align:\s+([^;]+);?!!) {
+                                                        $attr->{'align'} = $1;
+                                                        push(@$attrseq, "align") unless($existing_attr{'align'});
+                                                        $adjust = 1;
+                                                    }
+
+
+
                                                     # Remove style attribute if it's empty
                                                     unless($attr->{style}) {
                                                         $remove_attr{'style'} = 1;
                                                         $adjust = 1
                                                     }
-
 
                                                     if($adjust) {
                                                         my $endtag = "";
@@ -153,6 +173,16 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 }, "self, tagname, text, attr, attrseq" ],
                             end_h=> [sub {
                                             my($this, $tagname, $text, $attr)=@_;
+
+                                            if($tagname eq 'del') {
+                                                $text =~ s!</del!</strike!i;
+                                            }
+
+                                            if($this->{open_u_span} and $tagname eq 'span') {
+                                                $text = "</u>";
+                                                $this->{open_u_span} = 0;
+                                            }
+
                                             $out.=lc($text);
                                         }, "self, tagname, text, attr" ],
                             text_h=> [ sub {
