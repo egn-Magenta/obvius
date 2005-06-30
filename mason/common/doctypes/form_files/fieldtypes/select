@@ -13,6 +13,6 @@ $fielddata=>{}
 </%args>
 <%init>
 $fielddata ||= {};
-my $options = $fielddata->{options} = $fielddata->{options}->{option} || [] : [];
+my $options = $fielddata->{options} ? $fielddata->{options}->{option} || [] : [];
 my $value = $fielddata->{_submitted_value} || $fielddata->{defaultvalue} || '';
 </%init>
