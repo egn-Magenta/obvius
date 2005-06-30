@@ -5,6 +5,7 @@
 $fielddata=>{}
 </%args>
 <%init>
+$fielddata ||= {};
 my $value = $fielddata->{_submitted_value} || $fielddata->{defaultvalue} || '';
 my $cols = $fielddata->{params}->{param_cols} || 40;
 my $rows = $fielddata->{params}->{param_rows} || 6;
