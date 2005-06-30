@@ -7,7 +7,7 @@
 %
 %
 <%args>
-$fielddata
+$fielddata=>{}
 </%args>
 <%init>
 my $options = $fielddata->{options}->{option} || [];

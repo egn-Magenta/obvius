@@ -6,7 +6,7 @@
 %
 %
 <%args>
-$fielddata
+$fielddata=>{}
 </%args>
 <%init>
 my $current_fieldsets = $r->notes('fieldsets') || 0;
