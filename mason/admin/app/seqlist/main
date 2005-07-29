@@ -19,7 +19,7 @@
     <td>
       <ul>
 %     foreach my $sib (@{$seq->{sibs}}) {
-%         if ($sib->{doc}->Id eq $doc->Id) {
+%         if ($sib->{fake} or ($sib->{doc}->Id eq $doc->Id)) {
         <li class="current"><% $sib->{title} |h %>
           <span>
 %             if ($inactive) {
@@ -27,8 +27,8 @@
             <img class="obvius-inactive" width="7" height="6" src="/pics/icons/sort-up-inactive.png" alt="(<& /shared/msg, text=>'Up' &>)" />
 %             }
 %             else {
-            <a href="./?obvius_app_seqlist=1&amp;value=<% $next %>&amp;fieldname=<% $fieldname |u %>"><img width="7" height="6" src="/pics/icons/sort-down.png" alt="(<& /shared/msg, text=>'Down' &>)" /></a>
-            <a href="./?obvius_app_seqlist=1&amp;value=<% $prev %>&amp;fieldname=<% $fieldname |u %>"><img width="7" height="6" src="/pics/icons/sort-up.png" alt="(<& /shared/msg, text=>'Up' &>)" /></a>
+            <a href="./?obvius_app_seqlist=1&amp;value=<% $next %>&amp;fieldname=<% $fieldname |u %>&newdocument=<% $new_document %>"><img width="7" height="6" src="/pics/icons/sort-down.png" alt="(<& /shared/msg, text=>'Down' &>)" /></a>
+            <a href="./?obvius_app_seqlist=1&amp;value=<% $prev %>&amp;fieldname=<% $fieldname |u %>&newdocument=<% $new_document %>"><img width="7" height="6" src="/pics/icons/sort-up.png" alt="(<& /shared/msg, text=>'Up' &>)" /></a>
 %             }
           </span>
         </li>
@@ -57,7 +57,9 @@ my $inactive=1;
 
 my $sibs;
 
-my $parent_doc=$obvius->get_doc_by_id($doc->Parent);
+my $new_document = $r->param('newdocument') ? 1 : 0;
+
+my $parent_doc=$obvius->get_doc_by_id($new_document ? $doc->Id : $doc->Parent);
 my $parent_vdoc;
 $parent_vdoc=$obvius->get_public_version($parent_doc) || $obvius->get_latest_version($parent_doc) if ($parent_doc);
 if ($parent_vdoc) {
@@ -67,12 +69,50 @@ if ($parent_vdoc) {
     $inactive=0 if (defined $sortorder and $sortorder=~/^[+\-]seq/i);
 }
 
+if($new_document) {
+    # First grab a copy of sibs, so we don't modify anything in the cache:
+    $sibs = [ @$sibs ];
+
+    # Make a fake doc:
+
+    my $fake_doc = new Obvius::Document({
+                                            id => 0,
+                                            parent => $doc->Id,
+                                            owner => $doc->Owner,
+                                            group => $doc->Group,
+                                            name => 'dummy'
+                                        });
+
+    # Make a fake vdoc...
+    my $fake_vdoc = new Obvius::Version({
+                                            title => $m->scomp('/shared/msg', text=>"This document"),
+                                            seq => $value,
+                                            docid => 0,
+                                            type => 0,
+                                            lang => 'en'
+                                        });
+    $fake_vdoc->field('title' => $fake_vdoc->Title);
+    $fake_vdoc->field('seq' => $fake_vdoc->Seq);
+
+    my $fake_sib = {
+                    doc => $fake_doc,
+                    vdoc => $fake_vdoc,
+                    title => $fake_vdoc->Title,
+                    name => $fake_doc->Name,
+                    fake => 1
+                };
+
+    push(@$sibs, $fake_sib);
+
+}
+
+
 my $current;
 my @seqs=();
 my $seq={};
 if ($sibs) {
     foreach my $sib (@$sibs) {
-        if ($sib->{doc}->Id==$doc->Id) {
+        if ($sib->{fake} or ($sib->{doc}->Id==$doc->Id)) {
             $sib->{value}=$value;
             $current=$sib;
             next;
