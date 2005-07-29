@@ -1,0 +1,88 @@
+<% $out %>\
+<%args>
+$html
+</%args>
+<%init>
+$out = '';
+$p->parse($html);
+$p->eof;
+</%init>
+<%once>
+# $out should be reset before parsing.
+my $out='';
+my $hostname_from_req = $r->hostname;
+my $p = HTML::Parser->new(api_version=>3,
+                            default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
+                            start_h=> [sub {
+                                                my($this, $tagname, $text, $attr)=@_;
+                                                if($tagname eq 'a' and $attr->{href}) {
+
+                                                    # Make urls relative to / and convert to .docid format if possible:
+
+                                                    my $uri = $attr->{href};
+                                                    my $org_uri = $uri;
+
+                                                    if($uri) {
+                                                        $uri =~ s!^http://$hostname_from_req/!/!;
+                                                        $uri =~ s!^/admin/!/!;
+
+                                                        if($uri =~ m!^/!) {
+                                                            # Remove anchor ref and querystring:
+                                                            $uri =~ s!#.*$!!;
+                                                            $uri =~ s!\?.*$!!;
+
+                                                            if(my $doc = $obvius->lookup_document($uri)) {
+                                                                # Remove anchor and querystring from original uri:
+                                                                $org_uri =~ s!#.*$!!;
+                                                                $org_uri =~ s!\?.*$!!;
+
+                                                                $uri = "/" . $doc->Id . ".docid";
+                                                                $text =~ s!\Q$org_uri\E!$uri!;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    $out.=$text;
+
+                                                } elsif($tagname eq 'img') {
+
+                                                    # Make images relative to / and convert to .docid format if possible:
+
+                                                    my $org_src = $attr->{src};
+
+                                                    if($org_src) {
+                                                        # Remove achor and querystring:
+                                                        $org_src =~ s!#.*$!!;
+                                                        $org_src =~ s!\?.*$!!;
+
+                                                        my $src = $org_src;
+
+                                                        # Remove hostname:
+                                                        $src =~ s!^http://$hostname_from_req/!/!;
+                                                        $src =~ s!^/admin/!/!;
+
+
+                                                        if($src =~ m!^/!) {
+                                                            if(my $imgdoc = $obvius->lookup_document($src)) {
+                                                                $src = "/" . $imgdoc->Id . ".docid";
+                                                            }
+                                                        }
+
+                                                        $text =~ s!\Q$org_src\E!$src!;
+                                                    }
+
+                                                    $out .= $text;
+                                                } else {
+                                                    $out.=$text;
+                                                }
+                                                }, "self, tagname, text, attr" ],
+                            end_h=> [sub {
+                                            my($this, $tagname, $text, $attr)=@_;
+                                            $out.=$text;
+                                        }, "self, tagname, text, attr" ],
+                            text_h=> [ sub {
+                                        my ($this, $text)=@_;
+                                        $out.=$text;
+                                        },
+                                        "self, text" ]);
+</%once>
