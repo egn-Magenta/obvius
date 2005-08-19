@@ -64,8 +64,17 @@ $obvius->{USER} = 'admin';
 my $path_doc=$obvius->lookup_document($path);
 die "The path $path does not exist, stopping" unless ($path_doc);
 
+# Make a list of repeatable fields:
+
+my %is_repeatable;
+my $rfields = $obvius->get_table_data("fieldspecs", 'where' => "repeatable = 1") || [];
+for(@$rfields) {
+    $is_repeatable{$_->{name}} = 1;
+}
+my @repeatable_fields = keys %is_repeatable;
+
 print STDERR "Reading XML...\n";
-my $data=XMLin($ARGV[0], keyattr=>[]);
+my $data=XMLin($ARGV[0], keyattr=>[], suppressempty => '', forcearray => \@repeatable_fields);
 print STDERR "Converting from utf8...\n";
 $data=unutf8ify($data); # For some strange reason I don't understand,
                         # the text is converted from iso-8859-1 to
