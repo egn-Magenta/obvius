@@ -709,6 +709,18 @@
     <translation lang="en">You do not have access to this command. Sorry.</translation>
     <translation lang="da">Du har ikke adgang til denne kommando. Beklager.</translation>
   </text>
+  <text key="Categories">
+    <translation lang="en">Categories</translation>
+    <translation lang="da">Klassifikationskoder</translation>
+  </text>
+  <text key="Edit category">
+    <translation lang="en">Edit category</translation>
+    <translation lang="da">Rediger klassifikationskode</translation>
+  </text>
+  <text key="New category">
+    <translation lang="en">New category</translation>
+    <translation lang="da">Ny klassifikationskode</translation>
+  </text>
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>

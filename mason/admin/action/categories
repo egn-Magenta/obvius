@@ -1,0 +1,84 @@
+<& /shared/editengine2/init, editscheme=>$keywords &>
+%
+%
+%
+<%once>
+my $storage = {
+               organization => {
+                                class => 'DbTable',
+                                source => 'categories',
+                                identifiers => [qw(id)],
+                               },
+               functions => {
+                             update => {label=>'Edit', relation=>'edit'},
+                             create => {label=>'Create new', anonymous=>'1', relation=>'new'},
+                            },
+               data => {
+                        id => { type=>'line', mandatory=>1, },
+                        name => { type=>'line', },
+                       },
+              };
+
+my $cat = {
+               type => 'scheme/editsheet',
+               label => 'Edit category',
+               display => [
+                           {name=>'id', content=>'data', label=>'Id', style => { content => 'block', disabled => 1 } },
+                           {name=>'name', content=>'data', label=>'Name' },
+                          ],
+               storage => $storage,
+              };
+
+my $cat_new = {
+               type => 'scheme/editsheet',
+               label => 'New category',
+               display => [
+                           {name=>'id', content=>'data', label=>'Id'},
+                           {name=>'name', content=>'data', label=>'Name' },
+                          ],
+               storage => $storage,
+              };
+
+my $keywords={
+              label=>'Categories',
+              type=>'scheme/table',
+              arguments => {
+                            max => '20',
+                           },
+              display=>[
+                     { name=>'id', content=>'data', label=>'Id', },
+                     { name=>'name', content=>'data', label=>'Name', },
+                    ],
+              storage=>$storage,
+              relations=>{
+                          edit=>{
+                                 scheme=>$cat,
+                                 projection=>'pipe',
+                                },
+                          new=>{
+                                 scheme=>$cat_new,
+                                 projection=>'pipe',
+                                },
+                         },
+             };
+</%once>
+%
+<%init>
+# XXX:
+# $m->comp('/default/check_access', can=>'can_?');
+
+$r->pnotes('obvius_session')->{action}='editengine';
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+<%doc>
+This component allows for editing of categories in the database.
+
+Note that ids are not editable once they have been entered.
+</%doc>
