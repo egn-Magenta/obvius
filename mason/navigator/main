@@ -186,6 +186,13 @@ if(! $doctypeid and $doctype) {
 my $extra_path_info;
 my @path = $obvius->get_doc_by_path($path, \$extra_path_info);
 
+# Fixup for document not found, eg. when called with a /XX.docid path:
+unless($path[-1]) {
+    @path = $obvius->get_doc_by_path("/");
+    $path = "/";
+    $ARGS{path} = $path;
+}
+
 if($extra_path_info) {
     $path =~ s!\Q$extra_path_info\E/?$!!;
     $ARGS{path} = $path;
