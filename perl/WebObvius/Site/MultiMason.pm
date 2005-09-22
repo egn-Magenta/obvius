@@ -88,8 +88,8 @@ sub obvius_connect {
     return $obvius;
 }
 
-# Note that this method is meant to override the one in WebObvius::Site::Mason:
-
+# can_use_cache - Check if the given request is fit for being cached or not.
+#                 Note: this method overrides the one in WebObvius::Site::Mason
 sub can_use_cache {
     my ($this, $req, $output) = @_;
 
@@ -102,6 +102,7 @@ sub can_use_cache {
     return '' unless ($this->{WEBOBVIUS_CACHE_INDEX} and
                         $this->{WEBOBVIUS_CACHE_DIRECTORY});
     return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
+    return '' if (-e $this->{WEBOBVIUS_CACHE_INDEX} . "-off");
 
     my $vdoc=$output->param('version');
     my $lang=$vdoc->Lang || 'UNKNOWN'; # Should always be there
@@ -126,8 +127,9 @@ sub can_use_cache {
 }
 
 
-# Note that this method is meant to override the one in WebObvius::Site::Mason:
-
+# save_in_cache - Saves the data in $s in the document cache.
+#                 can_use_cache should always be called before calling this method.
+#                 Note: this method overrides the one in WebObvius::Site::Mason
 sub save_in_cache {
     my ($this, $req, $s) = @_;
 
@@ -175,26 +177,24 @@ sub save_in_cache {
 
         my $extra = '';
         my $qstring = $req->args;
-        if($qstring and $qstring =~ /^size=\d+x\d+$/) {
+        if ($qstring and $qstring =~ /^size=\d+x\d+$/) {
             $extra = $qstring;
         }
 
         # Perhaps move this check up, so nothing is written to disk if the cache is off?
-        if (! -e $this->{WEBOBVIUS_CACHE_INDEX} . "-off") {
-            # Add to cache-db
-            $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
-            if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
-                if (flock FH, LOCK_EX|LOCK_NB) {
-                    my $siteroot = $obvius->{SITEROOT} || '';
-                    print $fh $siteroot, $req->uri, $extra, "\t", $req->notes('cache_url'), "\n";
-                    $log->debug(" ADDED TO CACHE: " . $req->uri);
-                } else {
-                    $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
-                }
-                close FH;
+        # Add to cache-db
+        $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
+        if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
+            if (flock FH, LOCK_EX|LOCK_NB) {
+                my $siteroot = $obvius->{SITEROOT} || '';
+                print $fh $siteroot, $req->uri, $extra, "\t", $req->notes('cache_url'), "\n";
+                $log->debug(" ADDED TO CACHE: " . $req->uri);
             } else {
-                $log->debug("Couldn't write to WEBOBVIUS_CACHE_INDEX-file ($this->{WEBOBVIUS_CACHE_INDEX})");
+                $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
             }
+            close FH;
+        } else {
+            $log->debug("Couldn't write to WEBOBVIUS_CACHE_INDEX-file ($this->{WEBOBVIUS_CACHE_INDEX})");
         }
     }
     $log->debug("Cache file done");

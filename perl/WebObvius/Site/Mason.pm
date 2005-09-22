@@ -159,8 +159,8 @@ sub new {
 #
 ########################################################################
 
-# Note that this method is also present in WebObvius::Site::MultiMason:
-
+# can_use_cache - Check if the given request is fit for being cached or not.
+#                 Note: this method is also present in WebObvius::Site::MultiMason
 sub can_use_cache {
     my ($this, $req, $output) = @_;
 
@@ -172,6 +172,7 @@ sub can_use_cache {
     return '' unless ($this->{WEBOBVIUS_CACHE_INDEX} and
 		      $this->{WEBOBVIUS_CACHE_DIRECTORY});
     return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
+    return '' if (-e $this->{WEBOBVIUS_CACHE_INDEX} . "-off");
 
     my $vdoc=$output->param('version');
     my $lang=$vdoc->Lang || 'UNKNOWN'; # Should always be there
@@ -194,8 +195,9 @@ sub can_use_cache {
     return 1;
 }
 
-# Note that this method is also present in WebObvius::Site::MultiMason:
-
+# save_in_cache - Saves the data in $s in the document cache.
+#                 can_use_cache should always be called before calling this method.
+#                 Note: this method is also present in WebObvius::Site::MultiMason
 sub save_in_cache {
     my ($this, $req, $s) = @_;
 
@@ -211,20 +213,24 @@ sub save_in_cache {
     my $id = $req->notes('cache_id');
     return unless ($id);
     return unless ($this->{WEBOBVIUS_CACHE_INDEX}
-		   and $this->{WEBOBVIUS_CACHE_DIRECTORY});
+                   and $this->{WEBOBVIUS_CACHE_DIRECTORY});
 
     my $dir = $req->notes('cache_dir');
     unless (-d $dir) {
-	my $d;
-	my @dirs = split '/', $dir;
-	if ($dirs[0] eq '') { $dir = '/'; shift @dirs; } else { $dir = '' }
+        my $d;
+        my @dirs = split '/', $dir;
+        if ($dirs[0] eq '') {
+            $dir = '/'; shift @dirs;
+        } else {
+            $dir = '';
+        }
         while ($d = shift @dirs) {
             $dir .= $d . '/';
-	    unless (-d $dir) {
-	        mkdir($dir, 0775) or do{$log->debug("Couldn't make dir: $dir"); return};
-	        chmod(0775, $dir);
+            unless (-d $dir) {
+                mkdir($dir, 0775) or do{$log->debug("Couldn't make dir: $dir"); return};
+                chmod(0775, $dir);
             }
-	}
+        }
     }
 
     my $file = $req->notes('cache_file');
@@ -234,38 +240,35 @@ sub save_in_cache {
 
     my $fh = new Apache::File('>'.$file);
     if ($fh) {
-	$log->debug("Cache file open ok");
-	print $fh (ref($s) ? $$s : $s);
-	$fh->close;
+        $log->debug("Cache file open ok");
+        print $fh (ref($s) ? $$s : $s);
+        $fh->close;
 
         my $extra = '';
         my $qstring = $req->args;
-        if($qstring and $qstring =~ /^size=\d+(x\d+|\%)$/) {
+        if ($qstring and $qstring =~ /^size=\d+(x\d+|\%)$/) {
             $extra = $qstring;
         }
 
-        # Perhaps move this check up, so nothing is written to disk if the cache is off?
-	if (! -e $this->{WEBOBVIUS_CACHE_INDEX} . "-off") {
-	    # Add to cache-db
-	    $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
-	    if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
-		if (flock FH, LOCK_EX|LOCK_NB) {
-                    my $real_path=$req->uri();
-                    # If handle_path_info() is true on the doctype
-                    # (see WebObvius::Site::obvius_document),
-                    # obvius_path_info needs to be added:
-                    $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
-		    print $fh $real_path, $extra, "\t", $req->notes('cache_url'), "\n";
-		    $log->debug(" ADDED TO CACHE: " . $req->uri);
-		} else {
-		    $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
-		}
-		close FH;
-	    }
-	    else {
-		$log->debug("Couldn't write to WEBOBVIUS_CACHE_INDEX-file ($this->{WEBOBVIUS_CACHE_INDEX})");
-	    }
-	}
+        # Add to cache-db
+        $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
+        if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
+            if (flock FH, LOCK_EX|LOCK_NB) {
+                my $real_path=$req->uri();
+                # If handle_path_info() is true on the doctype
+                # (see WebObvius::Site::obvius_document),
+                # obvius_path_info needs to be added:
+                $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
+                print $fh $real_path, $extra, "\t", $req->notes('cache_url'), "\n";
+                $log->debug(" ADDED TO CACHE: " . $req->uri);
+            } else {
+                $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
+            }
+            close FH;
+        }
+        else {
+            $log->debug("Couldn't write to WEBOBVIUS_CACHE_INDEX-file ($this->{WEBOBVIUS_CACHE_INDEX})");
+        }
 
     }
     $log->debug("Cache file done");
