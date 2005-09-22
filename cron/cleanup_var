@@ -33,8 +33,13 @@ for d in /var/www/*/; do
         if [ -f ${first_entry} ]; then
             # Files that are 1) older than the first cache-entry and
             # 2) older than ${DOCUMENT_CACHE_RETAIN} days => deleted
-            find ${d}var/document_cache/ -type f -atime +${DOCUMENT_CACHE_RETAIN} -and -not -anewer ${first_entry} | xargs rm -f
+            find ${d}var/document_cache/ -type f -atime +${DOCUMENT_CACHE_RETAIN} -and -not -anewer ${first_entry} -exec rm -f \{\} \;
         fi
+    fi
+
+    #For some strange reason the cache data gets written even when cacheing is turned off - the index is just empty
+    if [ -f ${d}var/document_cache.txt-off ]; then
+        rm -rf ${d}/var/document_cache/*
     fi
 
 	#Handle document_cache for MCMS
