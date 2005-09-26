@@ -60,7 +60,10 @@ sub expire {
             my $curM = substr($cur,4,2);
             my $curD = substr($cur,6,2) || '01';
             my ($Dy,$Dm,$Dd) = Delta_YMD($curY,$curM,$curD,$latestY,$latestM,$latestD);
-            if (($Dy > 0) and ($Dm >= 0)) #More than a year old
+            #The Date::Calc module on roma has a strange way of giving the time deltas.
+            #Eg. a delta of 9 months is returned as $Dy=1 and $Dm=-3
+            #Code below works both on roma and on other servers
+            if (($Dy > 1) or (($Dy > 0) and ($Dm >= 0))) #More than a year old
             {
                 print ("#\tRemoving $basename$cur$extension\n");
                 delete $directory{"$basename$cur$extension"};
