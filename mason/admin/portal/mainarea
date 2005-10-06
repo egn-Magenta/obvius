@@ -12,7 +12,9 @@
 <& subdocs &>
 <& versions, %ARGS &>
 <& editing, %ARGS &>
+<& before_common, %ARGS &>
 <& common &>
+<& after_common, %ARGS &>
 
  </div>
 %
