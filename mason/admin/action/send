@@ -20,8 +20,8 @@
     </div>
     <div>
       <label><& /shared/msg, text=>'Show document address' &></label>
-      <input type="radio" name="obvius_show_url" checked="checked" value="public" id="obvius_send_public" /><label for="obvius_send_public" style="display: inline"><& /shared/msg, text=>'Link to public website' &></label>
-      <input type="radio" name="obvius_show_url" value="admin" id="obvius_send_admin" /><label for="obvius_send_admin" style="display: inline"><& /shared/msg, text=>'Link to admin' &></label>
+      <input type="radio" name="obvius_show_url"<% $vdoc->Public ? ' checked="checked"' : '' %> value="public" id="obvius_send_public" /><label for="obvius_send_public" style="display: inline"><& /shared/msg, text=>'Link to public website' &></label>
+      <input type="radio" name="obvius_show_url"<% $vdoc->Public ? '' : ' checked="checked"' %> value="admin" id="obvius_send_admin" /><label for="obvius_send_admin" style="display: inline"><& /shared/msg, text=>'Link to admin' &></label>
       <input type="radio" name="obvius_show_url" value="none" id="obvius_send_none" /><label for="obvius_send_none" style="display: inline"><& /shared/msg, text=>'No link' &></label>
     </div>
 
