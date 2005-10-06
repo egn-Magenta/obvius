@@ -1480,6 +1480,42 @@
     <translation lang="da">Tysk</translation>
   </text>
 
+  <!-- Language notification -->
+  <text key="lang_notification:msg1">
+    <translation lang="en">The path to the</translation>
+    <translation lang="da">Stien til den</translation>
+  </text>
+  <text key="lang_notification:msg2">
+    <translation lang="en">version of this document has not yet been created</translation>
+    <translation lang="da">version af dette dokument er endnu ikke blevet oprettet</translation>
+  </text>
+  <text key="lang_notification:msg3">
+    <translation lang="en">Click here to create the first missing part</translation>
+    <translation lang="da">Klik her for at oprette den første manglende del</translation>
+  </text>
+  <text key="lang_notification:msg4">
+    <translation lang="en">A</translation>
+    <translation lang="da">Den</translation>
+  </text>
+  <text key="lang_notification:msg5">
+    <translation lang="en">version of this document has not yet been created</translation>
+    <translation lang="da">version af dette dokument er endnu ikke oprettet</translation>
+  </text>
+  <text key="lang_notification:msg6">
+    <translation lang="en">Click here to create it</translation>
+    <translation lang="da">Klik her for at oprette den</translation>
+  </text>
+  <text key="lang_notification:msg7">
+    <translation lang="en">Click here to go to the </translation>
+    <translation lang="da">Klik her for at gå til den</translation>
+  </text>
+  <text key="lang_notification:msg8">
+    <translation lang="en">version of this document</translation>
+    <translation lang="da">version af dette dokument</translation>
+  </text>
+
+
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>
