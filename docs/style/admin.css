@@ -242,7 +242,7 @@ div.obvius-common {
 }
 
 
-/* MSIE doesn't do child selectors: 
+/* MSIE doesn't do child selectors:
 div.obvius-navigation > div {
   padding-left: 0.5em;
 }
@@ -1222,6 +1222,26 @@ div.obvius-common p.obvius-notice {
  background: red;
 }
 /* End hide from IE5/mac */
+
+/* General class for boxes above and below the common area */
+
+div.obvius-middle-box {
+  background-color: white;
+  margin-left: 200px;
+  margin-right: 122px; /* +7 */
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+/* Lang notification box */
+
+div.obvius-lang-notification-box {
+  border: 2px solid black;
+  padding: 5px;
+}
+
 
 /*
  Local Variables: ***
