@@ -66,5 +66,5 @@ tinyMCELang['lang_browse'] = 'Find';
 tinyMCELang['lang_insert_link_popup_anchor'] = 'Bogm&#230;rke: ';
 tinyMCELang['lang_pastetext_desc'] = 'Sæt ind som ren tekst';
 tinyMCELang['lang_theme_anchor_exist'] = 'Et anker med navnet "$value" findes allrede. V' + unescape("%E6") + 'lg venligst et andet navn.';
-tinyMCELang['lang_theme_anchor_confirm_delete'] = 'Er du sikker p' + unescape("%E5") + ' at du vil sl' + unescape("%E6") + 'tte dette bogm' + unescape("%E6") + 'rke?';
+tinyMCELang['lang_theme_anchor_confirm_delete'] = 'Er du sikker p' + unescape("%E5") + ' at du vil slette dette bogm' + unescape("%E6") + 'rke?';
 tinyMCELang['lang_anchor_list'] = 'Bogm&#230;rker';
