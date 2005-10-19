@@ -4,7 +4,7 @@ tinyMCE.importPluginLanguagePack('obvius', 'en,da');
 function TinyMCE_obvius_getControlHTML(control_name) {
     switch (control_name) {
         case "w3ccheck":
-            return '<img id="{$editor_id}_w3ccheck" src="{$pluginurl}/images/w3c.gif" title="{$lang_w3ccheck_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceW3cCheck\');" />';
+            return '<img id="{$editor_id}_w3ccheck" src="{$pluginurl}/images/briller.gif" title="{$lang_w3ccheck_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceW3cCheck\');" />';
         case "pasteastext":
             if(tinyMCE.isMSIE) {
                 return '<img id="{$editor_id}_pasteastext" src="{$pluginurl}/images/pastetext.gif" title="{$lang_pasteastext_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mcePasteAsText\');" />';
