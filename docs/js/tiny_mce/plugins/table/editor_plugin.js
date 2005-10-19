@@ -291,7 +291,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 						else
 							html += '<td>';
 
-						html += "&nbsp;</td>";
+						html += " </td>";
 					}
 					html += "</tr>";
 				}
@@ -339,7 +339,8 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 						if( tdElement ){
 							var newTH = doc.createElement("th");
 							newTH.innerHTML = tdElement.innerHTML;
-						
+							newTH.colSpan = tdElement.colSpan 
+
 							if (tableBorder == 0)
 								newTH.style.cssText = visualAidStyle;
 
@@ -351,6 +352,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 						if( thElement ){
 							var newTD = doc.createElement("td");
 							newTD.innerHTML = thElement.innerHTML;
+							newTD.colSpan = thElement.colSpan 
 						
 							if (tableBorder == 0)
 								newTD.style.cssText = visualAidStyle;
@@ -553,7 +555,8 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 					break;
 					
 					case "mceTableMergeCells":
-						if(!tdElement) return true
+						if( !( tdElement || thElement )) return true
+						var type = tdElement ? 'td' : 'th'
 						if (user_interface) {
 							// Setup template
 							var template = new Array();
@@ -572,11 +575,11 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 							}
 
 
-							var tmpTD = tdElement;
+							var tmpTD = tdElement || thElement;
 							var collCount = 0
 							// Count rows
 							while (tmpTD) {
-								if (tmpTD.nodeName.toLowerCase() == "td")
+								if (tmpTD.nodeName.toLowerCase() == type)
 									collCount += tmpTD.colSpan || 1;
 
 								tmpTD = tmpTD.nextSibling;
@@ -589,10 +592,10 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 							var cells = []
 							
 							//Count amounts of rowElements before our nice table thingie
-							var tmpTD = tdElement.previousSibling;
+							var tmpTD = (tdElement || thElement).previousSibling;
 							var startAt = 1
 							while (tmpTD) {
-								if (tmpTD.nodeName.toLowerCase() == "td")
+								if (tmpTD.nodeName.toLowerCase() == type)
 									startAt+=tmpTD.colSpan || 1;
 
 								tmpTD = tmpTD.previousSibling;
@@ -613,7 +616,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 								var totalScanWidth  = startAt + parseInt(value['width']);
 								//alert(tElm.getElementsByTagName)
 								
-								var toHandle = rows[row].getElementsByTagName('td');
+								var toHandle = rows[row].getElementsByTagName(type);
 								var curIndex = 0;
 								
 								for( var a=0;a<toHandle.length;a++){
@@ -701,6 +704,7 @@ function TinyMCE_table_handleNodeChange(editor_id, node, undo_index, undo_levels
 	if (tinyMCE.getParentElement(node, "th")){
 		tinyMCE.switchClassSticky(editor_id + '_convert_th_to_td', 'mceButtonNormal', false);
 		tinyMCE.switchClassSticky(editor_id + '_cell_props', 'mceButtonSelected', false);
+		tinyMCE.switchClassSticky(editor_id + '_merge_cells', 'mceButtonNormal', false);
 	}
 
 

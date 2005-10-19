@@ -161,7 +161,7 @@ function TinyMCE_init(settings) {
 	defParam("document_base_url", "" + document.location.href);
 	defParam("visual", true);
 	defParam("showanchors", false); //Chris Benjaminsen BeIT ApS
-	defParam("visual_table_style", "border: 1px dashed #BBBBBB");
+	defParam("visual_table_style", "border: 1px dashed #BBBBBB;height:1em");
 	defParam("setupcontent_callback", "");
 	defParam("fix_content_duplication", true);
 	defParam("custom_undo_redo", true);
@@ -1874,6 +1874,7 @@ function TinyMCE__initCleanup() {
 }
 
 function TinyMCE__cleanupHTML(doc, config, element, visual, on_save) {
+
 	// Set these for performance
 	tinyMCE.cleanup_visual_aid = visual;
 	tinyMCE.cleanup_on_save = on_save;
@@ -1937,6 +1938,7 @@ function TinyMCE__cleanupHTML(doc, config, element, visual, on_save) {
 
 	if (tinyMCE.settings["preformatted"])
 		return "<pre>" + html + "</pre>";
+		
 
 	return html;
 }
@@ -2619,7 +2621,7 @@ function TinyMCE_openWindow(template, args) {
 
 function TinyMCE_handleVisualAid(element, deep, state) {
 	function getAttrib(elm, name) {
-		return elm.getAttribute(name) ? elm.getAttribute(name) : "";
+		return elm.getAttribute(name) || "";
 	}
 
 	var tableElement = null;
@@ -2638,7 +2640,7 @@ function TinyMCE_handleVisualAid(element, deep, state) {
 				for (var x=0; x<element.rows[y].cells.length; x++)
 					element.rows[y].cells[x].style.cssText = state ? cssText : "";
 			}
-
+			
 			break;
 
 		//Chris Benjaminsen BeIT ApS **
@@ -3823,7 +3825,9 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 		case "mceCleanup":
 			tinyMCE._setHTML(this.contentDocument, this.contentDocument.body.innerHTML);
 			this.contentDocument.body.innerHTML = tinyMCE._cleanupHTML(this.contentDocument, this.settings, this.contentDocument.body, this.visualAid);
+			if( tinyMCE.isMSIE ) this.contentDocument.selection.clear()
 			tinyMCE.triggerNodeChange();
+			
 		break;
 
 		case "mceAnchor":
@@ -4118,7 +4122,6 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 					this.getBody().innerHTML = this.undoLevels[this.undoIndex];
 					//debug("Redo - undo levels:" + this.undoLevels.length + ", undo index: " + this.undoIndex);
 				}
-
 				tinyMCE.triggerNodeChange();
 			} else
 				this.contentDocument.execCommand(command, user_interface, value);
@@ -4133,6 +4136,7 @@ function TinyMCEControl_execCommand(command, user_interface, value) {
 		case "removeformat":
 			if (tinyMCE.isMSIE) {
 				try {
+					this.contentDocument.execCommand(command, user_interface, value);
 					var rng = doc.selection.createRange();
 					rng.pasteHTML(rng.text);
 				} catch (e) {

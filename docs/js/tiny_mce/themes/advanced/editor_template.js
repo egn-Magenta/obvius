@@ -480,9 +480,6 @@ function TinyMCE_advanced_handleNodeChange(editor_id, node, undo_index, undo_lev
 	//**
 
 
-
-
-
 	// Update path
 	var pathElm = document.getElementById(editor_id + "_path");
 	if (pathElm) {
