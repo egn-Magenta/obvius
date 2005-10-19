@@ -16,9 +16,27 @@ if (url != null)
 				option.selected = true;
 		}
 
-		document.forms[0].href.value = tinyMCE.getWindowArg('href');
+		var href = tinyMCE.getWindowArg('href');
+
+		// un-pathify local anchors:
+
+		// Get baseref and admin-ify it:
+		var baseRef = tinyMCE.settings['base_href'] || "";
+		baseRef = baseRef.replace(/http:\/\/([^/]+)/, "http://$1/admin");
+
+		// If the link is a local anchor then the char after the lenght of the
+		// baseRef must be a #:
+		if(href && href.charAt(baseRef.length) == "#") {
+			// If the start of the string up to the # is the same
+			// as the baseref, remove it:
+			if(href.substr(0, baseRef.length) == baseRef) {
+				href = href.replace(/^[^#]+/, "");
+			}
+		}
+		document.forms[0].href.value = href;
+
 		document.forms[0].linktitle.value = tinyMCE.getWindowArg('title');
-		document.forms[0].insert.value = tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('action'), 'Insert', true); 
+		document.forms[0].insert.value = tinyMCE.getLang('lang_' + tinyMCE.getWindowArg('action'), 'Insert', true);
 
 		// Handle file browser
 		if (tinyMCE.getParam("file_browser_callback") != null) {
