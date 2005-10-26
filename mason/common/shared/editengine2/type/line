@@ -1,7 +1,7 @@
 <%method block>\
 % my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
 <& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
-<input <% $disabled ? 'disabled="disabled" ' : '' %>type="text" size="50" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" value="<% $value->{value} |h %>" />
+<input <% $disabled ? 'disabled="disabled" ' : '' %>type="text" size="<% $size %>" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" value="<% $value->{value} |h %>" />
 %
 <%args>
 $prefix
@@ -9,6 +9,10 @@ $field
 $value=>''
 $style
 </%args>
+%
+<%init>
+my $size = $field->{options}->{size} || 50;
+</%init>
 %
 </%method>
 %
