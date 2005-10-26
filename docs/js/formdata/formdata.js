@@ -88,6 +88,17 @@ function formdata_populate_fieldtable(name) {
             }
             tr.appendChild(man_td);
 
+            var unique_td = document.createElement('td');
+            var unique_value = obj.unique || '';
+
+            if(unique_value == 1) {
+                unique_td.innerHTML = formdata_translations['Yes'];
+            } else {
+                unique_td.innerHTML = formdata_translations['No'];
+            }
+
+            tr.appendChild(unique_td);
+
             var edit_td = document.createElement('td');
             var edit_a = document.createElement('a');
             edit_a.href = document.location.href;
@@ -209,6 +220,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         tmpXML += "     <title></title>";
         tmpXML += "     <type>" + is_new + "</type>";
         tmpXML += "     <mandatory>0</mandatory>";
+        tmpXML += "     <unique>0</unique>";
         tmpXML += "     <imagepath></imagepath>";
         tmpXML += "     <description></description>";
         tmpXML += "     <validaterules>";
@@ -259,6 +271,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         document.getElementById('mandatory').style.display = 'none';
         document.getElementById('image').style.display = 'none';
         document.getElementById('description').style.display = 'none';
+        document.getElementById('unique').style.display = 'none';
     }
 
     if(type == 'text' || type == 'password') {
@@ -309,6 +322,14 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
             name_dropdown.options[name_dropdown.options.length] = new Option(fieldname, fieldname);
             name_dropdown.selectedIndex = name_dropdown.options.length - 1;
         }
+    }
+
+    if(fieldObj.unique == 1) {
+        document.getElementById('unique_yes').checked = 1;
+        document.getElementById('unique_no').checked = 0;
+    } else {
+        document.getElementById('unique_yes').checked = 0;
+        document.getElementById('unique_no').checked = 1;
     }
 
     // Populate params:
@@ -623,6 +644,24 @@ function formdata_save_field_form_data(fieldNode) {
     } else {
         mandNode.appendChild(newMand);
     }
+
+    var unique_value = document.getElementById('unique_yes').checked ? 1 : 0;
+
+    var uniqueNode = fieldNode.getElementsByTagName('unique').item(0);
+
+    // Can't be sure if unique is there, so if it doesn't exist, create it:
+    if(! uniqueNode) {
+        uniqueNode = fieldNode.getOwnerDocument().createElement('unique');
+        fieldNode.appendChild(uniqueNode);
+    }
+
+    var uniqueText = fieldNode.getOwnerDocument().createTextNode(unique_value);
+    if(uniqueNode.getFirstChild()) {
+        uniqueNode.replaceChild(uniqueText, uniqueNode.getFirstChild());
+    } else {
+        uniqueNode.appendChild(uniqueText);
+    }
+
 
     // Imagepath:
     var imgNode = fieldNode.getElementsByTagName('imagepath').item(0);

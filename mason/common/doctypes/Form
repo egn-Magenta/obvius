@@ -36,6 +36,17 @@ Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette
 </div>
 <br />
 %}
+%if(scalar(@$not_unique)) {
+<div class="error">
+Følgende felter er blevet udfyldt med værdier, der allerede findes i databasen:
+<ul>
+%for(@$not_unique) {
+    <li><a href="#<% $_ %>"><% $fields_by_name{$_}->{title} %></a></li>
+%}
+</ul>
+</div>
+<br />
+%}
 
 %$r->notes('fieldsets' => 0);
 %unless($prefix) {
@@ -109,6 +120,7 @@ my $formdata = $output->param('formdata') || {};
 my $fields = $formdata->{field} || [];
 
 my $invalid = $output->param('invalid') || [];
+my $not_unique = $output->param('not_unique') || [];
 
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 </%init>

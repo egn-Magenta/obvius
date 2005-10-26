@@ -321,36 +321,47 @@ sub action {
         }
     }
 
-    my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
+    # Third run - check for unique data:
 
-    if(scalar(@invalid)) {
+    # Build a hash with unique fieldnames as keys and submitted values as values
+    my %unique = map { $_->{name} => $_->{_submitted_value} } grep { $_->{unique} } @{$formdata->{field}};
+    my %unique_failed;
+
+    if(scalar(%unique)) {
+
+        # Get data from datafile:
+        my $data_file = $this->get_datafile_name($obvius, $doc);
+        my $xml = $this->get_datafile_xml_data($data_file) || {};
+
+        my $entries = $xml->{entry} || [];
+
+        # For each entry, check all fields and see if they're unique and, if they
+        # are, match them up against the submitted value for that field.
+        for(@$entries) {
+            my $fields = $_->{fields}->{field} || [];
+
+            for(@$fields) {
+                if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
+                    $unique_failed{$_->{fieldname}} = 1;
+                }
+            }
+        }
+    }
+
+
+    my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
+    my @not_unique = map {$_->{name}} grep { $unique_failed{$_->{name}} } @{$formdata->{field}};
+    if(scalar(@invalid) or scalar(@not_unique)) {
         $output->param('formdata' => $formdata);
         $output->param('invalid' => \@invalid);
+        $output->param('not_unique' => \@not_unique);
     } else {
         # Form filled ok, now save/mail the submitted data
 
-        my $data_dir = $obvius->config->param('forms_data_dir') || '/tmp';
-        $data_dir .= "/" unless($data_dir =~ m!/$!);
+        my $data_file = $this->get_datafile_name($obvius, $doc);
+        my $xml = $this->get_datafile_xml_data($data_file);
 
-        my $data_file = $data_dir . $doc->Id . ".xml";
-        if(! -f $data_file) {
-            # create the file:
-            if(open(FH, ">$data_file")) {
-                print FH '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
-                print FH "<entries></entries>\n";
-                close(FH);
-            } else {
-                print STDERR "Couldn't create datafile $data_file. Form data may be lost:\n";
-                print STDERR Dumper($formdata);
-                return OBVIUS_OK;
-            }
-        }
-
-        my $xml = XMLin($data_file, keyattr=>[], forcearray => [ 'entry', 'field' ], suppressempty => '') || {};
-
-        $xml = $this->unutf8ify($xml);
-
-        $xml->{entry} ||= [];
+        return OBVIUS_OK unless($xml);
 
         my %entry;
 
@@ -418,6 +429,41 @@ sub utf8ify {
     }
 }
 
+sub get_datafile_name {
+    my ($this, $obvius, $doc) = @_;
+
+    my $data_dir = $obvius->config->param('forms_data_dir') || '/tmp';
+    $data_dir .= "/" unless($data_dir =~ m!/$!);
+
+    my $data_file = $data_dir . $doc->Id . ".xml";
+
+    return $data_file;
+
+}
+
+sub get_datafile_xml_data {
+    my ($this, $data_file) = @_;
+
+    if(! -f $data_file) {
+        # create the file:
+        if(open(FH, ">$data_file")) {
+            print FH '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
+            print FH "<entries></entries>\n";
+            close(FH);
+        } else {
+            print STDERR "Couldn't create datafile $data_file. Form data may be lost.\n";
+            return undef;
+        }
+    }
+
+    my $xml = XMLin($data_file, keyattr=>[], forcearray => [ 'entry', 'field' ], suppressempty => '') || {};
+
+    $xml = $this->unutf8ify($xml);
+
+    $xml->{entry} ||= [];
+
+    return $xml;
+}
 
 1;
 __END__

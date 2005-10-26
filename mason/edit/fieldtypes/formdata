@@ -36,6 +36,7 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
         <th><& SELF:msg, text=>"Fieldname" &></th>
         <th><& SELF:msg, text=>"formdata_type" &></th>
         <th><& SELF:msg, text=>"Mandatory" &></th>
+        <th><& SELF:msg, text=>"Unique" &></th>
         <th><& SELF:msg, text=>"Edit" &></th>
         <th><& SELF:msg, text=>"Delete" &></th>
         <th><& SELF:msg, text=>"Up" &> / <& SELF:msg, text=>"Down" &></th>
