@@ -5,7 +5,7 @@
 % my $versions_html=$m->scomp('versions:display_versions', max=>$max, inactive=>\%inactive, language=>$obvius_language);
 % if ($filter) {
          <p>
-           <select name="obvius_language"<% $inactive{obvius_language} ? ' disabled="disabled" class="obvius-disabled"' : '' %> onclick="javascript:this.form.submit()">
+           <select name="obvius_language"<% $inactive{obvius_language} ? ' disabled="disabled" class="obvius-disabled"' : '' %> onchange="javascript:this.form.submit()">
              <option value=""><& /shared/msg, text=>'All lang.' &></option>
 %     foreach my $la (@las) {
 %         next unless ($r->pnotes('obvius_versions_langs')->{$la});
