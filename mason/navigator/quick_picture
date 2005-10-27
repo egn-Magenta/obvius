@@ -217,13 +217,27 @@ my $error;
 if(my $name = $r->param('image_data')) {
     if (my $upload=$r->upload('image_data')) {
         if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
-            my ($value, $mimetype) = $image_doctype->transform_image_at_upload(
+
+	    my $value;
+	    my $mimetype;
+
+	    if ( $r->param( 'new_width' ) || $r->param( 'new_height' ) || $r->param( 'new_format' ) || $r->param( 'quality' ) || $r->param( 'scaleby' ) ne "100%" )
+	    {
+
+              ($value, $mimetype) = $image_doctype->transform_image_at_upload(
                                                             \$fh,
                                                             $r->param('new_width'),
                                                             $r->param('new_height'),
                                                             $r->param('new_format'),
                                                             $r->param('quality')
                                                         );
+	    }
+	    else
+	    {
+		local $/ = undef;
+		$value = <$fh>;
+		$mimetype = $upload->type;
+	    }
             my $fields = new Obvius::Data;
 
 
