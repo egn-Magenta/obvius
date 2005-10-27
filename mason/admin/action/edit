@@ -170,6 +170,12 @@ $r->notes(inactive_subdocs=>1);
 $r->notes(inactive_versions=>1);
 $r->notes(inactive_information=>1);
 $r->notes(inactive_newsboxes=>1);
+
+# Add JS onsubmit if it's defined in the site's configuration:
+if(my $js_onsubmit = $obvius->config->param('admin_onsubmit')) {
+    $edit_version->{javascript_onsubmit} = $js_onsubmit;
+}
+
 </%init>
 %
 %
