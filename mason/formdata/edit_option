@@ -16,6 +16,17 @@ document.pageform.onsubmit = function () {
     formdata_validate_and_<% defined($r->param('rulenr')) ? 'save_option' : 'add_option' %>('<% $r->param('rulenr') %>');
     return false;
 }
+
+function title_onchange(elem) {
+    if(elem.form.optionvalue.value)
+        return true;
+
+    var val = elem.value;
+    val = val.replace(/[^a-z_-]/gi, "_");
+
+    elem.form.optionvalue.value = val;
+}
+
 </script>
 <table border="0" style="margin: 20px;">
     <tr>
@@ -23,7 +34,7 @@ document.pageform.onsubmit = function () {
     </tr>
     <tr>
         <th><& SELF:msg, text=>"Title" &></th>
-        <td><input type="text" size="30" value="" name="title" /></td>
+        <td><input type="text" size="30" value="" name="title" onchange="title_onchange(this);"/></td>
     </tr>
     <tr>
         <th><& SELF:msg, text=>"Value" &></th>
