@@ -792,7 +792,7 @@ sub split_language_preferences {
 }
 
 sub read_translations {
-    my ($this, $r, $file, $lang, $obvius) = @_;
+    my ($this, $r, $file, $lang, $obvius, %options) = @_;
 
     return if ($obvius->{TRANSLATIONS});
 
@@ -818,7 +818,7 @@ sub read_translations {
 		$lang{$_} ||= $site_pref{$_};
 	    }
         }
-	
+
     }
 
 #    for (keys %lang) {
@@ -830,6 +830,14 @@ sub read_translations {
 	foreach my $a ($_) {
 	    push @path, $a->[1];
 	}
+    }
+
+    if(my $extra_search_path = $options{extra_search_path}) {
+        if(ref($extra_search_path)) {
+            push(@path, @$extra_search_path);
+        } else {
+            push(@path, $extra_search_path);
+        }
     }
 
     # If the translation cache-index doesn't exist, create an empty one:
