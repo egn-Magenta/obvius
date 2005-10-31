@@ -22,7 +22,7 @@ function TinyMCE_obvius_getControlHTML(control_name) {
                 return '<img id="{$editor_id}_addtoplink" src="{$pluginurl}/images/addtoplink.gif" title="{$lang_addtoplink_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceAddTopLink\');" />';
             }
         case "formataddress":
-            return '<img id="{$editor_id}_formataddress" src="{$pluginurl}/images/w3c.gif" title="{$lang_formataddress_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceFormatAddress\');" />';
+            return '<img id="{$editor_id}_formataddress" src="{$pluginurl}/images/custom_1.gif" title="{$lang_formataddress_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceFormatAddress\');" />';
     }
     return "";
 }
