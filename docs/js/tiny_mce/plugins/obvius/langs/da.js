@@ -8,4 +8,4 @@ tinyMCELang['lang_pasteastext_desc'] = 'S' + ae + 't ind som ren tekst';
 tinyMCELang['lang_pastefromword_desc'] = 'S' + ae + 't ind fra Word';
 tinyMCELang['lang_addtoplink_desc'] = 'Inds' + ae + "t 'Til top' link";
 tinyMCELang['lang_formataddress_desc'] = 'Formater som adresse';
-
+tinyMCELang['lang_formatquote_desc'] = 'Formater som citat';

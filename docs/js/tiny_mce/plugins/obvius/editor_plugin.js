@@ -23,6 +23,8 @@ function TinyMCE_obvius_getControlHTML(control_name) {
             }
         case "formataddress":
             return '<img id="{$editor_id}_formataddress" src="{$pluginurl}/images/custom_1.gif" title="{$lang_formataddress_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceFormatAddress\');" />';
+        case "formatquote":
+            return '<img id="{$editor_id}_formatquote" src="{$pluginurl}/images/custom_1.gif" title="{$lang_formatquote_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceFormatQuote\');" />';
     }
     return "";
 }
@@ -87,6 +89,29 @@ function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface,
         case "mceFormatAddress":
             tinyMCE.execInstanceCommand(editor_id, "mceAddUndoLevel");
             tinyMCE.execInstanceCommand(editor_id, "FormatBlock", false, "address");
+            return true;
+        case "mceFormatQuote":
+            tinyMCE.execInstanceCommand(editor_id, "mceAddUndoLevel");
+
+            var mceControl = tinyMCE.getInstanceById(editor_id);
+
+            // Test if we're already inside a blockquote element:
+            var focusElem = mceControl.getFocusElement();
+            var parentElem = tinyMCE.getParentElement(focusElem, "blockquote");
+            if(parentElem) {
+                return true;
+            }
+
+            // Now indent and change the class of the inserted blockquote:
+            tinyMCE.execInstanceCommand(editor_id, "Indent");
+            var newBlockQuoteElem;
+            focusElem = mceControl.getFocusElement();
+            newBlockQuoteElem = tinyMCE.getParentElement(focusElem, "blockquote");
+
+            if(newBlockQuoteElem) {
+                newBlockQuoteElem.className = 'realblockquote';
+            }
+
             return true;
 
    }
