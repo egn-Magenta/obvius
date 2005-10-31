@@ -429,9 +429,9 @@ function TinyMCE_execCommand(command, user_interface, value) {
 			return;
 	}
 
-	if (this.selectedInstance)
+	if (this.selectedInstance){
 		this.selectedInstance.execCommand(command, user_interface, value);
-	else if (tinyMCE.settings['focus_alert'])
+	}else if (tinyMCE.settings['focus_alert'])
 		alert(tinyMCELang['lang_focus_alert']);
 }
 

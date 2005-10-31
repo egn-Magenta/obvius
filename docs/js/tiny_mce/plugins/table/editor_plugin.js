@@ -249,7 +249,11 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				}
 
 				// Create new table
-				html += '<table border="' + border + '" ';
+				var style = ''
+				if( width || height ){
+					style=' style="' + (width?'width=' + width + 'px;':'') + (height?'height=' + height+ 'px;':'')  + '" '
+				}
+				html += '<table ' + style + 'border="' + border + '" ';
 				var visualAidStyle = inst.visualAid ? tinyMCE.settings['visual_table_style'] : "";
 
 				if (cellpadding != -1)
