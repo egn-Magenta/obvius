@@ -21,6 +21,8 @@ function TinyMCE_obvius_getControlHTML(control_name) {
             if(window.obvius_addtoplink_src) {
                 return '<img id="{$editor_id}_addtoplink" src="{$pluginurl}/images/addtoplink.gif" title="{$lang_addtoplink_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceAddTopLink\');" />';
             }
+        case "formataddress":
+            return '<img id="{$editor_id}_formataddress" src="{$pluginurl}/images/w3c.gif" title="{$lang_formataddress_desc}" width="20" height="20" class="mceButtonNormal" onmouseover="tinyMCE.switchClass(this,\'mceButtonOver\');" onmouseout="tinyMCE.restoreClass(this);" onmousedown="tinyMCE.restoreAndSwitchClass(this,\'mceButtonDown\');" onclick="tinyMCE.execInstanceCommand(\'{$editor_id}\',\'mceFormatAddress\');" />';
     }
     return "";
 }
@@ -81,6 +83,10 @@ function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface,
                 instance.execCommand("mceAddUndoLevel");
                 instance.execCommand("mceInsertContent", null, "<a href=\"#top\" title=\"Til toppen\" style=\"float: right;\"><img src=\"" + window.obvius_addtoplink_src + "\" alt=\"Til toppen\" /></a>");
             }
+            return true;
+        case "mceFormatAddress":
+            tinyMCE.execInstanceCommand(editor_id, "mceAddUndoLevel");
+            tinyMCE.execInstanceCommand(editor_id, "FormatBlock", false, "address");
             return true;
 
    }
