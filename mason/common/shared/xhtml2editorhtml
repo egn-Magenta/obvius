@@ -4,12 +4,14 @@ $html
 </%args>
 <%init>
 $out = '';
+@open_divs = ();
 $p->parse($html);
 $p->eof;
 </%init>
 <%once>
 # $out should be reset before parsing.
 my $out='';
+my @open_divs;
 my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
@@ -132,6 +134,17 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         $adjust = 1;
                                                     }
 
+                                                    # blockquote => div with padding
+                                                    elsif($tagname eq 'div') {
+                                                        if($attr->{class} and $attr->{class} eq 'indent') {
+                                                            push(@open_divs, 'blockquote');
+                                                            $tagname = 'blockquote';
+                                                            $remove_attr{'class'} = 1;
+                                                        } else {
+                                                            push(@open_divs, 'normal');
+                                                        }
+                                                    }
+
                                                     if($tagname eq 'span' and $attr->{style} and $attr->{style} =~ s!text-decoration:\s+underline;?!!) {
                                                         $tagname = 'u';
                                                         $adjust = 1;
@@ -176,6 +189,11 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                             if($tagname eq 'del') {
                                                 $text =~ s!</del!</strike!i;
+                                            } elsif($tagname eq 'div') {
+                                                my $type = pop(@open_divs) || 'normal';
+                                                if($type eq 'blockquote') {
+                                                    $text = '</blockquote>';
+                                                }
                                             }
 
                                             if($this->{open_u_span} and $tagname eq 'span') {

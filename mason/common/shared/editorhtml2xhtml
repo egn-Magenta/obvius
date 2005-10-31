@@ -4,12 +4,14 @@ $html
 </%args>
 <%init>
 $out = '';
+@blockquote = ();
 $p->parse($html);
 $p->eof;
 </%init>
 <%once>
 # $out should be reset before parsing.
 my $out='';
+my @blockquote;
 my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
@@ -167,6 +169,19 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         push(@$attrseq, 'style') unless($existing_attr{'style'});
                                                     }
 
+                                                    # blockquote => div with padding:
+                                                    elsif($tagname eq 'blockquote') {
+                                                        # Don't do anything if blockquote has class="realblockquote"
+                                                        if($attr->{class} && $attr->{class} eq 'realblockquote') {
+                                                            push(@blockquote, 'real');
+                                                        } else {
+                                                            push(@blockquote, 'fake');
+                                                            $tagname = 'div';
+                                                            $attr->{class} = 'indent';
+                                                            push(@$attrseq, 'class') unless($existing_attr{'class'});
+                                                        }
+                                                    }
+
                                                     # Fixup for align attribute on block elements:
                                                     if($tagname =~ m!^h\d|p|div! and $attr->{align}) {
                                                         $remove_attr{'align'} = 1;
@@ -210,6 +225,16 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                             elsif($tagname eq 'u') {
                                                 $text =~ s!</u!</span!i;
+                                            }
+
+                                            elsif($tagname eq 'blockquote') {
+                                                # If current blockquote is a fake type endtag need to be </div>
+
+                                                # Default to real since an extra </blockquote> makes less mess than </div>
+                                                my $type = pop(@blockquote) || 'real';
+                                                if($type eq 'fake') {
+                                                    $text = '</div>';
+                                                }
                                             }
                                             $out.=lc($text);
                                         }, "self, tagname, text, attr" ],
