@@ -26,11 +26,13 @@ use Unicode::String qw(utf8);
 
 use Getopt::Long;
 
-my ($site, $path, $help)=(undef, '', 0);
+my ($site, $path, $remove_prefix, $add_prefix, $help)=(undef, '', '', '', 0);
 GetOptions(
-           'site=s',     => \$site,
-           'path=s',     => \$path,
-           'help'        => \$help,
+           'site=s',                => \$site,
+           'path=s',                => \$path,
+           'remove_prefix=s'        => \$remove_prefix,
+           'add_prefix=s'           => \$add_prefix,
+           'help'                   => \$help,
           );
 
 if ($help) {
@@ -39,6 +41,8 @@ Usage: create --site=sitename [OPTIONS] document[s]
 
   --site           the name of the site to create documents in (mandatory)
   --path           where to create the new documents (defaults to /)
+  --remove_prefix  remove this prefix from all uris
+  --add_prefix     add this prefix to all uris
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -73,6 +77,15 @@ for(@$rfields) {
 }
 my @repeatable_fields = keys %is_repeatable;
 
+# Figure out which fields are binary and should be decoded:
+my %binary_names;
+my $bin_fieldtypes = $obvius->get_table_data('fieldtypes', 'where' => "bin = 1") || [];
+if(scalar(@$bin_fieldtypes)) {
+    my $where = "type IN ('" . join("', '", map { $_->{id} } @$bin_fieldtypes) . "')";
+    my $bin_fields = $obvius->get_table_data('fieldspecs', 'where' => $where) || [];
+    map { $binary_names{$_->{name}} = 1 } @$bin_fields;
+}
+
 print STDERR "Reading XML...\n";
 my $data=XMLin($ARGV[0], keyattr=>[], suppressempty => '', forcearray => \@repeatable_fields);
 print STDERR "Converting from utf8...\n";
@@ -102,13 +115,20 @@ sub create_document {
         $new_uri=$path . $document->{obvius_dump_doc_uri};
     }
 
+    if($remove_prefix) {
+        $new_uri =~ s!^\Q$remove_prefix\E!!;
+    }
+    if($add_prefix) {
+        $new_uri = $add_prefix . $new_uri;
+    }
+
     print "$document->{obvius_dump_doc_uri} -> $new_uri\n";
 
     my $versions=$document->{version};
     $versions=[ $versions ] unless (ref $versions eq 'ARRAY');
 
     foreach my $version (@$versions) {
-        map { $version->{fields}->{$_}=decode_base64($version->{fields}->{$_}) if ($_ eq 'data'); }
+        map { $version->{fields}->{$_}=decode_base64($version->{fields}->{$_}) if ($binary_names{$_}); }
             keys %{$version->{fields}};
     }
 
@@ -187,13 +207,13 @@ sub create_obvius_document {
     }
     else {
         my @parent_uri=split '/', $new_uri;
-        pop @parent_uri;
+        my $name = pop @parent_uri;
         my $parent_uri=join '/', @parent_uri;
         my $parent=$obvius->lookup_document($parent_uri);
         my $owner=$obvius->get_userid($document->{obvius_dump_owner_login});
         my $grp=$obvius->get_grpid($document->{obvius_dump_grp_name});
 
-        @ret=$obvius->create_new_document($parent, $document->{name}, $doctype->Id, $version->{lang}, $fields, $owner, $grp, $errorref);
+        @ret=$obvius->create_new_document($parent, $name, $doctype->Id, $version->{lang}, $fields, $owner, $grp, $errorref);
     }
 
     print " $ret[0], $ret[1]";
