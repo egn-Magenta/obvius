@@ -154,7 +154,7 @@ sub hashify {
         if (defined $obj and defined $name and $binary_names{$name}) { # base64-encode binary fields:
             return encode_base64($obj);
         }
-        return (defined $obj ? $obj : '');
+        return (defined $obj ? urlify($obj) : '');
     }
     elsif ($ref eq 'ARRAY') { # Array:
         return [ map { hashify($_) } @$obj ];
@@ -167,5 +167,28 @@ sub hashify {
     }
     else {
         return 'UNHASHIFIABLE';
+    }
+}
+
+# Temporary implementation of URL-rewriting:
+# Convert xxxx.docid to ${path}.docid.
+
+sub urlify {
+    my ($text) = @_;
+
+    $text =~ s!/(\d+)\.docid!docid_to_url($1)!ge;
+
+    return $text;
+}
+
+sub docid_to_url {
+    my ($docid) = @_;
+
+    my $doc = $obvius->get_doc_by_id($docid);
+
+    if($doc) {
+        return $obvius->get_doc_uri($doc) . ".docid";
+    } else {
+        return "/" . $docid . ".docid";
     }
 }

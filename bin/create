@@ -194,6 +194,10 @@ sub create_obvius_document {
                 $value=$fieldtype->copy_in($obvius, $fieldspec, $value);
             }
         }
+
+        # Un-urlify:
+        $value =~ s!(/[^.\d]+)\.docid!unurlify($1)!ge;
+
         $fields->param($fieldname=>$value);
     }
 
@@ -269,4 +273,18 @@ sub unutf8ify {
     else {
         return 'UNUTF8IFIABLE';
     }
+}
+
+# Rewrite dumped URLs with remove and add prefixes.
+sub unurlify {
+    my ($path) = @_;
+
+    if($remove_prefix) {
+        $path =~ s!^\Q$remove_prefix\E!!;
+    }
+    if($add_prefix) {
+        $path = $add_prefix . $path;
+    }
+
+    return $path;
 }
