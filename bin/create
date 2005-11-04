@@ -286,5 +286,9 @@ sub unurlify {
         $path = $add_prefix . $path;
     }
 
+    if(my $d = $obvius->lookup_document($path)) {
+        $path = "/" . $d->Id . ".docid";
+    }
+
     return $path;
 }
