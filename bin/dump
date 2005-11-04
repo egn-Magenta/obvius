@@ -2,6 +2,10 @@
 
 # dump - dump an Obvius document.
 #
+#   TODO: XXX Handle document parameters.
+#
+#   See also: create, delete.
+#
 # Copyright (C) 2004, Magenta. By Adam Sjøgren. Under the GPL.
 #
 # $Id$
@@ -100,7 +104,7 @@ sub dump_doc {
         map {
             $obvius->get_version_fields($_, 255);
             $_->param(obvius_dump_type_name=>$obvius->get_version_type($_)->Name);
-            $_->param(obvius_dump_user_login=>$obvius->get_user($_->User)->{login}) if ($_->User);
+            $_->param(obvius_dump_user_login=>$obvius->get_user($_->User)->{login}) if ($_->param('User'));
         } @$vdocs;
     }
 
@@ -123,6 +127,14 @@ sub dump_doc {
 
     # Dump:
     print XMLout($doc_hash, rootname=>'document', noattr=>1), "\n";
+
+    # Recursively:
+    if ($recursive) {
+        my $subdocs=$obvius->get_docs_by_parent($doc->Id);
+        foreach my $subdoc (@$subdocs) {
+            dump_doc($subdoc->Id, 'DOCID', $recursive, $one_version);
+        }
+    }
 }
 
 sub hashify {
