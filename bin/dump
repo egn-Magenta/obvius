@@ -41,9 +41,6 @@ Usage: dump --site=sitename [OPTIONS] document[s]
 
 Note: wildcards do not work. Sorry.
 
-NOTE: Does not handle binary data well. Only fields called DATA are
-      encoded.
-
 NOTE: Publish fields are not exported.
 
 EOT
@@ -61,6 +58,15 @@ die "Could not get logging" unless(defined($log));
 my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
 die "Could not get Obvius object for $site" unless(defined($obvius));
 $obvius->{USER} = 'admin';
+
+# Figure out which fields are binary and should be encoded:
+my %binary_names;
+my $bin_fieldtypes = $obvius->get_table_data('fieldtypes', 'where' => "bin = 1") || [];
+if(scalar(@$bin_fieldtypes)) {
+    my $where = "type IN ('" . join("', '", map { $_->{id} } @$bin_fieldtypes) . "')";
+    my $bin_fields = $obvius->get_table_data('fieldspecs', 'where' => $where) || [];
+    map { $binary_names{$_->{name}} = 1 } @$bin_fields;
+}
 
 if (scalar(@ARGV)) {
     print '<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>', "\n";
@@ -145,7 +151,7 @@ sub hashify {
     my $ref=ref $obj;
 
     if (!$ref) { # Scalar:
-        if (defined $obj and defined $name and $name eq 'data') { # XXX If the name is 'data', base64-encode it:
+        if (defined $obj and defined $name and $binary_names{$name}) { # base64-encode binary fields:
             return encode_base64($obj);
         }
         return (defined $obj ? $obj : '');
