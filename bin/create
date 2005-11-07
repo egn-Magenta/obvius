@@ -196,7 +196,9 @@ sub create_obvius_document {
         }
 
         # Un-urlify:
-        $value =~ s!(/[^.\d]+)\.docid!unurlify($1)!ge;
+        if($value) {
+            $value =~ s!(/[^.\d]+)\.docid!unurlify($1)!ge;
+        }
 
         $fields->param($fieldname=>$value);
     }
