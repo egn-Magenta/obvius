@@ -42,7 +42,7 @@ function obvius_tinymce_navigator_callback(field_name, url, type, win) {
    loaded the javascript that called open, not to the window that called
    the function that called open(!)) */
 function obvius_tinymce_new_navigator_callback(field_name, url, type, win) {
-  return obvius_tinymce_navigator_callback_p(field_name, url, type, 'obvius_app_navigator=1', 'width=700, height=432, status=yes', win); /* See mason/admin/portal/util/navigator_link_start */
+  return obvius_tinymce_navigator_callback_p(field_name, url, type, 'obvius_app_navigator=1', 'width=700, height=432, status=yes, scrollbars=1, resizable=1', win); /* See mason/admin/portal/util/navigator_link_start */
 }
 
 function obvius_tinymce_navigator_callback_p(field_name, url, type, arg, options, win) {
