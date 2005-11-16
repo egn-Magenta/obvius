@@ -22,7 +22,7 @@ if (url != null)
 
 		// Get baseref and admin-ify it:
 		var baseRef = tinyMCE.settings['base_href'] || "";
-		baseRef = baseRef.replace(/http:\/\/([^/]+)/, "http://$1/admin");
+		baseRef = baseRef.replace(/http:\/\/([^\/]+)/, "http://$1/admin");
 
 		// If the link is a local anchor then the char after the lenght of the
 		// baseRef must be a #:
