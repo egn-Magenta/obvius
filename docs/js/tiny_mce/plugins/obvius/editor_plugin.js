@@ -99,6 +99,9 @@ function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface,
             var focusElem = mceControl.getFocusElement();
             var parentElem = tinyMCE.getParentElement(focusElem, "blockquote");
             if(parentElem) {
+                if(parentElem.className == 'realblockquote') {
+                    tinyMCE.execInstanceCommand(editor_id, "Outdent");
+                }
                 return true;
             }
 
