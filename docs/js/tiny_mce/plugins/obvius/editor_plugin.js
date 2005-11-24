@@ -88,7 +88,13 @@ function TinyMCE_obvius_execCommand(editor_id, element, command, user_interface,
             return true;
         case "mceFormatAddress":
             tinyMCE.execInstanceCommand(editor_id, "mceAddUndoLevel");
-            tinyMCE.execInstanceCommand(editor_id, "FormatBlock", false, "address");
+            /*
+                Grrr, MSIE wants the type of blockformat to
+                be translated into the language used in the
+                browser.
+            */
+            var address_translated = tinyMCELang['lang_theme_address'] || 'address';
+            tinyMCE.execInstanceCommand(editor_id, "FormatBlock", false, address_translated);
             return true;
         case "mceFormatQuote":
             tinyMCE.execInstanceCommand(editor_id, "mceAddUndoLevel");
