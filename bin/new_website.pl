@@ -13,6 +13,7 @@
 
 use strict;
 use warnings;
+use String::Random qw (random_string);
 
 use Getopt::Long;
 my @OPTV=@ARGV;
@@ -67,6 +68,7 @@ usage("Please supply dbname, stopping") unless ($options{dbname});
 $options{perlname}=ucfirst($options{dbname}) unless ($options{perlname});
 ($options{domain})=($options{website}=~/^[^.]*[.](.*)$/) unless ($options{domain});
 $options{dbusername}=substr($options{dbname}, 0, 4) unless ($options{dbusername}); # Must not be too long
+$options{dbpassword}=random_string("sssssssssss");
 $options{hostname}=`hostname -f` if ((defined $options{dbhost}) and ($options{hostname} eq 'localhost'));
 
 my @dirs=(
@@ -266,7 +268,7 @@ sub make_conf {
 DSN = $dsn
 
 normal_db_login=$options{dbusername}_normal
-normal_db_passwd=default_normal
+normal_db_passwd=$options{dbpassword}
 
 privileged_db_login= $options{dbusername}_priv
 privileged_db_passwd=default_priv
