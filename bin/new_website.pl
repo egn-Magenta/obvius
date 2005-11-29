@@ -24,6 +24,7 @@ my $obvius_conf_dir='/etc/obvius/';
 
 my %options=(
     website=>undef,
+	dbhost=>undef,
     dbname=>undef,
     dbuser=>'root', # For this script to access the database
     dbpasswd=>'',
@@ -36,11 +37,13 @@ my %options=(
     skeleton_dir=>'/var/www/obvius/skeleton',
     fromconf=>undef,
     new_admin=>0,
+	hostname=>'localhost',
    );
 # Remember to update sub usage below, when updating options.
 
 GetOptions(
 	   'website=s'    =>\$options{website},
+	'dbhost=s' =>\$options{dbhost},
 	   'dbname=s'     =>\$options{dbname},
 	   'dbuser=s'     =>\$options{dbuser},
 	   'dbpasswd=s'   =>\$options{dbpasswd},
@@ -53,6 +56,7 @@ GetOptions(
 	   'skeleton_dir=s'=>\$options{skeleton_dir},
            'fromconf:s'   =>\$options{fromconf},
            'new_admin'    =>\$options{new_admin},
+	'hostname=s' => \$options{hostname},
 	  ) or usage("Couldn't understand options, stopping");
 
 usage("Please supply website, stopping") unless ($options{website});
@@ -63,6 +67,7 @@ usage("Please supply dbname, stopping") unless ($options{dbname});
 $options{perlname}=ucfirst($options{dbname}) unless ($options{perlname});
 ($options{domain})=($options{website}=~/^[^.]*[.](.*)$/) unless ($options{domain});
 $options{dbusername}=substr($options{dbname}, 0, 4) unless ($options{dbusername}); # Must not be too long
+$options{hostname}=`hostname -f` if ((defined $options{dbhost}) and ($options{hostname} eq 'localhost'));
 
 my @dirs=(
 	  { dir=>'backup', },
@@ -142,7 +147,7 @@ foreach my $file (@files) {
 	print " File $file->{dir}/$file->{file} already exists\n";
     }
     else {
-	system "(cd $options{wwwroot}/$options{website}/$file->{dir}; touch $file->{file}; chmod $file->{perms} $file->{file}; sudo chgrp $file->{group} $file->{file})";
+	run_system_command ("(cd $options{wwwroot}/$options{website}/$file->{dir}; touch $file->{file}; chmod $file->{perms} $file->{file}; sudo chgrp $file->{group} $file->{file})");
     }
 }
 
@@ -177,7 +182,7 @@ make_db($options{dbname});
 # print "Do you want to import some basic documents (Y/n)? ";
 # my $test = <STDIN>;
 # unless($test and $test =~ /^n/i) {
-#     system("cat $options{wwwroot}/$options{website}/db/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
+#     run_system_command("cat $options{wwwroot}/$options{website}/db/basic_structures.sql | mysql $options{dbname} -u $options{dbuser} --password=$options{dbpasswd}")
 # }
 
 exit 0;
@@ -222,7 +227,7 @@ sub make_symlink {
     }
     else {
 	$to="../$to" unless ($to=~m!^/!);
-	system "(cd $options{wwwroot}/$options{website}/$dir; ln -s $to $link)";
+	run_system_command ("(cd $options{wwwroot}/$options{website}/$dir; ln -s $to $link)");
     }
 }
 
@@ -237,8 +242,8 @@ sub make_dir {
     else {
 	mkdir $dir or warn "Couldn't make directory $dir";
     }
-    system "sudo chgrp $group $dir";
-    system "sudo chmod g+w $dir";
+    run_system_command ("sudo chgrp $group $dir");
+    run_system_command ("sudo chmod g+w $dir");
 }
 
 # make_conf - create a default Obvius configuration file if it doesn't exist
@@ -249,10 +254,16 @@ sub make_conf {
 	print " Configuration file $file already exists\n";
     }
     else {
+		my $dsn;
+		if ($options{dbhost}) {
+			$dsn="DBI:mysql:database=$options{dbname};host=$options{dbhost}";
+		} else {
+			$dsn="DBI:mysql:$options{dbname}"
+		}
 	my $fh;
 	open $fh, ">$file" or die "Couldn't write $file, stopping";
 	print $fh <<EOT;
-DSN = DBI:mysql:$options{dbname}
+DSN = $dsn
 
 normal_db_login=$options{dbusername}_normal
 normal_db_passwd=default_normal
@@ -288,22 +299,22 @@ sub make_db {
 	print " The database $dbname already exists\n";
     }
     else {
-	system "mysqladmin create $dbname -u $options{dbuser} --password=$options{dbpasswd}";
-	system "cat $options{wwwroot}/$options{website}/db/structure.sql | mysql $dbname -u $options{dbuser} --password=$options{dbpasswd}";
-	system "cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname -u $options{dbuser} --password=$options{dbpasswd}";
-	# Put doctypes, editpages, fieldspecs and fieldtypes in the database:
-	system "(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh $options{dbuser} $options{dbpasswd})";
-	# Make root document, and publish it:
-	system "$options{wwwroot}/obvius/otto/create_root ${dbname} Forside --publish";
+		run_system_command ("mysqladmin create $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd}");
+		run_system_command ("cat $options{wwwroot}/$options{website}/db/structure.sql | mysql $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd}");
+		run_system_command ("cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd}");
+		# Put doctypes, editpages, fieldspecs and fieldtypes in the database:
+		run_system_command ("(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh $options{dbuser} $options{dbpasswd})");
+		# Make root document, and publish it:
+		run_system_command ("$options{wwwroot}/obvius/otto/create_root ${dbname} Forside --publish");
         # Import initial documents (XXX httpd_user here:):
-        system "sudo -u www-data $options{wwwroot}/obvius/bin/create --site ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml"
+        run_system_command ("sudo -u www-data $options{wwwroot}/obvius/bin/create --site ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml");
     }
 }
 
 sub db_exists {
     my ($dbname)=@_;
 
-    my $command = "mysql $dbname -u $options{dbuser} --password=$options{dbpasswd} -e 'show tables;' 2> /dev/null";
+    my $command = "mysql $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd} -e 'show tables;' 2> /dev/null";
 
     my $o=`$command`;
     if ($o eq "") {
@@ -416,6 +427,12 @@ sub store_cmdline {
     close $fh;
 }
 
+#run_system_command: Runs a system command and dies if the command returned non 0 
+sub run_system_command {
+	my ($command)=@_;
+	system($command) == 0 or die "Command \"$command\" had non-zero return value ($?)";
+}
+
 sub usage {
     print <<EOT;
 
@@ -434,12 +451,14 @@ Further options:
  --staff_group <group>     staff
  --skeleton_dir <dir>      /var/www/obvius/skeleton
 
+ --dbhost <database host>   database server for website
  --dbuser <database user>  root (what user to use when creating the database)
  --dbpasswd <password>
 
  --fromconf [confname]
 
  --new_admin               defaults to false, use if the website uses the new admin
+ --hostname [hostname]     hostname to be used in MySQL grant statements. Only needed if the name reported by hostname -f can't be resolved 
 EOT
     exit(1);
 }
