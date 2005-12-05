@@ -7,7 +7,7 @@ my $documents = {
                  type => 'scheme/search',
                  label => 'Versions',
                  display => [
-                             {name=>'short_title', content=>'data' },
+                             {name=>'title', content=>'data' },
                             ],
                  storage => {
                              organization => {
@@ -20,7 +20,7 @@ my $documents = {
                              data => {
                                       docid        => { type => 'integer' },
                                       version      => { type => 'date'    },
-                                      short_title  => { type => 'line'    },
+                                      title  => { type => 'line'    },
                                      },
                             },
                 };
