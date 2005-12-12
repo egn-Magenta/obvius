@@ -184,6 +184,16 @@ sub create_obvius_document {
                 }
             }
             $value=\@new_values;
+        } elsif($fieldname eq 'category') {
+            my @new_values;
+            foreach my $cat (@$value) {
+                if(ref($cat) and $cat->{id}) {
+                    push(@new_values, $cat->{id});
+                } else {
+                    push(@new_values, $_);
+                }
+            }
+            $value = \@new_values;
         }
 
         if ($fieldtype) {
