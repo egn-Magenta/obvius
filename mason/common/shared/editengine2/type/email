@@ -34,5 +34,5 @@ $validation
 <%init>
 my $value=$data->{$id};
 
-return ($value =~ /^\w+@[A-Za-z0-9.-]+$/ ? 'OK' : 'malformated'); 
+return ($value =~ /^[^@]+@[A-Za-z0-9.-]+$/ ? 'OK' : 'malformated');
 </%init>
