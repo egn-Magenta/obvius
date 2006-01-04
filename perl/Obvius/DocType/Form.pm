@@ -6,7 +6,7 @@ package Obvius::DocType::Form;
 #
 # Copyright (C) 2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Author: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -251,7 +251,10 @@ sub action {
             my $type = $_->{validationtype} || '';
             my $arg = $_->{validationargument};
 
-            if($type eq 'regexp') {
+            # Note that text-tests (length and regexp) is only performed if the
+            # submitted field has a value. If you want to make sure a field is
+            # filled use the mandatory flag.
+            if($type eq 'regexp' and $field->{has_value}) {
                 my $test = eval("'" . $value  . "' =~ /" . $arg . "/;");
                 if($@) {
                     print STDERR "Failed to test regexp: $@\n";
@@ -275,11 +278,11 @@ sub action {
                 if(scalar(@$value) != $arg) {
                     $field->{invalid} = $_->{errormessage};
                 }
-            } elsif($type eq 'min_length') {
+            } elsif($type eq 'min_length' and $field->{has_value}) {
                 if(length($value) < $arg) {
                     $field->{invalid} = $_->{errormessage};
                 }
-            } elsif($type eq 'max_length') {
+            } elsif($type eq 'max_length' and $field->{has_value}) {
                 if(length($value) > $arg) {
                     $field->{invalid} = $_->{errormessage};
                 }
