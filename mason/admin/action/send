@@ -70,7 +70,7 @@ $obvius_show_url
 %
 <%init>
 # Find text:
-my $sitename=$r->pnotes('site')->Sitename;
+my $sitename = $obvius->config->param('send_email_sitename') || $r->pnotes('site')->Sitename;
 $obvius->get_version_field($vdoc, qw(title));
 
 my $data=$m->comp('/default/generate_subsite');
