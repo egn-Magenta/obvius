@@ -177,8 +177,12 @@ sub action {
 
     my $is_admin = $input->param('IS_ADMIN');
 
-    my $nothidden = $obvius->config->param('show_hidden_calendarevents');
-    $nothidden = !$is_admin unless(defined($nothidden));
+    my $nothidden;
+    if(defined($obvius->config->param('show_hidden_calendarevents'))) {
+        $nothidden = ! $obvius->config->param('show_hidden_calendarevents');
+    } else {
+        $nothidden = !$is_admin;
+    }
 
     my %options = (
                     order=>$sort_sql,
