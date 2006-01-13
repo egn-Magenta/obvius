@@ -27,7 +27,8 @@
 
 %if(scalar(@$invalid)) {
 <div class="error">
-Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette feltet i formularen nedenfor.
+<& /shared/msg, text=>"You will need to correct the entries in the following fields" &>.
+<& /shared/msg, text=>"Please click the field name to correct the entry in the form below" &>.
 <ul>
 %for(@$invalid) {
     <li><a href="#<% $_ %>"><% $fields_by_name{$_}->{title} %></a></li>
@@ -65,7 +66,7 @@ Følgende felter er blevet udfyldt med værdier, der allerede findes i databasen:
 %
 %if($_->{invalid}) {
     <p class="error">
-        Fejl: <% $_->{invalid} %>
+        <& /shared/msg, text=>"Error" &>: <& /shared/msg, text=> $_->{invalid} &>
     </p>
 %}
 %
@@ -98,7 +99,9 @@ Følgende felter er blevet udfyldt med værdier, der allerede findes i databasen:
 <br />
 <div>
 <input type="submit" value="Send" />
-Felter markeret med <span class="mandatory">*</span> skal udfyldes.
+<& /shared/msg, text=>"Fields marked with" &>
+<span class="mandatory">*</span>
+<& /shared/msg, text=>"are required" &>.
 </div>
 %unless($prefix) {
 </form>
