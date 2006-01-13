@@ -98,7 +98,7 @@ Følgende felter er blevet udfyldt med værdier, der allerede findes i databasen:
 
 <br />
 <div>
-<input type="submit" value="Send" />
+<input type="submit" value="<& /shared/msg, text=>"Submit" &>" />
 <& /shared/msg, text=>"Fields marked with" &>
 <span class="mandatory">*</span>
 <& /shared/msg, text=>"are required" &>.
