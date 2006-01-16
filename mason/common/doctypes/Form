@@ -140,12 +140,12 @@ $fields_by_name
 </%args>
 <p class="error">
 %if($field->{mandatory} eq "1") {
-    Fejl: feltet skal udfyldes.
+    <& /shared/msg, text=>"Error" &>: <& /shared/msg/, text=>"This is a required field" &>.
 %} else {
 %    if($field->{mandatory} =~ s/^!//) {
-        Fejl: feltet skal udfyldes hvis feltet "<% $fields_by_name->{$field->{mandatory}}->{title} %>" ikke er udfyldt.
+        <& /shared/msg, text=>"Error" &>: <& /shared/msg/, text=>"This is a required field if the field" &> "<% $fields_by_name->{$field->{mandatory}}->{title} %>" <& /shared/msg, text=>"hasn't been entered" &>.
 %    } else {
-        Fejl: feltet skal udfyldes hvis feltet "<% $fields_by_name->{$field->{mandatory}}->{title} %>" er udfyldt.
+        <& /shared/msg, text=>"Error" &>: <& /shared/msg/, text=>"This is a required field if the field" &> "<% $fields_by_name->{$field->{mandatory}}->{title} %>" <& /shared/msg, text=>"has been entered" &>.
 %    }
 %}
 </p>
