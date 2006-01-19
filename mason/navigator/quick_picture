@@ -274,10 +274,14 @@ if(my $name = $r->param('image_data')) {
             $name =~ s/Å/AA/g;
             $name =~ s/[^a-zA-Z0-9._-]/_/g;
 
-            if($mimetype) {
+	    unless( $name =~ /\.[^\.]+$/ ) 
+	    {
+	      if ( $mimetype )
+	      {
                 my ($extension) = ($mimetype =~ m#/(\w+)$#); # Part of mimetype after /
-                $name =~ s/\.[^\.]+$/.$extension/;
-            }
+                $name .= $extension;
+              }
+	    }
 
             if($obvius->get_doc_by_name_parent($name, $parent->Id)) {
                 $error="Der findes allerede et dokument med det navn";
