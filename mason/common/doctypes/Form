@@ -39,7 +39,7 @@
 %}
 %if(scalar(@$not_unique)) {
 <div class="error">
-Følgende felter er blevet udfyldt med værdier, der allerede findes i databasen:
+<& /shared/msg, text=>"You can only enter unique values in the following fields, and the values you have entered have already been registered" &>:
 <ul>
 %for(@$not_unique) {
     <li><a href="#<% $_ %>"><% $fields_by_name{$_}->{title} %></a></li>
