@@ -1560,7 +1560,6 @@ function TinyMCE__verifyClass(node) {
 
 function TinyMCE_cleanupNode(node) {
 	var output = "";
-
 	switch (node.nodeType) {
 		case 1: // Element
 			var elementData = tinyMCE._cleanupElementName(node.nodeName, node);
@@ -1702,7 +1701,7 @@ function TinyMCE_cleanupNode(node) {
 			}
 
 			// Add nbsp to some elements
-			if ((elementName == "p" || elementName == "td") && (node.innerHTML == "" || node.innerHTML == "&nbsp;"))
+			if ((elementName == "p" ) && (node.innerHTML == "" || node.innerHTML == "&nbsp;"))
 				return "<" + elementName + elementAttribs + ">&nbsp;</" + elementName + ">";
 
 			// Is MSIE script element
@@ -1727,7 +1726,7 @@ function TinyMCE_cleanupNode(node) {
 					output += "</" + elementName + ">";
 			} else {
 				// Allways leave anchor elements open
-				if (elementName == "a")
+				if (elementName == "a" || elementName == "td" )
 					output += "<" + elementName + elementAttribs + "></" + elementName + ">";
 				else {
 					// No children

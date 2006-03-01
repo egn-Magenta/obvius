@@ -93,6 +93,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 	var thElm = tinyMCE.getParentElement(focusElm, "th");
 
 	// Handle commands
+//	tinyMCE.selectedInstance.execCommand("mceAddUndoLevel");
 	switch (command) {
 		case "mceTableRowProps":
 			if (trElm == null)
@@ -109,6 +110,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				// Open window
 				tinyMCE.openWindow(template, {editor_id : inst.editorId, align : getAttrib(trElm, 'align'), valign : getAttrib(trElm, 'valign'), height : getAttrib(trElm, 'height'), className : getAttrib(trElm, 'className')});
 			} else {
+				tinyMCE.selectedInstance.execCommand("mceAddUndoLevel");			
 				trElm.setAttribute('align', value['align']);
 				trElm.setAttribute('vAlign', value['valign']);
 				trElm.setAttribute('height', value['height']);
@@ -136,6 +138,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				// Open window
 				tinyMCE.openWindow(template, {editor_id : inst.editorId, align : getAttrib(tdElm, 'align'), valign : getAttrib(tdElm, 'valign'), width : getAttrib(tdElm, 'width'), height : getAttrib(tdElm, 'height'), className : getAttrib(tdElm, 'className'), scope:getAttrib(tdElm, 'scope') });
 			} else {
+				tinyMCE.selectedInstance.execCommand("mceAddUndoLevel");			
 				tdElm.setAttribute('align', value['align']);
 				tdElm.setAttribute('vAlign', value['valign']);
 				tdElm.setAttribute('width', value['width']);
@@ -149,6 +152,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 
 		case "mceInsertTable":
 			if (user_interface) {
+
 				var cols = 2, rows = 2, border = 0, cellpadding = "", cellspacing = "", align = "", width = "", height = "", action = "insert", className = "", caption="", summary="";
 
 				tinyMCE.tableElement = tinyMCE.getParentElement(inst.getFocusElement(), "table");
@@ -177,8 +181,12 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 					summary = tinyMCE.getAttrib(tinyMCE.tableElement, 'summary', summary );
 					//**
 
-					width = tinyMCE.tableElement.offsetWidth == 0 ? tinyMCE.tableElement.getAttribute("width") : tinyMCE.tableElement.offsetWidth;
-					height = tinyMCE.tableElement.offsetHeight == 0 ? tinyMCE.tableElement.getAttribute("height") : tinyMCE.tableElement.offsetHeight;
+
+					if( tinyMCE.tableElement.style.width || tinyMCE.tableElement.getAttribute("width") )
+						width = tinyMCE.tableElement.offsetWidth == 0 ? tinyMCE.tableElement.getAttribute("width") : tinyMCE.tableElement.offsetWidth;
+
+					if( tinyMCE.tableElement.style.height || tinyMCE.tableElement.getAttribute("height") )
+						height = tinyMCE.tableElement.offsetHeight == 0 ? tinyMCE.tableElement.getAttribute("height") : tinyMCE.tableElement.offsetHeight;
 
 					action = "update";
 				}
@@ -197,6 +205,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 				// Open window
 				tinyMCE.openWindow(template, {editor_id : inst.editorId, cols : cols, rows : rows, border : border, cellpadding : cellpadding, cellspacing : cellspacing, align : align, width : width, height : height, action : action, className : className, caption : caption, summary : summary}); //Chris Benjaminsen BeIT ApS **
 			} else {
+				tinyMCE.selectedInstance.execCommand("mceAddUndoLevel");			
 				var html = '';
 				var cols = 2, rows = 2, border = 0, cellpadding = -1, cellspacing = -1, align, width, height, className, caption, summary;
 
@@ -235,8 +244,9 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 							tinyMCE.tableElement.innerHTML = tinyMCE.tableElement.innerHTML
 					}
 
-					tinyMCE.tableElement.style.width = width + 'px'
-					tinyMCE.tableElement.style.height = height + 'px'
+					
+					tinyMCE.tableElement.style.width = width ? width + 'px' : ''
+					tinyMCE.tableElement.style.height = height ? height + 'px' : ''
 					//**
 
 					tinyMCE.handleVisualAid(tinyMCE.tableElement, false, inst.visualAid);
@@ -320,6 +330,8 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 		case "mceTableInsertColAfter":
 		case "mceTableDeleteCol":
 		
+			tinyMCE.selectedInstance.execCommand("mceAddUndoLevel");		
+		
 			var trElement = tinyMCE.getParentElement(inst.getFocusElement(), "tr");
 			var tdElement = tinyMCE.getParentElement(inst.getFocusElement(), "td");
 			var thElement = tinyMCE.getParentElement(inst.getFocusElement(), "th");
@@ -381,7 +393,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 						var r = tableElement.insertRow(rowCount == 0 ? 1 : rowCount-1);
 						for (var i=0; i<numcells; i++) {
 							var newTD = doc.createElement("td");
-							newTD.innerHTML = "&nbsp;";
+							newTD.innerHTML = "";
 
 							if (tableBorder == 0)
 								newTD.style.cssText = visualAidStyle;
@@ -410,7 +422,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 						var r = tableElement.insertRow(rowCount == 0 ? 1 : rowCount);
 						for (var i=0; i<numcells; i++) {
 							var newTD = doc.createElement("td");
-							newTD.innerHTML = "&nbsp;";
+							newTD.innerHTML = "";
 
 							if (tableBorder == 0)
 								newTD.style.cssText = visualAidStyle;
@@ -426,7 +438,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 					case "mceTableInsertCellAfter":
 						
 						var newTD = doc.createElement("td");
-						newTD.innerHTML = "&nbsp;";
+						newTD.innerHTML = "";
 
 						if (tableBorder == 0)
 							newTD.style.cssText = visualAidStyle;
@@ -476,7 +488,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 								break;
 
 							var newTD = doc.createElement("td");
-							newTD.innerHTML = "&nbsp;";
+							newTD.innerHTML = "";
 
 							if (tableBorder == 0)
 								newTD.style.cssText = visualAidStyle;
@@ -489,7 +501,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 					case "mceTableInsertCellBefore":
 						
 						var newTD = doc.createElement("td");
-						newTD.innerHTML = "&nbsp;";
+						newTD.innerHTML = "";
 
 						if (tableBorder == 0)
 							newTD.style.cssText = visualAidStyle;
@@ -512,7 +524,7 @@ function TinyMCE_table_execCommand(editor_id, element, command, user_interface, 
 								cell = tableElement.rows[y].cells[cellCount+1];
 
 							var newTD = doc.createElement("td");
-							newTD.innerHTML = "&nbsp;";
+							newTD.innerHTML = "";
 
 							if (tableBorder == 0)
 								newTD.style.cssText = visualAidStyle;
