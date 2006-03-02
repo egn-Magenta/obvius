@@ -10,6 +10,7 @@ Precedence: bulk
 Formularen "<% $vdoc->field('title') %>" er blevet udfyldt med følgende data:
 
 %for(@$fields) {
+%next if($_->{type} =~ m!^fieldset!);
 <% $_->{title} %> (<% $_->{name} %>):
 %if(ref($_->{_submitted_value})) {
 <% join(", ", @{ $_->{_submitted_value} }) %>
@@ -19,6 +20,9 @@ Formularen "<% $vdoc->field('title') %>" er blevet udfyldt med følgende data:
 
 %}
 
+-- Start csv data --
+<% join(";", @csv_values) %>
+-- End csv data --
 
 --
   <% $obvius->config->param('sitename') %>
@@ -48,6 +52,22 @@ if($fields_by_name{'name'}->{_submitted_value} and $fields_by_name{'email'}->{_s
 } elsif($fields_by_name{'email'}) {
     $from = $fields_by_name{'email'}->{_submitted_value};
     $r->notes('formdata_mail_from' => $fields_by_name{'email'}->{_submitted_value})
+}
+
+my @csv_values;
+
+for(@$fields) {
+    next if($_->{type} =~ m!^fieldset!);
+    my $val;
+    if(ref($_->{_submitted_value})) {
+        $val = join("|", @{$_->{_submitted_value}});
+    } else {
+        $val = $_->{_submitted_value} || '';
+    }
+    # Only documentation on windows CSV I could find said to use
+    # ~ for linebreaks.
+    $val =~ s!\r?\n!~!g;
+    push(@csv_values, $val);
 }
 </%init>
 <%once>
