@@ -15,7 +15,7 @@ $p->parse($html);
 $p->eof;
 if ( $] >= 5.008 ) {
     # this converts native perl unicode string into latin-1 text with unicode entities as &#...;
-    $out =~ s/(.)/(ord($1)>127)?sprintf("&#%d;",ord($1)):$1/ge;
+    $out =~ s/([^\x00-\x7F])/sprintf("&#%d;",ord($1))/ge;
     Encode::_utf8_off($out);
 
     # For this to work you need to load Encode from an apache perl startup script
