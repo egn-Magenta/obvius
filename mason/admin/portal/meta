@@ -1,1 +1,4 @@
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Type" content="text/html; charset=<% $charset %>" />
+<%init>
+my $charset = $obvius->config->param('charset') || 'iso-8859-1';
+</%init>

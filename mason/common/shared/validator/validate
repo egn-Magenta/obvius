@@ -3,6 +3,7 @@ $html=>undef
 </%args>
 %
 <%once>
+my $charset = $obvius->config->param('charset') || 'iso-8859-1';
 use URI::Escape;
 my $w3_check='/usr/lib/cgi-bin/check';
 my $start_html=<<EOT;
@@ -10,7 +11,7 @@ my $start_html=<<EOT;
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da">
   <head>
     <title>Validation</title>
-    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+    <meta http-equiv="content-type" content="text/html; charset=<% $charset %>" />
   </head>
   <body>
     <div>
@@ -32,7 +33,7 @@ if (-x $w3_check) {
         $ENV{PATH}='/usr/bin:/bin/';
         $ENV{REQUEST_METHOD}='GET';
         $ENV{QUERY_STRING}='fragment=' . uri_escape($start_html . $html . $end_html) .
-            '&output=xml&charset=iso-8859-1'; # XXX charset
+            '&output=xml&charset=' . $charset; # XXX charset
         $xml=`$w3_check`;
     }
 
