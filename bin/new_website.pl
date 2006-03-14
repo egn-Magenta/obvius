@@ -25,7 +25,7 @@ my $obvius_conf_dir='/etc/obvius/';
 
 my %options=(
     website=>undef,
-	dbhost=>undef,
+        dbhost=>undef,
     dbname=>undef,
     dbuser=>'root', # For this script to access the database
     dbpasswd=>'',
@@ -38,13 +38,13 @@ my %options=(
     skeleton_dir=>'/var/www/obvius/skeleton',
     fromconf=>undef,
     new_admin=>0,
-	hostname=>'localhost',
+        hostname=>'localhost',
    );
 # Remember to update sub usage below, when updating options.
 
 GetOptions(
 	   'website=s'    =>\$options{website},
-	'dbhost=s' =>\$options{dbhost},
+        'dbhost=s' =>\$options{dbhost},
 	   'dbname=s'     =>\$options{dbname},
 	   'dbuser=s'     =>\$options{dbuser},
 	   'dbpasswd=s'   =>\$options{dbpasswd},
@@ -57,7 +57,7 @@ GetOptions(
 	   'skeleton_dir=s'=>\$options{skeleton_dir},
            'fromconf:s'   =>\$options{fromconf},
            'new_admin'    =>\$options{new_admin},
-	'hostname=s' => \$options{hostname},
+        'hostname=s' => \$options{hostname},
 	  ) or usage("Couldn't understand options, stopping");
 
 usage("Please supply website, stopping") unless ($options{website});
@@ -301,9 +301,10 @@ sub make_db {
 	print " The database $dbname already exists\n";
     }
     else {
-		run_system_command ("mysqladmin create $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd}");
-		run_system_command ("cat $options{wwwroot}/$options{website}/db/structure.sql | mysql $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd}");
-		run_system_command ("cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd}");
+                my $host_option = $options{dbhost} ? "-h $options{dbhost}" : "";
+		run_system_command ("mysqladmin create $dbname $host_option -u $options{dbuser} --password=$options{dbpasswd}");
+		run_system_command ("cat $options{wwwroot}/$options{website}/db/structure.sql | mysql $dbname $host_option -u $options{dbuser} --password=$options{dbpasswd}");
+		run_system_command ("cat $options{wwwroot}/$options{website}/db/perms.sql | mysql $dbname $host_option -u $options{dbuser} --password=$options{dbpasswd}");
 		# Put doctypes, editpages, fieldspecs and fieldtypes in the database:
 		run_system_command ("(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh $options{dbuser} $options{dbpasswd})");
 		# Make root document, and publish it:
@@ -316,7 +317,8 @@ sub make_db {
 sub db_exists {
     my ($dbname)=@_;
 
-    my $command = "mysql $dbname -h $options{dbhost} -u $options{dbuser} --password=$options{dbpasswd} -e 'show tables;' 2> /dev/null";
+    my $host_option = $options{dbhost} ? "-h $options{dbhost}" : "";
+    my $command = "mysql $dbname $host_option -u $options{dbuser} --password=$options{dbpasswd} -e 'show tables;' 2> /dev/null";
 
     my $o=`$command`;
     if ($o eq "") {
