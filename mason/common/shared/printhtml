@@ -14,10 +14,6 @@ $decode_entities = (! $dont_decode_entities);
 $p->parse($html);
 $p->eof;
 if ( $] >= 5.008 ) {
-    # this converts native perl unicode string into latin-1 text with unicode entities as &#...;
-    $out =~ s/([^\x00-\x7F])/sprintf("&#%d;",ord($1))/ge;
-    Encode::_utf8_off($out);
-
     # For this to work you need to load Encode from an apache perl startup script
     # (/etc/apache-perl/httpd.pl or the sitespecific conf/setup.pl) like this:
     # 
@@ -25,6 +21,18 @@ if ( $] >= 5.008 ) {
     #    eval "use Encode;";
     #    die $@ if $@;
     #  }
+
+    my $charset = $obvius->config->param('charset') || 'iso-8859-1';
+    if($charset eq 'utf8') {
+        if(utf8::is_utf8($out)) {
+            $out = Encode::encode("utf8", $out);
+        }
+    } else {
+        # this converts native perl unicode string into latin-1 text with unicode entities as &#...;
+        $out =~ s/([^\x00-\x7F])/sprintf("&#%d;",ord($1))/ge;
+        Encode::_utf8_off($out);
+    }
+
 }
 $html=$out;
 if($no_first_paragraph) {
