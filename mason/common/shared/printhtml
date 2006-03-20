@@ -28,9 +28,11 @@ if ( $] >= 5.008 ) {
             $out = Encode::encode("utf8", $out);
         }
     } else {
-        # this converts native perl unicode string into latin-1 text with unicode entities as &#...;
-        $out =~ s/([^\x00-\x7F])/sprintf("&#%d;",ord($1))/ge;
-        Encode::_utf8_off($out);
+        if(utf8::is_utf8($out)) {
+            # this converts native perl unicode string into latin-1 text with unicode entities as &#...;
+            $out =~ s/([^\x00-\xFF])/sprintf("&#%d;",ord($1))/ge;
+            $out = Encode::encode("latin1", $out);
+        }
     }
 
 }
