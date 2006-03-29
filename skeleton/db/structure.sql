@@ -2,7 +2,7 @@
 
 DROP TABLE IF EXISTS documents;
 CREATE TABLE documents (
-  id int(8) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id int(8) unsigned NOT NULL auto_increment,
   parent int(8) unsigned DEFAULT '0' NOT NULL,
   name char(127) DEFAULT '' NOT NULL,
   type int(8) unsigned NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE vfields (
 ### CYCLE
 DROP TABLE IF EXISTS doctypes;
 CREATE TABLE doctypes (
-  id int(8) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id int(8) unsigned NOT NULL auto_increment,
   name varchar(127) DEFAULT '' NOT NULL,
   parent int(8) unsigned NOT NULL,
   basis int(1) unsigned DEFAULT '0' NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE fieldspecs (
 
 DROP TABLE IF EXISTS fieldtypes;
 CREATE TABLE fieldtypes (
-  id int(8) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id int(8) unsigned NOT NULL auto_increment,
   name varchar(127) DEFAULT '' NOT NULL,
   edit varchar(127) DEFAULT 'line' NOT NULL,
 	edit_args text DEFAULT '' NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE categories (
 
 DROP TABLE IF EXISTS keywords;
 CREATE TABLE keywords (
-  id smallint(5) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id smallint(5) unsigned NOT NULL auto_increment,
   name char(63) DEFAULT '' NOT NULL,
   PRIMARY KEY (id),
   UNIQUE keyword (name)
@@ -126,7 +126,7 @@ CREATE TABLE keywords (
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-  id smallint(5) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id smallint(5) unsigned NOT NULL auto_increment,
   login varchar(31) DEFAULT '' NOT NULL,
   passwd varchar(63) DEFAULT '' NOT NULL,
   name varchar(127) DEFAULT '' NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE users (
 
 DROP TABLE IF EXISTS groups;
 CREATE TABLE groups (
-  id smallint(5) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id smallint(5) unsigned NOT NULL auto_increment,
   name char(31) DEFAULT '' NOT NULL,
   PRIMARY KEY (id),
   UNIQUE name (name)
@@ -153,7 +153,7 @@ CREATE TABLE grp_user (
 
 DROP TABLE IF EXISTS subscribers;
 CREATE TABLE subscribers (
-  id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
+  id int(10) unsigned NOT NULL auto_increment,
   name varchar(127) DEFAULT '' NOT NULL,
   company varchar(127) DEFAULT '' NOT NULL,
   passwd varchar(63) DEFAULT '' NOT NULL,
