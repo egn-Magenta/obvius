@@ -44,8 +44,10 @@ use WebObvius::Template::Provider;
 
 use WebObvius::Cache::Flushing;
 
-use Apache::Constants qw(:common :methods :response);
-use Apache::File;
+use WebObvius::Apache 
+	Constants	=> qw(:common :methods :response),
+	File		=> ''
+;
 
 use HTML::Mason;
 # Support Mason before version 1.10 and after simultaneously:
@@ -353,7 +355,9 @@ sub access_handler ($$) {
 
     # The orig_uri case from above does not apply to admin, however, so it's
     # not needed here.
-    return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external') if (!$this->param('is_admin') and ($uri =~ s![.]html/$!.html!i)); # ... and we auto-deslash any uri which ends in .html.
+    return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external') 
+    	if (!$this->param('is_admin') and ($uri =~ s{[.]html/$}{.html}i)); 
+	# ... and we auto-deslash any uri which ends in .html.
 
     my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
     return SERVER_ERROR unless ($obvius);
@@ -508,7 +512,7 @@ sub handler ($$) {
         $req->set_content_length(length($html)) unless ($req->header_only or $status!=OK);
         $req->send_http_header;
 
-        $req->print(\$html) unless ($req->header_only or $status!=OK);
+        $req->print($html) unless ($req->header_only or $status!=OK);
 
         # Add to cache:
         if ($this->can_use_cache($req) and $status==OK) {
@@ -698,7 +702,6 @@ sub authen_handler ($$) {
 
     return OK unless ($req->is_initial_req); # Only check on the initial request, not
                                              # any subrequests (think /admin/admin/...)
-
     my ($res, $pw) = $req->get_basic_auth_pw;
     return $res unless ($res == OK);
 

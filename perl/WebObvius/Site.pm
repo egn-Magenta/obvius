@@ -44,9 +44,12 @@ use Image::Size;
 our @ISA = qw( Obvius::Data WebObvius );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-use Apache::Constants qw(:common :methods :response);
-use Apache::Util qw(ht_time);
-use Apache::Cookie();
+use WebObvius::Apache
+	Constants	=> qw(:common :methods :response),
+	Util		=> '',
+	Cookie		=> ''
+;
+
 use Digest::MD5 qw(md5_hex);
 
 use POSIX qw(strftime);
@@ -309,7 +312,7 @@ sub set_expire_header {
 	if ($agent =~ m/[Mm][Ss][Ii][Ee]/) {
 	    $req->header_out('Expires', -1);
 	} else {
-	    $req->header_out('Expires', ht_time($req->request_time));
+	    $req->header_out('Expires', Apache::Util::ht_time($req->request_time));
 	}
 	$req->headers_out->add('Pragma' => 'no-cache');
 	$req->header_out('Cache-Control', 'no-cache');
@@ -322,7 +325,7 @@ sub set_expire_header {
 				       ]);
 	}
     } else {
-	$req->header_out('Expires', ht_time($req->request_time + $ttl));
+	$req->header_out('Expires', Apache::Util::ht_time($req->request_time + $ttl));
 
 	# If another Cache-Control header was specified, use that one:
         my $cache_control=$req->header_out('Cache-Control');
@@ -334,7 +337,7 @@ sub set_expire_header {
 	if (defined $output) {
 	    $output->param(http_equiv=>[
 					{ name=>'Expires',
-					  value=>ht_time($req->request_time + $ttl),
+					  value=>Apache::Util::ht_time($req->request_time + $ttl),
 					},
 					{ name=>'Cache-Control',
 					  value=>$cache_control,
@@ -363,8 +366,9 @@ sub create_input_object {
     my ($this, $req, %options) = @_;
 
     my $input=new Obvius::Data;
-    foreach (keys %{$req->param}) {
-	my @value=$req->param($_);
+    my $parms = $req->param;
+    foreach (keys %$parms) {
+	my @value=$parms->{$_};
 	$input->param($_=> (scalar(@value)>1 ? \@value : $value[0]));
     }
     $input->param(NOW=>$req->notes('now'));
@@ -375,7 +379,7 @@ sub create_input_object {
 	$cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
 	$input->param('OBVIUS_COOKIES'=>$cookies);
     }
-    $input->param('OBVIUS_HEADERS_IN'=>{ $req->headers_in() });
+    $input->param('OBVIUS_HEADERS_IN'=> scalar( $req->headers_in() ));
     if (my $obvius_session_id=$req->param('obvius_session_id')) {
         # Notice that the admin/public-Mason must have released the
         # session for the common-part to grab it here. Symptoms of

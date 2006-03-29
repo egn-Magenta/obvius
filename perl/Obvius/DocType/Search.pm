@@ -36,18 +36,35 @@ sub read_htdig_output {
 
     my $cmd;
 
+
     # convert the incoming args to an url like string
     if (ref $args) {
+    	my %map;
+
+	if (( $ENV{'MOD_PERL'} || '') =~ /mod_perl\/2/) {
+    		my $r = Apache2::RequestUtil->request;
+		%map = map {
+			my $key = Apache2::Util::escape_path(lc($_), $r-> pool);
+			my $value = Apache2::Util::escape_path($$args{$_}, $r-> pool);
+			( $key, $value);
+		} keys %$args;
+	} else {
+		%map = map {
+			my $key = Apache::Util::escape_uri(lc($_), $r-> pool);
+			my $value = Apache::Util::escape_uri($$args{$_}, $r-> pool);
+			( $key, $value);
+		} keys %$args;
+	}
+	
         $cmd = join('&',
 		    map {
-			my $key = Apache::Util::escape_uri(lc($_));
-			my $value = Apache::Util::escape_uri($$args{$_});
-			if( $key =~ /(the_request|obvius_cookies|now)/) {
+		    	my $value = $map{$_};
+			if ( /(the_request|obvius_cookies|now)/) {
 			    $value = '';
 			}
-			( $key . '=' . $value )
-		    } keys(%$args)
-		   );
+			( $_ . '=' . $value )
+		    } keys %map;
+	);
     } else {
         $cmd = $args;
     }

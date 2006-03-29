@@ -41,9 +41,7 @@ use locale;
 
 use WebObvius::Template;
 
-use Apache::Request;
-use Apache::Util;
-use HTML::Entities;
+use WebObvius::Apache qw(Request Util);
 
 use HTML::Entities ();
 

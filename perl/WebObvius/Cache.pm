@@ -32,7 +32,7 @@ package WebObvius::Cache;
 use strict;
 use warnings;
 
-use Apache::Constants qw(:common);
+use WebObvius::Apache Constants => qw(:common);
 
 require Exporter;
 our @ISA = qw( Exporter );

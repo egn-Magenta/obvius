@@ -33,7 +33,7 @@ use warnings;
 use WebObvius::Site::Mason;
 use Obvius::MultiSite;
 
-use Apache::Constants qw(:common :methods :response);
+use WebObvius::Apache Constants => qw(:common :methods :response);
 
 use Digest::MD5 qw(md5_hex);
 

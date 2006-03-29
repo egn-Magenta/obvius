@@ -28,7 +28,7 @@ package WebObvius::Timer;
 
 use strict;
 use warnings;
-use Apache::Constants qw(:common);
+use WebObvius::Apache Constants => qw(:common);
 use Time::HiRes qw(gettimeofday tv_interval);
 
 require Exporter;

@@ -9,7 +9,7 @@ use warnings;
 our @ISA = ();
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-use Apache::Constants qw(:common :methods);
+use WebObvius::Apache Constants => qw(:common :methods);
 
 
 ########################################################################
