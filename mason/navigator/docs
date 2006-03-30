@@ -88,7 +88,13 @@
 %unless($simple) {
         <tr>
           <td valign="top" class="mellemstr">&nbsp;</td>
-          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_picture('<% $path %>')"><strong><& SELF:msg, text=>'Create new picture here' &></a></strong></td>
+          <td valign="top" class="mellemstr"><!--
+% if($can_create) {
+            --><a href="javascript:navigator_add_picture('<% $path %>')"><strong><& SELF:msg, text=>'Create new picture here' &></a></strong><!--
+% } else {
+            --><strong class="ghosted"><& SELF:msg, text=>'Create new picture here' &></strong><!--
+% }
+          --></td>
           <td valign="top" align="center" class="mellemstr">-</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
@@ -100,7 +106,13 @@
         </tr>
         <tr>
           <td valign="top" class="mellemstr">&nbsp;</td>
-          <td valign="top" class="mellemstr"><a href="javascript:navigator_add_upload('<% $path %>')"><strong><& SELF:msg, text=>'Create new upload-document here' &></a></strong></td>
+          <td valign="top" class="mellemstr"><!--
+% if($can_create) {
+            --><a href="javascript:navigator_add_upload('<% $path %>')"><strong><& SELF:msg, text=>'Create new upload-document here' &></a></strong><!--
+% } else {
+            --><strong class="ghosted"><& SELF:msg, text=>'Create new upload-document here' &></strong><!--
+% }
+          --></td>
           <td valign="top" align="center" class="mellemstr">-</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
           <td valign="top" class="mellemstr">&nbsp;</td>
@@ -126,6 +138,11 @@ unless($path eq '/') {
     $one_up = $path;
     $one_up =~ s/[^\/]+\/$//;
 }
+
+# When calling lookup_document with path_info we don't get
+# errors if it's a bogus url.
+my ($this_doc, $path_info) = $obvius->lookup_document($path);
+my $can_create = $obvius->can_create_new_document($this_doc);
 
 my @docs;
 my @special_docs;

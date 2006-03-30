@@ -48,18 +48,18 @@
             <font size="1">
 %}
                 <% $active ? "<strong>" : '' %>
-                    <a href="javascript:navigator_navigate('<% $document->Url %>')">
+                    <a href="javascript:navigator_navigate('<% $document->Url %>')"><!--
 %       if ($is_current) {
 %         if($simple) {
-[<% $document->Name %>/]\
+                        -->[<% $document->Name %>/]<!--
 %         } else {
-                        <font color="#ffffff"><% $document->Name %>/</font>
+                        --><font color="#ffffff"><% $document->Name %>/</font><!--
 %         }
 %       }
 %       else {
-%                       $_out->($document->Name . "/");
+                        --><% $document->Name . "/" %><!--
 %       }
-%                    $_out->('</a>');
+                    --></a>
                 <% $active ? "</strong>" : '' %>
 %unless($simple) {
             </font>

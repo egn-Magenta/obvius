@@ -285,6 +285,8 @@ if(my $name = $r->param('image_data')) {
 
             if($obvius->get_doc_by_name_parent($name, $parent->Id)) {
                 $error="Der findes allerede et dokument med det navn";
+            } elsif(! $obvius->can_create_new_document($parent)) {
+                $error="You do not have permissions to create documents here";
             } else {
                 my $create_error;
                 my ($docid, $version) = $obvius->create_new_document($parent, $name, $image_doctype->Id, 'da', $fields, $owner, $group, \$create_error);
