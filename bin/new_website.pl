@@ -23,28 +23,30 @@ $ENV{'PERL5LIB'} = $ENV{'PERL5LIB'} . ":/home/httpd/obvius/perl_blib";
 
 my $obvius_conf_dir='/etc/obvius/';
 
+my $bsd = ( $^O =~ /bsd/);
+
 my %options=(
-    website=>undef,
-        dbhost=>undef,
-    dbname=>undef,
-    dbuser=>'root', # For this script to access the database
-    dbpasswd=>'',
-    dbusername=>undef, # For the website to access the database
-    perlname=>undef,
-    domain=>undef,
-    wwwroot=>'/var/www',
-    httpd_group=>'www-data',
-    staff_group=>'staff',
-    skeleton_dir=>'/var/www/obvius/skeleton',
-    fromconf=>undef,
-    new_admin=>0,
-        hostname=>'localhost',
-   );
+    website	=> undef,
+    dbhost	=> undef,
+    dbname	=> undef,
+    dbuser	=> 'root', # For this script to access the database
+    dbpasswd	=> '',
+    dbusername	=> undef, # For the website to access the database
+    perlname	=> undef,
+    domain	=> undef,
+    wwwroot	=> ($bsd ? '/usr/local/www/data' : '/var/www'),
+    httpd_group	=> ($bsd ? 'www' : 'www-data'),
+    staff_group	=> 'staff',
+    skeleton_dir=> ($bsd ? '/usr/local/www/data/obvius/skeleton' : '/var/www/obvius/skeleton'),
+    fromconf	=> undef,
+    new_admin	=> 0,
+    hostname	=> 'localhost',
+);
 # Remember to update sub usage below, when updating options.
 
 GetOptions(
 	   'website=s'    =>\$options{website},
-        'dbhost=s' =>\$options{dbhost},
+           'dbhost=s' =>\$options{dbhost},
 	   'dbname=s'     =>\$options{dbname},
 	   'dbuser=s'     =>\$options{dbuser},
 	   'dbpasswd=s'   =>\$options{dbpasswd},
@@ -149,7 +151,7 @@ foreach my $file (@files) {
 	print " File $file->{dir}/$file->{file} already exists\n";
     }
     else {
-	run_system_command ("(cd $options{wwwroot}/$options{website}/$file->{dir}; touch $file->{file}; chmod $file->{perms} $file->{file}; sudo chgrp $file->{group} $file->{file})");
+	run_system_command ("(cd $options{wwwroot}/$options{website}/$file->{dir}; touch $file->{file}; chmod $file->{perms} $file->{file}; chgrp $file->{group} $file->{file})");
     }
 }
 
@@ -224,7 +226,7 @@ sub copy_interpolate {
 sub make_symlink {
     my ($to, $dir, $link)=@_;
 
-    if (-e "$options{wwwroot}/$options{website}/$dir/$link") {
+    if (-l "$options{wwwroot}/$options{website}/$dir/$link") {
 	print " Symlink $dir/$link already exists\n";
     }
     else {
@@ -244,8 +246,8 @@ sub make_dir {
     else {
 	mkdir $dir or warn "Couldn't make directory $dir";
     }
-    run_system_command ("sudo chgrp $group $dir");
-    run_system_command ("sudo chmod g+w $dir");
+    run_system_command ("chgrp $group $dir");
+    run_system_command ("chmod g+w $dir");
 }
 
 # make_conf - create a default Obvius configuration file if it doesn't exist
@@ -310,7 +312,7 @@ sub make_db {
 		# Make root document, and publish it:
 		run_system_command ("$options{wwwroot}/obvius/otto/create_root ${dbname} Forside --publish");
         # Import initial documents (XXX httpd_user here:):
-        run_system_command ("sudo -u www-data $options{wwwroot}/obvius/bin/create --site ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml");
+        run_system_command ("sudo -u $options{httpd_group} $options{wwwroot}/obvius/bin/create --site ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml");
     }
 }
 
@@ -434,7 +436,8 @@ sub store_cmdline {
 #run_system_command: Runs a system command and dies if the command returned non 0 
 sub run_system_command {
 	my ($command)=@_;
-	system($command) == 0 or die "Command \"$command\" had non-zero return value ($?)";
+	my ( undef, undef, $line) = caller; 
+	system($command) == 0 or die "Command \"$command\" had non-zero return value ($?) at line $line\n";
 }
 
 sub usage {
@@ -450,10 +453,10 @@ Further options:
  --perlname <perlname>     <Dbname>
  --dbusername <short name> First 4 characters of dbname
  --domain <domain>         <website> after the first dot to the end
- --wwwroot <wwwroot>       /var/www
- --httpd_group <group>     www-data
+ --wwwroot <wwwroot>       $options{wwwroot}
+ --httpd_group <group>     $options{httpd_group}
  --staff_group <group>     staff
- --skeleton_dir <dir>      /var/www/obvius/skeleton
+ --skeleton_dir <dir>      $options{skeleton_dir}
 
  --dbhost <database host>   database server for website
  --dbuser <database user>  root (what user to use when creating the database)
