@@ -44,11 +44,15 @@ sub import
 
 	for my $mod ( @imports) {
 		my $module = shift @$mod;
-		if ( $module eq 'Constants' and $MOD_PERL == 2) {
-			@$mod = grep { $_ ne ':response' } @$mod;
-			$module = 'Const';
-		} elsif ( $module eq 'Access' and $MOD_PERL == 2) {
-			require Apache2::Access;
+		if ( $MOD_PERL == 2) {
+			if ( $module eq 'Constants') {
+				@$mod = grep { $_ ne ':response' } @$mod;
+				$module = 'Const';
+			} elsif ( $module eq 'Access') {
+				require Apache2::Access;
+			} elsif ( $module eq 'File') {
+				next; # in ::compat() already
+			}
 		}
 		
 		$module = apache_module( $module);
