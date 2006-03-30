@@ -149,6 +149,10 @@ function formdata_populate_fieldtable(name) {
 }
 
 function formdata_delete_field(formfield_name, fieldname) {
+    if(! confirm(formdata_translations['really_delete'] + " '" + fieldname + "'?")) {
+        return false;
+    }
+
     var rootDoc = formdata_get_rootDoc_by_name(formfield_name);
 
     var names = rootDoc.getElementsByTagName('name');

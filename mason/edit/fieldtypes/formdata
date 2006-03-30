@@ -139,6 +139,7 @@ var formdata_translations = {
                                 "predef_valrule_numbers_only" : "<& SELF:msg, text=>"predef_valrule_numbers_only" &>",
                                 "predef_valrule_postal_code" : "<& SELF:msg, text=>"predef_valrule_postal_code" &>",
                                 "predef_valrule_phone_number" : "<& SELF:msg, text=>"predef_valrule_phone_number" &>",
+                                "really_delete" : "<& /shared/msg, text=>"Are you sure you want to delete the field" &>",
                                 'dummy': ''
                             };
 </script>
