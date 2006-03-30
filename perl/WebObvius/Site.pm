@@ -199,6 +199,8 @@ sub obvius_document {
         # can handle the request:
         my ($doc, $path_info)=$obvius->lookup_document($path);
 
+        return undef unless($doc);
+
         my $doctype=$obvius->get_document_type($doc); # XXX Should look at the public version?
 
         # It can:
