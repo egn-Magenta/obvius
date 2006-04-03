@@ -1,0 +1,75 @@
+<%args>
+$when
+</%args>
+<%init>
+my $at_exe = `which at` || '';
+unless($at_exe) {
+    $obvius->log->error("at executeable not found in /shared/cache/delayed_immediate_flush");
+    return undef;
+}
+
+# Test if we can run at (the apache user might be specified in /etc/at.deny):
+
+if(system("atq -V 2> /dev/null")) { # system returns 0 on success..
+    $obvius->log->error("Seems like we don't have permissions to run at in /shared/cache/delayed_immediate_flush");
+    return undef;
+}
+
+if($when =~ m!^(\d+-\d+-\d+) (\d+:\d+)!) {
+    unless($when gt $r->notes('now')) {
+        $obvius->log->info("Not running at with time in the past: $when");
+        return 1;
+    }
+
+    my $whenstr = "$2 $1";
+
+    my $grepstr = "$1 $2";
+
+    # Check if we already have a job running.
+    # First gather a list of job numbers running at the given time:
+    my @jobnrs;
+    if(open(PRG, "atq | grep '$grepstr'|")) {
+        while(<PRG>) {
+            if(/^(\d+)/) {
+                push(@jobnrs, $1);
+            }
+        }
+        close(PRG);
+    } else {
+        $obvius->log->error("Couldn't run atq in /shared/cache/delayed_immediate_flush");
+        return undef;
+    }
+
+
+    my $sitename = $obvius->config->param('sitename');
+
+    # Then for each job, grep for an immediate flush program:
+    for(@jobnrs) {
+        # system returns 0 on success..
+        if(! system("at -c $_ | grep 'Immediate flush for $sitename' > /dev/null")) {
+            # already flushing at the given time, just return true:
+            return 1;
+        }
+    }
+
+    my $cache_dir = $r->pnotes('site')->param('base') . "/var/";
+
+    my $program  = '# Immediate flush for ' . $sitename . "\n";
+    $program    .= "perl -MWebObvius::Cache::Flushing -e '" . "\n";
+    $program    .= 'my $d="' . $cache_dir . '";' . "\n";
+    $program    .= 'immediate_flush($d."document_cacheflush.db", $d."document_cache.txt");' . "\n";
+    $program    .= "'\n";
+
+    if(open(PRG, "| at '$whenstr'")) {
+        print PRG $program;
+        close(PRG);
+        return 1;
+    } else{
+        $obvius->log->error("Couldn't run at program in /shared/cache/delayed_immediate_flush");
+        return undef;
+    }
+} else {
+    $obvius->log->error("Malformed \$when in /shared/cache/delayed_immediate_flush: $when");
+    return undef;
+}
+</%init>
