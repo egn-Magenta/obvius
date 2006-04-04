@@ -1,6 +1,6 @@
 To: <% $mailto %>
 From: <% $from %>
-Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $obvius->config->param('sitename') %>/admin<% $uri %>)
+Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $url_sitename %>/admin<% $uri %>)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
@@ -69,6 +69,8 @@ for(@$fields) {
     $val =~ s!\r?\n!~!g;
     push(@csv_values, $val);
 }
+
+my $url_sitename = $obvius->config->param('test_sitename') || $obvius->config->param('sitename');
 </%init>
 <%once>
 use Unicode::String qw(utf8 latin1);
