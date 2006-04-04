@@ -1,0 +1,29 @@
+<%args>
+$description=>'Sti'
+$frontpage_name=>'Forside'
+</%args>
+<div class="breadcrumbs">
+      <a href="/"><% $frontpage_name %></a>
+% map {
+      &gt; <a href="<% $_->{sofar} %>" title="<% $_->{long_title} %>"><% $_->{title} %></a>
+% } @outpath;
+% if ($uri ne "/") {
+      &gt; <& /shared/shorten, text=>($vdoc->field('short_title') ? $vdoc->_Short_title : $vdoc->Title), len=>25 &>
+% }
+    </div>
+%
+<%init>
+$obvius->get_version_fields($vdoc);
+my @path=$obvius->get_doc_path($doc);
+my $sofar="/";
+my @outpath;
+map {
+ my $vdoc=$obvius->get_public_version($_);
+ $obvius->get_version_fields($vdoc, [qw(title short_title)]);
+ my $title=($vdoc->field('short_title') ? $vdoc->Short_title : $vdoc->Title);
+ $sofar.=$_->Name . "/" unless $_->Id == 1;
+ push @outpath, { sofar=>$sofar, title=>$title, long_title=>$vdoc->Title };
+} @path;
+my $frontpage=shift @outpath;
+pop @outpath;
+</%init>

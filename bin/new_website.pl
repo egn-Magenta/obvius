@@ -104,6 +104,7 @@ push @dirs, (
              { dir=>'docs/grafik/pager', },
              { dir=>'docs/grafik/news', },
              { dir=>'docs/grafik/menu', },
+	     { dir=>'docs/grafik/obvius', },
              { dir=>'docs/css', },
             ) if (!$options{new_admin}); # Legacy dirs
 

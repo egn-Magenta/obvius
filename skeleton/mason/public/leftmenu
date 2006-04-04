@@ -1,0 +1,72 @@
+    <ul>
+%for(@$docs) {
+        <li>
+	<& printitem, item=>$_ &>
+%   if($_->param('active') and scalar(@$subdocs)) {
+        <ul>
+%       for(@$subdocs) {
+            <li>
+	      <& printitem, item=>$_ &>
+%           if($_->param('active') and scalar(@$subsubdocs)) {
+                <ul>
+%               for(@$subsubdocs) {
+                  <li><& printitem, item=>$_ &></li>
+%               }
+		</ul>
+%           }
+	    </li>
+%       }
+	</ul>
+%   }
+	</li>
+%}
+    </ul>
+<%def printitem>
+<%args>
+$item
+</%args>
+<a class="submenu<% $item->param('active') ? '_active' : '' %>" href="<% $item->param('uri') %>"><% $item->field('short_title') || $item->field('title') %></a>
+</%def>
+<%init>
+my $docs = [];
+my $subdocs = [];
+my $subsubdocs = [];
+
+my $path = $r->pnotes('path') || [];
+
+my $basedoc = $obvius->lookup_document("/");
+if($basedoc) {
+    $docs = $obvius->get_document_subdocs($basedoc, nothidden=>1, notexpired => 1, sortvdoc=>$obvius->get_public_version($basedoc)) || [];
+    for(@$docs) {
+        $obvius->get_version_fields($_, ['title', 'short_title']);
+        my $d = $obvius->get_doc_by_id($_->DocId);
+        $_->param('uri' => $obvius->get_doc_uri($d));
+
+        if($path->[1] and $_->DocId == $path->[1]->Id) {
+            $_->param('active' => 1);
+            $subdocs = $obvius->get_document_subdocs($d, nothidden=>1, notexpired => 1, sortvdoc=>$_) || [];
+
+            for(@$subdocs) {
+                $obvius->get_version_fields($_, ['title', 'short_title']);
+                my $d = $obvius->get_doc_by_id($_->DocId);
+                $_->param('uri' => $obvius->get_doc_uri($d));
+
+                if($path->[2] and $_->DocId == $path->[2]->Id) {
+                    $_->param('active' => 1);
+                    $subsubdocs = $obvius->get_document_subdocs($d, nothidden=>1, notexpired => 1, sortvdoc=>$_) || [];
+
+                    for(@$subsubdocs) {
+                        $obvius->get_version_fields($_, ['title', 'short_title']);
+                        my $d = $obvius->get_doc_by_id($_->DocId);
+                        $_->param('uri' => $obvius->get_doc_uri($d));
+
+                        if($path->[3] and $_->DocId == $path->[3]->Id) {
+                            $_->param('active' => 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+</%init>
