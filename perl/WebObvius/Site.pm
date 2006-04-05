@@ -370,7 +370,7 @@ sub create_input_object {
     my $input=new Obvius::Data;
     my $parms = $req->param;
     foreach (keys %$parms) {
-	my @value=$parms->{$_};
+	my @value=$req->param($_);
 	$input->param($_=> (scalar(@value)>1 ? \@value : $value[0]));
     }
     $input->param(NOW=>$req->notes('now'));
