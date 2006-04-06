@@ -409,7 +409,12 @@ sub handler ($$) {
 
     # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
     # by the browser should have a method called "raw_document_data"
-	my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data($doc, $vdoc, $obvius, $req, $output);
+	    	
+	my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data(
+		$doc, $vdoc, $obvius, 
+		WebObvius::Apache::apache_module('Request')-> new($req), 
+		$output
+	);
 
 	if ($data) {
 	    $mime_type ||= 'application/octet-stream';
