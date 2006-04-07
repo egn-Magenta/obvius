@@ -119,6 +119,7 @@ if ( $MOD_PERL == 2) {
 	# not present in compat::
 	require Apache2::Cookie;
 	*Apache::Cookie::fetch = \&Apache2::Cookie::fetch;
+	*Apache::Cookie::new = sub { Apache2::Cookie-> new(@_[1..$#_]) };
 
 	# present in compat:: in Apache2:: namespace, but we need Apache::
 	require Apache2::Util;
@@ -126,6 +127,16 @@ if ( $MOD_PERL == 2) {
 		my $r = Apache2::compat::request('Apache::Util::ht_time');
 		return Apache2::Util::ht_time($r->pool, @_);
 	};
+	
+	# not present in compat::
+	require Apache2::Request;
+	*Apache::Request::new = sub { Apache2::Request-> new(@_[1..$#_]) };
+} elsif ( $MOD_PERL == 1) {
+	require Apache::Cookie;
+
+	local $SIG{__WARN__} = sub {};
+	my $bake = \&Apache::Cookie::bake;
+	*Apache::Cookie::bake = sub { $bake->( $_[0]) };
 }
 
 1;

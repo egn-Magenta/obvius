@@ -510,7 +510,7 @@ sub generate_page {
 					  -expires => $expires,
 					  -path => '/',
 					 );
-	    $cookie->bake;
+	    $cookie->bake($req);
 	}
 	$output->param(OBVIUS_COOKIES => undef); # clear
 
@@ -746,7 +746,7 @@ sub set_public_login_cookie {
     $options{'-domain'}=$domain if ($domain);
 
     my $cookie = Apache::Cookie->new($req, %options);
-    $cookie->bake;
+    $cookie->bake($req);
 
     #Update the DB with the new cookie value:
     $obvius->update_public_users({cookie => $cookie_value}, {id=>$user->{id}});
@@ -768,7 +768,7 @@ sub expire_public_login_cookie {
     $options{'-domain'}=$domain if ($domain);
 
     my $cookie = Apache::Cookie->new($req, %options);
-    $cookie->bake;
+    $cookie->bake($req);
 }
 
 

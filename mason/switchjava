@@ -15,7 +15,7 @@ my $cookie=new Apache::Cookie(  $r,
                                 -expires => '+3M',
                                 -path => '/',
                                 );
-$cookie->bake;
+$cookie->bake($r);
 </%init>
 <table border="0" cellspacing="10">
     <tr>

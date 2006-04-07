@@ -12,5 +12,5 @@ my $c=Apache::Cookie->new($r,
 			  -path => $path,
                          );
 $c->expires($expires) if ($expires);
-$c->bake;
+$c->bake($r);
 </%perl>
