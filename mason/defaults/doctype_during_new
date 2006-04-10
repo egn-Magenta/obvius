@@ -1,4 +1,4 @@
 <% $retval %>\
-<%perl>
+<%init>
 my $retval = '';
-</%perl>
+</%init>
