@@ -1,4 +1,4 @@
+<% $retval %>\
 <%perl>
 my $retval = '';
-$_out->($retval);
 </%perl>
