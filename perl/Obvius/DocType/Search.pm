@@ -50,8 +50,8 @@ sub read_htdig_output {
 		} keys %$args;
 	} else {
 		%map = map {
-			my $key = Apache::Util::escape_uri(lc($_), $r-> pool);
-			my $value = Apache::Util::escape_uri($$args{$_}, $r-> pool);
+			my $key = Apache::Util::escape_uri(lc($_));
+			my $value = Apache::Util::escape_uri($$args{$_});
 			( $key, $value);
 		} keys %$args;
 	}
@@ -63,7 +63,7 @@ sub read_htdig_output {
 			    $value = '';
 			}
 			( $_ . '=' . $value )
-		    } keys %map;
+		    } keys %map
 	);
     } else {
         $cmd = $args;
