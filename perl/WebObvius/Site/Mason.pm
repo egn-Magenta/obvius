@@ -462,7 +462,7 @@ sub handler ($$) {
             }
 
             # Add to cache:
-            if ($this->can_use_cache($req,$output)) {
+            if ($this->can_use_cache($req,$output) and not scalar($req->args)) {
 	        # $this->add_benchmark($req, 'Cache save') if ($this->{BENCHMARK});
 	        $this->save_in_cache($req, \$data);
 	    }
