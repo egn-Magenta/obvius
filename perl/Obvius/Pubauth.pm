@@ -207,8 +207,8 @@ sub create_public_user_area {
                                          docid=>         $area->{docid},
                                          created=>       $area->{created} || $now,
                                          modified=>      $area->{modified} || $now,
-                                         activated=>     $area->{activated} || '0000-00-00 00:00:00',
-                                         expires=>       $area->{expires} || '0000-00-00 00:00:00',
+                                         activated=>     $area->{activated} || '0000-01-01 00:00:00',
+                                         expires=>       $area->{expires} || '0000-01-01 00:00:00',
                                         }
                                        );
 
@@ -256,7 +256,7 @@ sub get_public_users_area {
     foreach my $rec (@recs) {
         if ($options{activated}) {
             my $take=1;
-            $take=0 if ($rec->{activated} eq '0000-00-00 00:00:00'); # Not activated
+            $take=0 if ($rec->{activated} eq '0000-01-01 00:00:00'); # Not activated
             $take=0 unless ($rec->{activated} le $options{activated} and # Activated before now
                             $options{activated} lt $rec->{expires});     # and now is before expiry
 

@@ -14,7 +14,6 @@ use POSIX qw(strftime);
 # use Spreadsheet::ParseExcel;
 use Text::CSV_XS;
 
-use lib qw(/home/httpd/root/perl);
 use Obvius;
 use Obvius::Config;
 use Obvius::Data;

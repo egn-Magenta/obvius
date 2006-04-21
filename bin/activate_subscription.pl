@@ -10,9 +10,6 @@
 
 # No exit codes, no nothing!
 
-use lib '/home/httpd/root/perl';
-use lib '/usr/lib/perl/5.6.0/';
-
 use Obvius;
 use Digest::MD5 qw(md5_base64);
 use Mail::Header;

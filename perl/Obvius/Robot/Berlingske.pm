@@ -99,7 +99,7 @@ sub store_document {
 	unless ($self->{KNOWN_DOCS} and $self->{KNOWN_DOCS}->{$self->{DOC}->{url}}) {
 	    $self->{KNOWN_DOCS}->{$self->{DOC}->{url}}++;
 
-	    $self->{DOC}->{docdate} = get_article_date($self->{DOC}->{url}) || '0000-00-00';
+	    $self->{DOC}->{docdate} = get_article_date($self->{DOC}->{url}) || '0000-01-01';
 
 	    unless ($self->{TIME_LIMIT} and $self->{DOC}->{docdate} lt $self->{TIME_LIMIT}) {
 		print(STDERR "\nSAVING ", $self->{DOC}->{url}, "\n")

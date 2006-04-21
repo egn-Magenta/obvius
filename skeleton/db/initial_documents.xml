@@ -128,7 +128,7 @@ Højreklik på AdminJump-linket nedenfor og vælg &quot;Føj til foretrukne...&quot;
       <expires>9999-01-01 18:00:00</expires>
       <sortorder>+seq,+title</sortorder>
       <short_title>Sitemap</short_title>
-      <root>/</root>
+      <root>1</root>
       <subscribeable>none</subscribeable>
       <levels>2</levels>
       <docdate>2005-05-10 00:00:00</docdate>

@@ -2122,7 +2122,10 @@ sub publish_version {
 	my ($year, $month, $day, $hour, $min) = ($publish_on =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/);
 	my $site = $this->{OBVIUS_CONFIG}->{NAME};
 
-	my $command = "echo perl -w /home/httpd/obvius/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
+	my $command = 
+		"echo perl -w ".
+		$this->config->param('prefix') . 
+		"/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
 
 	my $retval = system($command);
 	

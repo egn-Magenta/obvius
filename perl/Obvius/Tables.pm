@@ -194,6 +194,9 @@ sub insert_table_record {
                   '!TieRow'     => 0,
                   '!Serial'     => 'id', # Does this break, if the table has no id-column?
                  );
+	# XXX assert
+	Carp::confess("assert(id==0), please remove") 
+		if exists $rec->{id} and $rec->{id} eq '0';
         my $set = DBIx::Recordset->SetupObject(\%conf);
 
         $ret=$set->Insert($rec);

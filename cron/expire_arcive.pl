@@ -22,7 +22,7 @@ use Date::Calc qw (Delta_YMD);
 my @OPTV=@ARGV;
 
 #Directories where sites are stored. Usually /var/www and /home/http (often link to /var/www)
-my @BASEDIRS=qw (/var/www /home/httpd);
+my @BASEDIRS=qw (/var/www /home/httpd /usr/local/www/data);
 
 #Directories under each site where archived data can be found
 my $LOGDIR="logs";

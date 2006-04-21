@@ -12,7 +12,7 @@ DocType: Base basis searchable sortorder_field_is=sortorder
  subscribeable subscribeable                searchable          default_value=none
  expires       datetime                     searchable sortable threshold=0 default_value=9999-01-01_18:00:00
  published     datetime                     searchable sortable publish
- publish_on    publish_on                   searchable sortable publish default_value=0000-00-00_00:00:00
+ publish_on    publish_on                   searchable sortable publish default_value=0000-01-01_00:00:00
  in_subscription bool			    searchable sortable publish default_value=0
  mimetype      line			    searchable sortable threshold=0
  sec	       int	           optional searchable sortable publish default_value=0

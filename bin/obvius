@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-use lib '/home/httpd/root/perl';
-
 ########################################################################
 #
 # obvius - do various operations on an obvius database

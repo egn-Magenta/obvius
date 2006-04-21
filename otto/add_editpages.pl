@@ -34,7 +34,7 @@ die "Usage: add_editpages.pl <db name> <editpages file>\n" unless ($db{db} and $
 
 ##
 
-my $new_editpage = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db{db}",
+my $new_editpage = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db{db}",
 						    '!Username'   => $db{user},
 						    '!Password'   => $db{password},
 						    '!Table'      => 'editpages',
@@ -199,7 +199,7 @@ sub get_parentids {
 sub read_table {
     my($table, $key, $db, $searchoptions)=@_;
 
-    my $set = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db->{db}",
+    my $set = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db->{db}",
 					       '!Username'   => $db->{user},
 					       '!Password'   => $db->{password},
 					       '!Table'      => $table,

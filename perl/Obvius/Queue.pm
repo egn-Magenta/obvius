@@ -121,7 +121,8 @@ sub store_order {
         my $date_part=$1;
         my $time_part=$2;
         $ENV{PATH}='';
-        system "/bin/echo '/var/www/obvius/bin/perform_order --site " .
+        system "/bin/echo '".
+            $obvius->config->param('prefix') . "/bin/perform_order --site " .
             $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
 
         # Notice that we are returning this as a warning, because that

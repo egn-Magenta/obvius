@@ -34,8 +34,76 @@ use strict;
 use warnings;
 
 use POSIX qw(strftime);
+use DBIx::Recordset;
 
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
+# Various hacks to override DBIx::Recordset specifics
+my %DBIx;
+{
+	local $SIG{__WARN__} = sub {};
+
+	$DBIx{DB_new} = \&DBIx::Database::new;
+	*DBIx::Database::new = \&DBIx_Database_new;
+
+	$DBIx{RS_SetupObject} = \&DBIx::Recordset::SetupObject;
+	*DBIx::Recordset::SetupObject = \&DBIx_Recordset_SetupObject;
+	
+	$DBIx{RS_SQLInsert} = \&DBIx::Recordset::SQLInsert;
+	*DBIx::Recordset::SQLInsert = \&DBIx_Recordset_SQLInsert;
+}
+
+# DBIx::Database bravely reads all tables available via DBI::table_info().
+# Lots of these tables, of course, aren't tables.
+sub DBIx_Database_new
+{
+	my ( $class, $datasource) = @_;
+	
+	return $DBIx{DB_new}->(@_) if ref($datasource) ne 'HASH';
+
+	if ( 
+		$datasource->{'!DataSource'} =~ /DBI:Pg/ and
+		not exists $datasource->{'!TableFilter'} 
+	) {
+		$datasource->{'!TableFilter'} = 'public';
+	}
+
+	$DBIx{DB_new}->(@_);
+}
+
+# DBIx::Recordset can deal with different Sequence names, but its default
+# scheme is not applicable to PgSQL. Also, it is impractical to change
+# all code to reflect this fact, to we'd rather override the Sequence
+# construction logic
+sub DBIx_Recordset_SetupObject
+{
+	my ( $class, $parm) = @_;
+
+	if ( 
+		exists $parm->{'!Serial'} and 
+		not exists $parm->{'!Sequence'} and
+		$parm->{'!DataSource'}->{'*Driver'} eq 'Pg'
+	) {
+		$parm->{'!Sequence'} = $parm->{'!Table'} . '_'.  $parm->{'!Serial'} . '_seq';
+	}
+	$DBIx{RS_SetupObject}->( $class, $parm );
+}
+
+# PgSQL has a peculiar feature that reserved words must be quote no matter
+# the context is. For example, CREATE TABLE ( user INTEGER ) requires 'user'
+# to be quoted. We comply.
+sub DBIx_Recordset_SQLInsert($$$$)
+{
+	my ( $self, $fields, $vals, $bind_values, $bind_types) = @_;
+
+	if ( $self-> {'*Driver'} eq 'Pg') {
+		# force - quote keys
+		$fields = join(',', map { "\"$_\"" } split(',', $fields));
+	}
+
+	$DBIx{RS_SQLInsert}->( $self, $fields, $vals, $bind_values, $bind_types);
+}
+
 
 ########################################################################
 #
@@ -86,7 +154,6 @@ sub db_insert_document {
     $this->{LOG}->info("====> Inserting document ($name, $parent) ...");
 
     my $doc = {
-	       id      => 0,
 	       parent  => $parent,
 	       name    => $name,
 	       type    => $type,
@@ -316,7 +383,6 @@ sub db_insert_vfields {
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
 					     '!Table'      => 'vfields',
 					    });
-
     for my $k ($flist ? @$flist : $fields->param) {
 	$this->{LOG}->info("====> Inserting field $k ...");
 
@@ -399,7 +465,6 @@ sub db_insert_user {
 					     '!Table'      => 'users',
 					     '!Serial'     => 'id',
 					    });
-    $user->{id}=0;
     $set->Insert($user);
     $set->Disconnect;
 
@@ -486,7 +551,6 @@ sub db_insert_group {
 					     '!Table'      => 'groups',
 					     '!Serial'     => 'id',
 					    });
-    $group->{id}=0;
     $set->Insert($group);
     $set->Disconnect;
 
@@ -782,6 +846,7 @@ sub db_delete_docparams {
 
     return;
 }
+
 
 1;
 __END__

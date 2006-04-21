@@ -85,7 +85,7 @@ sub send_manual {
 
     for my $s (@$subscriptions) {
         my $last_update = $s->{last_update};
-        $last_update = $seven_days_ago if ($last_update eq '0000-00-00 00:00:00');
+        $last_update = $seven_days_ago if ($last_update eq '0000-01-01 00:00:00');
         my @docs_2_send = grep { $last_update lt $_->{published} } @$new_docs;
         if(scalar(@docs_2_send)) {
 
@@ -188,7 +188,7 @@ sub send_automatic {
             }
 
 
-            if($s->{last_update} eq '0000-00-00 00:00:00') {
+            if($s->{last_update} eq '0000-01-01 00:00:00') {
                 $s->{last_update} = $yesterday;
             }
 

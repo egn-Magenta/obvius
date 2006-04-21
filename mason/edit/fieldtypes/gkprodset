@@ -106,8 +106,8 @@ function gkprod_empty_fields() {
     document.pageform.obvius_<% $name %>_godkendelsesnr.value = '';
     document.pageform.obvius_<% $name %>_ansoeger.value = '';
     document.pageform.obvius_<% $name %>_land.value = '';
-    document.pageform.obvius_<% $name %>_ansoegningsdato.value = '0000-00-00';
-    document.pageform.obvius_<% $name %>_godkendelsesdato.value = '0000-00-00';
+    document.pageform.obvius_<% $name %>_ansoegningsdato.value = '0000-01-01';
+    document.pageform.obvius_<% $name %>_godkendelsesdato.value = '0000-01-01';
     document.pageform.obvius_<% $name %>_indsigelse.value = '0';
     document.pageform.obvius_<% $name %>_status.value = 'none';
 }
@@ -229,7 +229,7 @@ function gkprod_select_all() {
         <td>
             <script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
 
-            <input type="text" size="11" name="obvius_<% $name %>_ansoegningsdato" value="0000-00-00" onChange="adjust_date(this); synchronise_field(this,this.form.ansoegningsdato)" tabindex="10">
+            <input type="text" size="11" name="obvius_<% $name %>_ansoegningsdato" value="0000-01-01" onChange="adjust_date(this); synchronise_field(this,this.form.ansoegningsdato)" tabindex="10">
 
             <script language="javascript">
                 add_date_separator();
@@ -245,7 +245,7 @@ function gkprod_select_all() {
         </td>
         <td class="data" valign="top">
             <script src="/admin_js/date.js" type="text/javascript" language="javascript"></script>
-            <input type="text" size="11" name="obvius_<% $name %>_godkendelsesdato" value="0000-00-00" onChange="adjust_date(this); synchronise_field(this,this.form.godkendelsesdato)" tabindex="10">
+            <input type="text" size="11" name="obvius_<% $name %>_godkendelsesdato" value="0000-01-01" onChange="adjust_date(this); synchronise_field(this,this.form.godkendelsesdato)" tabindex="10">
             <script language="javascript">
                 add_date_separator();
                 add_date_buttons('obvius_<% $name %>_godkendelsesdato');

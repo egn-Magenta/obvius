@@ -25,7 +25,7 @@ echo "DATABASE:"
 ./import_new.pl $OLDDB $NEWDB $DOCS
 echo ""
 echo "IMAGES"
-PERL5LIB=/home/httpd/root/perl:/usr/lib/perl/5.6.0/ perl -w ./import_images.pl $OLDDB $CONF $DOCS 2> /dev/null
+perl -w ./import_images.pl $OLDDB $CONF $DOCS 2> /dev/null
 echo ""
 echo "SPECIAL"
-PERL5LIB=/home/httpd/root/perl:/usr/lib/perl/5.6.0/ ./fix_special.pl $CONF
+./fix_special.pl $CONF

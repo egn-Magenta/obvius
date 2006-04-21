@@ -31,8 +31,8 @@ my $obvius_config=new Obvius::Config('${dbname}');
 
 my $sitename = '${website}';
 
-my $globalbase ="${wwwroot}";
-my $base = "$globalbase/$sitename";
+my $globalbase ="${prefix}";
+my $base = "${wwwroot}/$sitename";
 my $log = new Obvius::Log::Apache;
 
 my $subsite='';
@@ -42,7 +42,7 @@ our $Common = ${perlname}::Site::Common->new(
                                         comp_root=>[
                                                     [docroot  =>"$base/docs"],
                                                     [sitecomp =>"$base/mason/common"],
-                                                    [globalcommoncomp =>"$globalbase/obvius/mason/common"],
+                                                    [globalcommoncomp =>"$globalbase/mason/common"],
                                                    ],
                                         base => $base,
                                         site => 'common',
@@ -72,9 +72,9 @@ our $Public = ${perlname}::Site::Public->new(
                                         comp_root=>[
                                                     [docroot  =>"$base/docs"],
                                                     [sitecomp =>"$base/mason/public"],
-                                                    [globalpubliccomp =>"$globalbase/obvius/mason/public"],
+                                                    [globalpubliccomp =>"$globalbase/mason/public"],
                                                     [commoncomp => "$base/mason/common"],
-                                                    [globalcommoncomp =>"$globalbase/obvius/mason/common"],
+                                                    [globalcommoncomp =>"$globalbase/mason/common"],
                                                    ],
                                         search_words_log => "$base/htdig/log/search_words.log",
                                         log => $log,
@@ -96,9 +96,9 @@ our $Admin = ${perlname}::Site::Admin->new(
                                       comp_root=>[
                                                   [docroot  =>"$base/docs"],
                                                   [sitecomp =>"$base/mason/admin"],
-                                                  [admincomp=>"$globalbase/obvius/mason/admin"],
+                                                  [admincomp=>"$globalbase/mason/admin"],
                                                   [commoncomp => "$base/mason/common"],
-                                                  [globalcommoncomp =>"$globalbase/obvius/mason/common"],
+                                                  [globalcommoncomp =>"$globalbase/mason/common"],
                                                  ],
                                       search_words_log => "$base/htdig/log/search_words.log",
                                       log => $log,

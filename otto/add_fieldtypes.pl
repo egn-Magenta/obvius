@@ -35,7 +35,7 @@ die "Usage: add_fieldtypes.pl <db name> <fieldtype file>\n" unless ($db{db} and 
 
 ##
 
-my $new_fieldtype = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db{db}",
+my $new_fieldtype = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db{db}",
 						   '!Username'   => $db{user},
 						   '!Password'   => $db{password},
 						   '!Table'      => 'fieldtypes',

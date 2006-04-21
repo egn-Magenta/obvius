@@ -1,8 +1,6 @@
 #!/bin/sh
 # $Id$
 
-export PERL5LIB=${PERL5LIB:-/home/httpd/root/perl}
-
 hostname="$(hostname)"
 hour="$(date '+%H')"
 

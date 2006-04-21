@@ -34,7 +34,7 @@ die "Usage: add_doctypes.pl <db name> <doctype file>\n" unless ($db{db} and $db{
 
 ##
 
-my $new_doctype = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db{db}",
+my $new_doctype = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db{db}",
 						   '!Username'   => $db{user},
 						   '!Password'   => $db{password},
 						   '!Table'      => 'doctypes',
@@ -42,7 +42,7 @@ my $new_doctype = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$
 						   '!TieRow'     => 0,
 						  });
 
-my $new_fieldspec = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db{db}",
+my $new_fieldspec = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db{db}",
 						     '!Username'   => $db{user},
 						     '!Password'   => $db{password},
 						     '!Table'      => 'fieldspecs',
@@ -105,7 +105,7 @@ exit 0;
 sub read_table {
     my($table, $key, $db)=@_;
 
-    my $set = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:mysql:$db->{db}",
+    my $set = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db->{db}",
 					       '!Username'   => $db->{user},
 					       '!Password'   => $db->{password},
 					       '!Table'      => $table,
@@ -168,6 +168,5 @@ sub add_fieldspec {
 	    print STDERR " !!! Yikes, conflicting types for \"$fieldspec->{name}\" in doctypes no. $rec->{doctypeid} and $fieldspec->{doctypeid} - fix it!\n";
 	}
     }
-
     $new_fieldspec->Insert($fieldspec);
 }

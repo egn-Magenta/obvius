@@ -11,8 +11,6 @@
 use strict;
 use warnings;
 
-use lib '/home/httpd/root/perl';
-
 use Obvius;
 use Obvius::Config;
 use Obvius::Data;

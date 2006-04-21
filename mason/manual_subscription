@@ -12,7 +12,7 @@
             document.pageform.go.value = '';
             document.pageform.submitknap.value = 'Send senere';
         } else {
-            document.pageform.delayed.value = '0000-00-00 00:00:00';
+            document.pageform.delayed.value = '0000-01-01 00:00:00';
             document.pageform.go.value = 'yes';
             document.pageform.submitknap.value = 'Send nu';
         }
@@ -101,7 +101,7 @@
             <br>
             <input type="hidden" name="obvius_op" value="manual_subscription">
             <input type="hidden" name="go" value="yes">
-            <input type="text" name="delayed" value="0000-00-00 00:00:00">
+            <input type="text" name="delayed" value="0000-01-01 00:00:00">
             <input type="button" name="submitknap" value="Send nu" onclick="m_s_submit()">
 
       </td>

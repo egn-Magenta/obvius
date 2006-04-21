@@ -215,14 +215,14 @@ sub do_is_expired_hook {
 
 sub do_date_format_hook {
     my ($this, $n) = @_;
-    my $d = $this->_value_safe($n) || '0000-00-00';
+    my $d = $this->_value_safe($n) || '0000-01-01';
     $d = $1 if ($d =~ m/^(\d\d\d\d-\d\d-\d\d)\b/);
     return $d;
 }
 
 sub do_time_format_hook {
     my ($this, $n) = @_;
-    my $d = $this->_value_safe($n) || '0000-00-00 00:00:00';
+    my $d = $this->_value_safe($n) || '0000-01-01 00:00:00';
     $d = $1 if ($d =~ m/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d):\d\d$/);
     return $d;
 }
@@ -251,12 +251,12 @@ our %time_periods =
 sub do_time_diff_hook {
     my ($this, $d1, $d2, $period) = @_;
 
-    $d1 = db_to_unix($this->_value_safe($d1) || '0000-00-00 00:00:00');
+    $d1 = db_to_unix($this->_value_safe($d1) || '0000-01-01 00:00:00');
 
     if (not $d2 or $d2 eq 'NOW') {
 	$d2 = time();
     } else {
-	$d2 = db_to_unix($this->_value_safe($d2) || '0000-00-00 00:00:00');
+	$d2 = db_to_unix($this->_value_safe($d2) || '0000-01-01 00:00:00');
     }
 
     $period = $time_periods{$period || 'days'} || 1;
@@ -279,7 +279,7 @@ sub format_date_helper {
     my ($d, $now) = @_;
 
     my $year = substr($now, 0, 4);
-    if ($d =~ m/^0000-00-00\b/) {
+    if ($d =~ m/^0000-01-01\b/) {
 	$d = '';
     } elsif ($d =~ m/^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)$/) {
 	$d = sprintf('%d. %s%s kl. %d:%02d',
@@ -322,8 +322,8 @@ sub do_display_date_range_hook{
 
     my $now = $this->_get_current_time;
 
-    $d1 = substr($this->_value_safe($d1), 0, 10) || '0000-00-00';
-    $d2 = substr($this->_value_safe($d2), 0, 10) || '0000-00-00';
+    $d1 = substr($this->_value_safe($d1), 0, 10) || '0000-01-01';
+    $d2 = substr($this->_value_safe($d2), 0, 10) || '0000-01-01';
 
     return format_date_helper($d1, $now) if ($d1 eq $d2);
 

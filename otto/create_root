@@ -6,8 +6,6 @@
 #
 # $Id$
 
-use lib '/home/httpd/root/perl';
-
 use strict;
 use warnings;
 
