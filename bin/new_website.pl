@@ -131,18 +131,18 @@ my @files=(
 my @symlinks=(
 	{ dir=>'docs', link=>'cache', to=>'var/document_cache', },
 	{ dir=>'docs', link=>'stats', to=>'stats', },
-	{ dir=>'docs', link=>'scripts', to=>"$options{wwwroot}/obvius/docs/scripts", },
-	{ dir=>'docs/pics', link=>'icons', to=>"$options{wwwroot}/obvius/docs/pics/icons", },
-	{ dir=>'docs/style', link=>'admin.css', to=>"$options{wwwroot}/obvius/docs/style/admin.css", },
-	{ dir=>'docs/style', link=>'common.css', to=>"$options{wwwroot}/obvius/docs/style/common.css", },
-	{ dir=>'docs/style', link=>'editor.css', to=>"$options{wwwroot}/obvius/docs/style/editor.css", },
-	{ dir=>'docs/style', link=>'public.css', to=>"$options{wwwroot}/obvius/docs/style/public.css", },
-	{ dir=>'docs/style', link=>'validation.xsl', to=>"$options{wwwroot}/obvius/docs/style/validation.xsl", },
+	{ dir=>'docs', link=>'scripts', to=>"$options{prefix}/docs/scripts", },
+	{ dir=>'docs/pics', link=>'icons', to=>"$options{prefix}/docs/pics/icons", },
+	{ dir=>'docs/style', link=>'admin.css', to=>"$options{prefix}/docs/style/admin.css", },
+	{ dir=>'docs/style', link=>'common.css', to=>"$options{prefix}/docs/style/common.css", },
+	{ dir=>'docs/style', link=>'editor.css', to=>"$options{prefix}/docs/style/editor.css", },
+	{ dir=>'docs/style', link=>'public.css', to=>"$options{prefix}/docs/style/public.css", },
+	{ dir=>'docs/style', link=>'validation.xsl', to=>"$options{prefix}/docs/style/validation.xsl", },
 );
 push @symlinks, (
-	{ dir=>'docs', link=>'admin_js', to=>"$options{wwwroot}/obvius/docs/js", },
-	{ dir=>'docs/grafik', link=>'admin', to=>"$options{wwwroot}/obvius/docs/grafik/admin", },
-	{ dir=>'docs/grafik', link=>'navigator', to=>"$options{wwwroot}/obvius/docs/grafik/admin/navigator", },
+	{ dir=>'docs', link=>'admin_js', to=>"$options{prefix}/docs/js", },
+	{ dir=>'docs/grafik', link=>'admin', to=>"$options{prefix}/docs/grafik/admin", },
+	{ dir=>'docs/grafik', link=>'navigator', to=>"$options{prefix}/docs/grafik/admin/navigator", },
 ) if (!$options{new_admin}); # Legacy symlinks
 
 my %heavy_interpolate_needed = map { $_ => 1 } qw(
