@@ -241,8 +241,9 @@ sub check_identifiers_in_data {
 sub list {
     my ($this, $object, $options)=@_;
 
-    my $where = join " and ", map {"$_='$object->{$_}'"} keys %$object;
-    $options->{where} = $where if $where;
+    my @where = map {"$_='$object->{$_}'"} keys %$object;
+    push @where, $this->param('where') if $this->param('where');
+    $options->{where} = join(' and ', @where) if @where;
 
     my ($table_data, $total) = $this->param('obvius')->get_table_data($this->param('source'), %$options);
     my @list;
