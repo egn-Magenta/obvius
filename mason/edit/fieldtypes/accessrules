@@ -36,7 +36,8 @@ var operators = new Array(
                             { key:'Tilføj (+)', value:'+' },
                             { key:'Nægt (-)', value:'-' },
                             { key:'Sæt til (=)', value:'=' },
-                            { key:'Forcer til (=!)', value:'=!' }
+                            { key:'Forcer til (=!)', value:'=!' },
+                            { key:'Betingelsesløs nægt (!)', value:'!' }
                         );
 function LoadFromIncoming() {
     var form = document.pageform;

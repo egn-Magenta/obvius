@@ -39,31 +39,29 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #
 ########################################################################
 
-sub get_capability_rules {
-    my ($this, $doc) = @_;
-    return () unless ($doc);
+sub _get_capability_rules
+{
+	my ($this, $doc) = @_;
+	return unless $doc;
 
-    my $rules=$doc->AccessRules || 'INHERIT';
-    $rules =~ s/\r//g;
-    chomp($rules);
+	my $rules = $doc-> AccessRules || 'INHERIT';
+	$rules =~ s/\r//gs;
 
-    if ($rules eq "INHERIT") {
-	return $this->get_capability_rules($this->get_doc_by_id($doc->Parent));
-    }
-    else {
-	my @rules=split /\n/, $rules;
-	map { chomp } @rules;
-	my @final;
-	foreach (@rules) {
-	    if ($_ eq "INHERIT") {
-		push @final, $this->get_capability_rules($this->get_doc_by_id($doc->Parent));
-	    }
-	    else {
-		push @final, $_;
-	    }
-	}
-	return @final;
-    }
+	return map {
+		($_ eq 'INHERIT') ?
+			$this-> _get_capability_rules( $this->get_doc_by_id( $doc->Parent)) :
+			$_
+	} split /\n/, $rules;
+}
+
+sub get_capability_rules
+{
+	my ($this, $doc) = @_;
+
+	return
+		$this-> _get_capability_rules( $this-> get_immutable_document()),
+		$this-> _get_capability_rules( $doc)
+		;
 }
 
 # user_has_capabilities - Return true if the user has all of the capabilities listed in
@@ -110,6 +108,7 @@ sub user_capabilities {
 
     my @accept;
     my @deny;
+    my @unconditional_deny;
     foreach (@rules) {
 	#print STDERR "  accept: " . Dumper(\@accept);
 	#print STDERR "  deny: " . Dumper(\@deny);
@@ -132,6 +131,9 @@ sub user_capabilities {
 		elsif ($how eq "-") {
 		    push @deny, @capabilities;
 		}
+		elsif ($how eq "!") {
+		    push @unconditional_deny, @capabilities;
+		}
 	    }
 	    #else {
             #    print STDERR " not applying rule $_\n";
@@ -149,7 +151,7 @@ sub user_capabilities {
     foreach (@accept) {
 	$capabilities{$_}=1;
     }
-    foreach (@deny) {
+    foreach (@deny, @unconditional_deny) {
 	delete $capabilities{$_};
     }
 
@@ -188,7 +190,7 @@ sub parse_access_rule {
     $userid=$this->get_userid($this->user) if (!defined $userid);
     $user_groups=$this->get_user_groups($userid) if (!defined $user_groups);
 
-    if (/^([^=+\-]+)(=|=!|[+]|-)\s*([^=+!\-]+)$/) {
+    if (/^([^=+\-]+)(!|=|=!|\+|-)\s*([^=+!\-]+)$/) {
         my ($who_list, $how, $capabilities)=($1, $2, $3);
 
         my $apply=0;

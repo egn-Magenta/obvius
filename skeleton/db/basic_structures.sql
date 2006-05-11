@@ -146,13 +146,14 @@ CREATE TABLE documents (
 
 
 INSERT INTO documents VALUES (1,0,'dummy',2,1,1,'admin=create,edit,delete,publish,modes,admin\nOWNER=create,edit,delete,publish,modes\nGROUP+create,edit,delete,publish\nALL+view\n@Admin+admin');
-INSERT INTO documents VALUES (2,1,'soeg',17,1,1,NULL);
-INSERT INTO documents VALUES (3,1,'admin',6,1,1,NULL);
-INSERT INTO documents VALUES (4,3,'users',19,1,1,NULL);
-INSERT INTO documents VALUES (5,3,'groups',19,1,1,NULL);
-INSERT INTO documents VALUES (6,3,'subscribers',19,1,1,NULL);
-INSERT INTO documents VALUES (7,1,'sitemap',13,1,1,NULL);
-INSERT INTO documents VALUES (8,1,'frontpage_en',2,1,1,NULL);
+INSERT INTO documents VALUES (2,1,'immutable',2,1,1,NULL);
+INSERT INTO documents VALUES (3,1,'soeg',17,1,1,NULL);
+INSERT INTO documents VALUES (4,1,'admin',6,1,1,NULL);
+INSERT INTO documents VALUES (5,3,'users',19,1,1,NULL);
+INSERT INTO documents VALUES (6,3,'groups',19,1,1,NULL);
+INSERT INTO documents VALUES (7,3,'subscribers',19,1,1,NULL);
+INSERT INTO documents VALUES (8,1,'sitemap',13,1,1,NULL);
+INSERT INTO documents VALUES (9,1,'frontpage_en',2,1,1,NULL);
 
 --
 -- Table structure for table 'editpages'
