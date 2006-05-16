@@ -184,6 +184,11 @@ sub action {
         $nothidden = !$is_admin;
     }
 
+    # Language limit:
+    if($obvius->config->param('limit_calendar_language')) {
+	$where .= "lang = '" . $vdoc->Lang . "' and ";
+    }
+
     my %options = (
                     order=>$sort_sql,
                     public => !$is_admin,
