@@ -87,6 +87,3 @@ else {
 $m->comp('default/release_session');
 </%perl>
 %
-<%filter>
-$r->headers_out->set('Content-Length'=>length $_);
-</%filter>
