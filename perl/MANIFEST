@@ -21,6 +21,7 @@ Obvius/Document.pm
 Obvius/EditPage.pm
 Obvius/FieldSpec.pm
 Obvius/FieldType.pm
+Obvius/Hostmap.pm
 Obvius/Log.pm
 Obvius/MultiSite.pm
 Obvius/Pubauth.pm
