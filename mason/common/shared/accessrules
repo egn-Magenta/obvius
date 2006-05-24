@@ -1,0 +1,156 @@
+%# $Id$
+<%args>
+$immutable=>''
+$inherited=>''
+$value=>''
+$groups=>[],
+$users=>[],
+</%args>
+
+<div id="editlayer" class="obvius-ac-editlayer" >
+
+<div class="obvius-ac-editheader" style="background-color: #050;">Access rule</div>
+
+<div class="obvius-ac-editcontrols">
+
+<label>
+<input type="radio" name="entity" value="owner">
+Owner
+</label>
+<select name="users" onClick="form.entity[0].checked=true;">
+<% map { "<option value='$$_[0]'>$$_[1]</option>\n"} @$users %>
+	<option value="ALL">All users</option>
+</select>
+
+<p>
+
+<label>
+<input type="radio" name="entity" value="group">
+Group
+</label>
+<select name="groups" onClick="form.entity[1].checked=true;">
+<% map { "<option value='$_'>$_</option>\n"} @$groups %>
+</select>
+<p>
+
+can
+<select name="action">
+	<option value="=">only</option>
+	<option value="+">also</option>
+	<option value="-">not</option>
+	<option value="=!">always</option>
+	<option value="!">never</option>
+</select>
+<p>
+
+
+<label><input type="checkbox" name="roles" value="view"> View</label><br>
+<label><input type="checkbox" name="roles" value="create"> Create</label><br>
+<label><input type="checkbox" name="roles" value="edit"> Edit</label><br>
+<label><input type="checkbox" name="roles" value="publish"> Publish</label><br>
+<label><input type="checkbox" name="roles" value="delete"> Delete</label><br>
+<label><input type="checkbox" name="roles" value="modes"> Change access</label><br>
+<label><input type="checkbox" name="roles" value="admin"> Administer</label><br>
+
+</div>   <!-- editcontrols -->
+
+<div class="obvius-ac-editbuttons">
+	<input type="button" value="Ok" onClick="accessrules_editbox_ok();">
+	<input type="button" value="Cancel" onClick="accessrules_editbox_visible(0);">
+</div>
+
+</div>  <!-- editlayer -->
+
+
+<!-- hide if no javascript -->
+<div id="js-panel" style="display:none">
+
+Universal access rules
+<p>
+<div class="obvius-ac-ruleset" id="immutable-content">
+<% $immutable %>
+</div>
+<p>
+
+<label>
+<input type="checkbox" name="inherited" onClick="accessrules_update_textarea()">
+Inherited access rules
+</label>
+<div class="obvius-ac-ruleset" id="inherited-content">
+<% $inherited %>
+</div>
+<p>
+
+Access rules for this document:<p>
+<div class="obvius-ac-ruleset">
+<div id="arena"></div>
+<p>
+<input type="button" value="Create new access rule" onClick="accessrules_new();">
+</div>
+
+<p>
+
+<div id="raw-edit-hide" style="display:inline">
+<a href="" onClick="
+get_element('raw-edit-show').style.display='inline';
+get_element('raw-edit-hide').style.display='none';
+return false;
+">
+Show raw rules
+</a>
+</div>
+
+</div> <!-- js-panel -->
+
+<!-- show if no javascript -->
+<div id="raw-edit-show" style="display:inline">
+
+<div id="js-autohide-part1" style="display:none">
+<a href="" onClick="
+get_element('raw-edit-hide').style.display='inline';
+get_element('raw-edit-show').style.display='none';
+return false;
+">
+Hide raw rules
+</a>
+<p>
+</div> <!-- js-autohide-part1 -->
+
+<div class="obvius-ac-ruleset">
+<br>
+<div id="js-autohide-part2" style="display:none">
+Raw rules. Use with caution.<p>
+</div>
+
+<textarea name="accessrules" rows=6 cols=50>
+<% $value %>
+</textarea>
+<p>
+
+<div id="js-autohide-part3" style="display:none">
+<input type="button" value="Parse ruleset" onClick="accessrules_parse_textarea();">
+</div>
+
+
+</div>
+
+</div> <!-- raw-edit-show -->
+
+<div id="js-error"><p><font size="-1" color="#CC0000">
+error in <b>scripts/admin_accessrules.js</b>, please investigate
+</font></div>
+
+<script language="JavaScript">
+accessrules_init('obvius-accessrules');
+get_element('js-panel').style.display="inline";
+get_element('raw-edit-show').style.display="none";
+get_element('raw-edit-hide').style.display="inline";
+get_element('js-autohide-part1').style.display="inline";
+get_element('js-autohide-part2').style.display="inline";
+get_element('js-autohide-part3').style.display="inline";
+get_element('js-error').style.display="none";
+</script>
+<noscript>
+<i><font size="-1">Note: A more user-friendly version of the access editor is available for javascript-capable browsers.
+Please consider turning on JavaScript in your setup or upgrading your browser.</i></font>
+</noscript>

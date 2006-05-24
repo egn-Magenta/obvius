@@ -1242,6 +1242,35 @@ div.obvius-lang-notification-box {
   padding: 5px;
 }
 
+/* Acccess rules */
+div.obvius-ac-ruleset {
+	border:  1px solid gray;
+	padding: 1em 1em 1em 1em;
+}
+
+div.obvius-ac-editlayer {
+	position: absolute;
+	border:  2px solid gray;
+	display: none;
+}
+
+div.obvius-ac-editcontrols {
+	border:  1px solid gray;
+	margin: 5px 5px 5px 5px;
+	padding: 5px 5px 5px 5px;
+}
+
+div.obvius-ac-editheader {
+	background-color: #050;
+	color: white;
+	padding-left: 1em;
+}
+
+div.obvius-ac-editbuttons {
+	padding: 5px 5px 5px 5px;
+}
+
+
 
 /*
  Local Variables: ***
