@@ -3,10 +3,10 @@
 %if($missing_levels) {
 <div class="obvius-lang-notification-box">
 %if($missing_levels > 1) {
-<& /shared/msg, text =>'lang_notification:msg1' &> <& /shared/msg, text=>$missing_type &> <& /shared/msg, text=>'lang_notification:msg2' &>.<br>
+<& /shared/msg, text =>'lang_notification:msg1' &> <& /shared/msg, text=>$missing_type &> <& /shared/msg, text=>'lang_notification:msg2' &>.<br />
 <a href="/admin<% $good_path %>?obvius_command_newdocument=1&obvius_new_document_name=<% $missing_name %>&obvius_new_language=<% $missing_lang %>"><& /shared/msg, text=>'lang_notification:msg3' &>&nbsp;&nbsp;<% $good_path . $missing_name %>/</a>
 %} else {
-<& /shared/msg, text=>'lang_notification:msg4' &> <& /shared/msg, text=>$missing_type &> <& /shared/msg, text=>'lang_notification:msg5' &>.<br>
+<& /shared/msg, text=>'lang_notification:msg4' &> <& /shared/msg, text=>$missing_type &> <& /shared/msg, text=>'lang_notification:msg5' &>.<br />
 <a href="/admin<% $good_path %>?obvius_command_newdocument=1&obvius_new_document_name=<% $missing_name %>&obvius_new_language=<% $missing_lang %>"><& /shared/msg, text=>'lang_notification:msg6' &></a>.
 %}
 </div>
