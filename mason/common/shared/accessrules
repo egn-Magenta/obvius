@@ -3,8 +3,8 @@
 $immutable=>''
 $inherited=>''
 $value=>''
-$groups=>[],
-$users=>[],
+$groups=>[]
+$users=>[]
 </%args>
 
 <div id="editlayer" class="obvius-ac-editlayer" >
