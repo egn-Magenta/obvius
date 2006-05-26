@@ -7,6 +7,7 @@ var ac_editor;
 var ac_entity;
 var ac_editbox_current_id;
 var ac_roles_hash;
+var ac_roles_imperatives;
 var ac_actions_hash;
 
 var ac_content;
@@ -44,6 +45,11 @@ function accessrules_init(form)
 	for ( i = 0; i < ac_form.roles.length; i++) {
 		ac_roles_hash[ ac_form.roles[i].value ] = i; 
 	}
+	ac_roles_imperatives = new Array;
+	ac_roles_imperatives['modes'] = 'change access';
+	ac_roles_imperatives['admin'] = 'administrate';
+	// all other role names (view, publish, etc) are imperative on their own
+	
 	
 	// populate actions lookup table
 	var i;
@@ -196,8 +202,16 @@ given a rule index, creates a human readable string
 function accessrules_create_readable_accessrule( a)
 {
 	if ( a['valid']) {
-		var can, what;
-		var r = a['roles'];
+		var i, can, what;
+		var r = new Array();
+		var roles = a['roles'];
+
+		for ( i = 0; i < roles.length; i++)
+			r.push(
+				(ac_roles_imperatives[roles[i]] != null) ?
+					ac_roles_imperatives[roles[i]] :
+					roles[i]
+			);
 
 		// only, not, always, etc
 		can = ac_actions_hash[ a['action']];
