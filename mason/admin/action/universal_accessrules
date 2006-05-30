@@ -1,0 +1,100 @@
+%# $Id$
+<script type="text/javascript" src="/scripts/admin_accessrules.js"></script>
+
+<div class="obvius-command obvius-command-document-information obvius-link-decor">
+<h2><& /shared/msg, text=>'Universal access rules' &></h2>
+
+<p>
+
+<form name="obvius-accessrules" action="./" method="get">
+	<& /shared/accessrules, 
+		show_universal	=> 0,
+		allow_inherited	=> 0,
+		value		=> $universal_rules,
+		groups		=> $groups,
+		users		=> $users,
+	&>
+
+	<p>
+	<& /portal/util/identifier, pass=>{ obvius_command_universal_accessrules =>1 } &>
+	<& util/do_cancel, do_text=>'Opdatér', no_later_date=>1 &>
+	</p>
+</form>
+</div>
+
+<%init>
+my $universal_rules = $obvius-> get_universal_document();
+if ( !$universal_rules) {
+	# not supported
+	$m->comp('/shared/msg', text=>'Universal rules not supported');
+	return '';
+	
+}
+$universal_rules = $universal_rules-> AccessRules;
+
+my $groups = [
+	map { 
+		$obvius->get_group($_)->{name}
+	} @{
+		$obvius->get_user_groups($obvius->get_userid($obvius->user))
+	}
+];
+
+my $users = [ 
+	['ALL', 'All users'],
+	['OWNER', 'The owner'],
+	['GROUP', 'All users in the group'],
+	map {
+		[ $_->{login}, $_->{name} ]
+	} sort { 
+		$a->{name} cmp $b->{name} 
+	} map { 
+		$obvius->{USERS}->{$_} 
+	} grep { 
+		/^\d+$/ 
+	} keys %{
+		$obvius->{USERS}
+	} 
+]; 
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
+%
+%
+%
+<%method cancel>
+<& /shared/set_status_message, message=>'CANCEL' &>
+</%method>
+%
+%
+%
+<%method do>
+%
+<%args>
+$owner=>undef
+$group=>undef
+$accessrules=>undef
+</%args>
+%
+<& /shared/set_status_message, message=>'OK' &>
+%
+<%init>
+my $doc = $obvius-> get_universal_document();
+my @success_messages=();
+if ($obvius->can_set_access_data($doc)) {
+	if (!$obvius->set_access_data($doc, $owner, $group, $accessrules)) {
+		$m->comp('/shared/set_status_message', status=>'WARNING', message=>'Could not update document');
+		return 'universal_accessrules';
+	}
+}
+
+$m->comp('/shared/set_status_message', message=>'Rules updated');
+return 'universal_accessrules';
+</%init>
+</%method>

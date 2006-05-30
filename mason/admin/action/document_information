@@ -15,7 +15,7 @@
 % }
 % if (defined $show->{type} and $show->{type} eq 'accessrules') {
 	<& /shared/accessrules, 
-		immutable	=> $show->{immutable},
+		universal	=> $show->{universal},
 		inherited	=> $show->{inherited},
 		value		=> $show->{value},
 		groups		=> $show->{groups},
@@ -68,12 +68,12 @@ my $inherited_docparams_show = join "<br />\n", map {
 }
 sort $inherited_docparams->param();
 
-# split rules in three parts: immutable, inherited, and document's
-my $immutable_access = $obvius-> get_immutable_document();
-$immutable_access = $immutable_access ? $immutable_access-> AccessRules : '';
+# split rules in three parts: universal, inherited, and document's
+my $universal_access = $obvius-> get_universal_document();
+$universal_access = $universal_access ? $universal_access-> AccessRules : '';
 my $local_access  = $doc-> Accessrules || '';
 my $inherited_access = join("\n", $obvius->get_capability_rules($doc));
-$inherited_access =~ s/^$immutable_access//s;
+$inherited_access =~ s/^$universal_access//s;
 $inherited_access =~ s/$local_access$//s;
 
 my $access_error;
@@ -145,7 +145,7 @@ my @info = (
 		name	=> 'accessrules', 
 		type	=> 'accessrules', 
 		inactive=> 1 - $can_access,
-		immutable => $immutable_access,
+		universal => $universal_access,
 		inherited => $inherited_access,
 		pre	=> 
 			$m->scomp('/shared/msg', text=>'Calculated access rules') . 
@@ -225,7 +225,6 @@ my @success_messages=();
 if ($obvius->can_set_access_data($doc)) {
 	if (!$obvius->set_access_data($doc, $owner, $group, $accessrules)) {
 		$m->comp('/shared/set_status_message', status=>'WARNING', message=>'Could not update document');
-		return '';
 		return 'document_information';
 	}
 }

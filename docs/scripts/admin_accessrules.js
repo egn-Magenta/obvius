@@ -9,6 +9,7 @@ var ac_editbox_current_id;
 var ac_roles_hash;
 var ac_roles_imperatives;
 var ac_actions_hash;
+var ac_allow_inherited;
 
 var ac_content;
 
@@ -16,8 +17,10 @@ var ac_content;
 inititalize internal variables. form is the name of form that is to be the arena
 of dhtml play ( see above )
 */
-function accessrules_init(form)
+function accessrules_init(form, show_universal, allow_inherited)
 {
+	ac_allow_inherited = allow_inherited;
+
 	// get hold of required dom elements
 	ac_form = document.forms[form];
 	if ( typeof(ac_form) == "undefined") {
@@ -25,7 +28,8 @@ function accessrules_init(form)
 	}
 
 	get_control('accessrules');
-	get_control('inherited');
+	if ( ac_allow_inherited)
+		get_control('inherited');
 	get_control('users');
 	get_control('groups');
 	get_control('entity');
@@ -58,26 +62,28 @@ function accessrules_init(form)
 		ac_actions_hash[ ac_form.action[i].value ] = i; 
 	}
 
-	// populate immutable rules
-	var c = get_element('immutable-content');
-	var d = new Array();
-	accessrules_parse( d, c.innerHTML);
-	for ( i = 0; i < d.length; i++)
-		d[i] = accessrules_create_readable_accessrule( d[i]);
-	c.innerHTML = d.length ? d.join("<br>") : "<i>none</i>"
+	// populate universal rules
+	if ( show_universal) {
+		var c = get_element('universal-content');
+		var d = new Array();
+		accessrules_parse( d, c.innerHTML);
+		for ( i = 0; i < d.length; i++)
+			d[i] = accessrules_create_readable_accessrule( d[i]);
+		c.innerHTML = d.length ? d.join("<br>") : "<i>none</i>"
+	}	
 	
 	// inherited 
-	c = get_element('inherited-content');
-	d = new Array();
-	accessrules_parse( d, c.innerHTML);
-	for ( i = 0; i < d.length; i++)
-		d[i] = accessrules_create_readable_accessrule( d[i]);
-	c.innerHTML = d.length ? d.join("<br>") : "<i>none</i>"
+	if ( ac_allow_inherited) {
+		c = get_element('inherited-content');
+		d = new Array();
+		accessrules_parse( d, c.innerHTML);
+		for ( i = 0; i < d.length; i++)
+			d[i] = accessrules_create_readable_accessrule( d[i]);
+		c.innerHTML = d.length ? d.join("<br>") : "<i>none</i>"
+	}
 
 	// and the actual content
-	ac_content = new Array();
-	ac_form.inherited.checked = accessrules_parse( ac_content, ac_form.accessrules.value);
-	accessrules_reshape_controls();
+	accessrules_parse_textarea();
 	
 	// etc
 	ac_editbox_current_id = -2;
@@ -115,7 +121,7 @@ function accessrules_parse( storage, text)
 	if ( m == null) return false;
 
 	for ( i = 0; i < m.length; i++) {
-		if ( m[i].match(/^inherit$/i)) {
+		if ( ac_allow_inherited && m[i].match(/^inherit$/i)) {
 			has_inherited = true;
 		} else if ( n = m[i].match(/^(\@?)(\w+)(\+|-|=|=!|!)([\w,]+)$/)) {
 			var a = new Array();
@@ -179,7 +185,10 @@ reads the current content of textarea, updates the controls
 function accessrules_parse_textarea()
 {
 	ac_content = new Array();
-	ac_form.inherited.checked = accessrules_parse( ac_content, ac_form.accessrules.value);
+	var has_inherited = accessrules_parse( ac_content, ac_form.accessrules.value);
+	if ( ac_allow_inherited) {
+		ac_form.inherited.checked = has_inherited;
+	}
 	accessrules_reshape_controls();
 }
 
@@ -259,7 +268,7 @@ function accessrules_create_readable_accessrule( a)
 		return t;
 
 	} else {
-		return '<font color="#CC0000">' + a['line'] + '</font>';
+		return '<font color="#CC0000">Invalid rule: </font><b>' + a['line'] + '</b>';
 	}
 }
 
@@ -292,7 +301,7 @@ function accessrules_update_textarea()
 	var i;
 	var t = '';
 
-	if ( ac_form.inherited.checked) {
+	if ( ac_allow_inherited && ac_form.inherited.checked) {
 		t = t + "INHERIT\n";
 	}
 	

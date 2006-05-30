@@ -665,6 +665,14 @@
     <translation lang="en">Access rules</translation>
     <translation lang="da">Adgangsregler</translation>
   </text>
+  <text key="Universal access rules">
+    <translation lang="en">Universal access rules</translation>
+    <translation lang="da">Universal adgangsregler</translation>
+  </text>
+  <text key="Rules updated">
+    <translation lang="en">Rules updated</translation>
+    <translation lang="da">Regler opdateret</translation>
+  </text>
   <text key="Document parameters">
     <translation lang="en">Document parameters</translation>
     <translation lang="da">Dokumentparametre</translation>

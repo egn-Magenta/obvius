@@ -271,13 +271,13 @@ sub get_root_document
 	return $this->get_doc_by_id(1);
 }
 
-sub get_immutable_document
+sub get_universal_document
 {
 	my $this = $_[0];
 
-	# Assume 'immutable' is 2, but check for older database layouts
-	my $immutable = $this-> get_doc_by_id(2);
-	return ( $immutable-> Name eq 'immutable') ? $immutable : undef;
+	# Assume 'universal' is 5, but check for older database layouts
+	my $universal = $this-> get_doc_by_id(5);
+	return ( $universal-> Name eq 'universal') ? $universal : undef;
 }
 
 sub lookup_document {

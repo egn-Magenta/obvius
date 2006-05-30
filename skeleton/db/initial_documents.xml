@@ -29,6 +29,7 @@ Administration af brugere, grupper, abonnenter og nøgleord:
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;./?obvius_command_users=1&quot;&gt;Brugere&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;./?obvius_command_groups=1&quot;&gt;Grupper&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;./?obvius_command_universal_accessrules=1&quot;&gt;Universal adgangsregler&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;./?obvius_command_subscribers=1&quot;&gt;Abonnenter&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;./?obvius_command_keywords=1&quot;&gt;Nøgleord&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;./?obvius_command_queue=1&quot;&gt;Kommando-kø&lt;/a&gt;&lt;/li&gt;
@@ -110,7 +111,7 @@ Højreklik på AdminJump-linket nedenfor og vælg &quot;Føj til foretrukne...&quot;
 </document>
 
 <document>
-  <parent>1</parent>
+  <parent>3</parent>
   <obvius_dump_owner_login>admin</obvius_dump_owner_login>
   <grp>1</grp>
   <accessrules></accessrules>
@@ -144,6 +145,47 @@ Højreklik på AdminJump-linket nedenfor og vælg &quot;Føj til foretrukne...&quot;
     <docid>2</docid>
   </version>
   <type>10</type>
+  <owner>1</owner>
+</document>
+
+<document>
+  <parent>1</parent>
+  <obvius_dump_owner_login>admin</obvius_dump_owner_login>
+  <grp>1</grp>
+  <accessrules></accessrules>
+  <name>universal</name>
+  <obvius_dump_grp_name>Admin</obvius_dump_grp_name>
+  <obvius_dump_parent_uri>/admin</obvius_dump_parent_uri>
+  <obvius_dump_doc_uri>/admin/universal/</obvius_dump_doc_uri>
+  <id>5</id>
+  <obvius_dump_type_name>HTML</obvius_dump_type_name>
+  <version>
+    <lang>en</lang>
+    <user>1</user>
+    <fields>
+      <bare>0</bare>
+      <pagesize>0</pagesize>
+      <title>Universal</title>
+      <expires>9999-01-01 18:00:00</expires>
+      <sortorder>+seq,+title</sortorder>
+      <short_title>Universal</short_title>
+      <root>1</root>
+      <subscribeable>none</subscribeable>
+      <docdate>2005-05-10 00:00:00</docdate>
+      <content></content>
+      <html_content></html_content>
+      <teaser></teaser>
+      <seq>-11</seq>
+    </fields>
+    <obvius_dump_user_login>admin</obvius_dump_user_login>
+    <valid>0</valid>
+    <version>2005-05-10 12:56:18</version>
+    <public>0</public>
+    <obvius_dump_type_name>HTML</obvius_dump_type_name>
+    <type>6</type>
+    <docid>5</docid>
+  </version>
+  <type>6</type>
   <owner>1</owner>
 </document>
 

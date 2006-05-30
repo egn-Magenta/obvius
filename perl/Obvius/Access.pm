@@ -59,7 +59,7 @@ sub get_capability_rules
 	my ($this, $doc) = @_;
 
 	return
-		$this-> _get_capability_rules( $this-> get_immutable_document()),
+		$this-> _get_capability_rules( $this-> get_universal_document()),
 		$this-> _get_capability_rules( $doc)
 		;
 }

@@ -1,10 +1,12 @@
 %# $Id$
 <%args>
-$immutable=>''
-$inherited=>''
-$value=>''
-$groups=>[]
-$users=>[]
+$immutable	  => ''
+$inherited	  => ''
+$value		  => ''
+$groups		  => []
+$users		  => []
+$allow_inherited  =>  1
+$show_universal   =>  1
 </%args>
 
 <div id="editlayer" class="obvius-ac-editlayer" >
@@ -64,14 +66,16 @@ can
 
 <!-- hide if no javascript -->
 <div id="js-panel" style="display:none">
-
+% if ( $show_universal) {
 Universal access rules
 <p>
-<div class="obvius-ac-ruleset" id="immutable-content">
-<% $immutable %>
+<div class="obvius-ac-ruleset" id="universal-content">
+<% $universal %>
 </div>
 <p>
+% } # endif
 
+% if ( $allow_inherited) {
 <label>
 <input type="checkbox" name="inherited" onClick="accessrules_update_textarea()">
 Inherited access rules
@@ -80,6 +84,7 @@ Inherited access rules
 <% $inherited %>
 </div>
 <p>
+% } # endif
 
 Access rules for this document:<p>
 <div class="obvius-ac-ruleset">
@@ -141,7 +146,7 @@ error in <b>scripts/admin_accessrules.js</b>, please investigate
 </font></div>
 
 <script language="JavaScript">
-accessrules_init('obvius-accessrules');
+accessrules_init('obvius-accessrules', <% $show_universal %>, <% $allow_inherited %>);
 get_element('js-panel').style.display="inline";
 get_element('raw-edit-show').style.display="none";
 get_element('raw-edit-hide').style.display="inline";
