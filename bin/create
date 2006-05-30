@@ -156,7 +156,6 @@ sub create_obvius_document {
                                  hide_subdocs=>1,
                                  bare=>1,
                                 );
-
     my $doctype=$obvius->get_doctype_by_name($version->{obvius_dump_type_name}) || $default_doctype;
     print " (", $doctype->Name, ")";
 

@@ -201,6 +201,12 @@ close F;
 # Copy from the skeleton-dir, interpolating:
 print "Skeleton files ...\n";
 my @skeleton_files=map { s|^[.]/||; $_; } split /\n/, `(cd $options{prefix}/skeleton; find ./ -type f)`;
+# db/structure.sql is special, move it forward
+@skeleton_files = (
+	(grep { m/structure.sql/} @skeleton_files),
+	(grep {!m/structure.sql/} @skeleton_files)
+);
+
 foreach my $skeleton_file (@skeleton_files) {
 	next if ($skeleton_file =~ /CVS/);
 	copy_interpolate(
@@ -249,7 +255,7 @@ sub copy_interpolate
 	}
 
 	if ( $heavy_interpolate_needed{$skeleton_file}) {
-		run_system_command( "sqlpp -I $options{wwwroot}/$options{website} -o $dest $from");
+		run_system_command("sqlpp -I $options{wwwroot}/$options{website} -o $dest $from");
 		return;
 	}
 
@@ -492,6 +498,7 @@ sub store_cmdline {
 sub run_system_command {
 	my ($command)=@_;
 	my ( undef, undef, $line) = caller; 
+	print "\$\$ $command\n";
 	system($command) == 0 or die "Command \"$command\" had non-zero return value ($?) at line $line\n";
 }
 
