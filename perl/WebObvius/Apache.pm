@@ -131,6 +131,16 @@ if ( $MOD_PERL == 2) {
 	# not present in compat::
 	require Apache2::Request;
 	*Apache::Request::new = sub { Apache2::Request-> new(@_[1..$#_]) };
+
+	# upload
+	require Apache2::Upload;
+	my $req_upload = \&Apache2::Request::upload;
+	*Apache2::Request::upload = sub {
+		my $self = shift;
+		return $req_upload->($self, @_) if @_;
+		# emulate A1
+		return map { $req_upload-> ( $self, $_ ) } @_;
+	};
 } elsif ( $MOD_PERL == 1) {
 	require Apache::Cookie;
 
