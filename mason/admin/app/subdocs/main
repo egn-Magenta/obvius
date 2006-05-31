@@ -3,7 +3,7 @@
 <documents>
 %     foreach my $sub (@$subs) {
 %         my $type=$obvius->get_version_type($sub->{vdoc})->Name;
-%         my $subsubnum=scalar(@{$m->comp('/portal/subdocs:get_subs', base_doc=>$sub->{doc}, base_vdoc=>$sub->{vdoc})});
+%         my $subsubnum=$obvius->get_nr_of_subdocs($sub->{doc});
   <document>
     <id><% $sub->{doc}->Id |h %></id>
     <name><% $sub->{name} |h %></name>
