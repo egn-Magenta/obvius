@@ -31,6 +31,10 @@
 <td class="event"><& /shared/htmlize, text=>$eventinfo &></td>
 </tr>
 %}
+<tr>
+<td width="100" valign="top" class="event">Gem som VCS :</td>
+<a href='<% "$prefix$uri" %>?get_ical=1'>ical</a><p>
+</tr>
 </table>
 
 <%init>
