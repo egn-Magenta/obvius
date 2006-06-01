@@ -4289,6 +4289,11 @@ abonnement på samme email-adresse.</translation>
     <translation lang="da">Skal udfyldes</translation>
   </text>
 
+  <text key="Unique">
+    <translation lang="en">Unique</translation>
+    <translation lang="da">Unik</translation>
+  </text>
+
   <text key="Add new field">
     <translation lang="en">Add new field</translation>
     <translation lang="da">Tilføj nyt felt</translation>
