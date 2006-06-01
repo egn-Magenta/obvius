@@ -146,13 +146,13 @@ sub raw_document_data
 	return undef unless $input->param('get_ical');
 
 	return (
-        	'text/x-vcalendar', 
-		$this-> as_ical( 
-	    		$obvius, 
+		'text/calendar',
+		$this-> as_ical(
+			$obvius,
 			$input-> hostname,
 			$vdoc
 		),
-		$doc->param('name') . ".vcs", # filename
+		$doc->param('name') . ".ics", # filename
 	)
 }
 
