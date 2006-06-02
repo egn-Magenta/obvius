@@ -112,7 +112,13 @@ sub as_ical
 
 		push @list, [
 			UID		=> $event-> Docid . '@' . $hostname,
-			DESCRIPTION	=> $event-> field('teaser'),
+			DESCRIPTION	=> 
+				$event-> field('teaser') .
+				"\n\n" .
+				"http://$hostname".
+				$obvius-> get_doc_uri(
+					$obvius-> get_doc_by_id( $event-> Docid)
+				),
 			SUMMARY    	=> $event-> field('title'),
 			CATEGORIES 	=> $event-> field('eventtype'),
 			LOCATION   	=> $event-> field('eventplace'),
@@ -144,6 +150,8 @@ sub raw_document_data
 	my ($this, $doc, $vdoc, $obvius, $input) = @_;
 
 	return undef unless $input->param('get_ical');
+
+	$input-> no_cache(1);
 
 	return (
 		'text/calendar',
