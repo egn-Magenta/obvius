@@ -277,7 +277,8 @@ sub get_universal_document
 
 	# Assume 'universal' is 5, but check for older database layouts
 	my $universal = $this-> get_doc_by_id(5);
-	return ( $universal-> Name eq 'universal') ? $universal : undef;
+	return ( defined($universal) && $universal-> Name eq 'universal') ? 
+		$universal : undef;
 }
 
 sub lookup_document {

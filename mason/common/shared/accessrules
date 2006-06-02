@@ -1,6 +1,6 @@
 %# $Id$
 <%args>
-$immutable	  => ''
+$universal	  => ''
 $inherited	  => ''
 $value		  => ''
 $groups		  => []
