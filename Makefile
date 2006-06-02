@@ -4,15 +4,15 @@ PREFIX?=/usr/local/obvius
 
 all: build
 
-build:
-.if ! exists ( perl/Obvius/Makefile )
-	cd perl/Obvius && perl Makefile.PL
-.endif
+build: perl/Obvius/Makefile perl/WebObvius/Makefile
 	cd perl/Obvius && make
-.if ! exists ( perl/WebObvius/Makefile )
-	cd perl/WebObvius && perl Makefile.PL
-.endif
 	cd perl/WebObvius && make
+
+perl/Obvius/Makefile:
+	cd perl/Obvius && perl Makefile.PL
+
+perl/WebObvius/Makefile:	
+	cd perl/WebObvius && perl Makefile.PL
 
 configure:
 	cd perl/Obvius && perl Makefile.PL

@@ -120,6 +120,7 @@ push @dirs, (
 	{ dir=>'docs/grafik/pager', },
 	{ dir=>'docs/grafik/news', },
 	{ dir=>'docs/grafik/menu', },
+	{ dir=>'docs/grafik/obvius', },
 	{ dir=>'docs/css', },
 ) if (!$options{new_admin}); # Legacy dirs
 
@@ -155,8 +156,14 @@ my %heavy_interpolate_needed = map { $_ => 1 } qw(
 
 # check for apache version
 unless ( $options{apache_version}) {
-	my $v = `apachectl -v`;
-	die "Cannot detect apache version\n" if $? < 0;	
+	my $v;
+	for my $ap ( qw(apachectl apache2ctl)) {
+		my $vers = `$ap -v`;
+		next if $? < 0;
+		$v = $vers;
+	}
+	die "Cannot detect apache version, consider using --apache_version explicitly\n" 
+		unless defined $v;
 	$options{apache_version} = ( $v =~ /Server version: Apache\/(\d)/) ? $1 : 1;
 }
 
@@ -203,8 +210,8 @@ print "Skeleton files ...\n";
 my @skeleton_files=map { s|^[.]/||; $_; } split /\n/, `(cd $options{prefix}/skeleton; find ./ -type f)`;
 # db/structure.sql is special, move it forward
 @skeleton_files = (
-	(grep { m/structure.sql/} @skeleton_files),
-	(grep {!m/structure.sql/} @skeleton_files)
+	(grep { m/(structure|perms).sql/} @skeleton_files),
+	(grep {!m/(structure|perms).sql/} @skeleton_files)
 );
 
 foreach my $skeleton_file (@skeleton_files) {
