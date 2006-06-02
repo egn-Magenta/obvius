@@ -78,7 +78,7 @@ $inherited_access =~ s/$local_access$//s;
 
 my $access_error;
 my $current_access_rules = join '<br />', map {
-	my $status = $obvius->access_rule_applies($_, $doc);
+	my $status = $obvius->access_rule_applies($_, $doc, $doc->Owner);
 	defined($status) ? (
 		$status ? 
 			"<span title=\"" . 
@@ -97,6 +97,7 @@ my $current_access_rules = join '<br />', map {
 
 my $can_access    = $obvius->can_set_access_data($doc);
 my $can_docparams = $obvius->can_set_docparams($doc);
+my $ownername     = $obvius->get_user($doc->Owner)->{name};
 
 my @info = (
 	{ 
@@ -148,11 +149,25 @@ my @info = (
 		universal => $universal_access,
 		inherited => $inherited_access,
 		pre	=> 
-			$m->scomp('/shared/msg', text=>'Calculated access rules') . 
-			':<div>' . $current_access_rules . '</div>' .
-			$m->scomp('/shared/msg', text=>'Current capabilities') . 
-			' (' . $obvius->user . '):<div>' . 
-			(join ", ", keys %{$obvius->user_capabilities($doc)}) . 
+			'<p>'.
+			$m->scomp(
+				'/shared/msg', 
+				text => "Actual access rules for <i>$ownername</i>",
+			) . 
+			':<div class="obvius-ac-ruleset">' . 
+				$current_access_rules . 
+			'</div><p>' .
+			$m->scomp(
+				'/shared/msg', 
+				text => "Current capabilities of <i>$ownername</i>",
+			) .
+			':<div class="obvius-ac-ruleset">' . 
+			join( ", ", keys %{
+				$obvius->compute_user_capabilities(
+					$doc, 
+					$doc->Owner
+				)
+			}) . 
 			'</div>',
 		groups  => [
 			map { 

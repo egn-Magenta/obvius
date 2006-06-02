@@ -95,13 +95,10 @@ sub user_has_any_capability {
     return $any;
 }
 
-sub user_capabilities {
-    my ($this, $doc) = @_;
+sub compute_user_capabilities
+{
+    my ($this, $doc, $userid) = @_;
 
-    $this->{CAPABILITIES}={} unless (defined $this->{CAPABILITIES});
-    return $this->{CAPABILITIES}->{$doc->Id} if (defined $this->{CAPABILITIES}->{$doc->Id});
-
-    my $userid=$this->get_userid($this->user);
     my $user_groups=$this->get_user_groups($userid);
 
     my @rules=$this->get_capability_rules($doc);
@@ -155,11 +152,18 @@ sub user_capabilities {
 	delete $capabilities{$_};
     }
 
-    #print STDERR "FINAL capabilities: " . Dumper(\%capabilities);
-
-    $this->{CAPABILITIES}->{$doc->Id}=\%capabilities;
-
     return \%capabilities;
+}
+
+sub user_capabilities {
+    my ($this, $doc) = @_;
+
+    $this->{CAPABILITIES}={} unless (defined $this->{CAPABILITIES});
+    return $this->{CAPABILITIES}->{$doc->Id} if (defined $this->{CAPABILITIES}->{$doc->Id});
+
+    my $capabilities = $this-> compute_user_capabilities( $this->get_userid( $this->user));
+
+    return $this->{CAPABILITIES}->{$doc->Id} = $capabilities;
 }
 
 # access_rule_applies - given a string with an access rule and a
@@ -167,9 +171,9 @@ sub user_capabilities {
 #                       to the current user, 0 if it doesn't apply and
 #                       undef if the rule is invalid.
 sub access_rule_applies {
-    my ($this, $line, $doc)=@_;
+    my ($this, $line, $doc, $userid)=@_;
 
-    my ($apply)=$this->parse_access_rule($line, $doc);
+    my ($apply)=$this->parse_access_rule($line, $doc, $userid);
 
     return $apply;
 }
@@ -197,7 +201,8 @@ sub parse_access_rule {
         if (defined $userid) {
             my @who_list=split /\s*,\s*/, $who_list;
             # ALL or username:  XXX add check for valid username!
-            if (grep { $this->user eq $_ or $_ eq 'ALL' } @who_list) {
+            my $username = $this-> get_user($userid)->{login};
+            if (grep { $username eq $_ or $_ eq 'ALL' } @who_list) {
                 $apply=1;
             }
             # OWNER:
