@@ -8,6 +8,11 @@ $users		  => []
 $allow_inherited  =>  1
 $show_universal   =>  1
 </%args>
+<%init>
+$universal =~ s/\r//gs;
+$inherited =~ s/\r//gs;
+$inherited =~ s/\r//gs;
+</%init>
 
 <div id="editlayer" class="obvius-ac-editlayer" >
 
@@ -95,9 +100,9 @@ Access rules for this document:<p>
 
 <p>
 
-<div id="raw-edit-hide" style="display:inline">
+<div id="raw-edit-hide" style="display:block">
 <a href="" onClick="
-get_element('raw-edit-show').style.display='inline';
+get_element('raw-edit-show').style.display='block';
 get_element('raw-edit-hide').style.display='none';
 return false;
 ">
@@ -108,11 +113,11 @@ Show raw rules
 </div> <!-- js-panel -->
 
 <!-- show if no javascript -->
-<div id="raw-edit-show" style="display:inline">
+<div id="raw-edit-show" style="display:block">
 
 <div id="js-autohide-part1" style="display:none">
 <a href="" onClick="
-get_element('raw-edit-hide').style.display='inline';
+get_element('raw-edit-hide').style.display='block';
 get_element('raw-edit-show').style.display='none';
 return false;
 ">
@@ -141,18 +146,20 @@ Raw rules. Use with caution.<p>
 
 </div> <!-- raw-edit-show -->
 
-<div id="js-error"><p><font size="-1" color="#CC0000">
+<p><font size="-1" color="#CC0000">
+<div id="js-error">
 error in <b>scripts/admin_accessrules.js</b>, please investigate
-</font></div>
+</div>
+</font>
 
 <script language="JavaScript">
 accessrules_init('obvius-accessrules', <% $show_universal %>, <% $allow_inherited %>);
-get_element('js-panel').style.display="inline";
+get_element('js-panel').style.display="block";
 get_element('raw-edit-show').style.display="none";
-get_element('raw-edit-hide').style.display="inline";
-get_element('js-autohide-part1').style.display="inline";
-get_element('js-autohide-part2').style.display="inline";
-get_element('js-autohide-part3').style.display="inline";
+get_element('raw-edit-hide').style.display="block";
+get_element('js-autohide-part1').style.display="block";
+get_element('js-autohide-part2').style.display="block";
+get_element('js-autohide-part3').style.display="block";
 get_element('js-error').style.display="none";
 </script>
 <noscript>

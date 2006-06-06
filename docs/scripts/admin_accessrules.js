@@ -13,19 +13,34 @@ var ac_allow_inherited;
 
 var ac_content;
 
+function raise(exception)
+{
+	var v = document.getElementById('js-error');
+	if ( v != null) {
+		v.innerHTML = exception;
+	} else {
+		document.writeln('<font color="#FF0000">' + exception + '</font>');
+	}
+	throw(exception);
+}
+
+
 /*
 inititalize internal variables. form is the name of form that is to be the arena
 of dhtml play ( see above )
 */
 function accessrules_init(form, show_universal, allow_inherited)
 {
+	// check fancy functions
+	if ( typeof(Array.prototype.splice) != "function")
+		raise("Unable to work correctly under this browser, consider installing a newer version, or Firefox");
+
 	ac_allow_inherited = allow_inherited;
 
 	// get hold of required dom elements
 	ac_form = document.forms[form];
-	if ( typeof(ac_form) == "undefined") {
-		document.writeln("error: accessrules_init(): form '" + form + "' not found<br>");
-	}
+	if ( typeof(ac_form) == "undefined")
+		raise("error: accessrules_init(): form '" + form + "' not found");
 
 	get_control('accessrules');
 	if ( ac_allow_inherited)
@@ -39,9 +54,8 @@ function accessrules_init(form, show_universal, allow_inherited)
 	ac_arena           = get_element('arena');
 	ac_editor          = get_element('editlayer');
 
-
 	// initial positioning
-	ac_editor.style.left = (window.innerWidth  - ac_editor.offsetWidth) / 2 + 'px';
+	ac_editor.style.left = (document.body.clientWidth  - ac_editor.offsetWidth) / 2 + 'px';
 
 	// populate roles lookup table
 	var i;
@@ -92,30 +106,28 @@ function accessrules_init(form, show_universal, allow_inherited)
 function get_control(name)
 {
 	var g = ac_form[name];
-	if ( typeof(g) == "undefined") {
-		document.writeln("error: accessrules_init(): control '" + name + "' not found<br>");
-	}
+	if ( typeof(g) == "undefined")
+		raise("error: accessrules_init(): control '" + name + "' not found<br>");
 	return g;
 }
 
 function get_element(id)
 {
 	var g = document.getElementById(id);
-	if ( g == null) {
-		document.writeln("error: accessrules_init(): element '" + id + "' not found<br>");
-	}
+	if ( g == null)
+		raise("error: accessrules_init(): element '" + id + "' not found<br>");
 	return g;
 }
 
 /*
 crudely parse the content, store parsed data in the passed array,
-returns boolean flag if INHERIT section is present
+returns boolean flag if INHERIT section is present.
 */
 function accessrules_parse( storage, text)
 {
 	var i;
 	var n;
-	var m = text.match(/.+/g); 
+	var m = text.match(/[\S]+/g); 
 	var has_inherited = false;
 
 	if ( m == null) return false;
@@ -287,7 +299,7 @@ function accessrules_reshape_controls()
 			' '
 		) + 
 		' <a href="" onClick="accessrules_delete(' + i + ');return false;">Delete</a>' + 
-		'<p>';
+		'<br>';
 	}
 	ac_arena.innerHTML = arena;
 }
@@ -330,7 +342,7 @@ function accessrules_editbox_visible(visible)
 {
 	if ( visible) {
 		ac_editor.style.display = "inline";
-		ac_editor.style.left = (window.innerWidth  - ac_editor.offsetWidth) / 2 + 'px';
+		ac_editor.style.left = (document.body.clientWidth  - ac_editor.offsetWidth) / 2 + 'px';
 	} else {
 		ac_editor.style.display = "none";
 	}
