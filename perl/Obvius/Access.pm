@@ -161,7 +161,7 @@ sub user_capabilities {
     $this->{CAPABILITIES}={} unless (defined $this->{CAPABILITIES});
     return $this->{CAPABILITIES}->{$doc->Id} if (defined $this->{CAPABILITIES}->{$doc->Id});
 
-    my $capabilities = $this-> compute_user_capabilities( $this->get_userid( $this->user));
+    my $capabilities = $this-> compute_user_capabilities( $doc, $this->get_userid( $this->user));
 
     return $this->{CAPABILITIES}->{$doc->Id} = $capabilities;
 }
