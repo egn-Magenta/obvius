@@ -49,16 +49,32 @@ sub encode_ical
 			next;
 		}
 
-		$val =~ s/([\\;,])/\\$1/gs;
-		$val =~ s/\n/\\n/gs;
+		# default encoding, conflicts with quoted-printable
+		# $val =~ s/([\\;,])/\\$1/gs;
+		# $val =~ s/\n/\\n/gs;
+		
 		# cheap latin-1 Encode, enable if necessary
 		# $val =~ s/([\x80-\xBF])|([\xC0-\xFF])/$1 ? "\xC2$1" : "\xC3" . chr(ord($2) - 0x40)/ge;
+
+		# quoted-printable, conflict with default and unicode strings
+		if ( $val =~ /[\\;,\t\r\n\x80-\xff]/) {
+			$key .= ";ENCODING=QUOTED-PRINTABLE";
+			$val =~ s/([\\;,\t\r\n\x80-\xff])/sprintf(q(=%02X),ord($1))/ge;
+		}
+		
 		$val =~ s/<("[^"]*"|'[^']*'|[^>])*>//g;
 		$val =~ s/\s\s+/ /g;
 		next if $val =~ /^\s*$/;
 
-		$val =~ s/(.{74})/$1\n /g;
-		$ret .= "$key:$val\n";
+		# simple default wrapping
+		# $val =~ s/(.{74})/$1\n /g;
+
+		# simple quoted-printable wrapping, assume no field names shouldn't be longer than 74
+		my $gval = "$key:$val";
+		$gval =~ s/(.{74}(?=.))/$1=\n/g;
+		$gval =~ s/ $/=20/; # outlook does this, but I don't care why
+		
+		$ret .= "$gval\n";
 	}
 	
 	$ret .= "END:$type\n";
