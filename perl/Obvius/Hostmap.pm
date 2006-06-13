@@ -40,6 +40,7 @@ sub create_hostmap {
                 roothost => $roothost,
                 last_change => 0,
                 hostmap => {},
+                regexp => '',
                 %options
             );
     my $new = bless(\%new, $this);
@@ -91,6 +92,8 @@ sub get_hostmap {
             }
         }
 
+        $this->{regexp} = "^(" . join("|", reverse sort keys %$siteroot_map) . ")";
+
         $this->{last_change} = $file_timestamp;
     }
 
@@ -113,27 +116,15 @@ sub translate_uri {
     my $roothost = $this->{roothost} || '';
     $hostname ||= $roothost;
 
+    $uri = lc($uri);
 
-    my $new_host;
-    my $subsiteuri = '/';
-    my @path = split("/", $uri);
-
-    # First parth of @path will always be an empty string:
-    shift(@path);
-
-
-    # Loop over the parts of the path and build up the subsiteuri.
-    # Stop first time we get an uri that does not macth a subsite.
-
+    my $new_host = '';
+    my $subsiteuri = '';
     my $levels_matched = 0;
-    for(@path) {
-        if(my $res = $hostmap->{"$subsiteuri$_/"}) {
-            $subsiteuri .= "$_/";
-            $new_host = $res;
-            $levels_matched++
-        } else {
-            last;
-        }
+
+    if($uri =~ m!$this->{regexp}!) {
+        $subsiteuri = $1;
+        $new_host = $hostmap->{$1};
     }
 
     if($new_host) {
@@ -151,7 +142,12 @@ sub translate_uri {
         }
     }
 
+
     if(wantarray) {
+        if($subsiteuri) {
+            my @parts = split("/", $subsiteuri);
+            $levels_matched = (scalar(@parts) - 1);
+        }
         return ($uri, $new_host, $subsiteuri, $levels_matched);
     } else {
         return $uri;
