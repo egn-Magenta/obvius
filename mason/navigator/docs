@@ -184,11 +184,11 @@ if(scalar(@$here_docs)){
         }
 
         if($doctypeid and $vdoc->Type == $doctypeid) {
-            $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "');";
+            $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "', '" . $vdoc->field('title') . "');";
             push(@special_docs, $vdoc);
         } else {
             # Only add a choose action if where are not searching for special docs
-            $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "');" unless($doctypeid);
+            $vdoc->{java_action} = "javascript:navigator_choose('" . $vdoc->Url . "', '" . $vdoc->field('title') . "');" unless($doctypeid);
             push(@docs, $vdoc);
         }
     }

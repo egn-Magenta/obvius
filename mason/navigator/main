@@ -6,10 +6,10 @@
 var obviused_callback;
 var obviused_ready = 1;
 
-function navigator_choose(path) {
+function navigator_choose(path, title) {
     if(obviused_callback) {
-	obviused_callback('http://<% $r->hostname %>' + path)
-	this.close();
+        obviused_callback('http://<% $r->hostname %>' + path)
+        this.close();
     }
     var fieldname = document.pageform.fieldname.value;
     if(fieldname) {
@@ -18,9 +18,18 @@ function navigator_choose(path) {
         if(get_dialog_func && get_dialog_func(fieldname)) {
             var field = get_dialog_func(fieldname);
             field.value = path;
+            var title_field;
+            if(title_field = field.form[fieldname + '_title_shadow']) {
+                title_field.value = title;
+            }
             this.close();
         } else {
-            window.opener.document.pageform[fieldname].value = path;
+            var field = window.opener.document.pageform[fieldname];
+            field.value = path;
+            var title_field;
+            if(title_field = field.form[fieldname + '_title_shadow']) {
+                title_field.value = title;
+            }
             this.close();
         }
     } else {
@@ -248,7 +257,7 @@ for(my $path_index = $path_levels - 1; $path_index >= 0;$path_index--) {
 
 my $list = [];
 my $showbutton = 1;
-my $java_action = "javascript:navigator_choose('$path')";
+my $java_action = "javascript:navigator_choose('$path', '$title')";
 my $buttontext = 'Choose this document';
 
 $showbutton = 0 if($fieldname and $doctypeid and $vdoc->Type != $doctypeid);
