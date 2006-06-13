@@ -1,0 +1,25 @@
+<%init>
+my $siterootmap = $r->pnotes('site')->param('siterootmap');
+unless(defined($siterootmap)) {
+    my $roothost = $m->comp('/shared/get_subsite_roothost');
+
+    my $map_file = $obvius->config->param('siterootmap');
+    unless($map_file) {
+        my $conf_dir = $r->document_root;
+        $conf_dir =~ s!docs/?$!conf/!;
+        if(-f $conf_dir . "hostmap.conf") {
+            $map_file = $conf_dir . "hostmap.conf";
+        } else {
+            $obvius->log->warn("No hostmap file found for this site. Please specify it in the config file");
+            $r->pnotes('site')->param('siterootmap' => 0);
+            return 0;
+        }
+    }
+    $siterootmap = Obvius::Hostmap->create_hostmap($map_file, $roothost);
+    $r->pnotes('site')->param('siterootmap' => $siterootmap);
+}
+return $siterootmap;
+</%init>
+<%once>
+use Obvius::Hostmap;
+</%once>
