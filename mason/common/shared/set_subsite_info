@@ -1,8 +1,6 @@
 <%init>
 return if($r->notes('subsite_info_set'));
 my $siterootmap = $m->comp('get_subsite_siterootmap');
-use Data::Dumper;
-print STDERR Dumper($siterootmap);
 if($siterootmap) {
     my ($resolved_url, $host, $subsite_uri, $levels) = $siterootmap->translate_uri($uri, $r->hostname);
     $r->notes('subsite_url' => $resolved_url);
