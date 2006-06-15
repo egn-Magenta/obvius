@@ -1,0 +1,11 @@
+%if($mail_error) {
+<p>
+    Der opstod en fejl under registreringen af dine indtastninger:<br />
+    <strong><% $mail_error %></strong>
+</p>
+%} else {
+<& /shared/htmlize, text=>$vdoc->field('aftersubmittext') &>
+%}
+<%init>
+my $mail_error = $r->param('mail_error');
+</%init>

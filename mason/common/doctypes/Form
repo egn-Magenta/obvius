@@ -16,7 +16,9 @@
 
 <& headline &>
 %
-%if($r->param('obvius_form_submitted') and $output->param('submitted_data_ok')) {
+%if($r->param('show_aftersubmit')) {
+<& form_files/show_after_submit, %ARGS, output=>$output &>
+%} elsif($r->param('obvius_form_submitted') and $output->param('submitted_data_ok')) {
 <& form_files/after_submit, %ARGS, output=>$output &>
 %} else {
 <& teaser &>
