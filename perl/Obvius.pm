@@ -1033,6 +1033,12 @@ sub search_subtree
 	my ( $self, $root_docid, $fields, $where, %options) = @_;
 
 	$root_docid ||= 0;
+	if ( $root_docid == 0 or $root_docid == 1) {
+		# search in all documents
+		return $self-> search( $fields, $where, %options);
+	}
+
+	
 	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( $root_docid);
 	my @result;
 	my @user_where_statement = length($where) ? ($where) : ();
