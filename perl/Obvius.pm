@@ -1025,6 +1025,80 @@ sub search {
 
     return $this->select_best_language_match_multiple(@subdocs ? \@subdocs : undef);
 }
+    
+# same as search but does WHERE doc.parent IN ( get_documents_subtree ) for
+# searching in a subtree; also searches in the root document itself
+sub search_subtree
+{
+	my ( $self, $root_docid, $fields, $where, %options) = @_;
+
+	$root_docid ||= 0;
+	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( $root_docid);
+	my @result;
+	my @user_where_statement = length($where) ? ($where) : ();
+
+	# add doc fields needed
+	$options{needs_document_fields} ||= [];
+	@{$options{needs_document_fields}} = grep { 
+		$_ ne 'id' and $_ ne 'parent' 
+	} @{$options{needs_document_fields}};
+	push @{$options{needs_document_fields}}, qw(id parent);
+	
+	do {
+		my @slice = splice( @parents, 0, 256); # XXX approx max query length is 2K
+		my @where;
+		push @where, 'parent IN (' . join(',', @slice) . ')'
+			if @slice;
+		if ( defined $root_docid) {
+			push @where, "id = $root_docid";
+			undef $root_docid;
+		}
+
+		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
+		
+		push @result, $self-> search( 
+			$fields,
+			join( ' AND ', @user_where_statement, @where),
+			%options
+		);
+		
+	} while (@parents);
+
+	@result;
+}
+
+# traverses root_docid and returns set of parent ids for all documents ids under the root
+sub get_documents_subtree
+{
+	my ( $self, $root_docid) = @_;
+
+	$root_docid ||= 0;
+	my $set = DBIx::Recordset-> SetupObject({
+		'!DataSource'	=> $self-> {DB},
+		'!Table'	=> 'documents',
+		'!Fields'	=> 'id,parent'
+	});
+
+	my ( %result, @current);
+	@current = ( $root_docid );
+
+	while ( @current) {
+		my @slice = splice( @current, 0, 256); # XXX approx max query length is 2K
+		
+		$set-> Search({
+			'$where'	=> 'parent IN (' . join(',', @slice) . ')',
+		});
+
+    		while ( my $rec = $set-> Next) {
+			$result{ $rec->{parent} } = 1;
+			push @current, $rec->{id};
+		}
+	}
+
+	$set-> Disconnect;
+
+	keys %result;
+}
 
 sub get_distinct_vfields {
     my ($this, $name, $value_field, %options) = @_;
