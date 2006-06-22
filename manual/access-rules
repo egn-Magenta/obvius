@@ -1,0 +1,157 @@
+Access rules 
+============
+
+Grammar
+-------
+
+Each and every document stored in table documents can possess a set of access
+rules. The rights occupy documents.accessrules text field, where each is a set
+of individual rules, divided by a newline.
+
+Each individual rule describes what particular rights are allocated to a given
+entity, and can in general be described as 
+
+   RULE := ENTITY can ACTION CAPABILITIES this document
+
+where
+
+   ENTITY        := USER | GROUP
+   ACTION        := ONLY | ALSO | NOT | ALWAYS | NEVER
+   CAPABILITIES  := one or more CAPABILITY
+   CAPABILITY    := VIEW | CREATE | EDIT | PUBLISH | DELETE | CHANGE ACCESS | ADMINISTER
+
+This way, the access rules mimic a human-readable description of rights a
+person might have been exposes to, for example, 
+
+  "User A can only view, edit and publish this document"
+
+or,
+
+  "Users from group B can not delete this document"
+
+The access rules that are stored in database, in a human-readable form, but the
+syntax is less relaxed, and the following encoding rules are used:
+
+   USER    := users.login
+   GROUP   := @groups.name
+
+where users and groups are tables in the database, and.
+
+   ONLY    := =
+   ALSO    := +
+   NOT     := -
+   ALWAYS  := =!
+   NEVER   := !
+
+   CHANGE ACCESS := MODES
+   ADMINISTER    := ADMIN
+
+This way, the former statements about user A and group B could be rewritten in
+the following way, assuming that users.login for the user A is "a" and
+groups.name for the group B is "b":
+
+   a=view,edit,publish
+   @b-delete
+
+The access rights are stored in this way in the database, and can be edited
+directly by a text editor.
+
+Precedence
+----------
+
+There can be defined more than access rule governing a particular action.  In
+order to computer what access has a user to a particular document, all access
+rules are scanned in order of their declaration. For example,
+
+   a=view,edit,publish
+   a-edit
+
+means that user A can only view and publish. If user A is a member of group B,
+then
+
+   a=view,edit,publish
+   @b-edit
+
+is effectively the same. The rules can be added and revoked many times:
+
+   a=view,edit,publish
+   a-view,edit,publish
+   a+edit
+
+leaves user A capable of editing only.
+
+Actions
+-------
+
+There are two type of actions, those that allow (ONLY,ALWAYS,ALSO) and those
+that deny (NOT,NEVER) access. After the processing of individual rules, two
+lists contain the capabilities the user is allowed and denied. The following
+set of actions is defined:
+
+ALSO: adds CAPABILITIES the allow list.
+
+ONLY: removes all capabilities from the allow list and assigns CAPABILITIES the
+allow list.
+
+ALWAYS: same as ONLY, but also removed all capabilities from the deny list.
+
+NOT: adds CAPABILITIES to the deny list.
+
+NEVER: same as NOT but CAPABILITIES cannot be later removed or masked.
+
+Inheritance
+-----------
+
+Each document has two integer fields, id and parent, where id is a unique
+document identification, and parent is such the id of the document parent. In
+such a way, the hierarchical structure of the document tree is declared, where
+the first parent for all documents in the predeclared document with id 1. The
+access rights can be also inherited from the access rights of parent documents.
+If the set of access rules contains a special keyword INHERIT, then all access
+rules from all parents of the documents are processed also. 
+
+In addition to that, all documents unconditionally inherit access rules from
+another predeclared document named "universal", which is only used for
+declaration of such access rules. Although universal access rules can contain
+the same rules that the other access rules can, it does only make sense to
+declare strong negative rules that unconditionally deny rights using "!" (
+NEVER ) that cannot be masked. Practically, this makes an effective tool for
+quick temporary removal of access rights.
+
+Editing
+-------
+
+Obvius provides dialog-based editing capability of of access rights.
+
+The dialog consists of four panels: computed rules, universal rules, inherited
+rules, and document rules.
+
+The computed rules display all rules, - universal, inherited ( if applicable ),
+and document rules, - and depending whether a particular rule is applicable or
+not the currently accesses document, the rules are either displayed normally or
+grayed out. This way, it is visually easier to discard rules that do not apply.
+
+The universal rules display the set of access rules unconditionally imposed on
+each document. The universal access rules themselves in turn can also be edited
+in a similar fashion, from the main page under "Edit universal access rules"
+link.
+
+The inherited rules panel displays a set of access rules collected by
+traversing the document inheritance tree, and features a check box which, if
+pressed, actualizes these rules ( see INHERIT above ).
+
+The document rules panel displays set of editable access rules, one line per
+rule, and "Create" button. The "Create" button, if pressed, displays a dialog
+where an individual rule can be composed, namely, either name of the user or
+group can be selected, together with an appropriate action and set of
+capabilities.
+
+The created rules can also be edited ("Edit") and deleted ("Delete"). The
+changes are not stored in the database until a green "Update" button is
+pressed. This action also causes the recomputation of all access rules and
+change of information in the computed rules panel.
+
+The editing engine is based on Javascript v1.2, so in case the browser does not
+support this version of the language, the panels are not shown, but rather a
+simple text editor is displayed instead. In this case, the access rules must be
+edited using the grammar described above.
