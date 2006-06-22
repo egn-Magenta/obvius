@@ -1040,7 +1040,7 @@ sub search_subtree
 
 	
 	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( $root_docid);
-	my @result;
+	my $result = [];
 	my @user_where_statement = length($where) ? ($where) : ();
 
 	# add doc fields needed
@@ -1062,7 +1062,7 @@ sub search_subtree
 
 		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
 		
-		push @result, $self-> search( 
+		push @$result, $self-> search( 
 			$fields,
 			join( ' AND ', @user_where_statement, @where),
 			%options
@@ -1070,7 +1070,7 @@ sub search_subtree
 		
 	} while (@parents);
 
-	@result;
+	$result;
 }
 
 # traverses root_docid and returns set of parent ids for all documents ids under the root
