@@ -1062,11 +1062,11 @@ sub search_subtree
 
 		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
 		
-		push @$result, $self-> search( 
+		push @$result, @{$self-> search( 
 			$fields,
 			join( ' AND ', @user_where_statement, @where),
 			%options
-		);
+		)};
 		
 	} while (@parents);
 
