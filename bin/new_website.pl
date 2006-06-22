@@ -262,7 +262,13 @@ sub copy_interpolate
 	}
 
 	if ( $heavy_interpolate_needed{$skeleton_file}) {
-		run_system_command("sqlpp -I $options{wwwroot}/$options{website} -o $dest $from");
+		run_system_command(
+			"$options{prefix}/bin/sqlpp ".
+			"-I $options{prefix}/skeleton ".
+			"-I $options{wwwroot}/$options{website} ".
+			"-o $dest ".
+			"$from"
+		);
 		return;
 	}
 

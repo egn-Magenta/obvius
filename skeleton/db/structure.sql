@@ -3,6 +3,8 @@
 
 #include <conf/config.h>
 
+#define HAS_STRUCTURE_SQL
+
 #if "DBTYPE" eq "mysql"
 
 #define COUNTER                      int(8) unsigned NOT NULL auto_increment
