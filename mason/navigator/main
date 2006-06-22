@@ -257,7 +257,9 @@ for(my $path_index = $path_levels - 1; $path_index >= 0;$path_index--) {
 
 my $list = [];
 my $showbutton = 1;
-my $java_action = "javascript:navigator_choose('$path', '$title')";
+my $js_title = $title;
+$js_title =~ s!'!\\'!g;
+my $java_action = "javascript:navigator_choose('$path', '$js_title')";
 my $buttontext = 'Choose this document';
 
 $showbutton = 0 if($fieldname and $doctypeid and $vdoc->Type != $doctypeid);
