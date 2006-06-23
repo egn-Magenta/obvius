@@ -32,7 +32,7 @@ sub read_htdig_output {
     my ($args, $part, $keep_part_list, $need_next_page, $obvius) = @_;
 
     my $htsearch = htdig_htsearch_path();
-    return undef unless ($htsearch);
+    return [] unless ($htsearch);
 
     my $cmd;
 
@@ -84,7 +84,7 @@ sub read_htdig_output {
     } else {
         $obvius->log->debug("RUNNING $htsearch '$cmd'| ");
     }
-    open(INPUT, "$htsearch |") or return undef;
+    open(INPUT, "$htsearch |") or return [];
     my @lines = <INPUT>;
     close(INPUT);
 

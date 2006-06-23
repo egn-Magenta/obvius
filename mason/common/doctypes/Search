@@ -185,7 +185,7 @@ my $form = $obvius->get_version_field($vdoc, 'form') || '';
 my $search_type=$output->param('search_type');
 my $search_term=$output->param('search_term');
 my $q=$output->param('_incoming_words') || $output->param('_incoming_q') || '';
-if ($q =~ /Ã/) {
+if ($q =~ /\xC3/) {
     $q = lc(utf8($q)->latin1);
 } else {
     $q = lc($q);
