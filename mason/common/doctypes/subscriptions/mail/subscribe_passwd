@@ -1,14 +1,13 @@
 %# $Id$
 From: <% $from %>
-Subject: Ændring af abonnement
+Subject: ï¿½dring af abonnement
 To: <% $email %>
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 
-Kære abonnent
+Kï¿½e abonnent
 
-Du kan ændre dit abonnement på nyhedsservices på
-<http://<% $r->pnotes('site')->Sitename %>/abonner/?mode=login;email=<% $email %>;password=<% $password %>>
+Du kan ï¿½dre dit abonnement pï¿½nyhedsservices pï¿½<http://<% $r->pnotes('site')->Sitename %>/abonnement/?mode=login;email=<% $email %>;password=<% $password %>>
 
 Med venlig hilsen
 Nyhedsservice

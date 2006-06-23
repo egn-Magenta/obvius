@@ -2,7 +2,7 @@
 %#
 %if($login_failed) {
 <p>
-Password er ikke korrekt => <a href="./">prøv igen</a>!
+Password er ikke korrekt => <a href="./">prv igen</a>!
 </p>
 %}
 %else {
@@ -22,10 +22,10 @@ Password er ikke korrekt => <a href="./">prøv igen</a>!
 
 <tr>
 <td>
-<p>Du kan ændre eller afmelde dit abonnemet ved at klikke på linket nederst i de email du modtager fra nyhedsservice.</p>
+<p>Du kan ï¿½dre eller afmelde dit abonnemet ved at klikke pï¿½linket nederst i de email du modtager fra nyhedsservice.</p>
 
-<p>Få tilsendt en ny email straks ved at indsætte din email-adresse
-herunder og klik på send.</p>
+<p>Fï¿½tilsendt en ny email straks ved at indsï¿½te din email-adresse
+herunder og klik pï¿½send.</p>
 
 <BR>
 %if($error_email) {
