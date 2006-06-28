@@ -139,7 +139,7 @@ if ( $MOD_PERL == 2) {
 		my $self = shift;
 		return $req_upload->($self, @_) if @_;
 		# emulate A1
-		return map { $req_upload-> ( $self, $_ ) } @_;
+		return map { $req_upload-> ( $self, $_ ) } $req_upload->( $self);
 	};
 } elsif ( $MOD_PERL == 1) {
 	require Apache::Cookie;
