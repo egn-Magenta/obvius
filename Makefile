@@ -30,7 +30,6 @@ clean:
 
 test:
 	@echo 'Checking prerequisites...'
-	@sqlpp --help > /dev/null
 	@perl -MString::Random -MDBI -MDBIx::Recordset -MParams::Validate -MDate::Calc \
 	-MDigest::SHA1 -MImage::Size -MXML::Simple -MUnicode::String -MBerkeleyDB \
 	-MHTML::Mason -MApache::Session -MHTML::Tree -MHTML::FormatText -e 1
