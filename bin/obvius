@@ -171,8 +171,8 @@ my %conf;
 
 if ($ops{$op}->{rw}) {
     %conf = $func->(database=>'dsn',
-		    privileged_db_login=>'user',
-		    privileged_db_passwd=>'password',
+		    normal_db_login=>'user',
+		    normal_db_passwd=>'password',
 		    document_type=>'doctype',
 		    version_type=>'versiontype',
 		    cache_timestamp=>'cache_timestamp',

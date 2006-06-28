@@ -347,9 +347,6 @@ prefix=$options{prefix}
 normal_db_login=$options{dbusername}_normal
 normal_db_passwd=$options{dbpassword}
 
-privileged_db_login= $options{dbusername}_priv
-privileged_db_passwd=default_priv
-
 administrator = admin
 
 htdig_config = $options{dbname}

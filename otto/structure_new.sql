@@ -213,8 +213,6 @@ CREATE TABLE votes (
 # Config:
 INSERT INTO config VALUES ('normal_db_user',       'dcmr', '');
 INSERT INTO config VALUES ('normal_db_passwd',     'cabcc10b06e91ca2', '');
-INSERT INTO config VALUES ('privileged_db_login',  'dcmr_admin', '');
-INSERT INTO config VALUES ('privileged_db_passwd', 'a691cb2c323e07c2', '');
 INSERT INTO config VALUES ('administrator',        'admin', '');
 
 ## DocTypes: brug add_doctypes.pl i stedet            par  basi  sear edi publish_page_seq
