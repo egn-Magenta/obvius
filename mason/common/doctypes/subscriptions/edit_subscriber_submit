@@ -2,16 +2,16 @@
 %#
 %if($errors) {
 
-	Du havde følgende fejl i dine indtastninger:<br><br>
+	<p>Du havde følgende fejl i dine indtastninger:<br />
 %	map {
-        <% $_->{error} %><br>
+        <% $_->{error} %></p>
 %	} @$errors;
 %} else {
 
-	Dine oplysninger er gemt.<br><br>
+	<p>Dine oplysninger er gemt.
 
 %	if($password_changed) {
-		Du har ændret dit password. Dit nye password vil blive sendt til <% $mailto %>.<br>
+		<br />Du har ændret dit password. Dit nye password vil blive sendt til <% $mailto %>.
 <%perl>
 		$r->pnotes('OBVIUS_OUTPUT')->param(OBVIUS_SIDE_EFFECTS => 1);
 		my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => 1);
@@ -25,8 +25,9 @@
 			<% $mail_error %>
 %		}
 %	}
+    </p>
 %}
-<br>Tryk <a href="?mode=choose">her</a> for at vende tilbage til abonnementstyringen.<br>
+<p>Klik for at <a href="?mode=choose" title="Klik her for vende tilbage til abonnementstyringen">vende tilbage til abonnementstyringen</a>.</p>
 
 <%args>
 $output

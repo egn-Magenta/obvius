@@ -1,15 +1,14 @@
 %# $Id$
 %if($subscription_exists) {
-    Du abonnerer allerede på det angivne dokument.<br>
+    <p>Du abonnerer allerede på det angivne dokument.</p>
 %} elsif($subscribe_error) {
-    Du kunne ikke abonnere på det angivne dokument på grund af følgende fejl:<br>
-    <br>
+    <p>Du kunne ikke abonnere på det angivne dokument på grund af følgende fejl:</p>
     <% $subscribe_error %><br>
 %} else {
-    Du abonnerer nu på "<% $added_title %>".<br>
+    <p>Du abonnerer nu på "<% $added_title %>".</p>
 %}
 %if($add_url) {
-    Klik <a href="<% $prefix . $add_url %>">her</a> for at vende tilbage.<br>
+    <p>Klik <a href="<% $prefix . $add_url %>" title="Tilbage">her</a> for at vende tilbage.</p>
 %}
 <%args>
 $output

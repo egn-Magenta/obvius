@@ -2,13 +2,13 @@
 %#
 %if($errors) {
 
-Der opstod følgende fejl ved oprettelsen af deres abonnement:<br>
-<br>
+<p>
+Der opstod følgende fejl ved oprettelsen af deres abonnement:
 
 %   for(@$errors) {
-        <% $_->{error} %><br>
+        <br /><% $_->{error} %>
 %   }
-
+</p>
 %} else {
 <%perl>
     $r->pnotes('OBVIUS_OUTPUT')->param(OBVIUS_SIDE_EFFECTS => 1);
@@ -28,10 +28,9 @@ mailen.
 
 %   } else {
 
-Der opstod et problem ved afsendelsen af dit password:<br>
-<br>
-<% $mail_error %>
-
+<p>Der opstod et problem ved afsendelsen af dit password:
+<br /><% $mail_error %>
+</p>
 %   }
 
 %}
