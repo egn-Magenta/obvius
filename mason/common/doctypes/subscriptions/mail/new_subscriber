@@ -1,6 +1,6 @@
 %# $Id$
-From: Synscenter Refsnæs
-Subject: Aktivering af abonnement på www.synref.dk
+From: Dansk Dekommissionering
+Subject: Aktivering af abonnement på www.ddcom.dk
 To: <% $email %>
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
@@ -10,7 +10,7 @@ Kære abonnent
 Du har tilmeldt dig den elektroniske nyhedsservice og vil modtage
 nyheder, når du har aktiveret dit abonnement. Det gør du ved at klikke 
 på dette link:
-<http://<% $r->hostname %>/abonnement/?mode=activate;e=<% $email %>;p=<% $password %>>
+<http://<% $r->hostname %>/abonner/?mode=activate;e=<% $email %>;p=<% $password %>>
 
 Fremover kan du logge ind med disse oplysninger:
 Email: <% $email %>
@@ -19,7 +19,7 @@ Password: <% $password %>
 Bemærk: Du skal _ikke_ besvare denne mail.
 
 Med venlig hilsen
-Synscenter Refsnæs
+Dansk Dekommissionering
 <%args>
 $output
 </%args>
