@@ -5,15 +5,15 @@
 <p>Klik med musen i boksen foran de emner, du ønsker at tilmelde dig.</p>
 
 <form method="post" action="<% $prefix . $uri %>">
-<input type="hidden" name="mode" value="choose_submit" />
+<input type="hidden" name="mode" value="choose_submit">
 
 <h2>Områder</h2>
 % my $i=0;
 % map {
 %     if(0 and $_->{new_section}) {
-<h2><% $_->{new_section} %></h2>
+<h2 class="standard"><% $_->{new_section} %></h2>
 %     }
-<input class="checkbox" id="subcheck<% $i %>" type="checkbox" name="subscription" value="<% $_->{id} %>" <% $_->{selected} ? 'CHECKED' : '' %> /><label for="subcheck<% $i %>"><% $_->{title} %></label><br />
+<input class="checkbox" id="subcheck<% $i %>" type="checkbox" name="subscription" value="<% $_->{id} %>" <% $_->{selected} ? 'CHECKED' : '' %>><label for="subcheck<% $i %>"><% $_->{title} %></label><br>
 %     $i++;
 %} @subscribe_list;
 
@@ -21,20 +21,21 @@
 <h2>Emner</h2>
 %     my $i;
 %     foreach (@$categories_list) {
-<input id="catcheck<% $i %>" class="checkbox" type="checkbox" name="categories" value="<% $_->{id} %>" <% $_->{selected} ? 'CHECKED' : '' %> /><label for="catcheck<% $i %>"><% $_->{name} %></label><br />
+<input id="catcheck<% $i %>" class="checkbox" type="checkbox" name="categories" value="<% $_->{id} %>" <% $_->{selected} ? 'CHECKED' : '' %>><label for="catcheck<% $i %>"><% $_->{name} %></label><br>
 %         $i++;
 %     }
 % }
 
 <p>
-<input type="submit" value="Gem" />
+<input type="submit" value="Gem">
 </p>
 </form>
 
 <p>
-Klik her for at <a href="<% $prefix . $ uri %>?mode=delete_subscriber" title="Klik her for at slette dit abonnement">slette dit abonnement</a>.<br />
-Klik her for at <a href="<% $prefix . $ uri %>?mode=edit_subscriber" title="Klik her for at ændre dine abonnentoplysninger">ændre dine abonnentoplysninger</a>.
-</p>
+Klik <a href="<% $prefix . $ uri %>?mode=delete_subscriber">her</a> for at
+<a href="<% $prefix . $ uri %>?mode=delete_subscriber">slette dit abonnement</a>.<br>
+Klik <a href="<% $prefix . $ uri %>?mode=edit_subscriber">her</a> for at
+<a href="<% $prefix . $ uri %>?mode=edit_subscriber">ændre dine abonnentoplysninger</a>.<br>
 
 <%args>
 $output

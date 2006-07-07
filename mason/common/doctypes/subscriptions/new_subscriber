@@ -3,59 +3,115 @@
 % if ($teaser) {
 <& /shared/htmlize, text=>$teaser &>
 % }
-<p>Er du allerede abonnent, <a href="?mode=login" title="Log ind her"><b>log ind her</b></a></p>
-<br />
-Her kan du tilmelde dig udvalgte elektroniske nyheder:
+% else {
+<p>Er du allerede abonnent, <a href='?mode=login'><b>tryk her</b></a>.</p>
+
+<p>Her kan du tilmelde dig udvalgte elektroniske nyheder.</p>
+% }
 
 <form method="get" action="./">
-<input type="hidden" name="op" value="subscribe" />
-<input type="hidden" name="mode" value="new_subscriber_submit" />
+<input type="hidden" name="op" value="subscribe">
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+<input type="hidden" name="mode" value="new_subscriber_submit">
 %if($add_one) {
-<input type="hidden" name="add_one" value="<% $add_one %>" />
+<input type="hidden" name="add_one" value="<% $add_one %>">
 %}
 %if($add_one_url) {
-<input type="hidden" name="add_one_url" value="<% $add_one_url %>" />
+<input type="hidden" name="add_one_url" value="<% $add_one_url %>">
 %}
 
+<tr>
+<td colspan='2' align='left'>
 % if ($content) {
 <& /shared/htmlize, text=>$content &>
 % }
 % else {
 <p>Klik med musen i boksen foran de områder, du ønsker at tilmelde dig.</p>
 % }
+</td>
+</tr>
 
-<h2>Områder</h2>
+<tr>
+<td height='15' align='left' colspan='2'>
+&nbsp;
+</td>
+</tr>
 
+<tr>
+ <td colspan="2">
+  <h2>Områder</h2>
+ </td>
+</tr>
 % my $i;
 % foreach (@subscribe_list) {
-<input id="subcheck<% $i %>" type="checkbox" name="subscription" value="<% $_->{id} %>" <% $pre_chosen{$_->{id}} ? 'checked' : '' %> />
+<tr>
+<td colspan='2' align='left'><input id="subcheck<% $i %>" class="checkbox" type="checkbox"
+name="subscription" value="<% $_->{id} %>" <% $pre_chosen{$_->{id}} ? 'checked' : '' %> >
 <label for="subcheck<% $i %>">&nbsp;
-<% $_->{title} %></label><br />
+<% $_->{title} %></label><br>
+</td>
+</tr>
 %     $i++;
 % }
 
 % if ($categories_list) {
-<h2>Emner</h2>
+<tr>
+<td height='15' align='left' colspan='2'>
+&nbsp;
+</td>
+</tr>
+<tr>
+ <td colspan="2">
+  <h2>Emner</h2>
+ </td>
+</tr>
 %     my $i;
 %     foreach (@$categories_list) {
-<input id="catcheck<% $i %>" type="checkbox" name="categories" value="<% $_->{id} %>" />
+<tr>
+<td colspan='2' align='left'><input id="catcheck<% $i %>" class="checkbox" type="checkbox"
+name="categories" value="<% $_->{id} %>">
 <label for="catcheck<% $i %>">&nbsp;
-<% $_->{name} %></label><br />
+<% $_->{name} %></label><br>
+</td>
+</tr>
 %         $i++;
 %     }
 % }
 
-<p>Skriv navn og email. Til slut klikker du på <b>Opret</b>.</p>
+<tr>
+<td height='25' align='left' colspan='2'>
+&nbsp;
+</td>
+</tr>
 
-Navn.<br />
-<input type="text" size="32" name="name" />
+<tr>
+<td colspan='2' align='left'>
 
-<br /><br />
-Email.<br />
-<input type="text" size="32" name='new_email' <% $email ? qq{value="$email"} : '' %> />
+<p>Skriv navn og email. Til slut trykker du på <b>Opret</b>.</p>
 
-<br />
-<input type="submit" value=" Opret " />
+Navn.<br>
+<input class="INPUT" type="text" size="32" name="name">
+
+<br><br>
+Email.<br>
+<input class="INPUT" type="text" size="32" name='new_email' <% $email ? qq{value="$email"} : '' %>>
+
+%# <br><br>
+%# Kodeord.<br>
+%# <input class="INPUT" type='passwd' size="32" name='passwd'>
+
+</td>
+</tr>
+
+<tr>
+<td>
+<br>
+<input type="submit" class="subscriptionbutton" value=" Opret ">
+</td>
+</tr>
+</table>
 </form>
 <%args>
 $output

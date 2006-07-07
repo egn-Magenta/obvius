@@ -7,10 +7,11 @@ Content-Transfer-Encoding: 8bit
 
 Kære abonnent
 
-Du kan ændre dit abonnement på nyhedsservices på<http://<% $r->hostname %>/abonner/?mode=login;email=<% $email %>;password=<% $password %>>
+Du kan ændre dit abonnement på nyhedsservices på
+<http://<% $r->pnotes('site')->Sitename %>/abonner/?mode=login;email=<% $email %>;password=<% $password %>>
 
 Med venlig hilsen
-Dansk Dekommissionering
+Nyhedsservice
 <%args>
 $output
 </%args>

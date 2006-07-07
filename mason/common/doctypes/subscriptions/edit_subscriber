@@ -1,26 +1,27 @@
 %# $Id$
 %#
 <form method="post" action="<% $prefix . $uri %>">
-<input type="hidden" name="op" value="subscribe" />
-<input type="hidden" name="mode" value="edit_subscriber_submit" />
+<input type="hidden" name="op" value="subscribe">
+
+<input type="hidden" name="mode" value="edit_subscriber_submit">
 
 <p>Kære <% $name %></p>
 
 <p>Her kan du ændre dine abonnementsoplysninger</p>
 
 <p>
-Email: <b><% $email %></b>
-</p>
+Email: <% $email %>
 
-<p>
-Navn.<br />
-<input type="text" size="32" name="name" value="<% $name %>" />
-<br />
-Firma.<br />
-<input type="text" size="32" name='company' value="<% $company %>" />
-<br />
-<input type="submit" value="Accepter" />
-</p>
+<br><br>
+Navn.<br>
+<input class="INPUT" type="text" size="32" name="name" value="<% $name %>">
+
+<br><br>
+Firma.<br>
+<input class="INPUT" type="text" size="32" name='company' VALUE="<% $company %>">
+
+<br><br>
+<input type="submit" class="subscriptionbutton" value="Ændr">
 </form>
 <%args>
 $output
