@@ -11,6 +11,8 @@ Du kan ændre dit abonnement på nyhedsservices på
 <http://<% $r->pnotes('site')->Sitename %>/abonner/?mode=login;email=<% $email %>;password=<% $password %>>
 
 Med venlig hilsen
+
+Dansk Dekommissionering
 Nyhedsservice
 <%args>
 $output
