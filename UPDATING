@@ -1,0 +1,7 @@
+# $Id$
+
+20060614: 
+	Universal accessrules need a dedicated entry in the DB. 
+	Execute the following statement to allow these:
+	
+	INSERT INTO documents VALUES (5,2,'universal',6,1,1,'');
