@@ -3,6 +3,11 @@
   <input type="hidden" name="obvius_app_navigator" value="1" />
   <input type="hidden" name="obvius_quickcreate_<% lc($type) %>" value="1" />
 %
+% for(@pass_on_args) {
+%   if(my $val = $r->param($_)) {
+    <input type="hidden" name="<% $_ %>" value="<% $val |h %>" />
+%   }
+% }
 % foreach my $field (@{$fields{$type}}) {
   <div>
     <label for="<% $field->{name} %>"><& /shared/msg, text=>$field->{label} &></label>
@@ -120,3 +125,6 @@ if ($obvius_quickcreate_do) {
     $m->comp('/shared/redirect', location=>'./', args=>\%redirect_args);
 }
 </%init>
+<%once>
+my @pass_on_args=qw(fieldname doctypeid doctype fields);
+</%once>

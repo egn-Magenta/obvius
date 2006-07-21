@@ -10,8 +10,8 @@
   <div>
     <div id="obvius-toolbar-new" class="obvius-link-decor">
       <ul>
-        <li><a href="./<& util/args, %ARGS &>&amp;obvius_quickcreate_image=1"><& /shared/msg, text=>'Image' &> ...</a></li>
-        <li><a href="./<& util/args, %ARGS &>&amp;obvius_quickcreate_upload=1"><& /shared/msg, text=>'Upload-document' &> ...</a></li>
+        <li><a href="<% $this_path %><& util/args, %ARGS &>&amp;obvius_quickcreate_image=1"><& /shared/msg, text=>'Image' &> ...</a></li>
+        <li><a href="<% $this_path %><& util/args, %ARGS &>&amp;obvius_quickcreate_upload=1"><& /shared/msg, text=>'Upload-document' &> ...</a></li>
       </ul>
     </div>
   </div>
@@ -44,4 +44,11 @@ $obvius_navigator_batch_function=>undef
 %
 <%init>
 my $selected_function=$obvius_navigator_batch_function || '';
+my $this_path;
+if(my $path = $r->param('path')) {
+    my ($d, $path_info) = $obvius->lookup_document($path);
+    $this_path = $prefix . $obvius->get_doc_uri($d);
+} else {
+    $this_path = "./";
+}
 </%init>
