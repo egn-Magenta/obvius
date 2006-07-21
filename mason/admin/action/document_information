@@ -172,8 +172,8 @@ my @info = (
 		groups  => [
 			map { 
 				$obvius->get_group($_)->{name}
-			} @{
-				$obvius->get_user_groups($obvius->get_userid($obvius->user))
+			} keys %{
+				$obvius->{GROUPS}
 			}],
 		users	=> [ 
 			['ALL', 'All users'],
