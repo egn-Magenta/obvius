@@ -23,12 +23,20 @@ if($when =~ m!^(\d+-\d+-\d+) (\d+:\d+)!) {
 
     my $whenstr = "$2 $1";
 
-    my $grepstr = "$1 $2";
+    # Different versions of at uses different time formats, so we have to make sure we
+    # match them both:
+    my $grepstr1 = "$1 $2";
+
+    my @months = qw(dummy Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+    my ($year, $month, $day) = split("-", $1);
+    $month = $months[int($month)] || $month;
+
+    my $grepstr2 = "$month $day $2.* $year";
 
     # Check if we already have a job running.
     # First gather a list of job numbers running at the given time:
     my @jobnrs;
-    if(open(PRG, "atq | grep '$grepstr'|")) {
+    if(open(PRG, "atq | egrep -i '($grepstr1|$grepstr2)'|")) {
         while(<PRG>) {
             if(/^(\d+)/) {
                 push(@jobnrs, $1);
