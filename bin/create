@@ -26,23 +26,33 @@ use Unicode::String qw(utf8);
 
 use Getopt::Long;
 
-my ($site, $path, $remove_prefix, $add_prefix, $help)=(undef, '', '', '', 0);
-GetOptions(
-           'site=s',                => \$site,
-           'path=s',                => \$path,
-           'remove_prefix=s'        => \$remove_prefix,
-           'add_prefix=s'           => \$add_prefix,
-           'help'                   => \$help,
-          );
+my ($site, $remove_prefix, $add_prefix, $help, $force_owner, $force_group);
+my $path = '/';
 
-if ($help) {
-    print <<EOT;
-Usage: create --site=sitename [OPTIONS] document[s]
+GetOptions(
+	'site=s',          => \$site,
+	'path=s',          => \$path,
+	'remove_prefix=s'  => \$remove_prefix,
+	'add_prefix=s'     => \$add_prefix,
+	'add_prefix=s'     => \$add_prefix,
+	'owner=s'          => \$force_owner,
+	'group=s'          => \$force_group,
+	'help'             => \$help,
+) or usage();
+
+usage() if $help or not $site or 1 != @ARGV;
+
+sub usage
+{
+	print <<EOT;
+Usage: create --site=sitename [OPTIONS] document
 
   --site           the name of the site to create documents in (mandatory)
   --path           where to create the new documents (defaults to /)
   --remove_prefix  remove this prefix from all uris
   --add_prefix     add this prefix to all uris
+  --owner          force owner name
+  --group          force group name
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -50,256 +60,307 @@ NOTE: Does not handle binary data well, only fields called DATA are
 NOTE: Versions get new dates (obviusly).
 
 EOT
-    exit 0;
+	exit 0;
 }
 
-die "No site given, stopping" unless ($site);
+my $conf = Obvius::Config-> new( $site);
+die "Could not get config for $site" unless defined $conf;
 
-my $conf=Obvius::Config->new($site);
-die "Could not get config for $site" unless(defined($conf));
+my $log = Obvius::Log-> new('notice');
+die "Could not get logging" unless defined $log;
 
-my $log=Obvius::Log->new('notice');
-die "Could not get logging" unless(defined($log));
-
-my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
-die "Could not get Obvius object for $site" unless(defined($obvius));
+my $obvius = Obvius-> new(
+	$conf, undef, undef, undef, undef, undef, 
+	log=>$log
+);
+die "Could not get Obvius object for $site" unless defined $obvius;
 $obvius->{USER} = 'admin';
 
-my $path_doc=$obvius->lookup_document($path);
-die "The path $path does not exist, stopping" unless ($path_doc);
+die "Path $path is invalid, must start with a slash ( Did you mean \/$path perhaps?)\n" 
+	unless $path =~ /^\//;
+my $path_doc = $obvius-> lookup_document( $path);
+die "The path $path does not exist, stopping" unless $path_doc;
 
 # Make a list of repeatable fields:
-
 my %is_repeatable;
-my $rfields = $obvius->get_table_data("fieldspecs", 'where' => "repeatable = 1") || [];
-for(@$rfields) {
-    $is_repeatable{$_->{name}} = 1;
-}
+my $rfields = $obvius-> get_table_data(
+	"fieldspecs", 
+	'where' => "repeatable = 1"
+) || [];
+$is_repeatable{$_->{name}} = 1 for @$rfields;
 my @repeatable_fields = keys %is_repeatable;
 
 # Figure out which fields are binary and should be decoded:
 my %binary_names;
-my $bin_fieldtypes = $obvius->get_table_data('fieldtypes', 'where' => "bin = 1") || [];
+my $bin_fieldtypes = $obvius->get_table_data(
+	'fieldtypes', 
+	'where' => "bin = 1"
+) || [];
 if(scalar(@$bin_fieldtypes)) {
-    my $where = "type IN ('" . join("', '", map { $_->{id} } @$bin_fieldtypes) . "')";
-    my $bin_fields = $obvius->get_table_data('fieldspecs', 'where' => $where) || [];
-    map { $binary_names{$_->{name}} = 1 } @$bin_fields;
+	my $where = 
+		"type IN ('" . 
+		join("', '", map { $_->{id} } @$bin_fieldtypes) . 
+		"')";
+	my $bin_fields = $obvius->get_table_data(
+		'fieldspecs', 
+		'where' => $where
+	) || [];
+	$binary_names{$_->{name}} = 1 for @$bin_fields;
 }
 
-print STDERR "Reading XML...\n";
-my $data=XMLin($ARGV[0], keyattr=>[], suppressempty => '', forcearray => \@repeatable_fields);
-print STDERR "Converting from utf8...\n";
-$data=unutf8ify($data); # For some strange reason I don't understand,
-                        # the text is converted from iso-8859-1 to
-                        # utf-8 on read. So I convert it back, here.
-$data->{document}=[ $data->{document} ] unless (ref $data->{document} eq 'ARRAY');
+print "Reading XML...\n";
+my $data = XMLin( 
+	$ARGV[0], 
+	keyattr		=> [], 
+	suppressempty	=> '', 
+	forcearray	=> \@repeatable_fields
+);
+print "Converting from utf8...\n";
+$data = unutf8ify( $data); # For some strange reason I don't understand,
+                           # the text is converted from iso-8859-1 to
+                           # utf-8 on read. So I convert it back, here.
+$data->{document} = [ $data->{document} ] unless ref($data->{document}) eq 'ARRAY';
 
-my $default_doctype=$obvius->get_doctype_by_name('Standard');
-die "Could not get default doctype Standard, stopping" unless ($default_doctype);
+my $default_doctype = $obvius->get_doctype_by_name('Standard');
+die "Could not get default doctype Standard, stopping" unless $default_doctype;
 
 print STDERR "Creating documents...\n";
-my $num=0;
+my $num = 0;
 foreach my $document (@{$data->{document}}) { # Must be in parent-before-child order!
-    create_document($document, $path);
-    $num++;
+	create_document($document, $path);
+	$num++;
 }
-print STDERR "$num documents\n";
+print STDERR "$num documents created\n";
 
 exit 0;
 
-sub create_document {
-    my ($document, $path)=@_;
+sub get
+{
+	my ( $object, $field) = @_;
 
-    my $new_uri=$document->{obvius_dump_doc_uri};
-    if (defined $path) {
-        $new_uri=$path . $document->{obvius_dump_doc_uri};
-    }
+	die "Cannot access field '$field'" unless exists $object->{$field};
 
-    if($remove_prefix) {
-        $new_uri =~ s!^\Q$remove_prefix\E!!;
-    }
-    if($add_prefix) {
-        $new_uri = $add_prefix . $new_uri;
-    }
-
-    print "$document->{obvius_dump_doc_uri} -> $new_uri\n";
-
-    my $versions=$document->{version};
-    $versions=[ $versions ] unless (ref $versions eq 'ARRAY');
-
-    foreach my $version (@$versions) {
-        map { $version->{fields}->{$_}=decode_base64($version->{fields}->{$_}) if ($binary_names{$_}); }
-            keys %{$version->{fields}};
-    }
-
-    if ($obvius->lookup_document($new_uri)) {
-        print " warning: a document already exists at $new_uri, skipping creation.\n";
-    }
-    else {
-        foreach my $version (@$versions) {
-            my $error='';
-            my ($new_docid, $new_version)=create_obvius_document($new_uri, $document, $version, \$error);
-        }
-    }
+	$object->{$field};
 }
 
-sub create_obvius_document {
-    my ($new_uri, $document, $version, $errorref)=@_;
+sub create_document
+{
+	my ($document, $path) = @_;
 
-    # Defaults:
-    my $fields=Obvius::Data->new(
-                                 seq=>'10',
-                                 sortorder=>'+seq,+title',
-                                 expires=>'9999-01-01 00:00:00',
-                                 docdate=>strftime('%Y-%m-%d 00:00:00', localtime),
-                                 subscribeable=>'none',
-                                 hide_subdocs=>1,
-                                 bare=>1,
-                                );
-    my $doctype=$obvius->get_doctype_by_name($version->{obvius_dump_type_name}) || $default_doctype;
-    print " (", $doctype->Name, ")";
+	my $new_uri = get( $document, 'obvius_dump_doc_uri');
 
-    # Fill out fields:
-    #  XXX This really should look up the fieldtype and do a copy_in!
-    foreach my $fieldname (keys (%{$version->{fields}})) {
-        my $value=$version->{fields}->{$fieldname};
+	if (defined $path) {
+		$new_uri = $path . $new_uri;
+	}
 
-        my $fieldspec=$obvius->get_fieldspec($fieldname, $doctype);
-        my $fieldtype;
-        $fieldtype=$fieldspec->{FIELDTYPE} if ($fieldspec); # XXX Should be a method...
+	if ($remove_prefix) {
+		$new_uri =~ s!^\Q$remove_prefix\E!!;
+	}
+	if ( $add_prefix) {
+		$new_uri = $add_prefix . $new_uri;
+	}
 
-        if ($fieldname eq 'keyword') { # XXX Xref-handling in general?!
-            my @new_values=();
-            foreach my $keyword (@$value) {
-                if (my $rec=$obvius->get_table_record('keywords', { name=>$keyword })) {
-                    push @new_values, $rec->{id};
-                }
-                else {
-                    eval {
-                        $obvius->insert_table_record('keywords', { name=>$keyword });
-                    };
-                    my $rec=$obvius->get_table_record('keywords', { name=>$keyword });
-                    push @new_values, $rec->{id};
-                }
-            }
-            $value=\@new_values;
-        } elsif($fieldname eq 'category') {
-            my @new_values;
-            foreach my $cat (@$value) {
-                if(ref($cat) and $cat->{id}) {
-                    push(@new_values, $cat->{id});
-                } else {
-                    push(@new_values, $_);
-                }
-            }
-            $value = \@new_values;
-        }
+	print "$document->{obvius_dump_doc_uri} -> $new_uri\n";
+	
+	if ( $obvius-> lookup_document( $new_uri)) {
+		print "warning: another document already exists at $new_uri, skipping.\n";
+		return;
+	}
 
-        if ($fieldtype) {
-            if (ref $value) {
-                $value=[ map { $fieldtype->copy_in($obvius, $fieldspec, $_) } @$value ];
-            }
-            else {
-                $value=$fieldtype->copy_in($obvius, $fieldspec, $value);
-            }
-        }
+	my $versions = get( $document, 'version');
+	$versions= [ $versions ] unless ref $versions eq 'ARRAY';
 
-        # Un-urlify:
-        if($value) {
-            $value =~ s!(/[^.\d]+)\.docid!unurlify($1)!ge;
-        }
-
-        $fields->param($fieldname=>$value);
-    }
-
-    my @ret=();
-    my $document_already_exists=$obvius->lookup_document($new_uri);
-    if ($document_already_exists) {
-
-        # XXX Only one version per second, so wait for the next one to come up:
-        sleep 1;
-        @ret=($document_already_exists->Id, $obvius->create_new_version($document_already_exists, $doctype->Id, $version->{lang}, $fields));
-    }
-    else {
-        my @parent_uri=split '/', $new_uri;
-        my $name = pop @parent_uri;
-        my $parent_uri=join '/', @parent_uri;
-        my $parent=$obvius->lookup_document($parent_uri);
-        my $owner=$obvius->get_userid($document->{obvius_dump_owner_login});
-        my $grp=$obvius->get_grpid($document->{obvius_dump_grp_name});
-
-        @ret=$obvius->create_new_document($parent, $name, $doctype->Id, $version->{lang}, $fields, $owner, $grp, $errorref);
-    }
-
-    print " $ret[0], $ret[1]";
-
-    if ($version->{public}) {
-        publish_doc_version(@ret);
-    }
-
-    print "\n";
-    return @ret;
+	foreach my $version (@$versions) {
+		my $fields = get( $version, 'fields');
+		for ( keys %$fields) {
+			$fields->{$_} = decode_base64( $fields->{$_}) 
+				if $binary_names{$_};
+		}
+		my $error = '';
+		my ($new_docid, $new_version) = create_obvius_document(
+			$new_uri, $document, $version, \$error
+		);
+	}
 }
 
-sub publish_doc_version {
-    my ($new_docid, $new_version)=@_;
+sub create_obvius_document
+{
+	my ($new_uri, $document, $version, $errorref) = @_;
 
-    my $new_doc=$obvius->get_doc_by_id($new_docid);
-    my $new_vdoc = $obvius->get_version($new_doc, $new_version);
+	# Defaults:
+	my $fields = Obvius::Data-> new(
+		seq		=> '10',
+		sortorder	=> '+seq,+title',
+		expires		=> '9999-01-01 00:00:00',
+		docdate		=> strftime('%Y-%m-%d 00:00:00', localtime),
+		subscribeable	=> 'none',
+		hide_subdocs	=> 1,
+		bare		=> 1,
+	);
+	my $doctype = $obvius-> get_doctype_by_name(
+		get( $version, 'obvius_dump_type_name')
+	);
+	unless ( defined $doctype) {
+		$doctype = $default_doctype;
+		print " ( warning, doctype '$version->{obvius_dump_type_name}' is unexistent, reverting to Standard )";
+	}
 
-    $obvius->get_version_fields($new_vdoc, 255, 'PUBLISH_FIELDS');
+	# Fill out fields:
+	#  XXX This really should look up the fieldtype and do a copy_in!
+	foreach my $fieldname (keys (%{$version->{fields}})) {
+		my $value = $version->{fields}->{$fieldname};
 
-    # Set published
-    my $publish_fields = $new_vdoc->publish_fields;
-    $publish_fields->param(PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
-    $publish_fields->param(in_subscription => 0);
+		my $fieldspec = $obvius-> get_fieldspec( $fieldname, $doctype);
+		my $fieldtype;
+		$fieldtype = $fieldspec->{FIELDTYPE} if defined $fieldspec; # XXX Should be a method...
 
-    my $publish_error;
-    $obvius->publish_version($new_vdoc, \$publish_error);
+		if ($fieldname eq 'keyword') { # XXX Xref-handling in general?!
+			my @new_values = ();
+			foreach my $keyword (@$value) {
+				my $rec;
+				unless ( $rec = $obvius->get_table_record(
+					'keywords', 
+					{ name=>$keyword }
+				)) {
+					$obvius-> insert_table_record(
+						'keywords', 
+						{ name=>$keyword }
+					);
+					$rec = $obvius-> get_table_record(
+				    		'keywords', 
+						{ name=>$keyword }
+					);
+				}
+				push @new_values, $rec->{id};
+			}
+			$value = \@new_values;
+		} elsif ( $fieldname eq 'category') {
+			@$value = map {
+				( ref($_) and $_->{id}) ?
+					$_->{id} :
+					$_
+			} @$value;
+		}
 
-    if($publish_error) {
-        print " Not published: $publish_error";
-        return 0;
-    }
-    else {
-        print " Published.";
-        return 1;
-    }
+		if ($fieldtype) {
+			if (ref $value) {
+				@$value = map { 
+					$fieldtype-> copy_in(
+						$obvius, $fieldspec, $_
+					) 
+				} @$value;
+			} else {
+				$value = $fieldtype-> copy_in(
+					$obvius, $fieldspec, $value
+				);
+			}
+		}
+
+		# Un-urlify:
+		$value =~ s!(/[^.\d]+)\.docid!unurlify($1)!ge if $value;
+
+		$fields-> param( $fieldname => $value);
+	}
+
+	my @ret;
+	my $document_already_exists = $obvius-> lookup_document( $new_uri);
+	if ($document_already_exists) {
+		# XXX Only one version per second, so wait for the next one to come up:
+		sleep 1;
+		@ret = ( 
+			$document_already_exists-> Id, 
+			$obvius-> create_new_version( 
+				$document_already_exists, 
+				$doctype-> Id, 
+				get( $version, 'lang'),
+				$fields
+		));
+	} else {
+		my @parent_uri	= split '/', $new_uri;
+		my $name	= pop @parent_uri;
+		my $parent_uri	= join '/', @parent_uri;
+		my $parent	= $obvius-> lookup_document($parent_uri);
+			
+		my $token = $force_owner || get( $document, 'obvius_dump_owner_login');
+		my $owner = $obvius-> get_userid( $token);
+		die "Cannot find user '$token'\n" unless defined $owner;
+		
+		$token = $force_group || get( $document, 'obvius_dump_grp_name');
+		my $grp = $obvius-> get_grpid( $token);
+		die "Cannot find group '$token'\n" unless defined $grp;
+
+		@ret = $obvius->create_new_document(
+			$parent, $name, $doctype->Id, get( $version, 'lang'),
+			$fields, $owner, $grp, $errorref
+		);
+	}
+
+	print " $ret[0], $ret[1]";
+
+	publish_doc_version( @ret)
+		if $version->{public};
+
+	print "\n";
+	return @ret;
 }
 
-sub unutf8ify {
-    my ($obj)=@_;
+sub publish_doc_version 
+{
+	my ($new_docid, $new_version)=@_;
 
-    my $ref=ref $obj;
+	my $new_doc = $obvius-> get_doc_by_id( $new_docid);
+	my $new_vdoc = $obvius-> get_version( $new_doc, $new_version);
 
-    if (!$ref) { # Scalar:
-        return utf8($obj)->latin1;
-    }
-    elsif ($ref eq 'ARRAY') { # Array:
-        return [ map { unutf8ify($_) } @$obj ];
-    }
-    elsif ($ref eq 'HASH') { # Hash:
-        return { map { $_=>unutf8ify($obj->{$_}) } keys (%$obj) };
-    }
-    else {
-        return 'UNUTF8IFIABLE';
-    }
+	$obvius-> get_version_fields( $new_vdoc, 255, 'PUBLISH_FIELDS');
+
+	# Set published
+	my $publish_fields = $new_vdoc-> publish_fields;
+	$publish_fields-> param( PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
+	$publish_fields-> param( in_subscription => 0);
+
+	my $publish_error;
+	$obvius-> publish_version($new_vdoc, \$publish_error);
+
+	if ( $publish_error) {
+		print " Not published: $publish_error";
+		return 0;
+	} else {
+		print " Published ok.";
+		return 1;
+	}
+}
+
+sub unutf8ify
+{
+	my ($obj)=@_;
+
+	my $ref = ref $obj;
+
+	if (!$ref) { # Scalar:
+		return utf8($obj)->latin1;
+	} elsif ($ref eq 'ARRAY') { # Array:
+		return [ map { unutf8ify($_) } @$obj ];
+	} elsif ($ref eq 'HASH') { # Hash:
+		return { map { $_=>unutf8ify($obj->{$_}) } keys (%$obj) };
+	} else {
+		return 'UNUTF8IFIABLE';
+	}
 }
 
 # Rewrite dumped URLs with remove and add prefixes.
-sub unurlify {
-    my ($path) = @_;
+sub unurlify
+{
+	my ($path) = @_;
 
-    if($remove_prefix) {
-        $path =~ s!^\Q$remove_prefix\E!!;
-    }
-    if($add_prefix) {
-        $path = $add_prefix . $path;
-    }
+	$path =~ s!^\Q$remove_prefix\E!! 
+		if $remove_prefix;
+		
+	$path = $add_prefix . $path 
+		if $add_prefix;
 
-    if(my $d = $obvius->lookup_document($path)) {
-        $path = "/" . $d->Id . ".docid";
-    }
+	if ( my $d = $obvius->lookup_document($path)) {
+		$path = "/" . $d-> Id . ".docid";
+	}
 
-    return $path;
+	return $path;
 }
