@@ -1,0 +1,205 @@
+#!/usr/bin/perl -w
+# $Id$
+use strict;
+use warnings;
+
+# XXX
+#
+# The following issues could've been addressed:
+#
+# - date validation - how to account for a field with arbitrary date format?
+# - same element name, different types - how to declare <fields> so all fields sets are nonambiguos?
+# - xs:group are strange
+#
+# To validate an xml, do DOMCount -n -s -v=always my.xml 
+# This seems to only work when this is present:
+# <moo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="THIS.xsd">
+# 
+# XSD is b0rken technology, no cookie.
+
+use Obvius;
+use Obvius::Config;
+use Obvius::Log;
+
+use Getopt::Long;
+
+my $site;
+my $help;
+
+GetOptions(
+	'site=s',   => \$site,
+	'help'      => \$help,
+) or usage();
+
+usage() if $help or not $site;
+
+sub usage
+{
+	print <<EOT;
+Usage: make_xsd --site=sitename
+
+  -s,--site      the name of the site to read doctypes from
+
+EOT
+	exit 0;
+}
+
+my $conf = Obvius::Config-> new( $site);
+die "Could not get config for $site" unless defined $conf;
+
+my $log = Obvius::Log-> new('notice');
+die "Could not get logging" unless defined $log;
+
+my $obvius = Obvius-> new(
+	$conf, undef, undef, undef, undef, undef, 
+	log => $log
+);
+die "Could not get Obvius object for $site" unless defined $obvius;
+$obvius->{USER} = 'admin';
+
+my $fspecs = $obvius-> get_table_data_hash_array('fieldspecs', 'doctypeid');
+die "Table 'fieldspecs' is empty\n" unless $fspecs;
+
+my $ftypes = $obvius-> get_table_data_hash('fieldtypes', 'id');
+die "Table 'fieldtypes' is empty\n" unless $ftypes;
+
+my $dtypes = $obvius-> get_table_data_hash('doctypes', 'id');
+die "Table 'doctypes' is empty\n" unless $dtypes;
+
+print <<HEADER;
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+HEADER
+
+# field types
+for my $v ( values %$ftypes) {
+	$v-> {NAME} = "ft_$v->{name}";
+	$v-> {NAME} =~ s/>=/_ge_/;
+	$v-> {NAME} =~ s/>/_gt_/;
+	$v-> {NAME} =~ s/(\W)/sprintf('__%02x',ord($1))/ge;
+
+	print "<xs:simpleType name=\"$v->{NAME}\">\n";
+
+	if ( $v-> {value_field} eq 'double') {
+		print "\t<xs:restriction base=\"xs:decimal\"/>\n";
+	} elsif ( $v-> {validate} eq 'regexp') {
+		my $rx = $v-> {validate_args};
+		$rx =~ s/^\^//;
+		$rx =~ s/\$$//;
+		if ( $rx =~ /\|/) {
+			# enumeration
+			$rx =~ s/\\(\W)/$1/g;
+			$rx =~ s/^\((.*)\)$/$1/;
+			my @enum = split('\|', $rx);
+			s/"/\\"/ for @enum;
+			print "\t<xs:restriction base=\"xs:string\">\n";
+			print "\t\t<xs:enumeration value=\"$_\"/>\n" for @enum;
+			print "\t</xs:restriction>\n";
+		} elsif ( 
+			$v-> {value_field} eq 'int' and 
+			$rx =~ /^\[(\d+)\]$/
+		) {
+			# set of integers
+			my @enum = split('', $1);
+			print "\t<xs:restriction base=\"xs:integer\">\n";
+			print "\t\t<xs:enumeration value=\"$_\"/>\n" for @enum;
+			print "\t</xs:restriction>\n";
+		} elsif (
+			# integer
+			$v-> {value_field} eq 'int' and 
+			$rx =~ /^\-\?\\d\+$/
+		) {
+			print "\t<xs:restriction base=\"xs:integer\"/>\n";
+		} elsif ( 
+			$v-> {value_field} eq 'int' and 
+			$rx =~ /^\\d\+$/
+		) {
+			# positive integer
+			print "\t<xs:restriction base=\"xs:nonNegativeInteger\"/>\n";
+		} else {
+			# anything else
+			$rx =~ s/"/\\"/g;
+			print "\t<xs:restriction base=\"xs:string\">\n";
+			print "\t\t<xs:pattern value=\"$rx\"/>\n";
+			print "\t</xs:restriction>\n";
+		}
+	} elsif ( $v-> {value_field} eq 'int') {
+		# integer that cannot be validated by a regexp
+		print "\t<xs:restriction base=\"xs:integer\"/>\n";
+	} else {
+		# anything else
+		print "\t<xs:restriction base=\"xs:string\"/>\n";
+	}
+	print "</xs:simpleType>\n\n";
+}
+
+# fields
+print "<xs:complexType name=\"fields\"><xs:all>\n";
+my %types;
+for ( values %$fspecs) {
+	for ( @$_) {
+		$types{ $ftypes->{$_->{type}}->{NAME} } = $_->{name};
+	}
+}
+while ( my ( $type, $name) = each %types) {
+	print "\t<xs:element minOccurs=\"0\" maxOccurs=\"1\" name=\"$name\" type=\"$type\"/>\n";
+}
+print "</xs:all></xs:complexType>\n\n";
+
+# doctypes
+print "<xs:simpleType name=\"doctypes\"><xs:restriction base=\"xs:string\">\n";
+for my $dtype ( values %$dtypes) {
+	print "\t<xs:enumeration value=\"$dtype->{name}\"/>\n";
+}
+print "</xs:restriction></xs:simpleType>\n\n";
+
+# version etc
+print <<VERSION;
+<xs:simpleType name="lang">
+\t<xs:restriction base="xs:string">
+\t\t<xs:pattern value="[a-z][a-z]"/>
+\t</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="bool">
+\t<xs:restriction base="xs:integer">
+\t\t<xs:enumeration value=\"0\"/>
+\t\t<xs:enumeration value=\"1\"/>
+\t</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="simpledatetime">
+\t<xs:restriction base="xs:string">
+\t\t<xs:pattern value="\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d"/>
+\t</xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="version"><xs:all>
+\t<xs:element name="lang" type="lang"/>
+\t<xs:element name="obvius_dump_type_name" type="doctypes"/>
+\t<xs:element name="obvius_dump_user_login" type="xs:string"/>
+\t<xs:element name="public" type="bool"/>
+\t<xs:element name="valid" type="bool"/>
+\t<xs:element name="version" type="simpledatetime"/>
+</xs:all></xs:complexType>
+
+<xs:complexType name="document"><xs:sequence>
+\t<xs:element name="name" type="xs:string"/>
+\t<xs:element name="accessrules" type="xs:string"/>
+\t<xs:element name="obvius_dump_doc_uri" type="xs:string"/>
+\t<xs:element name="obvius_dump_grp_name" type="xs:string"/>
+\t<xs:element name="obvius_dump_owner_login" type="xs:string"/>
+\t<xs:element name="obvius_dump_parent_uri" type="xs:string"/>
+\t<xs:element name="obvius_dump_type_name" type="doctypes"/>
+\t<xs:element name="version" type="version" minOccurs="1" maxOccurs="unbounded"/>
+</xs:sequence></xs:complexType>
+
+<xs:complexType name="documentcollection"><xs:sequence>
+\t<xs:element name="document" type="document" minOccurs="1" maxOccurs="unbounded"/>
+</xs:sequence></xs:complexType>
+
+VERSION
+
+print <<FOOTER;
+</xs:schema>
+FOOTER
