@@ -4,29 +4,22 @@ PREFIX?=/usr/local/obvius
 
 all: build
 
-build: perl/Obvius/Makefile perl/WebObvius/Makefile
-	cd perl/Obvius && make
-	cd perl/WebObvius && make
+build: perl/Makefile
+	cd perl && make
 
-perl/Obvius/Makefile:
-	cd perl/Obvius && perl Makefile.PL
-
-perl/WebObvius/Makefile:	
-	cd perl/WebObvius && perl Makefile.PL
+perl/Makefile:
+	cd perl && perl Makefile.PL
 
 configure:
-	cd perl/Obvius && perl Makefile.PL
-	cd perl/WebObvius && perl Makefile.PL
+	cd perl && perl Makefile.PL
 
 install: build
 	mkdir -p ${PREFIX} || true
 	cp -pPR bin cron docs example manual mason otto skeleton ${PREFIX}/
-	cd perl/Obvius && make install
-	cd perl/WebObvius && make install
+	cd perl && make install
 
 clean:
-	cd perl/Obvius && make clean || true
-	cd perl/WebObvius && make clean || true
+	cd perl && make clean || true
 
 test:
 	@echo 'Checking prerequisites...'
@@ -34,5 +27,4 @@ test:
 	-MDigest::SHA1 -MImage::Size -MXML::Simple -MUnicode::String -MBerkeleyDB \
 	-MHTML::Mason -MApache::Session -MHTML::Tree -MHTML::FormatText -e 1
 	@echo 'Running tests...'
-	@cd perl/Obvius && make test || true
-	@cd perl/WebObvius && make test || true
+	@cd perl && make test || true

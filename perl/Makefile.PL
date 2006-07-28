@@ -4,6 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'Obvius',
     'VERSION_FROM'	=> 'Obvius.pm', # finds $VERSION
+    'PMLIBDIRS'	=> [ qw(Obvius WebObvius)],
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'Obvius.pm', # retrieve abstract from module
