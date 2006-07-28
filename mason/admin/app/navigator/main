@@ -102,6 +102,23 @@ if ($obvius_navigator_perform_function_on_selected) {
                 # Lookup the public version (for unpublish) or the latest version (for publish):
                 my $selected_vdoc=$obvius->get_public_version($selected_doc) || $obvius->get_latest_version($selected_doc);
                 $args{version}=$selected_vdoc->Version if ($selected_vdoc);
+
+                # We need to set defaults for publish fields if we're publishing the document:
+                if($obvius_navigator_batch_function eq 'publish' and $selected_vdoc) {
+                    my $publish_fields = new Obvius::Data;
+                    my $doctype = $obvius->get_doctype_by_id($selected_vdoc->Type);
+
+                    # Default values
+                    for(keys %{$doctype->{PUBLISH_FIELDS}}) {
+                        my $default_value = $doctype->{PUBLISH_FIELDS}->{$_}->{DEFAULT_VALUE};
+                        $publish_fields->param($_ => $default_value)  if(defined($default_value));
+                    }
+
+                    # published always defaults to now:
+                    $publish_fields->param('published' => $r->notes('now'));
+
+                    $args{publish_fields} = $publish_fields;
+                }
             }
             my ($status, $message)=$obvius->send_order(
                                            docid=>$docid,
