@@ -117,7 +117,7 @@ sub store_order {
     $info{args}=flatten($info{args});
 
     if (my $queue_id=$obvius->insert_table_record('queue', \%info)) {
-        $info{date}=~/^\s*(\d{4}-\d{2}-\d{2})\s*(\d{1,2}:\d{2})\s*$/;
+        $info{date}=~/^\s*(\d{4}-\d{2}-\d{2})\s*(\d{1,2}:\d{2})(:\d{2})?\s*$/;
         my $date_part=$1;
         my $time_part=$2;
         $ENV{PATH}='';
