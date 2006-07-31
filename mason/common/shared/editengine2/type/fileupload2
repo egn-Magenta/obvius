@@ -1,0 +1,81 @@
+<%method block>\
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<& /shared/msg, text=>'Current value' &>: <% $value->{value} |h %>
+%if($value->{value}) {
+<input type="hidden" name="obvius_upload_<% $field->{name} %>_old_value" value="<% $value->{value} |h %>" />
+<input type="checkbox" name="obvius_upload_<% $field->{name} %>_delete" /> <& /shared/msg, text=>'Delete' &>
+%}
+<br />
+<input type="file" size="60" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" tabindex="10" />
+<%args>
+$prefix
+$field
+$value=>{}
+$style
+</%args>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+% if (exists $value->{value} and defined $value->{value}) {
+<% $value->{value} %>\
+% }
+%
+<%args>
+ $value
+</%args>
+%
+</%method>
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my @uploads=$r->upload;
+
+
+my $value=$data->{$id};
+my $new_upload = 0;
+my $upload;
+
+for(($r->upload)) {
+    if($_->name =~ m!:${id}$!) {
+	$upload = $_;
+	last;
+    }
+}
+
+
+if ($upload) {
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
+
+        $data->{mimetype}= $upload->type;
+        $data->{size}= $upload->size;
+
+        $value = $m->scomp('/shared/place_file_in_upload', fh => $fh, type => $upload->type, filename => $upload->filename);
+        $new_upload = 1;
+    }
+}
+if(! $new_upload) {
+    if($r->param('obvius_upload_' . $id . '_delete')) {
+        $value = '';
+    } else {
+        $value = $r->param('obvius_upload_<% $id %>_old_value');
+    }
+}
+
+$data->{$id}=$value;
+
+return 'OK';
+</%init>
+<%doc>
+This fieldtype is to be used with the FileUpload doctype, which is an alternative
+to the standard upload doctype. It will take uploaded data and store it as a file
+in docs/upload/ using the mason/common/shared/place_file_in_upload component.
+</%doc>

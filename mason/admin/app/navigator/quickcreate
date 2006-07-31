@@ -75,6 +75,8 @@ if ($obvius_quickcreate_do) {
          $field_values->param($_->{name} => $ARGS{$_->{name}});
     } grep {$_->{name} !~ /group/} @{$fields{$type}};
 
+    my $create_type = $type;
+
     my $data={ %ARGS }; # Do not modify ARGS, grab a copy.
     my $name;
     if (defined $ARGS{':data'}) {
@@ -89,8 +91,16 @@ if ($obvius_quickcreate_do) {
 
     if (defined $ARGS{':file'}) {
         $name=$ARGS{':file'};
-        $m->comp('/shared/editengine2/type/file', data=>$data, id=>'file', validation=>{type=>'file'});
-        $field_values->param(uploaddata=>$data->{file});
+        # If the special doctype FileUpload exist, use that instead of Upload:
+        if($obvius->get_doctype_by_name('FileUpload')) {
+            $m->comp('/shared/editengine2/type/fileupload2', data=>$data, id=>'file', validation=>{type=>'file'});
+            $field_values->param(uploadfile=>$data->{file});
+            $create_type = "FileUpload";
+        } else {
+            $m->comp('/shared/editengine2/type/file', data=>$data, id=>'file', validation=>{type=>'file'});
+            $field_values->param(uploaddata=>$data->{file});
+        }
+
         $field_values->param(mimetype=>$data->{mimetype});
         $field_values->param(size=>$data->{size});
     }
@@ -106,7 +116,7 @@ if ($obvius_quickcreate_do) {
               name=>$name,
               grpid=>$grpid,
               lang=>$vdoc->Lang,
-              doctypeid=>$obvius->get_doctype_by_name($type)->Id,
+              doctypeid=>$obvius->get_doctype_by_name($create_type)->Id,
               fields=>$field_values,
              );
 
