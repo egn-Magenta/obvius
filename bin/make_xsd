@@ -3,19 +3,17 @@
 use strict;
 use warnings;
 
-# XXX
-#
-# The following issues could've been addressed:
-#
-# - date validation - how to account for a field with arbitrary date format?
-# - same element name, different types - how to declare <fields> so all fields sets are nonambiguos?
-# - xs:group are strange
-#
-# To validate an xml, do DOMCount -n -s -v=always my.xml 
-# This seems to only work when this is present:
-# <moo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="THIS.xsd">
+# To validate an xml, do this (this is flaky, I just couldn't find anything better):
+# - Create test.xsd by running
+#      make_xsd -s=yourbase > test.xsd
+# - Add the following string to the beginning of an xml file:
+#      <moo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="test.xsd">
+# - Run DOMCount from Xerces installation:
+#      DOMCount -n -s -v=always my.xml 
+#   This should complain "Unknown element 'moo'" but that's ok.
 # 
-# XSD is b0rken technology, no cookie.
+# JFYI - XSD is b0rken technology, so no cookie.
+# XXX date validation - how to account for a field with arbitrary date format?
 
 use Obvius;
 use Obvius::Config;
@@ -133,18 +131,47 @@ for my $v ( values %$ftypes) {
 	print "</xs:simpleType>\n\n";
 }
 
+# doc types
+for my $dtype ( values %$dtypes) {
+	my $doctypename = $dtype-> {name};
+	$doctypename =~ s/(\W)/sprintf('__%02x',ord($1))/ge;
+	$doctypename = lc( $doctypename);
+	$dtype-> {NAME} = $doctypename;
+}
+
 # fields
-print "<xs:complexType name=\"fields\"><xs:all>\n";
-my %types;
-for ( values %$fspecs) {
-	for ( @$_) {
-		$types{ $ftypes->{$_->{type}}->{NAME} } = $_->{name};
+for my $doctypeid ( keys %$dtypes) {
+	print "<xs:group name=\"gr_$dtypes->{$doctypeid}->{NAME}\"><xs:sequence>\n";
+
+	my %types;
+	if ( $fspecs->{$doctypeid}) {
+		my $id = $doctypeid;
+		while ( $id) {
+			die "Error: doctypeid=$id is not present in table `filespecs'\n"
+				unless $fspecs->{$id};
+
+			for my $v ( @{$fspecs->{$id}}) {
+				my $typename = $ftypes->{ $v->{type} }-> {NAME};
+				die "Error: fieldtypeid=$v->{type} cannot be resolved\n" 
+					unless defined $typename;
+				$types{$v->{name}} = $typename;
+			}
+			$id = $dtypes->{$id}->{parent};
+		}
 	}
+
+	for ( sort keys %types) {
+		print "\t<xs:element minOccurs=\"0\" maxOccurs=\"1\" name=\"$_\" type=\"$types{$_}\" />\n";
+	}
+	
+	print "</xs:sequence></xs:group>\n\n";
 }
-while ( my ( $type, $name) = each %types) {
-	print "\t<xs:element minOccurs=\"0\" maxOccurs=\"1\" name=\"$name\" type=\"$type\"/>\n";
+
+print "<xs:complexType name=\"fields\"><xs:choice>\n";
+for my $dtype ( values %$dtypes) {
+ 	print "\t<xs:group ref=\"gr_$dtype->{NAME}\"/>\n";
 }
-print "</xs:all></xs:complexType>\n\n";
+print "</xs:choice></xs:complexType>\n\n";
 
 # doctypes
 print "<xs:simpleType name=\"doctypes\"><xs:restriction base=\"xs:string\">\n";
@@ -174,14 +201,15 @@ print <<VERSION;
 \t</xs:restriction>
 </xs:simpleType>
 
-<xs:complexType name="version"><xs:all>
+<xs:complexType name="version"><xs:sequence>
 \t<xs:element name="lang" type="lang"/>
 \t<xs:element name="obvius_dump_type_name" type="doctypes"/>
 \t<xs:element name="obvius_dump_user_login" type="xs:string"/>
 \t<xs:element name="public" type="bool"/>
 \t<xs:element name="valid" type="bool"/>
 \t<xs:element name="version" type="simpledatetime"/>
-</xs:all></xs:complexType>
+\t<xs:element name="fields" type="fields"/>
+</xs:sequence></xs:complexType>
 
 <xs:complexType name="document"><xs:sequence>
 \t<xs:element name="name" type="xs:string"/>
