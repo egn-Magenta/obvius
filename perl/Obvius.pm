@@ -935,7 +935,10 @@ sub search {
         my $field = $fspec->FieldType->param('value_field');
 
         if($do_left_join) {
-            push(@left_join_table, "LEFT JOIN vfields AS vf$i ON (versions.docid=vf$i.docid AND versions.version=vf$i.version AND vf$i.name='$_')");
+            # Since mysql 5 we have to join with the table to the left of the
+            # LEFT JOIN statement
+            my $last_table = $i ? ("vf" . ($i - 1)) : "versions";
+            push(@left_join_table, "LEFT JOIN vfields AS vf$i ON ($last_table.docid=vf$i.docid AND $last_table.version=vf$i.version AND vf$i.name='$_')");
         } else {
             push(@table,   "vfields AS vf$i");
             push(@join,  "(versions.docid=vf$i.docid AND versions.version=vf$i.version)");
