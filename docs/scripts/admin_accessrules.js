@@ -127,7 +127,7 @@ function accessrules_parse( storage, text)
 {
 	var i;
 	var n;
-	var m = text.match(/[\S]+/g); 
+	var m = text.match(/[^\n\r]+/g); 
 	var has_inherited = false;
 
 	if ( m == null) return false;
@@ -135,7 +135,7 @@ function accessrules_parse( storage, text)
 	for ( i = 0; i < m.length; i++) {
 		if ( ac_allow_inherited && m[i].match(/^inherit$/i)) {
 			has_inherited = true;
-		} else if ( n = m[i].match(/^(\@?)(\w+)(\+|-|=|=!|!)([\w,]+)$/)) {
+		} else if ( n = m[i].match(/^(\@?)([^\=\+\-\!]+)(\+|-|=|=!|!)([\w,]+)$/)) {
 			var a = new Array();
 			a['valid']        = true;
 			a['is_group']     = ( n[1] == '@');
