@@ -1027,19 +1027,26 @@ sub search {
 }
     
 # same as search but does WHERE doc.parent IN ( get_documents_subtree ) for
-# searching in a subtree; also searches in the root document itself
+# searching in a subtree; also searches in the root document itself.
+# $root_id is either a document id, or an array of document ids.
 sub search_subtree
 {
 	my ( $self, $root_docid, $fields, $where, %options) = @_;
 
-	$root_docid ||= 0;
-	if ( $root_docid == 0 or $root_docid == 1) {
+	my @root_docids = 
+		( ref( $root_docid) and ref( $root_docid) eq 'ARRAY') ?
+			@$root_docid :
+			( $root_docid || 0);
+	
+	@root_docids = (0) unless @root_docids;
+
+	if ( grep { $_ == 0 or $_ == 1 } @root_docids ) {
 		# search in all documents
 		return $self-> search( $fields, $where, %options);
 	}
 
 	
-	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( $root_docid);
+	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( @root_docids);
 	my $result = [];
 	my @user_where_statement = length($where) ? ($where) : ();
 
@@ -1051,13 +1058,16 @@ sub search_subtree
 	push @{$options{needs_document_fields}}, qw(id parent);
 	
 	do {
-		my @slice = splice( @parents, 0, 256); # XXX approx max query length is 2K
+		my $max = 256 - @root_docids;  # XXX approx max query length is 2K
+		$max = 0 if $max < 0;
+		my @slice = splice( @parents, 0, $max); 
+
 		my @where;
 		push @where, 'parent IN (' . join(',', @slice) . ')'
 			if @slice;
-		if ( defined $root_docid) {
-			push @where, "id = $root_docid";
-			undef $root_docid;
+		if ( @root_docids) {
+			push @where, 'id IN (', join(',', @root_docids) . ')';
+			@root_docids = ();
 		}
 
 		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
@@ -1076,9 +1086,9 @@ sub search_subtree
 # traverses root_docid and returns set of parent ids for all documents ids under the root
 sub get_documents_subtree
 {
-	my ( $self, $root_docid) = @_;
+	my ( $self, @root_docids) = @_;
 
-	$root_docid ||= 0;
+	@root_docids = (0) unless @root_docids;
 	my $set = DBIx::Recordset-> SetupObject({
 		'!DataSource'	=> $self-> {DB},
 		'!Table'	=> 'documents',
@@ -1086,7 +1096,7 @@ sub get_documents_subtree
 	});
 
 	my ( %result, @current);
-	@current = ( $root_docid );
+	@current = @root_docids;
 
 	while ( @current) {
 		my @slice = splice( @current, 0, 256); # XXX approx max query length is 2K
@@ -1096,8 +1106,9 @@ sub get_documents_subtree
 		});
 
     		while ( my $rec = $set-> Next) {
+			next if $result{ $rec->{parent} }; # met already
 			$result{ $rec->{parent} } = 1;
-			push @current, $rec->{id};
+			push @current, $rec->{id} ;
 		}
 	}
 
