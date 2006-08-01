@@ -34,16 +34,17 @@ require Exporter;
 use HTML::Parser ();
 use Obvius::Robot;
 use Unicode::String qw(utf8 latin1);
+use URI::Escape;
 
 our @ISA = qw(Exporter);
-our @EXPORT = qw(parse_document_list set_lang_and_links retrieve_real_title);
+our @EXPORT = qw(parse_document_list set_lang_and_links retrieve_real_title get_keywords);
 
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub start_tag {
     my ($self, $tag, $text, $attr) = @_;
 
-    return unless ($tag =~ /^(td|a)$/);
+    return unless ($tag =~ /^(td|a|input)$/);
 
     if($self->{state} eq 'look_for_title') {
         if($tag eq 'a' and $attr->{class} and $attr->{class} eq 'docSel-titleLink') {
@@ -62,6 +63,8 @@ sub start_tag {
     } else {
         if($tag eq 'td' and $attr->{class} and $attr->{class} eq 'bluetext11') {
             $self->{state} = 'get_docdate';
+        } elsif($tag eq 'input' and $attr->{name} and $attr->{name} eq 'checkReleases') {
+            $self->{doc}->{checkReleases} = $attr->{value};
         }
     }
 
@@ -294,6 +297,30 @@ sub retrieve_real_title {
     }
 
     return undef;
+}
+
+# This looks up the keywords for the document. It uses a request to an URL like the following:
+# http://europa.eu.int/rapid/recentPressReleasesAction.do?userAction=Selected%20Documents&selectedDocumentsType=HTML&aditionalInformations=KEYWORDS&checkReleases=59810|IP/06/1081|31/07/2006|EN:HTML,PDF,DOC;DE:HTML,PDF,DOC|0
+
+sub get_keywords {
+    my $obj = shift;
+
+    my $uri = 'http://europa.eu.int/rapid/recentPressReleasesAction.do?userAction=Selected%20Documents&selectedDocumentsType=HTML&aditionalInformations=KEYWORDS';
+    $uri .= "&checkReleases=" . uri_escape($obj->{checkReleases});
+
+    my $data = retrieve_uri($uri) || '';
+
+    # Remove HTML before the keywords:
+    $data =~ s!^.*<tr>\s*<td valign="top">\s*KEYWORDS:&nbsp;\s*</td>\s*<td>\s*!!s;
+    # Remove HTML after the keywords:
+    $data =~ s!\s*</td>\s*</tr>.*$!!s;
+
+    my @keywords = split(/\s*,\s*/, $data);
+
+    $obj->{keywords} = \@keywords;
+    $obj->{keyword_map} = { map { $_ => 1 } @keywords };
+
+    return 1;
 }
 
 # narrow_unicode_utf8 - convert commonly used utf-8-encoded unicode
