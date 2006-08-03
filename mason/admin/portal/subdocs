@@ -121,4 +121,7 @@ $max=>20
 %
 <%init>
 my $subs=$m->comp('subdocs:get_subs', base_doc=>$doc, base_vdoc=>$vdoc);
+if(my $config_max = $obvius->config->param('max_admin_leftmenu_subdocs')) {
+    $max = $config_max;
+}
 </%init>
