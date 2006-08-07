@@ -893,7 +893,9 @@ sub search {
         my $versions_sql = "versions LEFT JOIN versions as has_public ON ";
         $versions_sql .= "(versions.docid = has_public.docid and has_public.public=1) ";
         $versions_sql .= "LEFT JOIN versions as latestversion ON ";
-        $versions_sql .= "(has_public.public IS NULL AND versions.docid=latestversion.docid)";
+        # Grrr.. Actually want to match has_public.public IS NULL or so, but it doesn't
+        # work in old mysql :(
+        $versions_sql .= "(versions.public = 0 AND latestversion.public = 0 AND versions.docid=latestversion.docid)";
 
         # XXX this assumes $table[0] is just "versions".
         $table[0] = $versions_sql;
