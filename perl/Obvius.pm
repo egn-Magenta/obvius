@@ -897,11 +897,11 @@ sub search {
 
         # XXX this assumes $table[0] is just "versions".
         $table[0] = $versions_sql;
-        $having .= "(public=1 OR (has_public.public IS NULL and MAX(latestversion.version) = versions.version))";
 
-        # Uncomment these for debug:
-        #push(@fields, "has_public.public AS has_public_version");
-        #push(@fields, "MAX(latestversion.version) AS latest_version");
+        push(@fields, "has_public.public AS has_public_version");
+        push(@fields, "MAX(latestversion.version) AS latest_version");
+
+        $having .= "(public=1 OR (has_public_version IS NULL and latest_version = versions.version))";
     }
 
     # Sorting:
