@@ -875,16 +875,33 @@ sub search {
     if (defined $options{public} and $options{public}) {
         $where.=' AND public = 1'; # Formerly "public > 0", but = is more effective when using indexes.
     } else {
-        # Lets try this - if public is not set we join an extra versions table on
-        # versions.docid = vmax_versions.docid. Since we already group by (docid,versions.lang),
-        # we can use the extra versions table to get a row with the versionnumber of the latest
-        # version using MAX(vmax_versions.version) and add a HAVING statement to the GROUP BY
-        # that gives us either the public or the latest version. This way we get distinct
-        # docid,version,lang rows which is what select_best_language_match_multiple expects.
-        push(@table, "versions as vmax_versions");
-        push(@join, "versions.docid = vmax_versions.docid");
-        push(@fields, "MAX(vmax_versions.version) as obvius_vmax");
-        $having .= "(public=1 or versions.version=obvius_vmax)";
+        # If we're not searching for public documents, we want to get either
+        # the public version if it exists or the latest version if it doesn't.
+        # To do this we add two extra joins of the versions table to the query.
+        #
+        # The first one is a LEFT JOIN that gives us a flag of whether the given
+        # document has a public version or not.
+        #
+        # The second one is again a LEFT JOIN, this time joining the versions
+        # table onto the documents that doesn't have a public version. This can
+        # then later be used with the MAX() function to identify the latest
+        # version.
+        #
+        # Finally we use the information from the above joins in a having clause
+        # that will give us the versions we want.
+
+        my $versions_sql = "versions LEFT JOIN versions as has_public ON ";
+        $versions_sql .= "(versions.docid = has_public.docid and has_public.public=1) ";
+        $versions_sql .= "LEFT JOIN versions as latestversion ON ";
+        $versions_sql .= "(has_public.public IS NULL AND versions.docid=latestversion.docid)";
+
+        # XXX this assumes $table[0] is just "versions".
+        $table[0] = $versions_sql;
+        $having .= "(public=1 OR (has_public.public IS NULL and MAX(latestversion.version) = versions.version))";
+
+        # Uncomment these for debug:
+        #push(@fields, "has_public.public AS has_public_version");
+        #push(@fields, "MAX(latestversion.version) AS latest_version");
     }
 
     # Sorting:
