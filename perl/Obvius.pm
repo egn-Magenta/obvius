@@ -1055,11 +1055,11 @@ sub search_subtree
 {
 	my ( $self, $root_docid, $fields, $where, %options) = @_;
 
-	my @root_docids = 
+	my @root_docids =
 		( ref( $root_docid) and ref( $root_docid) eq 'ARRAY') ?
 			@$root_docid :
 			( $root_docid || 0);
-	
+
 	@root_docids = (0) unless @root_docids;
 
 	if ( grep { $_ == 0 or $_ == 1 } @root_docids ) {
@@ -1067,33 +1067,33 @@ sub search_subtree
 		return $self-> search( $fields, $where, %options);
 	}
 
-	
+
 	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( @root_docids);
 	my $result = [];
 	my @user_where_statement = length($where) ? ($where) : ();
 
 	# add doc fields needed
 	$options{needs_document_fields} ||= [];
-	@{$options{needs_document_fields}} = grep { 
-		$_ ne 'id' and $_ ne 'parent' 
+	@{$options{needs_document_fields}} = grep {
+		$_ ne 'id' and $_ ne 'parent'
 	} @{$options{needs_document_fields}};
 	push @{$options{needs_document_fields}}, qw(id parent);
-	
+
 	do {
 		my $max = 256 - @root_docids;  # XXX approx max query length is 2K
 		$max = 0 if $max < 0;
-		my @slice = splice( @parents, 0, $max); 
+		my @slice = splice( @parents, 0, $max);
 
 		my @where;
 		push @where, 'parent IN (' . join(',', @slice) . ')'
 			if @slice;
 		if ( @root_docids) {
-			push @where, 'id IN (', join(',', @root_docids) . ')';
+			push @where, 'id IN (' . join(',', @root_docids) . ')';
 			@root_docids = ();
 		}
 
 		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
-		
+
 		push @$result, @{$self-> search( 
 			$fields,
 			join( ' AND ', @user_where_statement, @where),
