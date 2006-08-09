@@ -1098,7 +1098,7 @@ sub search_subtree
 			$fields,
 			join( ' AND ', @user_where_statement, @where),
 			%options
-		)};
+		) || []};
 		
 	} while (@parents);
 
