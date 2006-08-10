@@ -1047,7 +1047,7 @@ sub search {
 
     return $this->select_best_language_match_multiple(@subdocs ? \@subdocs : undef);
 }
-    
+
 # same as search but does WHERE doc.parent IN ( get_documents_subtree ) for
 # searching in a subtree; also searches in the root document itself.
 # $root_id is either a document id, or an array of document ids.
@@ -1094,12 +1094,12 @@ sub search_subtree
 
 		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
 
-		push @$result, @{$self-> search( 
+		push @$result, @{$self-> search(
 			$fields,
 			join( ' AND ', @user_where_statement, @where),
 			%options
 		) || []};
-		
+
 	} while (@parents);
 
 	$result;
@@ -1117,18 +1117,19 @@ sub get_documents_subtree
 		'!Fields'	=> 'id,parent'
 	});
 
-	my ( %result, @current);
+	my ( %result, @current, %seen);
 	@current = @root_docids;
 
 	while ( @current) {
 		my @slice = splice( @current, 0, 256); # XXX approx max query length is 2K
-		
+
 		$set-> Search({
 			'$where'	=> 'parent IN (' . join(',', @slice) . ')',
 		});
 
     		while ( my $rec = $set-> Next) {
-			next if $result{ $rec->{parent} }; # met already
+			next if $seen{ $rec->{id} };
+			$seen{ $rec->{id} } = 1;
 			$result{ $rec->{parent} } = 1;
 			push @current, $rec->{id} ;
 		}
