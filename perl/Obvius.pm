@@ -877,33 +877,16 @@ sub search {
     } else {
         # If we're not searching for public documents, we want to get either
         # the public version if it exists or the latest version if it doesn't.
-        # To do this we add two extra joins of the versions table to the query.
-        #
-        # The first one is a LEFT JOIN that gives us a flag of whether the given
-        # document has a public version or not.
-        #
-        # The second one is again a LEFT JOIN, this time joining the versions
-        # table onto the documents that doesn't have a public version. This can
-        # then later be used with the MAX() function to identify the latest
-        # version.
-        #
-        # Finally we use the information from the above joins in a having clause
-        # that will give us the versions we want.
+        # To do this we join the versions table to the query and used MAX
+        # and SUM functions in a having clause to figure out which versions we
+        # want:
 
-        my $versions_sql = "versions LEFT JOIN versions as has_public ON ";
-        $versions_sql .= "(versions.docid = has_public.docid and has_public.public=1) ";
-        $versions_sql .= "LEFT JOIN versions as latestversion ON ";
-        # Grrr.. Actually want to match has_public.public IS NULL or so, but it doesn't
-        # work in old mysql :(
-        $versions_sql .= "(versions.public = 0 AND latestversion.public = 0 AND versions.docid=latestversion.docid)";
+        push(@table, "versions as otherversions");
+        push(@join, "versions.docid = otherversions.docid");
+        push(@fields, "SUM(otherversions.public) as has_public_version");
+        push(@fields, "MAX(otherversions.version) as latest_version");
 
-        # XXX this assumes $table[0] is just "versions".
-        $table[0] = $versions_sql;
-
-        push(@fields, "has_public.public AS has_public_version");
-        push(@fields, "MAX(latestversion.version) AS latest_version");
-
-        $having .= "(public=1 OR (has_public_version IS NULL and latest_version = versions.version))";
+        $having .= "(versions.public=1 OR (has_public_version = 0 and latest_version = versions.version))";
     }
 
     # Sorting:
