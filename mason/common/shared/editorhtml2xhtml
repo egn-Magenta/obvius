@@ -15,7 +15,7 @@ my @blockquote;
 my $p = HTML::Parser->new(api_version=>3,
                             default_h=> [ sub { my($this, $text)=@_; $out.=$text }, "self, text" ],
                             start_h=> [sub {
-                                                my($this, $tagname, $attr, $attrseq)=@_;
+                                                my($this, $tagname, $attr, $attrseq, $orgtext)=@_;
 
                                                     # List of attributes to be removed from the tag:
                                                     my %remove_attr;
@@ -153,6 +153,14 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         }
 
                                                         push(@$attrseq, 'style') unless($existing_attr{'style'});
+                                                    } elsif($tagname eq 'embed') {
+                                                        # Hmmm, we actually want to output both a tagname and some
+                                                        # text and the only way we can do that is by adding to
+                                                        # $tagname:
+                                                        $tagname = 'script type="text/javascript">';
+                                                        $tagname .= "<!-- document.write('" . $orgtext . "</embed>'); // --";
+                                                        # Reset the list of attributes:
+                                                        @$attrseq = ();
                                                     }
 
                                                     # strike, s => del
@@ -215,7 +223,7 @@ my $p = HTML::Parser->new(api_version=>3,
                                                     $text .= "$endtag>";
 
                                                     $out.= $text;
-                                                }, "self, tagname, attr, attrseq" ],
+                                                }, "self, tagname, attr, attrseq, text" ],
                             end_h=> [sub {
                                             my($this, $tagname, $text, $attr)=@_;
 
@@ -225,6 +233,10 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                             elsif($tagname eq 'u') {
                                                 $text =~ s!</u!</span!i;
+                                            }
+
+                                            elsif($tagname eq 'embed') {
+                                                $text = '</script>';
                                             }
 
                                             elsif($tagname eq 'blockquote') {
