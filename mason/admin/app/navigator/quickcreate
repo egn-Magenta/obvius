@@ -127,12 +127,26 @@ if ($obvius_quickcreate_do) {
                                                command=>'new_document',
                                                args=>\%args,
                                               );
-    # XXX Report result (perhaps create a session and pass it on the redirect):
-    $m->comp('/shared/set_status_message', status=>$status, message=>$message);
 
     # Return:
-    my %redirect_args=(%ARGS, obvius_quickcreate_image=>0, obvius_quickcreate_upload=>0);
-    $m->comp('/shared/redirect', location=>'./', args=>\%redirect_args);
+    if ( $status eq "OK" ) {
+        my %redirect_args=(%ARGS, obvius_quickcreate_image=>0, obvius_quickcreate_upload=>0);
+        $m->comp('/shared/redirect', location=>'./', args=>\%redirect_args);
+    }
+    else
+    {
+        # Obvius doesn't return proper errors, so check if a document with that name exists
+        # and if a document actually exists, then display the correct error.. There should be
+        # a better way to do this..
+        if ($obvius->get_doc_by_name_parent( $name, $doc->Id )) {
+            $status  = "ERROR";
+            $message = "Document already exists";
+        }
+
+        # XXX Report result (perhaps create a session and pass it on the redirect):
+        $m->comp('/shared/set_status_message', status=>$status, message=>$message);
+    }
+
 }
 </%init>
 <%once>

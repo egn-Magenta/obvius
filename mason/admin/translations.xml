@@ -1522,7 +1522,16 @@
     <translation lang="da">version af dette dokument</translation>
   </text>
 
-
+  <text key="Could not create document">
+      <translation lang="en">Could not create document</translation>
+      <translation lang="da">Kunne ikke oprette dokument</translation>
+  </text>
+  
+  <text key="Document already exists">
+      <translation lang="en">Document already exists</translation>
+      <translation lang="da">Dokumentet findes allerede</translation>
+  </text>
+	    	    
 
   <text key="">
     <translation lang="en"></translation>
