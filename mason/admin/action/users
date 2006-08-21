@@ -89,6 +89,7 @@ my $user_storage = {
                              notes  => { type => 'text'     },
                              email  => { type => 'email'    },
                              passwd => { type => 'password' },
+                             admin  => { type => 'radio'    },
                             },
                    };
 
@@ -99,6 +100,8 @@ my $input_display = [
                      { name=>'email',  content=>'data',   label=>'E-mail'   },
                      { name=>'passwd', content=>'data',   label=>'Password' },
                      { name=>'notes',  content=>'data',   label=>'Notes'    },
+                     { name=>'admin',  content=>'data',   label=>'Super-user', 
+		     	options=>{ label_0 => 'No', label_1 => 'Yes' }, edit_args=>'0|1'  },
                     ];
 
 

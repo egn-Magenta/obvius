@@ -93,6 +93,12 @@ sub get_group_users {
 sub validate_user {
     my ($this) = @_;
 
+    if ( $this->{USER} eq 'nobody') {
+        # nobody can never login interactively, but only programmatically
+	# with password set to undef
+        return not defined $this-> {PASSWORD};
+    }
+
     $this->read_user_and_group_info();
 
     if (my $crypted=$this->{USERS}->{$this->{USER}}->{passwd}) {

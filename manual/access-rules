@@ -155,3 +155,80 @@ The editing engine is based on Javascript v1.2, so in case the browser does not
 support this version of the language, the panels are not shown, but rather a
 simple text editor is displayed instead. In this case, the access rules must be
 edited using the grammar described above.
+
+
+
+
+Rule-based user authentication
+==============================
+
+Installation
+------------
+
+Access rules can be used to block certain documents or document trees from
+viewing by certain users. To do so, apache configuration must contain the
+following lines
+
+     PerlAuthenHandler $Test::Site::Public->rulebased_authen_handler
+     AuthName "${perlname}"
+     AuthType Basic
+     require valid-user
+
+in the <Location /public>, so the rule-based authentication takes place in the
+given location. If enabled, the procedure requires authentication if a document
+cannot be viewed by an unauthenticated user ( or, user "nobody". Obvius
+contains this dummy user specifically for this purpose ), and if not, requires
+the user to supply a valid login and a password. Note than the authentication
+procedure slows down the operation speed slightly, so you might consider to
+enable the rulebased authentication for a subtree only, by defining the subtree
+as
+
+ <Location /public/protected>
+ </Location>
+
+and adding the PerlAuthenHandler etc lines there only.
+
+Also, AuthName is by default the same in /public and /admin interface, so if
+the user was logged in one of these realms, the authentication is also valid
+for the other realm. To discontinue this feature, change AuthName to in /admin
+or /public to something else, for example to "${perlname}-admin" and
+"${perlname}-public".
+
+
+Users and groups
+----------------
+
+Users with 'super-user' flag (administrators) can always view all documents,
+both protected and unprotected. It is only users without the 'super-user' flags
+(normal users) are subject to rule-based authentication.
+
+It is possible to both allow and deny access to documents for individual users
+and user groups. A special user 'nobody' can be used to address unauthenticated
+access. 
+
+There are two ways to protect a document. The generic rule is to disable the
+access to all users, and then to force-enable access for the selected users
+and groups (again, - is NOT, =! is ALWAYS):
+
+   ALL-view
+   special_user_1=!view
+   special_user_2=!view
+   @group_1=!view
+
+In case it is only desired to protect a document from unauthenticated viewer,
+
+   nobody-view
+
+rule is enough to accomplish this.
+
+Inheritance
+-----------
+
+The rule-based authentication also takes in account both explicit document
+inheritance ( see INHERIT above ) and universal access rules. Adding
+
+   nobody-view
+
+in any level of hierarchy will effectively propagate the requirement for
+authenticated access to the whole document subtree. Adding this rule to
+the universal ruleset will effectively protect the whole site.

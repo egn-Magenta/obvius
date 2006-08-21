@@ -189,6 +189,7 @@ CREATE_TABLE( users,
   name         varchar(127) DEFAULT '' NOT NULL,
   email        varchar(127) DEFAULT '' NOT NULL,
   notes        text NOT NULL,
+  admin        TINYINT(1) DEFAULT '0' NOT NULL,
   PRIMARY KEY  (id)
 ); 
 CREATE UNIQUE INDEX users_login_idx ON users (login);
@@ -314,8 +315,8 @@ CREATE INDEX news_end_idx   ON news (FIELD(end));
 
 #perldef CRYPT($passwd) "'" . crypt($passwd, '$1$safdasdf$') . "'"
 
-INSERT INTO users VALUES ( '1',  'admin', CRYPT(admin),  'Admin', QUOTE(webmaster@DOMAIN), '');
-INSERT INTO users VALUES ( '2', 'nobody', CRYPT(nobody), 'Nobody', QUOTE(webmaster@DOMAIN), '');
+INSERT INTO users VALUES ( '1',  'admin', CRYPT(admin),  'Admin', QUOTE(webmaster@DOMAIN), '', '1');
+INSERT INTO users VALUES ( '2', 'nobody', CRYPT(nobody), 'Nobody', QUOTE(webmaster@DOMAIN), '', '0');
 
 # Groups:
 

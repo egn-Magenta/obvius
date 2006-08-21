@@ -175,6 +175,7 @@ sub can_use_cache {
 		      $this->{WEBOBVIUS_CACHE_DIRECTORY});
     return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
     return '' if (-e $this->{WEBOBVIUS_CACHE_INDEX} . "-off");
+    return '' if $req-> notes('nocache');
 
     my $vdoc=$output->param('version');
     my $lang=$vdoc->Lang || 'UNKNOWN'; # Should always be there
@@ -717,8 +718,15 @@ sub authen_handler ($$) {
     }
 
     # Check password
-    my $obvius   =$this->obvius_connect($req, $login, $pw, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+    my $obvius = $this->obvius_connect($req, $login, $pw, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
     unless ($obvius) {
+        $req->note_basic_auth_failure;
+        return AUTH_REQUIRED;
+    }
+
+    # if there's no 'admin', it's an old table layout
+    my $uid = $obvius-> get_user( $login);
+    if ( exists $uid->{admin} and not $uid->{admin}) {
         $req->note_basic_auth_failure;
         return AUTH_REQUIRED;
     }
@@ -758,6 +766,65 @@ sub authz_handler ($$) {
     # Lookup user-permissions...
 
     return $this->access_handler($req);
+}
+
+sub rulebased_authen_handler ($$) 
+{
+	my ($this, $req) = @_;
+
+	Obvius::log->debug(" Mason::authz_handler_rulebased ($this : " . $req->uri . ")");
+	
+	my $doc = $req-> pnotes('document');
+	return NOT_FOUND unless $doc;
+		
+	my ( $login, $uid, $obvius);
+
+	# stage 1: try to access the document as nobody
+	$obvius = $this-> obvius_connect(
+		$req, 
+		$login = 'nobody', undef, 
+		$this->{SUBSITE}->{DOCTYPES}, 
+		$this->{SUBSITE}->{FIELDTYPES}, 
+		$this->{SUBSITE}->{FIELDSPECS}
+	);
+	return SERVER_ERROR unless $obvius;
+	
+	$uid = $obvius-> get_user( $login);
+	return SERVER_ERROR unless $uid;
+	$req-> notes( user => $login);
+
+	# check if the user can view the document
+	my $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
+	return OK if $caps->{view};
+
+	# stage 2: cannot access the document anonymously, try to authenticate
+	my ( $have_user, $password) = $req-> get_basic_auth_pw;
+	goto AUTH_FAIL unless $have_user == OK;
+	$login = $req-> connection-> user;
+	goto AUTH_FAIL unless $login and $password;
+
+	$obvius-> {USER}     = $login;
+	$obvius-> {PASSWORD} = $password;
+	goto AUTH_FAIL unless $obvius-> validate_user;
+
+	# authenticated, can view?
+	$uid = $obvius-> get_user( $login);
+	return SERVER_ERROR unless $uid;
+	$req-> notes( user => $login);
+
+	unless ( $uid-> {admin}) {
+		$caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
+		goto AUTH_FAIL unless $caps->{view};
+	}
+
+	# finally, turn server cache off for the protected documents
+    	$req-> notes('nocache', 1) unless $have_user == OK;
+
+	return OK;
+
+AUTH_FAIL:
+	$req-> note_basic_auth_failure;
+	return AUTH_REQUIRED;
 }
 
 
