@@ -188,7 +188,7 @@ sub send_automatic {
             }
 
 
-            if($s->{last_update} eq '0000-01-01 00:00:00') {
+            if($s->{last_update} le '0000-01-01 00:00:00') {
                 $s->{last_update} = $yesterday;
             }
 
