@@ -128,8 +128,43 @@ if ($obvius_quickcreate_do) {
                                                args=>\%args,
                                               );
 
-    # Return:
+    # If uploading went fine.. then we'll need to publish it. 
+    # I believe that there should be an magic command to $obvius->send_order
+    # but aparently there isn't so we'll have to do it by hand.
     if ( $status eq "OK" ) {
+
+	# Reset the args array
+        %args = undef;
+
+	# Lookup the new document and get the latest version
+	my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $doc ) . $name );
+        my $new_vdoc = $obvius->get_public_version($new_doc) || $obvius->get_latest_version($new_doc);
+
+	# Initialize a Obvius::Data set, and lookup the doctype
+	my $publish_fields = new Obvius::Data;
+	my $doctype = $obvius->get_doctype_by_id($new_vdoc->Type);
+
+	# Load the default values
+	for(keys %{$doctype->{PUBLISH_FIELDS}}) {
+	    my $default_value = $doctype->{PUBLISH_FIELDS}->{$_}->{DEFAULT_VALUE};
+	    $publish_fields->param($_ => $default_value)  if(defined($default_value));
+	}
+
+	# published always defaults to now:
+	$publish_fields->param('published' => $r->notes('now'));
+
+	# Set the version and publish fields on the args hash
+	$args{version} = $new_vdoc->Version if ( $new_vdoc );	
+	$args{publish_fields} = $publish_fields;
+	
+	my ($status, $message)=$obvius->send_order(
+						   docid=>$new_doc->Id,
+						   user=>$obvius->user,
+						   command=>'publish',
+						   args=>\%args,
+						   );
+         
+	
         my %redirect_args=(%ARGS, obvius_quickcreate_image=>0, obvius_quickcreate_upload=>0);
         $m->comp('/shared/redirect', location=>'./', args=>\%redirect_args);
     }
