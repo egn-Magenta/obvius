@@ -9,12 +9,12 @@ $rows=>22
 $wrap=>1
 $onlylineif=>undef
 </%args>
-%unless($r->param('jsXMLparser_loaded')) {
+%unless($r->notes('jsXMLparser_loaded')) {
 <& formdata:translations &>
 <script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlw3cdom.js"></script>
 <script type="text/javascript" src="/admin_js/jsXMLParser/compressed/tinyxmlsax.js"></script>
 <script type="text/javascript" src="/admin_js/formdata/formdata.js"></script>
-%$r->param('jsXMLparser_loaded' => 1);
+%$r->notes('jsXMLparser_loaded' => 1);
 %}
 
 <script type="text/javascript">
