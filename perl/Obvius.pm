@@ -1644,6 +1644,14 @@ sub read_doctypes_table {
 
 		eval "use $_";
                 $ev_error=$@;
+
+		if ( $@) {
+			# test if this is because a module cannot be found, or something more serious
+			my $fn = $_;
+			$fn =~ s/::/\//g;
+			croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/;
+		}
+            
 		if (defined $$tester) {
 		    #$this->log->debug("LOADING $_ SUCCESS");
 		    $doctype = $_;
