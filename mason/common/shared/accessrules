@@ -57,7 +57,6 @@ can
 <label><input type="checkbox" name="roles" value="publish"> Publish</label><br>
 <label><input type="checkbox" name="roles" value="delete"> Delete</label><br>
 <label><input type="checkbox" name="roles" value="modes"> Change access</label><br>
-<label><input type="checkbox" name="roles" value="admin"> Administer</label><br>
 
 </div>   <!-- editcontrols -->
 

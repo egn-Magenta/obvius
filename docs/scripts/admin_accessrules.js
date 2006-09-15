@@ -65,7 +65,6 @@ function accessrules_init(form, show_universal, allow_inherited)
 	}
 	ac_roles_imperatives = new Array;
 	ac_roles_imperatives['modes'] = 'change access';
-	ac_roles_imperatives['admin'] = 'administrate';
 	// all other role names (view, publish, etc) are imperative on their own
 	
 	

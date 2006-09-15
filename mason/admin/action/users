@@ -10,6 +10,7 @@ my $groups = {
                                            class => 'DbTable',
                                            source=>'groups',
                                            identifiers=>[qw(id)],
+                                           where => undef,
                                           },
                           data => {
                                    id   => { type => 'integer' },
@@ -90,6 +91,8 @@ my $user_storage = {
                              email  => { type => 'email'    },
                              passwd => { type => 'password' },
                              admin  => { type => 'radio'    },
+                             can_manage_users  => { type => 'radio'    },
+                             can_manage_groups  => { type => 'radio'    },
                             },
                    };
 
@@ -100,8 +103,12 @@ my $input_display = [
                      { name=>'email',  content=>'data',   label=>'E-mail'   },
                      { name=>'passwd', content=>'data',   label=>'Password' },
                      { name=>'notes',  content=>'data',   label=>'Notes'    },
-                     { name=>'admin',  content=>'data',   label=>'Super-user', 
-		     	options=>{ label_0 => 'No', label_1 => 'Yes' }, edit_args=>'0|1'  },
+                     { name=>'admin',  content=>'data',   label=>'Can login to admin interface', 
+		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
+                     { name=>'can_manage_users',  content=>'data',   label=>'Can manage users', 
+		     	options=>{ label_2 => 'Yes', label_1 => 'In own group only', label_0 => 'No' }, edit_args=>'2|1|0'  },
+                     { name=>'can_manage_groups',  content=>'data',   label=>'Can manage groups', 
+		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
                     ];
 
 
@@ -279,18 +286,28 @@ my $users = {
 
 
 my $edges = {
-             'users:create:user[create]store' => {
-                                                  'users:create:groups[execute]store' => {
-                                                                                          merge     => 'insert',
-                                                                                          obj_maps  => {id=>'uid'},
-                                                                                          data_maps => {id=>'user'},
-                                                                                         },
-                                                 },
-            };
+	'users:create:user[create]store' => {
+		'users:create:groups[execute]store' => {
+			merge     => 'insert',
+			obj_maps  => {id=>'uid'},
+			data_maps => {id=>'user'},
+		},
+	},
+};
 </%once>
 %
 <%init>
 $m->comp('/default/check_access', can=>'can_create_new_user');
+
+if ( $obvius-> can_create_new_user > 1) {
+	$groups->{storage}->{organization}->{where} = undef;
+} else { 
+	my @groups = @{$obvius-> get_user_groups( $obvius-> get_userid( $obvius->{USER} ))};
+	$groups->{storage}->{organization}->{where} = 
+		( @groups) ? 
+			'id IN (' . join(',', @groups) . ')' :
+			'NOT TRUE'; # no groups
+}
 
 $r->pnotes('obvius_session')->{action}='editengine';
 

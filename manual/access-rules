@@ -18,7 +18,7 @@ where
    ENTITY        := USER | GROUP
    ACTION        := ONLY | ALSO | NOT | ALWAYS | NEVER
    CAPABILITIES  := one or more CAPABILITY
-   CAPABILITY    := VIEW | CREATE | EDIT | PUBLISH | DELETE | CHANGE ACCESS | ADMINISTER
+   CAPABILITY    := VIEW | CREATE | EDIT | PUBLISH | DELETE | CHANGE ACCESS
 
 This way, the access rules mimic a human-readable description of rights a
 person might have been exposes to, for example, 
@@ -44,7 +44,6 @@ where users and groups are tables in the database, and.
    NEVER   := !
 
    CHANGE ACCESS := MODES
-   ADMINISTER    := ADMIN
 
 This way, the former statements about user A and group B could be rewritten in
 the following way, assuming that users.login for the user A is "a" and

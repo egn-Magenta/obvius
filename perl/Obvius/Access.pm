@@ -352,19 +352,8 @@ sub can_set_access_data {
     return $this->user_has_capabilities($doc, qw(modes));
 }
 
-sub can_create_new_user {
-    my ($this, $doc) = @_;
-
-    $doc ||= $this->get_doc_by_id(1); # XXX Root
-    return $this->user_has_capabilities($doc, qw(admin)); # Changed from 'modes' to 'admin'.
-}
-
-sub can_create_new_group {
-    my ($this, $doc) = @_;
-
-    $doc ||= $this->get_doc_by_id(1); # XXX Root
-    return $this->user_has_capabilities($doc, qw(admin)); # Changed from 'modes' to 'admin'
-}
+sub can_create_new_user  { $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_users} }
+sub can_create_new_group { $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_groups} }
 
 sub can_update_comment {
     my ($this, $doc) = @_;

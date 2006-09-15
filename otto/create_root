@@ -52,11 +52,10 @@ my $doctype=$obvius->get_doctype_by_name('Standard');
 my ($docid, $version) = $obvius->create_new_document($doc, 'dummy', $doctype->Id, 'da', $fields, 1,1);
 if (defined $docid) {
     my $newdoc=$obvius->get_doc_by_id($docid);
-    $obvius->set_access_data($newdoc, 1, 1, 'admin=create,edit,delete,publish,modes,admin
+    $obvius->set_access_data($newdoc, 1, 1, 'admin=create,edit,delete,publish,modes
 OWNER=create,edit,delete,publish,modes
 GROUP+create,edit,delete,publish
-ALL+view
-@Admin+admin');
+ALL+view');
     print "New document $docid, version $version\n";
 
     if ($publish) {

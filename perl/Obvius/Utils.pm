@@ -53,6 +53,7 @@ sub get_passwordprotectedurl {
 sub can_create_new_passwordprotectedurl {
     my ($this) = @_;
 
+    # XXX this is obsolete, role 'admin' doesn't exist anymore 
     my $doc=$this->get_doc_by_id(1); # XXX Root
     return $this->user_has_capabilities($doc, qw(admin)); # Changed from 'modes' to 'admin'
 }
@@ -153,6 +154,7 @@ sub get_synonyms {
 sub can_create_new_synonyms {
     my ($this) = @_;
 
+    # XXX this is obsolete, role 'admin' doesn't exist anymore 
     my $doc=$this->get_doc_by_id(1); # XXX Root
     return $this->user_has_capabilities($doc, qw(admin)); # Changed from 'modes' to 'admin'
 }
@@ -524,6 +526,7 @@ sub can_create_new_loginuser {
     my ($this, $prefix) = @_;
     $prefix='' unless (defined $prefix);
 
+    # XXX this is obsolete, role 'admin' doesn't exist anymore 
     my $doc=$this->get_doc_by_id(1); # XXX Root
     return $this->user_has_capabilities($doc, qw(admin)); # Changed from 'modes' to 'admin'
 }
