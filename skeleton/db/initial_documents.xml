@@ -52,7 +52,7 @@ AdminJump:
 Højreklik på AdminJump-linket nedenfor og vælg &quot;Føj til foretrukne...&quot;.  Hvis værktøjslinien &quot;Hyperlinks&quot; ikke er slået til, så gør det i menuen &quot;Vis/Værktøjslinier/Hyperlinks&quot; - og træk derefter linket fra foretrukne menuen ned i værktøjslinien. Knappen &quot;AdminJump&quot; i værktøjslinien kan nu bruges til at hoppe direkte fra en side på det offentlige website og til administrationsdelens tilsvarende side (og tilbage igen).
 &lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;javascript:q=location.href;if(q&amp;&amp;q!=%22%22){q=String(q);r=new RegExp(%22http[s]?(://[^/]*/)(.*)%22);m=q.match(r);if(m){admin=%22admin/%22;ra=new RegExp(%22admin/(.*)%22);ma=m[2].match(ra);if(ma){admin=%22%22;m[2]=ma[1];}location.href=%22http%22+m[1]+admin+m[2];}else{alert(%22Dont know how to admin %22+q+%22, sorry%22);location.href=location.href;}}else{location.href=location.href;}&quot;&gt;AdminJump&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;javascript:q=location.href;if(q&amp;&amp;q!=%22%22){q=String(q);r=new RegExp(%22http[s]?(://[^/]*/)(.*)%22);m=q.match(r);if(m){admin=%22admin/%22;ra=new RegExp(%22admin/([^?]*)%22);ma=m[2].match(ra);if(ma){admin=%22%22;m[2]=ma[1];}location.href=%22http%22+m[1]+admin+m[2];}else{alert(%22Dont know how to admin %22+q+%22, sorry%22);location.href=location.href;}}else{location.href=location.href;}&quot;&gt;AdminJump&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </html_content>
       <teaser></teaser>
