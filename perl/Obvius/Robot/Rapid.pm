@@ -253,7 +253,7 @@ sub find_title {
     if($attr->{class} and $attr->{class} eq 'bluetitle14') {
         $self->handler(text => sub {
                         my $self = shift;
-                        $self->{new_title} .= shift;
+                        $self->{new_title} .= ' ' . shift;
                     }, 'self,dtext');
         $self->handler(end => sub {
                         my ($self, $tag) = @_;
@@ -281,7 +281,7 @@ sub retrieve_real_title {
         my $title = $parser->{new_title};
 
         # Replace nobreakspaces with normal spaces:
-        $title =~ s/ / /g;
+        $title =~ s/\x{A0}/ /g;
 
         # Make sure we only have single, normal spaces
         $title =~ s/\s+/ /g;
