@@ -1,9 +1,10 @@
+// $Id$
 // Global variables used
 
 var rootDocs = new Object();
 
-var formdata_field_dialog_width = 550;
-var formdata_field_dialog_height = 400;
+var formdata_field_dialog_width = 620;
+var formdata_field_dialog_height = 560;
 
 var formdata_option_dialog_width = 350;
 var formdata_option_dialog_height = 180;
