@@ -336,10 +336,8 @@ sub access_handler ($$) {
     $req->notes(uri=>$uri);
     $req->uri($uri) unless ($req->dir_config('AddPrefix')); # I'm unsure about this... but I'm guessing it's okay to put here.
 
-    # We want to get the original URI the user entered in his/her browser for
-    # redirects, so check for any ORIG_URI stored in %ENV by rewrite rules.
-
-    my $orig_uri = $req->subprocess_env('ORIG_URI') || $uri;
+    my $orig_uri = $uri;
+    my $roothost = $req->subprocess_env('ROOTHOST');
 
     # XXX Instead of checking for a '.' in the uri here, wouldn't it
     # be better to only do this whole slash-redirection thing only if
@@ -347,11 +345,19 @@ sub access_handler ($$) {
     # The problem with that is, that we only know if there is an
     # alternate location much later (in handler, below), so it takes a
     # little more work to change it.
-    return $this->redirect($req, $req->notes('prefix') . $orig_uri . '/', 'force-external')
-	if ($orig_uri !~ m!/$! and $orig_uri !~ /[.]/ and !$this->param('is_admin')); # ... and we auto-slash
-                                                                            # any uri without .'s in it
-                                                                            # except on admin where it's
-                                                                            # handled in Mason ...
+    
+    # ... and we auto-slash any uri without .'s in it except on admin where it's
+    # handled in Mason ...
+	if ($orig_uri !~ m!/$! and $orig_uri !~ /[.]/ and !$this->param('is_admin')) {
+        # If on a subsite system (eg. roothost is set) always redirect to the roothost
+        # or we will get a double subsite rewrite. A better way to handle this would be
+        # good since we now wil get 3 redirects if a user ommits the ending /:
+        # http://subsite.somehost/someurl =>
+        # http://roothost.somehost/somesubsite/someurl/ =>
+        # http://subsite.somehost/someurl/
+        my $host_part = $roothost ? ('http://' . $roothost) : '';
+        return $this->redirect($req, $host_part . $req->notes('prefix') . $orig_uri . '/', 'force-external')
+    }
 
 
     # The orig_uri case from above does not apply to admin, however, so it's
