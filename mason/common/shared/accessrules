@@ -7,6 +7,7 @@ $groups		  => []
 $users		  => []
 $allow_inherited  =>  1
 $show_universal   =>  1
+$inactive         =>  0
 </%args>
 <%init>
 $universal =~ s/\r//gs;
@@ -81,7 +82,9 @@ Universal access rules
 
 % if ( $allow_inherited) {
 <label>
-<input type="checkbox" name="inherited" onClick="accessrules_update_textarea()">
+<input type="checkbox" name="inherited" onClick="accessrules_update_textarea()"
+	<% $inactive ? 'disabled="disabled" ' : '' %>
+>
 Inherited access rules
 </label>
 <div class="obvius-ac-ruleset" id="inherited-content">
@@ -94,7 +97,9 @@ Access rules for this document:<p>
 <div class="obvius-ac-ruleset">
 <div id="arena"></div>
 <p>
+% if ( not $inactive) {
 <input type="button" value="Create new access rule" onClick="accessrules_new();">
+% }
 </div>
 
 <p>
@@ -128,7 +133,9 @@ Hide raw rules
 <div class="obvius-ac-ruleset">
 <br>
 <div id="js-autohide-part2" style="display:none">
+% if ( not $inactive) {
 Raw rules. Use with caution.<p>
+% }
 </div>
 
 <textarea name="accessrules" rows=6 cols=50>
@@ -137,7 +144,9 @@ Raw rules. Use with caution.<p>
 <p>
 
 <div id="js-autohide-part3" style="display:none">
+% if ( not $inactive) {
 <input type="button" value="Parse ruleset" onClick="accessrules_parse_textarea();">
+% }
 </div>
 
 
@@ -152,7 +161,8 @@ error in <b>scripts/admin_accessrules.js</b>, please investigate
 </font>
 
 <script language="JavaScript">
-accessrules_init('obvius-accessrules', <% $show_universal %>, <% $allow_inherited %>);
+accessrules_init('obvius-accessrules', 
+	<% $show_universal %>, <% $allow_inherited %>, <% $inactive%>);
 get_element('js-panel').style.display="block";
 get_element('raw-edit-show').style.display="none";
 get_element('raw-edit-hide').style.display="block";

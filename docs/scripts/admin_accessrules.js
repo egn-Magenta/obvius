@@ -10,6 +10,7 @@ var ac_roles_hash;
 var ac_roles_imperatives;
 var ac_actions_hash;
 var ac_allow_inherited;
+var ac_readonly;
 
 var ac_content;
 
@@ -29,13 +30,14 @@ function raise(exception)
 inititalize internal variables. form is the name of form that is to be the arena
 of dhtml play ( see above )
 */
-function accessrules_init(form, show_universal, allow_inherited)
+function accessrules_init(form, show_universal, allow_inherited, readonly)
 {
 	// check fancy functions
 	if ( typeof(Array.prototype.splice) != "function")
 		raise("Unable to work correctly under this browser, consider installing a newer version, or Firefox");
 
 	ac_allow_inherited = allow_inherited;
+	ac_readonly        = readonly;
 
 	// get hold of required dom elements
 	ac_form = document.forms[form];
@@ -129,7 +131,9 @@ function accessrules_parse( storage, text)
 	var m = text.match(/[^\n\r]+/g); 
 	var has_inherited = false;
 
-	if ( m == null) return false;
+	/* special case as written in Obvius/Access.pm: document without
+	access rules is treated as INHERITED . Go figure why not vice versa. */
+	if ( m == null) return true; 
 
 	for ( i = 0; i < m.length; i++) {
 		if ( ac_allow_inherited && m[i].match(/^inherit$/i)) {
@@ -292,13 +296,19 @@ function accessrules_reshape_controls()
 	var arena = '';
 	for ( i = 0; i < ac_content.length; i++) {
 		arena = arena +
-		accessrules_create_readable_accessrule(ac_content[i]) + 
-		( ac_content[i]['valid'] ?
-			' <a href="" onClick="accessrules_edit(' + i + ');return false;">Edit</a>' :
-			' '
-		) + 
-		' <a href="" onClick="accessrules_delete(' + i + ');return false;">Delete</a>' + 
-		'<br>';
+			accessrules_create_readable_accessrule(ac_content[i]) +
+			( ac_readonly ? '' : (
+				( ac_content[i]['valid'] ?
+				' <a href="" onClick="accessrules_edit(' + 
+					i + 
+					');return false;">Edit</a>' :
+				' '
+				) +
+				' <a href="" onClick="accessrules_delete(' + 
+					i + 
+					');return false;">Delete</a>'
+			)) + 
+			'<br>';
 	}
 	ac_arena.innerHTML = arena;
 }
@@ -352,6 +362,8 @@ create a new rule
 */
 function accessrules_new()
 {
+	if ( ac_readonly) return;
+
 	ac_editbox_current_id     = -1;
 	ac_form.entity[0].checked = true;
 	ac_form.users.selectedIndex = 0;
@@ -369,6 +381,8 @@ edit a rule
 */
 function accessrules_edit(id)
 {
+	if ( ac_readonly) return;
+
 	var e = ac_content[id];
 
 	if ( !e['valid']) {
@@ -410,6 +424,7 @@ delete a rule
 */
 function accessrules_delete(id)
 {
+	if ( ac_readonly) return;
 	accessrules_editbox_visible(false);
 
 	ac_content.splice(id, 1);

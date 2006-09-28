@@ -1,3 +1,4 @@
+% # $Id$
 <script type="text/javascript" src="/scripts/admin_accessrules.js"></script>
 
 <div class="obvius-command obvius-command-document-information obvius-link-decor">
@@ -17,6 +18,7 @@
 	<& /shared/accessrules, 
 		universal	=> $show->{universal},
 		inherited	=> $show->{inherited},
+		inactive	=> $show->{inactive},
 		value		=> $show->{value},
 		groups		=> $show->{groups},
 		users		=> $show->{users},
@@ -111,7 +113,7 @@ my @info = (
 		value	=> $doc->Owner, 
 		name	=> 'owner', 
 		type	=> 'dropdown', 
-		inactive=>1-$can_access,
+		inactive=> 1 - $can_access,
 		choices	=> [ 
 			sort { 
 				$a->{name} cmp $b->{name} 
