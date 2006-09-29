@@ -83,6 +83,21 @@ sub new {
     return $this;
 }
 
+sub read_roothost_conf
+{
+	my ( $self, $conf) = @_;
+
+	return unless -f $conf;
+
+	open F, '<', $conf or die "Cannot open $conf:$!\n";
+	my ($roothost) = (<F> =~ m!:([^\]]+)!);
+	close F;
+
+	die "Cannot extract roothost from $conf\n" unless $roothost;
+
+	$roothost;
+}
+
 
 
 1;
