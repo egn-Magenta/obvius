@@ -35,6 +35,19 @@ my $globalbase ="${prefix}";
 my $base = "${wwwroot}/$sitename";
 my $log = new Obvius::Log::Apache;
 
+$obvius_config-> param('roothost',
+        $obvius_config-> param('roothost') ||
+        $obvius_config-> read_roothost_conf( "$base/conf/roothost.conf") ||
+        $sitename
+);
+
+$obvius_config-> param('hostmap',
+        Obvius::Hostmap-> new(
+                "$base/conf/hostmap.conf",
+                $obvius_config-> param('roothost')
+        )
+);
+
 my $subsite='';
 our $Common = ${perlname}::Site::Common->new(
                                         debug => $obvius_config->Debug,
