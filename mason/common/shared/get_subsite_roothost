@@ -1,26 +1,3 @@
 <%init>
-my $roothost = $r->pnotes('site')->param('roothost');
-unless($roothost) {
-    if(my $rh = $obvius->config->param('roothost')) {
-        $roothost = $rh;
-    } else {
-        # Try to find the a roothost from the site's config:
-        my $conf_dir = $r->document_root;
-        $conf_dir =~ s![^/]+/?$!conf/!;
-
-        if(-f $conf_dir . "roothost.conf") {
-            open(FH, $conf_dir . "roothost.conf") or die "Couldn't open roothost configuration file";
-            my $line = <FH>;
-            close(FH);
-
-            ($roothost) = ($line =~ m!:([^\]]+)!);
-        } else {
-            # Default to sitename:
-            $roothost = $obvius->config->param('sitename');
-        }
-    }
-    $r->pnotes('site')->param('roothost' => $roothost);
-}
-
-return $roothost;
+$obvius->config->param('roothost');
 </%init>
