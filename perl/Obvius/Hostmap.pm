@@ -29,6 +29,8 @@ use warnings;
 
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+*new = \&create_hostmap;
+
 sub create_hostmap {
     my ($this, $path, $roothost, %options) = @_;
 
@@ -155,54 +157,3 @@ sub translate_uri {
 }
 
 1;
-__END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Obvius::Hostmap - Hostmap functionality for Obvius
-
-=head1 SYNOPSIS
-
-  use Obvius::Hostmap;
-  my $hostmap = Obvius::Hostmap->create_hostmap('/path/to/hostmap.txt');
-  my $hostmap_hashref = $hostmap->get_hostmap();
-
-=head1 DESCRIPTION
-
-This module parses and caches hostmap files used for apache mod_rewrite
-on Obvius sites.
-
-=head2 EXPORT
-
-None by default.
-
-
-
-=head1 SEE ALSO
-
-  Obvius
-
-=head1 AUTHOR
-
-Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2001-2006 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
-=cut
