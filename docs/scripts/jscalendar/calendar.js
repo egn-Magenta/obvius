@@ -674,6 +674,7 @@ Calendar.cellClick = function(el, ev) {
 			return;
 		    case 0:
 			// TODAY will bring us here
+
 			if ((typeof cal.getDateStatus == "function") && cal.getDateStatus(date, date.getFullYear(), date.getMonth(), date.getDate())) {
 				// remember, "date" was previously set to new
 				// Date() if TODAY was clicked; thus, it
@@ -682,10 +683,13 @@ Calendar.cellClick = function(el, ev) {
 			}
 			break;
 		}
-		if (!date.equalsTo(cal.date)) {
+		// HACK By Ole 3/10 2006..
+        // It seems that if it gets to compare the dates it will not allow users to use
+        // the today button if the value is set to 0000-00-00 00:00:00 ...
+		//if (!date.equalsTo(cal.date)) {
 			cal.setDate(date);
 			newdate = true;
-		}
+		//}
 	}
 	if (newdate) {
                 // Force saving of time here - otherwise it will be reset to 00:00
