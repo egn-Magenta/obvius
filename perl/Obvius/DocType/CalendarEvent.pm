@@ -57,22 +57,28 @@ sub encode_ical
 		# $val =~ s/([\x80-\xBF])|([\xC0-\xFF])/$1 ? "\xC2$1" : "\xC3" . chr(ord($2) - 0x40)/ge;
 
 		# quoted-printable, conflict with default and unicode strings
+		my $quoted = 0; 
 		if ( $val =~ /[\\;,\t\r\n\x80-\xff]/) {
 			$key .= ";ENCODING=QUOTED-PRINTABLE";
 			$val =~ s/([\\;,\t\r\n\x80-\xff])/sprintf(q(=%02X),ord($1))/ge;
+			$quoted = 1;
 		}
 		
 		$val =~ s/<("[^"]*"|'[^']*'|[^>])*>//g;
 		$val =~ s/\s\s+/ /g;
 		next if $val =~ /^\s*$/;
 
-		# simple default wrapping
-		# $val =~ s/(.{74})/$1\n /g;
-
-		# simple quoted-printable wrapping, assume no field names shouldn't be longer than 74
 		my $gval = "$key:$val";
-		$gval =~ s/(.{74}(?=.))/$1=\n/g;
-		$gval =~ s/ $/=20/; # outlook does this, but I don't care why
+		if ( $quoted) {
+			# quoted-printable wrapping: assume no field names 
+			# should be longer than 74, but do not split the string 
+			# inside =X{n} characters (assuming n=2)
+			$gval =~ s/\G(.{71}(?:=..|[^=]{1,3})(?=.))/$1=\n/g;
+			$gval =~ s/ $/=20/; # outlook does this, but I don't care why
+		} else {
+			# simple default wrapping
+			$gval =~ s/(.{74})/$1\n /g;
+		}
 		
 		$ret .= "$gval\n";
 	}
