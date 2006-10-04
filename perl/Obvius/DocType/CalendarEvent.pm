@@ -71,7 +71,7 @@ sub encode_ical
 
 		# simple quoted-printable wrapping, assume no field names shouldn't be longer than 74
 		my $gval = "$key:$val";
-		$gval =~ s/(.{74}(?=.))/$1\n\t/g;
+		$gval =~ s/(.{74}(?=.))/$1=\n/g;
 		$gval =~ s/ $/=20/; # outlook does this, but I don't care why
 		
 		$ret .= "$gval\n";
