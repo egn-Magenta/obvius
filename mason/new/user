@@ -146,6 +146,12 @@ if (my $id=$session->{fields_out}->param('id')) {
 }
 else {
     print STDERR "call create_user\n";
+    
+    # back-compat stuff
+    $user->{admin} = 1;
+    $user->{can_manage_users} = 2;
+    $user->{can_manage_groups} = 1;
+    
     return $obvius->create_new_user($user);
 }
 
