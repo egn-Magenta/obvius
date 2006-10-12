@@ -1,7 +1,7 @@
 // ** I18N
 
 var ae_DA = unescape('%E6');
-var oe_DA = unescape('%8F');
+var oe_DA = unescape('%F8');
 var aa_DA = unescape('%E5');
 
 var AE_DA = unescape('%C6');
