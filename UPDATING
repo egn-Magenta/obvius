@@ -5,3 +5,13 @@
 	Execute the following statement to allow these:
 	
 	INSERT INTO documents VALUES (5,2,'universal',6,1,1,'');
+
+20060915:
+	Table users now used to store both admin and non-admin users.
+	Execute this after upgrading:
+
+	ALTER TABLE users ADD COLUMN admin TINYINT(1) DEFAULT '0' NOT NULL;
+	ALTER TABLE users ADD COLUMN can_manage_users TINYINT(1) DEFAULT '0' NOT NULL;
+	ALTER TABLE users ADD COLUMN can_manage_groups TINYINT(1) DEFAULT '0' NOT NULL;
+	UPDATE users SET admin=1,can_manage_users=2,can_manage_groups=1;
+
