@@ -156,11 +156,6 @@ sub create_document
 	my ($document, $path) = @_;
 
 	my $new_uri = get( $document, 'obvius_dump_doc_uri');
-# HACK - Made by Ole, 4/8 2006. The path with a / will always be prepended
-# the new_uri, which makes it impossible for the remove_prefix function
-# to actually work. I've only switched theese few things, so the prefix
-# can be removed and then append the proper path. If you have any questions
-# please give me a call or an email (ole@magenta-aps.dk)
 
 	if ($remove_prefix) {
 		$new_uri =~ s!^\Q$remove_prefix\E!!;
