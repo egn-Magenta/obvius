@@ -17,18 +17,16 @@ use Getopt::Long;
 
 my ($site, $recursive, $docid, $subdocsonly, $help)=(undef, 0, 0, 0, 0);
 GetOptions(
-           'site=s',     => \$site,
-           'recursive'   => \$recursive,
-           'docid'       => \$docid,
-           'subdocsonly' => \$subdocsonly,
-           'help'        => \$help,
-          );
+	recursive   => \$recursive,
+	docid       => \$docid,
+	subdocsonly => \$subdocsonly,
+	help        => \$help,
+);
 
 if ($help) {
-    print <<EOT;
-Usage: delete --site=sitename [OPTIONS] document[s]
+	print <<EOT;
+Usage: delete [OPTIONS] site document[s]
 
-  --site           the name of the site to delete from (mandatory)
   --recursive, -r  delete recursively. Be. Careful.
   --subdocsonly    delete only the subdocs of the documents specified
   --docid          the documents are given as docids, not as paths
@@ -36,22 +34,23 @@ Usage: delete --site=sitename [OPTIONS] document[s]
 Note: wildcards do not work. Sorry.
       caches are not handled.
 EOT
-    exit 0;
+	exit 0;
 }
 
-die "No site given, stopping" unless ($site);
+$site = shift @ARGV;
+die "No site given, stopping" unless $site;
 
-my $conf=Obvius::Config->new($site);
+my $conf = Obvius::Config->new($site);
 die "Could not get config for $site" unless(defined($conf));
 
-my $log=Obvius::Log->new('notice');
+my $log = Obvius::Log->new('notice');
 die "Could not get logging" unless(defined($log));
 
-my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
+my $obvius = Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
 die "Could not get Obvius object for $site" unless(defined($obvius));
 $obvius->{USER} = 'admin';
 
-map { delete_doc($_, $docid, $recursive, 1-$subdocsonly) } @ARGV;
+delete_doc($_, $docid, $recursive, 1-$subdocsonly) for @ARGV;
 
 exit 0;
 

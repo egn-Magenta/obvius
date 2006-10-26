@@ -4,8 +4,8 @@
 #
 #  Example usage:
 #
-#   $ time /var/www/obvius/bin/delete --site deg -r --subdocsonly /videnbasen/\
-#      && time /var/www/obvius/bin/create --site deg --path /videnbasen /tmp/videnbasen.xml
+#   $ time /usr/local/obvius/bin/delete sitename -r --subdocsonly /videnbasen/\
+#      && time /local/obvius/bin/create sitename --path /videnbasen /tmp/videnbasen.xml
 #
 #
 # Copyright (C) 2004, Magenta. By Adam Sjøgren. Under the GPL.
@@ -30,24 +30,22 @@ my ($site, $remove_prefix, $add_prefix, $help, $force_owner, $force_group);
 my $path = '/';
 
 GetOptions(
-	'site=s',          => \$site,
 	'path=s',          => \$path,
 	'remove_prefix=s'  => \$remove_prefix,
-	'add_prefix=s'     => \$add_prefix,
 	'add_prefix=s'     => \$add_prefix,
 	'owner=s'          => \$force_owner,
 	'group=s'          => \$force_group,
 	'help'             => \$help,
 ) or usage();
 
+$site = shift @ARGV;
 usage() if $help or not $site or 1 != @ARGV;
 
 sub usage
 {
 	print <<EOT;
-Usage: create --site=sitename [OPTIONS] document
+Usage: create [OPTIONS] site filename
 
-  --site           the name of the site to create documents in (mandatory)
   --path           where to create the new documents (defaults to /)
   --remove_prefix  remove this prefix from all uris
   --add_prefix     add this prefix to all uris
@@ -85,7 +83,7 @@ die "The path $path does not exist, stopping" unless $path_doc;
 my %is_repeatable;
 my $rfields = $obvius-> get_table_data(
 	"fieldspecs", 
-	'where' => "repeatable = 1"
+	where => "repeatable = 1"
 ) || [];
 $is_repeatable{$_->{name}} = 1 for @$rfields;
 my @repeatable_fields = keys %is_repeatable;
@@ -94,7 +92,7 @@ my @repeatable_fields = keys %is_repeatable;
 my %binary_names;
 my $bin_fieldtypes = $obvius->get_table_data(
 	'fieldtypes', 
-	'where' => "bin = 1"
+	where => "bin = 1"
 ) || [];
 if(scalar(@$bin_fieldtypes)) {
 	my $where = 
@@ -103,7 +101,7 @@ if(scalar(@$bin_fieldtypes)) {
 		"')";
 	my $bin_fields = $obvius->get_table_data(
 		'fieldspecs', 
-		'where' => $where
+		where => $where
 	) || [];
 	$binary_names{$_->{name}} = 1 for @$bin_fields;
 }
@@ -115,6 +113,8 @@ my $data = XMLin(
 	suppressempty	=> '', 
 	forcearray	=> \@repeatable_fields
 );
+
+
 print "Converting from utf8...\n";
 $data = unutf8ify( $data); # For some strange reason I don't understand,
                            # the text is converted from iso-8859-1 to
@@ -124,13 +124,12 @@ $data->{document} = [ $data->{document} ] unless ref($data->{document}) eq 'ARRA
 my $default_doctype = $obvius->get_doctype_by_name('Standard');
 die "Could not get default doctype Standard, stopping" unless $default_doctype;
 
-print STDERR "Creating documents...\n";
+print "Creating documents...\n";
 my $num = 0;
 foreach my $document (@{$data->{document}}) { # Must be in parent-before-child order!
-	create_document($document, $path);
-	$num++;
+	$num++ if create_document( $document, $path);
 }
-print STDERR "$num documents created\n";
+print "$num documents created\n";
 
 exit 0;
 
@@ -170,6 +169,7 @@ sub create_document
 	my $versions = get( $document, 'version');
 	$versions= [ $versions ] unless ref $versions eq 'ARRAY';
 
+	my $succeeded = 0;
 	foreach my $version (@$versions) {
 		my $fields = get( $version, 'fields');
 		for ( keys %$fields) {
@@ -180,7 +180,11 @@ sub create_document
 		my ($new_docid, $new_version) = create_obvius_document(
 			$new_uri, $document, $version, \$error
 		);
+		next unless defined $new_docid;
+		$succeeded++;
 	}
+
+	return $succeeded;
 }
 
 sub create_obvius_document
@@ -289,11 +293,13 @@ sub create_obvius_document
 		my $grp = $obvius-> get_grpid( $token);
 		die "Cannot find group '$token'\n" unless defined $grp;
 
-		@ret = $obvius->create_new_document(
+		@ret = $obvius-> create_new_document(
 			$parent, $name, $doctype->Id, get( $version, 'lang'),
 			$fields, $owner, $grp, $errorref
 		);
 	}
+
+	return unless @ret;
 
 	print " $ret[0], $ret[1]";
 

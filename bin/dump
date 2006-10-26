@@ -22,24 +22,26 @@ use MIME::Base64;
 
 use Getopt::Long;
 
-my ( $site, $recursive, $one_version, $docid, $help);
+my ( $site, $output, $recursive, $one_version, $docid, $help);
+
+$output = '-';
 
 GetOptions(
-	'site=s',     => \$site,
-	'recursive'   => \$recursive,
-	'one-version' => \$one_version,
-	'docid'       => \$docid,
-	'help'        => \$help,
+	recursive    => \$recursive,
+	oneversion   => \$one_version,
+	docid        => \$docid,
+	"o|output=s" => \$output,
+	help         => \$help,
 ) or usage();
 
 sub usage
 {
 	print <<EOT;
-Usage: dump --site=sitename [OPTIONS] document[s]
+Usage: dump [OPTIONS] site document [documents...]
 
-  --site           the name of the site to dump from (mandatory)
   --recursive, -r  dump recursively
   --docid          the documents are given as docids, not as paths
+  --output,    -o  output file name
 
 Note: wildcards do not work. Sorry.
 
@@ -49,6 +51,7 @@ EOT
 	exit 0;
 }
 
+$site = shift @ARGV;
 usage() if $help or not $site or not @ARGV;
 
 my $conf = Obvius::Config-> new( $site);
@@ -63,6 +66,13 @@ my $obvius = Obvius-> new(
 );
 die "Could not get Obvius object for $site" unless defined $obvius;
 $obvius->{USER} = 'admin';
+
+if ( $output ne '-') {
+	open F, ">", $output or die "Cannot write to $output:$!\n";
+	$output = \*F;
+} else {
+	$output = \*STDOUT;
+}
 
 # Figure out which fields are binary and should be encoded:
 my %binary_names;
@@ -100,10 +110,10 @@ for my $tok ( @ARGV) {
 }
 
 
-print '<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>', "\n";
-print "<documentcollection>\n";
+print $output '<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>', "\n";
+print $output "<documentcollection>\n";
 dump_doc($_) for @docids;
-print "</documentcollection>\n";
+print $output "</documentcollection>\n";
 exit;
 
 
@@ -158,7 +168,7 @@ sub dump_doc
 	my $doc_hash = hashify($doc);
 
 	# Dump:
-	print XMLout(
+	print $output XMLout(
 		$doc_hash, 
 		rootname => 'document', 
 		noattr   => 1
