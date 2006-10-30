@@ -26,25 +26,24 @@ use Unicode::String qw(utf8);
 
 use Getopt::Long;
 
-my ($site, $remove_prefix, $add_prefix, $help, $force_owner, $force_group);
-my $path = '/';
+my ($site, $remove_prefix, $help, $force_owner, $force_group, $verbose);
+my $add_prefix = '/';
+my %unresolved_links;
 
 GetOptions(
-	'path=s',          => \$path,
+	'path=s',          => \$add_prefix,
 	'remove_prefix=s'  => \$remove_prefix,
-	'add_prefix=s'     => \$add_prefix,
 	'owner=s'          => \$force_owner,
 	'group=s'          => \$force_group,
+	'verbose'          => \$verbose,
 	'help'             => \$help,
 ) or usage();
 
 $site = shift @ARGV;
 usage() if $help or not $site or 1 != @ARGV;
 
-if ( $add_prefix) {
-	die "--add_prefix must begin with /\n" unless $add_prefix =~ /^\//;
-	$add_prefix =~ s/\/$//;
-}
+die "--path must begin with /\n" unless $add_prefix =~ /^\//;
+$add_prefix =~ s/\/$//;
 if ( $remove_prefix) {
 	die "--remove_prefix must begin with /\n" unless $remove_prefix =~ /^\//;
 	$remove_prefix =~ s/\/$//;
@@ -57,9 +56,9 @@ Usage: create [OPTIONS] site filename
 
   --path           where to create the new documents (defaults to /)
   --remove_prefix  remove this prefix from all uris
-  --add_prefix     add this prefix to all uris
   --owner          force owner name
   --group          force group name
+  --verbose        print more information
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -69,6 +68,8 @@ NOTE: Versions get new dates (obviusly).
 EOT
 	exit 0;
 }
+
+sub say { print @_ if $verbose }
 
 my $conf = Obvius::Config-> new( $site);
 die "Could not get config for $site" unless defined $conf;
@@ -83,10 +84,8 @@ my $obvius = Obvius-> new(
 die "Could not get Obvius object for $site" unless defined $obvius;
 $obvius->{USER} = 'admin';
 
-die "Path $path is invalid, must start with a slash ( Did you mean \/$path perhaps?)\n" 
-	unless $path =~ /^\//;
-my $path_doc = $obvius-> lookup_document( $path);
-die "The path $path does not exist, stopping" unless $path_doc;
+my $path_doc = $obvius-> lookup_document( $add_prefix);
+die "The path $add_prefix does not exist, stopping" unless $path_doc;
 
 # Make a list of repeatable fields:
 my %is_repeatable;
@@ -115,7 +114,7 @@ if(scalar(@$bin_fieldtypes)) {
 	$binary_names{$_->{name}} = 1 for @$bin_fields;
 }
 
-print "Reading XML...\n";
+say "reading...\n";
 my $data = XMLin( 
 	$ARGV[0], 
 	keyattr		=> [], 
@@ -124,7 +123,7 @@ my $data = XMLin(
 );
 
 
-print "Converting from utf8...\n";
+say "converting from utf8...\n";
 $data = unutf8ify( $data); # For some strange reason I don't understand,
                            # the text is converted from iso-8859-1 to
                            # utf-8 on read. So I convert it back, here.
@@ -133,12 +132,30 @@ $data->{document} = [ $data->{document} ] unless ref($data->{document}) eq 'ARRA
 my $default_doctype = $obvius->get_doctype_by_name('Standard');
 die "Could not get default doctype Standard, stopping" unless $default_doctype;
 
-print "Creating documents...\n";
+say "creating documents...\n";
 my $num = 0;
 foreach my $document (@{$data->{document}}) { # Must be in parent-before-child order!
-	$num++ if create_document( $document, $path);
+	$num++ if create_document( $document);
 }
-print "$num documents created\n";
+say "$num documents created\n";
+
+if ( scalar keys %unresolved_links) {
+	say "fixing links...\n";
+
+	my $dbset = DBIx::Recordset->SetupObject({
+		'!DataSource' => $obvius->{DB},
+		'!Table'      => 'vfields'
+	});
+
+	while ( my ( $docid, $d) = each %unresolved_links) {
+		while ( my ( $version, $fields) = each %$d) {
+			fixup_links( $dbset, $docid, $version, $fields);
+		}
+	}
+
+	$dbset-> Disconnect;
+	
+}
 
 exit 0;
 
@@ -153,28 +170,18 @@ sub get
 
 sub create_document
 {
-	my ($document, $path) = @_;
+	my ($document) = @_;
 
 	my $new_uri = get( $document, 'obvius_dump_doc_uri');
 
-	if ($remove_prefix) {
-		$new_uri =~ s!^\Q$remove_prefix\E!!;
-	}
-	
-	if (defined $path) {
-		$new_uri = $path . $new_uri;
-	}
-	
-	if ( $add_prefix) {
-		$new_uri = $add_prefix . $new_uri;
-	}
-
+	$new_uri =~ s!^\Q$remove_prefix\E!! if $remove_prefix;
+	$new_uri = $add_prefix . $new_uri;
 	$new_uri =~ s[//][/]g;
 
-	print "$document->{obvius_dump_doc_uri} -> $new_uri\n";
+	say "$document->{obvius_dump_doc_uri} -> $new_uri\n";
 	
 	if ( $obvius-> lookup_document( $new_uri)) {
-		print "warning: another document already exists at $new_uri, skipping.\n";
+		warn "** warning: another document already exists at $new_uri, skipping.\n";
 		return;
 	}
 
@@ -218,11 +225,12 @@ sub create_obvius_document
 	);
 	unless ( defined $doctype) {
 		$doctype = $default_doctype;
-		print " ( warning, doctype '$version->{obvius_dump_type_name}' is unexistent, reverting to Standard )";
+		warn "** warning, doctype '$version->{obvius_dump_type_name}' is unexistent, reverting to Standard \n";
 	}
-
+		
 	# Fill out fields:
 	#  XXX This really should look up the fieldtype and do a copy_in!
+	my %unresolved_fields;
 	foreach my $fieldname (keys (%{$version->{fields}})) {
 		my $value = $version->{fields}->{$fieldname};
 
@@ -258,7 +266,7 @@ sub create_obvius_document
 			} @$value;
 		}
 
-		if ($fieldtype) {
+		if ( $fieldtype) {
 			if (ref $value) {
 				@$value = map { 
 					$fieldtype-> copy_in(
@@ -273,24 +281,28 @@ sub create_obvius_document
 		}
 
 		# Un-urlify:
-		$value =~ s!(/[^.\'\"\d]+)\.docid!unurlify($1)!ge if $value;
+		if ( $value and not ref $value) {
+			my %unresolved;
+			$value =~ s!([^\'\"]+)\.docid!unurlify($1,$new_uri,0,\%unresolved)!ge;
+			$unresolved_fields{$fieldname} = scalar keys %unresolved
+				if scalar keys %unresolved;
+		}
 
 		$fields-> param( $fieldname => $value);
 	}
 
-	my @ret;
+	my ( $docid, $versionid);
 	my $document_already_exists = $obvius-> lookup_document( $new_uri);
 	if ($document_already_exists) {
 		# XXX Only one version per second, so wait for the next one to come up:
 		sleep 1;
-		@ret = ( 
-			$document_already_exists-> Id, 
-			$obvius-> create_new_version( 
+		$docid = $document_already_exists-> Id;
+		$versionid = $obvius-> create_new_version( 
 				$document_already_exists, 
 				$doctype-> Id, 
 				get( $version, 'lang'),
 				$fields
-		));
+		);
 	} else {
 		my @parent_uri	= split '/', $new_uri;
 		my $name	= pop @parent_uri;
@@ -305,26 +317,29 @@ sub create_obvius_document
 		my $grp = $obvius-> get_grpid( $token);
 		die "Cannot find group '$token'\n" unless defined $grp;
 
-		@ret = $obvius-> create_new_document(
+		( $docid, $versionid) = $obvius-> create_new_document(
 			$parent, $name, $doctype->Id, get( $version, 'lang'),
 			$fields, $owner, $grp, $errorref
 		);
 	}
 
-	return unless @ret;
+	return unless defined $docid and defined $versionid;
 
-	print " $ret[0], $ret[1]";
+	$unresolved_links{$docid}->{$versionid} = \%unresolved_fields
+		if scalar keys %unresolved_fields;
 
-	publish_doc_version( @ret)
+	say " $docid $versionid ";
+
+	publish_doc_version( $docid, $versionid)
 		if $version->{public};
 
-	print "\n";
-	return @ret;
+	say "\n";
+	return ( $docid, $versionid);
 }
 
 sub publish_doc_version 
 {
-	my ($new_docid, $new_version)=@_;
+	my ($new_docid, $new_version) = @_;
 
 	my $new_doc = $obvius-> get_doc_by_id( $new_docid);
 	my $new_vdoc = $obvius-> get_version( $new_doc, $new_version);
@@ -340,18 +355,17 @@ sub publish_doc_version
 	$obvius-> publish_version($new_vdoc, \$publish_error);
 
 	if ( $publish_error) {
-		print " Not published: $publish_error";
+		say "not published: $publish_error";
 		return 0;
 	} else {
-		print " Published ok.";
+		say "published ok";
 		return 1;
 	}
 }
 
 sub unutf8ify
 {
-	my ($obj)=@_;
-
+	my $obj = $_[0];
 	my $ref = ref $obj;
 
 	if (!$ref) { # Scalar:
@@ -368,19 +382,79 @@ sub unutf8ify
 # Rewrite dumped URLs with remove and add prefixes.
 sub unurlify
 {
-	my ($path) = @_;
+	my ( $path, $uri, $final, $unresolved_paths) = @_;
 
-	$path =~ s!^\Q$remove_prefix\E!! 
-		if $remove_prefix;
-		
-	$path = $add_prefix . $path 
-		if $add_prefix;
+	if ( $path =~ m[^\w+://]) {
+		# technically not an error, the link will stay intact, but
+		# it will point to a possible error within the source document
+		warn "** warning: weird link $path.docid in $uri\n" unless $final;
+		return "$path.docid";
+	}
+
+	unless ( $final) {
+		$path =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
+		$path = $add_prefix . $path;
+	} else {
+		return "/$path.docid" if $path =~ /^\/?\d+$/; # avoid double lookup
+	}
 
 	if ( my $d = $obvius->lookup_document($path)) {
+		say "  $path => /", $d-> Id, ".docid\n";
 		$path = "/" . $d-> Id . ".docid";
+	} else {
+		$path .= ".docid" unless $final;
+		$unresolved_paths->{$path} = 1;
+		say "  $path NOT FOUND\n";
 	}
 
 	$path =~ s[//][/]g;
 
 	return $path;
+}
+
+# fix URLs that couldn't be rewritten during creation
+sub fixup_links
+{
+	my ( $dbset, $docid, $version, $fields) = @_;
+
+	my $doc     = $obvius-> get_doc_by_id( $docid);
+	my $vdoc    = $obvius-> get_version( $doc, $version);
+	my $vfields = $obvius-> get_version_fields( $vdoc, 255);
+	my $doctype = $obvius-> get_version_type( $vdoc);
+	my $uri     = $obvius-> get_doc_uri( $doc);
+	say "fixing $uri...\n";
+
+	while ( my ( $fieldname, $unresolved_paths) = each %$fields) {
+		my $ftype = $doctype-> field( $fieldname);
+		die "Internal inconsistency: field $fieldname is not present in document $uri, $version\n"
+			unless $ftype;
+		unless ( $ftype-> FieldType-> param('value_field') eq 'text') {
+			warn "** cannot deal with non-text values in $uri $version $fieldname\n";
+			next;
+		}
+		if ( $ftype-> Repeatable) {
+			# XXX unimplemented
+			warn "** cannot deal with repeatable fields in $uri $version $fieldname\n";
+			next;
+		}
+
+		my %unresolved;
+		my $value = $vfields-> param( $fieldname);
+		$value =~ s!([^\'\"]+)\.docid!unurlify($1,$uri,1,\%unresolved)!ge;
+
+		for ( keys %unresolved) {
+			warn "** warning: cannot resolve $_ in $uri\n";
+		}
+
+		# no update anyway
+		next if scalar( keys %unresolved) == $unresolved_paths;
+
+		$dbset-> Update( {
+			text_value => $value
+		}, {
+			docid   => $docid,
+			version => $version,
+			name    => $fieldname,
+		});
+	}
 }
