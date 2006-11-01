@@ -281,11 +281,23 @@ sub create_obvius_document
 		}
 
 		# Un-urlify:
-		if ( $value and not ref $value) {
-			my %unresolved;
-			$value =~ s!([^\'\"]+)\.docid!unurlify($1,$new_uri,0,\%unresolved)!ge;
-			$unresolved_fields{$fieldname} = scalar keys %unresolved
-				if scalar keys %unresolved;
+		if ( $value) {
+			if ( ref $value) {
+				for ( @$value) {
+					my %unresolved;
+					s!([^\'\"]+)\.docid!unurlify($1,$new_uri,0,\%unresolved)!ge;
+					next unless scalar keys %unresolved;
+					# store the complete value so the update can be as precise
+					# as possible
+					$unresolved_fields{$fieldname}->{$_} = scalar keys %unresolved
+						if scalar keys %unresolved;
+				}
+			} else {
+				my %unresolved;
+				$value =~ s!([^\'\"]+)\.docid!unurlify($1,$new_uri,0,\%unresolved)!ge;
+				$unresolved_fields{$fieldname} = scalar keys %unresolved
+					if scalar keys %unresolved;
+			}
 		}
 
 		$fields-> param( $fieldname => $value);
@@ -391,6 +403,12 @@ sub unurlify
 		return "$path.docid";
 	}
 
+	if ( $path =~ /^(.*?[:])(.*)$/) {
+		# .docid scheme does not tell where the link begins. baaaad.
+		my ( $prefix, $link) = ( $1, $2);
+		return $prefix . unurlify( $link, $uri, $final, $unresolved_paths);
+	}
+
 	unless ( $final) {
 		$path =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
 		$path = $add_prefix . $path;
@@ -402,7 +420,7 @@ sub unurlify
 		say "  $path => /", $d-> Id, ".docid\n";
 		$path = "/" . $d-> Id . ".docid";
 	} else {
-		$path .= ".docid" unless $final;
+		$path .= ".docid";
 		$unresolved_paths->{$path} = 1;
 		say "  $path NOT FOUND\n";
 	}
@@ -410,6 +428,24 @@ sub unurlify
 	$path =~ s[//][/]g;
 
 	return $path;
+}
+
+# given the where clause, fixes the link in the vfield table
+sub fixup_link
+{
+	my ( $dbset, $uri, $val, $unresolved_paths, %update_where) = @_;
+	
+	my %unresolved;
+	$val =~ s!([^\'\"]+)\.docid!unurlify($1,$uri,1,\%unresolved)!ge;
+	warn "** warning: cannot resolve $_ in $uri\n"
+		for keys %unresolved;
+
+	# no update anyway
+	return if scalar( keys %unresolved) == $unresolved_paths;
+
+	$dbset-> Update( {
+		text_value => $val
+	}, \%update_where);
 }
 
 # fix URLs that couldn't be rewritten during creation
@@ -432,29 +468,30 @@ sub fixup_links
 			warn "** cannot deal with non-text values in $uri $version $fieldname\n";
 			next;
 		}
+
+		# repeatable is special
 		if ( $ftype-> Repeatable) {
-			# XXX unimplemented
-			warn "** cannot deal with repeatable fields in $uri $version $fieldname\n";
+			my $value = $vfields-> param( $fieldname);
+			die "Internal inconsistency: repeatable field is not an array ( $uri, $version, $fieldname) "
+				unless ref $value;
+			fixup_link( 
+				$dbset, $uri, $_, 
+				$unresolved_paths-> {$_},
+				docid      => $docid,
+				version    => $version,
+				name       => $fieldname,
+				text_value => $_,
+			) for grep { $unresolved_paths->{$_} } @$value;
 			next;
 		}
 
-		my %unresolved;
-		my $value = $vfields-> param( $fieldname);
-		$value =~ s!([^\'\"]+)\.docid!unurlify($1,$uri,1,\%unresolved)!ge;
-
-		for ( keys %unresolved) {
-			warn "** warning: cannot resolve $_ in $uri\n";
-		}
-
-		# no update anyway
-		next if scalar( keys %unresolved) == $unresolved_paths;
-
-		$dbset-> Update( {
-			text_value => $value
-		}, {
+		fixup_link(
+			$dbset, $uri,
+			$vfields-> param( $fieldname),
+			$unresolved_paths,
 			docid   => $docid,
 			version => $version,
 			name    => $fieldname,
-		});
+		);
 	}
 }
