@@ -154,7 +154,7 @@ my @info = (
 			'<p>'.
 			$m->scomp(
 				'/shared/msg', 
-				text => "Actual access rules for <i>$ownername</i>",
+				text => "Actual access rules",
 			) . 
 			':<div class="obvius-ac-ruleset">' . 
 				$current_access_rules . 
