@@ -26,8 +26,12 @@ use Unicode::String qw(utf8);
 
 use Getopt::Long;
 
-my ($site, $remove_prefix, $help, $force_owner, $force_group, $verbose);
+my (
+	$site, $remove_prefix, $help, $verbose,
+	$force_owner, $force_group, %map_owners, %map_groups
+);
 my $add_prefix = '/';
+my $usermap    = "o:unknown=admin,g:unknown=Admin";
 my %unresolved_links;
 
 GetOptions(
@@ -35,12 +39,13 @@ GetOptions(
 	'remove_prefix=s'  => \$remove_prefix,
 	'owner=s'          => \$force_owner,
 	'group=s'          => \$force_group,
+	'usermap=s'        => \$usermap,
 	'verbose'          => \$verbose,
 	'help'             => \$help,
 ) or usage();
 
+usage(@ARGV) if $help or not @ARGV;
 $site = shift @ARGV;
-usage() if $help or not $site or 1 != @ARGV;
 
 die "--path must begin with /\n" unless $add_prefix =~ /^\//;
 $add_prefix =~ s/\/$//;
@@ -51,6 +56,33 @@ if ( $remove_prefix) {
 
 sub usage
 {
+	my $what = shift() || '';
+	if ( $what eq 'usermap') {
+		print <<EOT;
+Usage: create --usermap=MAP 
+
+MAP is comma-divided a set of statements where each replacies a owner or group 
+name to another during the import. Statements have the syntax
+
+  [T:]OLDNAME=NEWNAME
+
+where OLDNAME is the name to replace with NEWNAME, and T is either 'o' or 'g'
+meaning 'owner' or 'group' . T is 'o' by default. 
+
+OLDNAME special value '*' means 'match all'. The options --owner NAME 
+and --group NAME are actually aliases for o:*=NAME and g:*=NAME, respectively .
+
+OLDNAME special value 'unknown' matches users and groups not found in the DB.
+If no 'unknown' mapping exists, the importing will abort upon meeting non-
+existent users.
+
+Default value: $usermap
+
+EOT
+		exit 0;
+	}
+
+
 	print <<EOT;
 Usage: create [OPTIONS] site filename
 
@@ -59,6 +91,7 @@ Usage: create [OPTIONS] site filename
   --owner          force owner name
   --group          force group name
   --verbose        print more information
+  --usermap        replace user and group names ( run with '--help usermap' for more)
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -83,6 +116,30 @@ my $obvius = Obvius-> new(
 );
 die "Could not get Obvius object for $site" unless defined $obvius;
 $obvius->{USER} = 'admin';
+
+
+# usermap
+if ( defined $force_owner) {
+	die "No such user '$force_owner'\n" unless $obvius-> get_userid( $force_owner);
+	$map_owners{'*'} = $force_owner;
+}
+if ( defined $force_group) {
+	die "No such group '$force_group'\n" unless $obvius-> get_grpid( $force_group);
+	$map_groups{'*'} = $force_group;
+}
+for ( split ',', $usermap) {
+	die "Invalid usermap statement '$_'\n" unless m/^(?:([og]):)?(\w+)=(\w+)$/;
+	my ( $what, $oldname, $newname) = ( $1 || 'o', $2, $3);
+	if ( $what eq 'o') {
+		die "Owner '$what' already specified\n" if $map_owners{$oldname};
+		die "No such user '$newname'\n" unless $obvius-> get_userid( $newname);
+		$map_owners{$oldname} = $newname;
+	} else {
+		die "Group '$what' already specified\n" if $map_groups{$oldname};
+		die "No such group '$newname'\n" unless $obvius-> get_grpid( $newname);
+		$map_groups{$oldname} = $newname;
+	}
+}
 
 my $path_doc = $obvius-> lookup_document( $add_prefix);
 die "The path $add_prefix does not exist, stopping" unless $path_doc;
@@ -166,6 +223,29 @@ sub get
 	die "Cannot access field '$field'" unless exists $object->{$field};
 
 	$object->{$field};
+}
+
+# maps user or group name based as requested in --usermap and/or --owner and --group
+sub get_usermap_id
+{
+	my ( $what, $uri, $token, $hash, $fetch) = @_;
+
+	if ( exists $hash->{'*'} ) {
+		$token = $hash->{'*'};
+	} elsif ( exists $hash-> {$token}) {
+		say "$what '$token' replaced to '$hash->{$token}'\n";
+		$token = $hash->{$token};
+	}
+
+	my $id = $obvius-> $fetch( $token);
+	if ( not defined $id and exists $hash->{unknown}) {
+		warn "** $what '$token' replaced to '$hash->{unknown}' in $uri\n";
+		$id = $obvius-> $fetch( $token = $hash->{unknown});
+	}
+
+	die "$what '$token' does not exist\n" unless defined $id;
+
+	$id;
 }
 
 sub create_document
@@ -264,6 +344,11 @@ sub create_obvius_document
 					$_->{id} :
 					$_
 			} @$value;
+		} elsif ( $fieldname eq 'url' and $value =~ m[^/] ) {
+			my $oldurl = $value;
+			$value =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
+			$value = $add_prefix . $value;
+			say "  -- $oldurl => $value\n";
 		}
 
 		if ( $fieldtype) {
@@ -320,14 +405,20 @@ sub create_obvius_document
 		my $name	= pop @parent_uri;
 		my $parent_uri	= join '/', @parent_uri;
 		my $parent	= $obvius-> lookup_document($parent_uri);
-			
-		my $token = $force_owner || get( $document, 'obvius_dump_owner_login');
-		my $owner = $obvius-> get_userid( $token);
-		die "Cannot find user '$token'\n" unless defined $owner;
-		
-		$token = $force_group || get( $document, 'obvius_dump_grp_name');
-		my $grp = $obvius-> get_grpid( $token);
-		die "Cannot find group '$token'\n" unless defined $grp;
+		my $owner = get_usermap_id(
+			'user',
+			$new_uri,
+			get( $document, 'obvius_dump_owner_login'),
+			\%map_owners,
+			'get_userid'
+		);
+		my $grp = get_usermap_id(
+			'group',
+			$new_uri,
+			get( $document, 'obvius_dump_grp_name'),
+			\%map_groups,
+			'get_grpid'
+		);
 
 		( $docid, $versionid) = $obvius-> create_new_document(
 			$parent, $name, $doctype->Id, get( $version, 'lang'),
