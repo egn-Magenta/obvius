@@ -30,8 +30,12 @@ function raise(exception)
 inititalize internal variables. form is the name of form that is to be the arena
 of dhtml play ( see above )
 */
-function accessrules_init(form, show_universal, allow_inherited, readonly)
-{
+function accessrules_init(
+	form, 
+	show_universal,  universal_rules, 
+	allow_inherited, inherited_rules,
+	readonly
+) {
 	// check fancy functions
 	if ( typeof(Array.prototype.splice) != "function")
 		raise("Unable to work correctly under this browser, consider installing a newer version, or Firefox");
@@ -81,7 +85,7 @@ function accessrules_init(form, show_universal, allow_inherited, readonly)
 	if ( show_universal) {
 		var c = get_element('universal-content');
 		var d = new Array();
-		accessrules_parse( d, c.innerHTML);
+		accessrules_parse( d, universal_rules);
 		for ( i = 0; i < d.length; i++)
 			d[i] = accessrules_create_readable_accessrule( d[i]);
 		c.innerHTML = d.length ? d.join("<br>") : "<i>none</i>"
@@ -91,7 +95,7 @@ function accessrules_init(form, show_universal, allow_inherited, readonly)
 	if ( ac_allow_inherited) {
 		c = get_element('inherited-content');
 		d = new Array();
-		accessrules_parse( d, c.innerHTML);
+		accessrules_parse( d, inherited_rules);
 		for ( i = 0; i < d.length; i++)
 			d[i] = accessrules_create_readable_accessrule( d[i]);
 		c.innerHTML = d.length ? d.join("<br>") : "<i>none</i>"

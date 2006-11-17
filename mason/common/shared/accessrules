@@ -13,6 +13,11 @@ $inactive         =>  0
 $universal =~ s/\r//gs;
 $inherited =~ s/\r//gs;
 $inherited =~ s/\r//gs;
+my ( $js_universal, $js_inherited) = map {
+	s/\n/\\n/g;
+	s/(['"])/\\$1/g;
+	$_;	
+} ( $universal, $inherited);
 </%init>
 
 <div id="editlayer" class="obvius-ac-editlayer" >
@@ -87,6 +92,7 @@ Universal access rules
 >
 Inherited access rules
 </label>
+<!-- displayed as is if no javascript -->
 <div class="obvius-ac-ruleset" id="inherited-content">
 <% $inherited %>
 </div>
@@ -162,7 +168,10 @@ error in <b>scripts/admin_accessrules.js</b>, please investigate
 
 <script language="JavaScript">
 accessrules_init('obvius-accessrules', 
-	<% $show_universal %>, <% $allow_inherited %>, <% $inactive%>);
+	<% $show_universal %>,  "<% $js_universal %>", 
+	<% $allow_inherited %>, "<% $js_inherited %>", 
+	<% $inactive%>
+);
 get_element('js-panel').style.display="block";
 get_element('raw-edit-show').style.display="none";
 get_element('raw-edit-hide').style.display="block";
