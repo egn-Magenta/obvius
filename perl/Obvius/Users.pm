@@ -150,18 +150,31 @@ sub encrypt_password {
 }
 
 sub delete_user {
-    my ($this, $userid, $doc) = @_;
+    my ($this, $userid) = @_;
 
-    return undef unless $this->can_create_new_user($doc);
+    return undef unless $this->can_create_new_user();
 
     return undef unless $this->get_user($userid);
+	
+    # we change owner to "nobody"
+    my $nobody = $this-> get_userid('nobody');
+    unless ( defined $nobody) {
+        $this->{DB_Error} = "User 'nobody' is not found; cannot relocate documents";
+	return undef;
+    }
 
     $this->db_begin;
     eval {
+        my $set = DBIx::Recordset->SetupObject ( {
+            '!DataSource' => $this->{DB},
+            '!Table'      => 'documents',
+	});
+        $set-> Update( { owner => $nobody }, { owner => $userid } );
+        $set-> Disconnect;
+        
 	$this->db_delete_user($userid);
 	$this->db_delete_user_grp($userid);
-	# XXX If this user owns documents, what to do? Change owner to someone else?
-	#     Don't delete user? What?
+
 	$this->db_commit;
     };
 
@@ -179,9 +192,9 @@ sub delete_user {
 }
 
 sub create_new_user {
-    my ($this, $user, $doc) = @_;
+    my ($this, $user) = @_;
 
-    return undef unless $this->can_create_new_user($doc);
+    return undef unless $this->can_create_new_user();
 
     return undef if ($this->get_userid($user->{login}));
 
@@ -218,9 +231,9 @@ sub create_new_user {
 #               document given. Returns undef on error and true on
 #               success.
 sub update_user {
-    my ($this, $user, $doc) = @_;
+    my ($this, $user) = @_;
 
-    return undef unless $this->can_create_new_user($doc); # Perhaps different?
+    return undef unless $this->can_create_new_user(); # Perhaps different?
 
     $user->{passwd}=$this->encrypt_password($user->{password})
 	if (defined $user->{password} and $user->{password});
@@ -375,7 +388,7 @@ Obvius::Users - User/Group handling methods for L<Obvius>.
 
   my $grpid=$obvius->get_grpid($group_name);
 
-  my $ret=$obvius->update_user($user, $doc);
+  my $ret=$obvius->update_user($user);
 
 =head1 DESCRIPTION
 
