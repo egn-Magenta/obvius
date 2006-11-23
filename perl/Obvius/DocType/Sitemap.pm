@@ -11,115 +11,80 @@ use Obvius::DocType;
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-sub action {
-    my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
-    my $depth=$obvius->get_version_field($vdoc, 'Levels') || 2;
-	my $root=$obvius->get_version_field($vdoc, 'Root');
-    $this->tracer($input, $output, $doc, $vdoc, $obvius) if ($this->{DEBUG});
+sub action
+{
+	my ( $this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-    $output->param(Obvius_DEPENCIES =>1);
+	$this-> tracer($input, $output, $doc, $vdoc, $obvius) if $this->{DEBUG};
+
+	my $depth      = $obvius-> get_version_field( $vdoc, 'levels') || 2;
+	my $public     = $obvius-> get_version_field( $vdoc, 'show_unpublished') ? 0 : 1;
+	my $notexpired = $obvius-> get_version_field( $vdoc, 'show_expired')     ? 0 : 1;
+	my $nothidden  = $obvius-> get_version_field( $vdoc, 'show_hidden')      ? 0 : 1;
+	my $root       = $obvius-> get_version_field( $vdoc, 'root');
 
 	my $top;
-	if ($root && $root ne '/') {
-		$top = $obvius->lookup_document($root);
-		chop($root);
+	if ( $root and $root ne '/') {
+		$top = $obvius-> lookup_document( $root);
+		chop $root;
 	} else {
-		$top = $obvius->get_root_document();
+		$top = $obvius-> get_root_document();
 		$root = ''; # Needed if $root was /
 	}
-    $top = $obvius->get_public_version($top);
+	$top = $obvius-> get_public_version( $top);
 
-	unless ($top) {
-		#Something is wrong with $top, tell the user
-		$output->param('message' => 'INVALID_ROOT');
+	unless ( $top) {
+		# Something is wrong with $top, tell the user
+		$output-> param( message => 'INVALID_ROOT');
 		return OBVIUS_ERROR;
 	}
 
-    $obvius->get_version_fields($top, [ 'title', 'short_title' ]);
-    $top->{SHORT_TITLE} = $top->field('short_title');
-    $top->{TITLE} = $top->field('title');
-    $top->{NAME} = '';
-    my $elements= [];
+	$obvius-> get_version_fields($top, [ qw(title short_title) ]);
+	$top-> {SHORT_TITLE} = $top->field('short_title');
+	$top-> {TITLE}       = $top->field('title');
+	$top-> {NAME}        = '';
 
-    add_to_sitemap($top, 0, $depth, $obvius, $elements, $root);
+	my $root_map = add_to_sitemap( 
+		$top, 0, $depth, $obvius, $root, 
+		$public, $notexpired, $nothidden
+	);
 
-    $output->param('sitemap' => $elements);
-    $output->param('depth' => $depth);
-    return OBVIUS_OK;
+	$output-> param( sitemap => $root_map-> {down} || [] ); # skip the root itself
+	$output-> param( depth   => $depth);
+
+	return OBVIUS_OK;
 }
 
-sub add_to_sitemap{
-    my ($vdoc, $level, $depth, $obvius, $elements, $url) = @_;
+sub add_to_sitemap
+{
+	my ($vdoc, $level, $depth, $obvius, $url, $public, $notexpired, $nothidden) = @_;
 
-    my $title= $vdoc->{SHORT_TITLE} || $vdoc->{TITLE};
-    my $uri = $url . $vdoc->{NAME} . '/';
-    my $seq = $vdoc->{SEQ};
+	my $uri = $url . $vdoc->{NAME} . '/';
 
-    my $element = {
-                    'title' => $title,
-                    'url'   => $uri,
-                    'level' => $level,
-                    'seq'   => $seq,
-                };
+	my $ret = {
+		title => $vdoc-> {SHORT_TITLE} || $vdoc-> {TITLE},
+		url   => $uri,
+		seq   => $vdoc-> {SEQ},
+	};
+	
+	return $ret if $level++ >= $depth;
 
-    push (@$elements, $element) if($level); # Don't include root doc.
+	my $subdocs = $obvius-> search(
+		[ qw(title short_title seq) ],
+		"parent = " . $vdoc-> DocId,
+		needs_document_fields   => [ qw(parent name) ],
+		straight_documents_join => 1,
+		public                  => $public,
+		notexpired              => $notexpired,
+		nothidden               => $nothidden,
+		sortvdoc                => $vdoc
+	);
 
-    return if ($level++ >= $depth); # HER BLIVER TESTEN UDFØRT
+	$ret-> {down} = [ map {
+		add_to_sitemap( $_, $level, $depth, $obvius, $uri, $public, $notexpired, $nothidden)
+	} @$subdocs ] if $subdocs;
 
-    my $subdocs = $obvius->search(
-                                [ 'title', 'short_title', 'seq' ],
-                                "(seq >= 0 AND parent = " . $vdoc->DocId . ")",
-                                needs_document_fields => [ 'parent', 'name' ],
-                                straight_documents_join => 1,
-                                public => 1,
-                                notexpired => 1,
-                                sortvdoc => $vdoc
-                            ) || [];
-
-    # XXX modifying the element we have already pushed onto @$elements
-    # We can do this because $element is a reference
-    $element->{subdocs_marker} = 1 if scalar(@$subdocs);
-
-    for (@$subdocs)
-    {
-        add_to_sitemap($_, $level, $depth, $obvius, $elements, $uri);
-    }
-    return;
+	return $ret;
 }
-
 
 1;
-__END__
-# Below is stub documentation for your module. You better edit it!
-
-=head1 NAME
-
-Obvius::DocType::Sitemap - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Obvius::DocType::Sitemap;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Obvius::DocType::Sitemap, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
-
-=head1 SEE ALSO
-
-L<perl>.
-
-=cut

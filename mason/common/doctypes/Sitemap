@@ -1,51 +1,20 @@
 <& headline &>
 <div class="sitemap">
-<ul>
-% my $level=1;
-% my $in=0;
-% foreach (@$sitemap) {
-%     next if ($_->{url} eq '/sitemap/');
-%     if ($level < $_->{level}) {
-%         for($i=$level; $i<$_->{level}; $i++) {
-
-<% '  ' x ($level+1) %><ul>
-<% '  ' x ($level+2) %><li>\
-%         }
-%     }
-%     elsif ($level > $_->{level}) {
-</li>
-%         for($i=$level; $i>$_->{level}; $i--) {
-<% '  ' x $level %></ul>
-<% '  ' x ($level-1) %></li>
-%         }
-<% '  ' x ($level-1) %><li>\
-%     }
-%     else { # equal
-%         if ($in) {
-</li>
-%         }
-<% '  ' x (2*$level-1) %><li>\
-%     }
-%     $level=$_->{level};
-%     $in++;
-<a href="<% $prefix %><% $_->{url} %>"><% $_->{title} |h %></a>\
-% }
-%
-</li>
-<% '  ' x $level %></ul>
-% # Close up:
-% for($i=$level-1; $i>0; $i--) {
-<% '  ' x ($i) %></li>
-<% '  ' x ($i-1) %></ul>
-% }
-%
-</li>
-<% '  ' x $level %></ul>
-% # Close up:
-% for($i=$level-1; $i>0; $i--) {
-<% '  ' x ($i) %></li>
-<% '  ' x ($i-1) %></ul>
-% }
+% my @stack = ([ $sitemap, 0 ]); # tree level pointer and level item number pointer
+%LOOP: while ( @stack) {
+%	my $sp = $stack[-1];
+%	$m-> print('<ul>') unless $sp-> [1];
+%	while ( $sp->[1] < @{ $sp-> [0] } ) {
+%		my $i = $sp->[0]->[ $sp->[1]++ ];
+<li><a href="<% $prefix %><% $i->{url} %>"><% $i->{title} |h %></a></li>
+%		if ( $i-> {down}) {
+%			push @stack, [ $i-> {down}, 0];
+%			next LOOP;
+%		}
+%	}
+%	pop @stack;
+</ul>
+%}
 </div>
 %
 <%args>
@@ -53,18 +22,5 @@ $output
 </%args>
 %
 <%init>
-my $i=undef;
-my $sitemap=$output->param('sitemap') || [];
-my $depth=$output->param('depth');
+my $sitemap = $output->param('sitemap') || [];
 </%init>
-%
-<%doc>
-
-This component is horribly complicated by the fact that the
-sitemap-information comes as a flat array, instead of a tree.
-
-That is probably a left-over from a world where recursion wasn't
-possible in the template system, but it is here, and the readability
-would gain immensely from such an approach.
-
-</%doc>

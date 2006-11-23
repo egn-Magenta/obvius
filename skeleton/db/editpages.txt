@@ -200,6 +200,9 @@ DocType: Sitemap
   Fields: docdate Date (YYYY-MM-DD)
   Fields: seq Order of succession;subtitle=Display-only, nopagenav=1
   Fields: root Base of sitemap
+  Fields: show_expired Show expired;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_hidden Show hidden;label_0=No, label_1=Yes, reverse_options=1
+  Fields: show_unpublished Show not published;label_0=No, label_1=Yes, reverse_options=1
  End
  Page: P
   Title: Publish document

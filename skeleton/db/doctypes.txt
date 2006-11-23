@@ -106,8 +106,11 @@ DocType: CreateDocument parent=Base basis searchable
  successtext        text                    searchable optional
 
 DocType: Sitemap parent=Standard basis searchable
- levels            priority6    default_value=2
- root			   path			optional
+ levels            priority6                default_value=2
+ root              path                     optional
+ show_hidden       bool                     default_value=0
+ show_expired      bool                     default_value=0
+ show_unpublished  bool                     default_value=0
 
 DocType: Subscribe parent=Standard basis searchable
  mailfrom          email
