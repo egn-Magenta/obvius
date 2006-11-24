@@ -525,3 +525,16 @@ DocType: CreateDocument
   Title: Publishing
   Desc: Publish now?
  End
+
+DocType: DocStats
+ Page: 1
+  Title: Text and options
+  Fields: title Title
+ End
+ Page: 2
+  Title: Keywords
+  Fields: keyword Choose the appropriate keywords for this document:
+ End
+ Page: P
+  Title: Publish document
+ End

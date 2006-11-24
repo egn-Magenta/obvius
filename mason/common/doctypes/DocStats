@@ -1,0 +1,18 @@
+%# $Id$
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius-> get_version_fields($vdoc, [qw(title)]);
+my $title = $vdoc->Title;
+</%init>
+
+<h1><% $title %></h1>
+<div>
+Published documents: <% $output->param('count_public') %> <br>
+Danish documents:    <% $output->param('count_da') %> <br>
+English documents:   <% $output->param('count_en') %> <br>
+Total documents:     <% $output->param('count_all') %> <br>
+</div>
+%

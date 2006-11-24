@@ -208,3 +208,6 @@ DocType: Newsbox parent=Base basis
 DocType: Proxy parent=Base basis
  url           line                         searchable sortable
  prefixes      text                         optional
+
+DocType: DocStats parent=Base basis
+
