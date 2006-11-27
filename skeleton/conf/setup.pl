@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Obvius::Config;
+use Obvius::Hostmap;
 use Obvius::Log::Apache;
 
 use WebObvius::Site::Mason;
