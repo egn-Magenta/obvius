@@ -3,7 +3,7 @@
 % my @stack = ([ $sitemap, 0 ]); # tree level pointer and level item number pointer
 %LOOP: while ( @stack) {
 %	my $sp = $stack[-1];
-%	$m-> print('<ul>') unless $sp-> [1];
+%	$m-> out('<ul>') unless $sp-> [1];
 %	while ( $sp->[1] < @{ $sp-> [0] } ) {
 %		my $i = $sp->[0]->[ $sp->[1]++ ];
 <li><a href="<% $prefix %><% $i->{url} %>"><% $i->{title} |h %></a></li>
