@@ -41,10 +41,11 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             $attr->{style} .= ";";
                                                         }
 
-                                                        if(my $align = $attr->{align}) {
-                                                            $attr->{style} =~ s/float:[^;]+;//;
-                                                            $attr->{style} .= "float: $align;";
-                                                        }
+# Er udkommenteret pga fejl - 30/11 2006 /Bjarni
+#                                                        if(my $align = $attr->{align}) {
+#                                                            $attr->{style} =~ s/float:[^;]+;//;
+#                                                            $attr->{style} .= "float: $align;";
+#                                                       }
 
                                                         if(my $vspace = $attr->{vspace}) {
                                                             $attr->{style} =~ s/margin-top:[^;]+;//;
@@ -97,10 +98,11 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         $remove_attr{'width'} = 1;
                                                         $remove_attr{'height'} = 1;
 
-                                                        if(my $align = $attr->{align}) {
-                                                            $attr->{style} =~ s/float:[^;]+;//;
-                                                            $attr->{style} .= "float: $align;";
-                                                        }
+# Er udkommenteret pga fejl - 30/11 2006 /Bjarni
+#                                                        if(my $align = $attr->{align}) {
+#                                                            $attr->{style} =~ s/float:[^;]+;//;
+#                                                            $attr->{style} .= "float: $align;";
+#                                                        }
 
                                                         if(my $width = $attr->{width}) {
                                                             $attr->{style} =~ s/width:[^;]+;//;
@@ -245,7 +247,3 @@ my $p = HTML::Parser->new(api_version=>3,
                                         "self, text" ]);
 
 </%once>
-
-
-
-
