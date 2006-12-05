@@ -38,7 +38,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 # recursively encode an array into ICal text scalar
 sub encode_ical
 {
-	my ( $type, $opt) = @_;
+	my ( $type, $opt, $as_quoted_printable) = @_;
 
 	my $ret = "BEGIN:$type\n";
 
@@ -49,19 +49,17 @@ sub encode_ical
 			next;
 		}
 
-		# default encoding, conflicts with quoted-printable
-		# $val =~ s/([\\;,])/\\$1/gs;
-		# $val =~ s/\n/\\n/gs;
 		
-		# cheap latin-1 Encode, enable if necessary
-		# $val =~ s/([\x80-\xBF])|([\xC0-\xFF])/$1 ? "\xC2$1" : "\xC3" . chr(ord($2) - 0x40)/ge;
-
-		# quoted-printable, conflict with default and unicode strings
 		my $quoted = 0; 
-		if ( $val =~ /[\\;,\t\r\n\x80-\xff]/) {
+		if ( $as_quoted_printable and $val =~ /[\\;,\t\r\n\x80-\xff]/) {
+			# quoted-printable, conflicts with default and unicode strings
 			$key .= ";ENCODING=QUOTED-PRINTABLE";
 			$val =~ s/([\\;,\t\r\n\x80-\xff])/sprintf(q(=%02X),ord($1))/ge;
 			$quoted = 1;
+		} else {
+			# default encoding, conflicts with quoted-printable
+			$val =~ s/([\\;,])/\\$1/gs;
+			$val =~ s/\n/\\n/gs;
 		}
 		
 		$val =~ s/<("[^"]*"|'[^']*'|[^>])*>//g;
@@ -160,7 +158,7 @@ sub as_ical
 	}
 
 	return encode_ical( 'VCALENDAR', [
-		VERSION	=> '2.0',
+		VERSION	=> '1.0',
 		METHOD	=> 'PUBLISH',
 		PRODID	=> ':-//Obvius//NONSGML ICal//DA',
 		VEVENT	=> \@list,
