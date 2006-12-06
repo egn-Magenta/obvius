@@ -318,7 +318,7 @@ CREATE INDEX news_end_idx   ON news (FIELD(end));
 #perldef CRYPT($passwd) "'" . crypt($passwd, '$1$safdasdf$') . "'"
 
 INSERT INTO users VALUES ( '1',  'admin', CRYPT(admin),  'Admin', QUOTE(webmaster@DOMAIN), '', '1','2','1');
-INSERT INTO users VALUES ( '2', 'nobody', CRYPT(nobody), 'Nobody', QUOTE(webmaster@DOMAIN), '', '0','0','0');
+INSERT INTO users VALUES ( '2', 'nobody', '', 'Nobody', '', '', '0','0','0');
 
 # Groups:
 
