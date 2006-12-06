@@ -1,5 +1,13 @@
 # $Id$
 
+20061206:
+	User 'nobody' and group 'No-one' must be always defined. Unless
+	already present, insert these as:
+
+	INSERT INTO users VALUES ( '2', 'nobody', '', 'Nobody', '', '', '0','0','0');
+	INSERT INTO groups VALUES ( '2', 'No-one');
+	INSERT INTO grp_user VALUES ( '2', '2');
+
 20060915:
 	Table users now used to store both admin and non-admin users.
 	Execute this after upgrading:
