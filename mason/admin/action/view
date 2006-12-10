@@ -1,3 +1,20 @@
+<%doc>
+Stuff that should be displayed above the common area in admin when
+viewing a document goes here. Can also be put in
+portal/before_common, but then it will also be displayed during
+editing of pages etc.
+</%doc>
+%if($obvius->config->param('use_manual_subscription')) {
+%my $subscription_type = $obvius->get_version_field($vdoc, 'subscribeable') || '';
+%if($subscription_type eq 'manual') {
+<& /portal/manual_subscription_notification &>
+%}
+%}
+<%doc>
+End of "before common" stuff.
+</%doc>
+%
+%
 <% $data %>\
 %
 <%init>

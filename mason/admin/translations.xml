@@ -1532,6 +1532,10 @@
       <translation lang="da">Dokumentet findes allerede</translation>
   </text>
 	    	    
+  <text key="Manual subscription for this document">
+    <translation lang="en">Manual subscription for this document</translation>
+    <translation lang="da">Manuel abonnementudsendelse for dette dokument</translation>
+  </text>
 
   <text key="">
     <translation lang="en"></translation>
