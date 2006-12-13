@@ -102,6 +102,11 @@ sub send_manual {
             # See <>
 
             my $subscriber_ = $obvius->get_subscriber({id => $s->{subscriber}});
+            unless ( $subscriber_) {
+                warn "** warning: subscriber with id $s->{subscriber} is not present in the subscribers table -- remove the subscription manually\n";
+                next;
+            }
+
             my $subscriber = {};
             for(keys %$subscriber_) {
                 $subscriber->{$_} = $subscriber_->{$_};
