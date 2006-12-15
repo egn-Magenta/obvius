@@ -2,6 +2,10 @@
 This is a copy of the manual subscription system from the old admin
 in Obvius. Can be enabled by setting "use_manual_subscription=1" in
 a sites configfile.
+
+Show error/perl command:
+%# print STDERR $command . " ----- " . $retval . "\n";
+<% $command %> - <% $retval %>
 </%doc>
 <script language="javascript">
     var m_s_incoming_value = '<% $four_days_from_now %>';
@@ -21,10 +25,10 @@ a sites configfile.
     }
 </script>
 
+<table border="0" width="100%">
 <form name="pageform" id="pageform" action="<% $prefix . $uri %>">
 <input type="hidden" name="obvius_command_manual_subscription" value="1" />
 
-<table border="0" width="100%">
 %if($delayed) {
 % if($go) {
 %  my ($d_year, $d_month, $d_day, $d_hour, $d_min) = $delayed =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
@@ -35,6 +39,7 @@ a sites configfile.
 %  $command .= "  --manual --docid=" . $doc->Id;
 %  $command .= " | at '$d_hour:$d_min $d_month/$d_day/$d_year'";
 %  my $retval = system($command);
+%  print STDERR $command . "\n";
     <tr>
       <td>
         Forsinket abonnementudsendelse afsendt.
@@ -81,6 +86,7 @@ a sites configfile.
     <tr>
       <td colspan="2">
         Følgende dokumenter vil blive sendt ud til en abonnent, der ikke har modtaget abonnementmail i 7 dage:
+        <br /><br />
       </td>
     </tr>
 %   my $counter = 1;
