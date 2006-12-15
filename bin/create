@@ -141,8 +141,8 @@ for ( split ',', $usermap) {
 	}
 }
 
-my $path_doc = $obvius-> lookup_document( $add_prefix);
-die "The path $add_prefix does not exist, stopping" unless $path_doc;
+warn "** warning: path $add_prefix does not exist\n"
+	unless $obvius-> lookup_document( $add_prefix);
 
 # Make a list of repeatable fields:
 my %is_repeatable;
