@@ -191,6 +191,8 @@ sub connect {
     return $db;
 }
 
+sub dbh { shift-> {DB}->{'*DBHdl'} }
+
 sub config {
     my ($this) = @_;
 

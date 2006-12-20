@@ -17,7 +17,7 @@ sub action
 
 	$this-> tracer( $input, $output, $doc, $vdoc, $obvius) if $this->{DEBUG};
 
-	my $dbh = $obvius-> {DB}->{'*DBHdl'};
+	my $dbh = $obvius-> dbh;
 
 	my $all    = $dbh-> selectrow_array( 
 		"SELECT count(*) FROM documents" 
