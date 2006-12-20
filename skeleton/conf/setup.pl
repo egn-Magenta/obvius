@@ -49,6 +49,8 @@ $obvius_config-> param('hostmap',
         )
 );
 
+Obvius-> new( $obvius_config) or die "Cannot instantiate Obvius\n";
+
 my $subsite='';
 our $Common = ${perlname}::Site::Common->new(
                                         debug => $obvius_config->Debug,
