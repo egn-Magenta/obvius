@@ -161,8 +161,22 @@ sub dump_doc
 		$doc-> param( obvius_dump_parent_uri => $obvius-> get_doc_uri( $parent));
 	}
 	$doc-> param( obvius_dump_type_name   => $obvius-> get_document_type( $doc)->Name);
-	$doc-> param( obvius_dump_owner_login => $obvius-> get_user( $doc-> Owner)->{login});
-	$doc-> param( obvius_dump_grp_name    => $obvius-> get_group( $doc-> Grp)->{name});
+
+	my $user  = $obvius-> get_user( $doc-> Owner);
+	if ( $user) {
+		$doc-> param( obvius_dump_owner_login => $user->{login});
+	} else {
+		$doc-> param( obvius_dump_owner_login => 'UNKNOWN');
+		warn "** warning: document ", $obvius-> get_doc_uri( $doc), " doesn't have a valid owner\n";
+	}
+	my $group = $obvius-> get_group( $doc-> Grp);
+	if ( $group) {
+		$doc-> param( obvius_dump_grp_name    => $group->{name});
+	} else {
+		$doc-> param( obvius_dump_grp_name    => 'UNKNOWN');
+		warn "** warning: document ", $obvius-> get_doc_uri( $doc), " doesn't have a valid group\n";
+	}
+	
 
 	# Un-objectify:
 	my $doc_hash = hashify($doc);
