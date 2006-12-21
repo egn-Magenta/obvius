@@ -25,7 +25,7 @@ sub access_handler ($$) {
 
     $this->tracer($req) if ($this->{DEBUG});
 
-    $this->add_benchmark($req, 'Access start') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('access::access') if $this-> {BENCHMARK};
 
     my $uri=$req->uri;
     # map:
@@ -62,7 +62,7 @@ sub authen_handler ($$) {
 
     $this->tracer($req) if ($this->{DEBUG});
 
-    $this->add_benchmark($req, 'Authen start') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('access::authen') if $this-> {BENCHMARK};
 
     my ($res, $pw) = $req->get_basic_auth_pw;
     return $res unless ($res == OK);
@@ -94,7 +94,7 @@ sub authz_handler ($$) {
 
     $this->tracer($req) if ($this->{DEBUG});
 
-    add_benchmark($req, 'Authz start') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('access::authz') if $this-> {BENCHMARK};
 
     my $doc = $this->obvius_document($req);
     return NOT_FOUND unless ($doc);

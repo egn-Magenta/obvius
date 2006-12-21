@@ -60,46 +60,6 @@ use Unicode::String qw(utf8 latin1);
 
 ########################################################################
 #
-#	Benchmark utilities
-#
-########################################################################
-
-use Benchmark qw(timediff timestr);
-
-sub add_benchmark {
-    my ($this, $req, $name) = @_;
-
-    my $data = $req->pnotes('BENCHMARKS');
-    if ($data) {
-	push(@$data, [ $name, new Benchmark ]);
-    } else {
-	$req->pnotes('BENCHMARKS', [ [ $name, new Benchmark ] ]);
-    }
-}
-
-sub report_benchmarks {
-    my ($this, $req, $fh) = @_;
-
-    my $data = $req->pnotes('BENCHMARKS');
-    return unless ($data);
-
-    push(@$data, [ 'End', new Benchmark ]);
-
-    my $td = timediff($data->[-1]->[1], $data->[0]->[1]);
-    printf $fh "Time %-16s: %s\n", 'total', timestr($td);
-
-    my $prev = shift(@$data);
-    my $cur;
-    while ($cur = shift(@$data)) {
-	$td = timediff($cur->[1], $prev->[1]);
-	printf $fh "Time %-16s: %s\n", $prev->[0], timestr($td);
-	$prev = $cur;
-    }
-}
-
-
-########################################################################
-#
 #	Language handling
 #
 ########################################################################
@@ -461,6 +421,8 @@ sub generate_page {
 
     my $output = $this->create_output_object($req, $doc, $vdoc, $doctype, $obvius);
 
+    my $benchmark = Obvius::Benchmark-> new('site::generate page') if $this-> {BENCHMARK};
+
     if ($this->{SUBSITE}) {
 	print STDERR "GENERATE_PAGE: calling subsite\n" if ($this->{DEBUG});
 
@@ -489,12 +451,11 @@ sub generate_page {
 	print STDERR "GENERATE_PAGE: calling site operation\n"
 	    if ($this->{DEBUG});
 
-	$this->add_benchmark($req, "Operation " . $doctype->Name) if ($this->{BENCHMARK});
+	$benchmark-> lap( "operation " . $doctype->Name) if $benchmark;
 
 	my $input=$this->create_input_object($req, %options);
 	my $status = $site->handle_operation($input, $output, $doc, $vdoc, $doctype, $obvius);
 
-	#$this->add_benchmark($req, 'Bake cookies') if ($this->{BENCHMARK});
 	my $outgoing_cookies=$output->param('OBVIUS_COOKIES') || {};
 	foreach my $k (keys %$outgoing_cookies) {
 	    # To keep backwards compatibility we do something like this,
@@ -555,7 +516,7 @@ sub generate_page {
     }
     print STDERR "GENERATE_PAGE: expanding site outputs\n" if ($this->{DEBUG});
 
-    $this->add_benchmark($req, 'Output start') if ($this->{BENCHMARK});
+    $benchmark-> lap('output start') if $benchmark;
     return $this->expand_output($site, $output, $req);
 }
 
@@ -591,7 +552,7 @@ sub handler ($$) {
 
     $this->tracer($req) if ($this->{DEBUG});
 
-    $this->add_benchmark($req, 'Handler start') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('site::handler') if $this-> {BENCHMARK};
 
     my $uri = $req->uri;
     return $this->redirect($req, "$uri/", 'force-external')
@@ -613,7 +574,8 @@ sub handler ($$) {
 	return $this->redirect($req, $alternate, 'force-external');
     }
 
-    $this->add_benchmark($req, 'Raw data') if ($this->{BENCHMARK});
+    $benchmark-> lap( 'raw data') if $benchmark;
+
     my ($mime_type, $data) = $doctype->raw_document_data($doc, $vdoc, $obvius);
 
     if ($data) {
@@ -626,24 +588,21 @@ sub handler ($$) {
 	return $req->status unless (defined $data);
 
 	if ($this->can("output_filter")) {
-	    $this->add_benchmark($req, 'Filter start') if ($this->{BENCHMARK});
+            $benchmark-> lap( 'filter start') if $benchmark;
 	    $this->output_filter($req, \$data);
 	}
 
 	$mime_type ||= 'text/html';
     }
 
-    $this->add_benchmark($req, 'Making response') if ($this->{BENCHMARK});
+    $benchmark-> lap( 'making response') if $benchmark;
     $req->content_type($mime_type);
     $req->set_content_length(length($data));
     $req->send_http_header;
 
-    $this->add_benchmark($req, 'Sending data') if ($this->{BENCHMARK});
+    $benchmark-> lap( 'sending data') if $benchmark;
     # XXX should be \$data
     $req->print($data) unless ($req->header_only);
-
-    $this->add_benchmark($req, 'Handler end') if ($this->{BENCHMARK});
-    $this->report_benchmarks($req, \*STDERR) if ($this->{BENCHMARK});
 
     return OK;
 }

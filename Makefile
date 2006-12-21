@@ -25,6 +25,7 @@ test:
 	@echo 'Checking prerequisites...'
 	@perl -MString::Random -MDBI -MDBIx::Recordset -MParams::Validate -MDate::Calc \
 	-MDigest::SHA1 -MImage::Size -MXML::Simple -MUnicode::String -MBerkeleyDB \
+	-MTime::HiRes \
 	-MHTML::Mason -MApache::Session -MHTML::Tree -MHTML::FormatText -e 1
 	@echo 'Running tests...'
 	@cd perl && make test || true

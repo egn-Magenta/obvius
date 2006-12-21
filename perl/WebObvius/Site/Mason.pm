@@ -76,82 +76,87 @@ use Fcntl ':flock';
 #
 ########################################################################
 
-sub new {
-    my ($class, %options) = @_;
+sub new
+{
+	my ( $class, %options) = @_;
 
-    my $new = $class->SUPER::new(%options);
+	my $new = $class-> SUPER::new( %options);
 
-    my $basedir=$options{base};
+	my $basedir = $options{base};
 
-    if (!$new_mason) {
-        $new->{parser}=new HTML::Mason::Parser(
-                                               in_package=>$class,
-                                               # XXX have both $mcms and $obvius here!
-                                               allow_globals=>[qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
-                                              );
-    }
+	unless ( $new_mason) {
+		$new->{parser} = new HTML::Mason::Parser(
+		 	in_package    => $class,
+		 	# XXX have both $mcms and $obvius here!
+		 	allow_globals => [qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
+		);
+	}
 
-    my %interp_conf=(
-		     comp_root=>$options{comp_root},
-		     data_dir=>"$basedir/var/$options{site}/",
-                     max_recurse=>64, # Default is 32
-		    );
+	my %interp_conf = (
+		comp_root       => $options{comp_root},
+		data_dir        => "$basedir/var/$options{site}/",
+		max_recurse     => 64, # Default is 32
+		preamble        => 
+			"my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n",
+	);
 
-    if ($new_mason) {
-        $interp_conf{autoflush}=0;
-        $interp_conf{data_cache_api}='1.0'; # XXX This won't be supported by Mason forever, but
-                                            #     we need it for compability with the old admin.
-    } else {
-        $interp_conf{parser}=$new->{parser};
-        $interp_conf{static_file_root}="$basedir/docs";
-        $interp_conf{out_mode}='batch';
-    }
+	if ($new_mason) {
+		$interp_conf{autoflush}        = 0;
+		$interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
+		                                        # we need it for compability with the old admin.
+	} else {
+		$interp_conf{parser}           = $new->{parser};
+		$interp_conf{static_file_root} = "$basedir/docs";
+		$interp_conf{out_mode}         = 'batch';
+	}
 
 
-    if (defined $options{out_method}) {
-	$interp_conf{out_method}=$options{out_method};
-	$new->param('SITE_SCALAR_REF'=>$options{out_method});
-    }
+	if (defined $options{out_method}) {
+		$interp_conf{out_method}       = $options{out_method};
+		$new->param( SITE_SCALAR_REF   => $options{out_method});
+	}
 
-    if (!$new_mason) {
-        # Interp was a Mason<1.10 thing. In later Masonae all options
-        # are passed to ApacheHandler instead.
-        $new->{interp}=new HTML::Mason::Interp(%interp_conf);
-    }
+	if (!$new_mason) {
+		# Interp was a Mason<1.10 thing. In later Masonae all options
+		# are passed to ApacheHandler instead.
+		$new-> {interp} = new HTML::Mason::Interp( %interp_conf);
+	}
 
-    # If $class ends in ::Common or ::Public, set auto_send_headers to
-    # false (we still want headers sent automatically in admin,
-    # because less of the handler() is used there (and more is handled
-    # in Mason in admin):
-    my %apachehandler_options=(
-                               apache_status_title=>'HTML::Mason: ' . $class,
-                               # error_mode=> $options{debug} ? 'html' : 'fatal',
-                               decline_dirs=>0,
-                               auto_send_headers=>(scalar($class)=~/::(Common|Public)$/) ? 0 : 1,
-                              );
+	# If $class ends in ::Common or ::Public, set auto_send_headers to
+	# false (we still want headers sent automatically in admin,
+	# because less of the handler() is used there (and more is handled
+	# in Mason in admin):
+	my %apachehandler_options = (
+		apache_status_title => 'HTML::Mason: ' . $class,
+		# error_mode        => $options{debug} ? 'html' : 'fatal',
+		decline_dirs        => 0,
+		auto_send_headers  => (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
+	);
 
-    if ($new_mason) {
-        map { $apachehandler_options{$_}=$interp_conf{$_} } keys %interp_conf;
-        $apachehandler_options{allow_globals}=[qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)];
-        $apachehandler_options{args_method}='mod_perl';
-    }
-    else {
-        $apachehandler_options{interp}=$new->{interp};
-    }
+	if ($new_mason) {
+		%apachehandler_options = %interp_conf;
+		$apachehandler_options{allow_globals} = [
+			qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
+		];
+		$apachehandler_options{args_method}   = 'mod_perl';
+	}
+	else {
+		$apachehandler_options{interp}        = $new->{interp};
+	}
 
-    $new->{handler}=new HTML::Mason::ApacheHandler(%apachehandler_options);
+	$new-> {handler} = new HTML::Mason::ApacheHandler( %apachehandler_options);
 
-    if (!$new_mason) {
-        # In Mason<1.10 this has to be done "manually":
-        # It would be nice, if the user Apache runs as could be detected, instead of this:
-        my $httpd_user = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
-        my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
-        chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
-    }
+	if (!$new_mason) {
+		# In Mason<1.10 this has to be done "manually":
+		# It would be nice, if the user Apache runs as could be detected, instead of this:
+		my $httpd_user  = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
+		my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
+		chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
+	}
 
-    $new->{is_admin}=$options{is_admin};
+	$new->{is_admin} = $options{is_admin};
 
-    return bless $new, $class;
+	return bless $new, $class;
 }
 
 
@@ -325,7 +330,7 @@ sub access_handler ($$) {
     #Obvius::log->debug(" Mason::access_handler ($this : " . $req->uri . ")";
 
     $this->tracer($req) if ($this->{DEBUG});
-    $this->add_benchmark($req, 'Access') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('mason::access') if $this-> {BENCHMARK};
 
     my $uri=$req->uri;
     my $remove = $req->dir_config('RemovePrefix');
@@ -390,7 +395,7 @@ sub handler ($$) {
     Obvius::log->debug(" Mason::handler ($this : " . $req->uri . ")");
 
     $this->tracer($req) if ($this->{DEBUG});
-    $this->add_benchmark($req, 'Mason h start') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('mason::handler') if $this-> {BENCHMARK};
 
     $req->notes(now => strftime('%Y-%m-%d %H:%M:%S', localtime($req->request_time)));
 
@@ -470,14 +475,11 @@ sub handler ($$) {
 
             # Add to cache:
             if ($this->can_use_cache($req,$output) and not scalar($req->args)) {
-	        # $this->add_benchmark($req, 'Cache save') if ($this->{BENCHMARK});
 	        $this->save_in_cache($req, \$data);
 	    }
             else {
 	        $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
 	    }
-
-	    $this->report_benchmarks($req, \*STDERR) if ($this->{BENCHMARK});
 
 	    return OK;
 	}
@@ -528,7 +530,6 @@ sub handler ($$) {
 
         # Add to cache:
         if ($this->can_use_cache($req) and $status==OK) {
-	    #$this->add_benchmark($req, 'Cache save') if ($this->{BENCHMARK});
 	    $this->save_in_cache($req, \$html);
 	}
         else {
@@ -539,9 +540,6 @@ sub handler ($$) {
 
     $this->handle_modified_docs_cache($obvius);
 
-    $this->add_benchmark($req, 'Mason h end') if ($this->{BENCHMARK});
-    $this->report_benchmarks($req, \*STDERR) if ($this->{BENCHMARK});
-    print STDERR "\n" if ($this->{BENCHMARK});
     return $status;
 }
 
@@ -710,7 +708,7 @@ sub authen_handler ($$) {
 
     Obvius::log->debug(" Mason::authen_handler ($this : " . $req->uri . ")");
 
-    $this->add_benchmark($req, 'Authen') if ($this->{BENCHMARK});
+    my $benchmark = Obvius::Benchmark-> new('mason::authen') if $this-> {BENCHMARK};
 
     return OK unless ($req->is_initial_req); # Only check on the initial request, not
                                              # any subrequests (think /admin/admin/...)
@@ -874,6 +872,8 @@ sub create_output_object {
 
 sub expand_output {
     my ($this, $site, $output, $req) = @_;
+    
+    my $benchmark = Obvius::Benchmark-> new('mason::expand output') if $this-> {BENCHMARK};
 
     # XXX Hvordan pokker håndteres dette? XXX
     # Måske kan HTML::Mason::Interp out_method hjælpe?
@@ -893,7 +893,6 @@ sub expand_output {
     }
     ${$this->{'SITE_SCALAR_REF'}}='';
 
-    $this->add_benchmark($req, 'expand o end') if ($this->{BENCHMARK});
     return $s;
 }
 

@@ -2538,6 +2538,45 @@ sub get_editpages {
     return $doctype->{EDITPAGES};
 }
 
+package Obvius::Benchmark;
+
+use strict;
+use Time::HiRes qw(gettimeofday);
+
+sub new
+{
+	my ( $self, $id, $filehandle) = @_;
+
+	$id = join(':', (caller)[1,2]) unless defined $id;
+	$filehandle ||= \*STDERR;
+
+	return bless [ $id, scalar gettimeofday(), $filehandle, 1 ];
+}
+
+sub lap
+{
+	my ( $self, $id) = @_;
+
+	return unless $self-> [3];
+
+	$id = join(':', (caller)[1,2]) unless defined $id;
+
+	my $now  = scalar gettimeofday();
+	my $diff = $now - $self->[1];
+
+	printf { $self-> [2] } "%.3f sec %s %s\n",
+		$diff,
+		$self-> [0], $id
+	if $diff >= 0.01; # who cares otherwise
+
+	$self-> [0] = $id;
+	$self-> [1] = $now;
+}
+
+sub disable { shift->[3] = 0 }
+
+sub DESTROY { shift-> lap('') }
+
 1;
 __END__
 
@@ -2574,6 +2613,23 @@ Obvius - Content Manager, database handling.
 =head1 DESCRIPTION
 
 Obvius is the main object for accessing the content manager.
+
+=head1 Obvius::Benchmark
+
+    sub a{
+        my $b = Obvius::Benchmark-> new if $this-> {BENCHMARK};
+        ... code ...
+    }	
+    
+    sub b{
+        my $b = Obvius::Benchmark-> new('sub b') if $this-> {BENCHMARK};
+        ....
+	$b-> lap('point 1') if $b;
+        ....
+	$b-> lap('point 2') if $b;
+	....
+	undef $b;  # <-- this is also a checkpoint
+    }	
 
 =head2 EXPORT
 
