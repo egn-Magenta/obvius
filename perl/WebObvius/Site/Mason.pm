@@ -134,7 +134,7 @@ sub new
 	);
 
 	if ($new_mason) {
-		%apachehandler_options = %interp_conf;
+		%apachehandler_options = ( %apachehandler_options, %interp_conf);
 		$apachehandler_options{allow_globals} = [
 			qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
 		];
