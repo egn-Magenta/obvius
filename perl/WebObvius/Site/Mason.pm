@@ -96,14 +96,14 @@ sub new
 		comp_root       => $options{comp_root},
 		data_dir        => "$basedir/var/$options{site}/",
 		max_recurse     => 64, # Default is 32
-		preamble        => 
-			"my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n",
 	);
 
 	if ($new_mason) {
 		$interp_conf{autoflush}        = 0;
 		$interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
 		                                        # we need it for compability with the old admin.
+		$interp_conf{preamble}         = 
+			"my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
 	} else {
 		$interp_conf{parser}           = $new->{parser};
 		$interp_conf{static_file_root} = "$basedir/docs";
