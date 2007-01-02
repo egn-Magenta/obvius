@@ -232,6 +232,11 @@ sub urlify
 
 	$text =~ s!/(\d+)\.docid!docid_to_url($1)!ge;
 
+	# Brain-dead XML 1.0 cannot contain certain characters, and thus, 
+	# XML importers die on things such as &#12; . So beautiful, so useless.
+	# ( we preserve \n, \r, and \t though ).
+	$text =~ s/([\x00-\x08\x0B\x0C\x0E-\x1F\\])/sprintf(q(\\x%02x), ord($1))/gse;
+
 	return $text;
 }
 

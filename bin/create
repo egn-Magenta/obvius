@@ -181,7 +181,7 @@ my $data = XMLin(
 
 
 say "converting from utf8...\n";
-$data = unutf8ify( $data); # For some strange reason I don't understand,
+$data = normalize( $data); # For some strange reason I don't understand,
                            # the text is converted from iso-8859-1 to
                            # utf-8 on read. So I convert it back, here.
 $data->{document} = [ $data->{document} ] unless ref($data->{document}) eq 'ARRAY';
@@ -466,17 +466,19 @@ sub publish_doc_version
 	}
 }
 
-sub unutf8ify
+sub normalize
 {
 	my $obj = $_[0];
 	my $ref = ref $obj;
 
 	if (!$ref) { # Scalar:
-		return utf8($obj)->latin1;
+		my $t = utf8($obj)->latin1;
+		$t =~ s/\\x([\da-f]{2})/chr(hex $1)/gesi;
+		return $t;
 	} elsif ($ref eq 'ARRAY') { # Array:
-		return [ map { unutf8ify($_) } @$obj ];
+		return [ map { normalize($_) } @$obj ];
 	} elsif ($ref eq 'HASH') { # Hash:
-		return { map { $_=>unutf8ify($obj->{$_}) } keys (%$obj) };
+		return { map { $_=>normalize($obj->{$_}) } keys (%$obj) };
 	} else {
 		return 'UNUTF8IFIABLE';
 	}
