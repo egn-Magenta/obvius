@@ -2564,7 +2564,7 @@ sub lap
 	my $now  = scalar gettimeofday();
 	my $diff = $now - $self->[1];
 
-	printf { $self-> [2] } "%.3f sec %s %s\n",
+	printf { $self-> [2] } "$$ %.3f sec %s %s\n",
 		$diff,
 		$self-> [0], $id
 	if $diff >= 0.01; # who cares otherwise
