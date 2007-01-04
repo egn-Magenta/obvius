@@ -73,7 +73,6 @@ sub add_to_sitemap
 		[ qw(title short_title seq) ],
 		"parent = " . $vdoc-> DocId,
 		needs_document_fields   => [ qw(parent name) ],
-		straight_documents_join => 1,
 		public                  => $public,
 		notexpired              => $notexpired,
 		nothidden               => $nothidden,

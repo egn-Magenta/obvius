@@ -330,7 +330,6 @@ my $vdocsubdocs = $obvius->search(
                                     public=>0,
                                     nothidden => (defined($seq) ? 1 : undef),
                                     needs_document_fields => ['parent', 'name'],
-                                    straight_documents_join => 1,
                                     append => $append
                                 ) || [];
 my $NOW = $r->notes('now');

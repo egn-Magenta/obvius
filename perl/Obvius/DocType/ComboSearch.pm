@@ -127,8 +127,6 @@ sub action {
     if(scalar(@needed_parent_fields)) {
         # Add the document fields to the search
         $extra_search_options{needs_document_fields} = \@needed_parent_fields;
-        # If we are searching on something in documents it's a good idea to use straight_documents_join
-        $extra_search_options{straight_documents_join} = 1;
     }
 
     # doctype is actually type:

@@ -717,7 +717,6 @@ sub get_document_subdocs {
 			      sortvdoc => $sortvdoc,
 			      # notexpired=>,
 			      # nothidden=>,
-			      straight_documents_join=>1,
 			      public=>1, # Results in max one version per language per docid
 			      %options,  # which is what select_best_lang...() expects.
 			     );
@@ -742,7 +741,6 @@ sub get_document_subdocs_latest {
                              [],
                              'parent = ' . $doc->Id,
                              needs_document_fields=>[qw(parent)],
-			     straight_documents_join=>1,
                              sortvdoc => $sortvdoc,
                              %options,
                             );
@@ -854,7 +852,6 @@ sub search {
     my @fields = ( 'versions.*' );
     my @where;
     my %map;
-    my $straight_fields = '';
     my $having = '';
 
     my $i = 0;
@@ -898,11 +895,7 @@ sub search {
     map { push @$fields, $_ } (keys %$sort_fields);
 
     if($options{'needs_document_fields'} and ref($options{'needs_document_fields'}) eq 'ARRAY') {
-        if($options{'straight_documents_join'}) {
-            $straight_fields .= 'documents as obvius_documents STRAIGHT_JOIN ';
-        } else {
-            push(@table, "documents as obvius_documents");
-        }
+        push(@table, "documents as obvius_documents");
         push(@join, "(obvius_documents.id = versions.docid)");
         for(@{$options{'needs_document_fields'}}) {
             push(@fields, "obvius_documents.$_ as $_");
@@ -992,7 +985,7 @@ sub search {
     $where =~ s/$regex/$1 . $map{$2}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
-                                            '!Table'	    => $straight_fields . join(', ', @table) . " " . join(" ", @left_join_table),
+                                            '!Table'	    => join(', ', @table) . " " . join(" ", @left_join_table),
                                             '!TabRelation'  => join(' AND ', @join),
                                             '!Fields'	    => join(', ', @fields),
 #                                           '!Debug'		=> 2,

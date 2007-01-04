@@ -201,7 +201,6 @@ sub action {
         my $limit_parent = $obvius->lookup_document($limit_path);
         if($limit_parent) {
             $options{needs_document_fields} = [ 'parent' ];
-            $options{straight_documents_join} = 1;
             $where .= "parent = " . $limit_parent->Id . " and ";
         }
     }
