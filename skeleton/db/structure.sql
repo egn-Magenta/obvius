@@ -108,11 +108,11 @@ CREATE_TABLE( vfields,
   double_value DOUBLE,
   date_value   DATETIME
 );
-CREATE INDEX vfields_docid_version_name_idx ON vfields (docid,version,name);
-CREATE INDEX vfields_name_text_value_idx    ON vfields (name,INDEX_FIELD_LIMIT(text_value,16));
-CREATE INDEX vfields_name_int_value_idx	    ON vfields (name,int_value);
-CREATE INDEX vfields_name_double_value_idx  ON vfields (name,double_value);
-CREATE INDEX vfields_name_date_value_idx    ON vfields (name,date_value);
+
+CREATE INDEX vfields_docid_version_name_int_value_idx ON vfields (docid,version,name,int_value);
+CREATE INDEX vfields_docid_version_name_double_value_idx ON vfields (docid,version,name,double_value);
+CREATE INDEX vfields_docid_version_name_date_value_idx ON vfields (docid,version,name,date_value);
+CREATE INDEX vfields_docid_version_name_text_value_idx ON vfields (docid,version,name,INDEX_FIELD_LIMIT(text_value,16));
 
 #endif -- CYCLE
 
