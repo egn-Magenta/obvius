@@ -403,7 +403,7 @@ $r->pnotes('version' =>$vdoc);
 $r->pnotes('doctype' =>$doctype);
 
 # Default language 'da':
-$r->pnotes('site')->read_translations($r, 'translations', 'da', $obvius);
+$r->pnotes('site')->set_language_preferences($r, 'da');
 
 # help-webserver:
 

@@ -5,18 +5,7 @@ $text
 </%args>\
 %
 <%init>
-if (!defined $obvius->{TRANSLATIONS}) {
-    warn "common/shared/msg: No message-catalogue ever read - no translation done";
-}
-else {
-    $text =~ s/\r//g;
-    $text =~ s/\n/ /g;
-
-    if (exists $obvius->{TRANSLATIONS}->{$text}) {
-        $text = $obvius->{TRANSLATIONS}->{$text}
-    }
-    else {
-#        warn "common/shared/msg: No translation available for »$text«\n";
-    }
-}
+$text =~ s[\r][]g;
+$text =~ s[\n][ ]g;
+$text = $r->pnotes('site')->translate($text);
 </%init>

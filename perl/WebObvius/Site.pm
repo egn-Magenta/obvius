@@ -44,6 +44,11 @@ use Image::Size;
 our @ISA = qw( Obvius::Data WebObvius );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+our %xml_cache;
+
+use constant TRANSLATION_FILENAME => 'translations';
+use constant TRANSLATION_SUFFIXES => ('.xml', '_local.xml');
+
 use WebObvius::Apache
 	Constants	=> qw(:common :methods :response),
 	Util		=> '',
@@ -57,12 +62,24 @@ use POSIX qw(strftime);
 use XML::Simple;
 use Unicode::String qw(utf8 latin1);
 
+
+sub new
+{
+	my $self = shift-> SUPER::new(@_);
+
+	$self-> {LANGUAGE_PREFERENCES} = [];
+	$self-> load_translation_fileset();
+
+	return $self;
+}
+
 
 ########################################################################
 #
 #	Language handling
 #
 ########################################################################
+
 
 # get_languages - returns a hash with keys being languages and values
 # being their priority. The higher value the more preferred
@@ -737,10 +754,6 @@ sub expire_public_login_cookie {
 #
 ########################################################################
 
-sub utf8_to_latin1 {
-    return utf8(shift || '')->latin1;
-}
-
 sub split_language_preferences {
     my ($lang, $default) = @_;
 
@@ -756,143 +769,152 @@ sub split_language_preferences {
     return %weights;
 }
 
-sub read_translations {
-    my ($this, $r, $file, $lang, $obvius, %options) = @_;
+# xml files are loaded statically and never reloaded, because it is a costly
+# operation to reload in every child apache process, and I cannot see how to 
+# reload xml in the the server apache process. Once it is figured out, xml files
+# can be reverted back to automatic loading.
 
-    return if ($obvius->{TRANSLATIONS});
+sub L ($) { utf8( $_[0] || '')-> latin1 } # XML::Parser loves UTF8 
 
-    my %lang;
-    if ($lang =~ /^=/) {
-        %lang = split_language_preferences(substr($lang, 1));
-    } else {
-        if ($r) {
-            my $accept_language = $r->headers_in->{'Accept-Language'};
-            #print STDERR "Accept-Language = $accept_language\n";
-            if ($accept_language) {
-                %lang = split_language_preferences($accept_language);
+# static call
+sub load_translation_file
+{
+	my $filename = shift;
 
-                my @vary;
-                push(@vary, $r->header_out('Vary')) if $r->header_out('Vary');
-                push @vary, "Accept-Language";
-                $r->header_out('Vary', join(', ', @vary));
+	return if $xml_cache{$filename};
 
-            }
-
-	    my %site_pref = split_language_preferences($lang, 1);
-	    for (keys %site_pref) {
-		$lang{$_} ||= $site_pref{$_};
-	    }
-        }
-
-    }
-
-#    for (keys %lang) {
-#        print STDERR "LANG WEIGHT $_ => $lang{$_}\n";
-#    }
-
-    my @path;
-    foreach (@{$r->pnotes('site')->{COMP_ROOT}}) {
-	foreach my $a ($_) {
-	    push @path, $a->[1];
+	my $xml = eval {
+		XMLin( $filename,
+			keyattr      => {translation=>'lang'},
+			parseropts   => [ ProtocolEncoding => 'ISO-8859-1' ]
+		);
+	};
+	if ( $@) {
+		warn "Translation file $filename: XML error: $@";
+		$xml_cache{$filename} = {};
+		return;
 	}
-    }
+	# print STDERR "$filename loaded ok\n"
 
-    if(my $extra_search_path = $options{extra_search_path}) {
-        if(ref($extra_search_path)) {
-            push(@path, @$extra_search_path);
-        } else {
-            push(@path, $extra_search_path);
-        }
-    }
-
-    # If the translation cache-index doesn't exist, create an empty one:
-    if (!defined $r->pnotes('site')->{TRANSLATIONS}) {
-        $r->pnotes('site')->{TRANSLATIONS}={ '_internal_obvius_timestamp'=>time() };
-    }
-    else { # Check if cache is up-to date:
-        my $changed=0;
-        my $timestamp=$r->pnotes('site')->{TRANSLATIONS}->{_internal_obvius_timestamp};
-
-        # Check if the files have been changed on disk; .xml and _local.xml postfixes:
-        foreach my $postfix qw(.xml _local.xml) {
-            foreach my $path (@path) {
-                if (-e "$path/$file$postfix" and (stat "$path/$file$postfix")[9]>$timestamp) {
-                    $changed=1;
-                    last;
-                }
-            }
-            last if ($changed);
-        }
-
-        if ($changed) { # If not; reset cache to nothing:
-            $r->pnotes('site')->{TRANSLATIONS}={ '_internal_obvius_timestamp'=>time() };
-        }
-    }
-
-    # Determine key to cache-index:
-    my $lang_fingerprint=join ":", map { "$_:$lang{$_}" } sort (keys %lang);
-
-    if($r->pnotes('site')->{TRANSLATIONS}->{$lang_fingerprint}) {
-        $obvius->{TRANSLATIONS} = $r->pnotes('site')->{TRANSLATIONS}->{$lang_fingerprint};
-        return;
-    }
-
-    my $xmldata = eval {
-        XMLin($file . ".xml",
-              searchpath=>\@path,
-              keyattr=>{translation=>'lang'},
-              parseropts => [ ProtocolEncoding => 'ISO-8859-1' ]
-             );
-    };
-    if ($@) {
-        warn "Translation file $file: XML error: $@";
-        return;
-    }
-    $xmldata->{text}=[$xmldata->{text}] if (ref $xmldata->{text} eq 'HASH');
-
-    # Read the _local.xml if it's there:
-    my $local_xmldata = eval {
-        XMLin($file . "_local.xml",
-              searchpath=>\@path,
-              keyattr=>{translation=>'lang'},
-              parseropts => [ ProtocolEncoding => 'ISO-8859-1' ]
-             );
-    };
-    unless ($@) {
-	if (my $ref=ref $local_xmldata->{text}) {
-	    # Merge it:
-	    my $local=($ref eq 'HASH' ? [$local_xmldata->{text}] : $local_xmldata->{text});
-	    $xmldata->{text}=[ @{$xmldata->{text}}, @{$local} ];
+	my $t = {};
+	$xml-> {text} = [ $xml->{text} ] if ref $xml->{text} eq 'HASH';
+	for my $item ( @{$xml-> {text}}) {
+		next unless $item-> {key};
+		my $x = $item-> {translation};
+		$t-> { L $item->{key} } = {
+			map {
+				$_ => L $x-> {$_}-> {content}
+			} keys %$x
+		};
 	}
-    }
 
-    $obvius->{TRANSLATIONS} = {} unless defined($obvius->{TRANSLATIONS});
-    my $translations = $obvius->{TRANSLATIONS};
+	$xml_cache{$filename} = $t;
+}
 
-    for my $text (@{$xmldata->{text}}) {
-        next unless ($text->{key});
+# XXX detect inode, if file is a link to avoid loading same file twice
+sub normalize_path
+{
+	my $path = shift;
+	$path =~ s[//][/]g;
+	$path;
+}
 
-        my $weight = 0;
-        my $language;
+# read all files, and record path to these files, for each object instance
+# should only be run initially ( see comments about apache server above )
+sub load_translation_fileset
+{
+	my ( $self) = @_;
+	
+	$self-> {TRANSLATION_FILESET} = [];
 
-        for (keys %lang) {
-            if ($lang{$_} > $weight and exists $text->{translation}->{$_}) {
-                $weight = $lang{$_};
-                $language = $_;
-            }
-        }
+	my $file = TRANSLATION_FILENAME;
+	my @path = map { $$_[1] } @{$self-> {COMP_ROOT}};
 
-        if (defined $language and exists $text->{translation}->{$language}) {
-            my $s = utf8_to_latin1($text->{translation}->{$language}->{content});
-            $s =~ tr/{}/<>/;
-            $translations->{utf8_to_latin1($text->{key})} = $s;
-        } else {
-            $obvius->log->debug("Translation file $file: no translation for $text->{key} " .
-		(defined $language ? $language : ''));
-        }
-    }
+	for my $suffix ( TRANSLATION_SUFFIXES) {
 
-    $r->pnotes('site')->{TRANSLATIONS}->{$lang_fingerprint} = $translations;
+		my $filename;
+		for my $path ( @path) {
+			my $f = normalize_path( "$path/$file$suffix");
+			next unless -f $f;
+			push @{$self-> {TRANSLATION_FILESET}}, $filename = $f;
+			last;
+		}
+		next if not defined $filename;
+		print STDERR "load file: $filename\n" if $self-> {DEBUG};
+		load_translation_file( $filename);
+	}
+}
+
+# resets search path for translation xml files, but only allows
+# files that are already loaded, to discourage dynamic xml loading
+# ( see comments about apache server above )
+sub set_translation_fileset
+{
+	my ( $self, @path) = @_;
+
+	$self-> {TRANSLATION_FILESET} = [];
+	unshift @path, map { $$_[1] } @{$self-> {COMP_ROOT}};
+	
+	my $file = TRANSLATION_FILENAME;
+	for my $suffix ( TRANSLATION_SUFFIXES) {
+		for my $path ( @path) {
+			my $f = normalize_path( "$path/$file$suffix");
+			next unless exists $xml_cache{$f};
+			push @{$self-> {TRANSLATION_FILESET}}, $f;
+			last;
+		}
+	}
+
+}
+
+my ( $current_language_preferences, $current_translation_fileset);
+
+sub set_language_preferences
+{
+	my ( $self, $r, $lang) = @_;
+	
+	my %lang;
+	if ($lang =~ /^=/) {
+		%lang = split_language_preferences(substr($lang, 1));
+#		print STDERR "$$ force lang $lang\n";
+	} elsif ( $r) {
+		my $accept_language = $r->headers_in->{'Accept-Language'};
+		
+		if ($accept_language) {
+#			print STDERR "$$ accept lang $accept_language\n";
+			%lang = split_language_preferences( $accept_language);
+
+			my @vary;
+			push @vary, $r-> header_out('Vary') if $r-> header_out('Vary');
+			push @vary, "Accept-Language";
+			$r-> header_out( 'Vary', join(', ', @vary));
+		}
+
+		my %site_pref = split_language_preferences( $lang, 1);
+		$lang{$_} ||= $site_pref{$_} for keys %site_pref;
+	}
+
+	
+	$self-> {LANGUAGE_PREFERENCES} = [ sort { $lang{$b} <=> $lang{$a} } keys %lang ];
+#	print STDERR "$$ lang_pref = ", join(",", @{$self-> {LANGUAGE_PREFERENCES}}), "\n";
+}
+
+sub translate
+{
+	my ( $self, $text) = @_;
+#	print STDERR "$$ $self translates $text\n";
+
+	for my $lang ( @{$self-> {LANGUAGE_PREFERENCES}}) {
+		for my $file ( @{$self-> {TRANSLATION_FILESET}}) {
+			next unless exists $xml_cache{$file}->{$text};
+			my $k = $xml_cache{$file}->{$text};
+#			print STDERR "$$ => $lang/$k->{$lang}\n" if $k->{$lang};
+			return $k->{$lang} if exists $k->{$lang};
+		}
+	}
+	
+	warn "Cannot find translation for '$text'\n";
+	return $text;
 }
 
 1;
@@ -906,37 +928,34 @@ WebObvius::Site - General site object.
 
   use WebObvius::Site;
 
-  $site->read_translations($r, $filename, $language, $obvius);
+  $site-> set_language_preferences($r, $language);
+  $text = $site-> translate($text);
 
 =head1 DESCRIPTION
 
 Please notice that external redirects performed on port 80 _and_ 81 do
 not append the port-number to the redirect-URL.
 
-This is to allow having a bunch of cache/static-serving light-weight
-Apache's on port 80, and the mod_perl ones on port 81 - without
-redirecting people directly to port 81 (NOTE: Isn't this what
-ProxyPassReverse is supposed to fix by itself?).
+This is to allow having a bunch of cache/static-serving light-weight Apache's
+on port 80, and the mod_perl ones on port 81 - without redirecting people
+directly to port 81 (NOTE: Isn't this what ProxyPassReverse is supposed to fix
+by itself?).
 
-
-The least simple one is read_translations() that allows the
-administration system to read translations from the
-XML-files. comp_root is searched for "$filename.xml" and
-"$filename_local.xml" - the resulting translations are used (and
-cached on a per language-prefs basis (reading it on every hit is very
-time consuming)).
+The least simple one is set_language_preferences() that allows the
+administration system to read translations from the XML-files. comp_root is
+searched for "translations.xml" and "translations_local.xml" - the resulting
+translations are used (and cached on a per language-prefs basis (reading it on
+every hit is very time consuming)).
 
 Usually you would have a "translations.xml" in the global mason/admin,
 and then you could have an optional "translations_local.xml" in
 website/mason/admin.
 
-Overriding the global file is possible by placing a "$filename.xml" in
-the website dir. (Provided the search-path is searched in the proper
-direction).
+Overriding the global file is possible by placing a "translations.xml" in the
+website dir. (Provided the search-path is searched in the proper direction).
 
-Translations are cached, but read_translations checks the filestamp of
-the files to see if the cache needs updating, so it is no longer
-necessary to restart Apache when updating translations.
+Translations are cached, but never reloaded. Restart apache after editing
+translation files.
 
 =head2 SESSIONS
 
