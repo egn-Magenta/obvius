@@ -1,5 +1,19 @@
 # $Id$
 
+20070105:
+	New API for xml-based language translation:
+		$text = $obvius->{TRANSLATIONS}->{$text} 
+	is to be replaced to
+		$text = $r-> notes('site')->translate( $text)
+	and 
+		$r->pnotes('site')->read_translations($r, 'translations', 'da', $obvius);
+	to
+		$r->pnotes('site')->set_language_preferences($r, 'da');
+	and possibly
+		$r->pnotes('site')->set_translation_fileset( @extra_search_path);
+	before set_language_preferences() call if @extra_search_path is required.
+
+
 20061206:
 	User 'nobody' and group 'No-one' must be always defined. Unless
 	already present, insert these as:
