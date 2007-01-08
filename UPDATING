@@ -4,7 +4,7 @@
 	New API for xml-based language translation:
 		$text = $obvius->{TRANSLATIONS}->{$text} 
 	is to be replaced to
-		$text = $r-> notes('site')->translate( $text)
+		$text = $r-> pnotes('site')->translate( $text)
 	and 
 		$r->pnotes('site')->read_translations($r, 'translations', 'da', $obvius);
 	to
