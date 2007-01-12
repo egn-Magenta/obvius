@@ -51,14 +51,14 @@ sub start_tag {
             $self->{state} = 'get_title';
             if($attr->{href}) {
                 $attr->{href} =~ s/\s+//gs;
-                $self->{doc}->{globalurl} = "http://europa.eu.int/rapid/" . $attr->{href};
+                $self->{doc}->{globalurl} = "http://europa.eu/rapid/" . $attr->{href};
             }
         }
     } elsif($self->{state} eq 'get_html_links' or $self->{state} eq 'get_pdf_links') {
         if($tag eq 'a' and $attr->{href}) {
             my $link = $attr->{href};
             $link =~ s/\s+//gs;
-            $self->{tmp_link} = "http://europa.eu.int/rapid/" . $link;
+            $self->{tmp_link} = "http://europa.eu/rapid/" . $link;
         }
     } else {
         if($tag eq 'td' and $attr->{class} and $attr->{class} eq 'bluetext11') {
@@ -300,12 +300,12 @@ sub retrieve_real_title {
 }
 
 # This looks up the keywords for the document. It uses a request to an URL like the following:
-# http://europa.eu.int/rapid/recentPressReleasesAction.do?userAction=Selected%20Documents&selectedDocumentsType=HTML&aditionalInformations=KEYWORDS&checkReleases=59810|IP/06/1081|31/07/2006|EN:HTML,PDF,DOC;DE:HTML,PDF,DOC|0
+# http://europa.eu/rapid/recentPressReleasesAction.do?userAction=Selected%20Documents&selectedDocumentsType=HTML&aditionalInformations=KEYWORDS&checkReleases=59810|IP/06/1081|31/07/2006|EN:HTML,PDF,DOC;DE:HTML,PDF,DOC|0
 
 sub get_keywords {
     my $obj = shift;
 
-    my $uri = 'http://europa.eu.int/rapid/recentPressReleasesAction.do?userAction=Selected%20Documents&selectedDocumentsType=HTML&aditionalInformations=KEYWORDS';
+    my $uri = 'http://europa.eu/rapid/recentPressReleasesAction.do?userAction=Selected%20Documents&selectedDocumentsType=HTML&aditionalInformations=KEYWORDS';
     $uri .= "&checkReleases=" . uri_escape($obj->{checkReleases});
 
     my $data = retrieve_uri($uri) || '';
