@@ -140,21 +140,9 @@ Admin
 $text
 </%args>
 <%init>
-unless (defined $obvius->{TRANSLATIONS}) {
-    warn "No message-catalogue ever read - no translation done";
-    return $text;
-}
-
 $text =~ s/\r//g;
 $text =~ s/\n/ /g;
-
-if (exists $obvius->{TRANSLATIONS}->{$text}) {
-    $text = $obvius->{TRANSLATIONS}->{$text}
-}
-else {
-    print STDERR "No translation available for »$text«\n";
-}
-
+$text = $r-> pnotes('site')->translate( $text);
 $m->out($text);
 return $text;
 </%init>
