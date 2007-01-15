@@ -209,7 +209,9 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                                     my $text = "<$tagname";
                                                     for(@$attrseq) {
-                                                        my $value = $attr->{$_} || '';
+							my $value = "";
+                                                        $value = $attr->{$_};
+							
                                                         $text .= " " . lc($_) . '="' . $value . '"';
                                                     }
                                                     $text .= "$endtag>";
