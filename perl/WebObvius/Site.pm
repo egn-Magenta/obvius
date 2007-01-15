@@ -786,7 +786,6 @@ sub load_translation_file
 	my $xml = eval {
 		XMLin( $filename,
 			keyattr      => {translation=>'lang'},
-			parseropts   => [ ProtocolEncoding => 'ISO-8859-1' ]
 		);
 	};
 	if ( $@) {
