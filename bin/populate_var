@@ -4,7 +4,7 @@
 
 mkdir var || exit 
 cd var
-mkdir -p admin common document_cache edit_session/LOCKS user_session/LOCKS public mail
+mkdir -p admin common document_cache edit_sessions/LOCKS user_sessions/LOCKS public mail
 touch document_cache.txt
 cd ..
 chmod -R g+w var
