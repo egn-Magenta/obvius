@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# populate ./var with all required directories
+
+mkdir var || exit 
+cd var
+mkdir -p admin common document_cache edit_session/LOCKS user_session/LOCKS public mail
+touch document_cache.txt
+cd ..
+chmod -R g+w var
+chgrp -R www-data var
