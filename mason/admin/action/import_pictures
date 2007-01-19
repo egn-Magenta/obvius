@@ -1,0 +1,183 @@
+%# Please note that this is experimental code. It works, but it needs
+%# some changes, fx. use Archive::ZIP instead of using commandline output
+%# from unzip.. It also needs translations and better error handling.
+%
+%
+<h1>Importer billeder</h1>
+% if ( ! $u ) {
+<form action="./" method="post" enctype="multipart/form-data">
+<& /portal/util/identifier, pass=>{ obvius_command_import_pictures=>1 } &>
+%#<p>Importer billeder fra: <% $source_dir %></p>
+<input type="file" name="zip_file" /><br />
+<p>Til: <input type="text" name="import_pictures_dest_url" id="import_pictures_dest_url" />  
+<input onclick="<& /portal/util/navigator_link_start:onclick, path=>$dest_url, fieldname=>"import_pictures_dest_url" &>" type="button" value="<& /shared/msg, text=>'Find' &> ..." />
+<p><input type="submit" name="import_pictures_do" value="Upload" /></p>
+</form>
+% } else {
+<p>Billederne er nu uploadet</p>
+% }
+
+<%init>
+my $dest_url = "/";
+my $u;
+my $zip_path = $r->pnotes('site')->{BASE} . "/var/picture_upload/";
+
+if ( $r->param( "import_pictures_do" ) )
+{    
+
+
+    $u = $obvius->lookup_document( $dest_url );
+    if ( $u )
+    {
+
+
+        # Make a temp dir for this session
+        my $tmp = time();
+        mkdir ( $zip_path . $tmp );
+        $zip_path .= $tmp;
+
+
+	$dest_url = $r->param( "import_pictures_dest_url" );
+
+        my $upload;
+
+        for (( $r->upload )) {
+    	    if ( $_->name =~ m/^zip_file$/ ) {
+		$upload = $_;
+		last;
+	    }
+	}
+
+        if ( $upload ) {
+    	    if ( $upload->filename ne '' and $upload->size != 0 and my $fh = $upload->fh ) {
+		my $filename = $upload->filename;
+		local $/ = undef;
+		open(FILE, ">$zip_path/" . $upload->filename);
+		print FILE <$fh>;
+    		close(FILE);
+
+		# This IS ugly, however it beats using Archive::Zip...
+		my $output = `unzip -l $zip_path/$filename |awk '{print \$4}'|grep -i -e "[.jpg]"`;
+		my @files = split( /\n/, $output );
+		`unzip -d $zip_path/ $zip_path/$filename`;
+		for ( @files ) {
+		    if ( -f "$zip_path/$_" ) {
+			$m->comp('import_pictures:do', source=>"$zip_path/$_", dest_url=>$dest_url);
+		    }
+		}
+
+	    }
+	}
+
+}
+
+
+}
+
+</%init>
+<%once>
+use Image::Size;
+use Data::Dumper;
+use POSIX qw(strftime);
+</%once>
+
+
+<%method do>
+<%args>
+$source
+$dest_url
+</%args>
+
+<%init>
+
+my $parent = $obvius->lookup_document( $dest_url );
+die "Could not find dest path ($dest_url)" unless( $parent );
+
+
+# Prepare a data fieldset for the document
+my $data = new Obvius::Data( 
+			     seq             => '-10',
+			     sortorder       => '+seq,+title',
+			     expires         => '9999-01-01 00:00:00',
+			     docdate         => strftime('%Y-%m-%d 00:00:00', localtime),
+			     subscribeable   => 'none',
+			     );
+
+# Get filename and set it as title
+
+my @tmp = split( "/", $source );
+my $title = pop( @tmp );
+
+$data->param( title => $title);
+$data->param( short_title => $title);
+
+# Now it gets tricky.. tricky tricky tricky.. and it's friday the 13th...
+
+open( FH, $source ) || die ( "Can't open file: $source\n" );
+
+local $/; 
+my $raw_file = <FH>;
+
+$data->param( data => \$raw_file );
+
+my ( $w, $h ) = imgsize( \$raw_file );
+$data->param( width => $w );
+$data->param( height => $h );
+$data->param( size => -s $source );
+$data->param( mimetype => "image/jpeg" );
+
+my %args=(
+	  name=>$title,
+	  grpid=>1,
+	  lang=>"da",
+	  doctypeid=>$obvius->get_doctype_by_name("Image")->Id,
+	  fields=>$data,
+	  );
+
+# XXX Send order:
+my ($status, $message)=$obvius->send_order(
+					   docid=>$parent->Id,
+					   user=>$obvius->user,
+					   command=>'new_document',
+					   args=>\%args,
+					   );
+
+
+if ( $status eq "OK" )
+{
+    # Reset the args array
+    %args = ();
+      
+    # Lookup the new document and get the latest version
+    my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $parent ) . $title );
+
+    my $new_vdoc = $obvius->get_public_version($new_doc) || $obvius->get_latest_version($new_doc);
+    
+    # Initialize a Obvius::Data set, and lookup the doctype
+    my $publish_fields = new Obvius::Data;
+    my $doctype = $obvius->get_doctype_by_id($new_vdoc->Type);
+    
+    # Load the default values
+    for(keys %{$doctype->{PUBLISH_FIELDS}}) {
+	my $default_value = $doctype->{PUBLISH_FIELDS}->{$_}->{DEFAULT_VALUE};
+	$publish_fields->param($_ => $default_value)  if(defined($default_value));
+    }
+    
+    # published always defaults to now:
+    $publish_fields->param('published' => $r->notes('now'));
+    # Set the version and publish fields on the args hash
+    $args{version} = $new_vdoc->Version if ( $new_vdoc );	
+    $args{publish_fields} = $publish_fields;
+    
+    ($status, $message)=$obvius->send_order(
+					       docid=>$new_doc->Id,
+					       user=>$obvius->user,
+					       command=>'publish',
+					       args=>\%args,
+					       );
+    
+      
+}
+
+</%init>
+</%method>
