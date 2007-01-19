@@ -52,7 +52,9 @@ my %loglevel;
 sub new {
     my ($class, $loglevel) = @_;
 
-    $loglevel = $loglevel{$loglevel};
+    $loglevel = 'none' unless defined $loglevel;
+    $loglevel = exists($loglevel{$loglevel}) ? $loglevel{$loglevel} : $loglevel{none};
+
     bless \$loglevel, $class
 }
 
