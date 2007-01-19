@@ -1,0 +1,182 @@
+#!/usr/bin/perl -w
+# $Id$
+
+# generates a fake request without apache
+# run in ./conf directory so the setup.pl is accessible
+
+use strict;
+use warnings;
+
+package main;
+use vars qw($site $req);
+
+my $uri = @ARGV ? $ARGV[0] : '/';
+
+my $file = './setup.pl'; # XXX
+
+{
+open F, $file or die "Cannot open $file";
+local $/;
+die "Cannot locate package in $file\n" unless <F> =~ /package (\w+)::Site::Admin/;
+close F;
+$site = $1;
+}
+
+sub code($)
+{
+	use POSIX qw(exit);
+	use IO::Handle;
+	my $c = shift;
+	my $i = IO::Handle-> new;
+	return $i if open $i, "-|";
+	print $c;
+	POSIX::exit(0);
+}
+
+sub Apache2::ServerUtil::server_root { '/tmp' }
+sub Apache2::ServerUtil::restart_count { 0 }
+sub Apache2::RequestUtil::request { $req }
+sub Apache2::Util::ht_time { 0 }
+$ENV{'MOD_PERL'} = 'mod_perl/2';
+unshift @INC, sub {
+	return code <<APACHE2 if $_[1] eq 'APR/Request/Apache2.pm';
+package APR::Request::Apache2;
+sub handle { \$main::req }
+1;
+APACHE2
+
+	0;
+};
+
+
+require $file;
+
+HTML::Mason::Request::ApacheHandler-> valid_params->{apache_req}->{isa} = 'FakeRequest';
+
+package FakeRequest;
+
+sub new 
+{ 
+	local $_ = shift; 
+	bless { 
+		@_ ,
+		notes => {},
+		pnotes => {},
+		dir_config => {},
+		param => {},
+	}, $_ 
+}
+sub request_time { 0 }
+
+sub _store
+{
+	my ( $id, $self, $name, @x) = @_;
+
+	return $self->{$id} || {} unless defined $name;
+
+	if ( @x) {
+		$self-> {$id}->{$name} = \@x;
+#		print "$id($name) set @x\n";
+	} elsif ( $self-> {$id}->{$name}) {
+		@x = @{ $self-> {$id}->{$name} };
+		return wantarray ? @x : $x[0];
+	} else {
+		return;
+	}
+}
+
+sub notes      { _store( 'notes',      @_ ) }
+sub pnotes     { _store( 'pnotes',     @_ ) }
+sub dir_config { _store( 'dir_config', @_ ) }
+sub param      { _store( 'param',      @_ ) }
+sub header_out { _store( 'header_out',      @_ ) }
+
+sub log { warn @_, "\n" if 0 }
+sub register_cleanup {}
+sub get_basic_auth_pw { 0, $_[0]-> {password} }
+sub connection  { $_[0] }
+sub server      { $_[0] }
+sub headers_out { $_[0] }
+sub add         { $_[0]-> header_out( $_[1], $_[2] ) } # headers_out
+sub the_request { $_[0]-> uri }
+sub upload {}
+sub args {}
+sub rflush {}
+sub print { CORE::print @_ }
+sub headers_in { $_[0]-> {headers_in} }
+
+sub AUTOLOAD
+{
+	use Carp;
+	use vars qw($AUTOLOAD);
+	my $m = $AUTOLOAD;
+	$m =~ s/^.*:://;
+	my $self = shift;
+	if ( exists $self->{$m}) {
+		if ( 0 == @_)  {
+			return $self-> {$m};
+		} elsif ( 1 == @_)  {
+			$self-> {$m} = $_[0]
+		} else {
+			croak "Method FakeRequest::$m called with @_\n";
+		}
+	} else {
+		croak "Method FakeRequest::$m is not implemented\n";
+	}
+}
+
+sub DESTROY {}
+
+package main;
+
+
+my $admin = eval "\$${site}::Site::Admin";
+
+$req  = FakeRequest-> new(
+	uri		=> $uri,
+	document_root	=> "$admin->{BASE}/docs",
+	filename	=> '',
+	path_info	=> '/',
+	method		=> 'GET',
+	content_type    => undef,
+	is_initial_req  => 1,
+	no_cache	=> 1,
+	dir_config	=> {
+		AddPrefix	=> [''],
+		RemovePrefix	=> [''],
+	},
+	headers_in	=> { 
+		'User-Agent' => 'robotz',
+	},
+	user		=> 'admin',
+	password	=> 'admin',
+	server_hostname	=> 'localhost',
+	remote_ip	=> '127.0.0.1',
+	pool		=> 0,
+	is_main		=> 1,
+	main		=> 1,
+	subprocess_env	=> '',
+	jar		=> 0,
+);
+
+no warnings;
+use HTML::Mason::Request;
+*HTML::Mason::Request::rethrow_exception = sub {
+	return if $^S;
+	print STDERR "@_\n";
+	POSIX::exit(1);
+};
+use warnings;
+
+$req-> notes('prefix', '');
+my $res = $admin-> authen_handler( $req); 
+die "auth bad $res\n" if $res;
+$res = $admin-> access_handler( $req); 
+die "access bad $res\n" if $res;
+$res = $admin-> handler( $req); 
+die "body bad $res\n" if $res;
+
+print "\n";
+while ( my ( $k, $v) = each %{$req->{header_out}}) {
+	print "$k: @{$v}\n";
+}
