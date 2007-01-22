@@ -4,6 +4,7 @@ package WebObvius::Apache;
 # A hackish compatibility layer between Apache1 and Apache2. 
 
 use strict;
+use warnings;
 require Exporter;
 use vars qw(@ISA @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -135,12 +136,14 @@ if ( $MOD_PERL == 2) {
 	# upload
 	require Apache2::Upload;
 	my $req_upload = \&Apache2::Request::upload;
+	no warnings;
 	*Apache2::Request::upload = sub {
 		my $self = shift;
 		return $req_upload->($self, @_) if @_;
 		# emulate A1
 		return map { $req_upload-> ( $self, $_ ) } $req_upload->( $self);
 	};
+	use warnings;
 } elsif ( $MOD_PERL == 1) {
 	require Apache::Cookie;
 
