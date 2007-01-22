@@ -10,6 +10,7 @@ my $users = {
                                            class => 'DbTable',
                                            source=>'users',
                                            identifiers=>[qw(id)],
+                                           sort        => 'name',
                                           },
                           data => {
                                    id   => { type => 'integer' },
