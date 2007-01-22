@@ -3,14 +3,20 @@
 
 # generates a fake request without apache
 # run in ./conf directory so the setup.pl is accessible
+#
+# XXX - currently works with admin only
 
 use strict;
 use warnings;
 
 package main;
-use vars qw($site $req);
+use Carp;
+use vars qw($site $req $uri %param);
 
-my $uri = @ARGV ? $ARGV[0] : '/';
+$uri = @ARGV ? $ARGV[0] : '/';
+( $uri, %param) = ( $1, map { m/([^=]*)=(.*)$/ ? ( $1, $2) : ( $_, 1) } split('&', $2))
+	if $uri =~ /^([^\?]*)\?(.*)$/;
+$uri .= '/' unless $uri =~ m#/$#;
 
 my $file = './setup.pl'; # XXX
 
@@ -22,92 +28,87 @@ close F;
 $site = $1;
 }
 
-sub code($)
-{
-	use POSIX qw(exit);
-	use IO::Handle;
-	my $c = shift;
-	my $i = IO::Handle-> new;
-	return $i if open $i, "-|";
-	print $c;
-	POSIX::exit(0);
-}
 
-sub Apache2::ServerUtil::server_root { '/tmp' }
+sub Apache2::ServerUtil::server_root   { '/tmp' }
 sub Apache2::ServerUtil::restart_count { 0 }
-sub Apache2::RequestUtil::request { $req }
-sub Apache2::Util::ht_time { 0 }
+sub Apache2::RequestUtil::request      { $req }
+sub Apache2::Util::ht_time             { 0 }
+
 $ENV{'MOD_PERL'} = 'mod_perl/2';
-unshift @INC, sub {
-	return code <<APACHE2 if $_[1] eq 'APR/Request/Apache2.pm';
-package APR::Request::Apache2;
-sub handle { \$main::req }
-1;
-APACHE2
+$INC{'APR/Request/Apache2.pm'}++;
+sub APR::Request::Apache2::handle      { $main::req }
 
-	0;
-};
-
+# fuck xml
+$INC{'XML/Simple.pm'}++;
+sub XML::Simple::import
+{ 
+	no strict;
+	*{(caller)[0]."::XMLin"} = sub {};
+	use strict;
+} 
 
 require $file;
 
 HTML::Mason::Request::ApacheHandler-> valid_params->{apache_req}->{isa} = 'FakeRequest';
 
 package FakeRequest;
+use Carp;
 
 sub new 
 { 
 	local $_ = shift; 
 	bless { 
-		@_ ,
-		notes => {},
-		pnotes => {},
+		notes      => {},
+		pnotes     => {},
 		dir_config => {},
-		param => {},
+		param      => \%main::param,
+		@_ ,
 	}, $_ 
 }
-sub request_time { 0 }
 
 sub _store
 {
-	my ( $id, $self, $name, @x) = @_;
+	my ( $id, $hashref, $self, $name, @x) = @_;
 
-	return $self->{$id} || {} unless defined $name;
+	unless ( defined $name) {
+		my $ref = $self->{$id} || {};
+		return $hashref ? $ref : keys %$ref;
+	}
 
 	if ( @x) {
-		$self-> {$id}->{$name} = \@x;
-#		print "$id($name) set @x\n";
-	} elsif ( $self-> {$id}->{$name}) {
-		@x = @{ $self-> {$id}->{$name} };
-		return wantarray ? @x : $x[0];
+		croak "$id($name) too many parameters" if 1 != @x;
+		$self-> {$id}->{$name} = $x[0];
+#		print "$id($name) set $x[0]\n";
+	} elsif ( exists $self-> {$id}->{$name}) {
+		return $self-> {$id}->{$name};
 	} else {
 		return;
 	}
 }
 
-sub notes      { _store( 'notes',      @_ ) }
-sub pnotes     { _store( 'pnotes',     @_ ) }
-sub dir_config { _store( 'dir_config', @_ ) }
-sub param      { _store( 'param',      @_ ) }
-sub header_out { _store( 'header_out',      @_ ) }
+sub dir_config        { _store( 'dir_config', 0, @_ ) }
+sub header_out        { _store( 'header_out', 1, @_ ) }
+sub notes             { _store( 'notes',      0, @_ ) }
+sub param             { _store( 'param',      0, @_ ) }
+sub pnotes            { _store( 'pnotes',     0, @_ ) }
 
-sub log { warn @_, "\n" if 0 }
-sub register_cleanup {}
+sub add               { $_[0]-> header_out( $_[1], $_[2] ) } # headers_out
+sub args              {}
+sub connection        { $_[0] }
 sub get_basic_auth_pw { 0, $_[0]-> {password} }
-sub connection  { $_[0] }
-sub server      { $_[0] }
-sub headers_out { $_[0] }
-sub add         { $_[0]-> header_out( $_[1], $_[2] ) } # headers_out
-sub the_request { $_[0]-> uri }
-sub upload {}
-sub args {}
-sub rflush {}
-sub print { CORE::print @_ }
-sub headers_in { $_[0]-> {headers_in} }
+sub headers_in        { $_[0]-> {headers_in} }
+sub headers_out       { $_[0] }
+sub log               { warn @_, "\n" if 0 }
+sub print             { CORE::print @_ }
+sub register_cleanup  {}
+sub request_time      { 0 }
+sub rflush            {}
+sub server            { $_[0] }
+sub the_request       { $_[0]-> uri }
+sub upload            {}
 
 sub AUTOLOAD
 {
-	use Carp;
 	use vars qw($AUTOLOAD);
 	my $m = $AUTOLOAD;
 	$m =~ s/^.*:://;
@@ -142,8 +143,8 @@ $req  = FakeRequest-> new(
 	is_initial_req  => 1,
 	no_cache	=> 1,
 	dir_config	=> {
-		AddPrefix	=> [''],
-		RemovePrefix	=> [''],
+		AddPrefix	=> '',
+		RemovePrefix	=> '',
 	},
 	headers_in	=> { 
 		'User-Agent' => 'robotz',
@@ -164,7 +165,7 @@ use HTML::Mason::Request;
 *HTML::Mason::Request::rethrow_exception = sub {
 	return if $^S;
 	print STDERR "@_\n";
-	POSIX::exit(1);
+	exit(1);
 };
 use warnings;
 
