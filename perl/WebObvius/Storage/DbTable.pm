@@ -245,6 +245,9 @@ sub list {
     push @where, $this->param('where') if $this->param('where');
     $options->{where} = join(' and ', @where) if @where;
 
+    $options->{sort}  = $this-> param('sort') 
+    	if not (exists $options->{sort}) and defined $this-> param('sort');
+
     my ($table_data, $total) = $this->param('obvius')->get_table_data($this->param('source'), %$options);
     my @list;
     foreach my $entry (@$table_data) {
