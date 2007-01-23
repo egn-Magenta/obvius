@@ -71,6 +71,7 @@ if ( $MOD_PERL == 2) {
 	require Apache2::RequestRec;
 	# compat::args() is broken 
 	my $req_args = \&Apache2::RequestRec::args;
+	no warnings;
 	*Apache2::RequestRec::args = sub {
 		my $req = shift;
 		if ( wantarray) {
@@ -83,9 +84,11 @@ if ( $MOD_PERL == 2) {
 			return $req_args->( $req);
 		}
 	};
+	use warnings;
 	
 	# support both Apache1 and Apache2 styles
 	my $req_notes = \&Apache2::RequestRec::notes;
+	no warnings;
 	*Apache2::RequestRec::notes = sub {
 		my $req = shift;
 		if ( 0 == @_ ) {
@@ -116,6 +119,7 @@ if ( $MOD_PERL == 2) {
 			die "panic: Apache2::RequestRec::notes: Don't know how to handle parameters '@_'\n";
 		}
 	};
+	use warnings;
 	
 	# not present in compat::
 	require Apache2::Cookie;
