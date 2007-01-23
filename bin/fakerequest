@@ -3,8 +3,6 @@
 
 # generates a fake request without apache
 # run in ./conf directory so the setup.pl is accessible
-#
-# XXX - currently works with admin only
 
 use strict;
 use warnings;
@@ -13,9 +11,12 @@ package main;
 use Carp;
 use vars qw($site $req $uri %param);
 
+my $handler = 'Public';
 $uri = @ARGV ? $ARGV[0] : '/';
 ( $uri, %param) = ( $1, map { m/([^=]*)=(.*)$/ ? ( $1, $2) : ( $_, 1) } split('&', $2))
 	if $uri =~ /^([^\?]*)\?(.*)$/;
+$handler = 'Admin', $uri = $1
+	if $uri =~ m[^\/admin(.*)$];
 $uri .= '/' unless $uri =~ m#/$#;
 
 my $file = './setup.pl'; # XXX
@@ -96,6 +97,7 @@ sub add               { $_[0]-> header_out( $_[1], $_[2] ) } # headers_out
 sub args              {}
 sub connection        { $_[0] }
 sub get_basic_auth_pw { 0, $_[0]-> {password} }
+sub header_only       { 0 } 
 sub headers_in        { $_[0]-> {headers_in} }
 sub headers_out       { $_[0] }
 sub log               { warn @_, "\n" if 0 }
@@ -104,6 +106,8 @@ sub register_cleanup  {}
 sub request_time      { 0 }
 sub rflush            {}
 sub server            { $_[0] }
+sub send_http_header  {}
+sub set_content_length{}
 sub the_request       { $_[0]-> uri }
 sub upload            {}
 
@@ -131,11 +135,11 @@ sub DESTROY {}
 package main;
 
 
-my $admin = eval "\$${site}::Site::Admin";
+my $handle = eval "\$${site}::Site::$handler";
 
 $req  = FakeRequest-> new(
 	uri		=> $uri,
-	document_root	=> "$admin->{BASE}/docs",
+	document_root	=> "$handle->{BASE}/docs",
 	filename	=> '',
 	path_info	=> '/',
 	method		=> 'GET',
@@ -170,11 +174,11 @@ use HTML::Mason::Request;
 use warnings;
 
 $req-> notes('prefix', '');
-my $res = $admin-> authen_handler( $req); 
+my $res = $handle-> authen_handler( $req); 
 die "auth bad $res\n" if $res;
-$res = $admin-> access_handler( $req); 
+$res = $handle-> access_handler( $req); 
 die "access bad $res\n" if $res;
-$res = $admin-> handler( $req); 
+$res = $handle-> handler( $req); 
 die "body bad $res\n" if $res;
 
 print "\n";
