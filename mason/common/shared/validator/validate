@@ -35,7 +35,7 @@ if (-x $w3_check) {
     # handling via uploaded files
     $h =~ s/(\W)/sprintf("%%%02x", ord($1))/ge;
     my $env = 
-    	"REQUEST_METHOD=POST ".
+    	"REQUEST_METHOD=GET ".
     	"QUERY_STRING=".
     		"fragment=$h".
     		"\\&output=xml\\&charset=$charset".  # XXX charset
