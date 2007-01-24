@@ -1,0 +1,25 @@
+<%args>
+$dataref
+</%args>
+<%once>
+# $Id$
+
+# Single place to convert unicode scalars to the desired representation.
+# Input  - scalar with utf8 bit set on
+# Output - scalar with utf8 bit set off, in either utf8 or latin1 (or anything else)
+
+use Encode;
+</%once>
+
+<%init>
+
+return unless Encode::is_utf8( $$dataref);
+
+my $charset = $obvius->config->param('charset') || '';
+
+# unicode entities as html numerics
+$$dataref =~ s/([^\x00-\xFF])/sprintf("&#%d;",ord($1))/ge
+	unless $charset =~ /^utf-?8$/;
+
+Encode::_utf8_off( $$dataref);
+</%init>

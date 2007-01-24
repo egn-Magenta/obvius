@@ -136,6 +136,7 @@ if(defined($value)) {
 $out = '';
 $p->parse($value);
 $p->eof;
+$m->scomp( '/shared/from_utf8', dataref => \$out);
 $value = $out;
 return $value;
 </%perl>

@@ -21,6 +21,7 @@ if($url and $url =~ m!^http://!) {
     $_replace_url = $replace_url;
 
     $p->parse($html);
+    $m->scomp( '/shared/from_utf8', dataref => \$out);
     $html=$out;
 } else {
     $url ||='';

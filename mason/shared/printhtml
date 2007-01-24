@@ -9,6 +9,7 @@ $farve = $r->notes('farve') || 'neutral';
 $useprefix = (! $noprefix);
 $p->parse($html);
 $p->eof;
+$m->scomp( '/shared/from_utf8', dataref => \$out);
 $html=$out;
 
 # Cleanup -  &amp;#xxxx; back to &#xxxx;

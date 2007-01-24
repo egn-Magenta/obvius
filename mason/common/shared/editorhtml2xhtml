@@ -7,6 +7,7 @@ $out = '';
 @blockquote = ();
 $p->parse($html);
 $p->eof;
+$m->scomp( '/shared/from_utf8', dataref => \$out);
 </%init>
 <%once>
 # $out should be reset before parsing.
