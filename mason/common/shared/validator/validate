@@ -11,7 +11,7 @@ my $start_html=<<EOT;
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da">
   <head>
     <title>Validation</title>
-    <meta http-equiv="content-type" content="text/html; charset=<% $charset %>" />
+    <meta http-equiv="content-type" content="text/html; charset=$charset" />
   </head>
   <body>
     <div>
@@ -28,14 +28,20 @@ my ($status, $validator_error_count, $warnings, $errors, $result)=('Unknown', un
 
 if (-x $w3_check) {
     my $xml;
-    {
-        local %ENV;
-        $ENV{PATH}='/usr/bin:/bin/';
-        $ENV{REQUEST_METHOD}='GET';
-        $ENV{QUERY_STRING}='fragment=' . uri_escape($start_html . $html . $end_html) .
-            '&output=xml&charset=' . $charset; # XXX charset
-        $xml=`$w3_check`;
-    }
+    my $h = $start_html . $html . $end_html;
+
+    # Forced to pass %ENV via command-line because brain-damaged mod_perl
+    # doesn't call setenv(3) on %ENV change. Really, need to change
+    # handling via uploaded files
+    $h =~ s/(\W)/sprintf("%%%02x", ord($1))/ge;
+    my $env = 
+    	"REQUEST_METHOD=POST ".
+    	"QUERY_STRING=".
+    		"fragment=$h".
+    		"\\&output=xml\\&charset=$charset".  # XXX charset
+    		"\\&debug=1\\&errors=1\\&esis=1\\&verbose=1"
+    	;
+    $xml=`env $env $w3_check`;
 
 
     # The outputs XML is subject to change, and sometimes it ain't even
