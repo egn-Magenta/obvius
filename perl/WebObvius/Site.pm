@@ -866,8 +866,6 @@ sub set_translation_fileset
 
 }
 
-my ( $current_language_preferences, $current_translation_fileset);
-
 sub set_language_preferences
 {
 	my ( $self, $r, $lang) = @_;
