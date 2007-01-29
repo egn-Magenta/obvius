@@ -912,7 +912,7 @@ sub translate
 		}
 	}
 	
-	warn "Cannot find translation for '$text'\n";
+	warn "Cannot find translation for '$text'\n" if $self->{DEBUG};
 	return $text;
 }
 
