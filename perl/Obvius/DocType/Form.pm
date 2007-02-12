@@ -203,7 +203,6 @@ sub action {
                             forcearray => [ 'field', 'option', 'validaterule' ],
                             suppressempty => ''
                         );
-
     $formdata=$this->unutf8ify($formdata); # XMLin automatically generates utf8 data.
                                            # We want the data as latin1, so converting here.
 
@@ -376,8 +375,9 @@ sub action {
         }
 
         push(@{ $xml->{entry} }, $this->unutf8ify(\%entry));
+        #push(@{ $xml->{entry} }, %entry);
 
-        $xml = $this->utf8ify($xml);
+        #$xml = $this->utf8ify($xml);
 
         XMLout(
                 $xml,
