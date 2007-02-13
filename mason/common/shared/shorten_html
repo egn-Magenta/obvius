@@ -4,7 +4,11 @@ $length
 $post=>'...'
 </%args>\
 <%init>
-$text = $m->scomp('/shared/printhtml', html=>$text);
+# - Hack by Ole feb. 12 2007. 
+# Somehow it causes alot of trouble to call printhtml 
+# at this time. If we do it after the parse it doesn't
+# cause problems.. 
+#$text = $m->scomp('/shared/printhtml', html=>$text);
 $textlength = 0;
 $max_length = $length;
 $stop = 0;
@@ -13,6 +17,7 @@ $out='';
 $r->notes('shortened' => 0);
 $p->parse($text);
 $p->eof;
+$out = $m->scomp('/shared/printhtml', html=>$out);
 $m->scomp( '/shared/from_utf8', dataref => \$out);
 $r->notes('shortened' => 1) if($stop);
 </%init>
