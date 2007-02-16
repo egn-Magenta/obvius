@@ -144,9 +144,7 @@ Raw rules. Use with caution.<p>
 % }
 </div>
 
-<textarea name="accessrules" rows=6 cols=50>
-<% $value %>
-</textarea>
+<textarea name="accessrules" rows=6 cols=50><% $value %></textarea>
 <p>
 
 <div id="js-autohide-part3" style="display:none">
