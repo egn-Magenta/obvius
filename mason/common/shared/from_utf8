@@ -15,7 +15,7 @@ use Encode;
 
 return unless Encode::is_utf8( $$dataref);
 
-my $charset = $obvius->config->param('charset') || '';
+my $charset = $obvius->config->param('charset') || 'utf8';
 
 # unicode entities as html numerics
 $$dataref =~ s/([^\x00-\xFF])/sprintf("&#%d;",ord($1))/ge

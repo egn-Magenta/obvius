@@ -14,6 +14,7 @@ $max_length = $length;
 $stop = 0;
 $_post = $post;
 $out='';
+$m->scomp( '/shared/to_utf8', dataref => \$text);
 $r->notes('shortened' => 0);
 $p->parse($text);
 $p->eof;

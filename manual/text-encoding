@@ -1,0 +1,94 @@
+# $Id$
+
+Text encoding in obvius
+=======================
+
+The document clarifies issues of conversion of various text encoding as present
+in different parts of Obvius. The CMS is a mediator between various text inputs
+( files, db, user input ) and outputs ( db, http output ), and thus a
+consistent framework is needed to avoid misinterpretations and wrongly produced
+web pages.
+
+A consistent set of transformations from 8bit to utf8 and vice versa is
+automatically prefixed before and after the output and input. See below for the
+individual explanation.
+
+Data flow
+---------
+
+  external libraries               
+  config files      \              /  output to apache
+  source texts       >-- obvius --<   external libraries
+  database content  /              \  database content
+  input from apache
+
+All actors may provide or require text encoded differently. A proposed solution
+is to make Obvius internally transparent to whatever encoding is required, and
+make the system administrator responsible for the choice, thus Obvius can
+produce both 8bit and utf8 text depending on the apache configuration. The
+[charset] setting in a site configuration file ( in /etc/obvius ) is the
+charset the apache expects; thus, all internal text transformation logic is
+based on [charset].
+
+Another proposed solution is the presentation of utf8 text. Perl utf8-encoded
+scalars can be used, however, with utf8 bit cleared. This provides
+backward-compatibility layer for byte-wise parts, and easies DB support by not
+requiring DB drivers to support unicode. On the bad side it opens a possibility
+to a double-encoding whenever a utf-8 scalar is thought by perl as a 8bit
+scalar, and is upgraded to utf8.
+
+External libraries
+------------------
+
+Depending on the library and its implementation, the transformation of perl
+scalars by the library can lead to double encoding or losing characters with U
+> 0x7F . It is therefore important to wrap calls to the external libraries
+known to produce these effects with conversion calls. For example, HTML::Parser
+can only guarantee stable results when given utf8 html input, because
+otherwise, if a character encoded in &XXX; format is met, it is reported back
+as UTF8 entity, which causes silent upgrade of the whole text. The solution is
+to explicitly upgrade all input to utf8, and downgrade it afterwards. This
+solution naturally puts speed penalty if Obvius operates in 8bit encoding, and
+no penalty otherwise. The standard wrappers /shared/to_utf8 and
+/shared/from_utf8 do not alter the passed scalar but rather set and clear
+internal utf8 bit in the scalar metadata, which is very fast.
+
+Config files
+------------
+
+These are mostly, but not limited to, XML translation files used to provide
+output in different languages. Obvius XML reader loads these files as 8bit
+latin1 scalars. The question whether this should be changed to the [charset]
+format is open, because mostly these are used as key lookups where keys are
+explicitly given in the source files.
+
+Source files
+------------
+
+String constants in the source files contain characters in range 0x7F-0xFF
+explicitly, and >0xFF in form of \x{100} . The programmer is responsible to
+upgrade and downgrade these as seemed fit.
+
+Database content
+----------------
+
+Database format is expected to be in the same format as apache-generated input,
+however it is reasonable to expect malformed data, because browser might
+behave; Obvius does not check on the well-formness of the input, leaving the
+site editor with the task of checking that the input is stored correctly.
+
+Apache input and output
+-----------------------
+
+These are governed by system administrator, and should be set once before a
+site is opened for the production. This choice is pivotal because usually one
+apache server can host more than one Obvius site, which in turn must be
+configured to use the same encoding format.
+
+Overall considerations
+----------------------
+
+There's no definitive scenario of whether 8bit or utf8 encoding should be
+preferred, however, more modern installation run in utf8 mode, and use latest
+Obvius versions. Therefore, unless all other considerations are equal, possibly
+new sites should run in utf8 mode.

@@ -1,0 +1,29 @@
+<%args>
+$dataref
+</%args>
+<%once>
+# $Id$
+
+# Single place to convert internal obvius representation to unicode scalars.
+# Input  - scalar with utf8 bit set off, in either utf8 or latin1 (or anything else)
+# Output - scalar with utf8 bit set on
+#
+# warning: if internal charset is utf8, then input is expected to be a
+# well-formed utf8, otherwise all non-utf8 sequences will be set to chr(0) .
+# Call shared/iso-8859-1_to_utf-8 first to normalize from mixed utf8/non-utf8
+# scalars.
+
+use Encode;
+</%once>
+
+<%init>
+
+return if Encode::is_utf8( $$dataref);
+
+my $charset = $obvius->config->param('charset') || 'utf8';
+$charset = 'utf8' if $charset eq 'utf-8';
+$$dataref = Encode::decode( $charset, $$dataref)
+	if $charset ne 'utf8';
+Encode::_utf8_on( $$dataref);
+
+</%init>
