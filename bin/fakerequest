@@ -9,7 +9,13 @@ use warnings;
 
 package main;
 use Carp;
-use vars qw($site $req $uri %param);
+use vars qw($site $req $uri %param $real_die);
+
+sub cwoak
+{
+	$real_die = 1;
+	goto &Carp::croak;
+}
 
 my $handler = 'Public';
 $uri = @ARGV ? $ARGV[0] : '/';
@@ -77,7 +83,7 @@ sub _store
 	}
 
 	if ( @x) {
-		croak "$id($name) too many parameters" if 1 != @x;
+		main::cwoak "$id($name) too many parameters" if 1 != @x;
 		$self-> {$id}->{$name} = $x[0];
 #		print "$id($name) set $x[0]\n";
 	} elsif ( exists $self-> {$id}->{$name}) {
@@ -123,10 +129,10 @@ sub AUTOLOAD
 		} elsif ( 1 == @_)  {
 			$self-> {$m} = $_[0]
 		} else {
-			croak "Method FakeRequest::$m called with @_\n";
+			main::cwoak "Method FakeRequest::$m called with @_\n";
 		}
 	} else {
-		croak "Method FakeRequest::$m is not implemented\n";
+		main::cwoak "Method FakeRequest::$m is not implemented\n";
 	}
 }
 
@@ -140,6 +146,7 @@ my $handle = eval "\$${site}::Site::$handler";
 $req  = FakeRequest-> new(
 	uri		=> $uri,
 	document_root	=> "$handle->{BASE}/docs",
+	hostname	=> '',
 	filename	=> '',
 	path_info	=> '/',
 	method		=> 'GET',
@@ -167,7 +174,7 @@ $req  = FakeRequest-> new(
 no warnings;
 use HTML::Mason::Request;
 *HTML::Mason::Request::rethrow_exception = sub {
-	return if $^S;
+	return if $^S and not $real_die;
 	print STDERR "@_\n";
 	exit(1);
 };
