@@ -11,6 +11,7 @@ $out = '';
 $pclass = $class;
 $_plaintext = $plaintext;
 $decode_entities = (! $dont_decode_entities);
+$m->scomp( '/shared/to_utf8', dataref => \$html);
 $p->parse($html);
 $p->eof;
 $m->scomp( '/shared/from_utf8', dataref => \$out);
