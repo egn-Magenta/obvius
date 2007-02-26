@@ -15,10 +15,10 @@ use Encode;
 
 return unless Encode::is_utf8( $$dataref);
 
-my $charset = $obvius->config->param('charset') || 'utf8';
+my $charset = $obvius->config->param('charset') || 'latin1';
 
 # unicode entities as html numerics
-$$dataref =~ s/([^\x00-\xFF])/sprintf("&#%d;",ord($1))/ge
+$$dataref = Encode::encode( $charset, $$dataref, Encode::FB_HTMLCREF)
 	unless $charset =~ /^utf-?8$/;
 
 Encode::_utf8_off( $$dataref);

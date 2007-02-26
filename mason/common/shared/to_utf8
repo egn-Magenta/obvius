@@ -20,7 +20,7 @@ use Encode;
 
 return if Encode::is_utf8( $$dataref);
 
-my $charset = $obvius->config->param('charset') || 'utf8';
+my $charset = $obvius->config->param('charset') || 'latin1';
 $charset = 'utf8' if $charset eq 'utf-8';
 $$dataref = Encode::decode( $charset, $$dataref)
 	if $charset ne 'utf8';
