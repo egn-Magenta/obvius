@@ -1,8 +1,3 @@
-%# Please note that this is experimental code. It works, but it needs
-%# some changes, fx. use Archive::ZIP instead of using commandline output
-%# from unzip.. It also needs translations and better error handling.
-%
-%
 <h1>Importer billeder</h1>
 % if ( ! $u ) {
 <form action="./" method="post" enctype="multipart/form-data">
@@ -15,12 +10,36 @@
 </form>
 % } else {
 <p>Billederne er nu uploadet</p>
+
+% if ( $error ) {
+<p>
+<b>Advarsel</b><br />
+F&oslash;lgende billeder fra zipfilen blev ikke uploadet:<br />
+
+%   foreach ( keys %files )
+%   {
+%     my $file = $files{$_};
+%     if ( defined( $file->{error} ) ) {                                                                                                                                                            
+<% $_ %><br />
+
+
+%     }                                                                                                                                                            
+%   }
+<br /><br />Det kan skyldes at:<br />
+- Filen ikke er et JPG billede<br />
+- Filen har et ugyldigt filnavn<br />
+- Zipfilen indeholder flere mapper, og filnavnet allerede findes<br />
+</p>
+% }           
+
 % }
 
 <%init>
 my $dest_url = "/";
 my $u;
 my $zip_path = $r->pnotes('site')->{BASE} . "/var/picture_upload/";
+my $error;
+my %files = ();  
 
 if ( $r->param( "import_pictures_do" ) )
 {    
@@ -50,20 +69,47 @@ if ( $r->param( "import_pictures_do" ) )
 
         if ( $upload ) {
     	    if ( $upload->filename ne '' and $upload->size != 0 and my $fh = $upload->fh ) {
-		my $filename = $upload->filename;
+		my $filename = $tmp . ".zip";;
 		local $/ = undef;
-		open(FILE, ">$zip_path/" . $upload->filename);
+		open(FILE, ">$zip_path/" . $filename);
 		print FILE <$fh>;
     		close(FILE);
+		
+		my $zipFile = Archive::Zip->new();
+		unless ( $zipFile->read( "$zip_path/$filename" ) == AZ_OK )
+		{
+		    die 'read error';
+		}
+		
+		foreach my $member ( $zipFile->members() )
+		{
+		    my @x = split( "/", $member->fileName );
+		    my $file = pop( @x );
+		    my %info = 
+		    (    
+		      orgFile => $member->fileName,
+		      short => $file
+		    );
+		    
+		    
+		    if ( ! defined( $files{$file} ) && $file =~ m/\.jpg/i )
+		    {
+		      $zipFile->extractMemberWithoutPaths( $member->fileName, "$zip_path/$file" );
+		      if ( ! $m->comp('import_pictures:do', source=>"$zip_path/$file", dest_url=>$dest_url) )
+		      {
+		        $info{error} = 1;
+			$error = 1;
+		      }
+		      $files{$file} = \%info;
 
-		# This IS ugly, however it beats using Archive::Zip...
-		my $output = `unzip -l $zip_path/$filename |awk '{print \$4}'|grep -i -e "[.jpg]"`;
-		my @files = split( /\n/, $output );
-		`unzip -d $zip_path/ $zip_path/$filename`;
-		for ( @files ) {
-		    if ( -f "$zip_path/$_" ) {
-			$m->comp('import_pictures:do', source=>"$zip_path/$_", dest_url=>$dest_url);
 		    }
+		    else
+		    {
+		       $info{error} = 1;
+		       $error = 1;
+		       $files{$member->fileName} = \%info; 
+		    }
+		
 		}
 
 	    }
@@ -79,6 +125,7 @@ if ( $r->param( "import_pictures_do" ) )
 use Image::Size;
 use Data::Dumper;
 use POSIX qw(strftime);
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 </%once>
 
 
@@ -175,8 +222,19 @@ if ( $status eq "OK" )
 					       command=>'publish',
 					       args=>\%args,
 					       );
-    
+    if ( $status eq "OK" )
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
       
+}
+else
+{
+  return 0;
 }
 
 </%init>
