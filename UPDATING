@@ -1,5 +1,19 @@
 # $Id$
 
+20070309:
+	Increase preformance by changing index structure of vfields table:
+
+	CREATE INDEX vfields_docid_version_name_int_value_idx ON vfields (docid,version,name,int_value);
+	CREATE INDEX vfields_docid_version_name_double_value_idx ON vfields (docid,version,name,double_value);
+	CREATE INDEX vfields_docid_version_name_date_value_idx ON vfields (docid,version,name,date_value);
+	CREATE INDEX vfields_docid_version_name_text_value_idx ON vfields (docid,version,name,text_value(16));
+	DROP INDEX docid ON vfields;
+	DROP INDEX name ON vfields;
+	DROP INDEX name_2 ON vfields;
+	DROP INDEX name_3 ON vfields;
+	DROP INDEX name_4 ON vfields;
+	
+
 20070105:
 	New API for xml-based language translation:
 		$text = $obvius->{TRANSLATIONS}->{$text} 
