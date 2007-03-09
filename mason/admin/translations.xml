@@ -1537,6 +1537,16 @@
     <translation lang="da">Manuel abonnementudsendelse for dette dokument</translation>
   </text>
 
+  <text key="Display first items only">
+    <translation lang="en">Display first items only</translation>
+    <translation lang="da">Vis kun første dokumenter</translation>
+  </text>
+
+  <text key="Display all items">
+    <translation lang="en">Display all items</translation>
+    <translation lang="da">Vis alle dokumenter</translation>
+  </text>
+
   <text key="">
     <translation lang="en"></translation>
     <translation lang="da"></translation>

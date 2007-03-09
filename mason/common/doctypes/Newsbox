@@ -124,7 +124,14 @@ if ($output->param('message') or $output->param('status')) {
           <a onclick="javascript:return news_delete(<% $i %>);" href="./?mode=delete&amp;newsitem=<% $i %>"><img class="delete" width="7" height="10" src="/pics/icons/delete.png" alt="<& /shared/msg, text=>'Delete' &>" title="<& /shared/msg, text=>'Remove' &>" /></a>
         </td>
       </tr>
+%     last if $last > 0 and $last < $i - 2 and not $r->param('nb_all');
 % }
+
+        <tr><td align="right" colspan="5"><b>
+% my @disp = $r->param('nb_all') ? (0,'Display first items only') : (1, 'Display all items');
+<a href="<% $prefix %><% $uri %>?nb_all=<% $disp[0] %>"><& /shared/msg, text=>$disp[1] &></a>
+        </b></td></tr>
+
     </table>
 
     <div>
