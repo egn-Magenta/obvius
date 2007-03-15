@@ -103,7 +103,8 @@ if ($output->param('message') or $output->param('status')) {
 %     push @class, ($i%2 ? "obvius-a" : "obvius-b");
 %     push @class, "obvius-last" if ($last==$i and $entry->{doc});
 %     push @class, "obvius-inactive" if ($add_message);
-      <tr<% scalar(@class) ? ' class="' . (join " ", @class) . '"' : '' %>>
+%     my $style = ( $last > 0 and $last < $i - 2 and not $r->param('nb_all')) ? 'style="display:none"' : '';
+      <tr<% scalar(@class) ? ' class="' . (join " ", @class) . '"' : '' %> <% $style %>>
         <td><% $i %></td>
         <td>
           <& .newsitem_chooser, entries=>$entries, entry=>$entry, num=>$i, add_message=>$add_message &>
@@ -124,7 +125,6 @@ if ($output->param('message') or $output->param('status')) {
           <a onclick="javascript:return news_delete(<% $i %>);" href="./?mode=delete&amp;newsitem=<% $i %>"><img class="delete" width="7" height="10" src="/pics/icons/delete.png" alt="<& /shared/msg, text=>'Delete' &>" title="<& /shared/msg, text=>'Remove' &>" /></a>
         </td>
       </tr>
-%     last if $last > 0 and $last < $i - 2 and not $r->param('nb_all');
 % }
 
         <tr><td align="right" colspan="5"><b>
