@@ -2,7 +2,7 @@
 % if ($output->param('activate_failed')) {
 Vi beklager - men der er desværre sket en fejl, da du 
 forsøgte at aktivere dit abonnement. 
-Send en mail til <a href='mailto:webmaster@<% $r->pnotes('site')->Sitename %>'>webmaster@<% $r->pnotes('site')->Sitename %></a>. Så
+Send en mail til <a href='mailto:webmaster@<% $domain %>'>webmaster@<% $domain %></a>. Så
 sørger vi for, at dit abonnement bliver aktiveret. 
 % } else {
 Du har nu aktiveret dit abonnement. Fremover vil du modtage 
@@ -14,3 +14,8 @@ de områder, du har valgt.
 <%args>
 $output
 </%args>
+
+<%init>
+my $domain = $r->pnotes('site')->Sitename;
+$domain =~ s/^www\.//;
+</%init>
