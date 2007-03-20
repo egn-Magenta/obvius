@@ -231,3 +231,61 @@ inheritance ( see INHERIT above ) and universal access rules. Adding
 in any level of hierarchy will effectively propagate the requirement for
 authenticated access to the whole document subtree. Adding this rule to
 the universal ruleset will effectively protect the whole site.
+
+
+
+Access management with web interface
+====================================
+
+Initial setup
+-------------
+
+Suppose we have a dedicated sub-tree for protected documents, /public/protected .
+The conf/setup.conf contains:
+
+   <Location /public/protected>
+       PerlAuthenHandler $MYSITE::Site::Public->rulebased_authen_handler
+       AuthName "MYSITE-Protected"
+       AuthType Basic
+       require valid-user
+   </Location>
+
+The document placeholder /protected must be created using web interface, with specially
+made access rules, which will be by default inherited to all subdocuments.
+The /protected document access rules should include:
+
+    "Nobody can not view" ( nobody-view )
+
+which means that unauthenticated uses cannot view the page. After this setup is in place,
+three following types of access for can be implemented for sub-document:
+
+Default access
+--------------
+
+Documents with no changes to the access rules by default inherit their parent access rules.
+Simply put, these documents will require the same authentication as required for /protected,
+their parent.
+
+Public access
+-------------
+
+Document access can be reverted to the public, unauthenticated access. For doing so,
+the INHERITED access rule flag must be cleared.
+
+Restricted access
+-----------------
+
+If further access control is desired, more access rules must be added to the
+document.  For example, if only members of the groups "Admin" and "PowerUser"
+should be allowed to access a document, its access rule must contain 
+
+   "Group Admin can also view" ( @Admin+view )
+   "Group PowerUser can also view" ( @PowerUser+view )
+
+and then finalized by
+   
+     "All users can not view" ( ALL-view )
+
+to deny the access for all the other users.
+
+
