@@ -68,19 +68,6 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         if(my $doc = $obvius->get_doc_by_id($1)) {
                                                             my $uri = $obvius->get_doc_uri($doc);
                                                             if($r->pnotes('site')->param('is_admin')) {
-							        # Hack - if we're in admin, and the doc is a fileupload we need to 
-								# fetch the direct link for the uploaded file
-								my $doctype = $obvius->get_doctype_by_name('FileUpload');
-								if ($doctype->Id == $doc->Type ) {
-								  my $vdoc = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc);
-								  if (my $link = $obvius->get_version_field($vdoc, 'uploadfile')) {
-								    $uri = 'http://' . $r->hostname . $link;
-								  }							  								  
-								}
-								else {
-								  $uri = 'http://' . $r->hostname . '/admin' . $uri;
-								}
-
                                                                 $uri =~ s!/$!!;
                                                             }
 
@@ -92,19 +79,6 @@ my $p = HTML::Parser->new(api_version=>3,
                                                         if(my $doc = $obvius->get_doc_by_id($1)) {
                                                             my $uri = $obvius->get_doc_uri($doc);
                                                             if($r->pnotes('site')->param('is_admin')) {
-							        # Hack - if we're in admin, and the doc is a fileupload we need to 
-								# fetch the direct link for the uploaded file
-								my $doctype = $obvius->get_doctype_by_name('FileUpload');
-								if ($doctype->Id == $doc->Type ) {
-								  my $vdoc = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc);
-								  if (my $link = $obvius->get_version_field($vdoc, 'uploadfile')) {
-								    $uri = 'http://' . $r->hostname . $link;
-								  }							  								  
-								}
-								else {
-								  $uri = 'http://' . $r->hostname . '/admin' . $uri;
-								}
-
                                                                 $uri =~ s!/$!!;
                                                             }
 
