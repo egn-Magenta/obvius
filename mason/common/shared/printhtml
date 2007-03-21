@@ -63,6 +63,30 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             $text =~ s!/(\d+).docid!$uri!;
                                                         }
                                                         $out.=$text;
+                                                    } elsif($tagname eq 'object' and $attr->{data} and $attr->{data} =~ m!^/(\d+).docid!) {
+                                                        # Do docid trick on flash files:
+                                                        if(my $doc = $obvius->get_doc_by_id($1)) {
+                                                            my $uri = $obvius->get_doc_uri($doc);
+                                                            if($r->pnotes('site')->param('is_admin')) {
+                                                                $uri = 'http://' . $r->hostname . '/admin' . $uri;
+                                                                $uri =~ s!/$!!;
+                                                            }
+
+                                                            $text =~ s!/(\d+).docid!$uri!;
+                                                        }
+                                                        $out.=$text;
+                                                    } elsif($tagname eq 'param' and $attr->{value} and $attr->{value} =~ m!^/(\d+).docid!) {
+                                                        # Do docid trick on flash movies param tags:
+                                                        if(my $doc = $obvius->get_doc_by_id($1)) {
+                                                            my $uri = $obvius->get_doc_uri($doc);
+                                                            if($r->pnotes('site')->param('is_admin')) {
+                                                                $uri = 'http://' . $r->hostname . '/admin' . $uri;
+                                                                $uri =~ s!/$!!;
+                                                            }
+
+                                                            $text =~ s!/(\d+).docid!$uri!;
+                                                        }
+                                                        $out.=$text;
                                                     } elsif($r->notes('is_admin') and $tagname eq 'img' and $attr->{src} and $attr->{src} =~ s!/$!!) {
                                                         $out .= "<img " . join(" ", map { $_ . '="' . $attr->{$_} . '"' } keys %$attr) . ">";
                                                     } elsif($pclass and $tagname eq 'p' and not $attr->{class}) {

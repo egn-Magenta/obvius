@@ -73,6 +73,24 @@ my $p = HTML::Parser->new(api_version=>3,
                                                     }
 
                                                     $out .= $text;
+                                                } elsif($tagname eq 'object' and $attr->{type} and $attr->{type} eq 'application/x-shockwave-flash') {
+                                                    my $org_path = $attr->{data};
+                                                    if($org_path) {
+                                                        my ($docid_url, $replace) = $m->comp('docidify:url2docid', url=>$org_path);
+                                                        if($docid_url) {
+                                                            $text =~ s!\Q$replace\E!$docid_url!;
+                                                        }
+                                                    }
+                                                    $out .= $text;
+                                                } elsif($tagname eq 'param' and $attr->{name} and ($attr->{name} eq 'movie' or $attr->{name} eq 'src')) {
+                                                    my $org_path = $attr->{value};
+                                                    if($org_path) {
+                                                        my ($docid_url, $replace) = $m->comp('docidify:url2docid', url=>$org_path);
+                                                        if($docid_url) {
+                                                            $text =~ s!\Q$replace\E!$docid_url!;
+                                                        }
+                                                    }
+                                                    $out .= $text;
                                                 } else {
                                                     $out.=$text;
                                                 }
@@ -87,3 +105,30 @@ my $p = HTML::Parser->new(api_version=>3,
                                         },
                                         "self, text" ]);
 </%once>
+<%method url2docid>
+<%args>
+$url
+</%args>
+<%init>
+# Remove achor and querystring:
+$url =~ s!#.*$!!;
+$url =~ s!\?.*$!!;
+
+# This is the part of the URL we want to replace with /<docid>.docid. Save it.
+my $replace_part = $url;
+
+# Remove hostname:
+$url =~ s!^http://$hostname_from_req/!/!;
+# and /admin/:
+$url =~ s!^/admin/!/!;
+
+
+if($url =~ m!^/!) {
+    if(my $doc = $obvius->lookup_document($url)) {
+        $url = "/" . $doc->Id . ".docid";
+        return ($url, $replace_part);
+    }
+}
+return undef;
+</%init>
+</%method>
