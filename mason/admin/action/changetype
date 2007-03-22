@@ -18,6 +18,10 @@
 <%method doctype_dropdown>
 %
 <& /shared/editengine2/type/util/dropdown, name=>'obvius_new_doctypeid', choices=>\@choices, labels=>\%labels, value=>$value || $doctype->Id &>
+<p>
+%if($restricted and $user_is_admin) {
+<& /shared/msg, text=>'Doctypes marked with (*) are normally resticted in this area, but are visible to users with admin-rights.' &>
+%}
 %
 <%args>
 $limit=>undef
@@ -25,27 +29,51 @@ $value=>undef
 </%args>
 %
 <%init>
-# XXX Needs to be limited by the docparms thing... (see obvius/mason/shared/widgets/doctype).
+my %available_doctypes;
+my $restricted;
+my $user_is_admin = grep { $_ == 1 } # 1 is builtin Admin group guid
+	@{$obvius-> get_user_groups( $obvius->get_userid( $obvius->user))}
+;
+
+my $docparams = $obvius->get_docparams_recursive($doc);
+if(my $dt_value = $docparams->param('admin_doctypes_available')) {
+    if(my $dt_list = $dt_value->param('value')) {
+        $restricted = 1;
+        $available_doctypes{$_}++ for split /\s*,\s*/, $dt_list;
+    }
+}
+
 
 my %labels=();
 my @choices=();
 
-my @doctypes;
+my ( @doctypes, @doctypes2);
 foreach my $type (@{$obvius->{DOCTYPES}}) {
     next unless $type;
     if ($obvius->get_editpages($type)) {
         next if (defined $limit and !($type->{NAME} =~ /$limit/));
-        my %doctype = (
-                       id=>$type->{ID},
-                       name=>$type->{NAME},
-                       translated_name=> $m->scomp('/shared/msg', text=>$type->{NAME}),
-                      );
-        push @doctypes, \%doctype if $doctype{id};
+	next unless $type->{ID};
+
+	my $doctype = {
+		id              => $type-> {ID},
+		name            => $type-> {NAME},
+		translated_name => $m-> scomp('/shared/msg', text=> $type->{NAME}),
+	};
+
+	if ( $restricted and not $available_doctypes{ $doctype->{name} } ) {
+		next unless $user_is_admin;
+		$doctype-> {translated_name} = '(*) ' . $doctype-> {translated_name};
+        	push @doctypes2, $doctype;
+	} else {
+        	push @doctypes, $doctype;
+	}
+
     }
 }
-@doctypes = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
+@doctypes  = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
+@doctypes2 = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes2;
 
-@choices=map { $labels{$_->{id}}=$_->{name}; $_->{id} } @doctypes;
+@choices=map { $labels{$_->{id}}=$_->{translated_name}; $_->{id} } @doctypes, @doctypes2;
 
 $r->notes(inactive_handlingarea=>1);
 $r->notes(inactive_path=>1);

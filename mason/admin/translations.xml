@@ -1536,6 +1536,13 @@
     <translation lang="en">Manual subscription for this document</translation>
     <translation lang="da">Manuel abonnementudsendelse for dette dokument</translation>
   </text>
+  
+  <text key="Doctypes marked with (*) are normally resticted in this area, but are visible to users with admin-rights.">
+    <translation lang="en">Doctypes marked with (*) are normally resticted in this area,
+    but are visible to users with admin-rights.</translation>
+    <translation lang="da">Dokumenttyper markeret med (*) er normalt begræet i dette områ,
+    men er synlige for brugere med admin-rettighed.</translation>
+  </text>
 
   <text key="Display first items only">
     <translation lang="en">Display first items only</translation>
