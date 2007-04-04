@@ -1,0 +1,3 @@
+%# $Id$
+%# %ARGS
+<% sprintf( $m-> scomp('/shared/msg', text => $_[0]), @_[1..$#_]) %>\
