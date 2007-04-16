@@ -126,7 +126,8 @@ my $delete_group = {
                                 functions => {
                                               remove => { label => 'Delete' }
                                              },
-                               }
+                               },
+	            callback => '/action/groups:delete',
                    };
 
 my $input_form = {
@@ -284,3 +285,21 @@ $r->notes(inactive_information=>1);
 $r->notes(inactive_editing=>1);
 $r->notes(inactive_newsboxes=>1);
 </%init>
+
+<%method delete>
+<%args>
+$relations
+$storage
+$editscheme
+$session
+$history
+</%args>
+<%init>
+if ( $relations-> {delete}-> {id} < 3) {
+	$m->comp('/shared/set_status_message', status=>'WARNING', message=>
+		'This group is important for proper system functioning and may not be deleted' );
+        $m->comp('/shared/redirect/', location=>"./?obvius_command_groups=1&obvius_session_id=$session->{_session_id}");
+}	
+</%init>
+</%method>
+

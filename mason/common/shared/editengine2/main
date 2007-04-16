@@ -86,6 +86,21 @@ if (!scalar(@confirmations)) {
     $scheme_parameters{$event}->{$parameter} = $ARGS{$_};
   } grep {/local_scheme_parameter_/} keys %ARGS;
   $session->{editscheme_requests} = \%scheme_parameters if scalar(keys %scheme_parameters);
+
+  if ( exists $editscheme->{callback}) {
+        my $events = $m->comp('history:split_events', history=>$history);
+        my %relations = map { 
+	     my ( $relation, $object) = $m->comp('history:extract_event_info', event => $_);
+	     ( $relation, $object);
+	} @$events;
+	$m-> comp( $editscheme->{callback}, 
+	     relations   => \%relations,
+	     storage     => $storage,
+	     editscheme  => $editscheme,
+	     session     => $session,
+	     history     => $history,
+	);
+  }
 }
 else {
     my $confirmation = pop @confirmations;
