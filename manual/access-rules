@@ -288,4 +288,36 @@ and then finalized by
 
 to deny the access for all the other users.
 
+Testing access rules 
+====================
+
+The program 'explain_access' from Obvius installation ( look in
+/usr/local/obvius/bin or /var/www/obvius/bin ) displays set of access rules
+applicable for a user on a document. For example, testing if an unauthenticated
+user can see a URL would yield output like
+
+    $ /var/www/obvius/bin/explain_access nobody test /
+    Universal rules:
+      1: admin=!view,create,edit,publish,delete,modes
+     *2: ALL+view
+        ++> view
+    
+    Inherited rules:
+    (none)
+    
+    Local rules:
+    (none)
+    
+    Admin access: no
+    Public access: yes, see rule #2
+
+where rules marked by * are rules applicable to the given user. 
+
+Note that the program output may not be coherent with the actual behavior of
+the website, depending on the apache setup. For example, the program might
+report a URL that begins with /admin as accessible to a non-admin user, whereas
+it actually is not, because Obvius enforces special apache setup for all /admin
+URIs.
+
+
 
