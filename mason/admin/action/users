@@ -133,6 +133,7 @@ my $update_user = {
                                              update => { label => 'Update' }
                                             },
                               },
+	           callback => '/action/users:update',
                   };
 
 my $delete_user = {
@@ -330,6 +331,26 @@ $r->notes(inactive_editing=>1);
 $r->notes(inactive_newsboxes=>1);
 </%init>
 
+<%once>
+sub can_edit_user
+{
+	my ( $session, $what, $uid) = @_;
+	return unless $obvius-> can_create_new_user == 1;
+
+	my %my_groups = map { $_ => 1 } 
+		@{$obvius-> get_user_groups( $obvius-> get_userid( $obvius->{USER} ))};
+	my @deny = grep { not exists $my_groups{$_} }
+		@{$obvius-> get_user_groups( $uid )};
+	if ( @deny) {
+		my $deny = join(",", map { $obvius-> get_group($_)->{name} } @deny);
+		$m->comp('/shared/set_status_message', status=>'WARNING', message=>
+			"This user is a member of group(s) $deny , ".
+			"which you're not member of, and therefore may not $what this record" );
+        	$m->comp('/shared/redirect/', location=>"./?obvius_command_users=1&obvius_session_id=$session->{_session_id}");
+	}
+}
+</%once>
+
 <%method delete>
 <%args>
 $relations
@@ -343,7 +364,20 @@ if ( $relations-> {delete}-> {id} < 3) {
 	$m->comp('/shared/set_status_message', status=>'WARNING', message=>
 		'This user is important for proper system functioning and may not be deleted' );
         $m->comp('/shared/redirect/', location=>"./?obvius_command_users=1&obvius_session_id=$session->{_session_id}");
-}	
+}
+can_edit_user( $session, 'delete', $relations-> {delete}-> {id});
 </%init>
 </%method>
 
+<%method update>
+<%args>
+$relations
+$storage
+$editscheme
+$session
+$history
+</%args>
+<%init>
+can_edit_user( $session, 'edit', $relations-> {user}-> {id});
+</%init>
+</%method>
