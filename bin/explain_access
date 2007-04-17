@@ -40,10 +40,10 @@ die "** error: no such user `$username'\n" unless defined $obvius->{USER};
 # split rules in three parts: universal, inherited, and document's
 my $universal_access = $obvius-> get_universal_document();
 $universal_access = join("\n", split "[\n\r]+", ( $universal_access ? $universal_access-> AccessRules : ''));
-my $local_access  = $doc-> Accessrules || '';
+my $local_access  = join("\n", split "[\n\r]+", ( $doc-> Accessrules || ''));
 my $inherited_access = join("\n", $obvius->get_capability_rules($doc));
 $inherited_access =~ s/^\Q$universal_access\E//s;
-$inherited_access =~ s/\Q$local_access\E$//s;
+$inherited_access =~ s/\Q$local_access\E\s*$//s;
 
 my @accept;
 my @deny;
@@ -71,12 +71,12 @@ sub explain
 
 	for ( @r) {
 		$glob++;
-		print "  #$glob: $_\n"; 
 		my ( $apply, $who, $how, $caps) = $obvius-> parse_access_rule(
 			$_, $doc 
 		);
 
 		if ( $apply) {
+			print " *$glob: $_\n"; 
 			my @capabilities = split /\s*,\s*/, $caps;
 			if ( $how eq "=" ) {
 				@accept = @capabilities;
@@ -95,15 +95,17 @@ sub explain
 			delete @caps{ @deny, @unconditional_deny };
 
 			for ( grep { not exists $lastcaps{$_} } keys %caps) {
-				print "     ++> $_\n";
+				print "    ++> $_\n";
 			}
 
 			for ( grep { not exists $caps{$_} } keys %lastcaps) {
-				print "     --> $_\n";
+				print "    --> $_\n";
 				$denycaps{$_} = $glob;
 			}
 
 			%lastcaps = %caps;
+		} else {
+			print "  $glob: $_\n"; 
 		}
 	}
 
