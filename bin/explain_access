@@ -1,0 +1,137 @@
+#!/usr/bin/perl -w
+# $Id$
+# test access rules for a document for a given user, explain as it goes
+
+use strict;
+use Obvius;
+use Obvius::Config;
+
+usage() unless 3 == @ARGV;
+
+sub usage
+{
+	print <<USAGE;
+$0 - test and explain access rules for a document for a given user
+
+format:
+	explain_access username sitename URI
+
+example:
+	$0 admin test /admin
+	
+USAGE
+	exit;
+}
+
+my ( $username, $sitename, $uri) = @ARGV;
+
+my $config = new Obvius::Config( $sitename) or die "** error: could not get config for '$sitename'\n";
+my $obvius = new Obvius( $config) or die "** error: could not get Obvius object for '$config'\n";
+my $doc    = $obvius-> lookup_document( $uri) or die "** error: document '$uri' not found\n";
+my $user;
+for ( values %{$obvius->{USERS}}) {
+	next unless $_-> {login} eq $username;
+	$obvius->{USER} = $username;
+	$user = $_;
+	last;
+}
+die "** error: no such user `$username'\n" unless defined $obvius->{USER};
+
+# split rules in three parts: universal, inherited, and document's
+my $universal_access = $obvius-> get_universal_document();
+$universal_access = join("\n", split "[\n\r]+", ( $universal_access ? $universal_access-> AccessRules : ''));
+my $local_access  = $doc-> Accessrules || '';
+my $inherited_access = join("\n", $obvius->get_capability_rules($doc));
+$inherited_access =~ s/^\Q$universal_access\E//s;
+$inherited_access =~ s/\Q$local_access\E$//s;
+
+my @accept;
+my @deny;
+my @unconditional_deny;
+my %lastcaps;
+my %denycaps;
+my $glob;
+
+explain( $universal_access, 'Universal rules');
+explain( $inherited_access, 'Inherited rules');
+explain( $local_access,     'Local rules');
+
+sub explain
+{
+	my ( $rules, $what) = @_;
+	
+	print "$what:\n";
+
+	my @r = grep { length } split "[\n\r]+", $rules;
+	unless ( @r) {
+		print "(none)\n\n";
+		return;
+	}
+
+
+	for ( @r) {
+		$glob++;
+		print "  #$glob: $_\n"; 
+		my ( $apply, $who, $how, $caps) = $obvius-> parse_access_rule(
+			$_, $doc 
+		);
+
+		if ( $apply) {
+			my @capabilities = split /\s*,\s*/, $caps;
+			if ( $how eq "=" ) {
+				@accept = @capabilities;
+			} elsif ($how eq "=!") {
+				@accept = @capabilities; 
+				@deny = ();
+			} elsif ($how eq "+") {
+				push @accept, @capabilities;
+			} elsif ($how eq "-") {
+				push @deny, @capabilities;
+			} elsif ($how eq "!") {
+				push @unconditional_deny, @capabilities;
+			}
+
+			my %caps = map { $_ => $glob } @accept;
+			delete @caps{ @deny, @unconditional_deny };
+
+			for ( grep { not exists $lastcaps{$_} } keys %caps) {
+				print "     ++> $_\n";
+			}
+
+			for ( grep { not exists $caps{$_} } keys %lastcaps) {
+				print "     --> $_\n";
+				$denycaps{$_} = $glob;
+			}
+
+			%lastcaps = %caps;
+		}
+	}
+
+	print "\n";
+}
+
+print "Admin access: ", ($user->{admin} ? "yes" : "no"), "\n";
+if ( $user->{admin} ) {
+	for ( qw(view create edit publish delete modes)) {
+		if ( $lastcaps{$_}) {
+			printf "  %-9s is allowed by rule #$lastcaps{$_}\n", "'$_'";
+		} elsif ( $denycaps{$_}) {
+			printf "  %-9s is denied  by rule #$denycaps{$_}\n", "'$_'";
+		}
+	}
+	print "\n";
+}
+
+print "Public access: ";
+if ( $user-> {admin} ) {
+	print "yes, because user is admin\n";
+} elsif ( $lastcaps{view}) {
+	print "yes, see rule #$lastcaps{view}\n";
+} elsif ( $denycaps{view}) {
+	print "no, see rule #$denycaps{view}\n";
+} else {
+	print "no\n";
+}
+
+
+print "\n";
