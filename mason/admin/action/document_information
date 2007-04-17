@@ -72,11 +72,11 @@ sort $inherited_docparams->param();
 
 # split rules in three parts: universal, inherited, and document's
 my $universal_access = $obvius-> get_universal_document();
-$universal_access = $universal_access ? $universal_access-> AccessRules : '';
+$universal_access = join("\n", split "[\n\r]+", ( $universal_access ? $universal_access-> AccessRules : ''));
 my $local_access  = $doc-> Accessrules || '';
 my $inherited_access = join("\n", $obvius->get_capability_rules($doc));
-$inherited_access =~ s/^$universal_access//s;
-$inherited_access =~ s/$local_access$//s;
+$inherited_access =~ s/^\Q$universal_access\E//s;
+$inherited_access =~ s/\Q$local_access\E$//s;
 
 my $access_error;
 my $current_access_rules = join '<br />', map {
