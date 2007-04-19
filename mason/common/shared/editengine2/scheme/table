@@ -7,11 +7,30 @@
     <& '.display_pagelist', page=>$page, max=>$obvius_max, total=>$total, history=>$history, numberofcolumns=>scalar(@columns) &>
 % }
 %
+%   if ( $do_filters) {
+<form class="obvius-handling" method="post" action="?<% 
+	$m-> scomp( '../toolbox:get_scheme_parameters',
+		history => $history,
+	) 
+%>">
+%   }
     <tr>
 %   foreach my $column (@columns) {
       <th>
+%      if ( defined $column-> {filter}) {
+<input name="obvius_editengine_filter_on" type="radio" value="<% $column-> {name} %>" \
+<% ($column->{name} eq $filter_on) ? 'checked' : '' %> \
+/>
+%      }
         <& '.display_label', column=>$column, sort=>$sort, reverse=>$reverse, history=>$history  &>
       </th>
+%   }
+%   if ( $do_filters) {
+<th>
+<input name="obvius_editengine_filter" type="input" size=10" value="<% $filter %>" />
+<input type="submit" value="Filter"/>
+</th>
+</form>
 %   }
     </tr>
 %
@@ -81,6 +100,22 @@ my $page = $session->{editscheme_parameters}->{$history}->{page} || 1;
 my $sort = $session->{editscheme_parameters}->{$history}->{sort};
 my $reverse = $session->{editscheme_parameters}->{$history}->{reverse};
 
+# local filters
+my ( $filter_on, $filter);
+for ( 
+	[\$filter_on, 'filter_on'],
+	[\$filter,    'filter']
+) {
+	my ( $ref, $ix) = @$_;
+	if ( defined $r-> param("obvius_editengine_$ix")) {
+		$$ref = $session-> {editscheme_parameters}-> {$ix} = $r-> param("obvius_editengine_$ix");
+	} elsif ( defined $session-> {editscheme_parameters}-> {$ix} ) {
+		$$ref = $session-> {editscheme_parameters}-> {$ix};
+	} else {
+		$$ref = '';
+	}
+}
+
 # Options controlling table display.
 my $obvius_max = (defined $editscheme->{arguments} and defined $editscheme->{arguments}->{max}) ? $editscheme->{arguments}->{max} : 10;
 
@@ -103,13 +138,44 @@ if ($style->{context} eq 'raw') {
     return $table;
 }
 
+my @columns = @{$editscheme->{display}};
+
+# filtering
+my ( $do_filters);
+for ( @columns) {
+	next unless $_-> {filter};
+	$do_filters++;
+
+	next unless length($filter) and $filter_on eq $_-> {name};
+
+	if ( $_-> {filter} eq 'int') {
+		unless ( $filter =~ /^\s*(?:(<|>|=|<=|>=))?(\d+)\s*$/) {
+			$m->comp('/shared/set_status_message', status=>'WARNING', message=>
+				'Invalid filter expression, must be either a number '.
+				'or a number prefixed with one of <,>,=,<=,>=');
+			next;
+		}
+		if ( $1) {
+			$options->{where} = "$_->{name} $1 $2";
+		} else {
+			$options->{where} = "$_->{name} = $2";
+		}
+	} elsif ( $_-> {filter} eq 'str') {
+		my $f = $filter;
+		$f =~ s[(')][$1']g;
+		$f =~ s[\\][\\\\]g;
+		$options->{where} = "$_->{name} like '%$f%'";
+	} else {
+		die "bad filter $_->{filter}";
+	}
+}
+
 # Fix: Currently $total is the total number of rows in the table, and
 # not the total number of found records, as it ought to be: If an
 # object is passed to the scheme only entries (ie. the subset)
 # matching this object identification are wanted
 my ($table, $total)=$storage->list(\%object, $options);
 
-my @columns = @{$editscheme->{display}};
 
 my $functions = $editscheme->{storage}->{functions};
 #use Data::Dumper; print STDERR '$functions: ' . Dumper($functions);

@@ -230,10 +230,10 @@ my $users = {
              type => 'scheme/table',
              label => 'Users',
              display => [
-                         {name=>'id',     content=>'data',   label=>'Id'     },
-                         {name=>'name',   content=>'data',   label=>'Name'   },
-                         {name=>'login',  content=>'data',   label=>'Login'  },
-                         {name=>'email',  content=>'data',   label=>'E-mail' },
+                         {name=>'id',     content=>'data',   label=>'Id'     , filter => 'int' },
+                         {name=>'name',   content=>'data',   label=>'Name'   , filter => 'str' },
+                         {name=>'login',  content=>'data',   label=>'Login'  , filter => 'str' },
+                         {name=>'email',  content=>'data',   label=>'E-mail' , filter => 'str' },
                          {name=>'groups', content=>'scheme', label=>'Groups' },
                         ],
              storage => {
