@@ -11,6 +11,9 @@
 <form class="obvius-handling" method="post" action="?<% 
 	$m-> scomp( '../toolbox:get_scheme_parameters',
 		history => $history,
+		options => {
+			page => 1
+		}
 	) 
 %>">
 %   }
@@ -175,7 +178,6 @@ for ( @columns) {
 # object is passed to the scheme only entries (ie. the subset)
 # matching this object identification are wanted
 my ($table, $total)=$storage->list(\%object, $options);
-
 
 my $functions = $editscheme->{storage}->{functions};
 #use Data::Dumper; print STDERR '$functions: ' . Dumper($functions);
