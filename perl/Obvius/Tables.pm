@@ -77,7 +77,7 @@ sub get_table_data {
     $set->Disconnect;
 
     if (wantarray) {
-        return (\@records, $this->db_number_of_rows_in_table($table));
+        return (\@records, $this->db_number_of_rows_in_table($table, $search_options{'$where'}));
     }
     else {
         return \@records;

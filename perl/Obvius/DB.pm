@@ -137,9 +137,11 @@ sub db_rollback	{
 #                              given.
 #
 sub db_number_of_rows_in_table {
-    my ($this, $table)=@_;
+    my ($this, $table, $where)=@_;
 
-    my $sth=$this->{DB}->DBHdl->prepare('SELECT COUNT(*) FROM ' . $table);
+    $where = ( defined $where) ? "WHERE $where" : '';
+
+    my $sth=$this->{DB}->DBHdl->prepare("SELECT COUNT(*) FROM $table $where" );
     $sth->execute;
     my $count=$sth->fetchrow;
 
