@@ -32,6 +32,18 @@
 <th>
 <input name="obvius_editengine_filter" type="input" size=10" value="<% $filter %>" />
 <input type="submit" value="Filter"/>
+% 		if ( length $filter) {
+		<div class="obvius-editengine-anonymous-functions">
+		<a href="./?<% $m-> scomp( '../toolbox:get_scheme_parameters',
+			history => $history,
+			options => {
+				filter => '',
+				filter_on => '',
+			}
+		)
+%>">Show all records</a>
+		</div>
+% 		}
 </th>
 </form>
 %   }
@@ -111,9 +123,9 @@ for (
 ) {
 	my ( $ref, $ix) = @$_;
 	if ( defined $r-> param("obvius_editengine_$ix")) {
-		$$ref = $session-> {editscheme_parameters}-> {$ix} = $r-> param("obvius_editengine_$ix");
-	} elsif ( defined $session-> {editscheme_parameters}-> {$ix} ) {
-		$$ref = $session-> {editscheme_parameters}-> {$ix};
+		$$ref = $session-> {editscheme_parameters}-> {$history}-> {$ix} = $r-> param("obvius_editengine_$ix");
+	} elsif ( defined $session-> {editscheme_parameters}-> {$history}-> {$ix} ) {
+		$$ref = $session-> {editscheme_parameters}-> {$history}-> {$ix};
 	} else {
 		$$ref = '';
 	}
