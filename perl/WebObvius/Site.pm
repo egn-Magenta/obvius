@@ -47,7 +47,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 our %xml_cache;
 
 use constant TRANSLATION_FILENAME => 'translations';
-use constant TRANSLATION_SUFFIXES => ('.xml', '_local.xml');
+use constant TRANSLATION_SUFFIXES => ('_local.xml', '.xml');
 
 use WebObvius::Apache
 	Constants	=> qw(:common :methods :response),
