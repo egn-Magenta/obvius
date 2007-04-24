@@ -45,7 +45,7 @@ sub encode_ical
 	for ( my $i = 0; $i < @$opt; $i += 2) {
 		my ( $key, $val) = @$opt[$i,$i+1];
 		if ( ref($val) eq 'ARRAY') {
-			$ret .= encode_ical( $key, $_ ) for @$val;
+			$ret .= encode_ical( $key, $_, $as_quoted_printable ) for @$val;
 			next;
 		}
 
@@ -158,7 +158,7 @@ sub as_ical
 	}
 
 	return encode_ical( 'VCALENDAR', [
-		VERSION	=> '1.0',
+		VERSION	=> '2.0',
 		METHOD	=> 'PUBLISH',
 		PRODID	=> ':-//Obvius//NONSGML ICal//DA',
 		VEVENT	=> \@list,
