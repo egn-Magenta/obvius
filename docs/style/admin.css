@@ -889,9 +889,9 @@ form.obvius-manual-placement div div {
 /* Navigator style: */
 body.obvius-navigator {
   background-color: white;
-  background-image: url(/pics/icons/navigator-background.png);
+  /*background-image: url(/pics/icons/navigator-background.png);
   background-repeat: repeat-y;
-  border: 0;
+  border: 0;*/
 }
 
 form.obvius-navigator {
@@ -954,7 +954,7 @@ form.obvius-navigator #obvius-toolbar-new ul li a:hover {
 
 form.obvius-navigator div.obvius-current-document {
   background-color: white;
-  margin-left: 15em; /* obvius-tree width */
+  margin-left: 25em; /* obvius-tree width, old: 15em */
   padding-left: 0.25em;
   border-left: 1px solid #aaa;
   border-bottom: 1px solid #aaa;
@@ -982,7 +982,7 @@ form.obvius-navigator div.obvius-current-document table tr th {
 form.obvius-navigator div.obvius-subdocs {
   background-color: white;
   margin-top: 0;
-  margin-left: 15em; /* width of obvius-tree */
+  margin-left: 25em; /* width of obvius-tree, old: 15em */
   border: 0;
   border-left: 1px solid #aaa;
 }
@@ -1022,7 +1022,7 @@ form.obvius-navigator div.obvius-tree {
   background-color: #f8f8f8;
   border-right: 1px solid #aaa;
   margin-top: 0;
-  width: 15em; /* obvius-tree width */
+  width: 25em; /* obvius-tree width, old: 15em */
 }
 
 form.obvius-navigator div.obvius-tree ul {
