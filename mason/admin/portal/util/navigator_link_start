@@ -19,7 +19,7 @@ $fieldname=>undef
 $fieldname=>undef
 </%args>
 %
-javascript:return obvius_open_window(<% $href %>, 'obvius_navigator', 'width=700', 'height=432', 'status=yes');\
+javascript:return obvius_open_window(<% $href %>, 'obvius_navigator', 'width=800', 'height=432', 'status=yes');\
 %
 %
 <%init>
