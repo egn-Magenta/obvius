@@ -30,5 +30,11 @@ my $html_content=$obvius->get_version_field($vdoc,'html_content');
 my $org_uri = $output->param('ORG_URI');
 $html_content =~ s/\$url/$org_uri/g;
 
+my ($uri,$host) = $m->comp('/shared/get_subsite_siterootmap')->translate_uri($org_uri, $r->hostname);
+if ( $host eq "" ) {
+    $host = $uri;
+}
+$html_content =~ s/\$subsiteurl/$host/g;
+
 $r->notes('show_subdocs'=>$vdoc->Show_subdocs) if (defined $vdoc->field('show_subdocs'));
 </%init>
