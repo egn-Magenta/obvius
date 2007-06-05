@@ -31,9 +31,7 @@ my $org_uri = $output->param('ORG_URI');
 $html_content =~ s/\$url/$org_uri/g;
 
 my ($uri,$host) = $m->comp('/shared/get_subsite_siterootmap')->translate_uri($org_uri, $r->hostname);
-if ( $host eq "" ) {
-    $host = $uri;
-}
+
 $html_content =~ s/\$subsiteurl/$host/g;
 
 my $subsitelink = $host . $uri;
