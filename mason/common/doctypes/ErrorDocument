@@ -28,7 +28,7 @@ my $docdate = $vdoc->Docdate;
 my $content=$obvius->get_version_field($vdoc,'content');
 
 my $org_uri = $output->param('ORG_URI');
-$content =~ s/\$url/$org_uri/;
+$content =~ s/\$url/$org_uri/g;
 
 $r->notes('show_subdocs'=>$vdoc->Show_subdocs) if (defined $vdoc->field('show_subdocs'));
 </%init>
