@@ -4,7 +4,7 @@
 %
 <& teaser &>
 %
-<& /shared/htmlize, text=>$content &>
+<% $html_content %>
 %
 <& comments, output=>$output &>
 %
@@ -25,10 +25,10 @@ $obvius->get_version_fields($vdoc, [qw(url teaser docdate show_subdocs show_subd
 my $teaser = $vdoc->field('Teaser');
 my $docdate = $vdoc->Docdate;
 
-my $content=$obvius->get_version_field($vdoc,'content');
+my $html_content=$obvius->get_version_field($vdoc,'html_content');
 
 my $org_uri = $output->param('ORG_URI');
-$content =~ s/\$url/$org_uri/g;
+$html_content =~ s/\$url/$org_uri/g;
 
 $r->notes('show_subdocs'=>$vdoc->Show_subdocs) if (defined $vdoc->field('show_subdocs'));
 </%init>

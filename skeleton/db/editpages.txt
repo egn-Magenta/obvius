@@ -541,17 +541,17 @@ DocType: DocStats
 
 DocType: ErrorDocument
  Page: 1
-  Copy: Standard(1)
+  Copy: HTML(1)
  End
  Page: 2
-  Copy: Standard(2)
+  Copy: HTML(2)
  End
  Page: 3
-  Copy: Standard(3)
+  Copy: HTML(3)
  End
  Page: 4
-  Copy: Standard(4)
+  Copy: HTML(4)
  End
  Page: P
-  Copy: Standard(P)
+  Copy: HTML(P)
  End
