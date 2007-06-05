@@ -211,3 +211,4 @@ DocType: Proxy parent=Base basis
 
 DocType: DocStats parent=Base basis
 
+DocType: ErrorDocument parent=Base basis

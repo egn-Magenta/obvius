@@ -1,0 +1,34 @@
+<!-- ErrorDocument doctype: -->
+
+<& headline &>
+%
+<& teaser &>
+%
+<& /shared/htmlize, text=>$content &>
+%
+<& comments, output=>$output &>
+%
+% if (my $url=$vdoc->field('url')) {
+<a href="<% $url %>"><% $url |h %></a>
+% }
+
+<!-- :ErrorDocument doctype -->
+%
+% #####################
+%
+<%args>
+$output
+</%args>
+%
+<%init>
+$obvius->get_version_fields($vdoc, [qw(url teaser docdate show_subdocs show_subdoc_teaser show_subdoc_date)]);
+my $teaser = $vdoc->field('Teaser');
+my $docdate = $vdoc->Docdate;
+
+my $content=$obvius->get_version_field($vdoc,'content');
+
+my $org_uri = $output->param('ORG_URI');
+$content =~ s/\$url/$org_uri/;
+
+$r->notes('show_subdocs'=>$vdoc->Show_subdocs) if (defined $vdoc->field('show_subdocs'));
+</%init>

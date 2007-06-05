@@ -538,3 +538,20 @@ DocType: DocStats
  Page: P
   Title: Publish document
  End
+
+DocType: ErrorDocument
+ Page: 1
+  Copy: Standard(1)
+ End
+ Page: 2
+  Copy: Standard(2)
+ End
+ Page: 3
+  Copy: Standard(3)
+ End
+ Page: 4
+  Copy: Standard(4)
+ End
+ Page: P
+  Copy: Standard(P)
+ End
