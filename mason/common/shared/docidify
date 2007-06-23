@@ -104,6 +104,7 @@ my $p = HTML::Parser->new(api_version=>3,
                                         $out.=$text;
                                         },
                                         "self, text" ]);
+$p->attr_encoded(1); # Don't decode entities in attributes
 </%once>
 <%method url2docid>
 <%args>
