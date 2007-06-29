@@ -7,7 +7,7 @@ use Obvius;
 use Obvius::Data;
 use WebObvius;
 use Data::Dumper;
-use SOAP::Transport::HTTP;
+use SOAP::Transport::HTTP2;
 use WebObvius::Apache
         Constants       => qw(:common :methods :response),
         File            => '';                                                                                                                                                              
@@ -33,7 +33,7 @@ sub new
  
   $obvius = new Obvius($this->{obvius_config});
   
-  $SOAPServer = SOAP::Transport::HTTP::Apache-> dispatch_to( "WebObvius::SOAP::Functions" );
+  $SOAPServer = SOAP::Transport::HTTP2::Apache-> dispatch_to( "WebObvius::SOAP::Functions" );
   
   return $this;
 }
