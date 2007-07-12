@@ -753,9 +753,9 @@ Calendar.prototype.create = function (_par) {
 	var hh = function (text, cs, navtype) {
 		cell = Calendar.createElement("td", row);
 		cell.colSpan = cs;
-		cell.className = "button";
+		cell.className = "obviuscal_button";
 		if (navtype != 0 && Math.abs(navtype) <= 2)
-			cell.className += " nav";
+			cell.className += " obviuscal_nav";
 		Calendar._add_evs(cell);
 		cell.calendar = cal;
 		cell.navtype = navtype;
@@ -1320,8 +1320,15 @@ Calendar.prototype.showAtElement = function (el, opts) {
 		var br = Calendar.getAbsolutePos(cp);
 		document.body.removeChild(cp);
 		if (Calendar.is_ie) {
-			br.y += document.body.scrollTop;
-			br.x += document.body.scrollLeft;
+			if (typeof document.body.style.maxHeight != "undefined") {
+ 				// IE 7, mozilla, safari, opera 9
+				br.y += window.scrollY;
+				br.x += window.scrollX;
+			} else {
+				// older IE
+				br.y += document.body.scrollTop; 
+				br.x += document.body.scrollLeft;
+			}
 		} else {
 			br.y += window.scrollY;
 			br.x += window.scrollX;
