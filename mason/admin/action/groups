@@ -208,8 +208,8 @@ my $groups = {
               type => 'scheme/table',
               label => 'Groups',
               display => [
-                          {name=>'id',    content=>'data',   label=>'Id'    },
-                          {name=>'name',  content=>'data',   label=>'Name'  },
+                          {name=>'id',    content=>'data',   label=>'Id'    , filter => 'int'},
+                          {name=>'name',  content=>'data',   label=>'Name'  , filter => 'str'},
                           {name=>'users', content=>'scheme', label=>'Users' },
                          ],
               storage => {
