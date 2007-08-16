@@ -44,7 +44,13 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                                         if(my $align = $attr->{align}) {
                                                             $attr->{style} =~ s/float:[^;]+;//;
+							    if ($align =~ m/(left|right)/i) {
                                                             $attr->{style} .= "float: $align;";
+							    }
+							    else
+							    {
+								$attr->{style} .= "vertical-align: $align;";
+							    }
                                                        }
 
                                                         if(my $vspace = $attr->{vspace}) {

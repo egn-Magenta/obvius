@@ -40,6 +40,19 @@ my $p = HTML::Parser->new(api_version=>3,
                                                             $adjust = 1;
                                                         }
 
+                                                        # Set align from vertical-align:
+                                                        if($attr->{style} =~ s!vertical-align:([^;]+);!!) {
+                                                            my $valign_val = $1;
+                                                            $valign_val =~ s/^\s+//;
+
+                                                            $attr->{align} = $valign_val;
+
+                                                            push(@$attrseq, "align") unless($existing_attr{'align'});
+
+                                                            $adjust = 1;
+                                                        }
+
+
                                                         # No longer necessary to convert padding-styles back to
                                                         # hspace and vspace since the editor now allows editing of all
                                                         # four of the padding styles instead of hspace and vspace.
