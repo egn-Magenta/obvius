@@ -138,9 +138,9 @@ my $delete_subscriber = {
                          type => 'scheme/editsheet',
                          label => 'Subscriber',
                          display => [
-                                     {name =>'name',     content=>'data',   label=>'Name',    style=>{context=>'block',disabled=>'1'} },
-                                     {name=>'company',   content=>'data',   label=>'Company', style=>{context=>'block',disabled=>'1'} },
-                                     {name=>'email',     content=>'data',   label=>'E-mail',  style=>{context=>'block',disabled=>'1'} },
+                                     {name =>'name',     content=>'data',   label=>'Name',    style=>{context=>'block',disabled=>'1'} , filter => 'str'},
+                                     {name=>'company',   content=>'data',   label=>'Company', style=>{context=>'block',disabled=>'1'} , filter => 'str'},
+                                     {name=>'email',     content=>'data',   label=>'E-mail',  style=>{context=>'block',disabled=>'1'} , filter => 'str'},
                                     ],
                          storage => {
                                      %$subscriber_storage,
@@ -226,9 +226,9 @@ my $subscribers = {
                                  max => '20',
                                 },
                    display => [
-                               {name=>'name',      content=>'data',   label=>'Name'                                    },
-                               {name=>'email',     content=>'data',   label=>'E-mail'                                  },
-#                               {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_1 => 'Yes'} },
+                               {name=>'name',      content=>'data',   label=>'Name'                                    , filter => 'str'},
+                               {name=>'email',     content=>'data',   label=>'E-mail'                                  , filter => 'str'},
+#                              {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_1 => 'Yes'} },
                                {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_0=>'No', label_1 => 'Yes'} },
                               ],
                    storage => {
