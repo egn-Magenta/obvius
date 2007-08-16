@@ -228,8 +228,7 @@ my $subscribers = {
                    display => [
                                {name=>'name',      content=>'data',   label=>'Name'                                    , filter => 'str'},
                                {name=>'email',     content=>'data',   label=>'E-mail'                                  , filter => 'str'},
-#                              {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_1 => 'Yes'} },
-                               {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_0=>'No', label_1 => 'Yes'} },
+                               {name=>'suspended', content=>'data',   label=>'Suspended', options=>{ label_0=>'No', label_1 => 'Yes'}, filter => 'str' },
                               ],
                    storage => {
                                %$subscriber_storage,
