@@ -91,6 +91,21 @@ sub as_ical
 {
 	my ( $self, $obvius, $hostname, @events) = @_;
 
+    # Make a translate function for urls: $translate->( $doc_object )
+    my $translate;
+    my $hostmap   = $obvius-> config-> param('hostmap');
+    if($hostmap) {
+        $translate = sub {
+                          scalar $hostmap-> translate_uri(
+                          $obvius-> get_doc_uri( shift ),
+                          ':stupid interface:'
+                          ) };
+    } else {
+        $translate = sub {
+                            return "http://$hostname" . $obvius->get_doc_uri(shift);
+                        }
+    }
+
 	my @list;
 	for my $event ( @events) {
 		$obvius-> get_version_fields( $event, [qw(
@@ -135,10 +150,11 @@ sub as_ical
 			DESCRIPTION	=> 
 				$event-> field('teaser') .
 				"\n\n" .
-				"http://$hostname".
-				$obvius-> get_doc_uri(
-					$obvius-> get_doc_by_id( $event-> Docid)
-				),
+                $translate->($obvius->get_doc_by_id($event->DocId)),
+				#"http://$hostname".
+				#$obvius-> get_doc_uri(
+				#	$obvius-> get_doc_by_id( $event-> Docid)
+				#),
 			SUMMARY    	=> $event-> field('title'),
 			CATEGORIES 	=> $event-> field('eventtype'),
 			LOCATION   	=> $event-> field('eventplace'),
