@@ -39,7 +39,7 @@ $validation
 <%init>
 # Use uploaded file, if there is one:
 
-my $max_upload = (2 << 20);
+my $max_upload = (2 << 20); #1m
 
 my @uploads=$r->upload;
 my $match=':' . $id . "_upload\$";
