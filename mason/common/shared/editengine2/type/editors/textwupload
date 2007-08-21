@@ -38,15 +38,22 @@ $validation
 %
 <%init>
 # Use uploaded file, if there is one:
+
+my $max_upload = (2 << 20);
+
 my @uploads=$r->upload;
 my $match=':' . $id . "_upload\$";
 foreach my $upload (@uploads) {
     my $name=$upload->name;
     next unless ($name=~/$match/o); # XXX This is editengine-naming dependent, since I do not get prefix here...
-    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
-	local $/ = undef;
-	my $value=<$fh>;
-        $data->{$id}=$value;
+    # Here goes size of max_upload...
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh
+	and (!(defined $max_upload) or $upload->size < $max_upload)) {
+      local $/ = undef;
+      my $value=<$fh>;
+      # Check if the file contains non-printable characters (and therefore is in reality binary)
+      next if ($value =~ /\x00/);
+      $data->{$id}=$value;
     }
 }
 
