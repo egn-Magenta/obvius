@@ -8,8 +8,7 @@ require Exporter;
 our @ISA = ("Exporter");
 
 our @EXPORT_OK = qw (escape_uri_argument 
-                     unescape_uri_argument 
-                     sort_alphabetically);
+                     unescape_uri_argument);
 
 #\ is used here because % apparently gets mangled...
 sub escape_uri_argument {
