@@ -1,6 +1,14 @@
 <& /shared/editengine2/init, editscheme=>$users, relation=>'users', edges=>$edges &>
 <%once>
 
+
+sub sorter {
+    my $list = shift;
+    @$list = sort {lc($a->{name}->{value}) cmp lc($b->{name}->{value})} @$list;
+    return $list;
+}
+
+
 my $groups = {
               type => 'scheme/table',
               display => [
@@ -43,7 +51,7 @@ my $group_membership = {
                     arguments => {
                                    set => 'set',
                                    subset => 'checks',
-				   set_transformer => \&Obvius::Helpers::sort_alphabetically,
+				   set_transformer => \&sorter,
                                    subset_mappings => {
                                                        id => 'grp',
                                                       },
