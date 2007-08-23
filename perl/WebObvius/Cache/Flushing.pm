@@ -14,7 +14,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub immediate_flush {
     my $cache_file = shift;
 
-    open F ">$cache_file";
+    open F, ">$cache_file";
     close F;
 }
 
@@ -22,6 +22,9 @@ sub flush_all {
     immediate_flush(@_);
 }
 
+#Takes the cache index file and an url array, 
+#and removes the urls in the url array, from the index file passed...
+ 
 sub flush {
     my ($cache_file, $url) = @_;
     my $content;
