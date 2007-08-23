@@ -23,11 +23,4 @@ sub unescape_uri_argument {
     $url =~ s/\\(\d{2})/chr($1)/ge;
     return $url;
 }
-
-sub sort_alphabetically {
-    my $list = shift;
-    @$list = sort {lc($a->{name}->{value}) cmp lc($b->{name}->{value})} @$list;
-    return $list;
-}
-
 1;
