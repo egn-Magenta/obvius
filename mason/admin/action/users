@@ -12,6 +12,7 @@ my $groups = {
                                            source=>'groups',
                                            identifiers=>[qw(id)],
                                            where => undef,
+					   order => [qw(name)]
                                           },
                           data => {
                                    id   => { type => 'integer' },
@@ -42,6 +43,7 @@ my $group_membership = {
                     arguments => {
                                    set => 'set',
                                    subset => 'checks',
+				   set_transformer => \&Obvius::Helpers::sort_alphabetically,
                                    subset_mappings => {
                                                        id => 'grp',
                                                       },
@@ -234,7 +236,7 @@ my $users = {
                          {name=>'name',   content=>'data',   label=>'Name'   , filter => 'str' },
                          {name=>'login',  content=>'data',   label=>'Login'  , filter => 'str' },
                          {name=>'email',  content=>'data',   label=>'E-mail' , filter => 'str' },
-                         {name=>'groups', content=>'scheme', label=>'Groups' },
+                         {name=>'groups', content=>'scheme', label=>'Groups'},
                         ],
              storage => {
                          %$user_storage,
