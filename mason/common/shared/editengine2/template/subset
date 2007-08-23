@@ -95,9 +95,18 @@ my %set = (
           );
 
 my $set = $m->comp('../display', layout=>\%set, editscheme=>$editscheme, history=>$history);
-#use Data::Dumper; print STDERR '$set: ' . Dumper($set);
 
-$set = &$set_transformer($set) if (defined $set_transformer);
+#Apply the set_transformer described in the arguments.
+if ($set_transformer eq 'sort') {
+    sub sorter {
+	my $list = shift;
+	@$list = sort {lc($a->{name}->{value}) cmp lc($b->{name}->{value})} @$list;
+	return $list;
+    };
+    $set = sorter($set) if (defined $set_transformer);
+} else {
+    print STDERR "Unknown set_transformer: $set_transformer";
+}
 
 
 # Rename set identifiers to match those of the subset.  $set_renamed
@@ -108,7 +117,6 @@ my @correspondances = keys %$subset_mappings;
 
 my $set_renamed;
 foreach my $element (@$set) {
-    use Data::Dumper;
     my $new_element;
     foreach my $identifier (@correspondances) {
         $new_element->{$subset_mappings->{$identifier}} = $element->{$identifier};
