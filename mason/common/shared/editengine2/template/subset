@@ -83,6 +83,7 @@ my %object = %{$m->comp('../toolbox:access_object')};
 
 my $set_relation = $editscheme->{arguments}->{set};
 my $subset_relation = $editscheme->{arguments}->{subset};
+my $set_transformer = $editscheme->{arguments}->{set_transformer} if defined $editscheme->{arguments}->{set_transformer};
 
 # Create a fictious display element for describing the set as a scheme
 # and save the output.  $set is used to display the elements
@@ -92,8 +93,12 @@ my %set = (
            content=>'scheme',
            style=>{context=>'raw'},
           );
+
 my $set = $m->comp('../display', layout=>\%set, editscheme=>$editscheme, history=>$history);
 #use Data::Dumper; print STDERR '$set: ' . Dumper($set);
+
+$set = &$set_transformer($set) if (defined $set_transformer);
+
 
 # Rename set identifiers to match those of the subset.  $set_renamed
 # is used to select the correct values, ie. with identifiers that
@@ -103,6 +108,7 @@ my @correspondances = keys %$subset_mappings;
 
 my $set_renamed;
 foreach my $element (@$set) {
+    use Data::Dumper;
     my $new_element;
     foreach my $identifier (@correspondances) {
         $new_element->{$subset_mappings->{$identifier}} = $element->{$identifier};
