@@ -2,13 +2,6 @@
 <%once>
 
 
-sub sorter {
-    my $list = shift;
-    @$list = sort {lc($a->{name}->{value}) cmp lc($b->{name}->{value})} @$list;
-    return $list;
-}
-
-
 my $groups = {
               type => 'scheme/table',
               display => [
@@ -20,7 +13,6 @@ my $groups = {
                                            source=>'groups',
                                            identifiers=>[qw(id)],
                                            where => undef,
-					   order => [qw(name)]
                                           },
                           data => {
                                    id   => { type => 'integer' },
@@ -51,7 +43,7 @@ my $group_membership = {
                     arguments => {
                                    set => 'set',
                                    subset => 'checks',
-				   set_transformer => \&sorter,
+				   set_transformer => 'sort',
                                    subset_mappings => {
                                                        id => 'grp',
                                                       },
@@ -240,11 +232,11 @@ my $users = {
              type => 'scheme/table',
              label => 'Users',
              display => [
-                         {name=>'id',     content=>'data',   label=>'Id'     , filter => 'int' },
-                         {name=>'name',   content=>'data',   label=>'Name'   , filter => 'str' },
-                         {name=>'login',  content=>'data',   label=>'Login'  , filter => 'str' },
-                         {name=>'email',  content=>'data',   label=>'E-mail' , filter => 'str' },
-                         {name=>'groups', content=>'scheme', label=>'Groups'},
+                         {name=>'id',     content=>'data',   label=>'Id'     , filter => 'int'},
+                         {name=>'name',   content=>'data',   label=>'Name'   , filter => 'str'},
+                         {name=>'login',  content=>'data',   label=>'Login'  , filter => 'str'},
+                         {name=>'email',  content=>'data',   label=>'E-mail' , filter => 'str'},
+                         {name=>'groups', content=>'scheme', label=>'Groups' },
                         ],
              storage => {
                          %$user_storage,
