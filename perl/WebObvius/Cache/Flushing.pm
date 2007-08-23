@@ -10,7 +10,7 @@ our @EXPORT = qw( flush immediate_flush step );
 
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-#delete cache_file
+#empty cache_file
 sub immediate_flush {
     my $cache_file = shift;
 
