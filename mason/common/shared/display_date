@@ -4,20 +4,23 @@ $month =>'long'
 </%args>
 %
 <%init>
-my $display_date = '';
-if($date) {
-    if ($month eq 'long') {
-	$date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
-	my $long_month = $m->scomp('/shared/msg', text=>$month_desc[$2]);
-	$display_date = sprintf "%d. $long_month $1", $3;
-	  } elsif ($month eq 'dot-numeric') {
-        $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
-		$display_date = sprintf "%d.$2.$1", $3;
+my $display_date;
+my ($year, $mon, $day) = $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
+
+if ($month eq 'long') {
+    my $long_month = $m->scomp('/shared/msg', text=>$month_desc[$mon]);
+    $display_date = "$day. $long_month $year";
+} elsif ($month eq 'dot-numeric') {
+    if ($vdoc->Lang eq 'da') {
+	#Dansk punktformat
+	$display_date = "$day.$mon.$year";
     } else {
-        $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
-	my $short_month = $m->scomp('/shared/msg', text=>$month_short[$2]);
-        $display_date = sprintf "%d. $short_month $1", $3;
+	#Engelsk ditto.
+	$display_date = "$year.$mon.$day";
     }
+} else {
+    my $short_month = $m->scomp('/shared/msg', text=>$month_short[$mon]);
+    $display_date = "$day. $short_month $year";
 }
 </%init>
 %
