@@ -376,7 +376,7 @@ sub create_input_object {
             my $value = <$fh>;
             $data->param(filename => $_->filename);
             $data->param(data => $value);
-            $data->param(mimetype => $_->type);
+            $data->param(mimetype => $_->mimetype);
             $data->param(size => $_->size);
             if($_->type =~ /^image\//) {
                 my ($w, $h)=imgsize(\$value);
@@ -696,9 +696,7 @@ sub public_login_cookie {
         if($users) {
             my $user = $users->[0];
             $obvius->param('public_user' => $user);
-
-            #$this->set_public_login_cookie($req, $obvius, $user);
-        }
+	}
     }
 }
 
@@ -898,18 +896,26 @@ sub set_language_preferences
 
 sub translate
 {
-	my ( $self, $text) = @_;
+	my ( $self, $text, $lang) = @_;
 #	print STDERR "$$ $self translates $text\n";
+	for (keys %xml_cache) {
+	    next unless exists $xml_cache{$_}->{$text};
+	    my $k = $xml_cache{$_}->{$text};
 
-	for my $lang ( @{$self-> {LANGUAGE_PREFERENCES}}) {
-		for my $file ( @{$self-> {TRANSLATION_FILESET}}) {
-			next unless exists $xml_cache{$file}->{$text};
-			my $k = $xml_cache{$file}->{$text};
-#			print STDERR "$$ => $lang/$k->{$lang}\n" if $k->{$lang};
-			return $k->{$lang} if exists $k->{$lang};
+	    # For backward compatibility, $lang is accepted as undefined
+	    # and the user's language->preference will then be found...
+	    # However, this should be ideally be handled much earlier 
+	    # in the request,so $vdoc->Lang should be passed as the 
+	    # second argument in all new code( third if counting self).
+	    if (defined $lang) {
+		return $k->{$lang} if exists ($k->{$lang});
+	    } else {
+
+		for ( @{$self-> {LANGUAGE_PREFERENCES}}) {
+		    return $k->{$_} if exists $k->{$_};
 		}
+	    }
 	}
-	
 	warn "Cannot find translation for '$text'\n" if $self->{DEBUG};
 	return $text;
 }
