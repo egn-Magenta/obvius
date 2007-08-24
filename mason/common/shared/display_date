@@ -15,7 +15,7 @@ if ($month eq 'long') {
 	#Dansk punktformat
 	$display_date = "$day.$mon.$year";
     } else {
-	#Engelsk ditto.
+	#International ditto.
 	$display_date = "$year.$mon.$day";
     }
 } else {
