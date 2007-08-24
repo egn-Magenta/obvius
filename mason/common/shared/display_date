@@ -7,21 +7,23 @@ $month =>'long'
 my $display_date = '';
 if($date) {
     if ($month eq 'long') {
-        $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
-        $display_date = sprintf "%d. $month_desc[$2] $1", $3;
+	$date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
+	my $long_month = $m->scomp('/shared/msg', text=>$month_desc[$2]);
+	$display_date = sprintf "%d. $long_month $1", $3;
 	  } elsif ($month eq 'dot-numeric') {
         $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
 		$display_date = sprintf "%d.$2.$1", $3;
     } else {
         $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
-        $display_date = sprintf "%d. $month_short[$2] $1", $3;
+	my $short_month = $m->scomp('/shared/msg', text=>$month_short[$2]);
+        $display_date = sprintf "%d. $short_month $1", $3;
     }
 }
 </%init>
 %
 <%once>
-my @month_desc = qw(none januar februar marts april maj juni juli august september oktober november december);
-my @month_short = qw (none jan feb mar apr maj jun jul aug sep okt nov dec);
+my @month_desc = qw(none january february march april may june july august september october november december);
+my @month_short = qw (none jan feb mar apr may jun jul aug sep oct nov dec);
 </%once>
 %
 <% $display_date %>
