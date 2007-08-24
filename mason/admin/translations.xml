@@ -1558,4 +1558,70 @@
     <translation lang="da"></translation>
   </text>
 
+  <!-- months -->
+  <text key="january">
+    <translation lang="en">january</translation>
+    <translation lang="da">januar</translation>
+  </text>
+  
+  <text key="february">
+    <translation lang="en">february</translation>
+    <translation lang="da">februar</translation>
+  </text>
+
+  <text key="march">
+    <translation lang="en">march</translation>
+    <translation lang="da">marts</translation>
+  </text>
+
+  <text key="april">
+    <translation lang="en">april</translation>
+    <translation lang="da">april</translation>
+  </text>
+
+  <text key="may">
+    <translation lang="en">may</translation>
+    <translation lang="da">maj</translation>
+  </text>
+  
+  <text key="june">
+    <translation lang="en">june</translation>
+    <translation lang="da">juni</translation>
+  </text>
+
+  <text key="july">
+    <translation lang="en">july</translation>
+    <translation lang="da">juli</translation>
+  </text>
+
+  <text key="august">
+    <translation lang="en">august</translation>
+    <translation lang="da">august</translation>
+  </text>
+
+  <text key="september">
+    <translation lang="en">september</translation>
+    <translation lang="da">september</translation>
+  </text>
+
+  <text key="october">
+    <translation lang="en">october</translation>
+    <translation lang="da">oktober</translation>
+  </text>
+
+  <text key="november">
+    <translation lang="en">november</translation>
+    <translation lang="da">november</translation>
+  </text>
+
+  <text key="december">
+    <translation lang="en">december</translation>
+    <translation lang="da">december</translation>
+  </text>  
+
+  <text key="oct">
+    <translation lang="en">oct</translation>
+    <translation lang="da">okt</translation>
+  </text>
+
 </messages>
