@@ -689,7 +689,7 @@ sub handle_mason_cache {
 
     $interp->set_global(obvius=>$obvius);
 
-    if ( $call_local_component )
+    if ( defined( $call_local_component ) )
     {
       $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
     }
