@@ -625,7 +625,7 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
     if ( $obvius->config->param("handle_document_cache_locally") )
     {
 	my $modified_docid=$obvius->list_modified_docid();
-	$this->handle_dirty_document_cache($obvius, \$modified_docid, 1 );
+	$this->handle_mason_cache($obvius, \$modified_docid, 1 );
     }
     
 }
