@@ -616,7 +616,7 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
               $this->dirty_url_in_cache($obvius, $_); } keys %dirty_urls;
 	
         # Handle the Mason-cache:
-        $this->handle_mason_cache($obvius, \%dirty_docids, 0);
+        $this->handle_mason_cache($obvius, \%dirty_docids);
 
         # Turn object-cache back on:
         $obvius->cache(1);
@@ -625,7 +625,10 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
     if ( $obvius->config->param("handle_document_cache_locally") )
     {
 	my $modified_docid=$obvius->list_modified_docid();
-	$this->handle_mason_cache($obvius, \$modified_docid, 1 );
+	if (scalar(@$modified_list)) 
+	{
+	  $this->handle_mason_cache($obvius, \$modified_docid, 1 );
+	}
     }
     
 }
