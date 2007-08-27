@@ -302,7 +302,7 @@ sub dirty_url_in_cache {
      # so I need to implement a feature that can disable all form of
      # cache-clearing. I'd like to handle it MY WAY!
  
-     if ( ! $obvius->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
+     if ( ! $obvius->config->param("handle_document_cache_locally") )
      {
         WebObvius::Cache::Flushing::flush($url,$this->{WEBOBVIUS_CACHE_DIRECTORY} . 'flush.db', $this->{WEBOBVIUS_CACHE_INDEX});
      }
@@ -612,23 +612,20 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
         }
         # Consider only doing this for the public ones:
         # (or do we define that it's up to dirty_url_in_cache to worry about that?)
-	if ( ! $obvius->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
-	{
-          map { #print STDERR "  dirty_url: $_\n";
+        map { #print STDERR "  dirty_url: $_\n";
               $this->dirty_url_in_cache($obvius, $_); } keys %dirty_urls;
 	
         # Handle the Mason-cache:
-        $this->handle_mason_cache($obvius, \%dirty_docids);
-	}
+        $this->handle_mason_cache($obvius, \%dirty_docids, 0);
 
         # Turn object-cache back on:
         $obvius->cache(1);
     }
 
-    if ( $obvius->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
+    if ( $obvius->config->param("handle_document_cache_locally") )
     {
 	my $modified_docids=$obvius->list_modified_docids();
-	$this->handle_mason_cache($obvius, \$modified_docids );
+	$this->handle_dirty_document_cache($obvius, \$modified_docids, 1 );
     }
     
 }
@@ -641,7 +638,7 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
 #                      status if the mason-component run. False on
 #                      failure.
 sub handle_mason_cache {
-    my ($this, $obvius, $dirty_docids)=@_;
+    my ($this, $obvius, $dirty_docids, $call_local_component)=@_;
 
     # Only do this, if the website uses a newer admin - check if the
     # CacheHandling-package is there:
@@ -692,9 +689,14 @@ sub handle_mason_cache {
 
     $interp->set_global(obvius=>$obvius);
 
+    if ( $call_local_component )
+    {
+      $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
+    }
+
+
     # XXX Should pass dirty_urls as well, in case some caches use url as key:
     $status=$interp->exec('/default/dirty_cache', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
-
     if (!$status) {
         warn "Error when running dirty_cache: $status ($string)";
     }
