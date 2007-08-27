@@ -691,12 +691,14 @@ sub handle_mason_cache {
 
     if ( defined( $call_local_component ) )
     {
-      $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
+      my $status = $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
+    }
+    else
+    {
+      # XXX Should pass dirty_urls as well, in case some caches use url as key:
+      $status=$interp->exec('/default/dirty_cache', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
     }
 
-
-    # XXX Should pass dirty_urls as well, in case some caches use url as key:
-    $status=$interp->exec('/default/dirty_cache', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
     if (!$status) {
         warn "Error when running dirty_cache: $status ($string)";
     }
