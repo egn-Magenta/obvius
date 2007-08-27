@@ -612,15 +612,25 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
         }
         # Consider only doing this for the public ones:
         # (or do we define that it's up to dirty_url_in_cache to worry about that?)
-        map { #print STDERR "  dirty_url: $_\n";
+	if ( ! $obvius->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
+	{
+          map { #print STDERR "  dirty_url: $_\n";
               $this->dirty_url_in_cache($obvius, $_); } keys %dirty_urls;
-
+	
         # Handle the Mason-cache:
         $this->handle_mason_cache($obvius, \%dirty_docids);
+	}
 
         # Turn object-cache back on:
         $obvius->cache(1);
     }
+
+    if ( $obvius->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
+    {
+	my $modified_docids=$obvius->list_modified_docids();
+	$this->handle_mason_cache($obvius, \$modified_docids );
+    }
+    
 }
 
 # handle_mason_cache - given a hash-ref to dirty docids, calls the
