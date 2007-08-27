@@ -283,7 +283,7 @@ sub save_in_cache {
 }
 
 sub dirty_url_in_cache {
-    my ($this, $url) = @_;
+    my ($this, $obvius, $url) = @_;
 
     # XXX This should just remove the url from the CACHE_INDEX and
     # (possibly) delete the corresponding file in the
@@ -297,7 +297,17 @@ sub dirty_url_in_cache {
     # XXX This should be called when a document is
     # published/unpublished. And when it expires(!)
 
-    WebObvius::Cache::Flushing::flush($url,$this->{WEBOBVIUS_CACHE_DIRECTORY} . 'flush.db', $this->{WEBOBVIUS_CACHE_INDEX});
+     # Ole: This is so stupid. Why does it have to be so hard? 
+     # I'm trying to implement a WAY better cache handling for KU,
+     # so I need to implement a feature that can disable all form of
+     # cache-clearing. I'd like to handle it MY WAY!
+ 
+     if ( ! $obvius->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
+     {
+        WebObvius::Cache::Flushing::flush($url,$this->{WEBOBVIUS_CACHE_DIRECTORY} . 'flush.db', $this->{WEBOBVIUS_CACHE_INDEX});
+     }
+    
+
 }
 
 sub clear_cache {
@@ -603,7 +613,7 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
         # Consider only doing this for the public ones:
         # (or do we define that it's up to dirty_url_in_cache to worry about that?)
         map { #print STDERR "  dirty_url: $_\n";
-              $this->dirty_url_in_cache($_); } keys %dirty_urls;
+              $this->dirty_url_in_cache($obvius, $_); } keys %dirty_urls;
 
         # Handle the Mason-cache:
         $this->handle_mason_cache($obvius, \%dirty_docids);

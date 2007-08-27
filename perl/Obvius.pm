@@ -120,6 +120,7 @@ sub new {
 				  FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
 				  LANGUAGES   => {},
                                   MODIFICATIONS=>[],
+				  MODIFIED_DOCIDS=>[],
 				 );
 
     $this->tracer($obvius_config, $user||'', $password||'') if ($this->{DEBUG});
@@ -1925,6 +1926,7 @@ sub create_new_document {		# RS 20010819 - ok
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new document ... done");
     $this->register_modified(docid=>$docid);
+    $this->register_modified_docid( $docid );
     return wantarray ? ($docid, $version) : [$docid, $version];
 }
 
@@ -1999,6 +2001,7 @@ sub create_new_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new version ... done");
     $this->register_modified(docid=>$doc->Id);
+    $this->register_modified_docid( $doc->Id );
     return $version;
 }
 
@@ -2068,6 +2071,7 @@ sub delete_document {
     # modified, and its parent:
     $this->register_modified(url=>$doc_uri);
     $this->register_modified(docid=>$doc->Parent);
+    $this->register_modified_docid( $doc->Id );
     return 1;
 }
 
@@ -2152,6 +2156,7 @@ sub rename_document {
     $this->register_modified(docid=>$old_parent_id);
     $this->register_modified(url=>$old_uri); # Because the doc does no longer refers to this
     $this->register_modified(docid=>$doc->Id);
+    $this->register_modified_docid( $doc->Id );
     return 1;
 }
 
@@ -2226,6 +2231,7 @@ sub publish_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done");
     $this->register_modified(docid=>$vdoc->Docid);
+    $this->register_modified_docid( $vdoc->Docid );
 
     if($delayed_publish) {
 	$this->{LOG}->info("====> Setting 'at' autopublishing job...");
@@ -2303,6 +2309,7 @@ sub unpublish_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Unpublishing version ... done");
     $this->register_modified(docid=>$vdoc->Docid);
+    $this->register_modified_docid( $vdoc->Docid );
     return 1;
 }
 
@@ -2359,8 +2366,36 @@ sub delete_single_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Deleting single version ... done");
     $this->register_modified(docid=>$vdoc->Docid);
+    $this->register_modified_docid( $vdoc->Docid );
     return 1;
 }
+
+
+########################################################################
+#
+#	Registering modified docids
+#
+########################################################################
+
+# register_modified_docid(docid) - register that a docid was modified,
+#                                  so we can use it when the cache
+#                                  is about to be changed.
+#                                  This function looks almost exactly
+#                                  like register_modified(), but this
+#                                  one should ONLY contain the DOCID
+#                                  and nothing else! Not the parent,
+#                                  not anything related.
+sub register_modified_docid {
+    my ($this, $docid)=@_;
+
+    push @{$this->{MODIFIED_DOCIDS}}, $docid;
+}
+
+sub list_modified {
+    my ($this)=@_;
+    return $this->{MODIFIED_DOCIDS};
+}
+
 
 
 
