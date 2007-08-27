@@ -260,8 +260,6 @@ if (defined $remove) {
     my @versions = ref ($remove) ? 
                    map {$obvius->get_version($doc, $_) } @$remove :
 		   ($obvius->get_version($doc, $remove));
-    use Data::Dumper;
-    print STDERR Dumper($remove);
     for (@versions) {
 	next if (!defined $_);
 	$obvius->get_version_fields($_);
