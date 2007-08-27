@@ -2391,7 +2391,7 @@ sub register_modified_docid {
     push @{$this->{MODIFIED_DOCIDS}}, $docid;
 }
 
-sub list_modified {
+sub list_modified_docid {
     my ($this)=@_;
     return $this->{MODIFIED_DOCIDS};
 }
