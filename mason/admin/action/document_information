@@ -34,8 +34,11 @@
         <option value="<% $option->{id} |h %>"<% $option->{id} eq $show->{value} ? ' selected="selected"' : '' %>><% $option->{name} |h %></option>
 %     }
       </select>
-% }
-% else {
+% } elsif (defined $show->{type} and $show->{type} eq 'checkbox') {
+%    for my $opt (@{$show->{choices}}) {
+       <% $opt->{name} %> <input <% !$opt->{active} ? 'disabled="disabled"' :'' %>  type="checkbox" name="Remove" value="<% $opt->{value} %>"><br/>
+%    }
+% } else {
       <% $show->{value} %>
 % }
 % if ($show->{post}) {
@@ -96,6 +99,13 @@ my $current_access_rules = join '<br />', map {
 			$m->scomp('/shared/msg', text=>'Rule invalid') . 
 			"\" class=\"obvius-rule-invalid\">$_</span>"
 } $obvius->get_capability_rules($doc);
+
+my $dummy = $obvius->get_versions($doc);
+map { $obvius->get_version_fields($_) } @$dummy;
+my @versions = ();
+push @versions, { name => $_->Version . ' Language: ' . $_->Lang,
+		  active => !$_->Public,
+		  value => $_->Version} for @$dummy;
 
 my $can_access    = $obvius->can_set_access_data($doc);
 my $can_docparams = $obvius->can_set_docparams($doc);
@@ -206,8 +216,13 @@ my @info = (
 			($inherited_docparams_show || 
 				'<em>' .  $m->scomp('/shared/msg', text=>'none') . '</em>'
 			) . '</div>' 
-	},
+	}, {
+	    title => 'Remove Versions',
+	    type => 'checkbox',
+	    choices => \@versions,
+	   }
 );
+
 
 $r->notes(inactive_handlingarea=>1);
 $r->notes(inactive_path=>1);
@@ -238,6 +253,24 @@ $docparams=>undef
 <& /shared/set_status_message, message=>'OK' &>
 %
 <%init>
+my $remove = $ARGS{'Remove'};
+
+if (defined $remove) {
+
+    my @versions = ref ($remove) ? 
+                   map {$obvius->get_version($doc, $_) } @$remove :
+		   ($obvius->get_version($doc, $remove));
+    use Data::Dumper;
+    print STDERR Dumper($remove);
+    for (@versions) {
+	next if (!defined $_);
+	$obvius->get_version_fields($_);
+	next if ($vdoc->Version eq $_->Version);
+	$obvius->delete_single_version($_)
+    }
+}
+
+
 my @success_messages=();
 if ($obvius->can_set_access_data($doc)) {
 	if (!$obvius->set_access_data($doc, $owner, $group, $accessrules)) {
