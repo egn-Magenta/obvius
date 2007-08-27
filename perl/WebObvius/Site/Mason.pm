@@ -691,7 +691,7 @@ sub handle_mason_cache {
 
     if ( defined( $call_local_component ) )
     {
-      my $status = $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
+      $status = $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
     }
     else
     {
