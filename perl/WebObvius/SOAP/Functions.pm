@@ -43,6 +43,17 @@ sub clear_cache_smart {
    return "OK";
 }
 
+sub flush_single_uri {
+   my $this = shift;
+   my $uri = shift;
+  
+   my @uris;
+   push( @uris, $uri );
+   my $options = $WebObvius::SOAP::Server::options;
+   WebObvius::Cache::Flushing::flush_multiple( $options->{base} . "/var/document_cache.txt", \@uris );
+  
+   return "OK";  
+}
 
 1;
 __END__
