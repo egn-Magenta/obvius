@@ -1,5 +1,9 @@
 # $Id$
 
+20070829:
+	Added new table formdata.
+	The structure can be seen in the file www.ku.dk/db/formdata.sql
+
 20070309:
 	Increase preformance by changing index structure of vfields table:
 
