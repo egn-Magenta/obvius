@@ -33,9 +33,19 @@ sub clear_cache {
 sub clear_cache_smart {
    my $this = shift;
    my $docid = shift;
-   
+   my $force = shift;   
    my $options = $WebObvius::SOAP::Server::options;
-   my $system_str = $options->{base} . "/bin/clear_cache.pl $docid &";
+
+   my $system_str;   
+   if ( $force eq "1" )
+   {
+     $system_str = $options->{base} . "/bin/clear_cache.pl $docid force &";  
+   }
+   else
+   {
+     $system_str = $options->{base} . "/bin/clear_cache.pl $docid &";
+   }
+   
    system($system_str);
       
    #WebObvius::Cache::Flushing::immediate_flush( $options->{base} . "/var/document_cacheflush.db", $options->{base} . "/var/document_cache.txt");
