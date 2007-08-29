@@ -68,24 +68,13 @@ sub raw_document_data {
     $xmldata .= "  <version>" . $vdoc->Version . "</version>\n";
     $xmldata .= "  <downloaddate>" . strftime('%Y-%m-%d %H:%M:%S', localtime) . "</downloaddate>\n";
 
-    my $data_dir = $obvius->config->param('forms_data_dir') || '/tmp';
-    $data_dir .= "/" unless($data_dir =~ m!/$!);
-    my $data_file = $data_dir . $doc->Id . ".xml";
-
     my $entries_xml = '';
 
-    if(open(FH, $data_file)) {
-        $entries_xml = join("", <FH>);
-        close(FH);
+    $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
+    
+    # Remove  xml declaration:
 
-        # Remove  xml declaration:
-        $entries_xml =~ s!^<[?]xml[^>]+>\s*!!s;
-
-        # Indent:
-        $entries_xml =~ s/^/  /m;
-    }
-
-    $xmldata .= $entries_xml;
+    $xmldata .= "<entries>" . $entries_xml . "</entries>";
 
     my $formdata_xml = $vdoc->field('formdata') || '';
 
@@ -100,15 +89,14 @@ sub raw_document_data {
 
     if($format eq 'excel') {
 
-        my $xml_data = XMLin(
-                                $xmldata,
+        my $xml_data = XMLin(   $xmldata,
                                 keyattr=>[],
                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
                                 suppressempty => ''
                             );
         my @headers;
 
-        for(@{ $xml_data->{fields}->{field} || [] }) {
+        for(@{$xml_data->{fields}->{field} || [] }) {
             my $header = $_->{title} . " (" . $_->{name} . ")";
             $header = $this->unutf8ify($header);
             push(@headers, $header);
@@ -165,40 +153,38 @@ sub raw_document_data {
     return ("text/xml", $xmldata, $name . ".xml", "attachment");
 }
 
-
+sub flush_xml {
+    my ($this, $id, $obvius) = @_;
+    my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
+					     '!Table'      => 'formdata'});
+    $set->Delete(docid=>$id);
+    $set->Disconnect;
+    return OBVIUS_OK;
+}
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-
+    
     # Flushing of XML-file in admin:
-    if($input->param('is_admin')) {
-        if($input->param('flush_xml')) {
-            $output->param('flush_xml' => 1);
-            if($input->param('confirm')) {
-                my $data_dir = $obvius->config->param('forms_data_dir') || '/tmp';
-                $data_dir .= "/" unless($data_dir =~ m!/$!);
-
-                my $data_file = $data_dir . $doc->Id . ".xml";
-
-                if(open(FH, ">$data_file")) {
-                    print FH '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
-                    print FH "<entries></entries>\n";
-                    close(FH);
-                    $output->param('flushed_ok' => 1);
-                } else {
-                    print STDERR "Couldn't flush datafile $data_file. Permission problem?\n";
-                    return OBVIUS_OK;
-                }
-            }
-        }
+    if ($input->param('flush_xml')) {
+	if ($input->param('is_admin')) {
+	    $output->param('flush_xml' => 1);
+	    my $status = $this->flush_xml($doc->{Id}, $obvius);
+	    if($status != OBVIUS_OK) {
+		print STDERR "Couldn't flush formdata\n";
+		return $status;
+	    }
+	} else {
+	    print STDERR "None-admin tried to flush formula data\n";
+	    return OBVIUS_OK;
+	}
     }
 
 
     $obvius->get_version_fields($vdoc, ['formdata' ]);
 
-    my $formdata = XMLin(
-                            $vdoc->field('formdata'),
+    my $formdata = XMLin(   $vdoc->field('formdata'),
                             keyattr=>[],
                             forcearray => [ 'field', 'option', 'validaterule' ],
                             suppressempty => ''
@@ -211,9 +197,6 @@ sub action {
         $output->param('formdata' => $formdata);
         return OBVIUS_OK;
     }
-
-
-    # Ok assume data submitted, now validate:
 
     my %fields_by_name;
 
@@ -330,40 +313,33 @@ sub action {
     my %unique_failed;
 
     if(scalar(%unique)) {
-
-        # Get data from datafile:
-        my $data_file = $this->get_datafile_name($obvius, $doc);
-        my $xml = $this->get_datafile_xml_data($data_file) || {};
-
-        my $entries = $xml->{entry} || [];
-
-        # For each entry, check all fields and see if they're unique and, if they
-        # are, match them up against the submitted value for that field.
-        for(@$entries) {
-            my $fields = $_->{fields}->{field} || [];
-
-            for(@$fields) {
-                if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
-                    $unique_failed{$_->{fieldname}} = 1;
-                }
-            }
-        }
+	
+#      Get data from datafile:
+	my $entries = $this->get_xml_entries($obvius, docid => $doc->{Id}) || [];
+	
+#      For each entry, check all fields and see if they're unique and, if they
+#      are, match them up against the submitted value for that field.
+	for(@$entries) {
+	    my $entry = XMLin($_);
+	    my $fields = $entry->{fields}->{field} || [];
+	    	    
+	    for(@$fields) {
+		if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
+		    $unique_failed{$_->{fieldname}} = 1;
+		}
+	    }
+	}
     }
-
+	
 
     my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
     my @not_unique = map {$_->{name}} grep { $unique_failed{$_->{name}} } @{$formdata->{field}};
-    if(scalar(@invalid) or scalar(@not_unique)) {
+    if(scalar(@invalid)) { # or scalar(@not_unique)) {
         $output->param('formdata' => $formdata);
         $output->param('invalid' => \@invalid);
         $output->param('not_unique' => \@not_unique);
     } else {
         # Form filled ok, now save/mail the submitted data
-
-        my $data_file = $this->get_datafile_name($obvius, $doc);
-        my $xml = $this->get_datafile_xml_data($data_file);
-
-        return OBVIUS_OK unless($xml);
 
         my %entry;
 
@@ -373,19 +349,8 @@ sub action {
         for(@{$formdata->{field}}) {
             push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
         }
-
-        push(@{ $xml->{entry} }, $this->unutf8ify(\%entry));
-        #push(@{ $xml->{entry} }, %entry);
-
-        #$xml = $this->utf8ify($xml);
-
-        XMLout(
-                $xml,
-                rootname=>'entries',
-                noattr=>1,
-                outputfile => $data_file,
-                xmldecl=> '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>'
-            );
+	
+	$this->insert_xml_entry($doc->Id, \%entry, $obvius);
 
         $output->param('submitted_data_ok' => 1);
         $output->param('formdata' => $formdata);
@@ -394,6 +359,37 @@ sub action {
     return OBVIUS_OK;
 }
 
+    
+sub get_xml_entries {
+    my ($this, $obvius, @how) = @_;
+    my @entries;    
+
+    my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
+					     '!Table'      => 'formdata'});					  
+    $set->Search(@how);
+
+    while (my $rec = $set->Next) {
+	push @entries, $rec->{entry};
+    }
+    $set->Disconnect();
+
+    return (wantarray ? @entries : \@entries);
+}
+	
+sub insert_xml_entry {
+    my ($this, $id, $entry, $obvius) = @_;
+
+    my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
+					     '!Table'      => 'formdata'});
+    my $xml = XMLout($entry, 
+		     rootname => 'entry',
+		     noattr => 1);
+    $set->Insert( {docid => $id, entry => $xml });
+
+    $set->Disconnect();
+}
+    
+	
 sub unutf8ify {
     my ($this, $obj)=@_;
 
@@ -432,41 +428,6 @@ sub utf8ify {
     }
 }
 
-sub get_datafile_name {
-    my ($this, $obvius, $doc) = @_;
-
-    my $data_dir = $obvius->config->param('forms_data_dir') || '/tmp';
-    $data_dir .= "/" unless($data_dir =~ m!/$!);
-
-    my $data_file = $data_dir . $doc->Id . ".xml";
-
-    return $data_file;
-
-}
-
-sub get_datafile_xml_data {
-    my ($this, $data_file) = @_;
-
-    if(! -f $data_file) {
-        # create the file:
-        if(open(FH, ">$data_file")) {
-            print FH '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
-            print FH "<entries></entries>\n";
-            close(FH);
-        } else {
-            print STDERR "Couldn't create datafile $data_file. Form data may be lost.\n";
-            return undef;
-        }
-    }
-
-    my $xml = XMLin($data_file, keyattr=>[], forcearray => [ 'entry', 'field' ], suppressempty => '') || {};
-
-    $xml = $this->unutf8ify($xml);
-
-    $xml->{entry} ||= [];
-
-    return $xml;
-}
 
 1;
 __END__
