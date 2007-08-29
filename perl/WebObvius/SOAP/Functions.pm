@@ -29,6 +29,21 @@ sub clear_cache {
    return "OK";
 }
 
+
+sub clear_cache_smart {
+   my $this = shift;
+   my $docid = shift;
+   
+   my $options = $WebObvius::SOAP::Server::options;
+   my $system_str = $options->{base} . "/bin/clear_cache.pl $docid &";
+   system($system_str);
+      
+   #WebObvius::Cache::Flushing::immediate_flush( $options->{base} . "/var/document_cacheflush.db", $options->{base} . "/var/document_cache.txt");
+   
+   return "OK";
+}
+
+
 1;
 __END__
 
