@@ -627,7 +627,7 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
 	my $modified_docid=$obvius->list_modified_docid();
 	if (scalar(@$modified_list)) 
 	{
-	  $this->handle_mason_cache($obvius, \$modified_docid, 1 );
+	  $this->handle_mason_cache($obvius, $modified_docid, 1 );
 	}
     }
     
