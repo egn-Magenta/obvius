@@ -53,7 +53,7 @@
 
 %$r->notes('fieldsets' => 0);
 %unless($prefix) {
-<form name="pageform" action="<% $uri %>" method="get">
+<form name="pageform" action="<% $uri %>" method="post">
 %}
 <input type="hidden" name="obvius_form_submitted" value="1" />
 %for(@$fields) {
