@@ -9,7 +9,7 @@
 <p><input type="submit" name="import_files_do" value="Upload" /></p>
 </form>
 % } else {
-<p>Billederne er nu uploadet</p>
+<p>Filerne er nu uploadet</p>
 
 % if ( $error ) {
 <p>
@@ -134,10 +134,82 @@ use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 $source
 $dest_url
 </%args>
-
 <%init>
-use File::Type;
-my $ft = File::Type->new();
+sub upload_image {
+    use Image::Size;
+    my ($data, $filename, $mime_type, $obvius) = @_;
+
+    local $/ = undef;
+    my ($title) = ($filename =~ m|/([^/]+)$|);
+    open (FH, $filename) or return 0;
+
+    my $raw = <FH>;
+
+    $data->param (data => \$raw);
+
+    my ( $w, $h ) = imgsize( \$raw );
+
+    $data->param( width => $w );
+    $data->param( height => $h );
+    $data->param( size => -s $filename );
+    $data->param( mimetype => $mime_type );
+
+    my %args=(
+	      name=>$title,
+	      grpid=>1,
+	      lang=>"da",
+	      doctypeid=>$obvius->get_doctype_by_name("Image")->Id,
+	      fields=>$data,
+	     );
+    return \%args;
+
+}
+
+sub upload_file {
+    my ($data, $f, $mime_type, $obvius) = @_;
+
+    local $/ = undef;
+    my ($title) = ($f =~ m|/([^/]+)$|);
+
+    open (FH, $f) or return 0;
+
+    my $filename =  $m->scomp('/shared/place_file_in_upload', 
+			  fh => \*FH, 
+			  type => $mime_type,
+			  filename => $title);
+
+
+    $data->param( mimetype => $mime_type);
+    $data->param( size => -s $f );
+    $data->param( uploadfile => $filename);
+
+    my %args=(
+	      name=>$title,
+	      grpid=>1,
+	      lang=>"da",
+	      doctypeid=>$obvius->get_doctype_by_name("FileUpload")->Id,
+	      fields=>$data,
+	     );
+
+    return \%args;
+}
+
+my @fe_array = ({ regex => qr|\.jpe?g$|,
+		 mime_type => "image/jpeg"},
+	       { regex => qr|\.bmp$|,
+		 mime_type => "image/bmp" },
+	       { regex => qr|\.gif$|,
+		 mime_type => "image/gif" },
+	       { regex => qr|\.txt$|, 
+		 mime_type => "text/plain"},
+	       { regex => qr|.*|,
+		 mime_type => "application/octet-stream"});
+
+
+my @mime_array = ({ regex => qr|image/|,
+		    function => \&upload_image},
+		  { regex => qr|.*|,
+		    function => \&upload_file });
 
 my $parent = $obvius->lookup_document( $dest_url );
 die "Could not find dest path ($dest_url)" unless( $parent );
@@ -158,42 +230,47 @@ my $title = pop( @tmp );
 
 $data->param( title => $title);
 $data->param( short_title => $title);
+my ($mime_type, $args);
 
-my $mime_type = $ft->mime_type($source);
-open( FH, $source ) || die ( "Can't open file: $source\n" );
+eval {
+    use File::Type;
+    my $ft = File::Type->new();
+    $mime_type = $ft->mime_type($source);
+};
 
-local $/ = undef; 
+if (!defined($mime_type)) {
+    for (@fe_array) {
+	my $r = $_->{regex};
+	if ( $source =~ /$r/) {
+	    $mime_type = $_->{mime_type};
+	    last;
+	}
+    }
+}
 
-my $file =  $m->scomp('/shared/place_file_in_upload', 
-		      fh => \*FH, 
-		      type => $mime_type,
-		      filename => $title);
+for (@mime_array) {
+    my $regex = $_->{regex};
+    if ($mime_type =~ /$regex/) {
+	$args = &{$_->{function}}($data, $source, $mime_type, $obvius);
+	last;
+    }
+}
 
+return 0 if (!$args);
 
-$data->param( mimetype => $mime_type);
-$data->param( size => -s $source );
-$data->param( uploadfile => $file);
-my %args=(
-	  name=>$title,
-	  grpid=>1,
-	  lang=>"da",
-	  doctypeid=>$obvius->get_doctype_by_name("FileUpload")->Id,
-	  fields=>$data,
-	  );
-
-# XXX Send order:
+print STDERR "Here: $source\n";
 my ($status, $message)=$obvius->send_order(
 					   docid=>$parent->Id,
 					   user=>$obvius->user,
 					   command=>'new_document',
-					   args=>\%args,
+					   args=>$args,
 					   );
 
 
 if ( $status eq "OK" )
 {
     # Reset the args array
-    %args = ();
+    my %args = ();
       
     # Lookup the new document and get the latest version
     my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $parent ) . $title );
