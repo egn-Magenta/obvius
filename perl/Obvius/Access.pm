@@ -200,11 +200,10 @@ sub parse_access_rule {
         my $apply=0;
         if (defined $userid) {
             my @who_list=split /\s*,\s*/, $who_list;
-            # ALL or username:  XXX add check for valid username!
-            my $username = $this-> get_user($userid)->{login};
-            if (grep { $username eq $_ or $_ eq 'ALL' } @who_list) {
-                $apply=1;
-            }
+            my $user = $this-> get_user($userid);
+	    if (grep { (defined $user && $user->{login} eq $_) or $_ eq 'ALL' } @who_list) {
+		$apply=1;
+	    }
             # OWNER:
             elsif ($doc->Owner == $userid and grep { $_ eq 'OWNER' } @who_list) {
                 $apply=1
