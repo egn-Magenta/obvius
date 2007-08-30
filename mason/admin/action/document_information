@@ -106,6 +106,7 @@ my @versions = ();
 push @versions, { name => $_->Version . ' Language: ' . $_->Lang,
 		  active => !$_->Public,
 		  value => $_->Version} for @$dummy;
+@versions = sort { $b->{value} cmp $a->{value} } @versions;
 
 my $can_access    = $obvius->can_set_access_data($doc);
 my $can_docparams = $obvius->can_set_docparams($doc);
