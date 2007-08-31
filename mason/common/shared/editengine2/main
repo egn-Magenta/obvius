@@ -35,7 +35,6 @@
 
  # Possibly executed functions
  $obvius_editengine_protocol_function=>''
-
 </%args>
 %
 <%init>
@@ -55,12 +54,13 @@ my @confirmations = grep /^obvius_editengine_protocol_confirmation:/, keys %ARGS
 my $path;
 my $editscheme;
 my $storage;
-if (!scalar(@confirmations)) {
 
+if (!scalar(@confirmations)) {
   #use Data::Dumper; print STDERR '$r->pnotes("obvius_editengine_protocol"): ' . Dumper($r->pnotes("obvius_editengine_protocol"));
 
   # Setup editscheme
   $path = $m->comp('history:extract_path', history=>$history);
+
   $editscheme = eval $m->comp('toolbox:setup_editscheme', path=>$path)
     or die "<main> $path does not correspond to an editscheme";
 
@@ -104,7 +104,10 @@ if (!scalar(@confirmations)) {
 }
 else {
     my $confirmation = pop @confirmations;
+    my $redirect_to;
     $confirmation =~ s/obvius_editengine_protocol_confirmation://;
+    ($confirmation, $redirect_to) = ($confirmation =~ m/([^:]+)(?::(.*))?/);
+
     #use Data::Dumper; print STDERR '<main> $confirmation: ' . Dumper($confirmation);
     my $execute = $confirmation;
     if ($execute) {
@@ -139,10 +142,10 @@ else {
             $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
         }
 
+
         if (defined $session->{cesi_log_data} and $session->{cesi_log_data}) {
             use Data::Dumper; print STDERR '\%objects: ' . Dumper(\%objects);
         }
-
         my $confirmation_path = $possibly_executed_functions->{$execute};
         if ($execute eq 'CANCEL') {
             my $vertex = $m->comp('history:extract_vertex', history=>$confirmation_path);
@@ -248,8 +251,9 @@ else {
             # Flow: The vertex has [edit] status here...
 
             #            print STDERR "Inserting from <main>\n";
-            $m->comp('flow:insert', execute=>$execute, objects=>\%objects, history=>$confirmation_path, session=>$session);
-            $m->comp('main:confirmation', obvius=>$obvius, session=>$session);
+
+	    $m->comp('flow:insert', execute=>$execute, objects=>\%objects, history=>$confirmation_path, session=>$session);
+            $m->comp('main:confirmation', redirect_to => $redirect_to, obvius=>$obvius, session=>$session);
         }
 
         my $return_stack = $m->comp('history:previous_events', history=>$confirmation_path);
@@ -278,9 +282,11 @@ else {
 # Mandatory arguments
  $obvius  # the obvius object for system access
  $session # the session object with the editscheme description
+
+#Non-mandatory arguments
+ $redirect_to => undef # Redirects here after edit is finished.
 </%args>
 <%init>
-##print STDERR "<main:confirmation>\thistory = '$history'\n";
 
 my $status;
 my $message;
@@ -288,10 +294,10 @@ my $results;
 
 my $status_report;
 my $predecessors;
+
 # Retrieve $execute, $objects, and $history and $execute and continue
 # to perform updatings
 while ($m->comp('flow', session=>$session)) {
-
   my ($execute, $objects, $history, $parent) = $m->comp('flow:extract', session=>$session);
 
   my $vertex = $m->comp('history:extract_vertex', history=>$history);
@@ -319,6 +325,10 @@ while ($m->comp('flow', session=>$session)) {
       # passed to the perl modules (since they don't have easy access
       # to the mason components)
       ($status, $message, $results)=$storage->execute($execute, $objects, $session, $history);
+      my $hook = "post_" . $execute . "_hook";
+      if (my $func = $editscheme->{$hook}) {
+	  $m->comp($func, $obvius);
+      }
     }
     else {
         # This should no longer be possible
@@ -327,6 +337,7 @@ while ($m->comp('flow', session=>$session)) {
     }
   }
 
+  
   # Collect data for the status report
   $status_report->{$history} = {status=>$status, message=>$message};
   if ($parent) {
@@ -336,8 +347,9 @@ while ($m->comp('flow', session=>$session)) {
       push @{$predecessors->{''}}, $history;
   }
 
-  # Flow: the vertex has "store" status now
-  $m->comp('flow:route', vertex=>$vertex."[$execute]store", data=>$results, session=>$session);
+  # Flow: the vertex has "store" status now, 
+  # and this apparently redirects to another page.
+  $m->comp('flow:route', vertex=>$vertex."[$execute]store", redirect_to => $redirect_to, data=>$results, session=>$session);
 
 }
 
