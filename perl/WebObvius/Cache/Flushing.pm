@@ -107,13 +107,13 @@ sub step {
 sub flush_multiple {
     my ($cache_file, $url) = @_;
     my $content;
-    my @url_regexes = map { qr/^$_\s/ } @$url;
+    my @url_regexes = map { qr/^$_\s/i } @$url;
 	    
     open F, "<$cache_file";
 		
     while(my $line = <F>) {
         for (@url_regexes) {
-                $line = "" if ($line =~ /$_/i);
+                $line = "" if ($line =~ /$_/);
         }
         $content .= $line;
     }
