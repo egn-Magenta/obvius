@@ -113,7 +113,7 @@ sub flush_multiple {
 		
     while(my $line = <F>) {
         for (@url_regexes) {
-                $line = "" if ($line =~ /$_/);
+                $line = "" if ($line =~ /$_/i);
         }
         $content .= $line;
     }
