@@ -5,7 +5,7 @@
   </span>
   <input onclick="javascript:history.back(); return false;" type="submit" name="obvius-navigator-back" value="<& /shared/msg, text=>'Back' &>" />
   <input onclick="javascript:history.forward(); return false;;" type="submit" name="obvius-navigator-forward" value="<& /shared/msg, text=>'Forward' &>" />
-  <input onclick="javascript:document.location.href='../<& util/args, %ARGS &>'; return false;" <% $uri eq '/' ? 'disabled="disabled" ' : '' %>type="submit" name="obvius-navigator-up" value="<& /shared/msg, text=>'Up' &>" />
+  <input onclick="javascript:window.location.href='<% $up_path %><& util/args, %ARGS &>'; return false;" <% $uri eq '/' ? 'disabled="disabled" ' : '' %>type="submit" name="obvius-navigator-up" value="<& /shared/msg, text=>'Up' &>" />
   <input onclick="javascript:return obvius_display_toggle('obvius-toolbar-new');" class="obvius-new" type="button" name="obvius-navigator-new" value="<& /shared/msg, text=>'New' &>" />
   <div>
     <div id="obvius-toolbar-new" class="obvius-link-decor">
@@ -43,12 +43,20 @@ $obvius_navigator_batch_function=>undef
 </%args>
 %
 <%init>
+#Warning. The path for the navigator is not set correctly the first time around. This creates some devious problems for example with regards to the up_path.
+# The correct path for the navigator is if set in $r->param('path'). I don't know why.
 my $selected_function=$obvius_navigator_batch_function || '';
 my $this_path;
+my $up_path;
 if(my $path = $r->param('path')) {
+    ($up_path) =($path =~ m|(.*/).*$|);
+    $up_path = $prefix . $up_path;
     my ($d, $path_info) = $obvius->lookup_document($path);
     $this_path = $prefix . $obvius->get_doc_uri($d);
 } else {
+    ($up_path) = ($obvius->get_doc_uri($doc) =~ m|(.*/).*/$|);
+    $up_path = $prefix . $up_path;
     $this_path = "./";
 }
+print STDERR "UP path: $up_path\n";
 </%init>
