@@ -32,7 +32,7 @@ function formdata_save(elem) {
     xml = xml.replace(/<\/([^>]+)></g, "</$1>\n<");
 
     elem.value = xml;
-
+    return true;
 }
 
 function formdata_populate_fieldtable(name) {
