@@ -58,5 +58,4 @@ if(my $path = $r->param('path')) {
     $up_path = $prefix . $up_path;
     $this_path = "./";
 }
-print STDERR "UP path: $up_path\n";
 </%init>
