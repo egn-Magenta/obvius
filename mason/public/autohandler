@@ -13,7 +13,6 @@ my @params=$r->param;
 
 $r->no_cache(1) unless scalar(@params)==0;
 
-print STDERR "Public autohandler\n";
 if ($obvius_version) {
     if ($obvius_version eq "latest") {
 	$vdoc = $obvius->get_latest_version($doc);
