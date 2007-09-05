@@ -373,9 +373,6 @@ $doc=$r->pnotes('document');
 $obvius->log->debug(">>> /autohandler ($prefix$uri) [$doc]");
 $obvius->log->debug(">>> /autohandler (obvius_version: $obvius_version)") if ($obvius_version);
 
-$vdoc=undef; # Be sure to look up a vdoc
-
-
 if ($obvius_version) {
     if ($obvius_version eq "latest") {
 	$vdoc = $obvius->get_latest_version($doc);
@@ -391,6 +388,10 @@ unless ($vdoc) {
 }
 $obvius->get_version_fields($vdoc);
 
+print STDERR "Main autohandler\n";
+if(!defined($vdoc)) {
+    $m->clear_and_abort(404);
+}
 $doctype=$obvius->get_version_type($vdoc);
 $r->pnotes('version' =>$vdoc);
 $r->pnotes('doctype' =>$doctype);
