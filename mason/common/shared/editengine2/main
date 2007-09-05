@@ -310,31 +310,30 @@ while ($m->comp('flow', session=>$session)) {
 
   # Set up a new storage object based on the description i $editscheme->{storage}:
   my $storage = $m->comp('toolbox:setup_storage', editscheme=>$editscheme, obvius=>$obvius, session=>$session);
-
+  
   # If the scheme is of a template type go through a special
   # template component. Outdated: This should probably be done in all cases to
   # allow for type and range checking (and the succeding user
   # interaction in case of failure) etc.
   my ($maintype, $minortype) = $editscheme->{type} =~ m!^(scheme|template)/(.*)$!;
   if ($maintype eq 'template') {
-    ($status, $message, $results)=$m->comp("store:$minortype", history=>$history, objects=>$objects, session=>$session, obvius=>$obvius);
-  }
-  else {
-    if ($execute !~ /^CANCEL$/) {
-      # Note that $path needs to be extracted _before_ control is
-      # passed to the perl modules (since they don't have easy access
-      # to the mason components)
-      ($status, $message, $results)=$storage->execute($execute, $objects, $session, $history);
-      my $hook = "post_" . $execute . "_hook";
-      if (my $func = $editscheme->{$hook}) {
-	  $m->comp($func, $obvius);
+      ($status, $message, $results)=$m->comp("store:$minortype", history=>$history, objects=>$objects, session=>$session, obvius=>$obvius);
+  } else {
+      if ($execute !~ /^CANCEL$/) {
+	  # Note that $path needs to be extracted _before_ control is
+	  # passed to the perl modules (since they don't have easy access
+	  # to the mason components)
+	  ($status, $message, $results)=$storage->execute($execute, $objects, $session, $history);
+      } else {
+	  # This should no longer be possible
+	  die "confirmation CANCEL uncaught?!\n";
+	  ($status, $message, $results)=$storage->cancel($execute, $objects, $session, $path, $history);
       }
-    }
-    else {
-        # This should no longer be possible
-        die "confirmation CANCEL uncaught?!\n";
-      ($status, $message, $results)=$storage->cancel($execute, $objects, $session, $path, $history);
-    }
+      
+      # Do the hooks in the relevant editschemes.
+      my $hook = "post_" . $execute . "_hook";
+      my $func = $editscheme->{$hook};
+      $m->comp($func) if (defined $func);
   }
 
   
@@ -350,7 +349,6 @@ while ($m->comp('flow', session=>$session)) {
   # Flow: the vertex has "store" status now, 
   # and this apparently redirects to another page.
   $m->comp('flow:route', vertex=>$vertex."[$execute]store", redirect_to => $redirect_to, data=>$results, session=>$session);
-
 }
 
 # Construct the status report
