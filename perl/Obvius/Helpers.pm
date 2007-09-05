@@ -13,7 +13,7 @@ our @EXPORT_OK = qw (escape_uri_argument
 #\ is used here because % apparently gets mangled...
 sub escape_uri_argument {
     my $url = shift;
-    $url =~ s|([?&:/=])|sprintf("\\%02d", ord($1))|ge;
+    $url =~ s|([?&:/=\\])|sprintf("\\%02d", ord($1))|ge;
     return $url;
 }
 
