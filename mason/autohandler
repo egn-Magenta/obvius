@@ -2,7 +2,6 @@
 % print STDERR "\n\n";
 %
 <%args>
-$obvius_version=>undef
 </%args>
 %
 <%method link>
@@ -375,8 +374,14 @@ $obvius->log->debug(">>> /autohandler ($prefix$uri) [$doc]");
 $obvius->log->debug(">>> /autohandler (obvius_version: $obvius_version)") if ($obvius_version);
 
 $vdoc=undef; # Be sure to look up a vdoc
+
+
 if ($obvius_version) {
-    $vdoc=$obvius->get_version($doc, $obvius_version);
+    if ($obvius_version eq "latest") {
+	$vdoc = $obvius->get_latest_version($doc);
+    } else {
+	$vdoc = $obvius->get_version($doc, $obvius_version);
+    }
 }
 
 unless ($vdoc) {
@@ -397,9 +402,9 @@ $r->pnotes('site')->set_language_preferences($r, 'da');
 
 my $helpserver = $obvius->config->param('HELP_SERVER');
 if ($helpserver) {
-$r->notes('helpserver'=>"$helpserver");
+    $r->notes('helpserver'=>"$helpserver");
 } else {
-$r->notes('helpserver'=>'help.aparte-test.dk');
+    $r->notes('helpserver'=>'help.aparte-test.dk');
 }
 
 # Don't cache this:
