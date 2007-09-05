@@ -11,6 +11,7 @@ $uri=$r->notes('uri');
 $obvius=$r->pnotes('obvius');
 $doc=$r->pnotes('document');
 
+print STDERR "Common autohandler\n";
 my $session = $r->pnotes('site')->get_session($obvius_session_id)
   if ($obvius_session_id);
 
@@ -35,6 +36,10 @@ if ($r->pnotes('site')->param('is_admin') ||
 }
 else {
     $vdoc=$obvius->get_public_version($doc);
+}
+
+if (! defined $vdoc) {
+    $m->clear_and_abort(404);
 }
 $doctype=$obvius->get_version_type($vdoc);
 #$r->pnotes('version' =>$vdoc);
