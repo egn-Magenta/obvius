@@ -26,6 +26,7 @@ $vdoc ||= $obvius->get_public_version($doc);
 
 if (! defined $vdoc) {
     $m->clear_and_abort(404);
+    print STDERR "Huh Undefined VDOC, and I am going\n"
 }
 $doctype=$obvius->get_version_type($vdoc);
 $r->pnotes('version' =>$vdoc);
