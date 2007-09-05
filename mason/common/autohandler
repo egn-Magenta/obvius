@@ -15,7 +15,7 @@ my $session = $r->pnotes('site')->get_session($obvius_session_id)
   if ($obvius_session_id);
 
 $vdoc=undef; # Be sure to look up a vdoc
-if ($r->pnotes('site')->param('is_admin') || 
+if ($r->pnotes('site')->param('is_admin') ||
     ($session && ($uri eq $session->{allow_access_to}))) {
     delete $session->{allow_access_to};
     # Remove access to the preview page for this session id 
@@ -53,9 +53,9 @@ $r->notes('siteflag' =>$siteflag);
 my $language;
 
 if ($siteflag =~ m/_en$/) {
-$language = 'en';
+    $language = 'en';
 } else {
-$language = 'da';
+    $language = 'da';
 }
 
 $r->notes('language' =>$language);
