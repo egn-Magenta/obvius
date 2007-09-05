@@ -43,6 +43,7 @@ use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;
 
 use WebObvius::Cache::Flushing;
+use WebObvius::Cache;
 
 use WebObvius::Apache 
 	Constants	=> qw(:common :methods :response),
@@ -224,34 +225,17 @@ sub save_in_cache {
                    and $this->{WEBOBVIUS_CACHE_DIRECTORY});
 
     my $dir = $req->notes('cache_dir');
-    unless (-d $dir) {
-        my $d;
-        my @dirs = split '/', $dir;
-        if ($dirs[0] eq '') {
-            $dir = '/'; shift @dirs;
-        } else {
-            $dir = '';
-        }
-        while ($d = shift @dirs) {
-            $dir .= $d . '/';
-            unless (-d $dir) {
-                mkdir($dir, 0775) or do{$log->debug("Couldn't make dir: $dir"); return};
-                chmod(0775, $dir);
-            }
-        }
-    }
-
     my $file = $req->notes('cache_file');
 
     $log->debug("Cache file name $file");
     unlink($file);
 
     my $fh = new Apache::File('>'.$file);
+    
     if ($fh) {
         $log->debug("Cache file open ok");
         print $fh (ref($s) ? $$s : $s);
         $fh->close;
-
         my $extra = '';
         my $qstring = $req->args;
         if ($qstring and $qstring =~ /^size=\d+(x\d+|\%)$/) {
@@ -259,25 +243,17 @@ sub save_in_cache {
         }
 
         # Add to cache-db
-        $fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX});
-        if (open FH, '>>', $this->{WEBOBVIUS_CACHE_INDEX}) {
-            if (flock FH, LOCK_EX|LOCK_NB) {
-                my $real_path=$req->uri();
-                # If handle_path_info() is true on the doctype
-                # (see WebObvius::Site::obvius_document),
-                # obvius_path_info needs to be added:
-                $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
-                print $fh $real_path, $extra, "\t", $req->notes('cache_url'), "\n";
-                $log->debug(" ADDED TO CACHE: " . $req->uri);
-            } else {
-                $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
-            }
-            close FH;
-        }
-        else {
-            $log->debug("Couldn't write to WEBOBVIUS_CACHE_INDEX-file ($this->{WEBOBVIUS_CACHE_INDEX})");
-        }
-
+        if ($fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX})) {
+	    my $real_path=$req->uri();
+	    # If handle_path_info() is true on the doctype
+	    # (see WebObvius::Site::obvius_document),
+	    # obvius_path_info needs to be added:
+	    $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
+	    print $fh $real_path,$extra, "\t", $req->notes('cache_url'), "\n";
+	    $log->debug(" ADDED TO CACHE: " . $req->uri);
+	} else {
+	    $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
+	}
     }
     $log->debug("Cache file done");
 }
@@ -389,7 +365,9 @@ sub access_handler ($$) {
 	qw(DOCTYPES FIELDTYPES FIELDSPECS);
 
     my $doc    =$this->obvius_document($req, $uri);
+    print STDERR "Found document Here2\n";
     return NOT_FOUND unless ($doc);
+    print STDERR "Found document Here\n";
 
     $req->pnotes('document'=>$doc);
     $req->pnotes('site'    =>$this);
@@ -413,11 +391,12 @@ sub handler ($$) {
     my $doc=$req->pnotes('document');
 
     unless ($this->param('is_admin')) {
-	return NOT_FOUND unless ($obvius->is_public_document($doc));
+#	return NOT_FOUND unless ($obvius->is_public_document($doc));
 	my $vdoc = $this->obvius_document_version($req, $doc);
 	return NOT_FOUND unless ($vdoc);
-	return FORBIDDEN if ($vdoc->Expires lt $req->notes('now'));
 
+	return FORBIDDEN if ($vdoc->Expires lt $req->notes('now'));
+	
 	my $doctype = $obvius->get_version_type($vdoc);
 
         my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
@@ -428,16 +407,16 @@ sub handler ($$) {
 	    return NOT_FOUND if (Apache->define('NOREDIR'));
 	    return $this->redirect($req, $alternate, 'force-external');
 	}
-
-    # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
-    # by the browser should have a method called "raw_document_data"
-	    	
+	
+	# Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
+	# by the browser should have a method called "raw_document_data"
+	
 	my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data(
 		$doc, $vdoc, $obvius, 
-		WebObvius::Apache::apache_module('Request')-> new($req), 
-		$output
-	);
-
+	    WebObvius::Apache::apache_module('Request')-> new($req), 
+	    $output
+	    );
+	
 	if ($data) {
 	    $mime_type ||= 'application/octet-stream';
 
@@ -617,7 +596,7 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
 	
         # Handle the Mason-cache:
         $this->handle_mason_cache($obvius, \%dirty_docids);
-
+	
         # Turn object-cache back on:
         $obvius->cache(1);
     }
@@ -719,7 +698,7 @@ sub execute_mason {
     # Clean up globals (we don't clean up $r; we didn't make it):
     if ($new_mason) {
         # XXX IMPLEMENT FOR NEWER, >=1.10, MASONAE!
-        warn "Need to implement cleaning up globals for Mason =>1.10\n";
+        # warn "Need to implement cleaning up globals for Mason =>1.10\n";
     }
     else {
         map { $this->{handler}->interp->set_global($_=>undef) }
