@@ -218,6 +218,7 @@ sub obvius_document_version {
     return undef unless ($obvius);
 
     my $vdoc = $obvius->get_public_version($doc);
+    $vdoc ||= $obvius->get_latest_version($doc);
     $req->pnotes(version => $vdoc);
 
     $obvius->get_version_fields($vdoc) if ($vdoc);
