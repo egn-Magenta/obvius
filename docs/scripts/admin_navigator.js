@@ -26,7 +26,6 @@ function obvius_navigator_toggle(uri, id) {
   while (lastnodename=='#text' && (node=node.previousSibling)) {
     lastnodename=node.nodeName;
   }
-
   if (lastnodename=='UL') {
     obvius_navigator_fold(id);
   }
@@ -169,7 +168,7 @@ function obvius_navigator_get_arguments(current_document_elt) {
       return('?'+hrefparts[1]);
     }
   }
-  return '?obvius_app_navigator=1'; /* Fallback */
+  return '?obvius_app_navigator=1&fieldname=href'; /* Fallback */
 }
 
 function obvius_navigator_fold(id) {
