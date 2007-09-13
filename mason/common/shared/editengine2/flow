@@ -3,7 +3,7 @@
  $execute
  $objects
  $history
- $parent=>''
+n $parent=>''
  $session
 </%args>
 <%init>
@@ -85,7 +85,6 @@
  $redirect_to => undef
 </%args>
 <%init>
-  use Apache::Util qw (escape_uri);
 #use Data::Dumper; print STDERR "\t" . '<flow:route> $vertex: ' . "$vertex";
 
  if (exists $session->{cesi}->{edges}->{$vertex}) {
@@ -118,7 +117,6 @@
 
 	   use Obvius::Helpers qw (escape_uri_argument);
 	   my $escaped_uri = escape_uri_argument($redirect_to);
-	   print STDERR "Escaped uri: $escaped_uri\n";
 	   $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}&obvius_perform_$do=1" . 
 		    ($redirect_to ? "&obvius_redirect_to=" . $escaped_uri : '' ));
 	 } else {
