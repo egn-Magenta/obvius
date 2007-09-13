@@ -46,10 +46,13 @@ select:execute with different functions on the protocol
 
 </%doc>
 <input type='hidden' name='obvius_editengine_protocol_function' value='<% "$function_name=$history" %>' />
+%if ($show_button) {
 <input type='submit' name='obvius_editengine_protocol_confirmation:<% "$function_name" %>' value='<& /shared/msg, text=>$function_label &>' class="obvius-command-do" />
+%}
 <%args>
  $editscheme
  $history=>''
+ $show_button => 1
 </%args>
 <%init>
 my $function = $r->pnotes('obvius_editengine_protocol')->{function};
@@ -64,9 +67,12 @@ my $function_label = $m->scomp('/shared/msg', text=>$editscheme->{storage}->{fun
 %#----------------------------------------------------------------------------------
 %
 <%method cancel>
-<input type='hidden' name='obvius_editengine_protocol_function' value='<% "CANCEL=$history" %>' />
+  <input type='hidden' name='obvius_editengine_protocol_function' value='<% "CANCEL=$history" %>' />
+%if ($show_button) {
 <input type='submit' name='obvius_editengine_protocol_confirmation:CANCEL' value='<& '/shared/msg', text=>'Cancel' &>' class="obvius-command-cancel"/>
+%}
 <%args>
+ $show_button => 1
  $history
 </%args>
 </%method>
