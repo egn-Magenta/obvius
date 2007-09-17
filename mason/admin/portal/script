@@ -4,3 +4,7 @@
   <script type="text/javascript" src="/scripts/jscalendar/calendar.js"></script>
   <script type="text/javascript" src="/scripts/jscalendar/lang/calendar-<% $vdoc->Lang %>.js"></script>
   <script type="text/javascript" src="/scripts/jscalendar/calendar-setup.js"></script>
+  <script type="text/javascript" src="/scripts/ajax/ajax.js"></script>
+  <script type="text/javascript" src="/scripts/ajax/ajax-dynamic-content.js"</script>
+  <script type="text/javascript" src="/scripts/ajax/ajax-tooltip.js"></script>
+

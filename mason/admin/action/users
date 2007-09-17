@@ -101,16 +101,16 @@ my $user_storage = {
 
 
 my $input_display = [
-                     { name=>'name',   content=>'data',   label=>'Name'     },
-                     { name=>'login',  content=>'data',   label=>'Login'    },
-                     { name=>'email',  content=>'data',   label=>'E-mail'   },
-                     { name=>'passwd', content=>'data',   label=>'Password' },
-                     { name=>'notes',  content=>'data',   label=>'Notes'    },
-                     { name=>'admin',  content=>'data',   label=>'Can login to admin interface', 
+                     { name=>'name',   content=>'data',   label=>'Name' , tooltip => '/users/'    },
+                     { name=>'login',  content=>'data',   label=>'Login', tooltip => '/users/'    },
+                     { name=>'email',  content=>'data',   label=>'E-mail', tooltip => '/users/'   },
+                     { name=>'passwd', content=>'data',   label=>'Password', tooltip => '/users/' },
+                     { name=>'notes',  content=>'data',   label=>'Notes'   , tooltip => '/users/' },
+                     { name=>'admin',  content=>'data',   label=>'Can login to admin interface', tooltip => '/users/', 
 		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
-                     { name=>'can_manage_users',  content=>'data',   label=>'Can manage users', 
+                     { name=>'can_manage_users',  content=>'data',   label=>'Can manage users', tooltip => '/users/',
 		     	options=>{ label_2 => 'Yes', label_1 => 'In own group only', label_0 => 'No' }, edit_args=>'2|1|0'  },
-                     { name=>'can_manage_groups',  content=>'data',   label=>'Can manage groups', 
+                     { name=>'can_manage_groups',  content=>'data',   label=>'Can manage groups', tooltip => '/users/',
 		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
                     ];
 

@@ -1,0 +1,22 @@
+<% $text %>
+<%init>
+my $text;
+
+# If text is enot set, use the parent-text.
+$obvius->get_version_field($vdoc, 'content');
+$obvius->get_version_field($vdoc, 'parent');
+
+if ($vdoc->field('content') =~ /^\s*$/ && !($vdoc->field('parent') eq '')) {
+    local $doc = $obvius->lookup_document($vdoc->field('parent'));
+    local $vdoc = $obvius->get_public_version($doc); 
+    $vdoc ||= $obvius->get_latest_version($doc);
+
+    if(defined $doc && defined $vdoc) {
+	$text = $m->scomp('Tooltip');
+    } else {
+	$text ="";
+    }
+} else {
+    $text = $vdoc->field('content');
+}
+</%init>

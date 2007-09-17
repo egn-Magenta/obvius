@@ -2,7 +2,15 @@
 <h4><& /shared/msg, text=>$subtitle &></h4>
 % }
 % if (defined $name) {
-<label for="<% $name |h %>"><& /shared/msg, text=>$label &></label><br />\
+<label for="<% $name |h %>">
+  <& /shared/msg, text=> $label &>
+%if (defined $tooltip_url) {
+    <a href="#" onmouseover="ajax_showTooltip('<% $tooltip_url %>', this)" onmouseout="ajax_hideTooltip()"> 
+      <img src="/grafik/spg.gif" alt="?" />
+    </a>
+%}
+</label>
+<br />\
 % }
 % else {
 <& /shared/msg, text=>$label &><br />\
@@ -15,6 +23,23 @@ $name=>undef
 </%args>
 %
 <%init>
-my $subtitle=undef;
-$subtitle=$field->{options}->{subtitle} if (exists $field->{options});
+use WebObvius::Tooltip qw(get_tooltip_path);
+
+my $doctype = $obvius->get_document_type($doc);
+my ($docname, $tooltip_url);
+
+if ($field->{tooltip}) {
+    $docname = $field->{tooltip};
+} else {
+    $docname = $doctype->param('name');
+}
+
+$tooltip_url = get_tooltip_path( doctype => $docname, field => $field->{name});
+if ($obvius->lookup_document($tooltip_url)) {
+    $tooltip_url = $prefix . $tooltip_url . '?obvius_bare=1';
+} else {
+    $tooltip_url = undef;
+}
+
+my $subtitle=$field->{options}->{subtitle} if (exists $field->{options});
 </%init>
