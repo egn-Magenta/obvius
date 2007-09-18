@@ -4,12 +4,15 @@
 % if (defined $name) {
 <label for="<% $name |h %>">
   <& /shared/msg, text=> $label &>
-%if (defined $tooltip_url) {
-    <a href="#" onmouseover="ajax_showTooltip('<% $tooltip_url %>', this)" onmouseout="ajax_hideTooltip()"> 
-      <img src="/grafik/spg.gif" alt="?" />
-    </a>
-%}
 </label>
+
+%if (defined $tooltip_url) {
+<!--    <a href="#" onmouseover="ajax_showTooltip('<% $tooltip_url %>', this)" onmouseout="ajax_hideTooltip()"> -->
+<!--    <a href="#" onclick="ajax_showTooltip('<% $tooltip_url %>', this)">  -->
+
+      <img src="/grafik/spg.gif" alt="?" style="cursor: pointer; cursor: hand" onclick="ajax_showTooltip('<% $tooltip_url %>', this)" />
+<!--    </a> -->
+%}
 <br />\
 % }
 % else {
@@ -36,6 +39,7 @@ if ($field->{tooltip}) {
 
 $tooltip_url = get_tooltip_path( doctype => $docname, field => $field->{name});
 if ($obvius->lookup_document($tooltip_url)) {
+    $tooltip_url =~ s!/$!!;
     $tooltip_url = $prefix . $tooltip_url . '?obvius_bare=1';
 } else {
     $tooltip_url = undef;
