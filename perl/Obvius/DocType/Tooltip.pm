@@ -47,10 +47,11 @@ sub action {
 sub raw_document_data {
     my ( $this, $doc, $vdoc, $obvius, $input) = @_; 
     return unless $input->param('obvius_bare');
+    return if (!defined $doc || !defined $vdoc);
 
     my $text;
     $text = "<img src='/grafik/close.gif' class='close' onclick='ajax_hideTooltip();' />";
-
+    
     # If text is enot set, use the parent-text.
     $obvius->get_version_field($vdoc, 'content');
     $obvius->get_version_field($vdoc, 'parent');
@@ -59,13 +60,9 @@ sub raw_document_data {
 	$doc = $obvius->lookup_document($vdoc->field('parent'));
         $vdoc = $obvius->get_public_version($doc);
         $vdoc ||= $obvius->get_latest_version($doc);
-        $obvius->get_version_field($vdoc, 'content');
+	my ($mime_type, $parent_text) = raw_document_data($this, $doc, $vdoc, $obvius, $input);
 
-        if(defined $doc && defined $vdoc) {
-            $text .= $vdoc->field('content');
-        } else {
-            $text .="";
-        }
+	$text .= $parent_text;
     } else {
         $text .= $vdoc->field('content');
     }
