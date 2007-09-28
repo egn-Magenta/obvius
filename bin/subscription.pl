@@ -7,7 +7,7 @@ use Obvius;
 use Obvius::Config;
 use Obvius::Log;
 
-use HTML::Mason::Parser;
+
 use HTML::Mason::Interp;
 
 use Net::SMTP;
@@ -20,7 +20,7 @@ use locale;
 
 use Data::Dumper;
 
-my ($automatic, $manual, $site, $sender, $debug, $docid, $sitename) = (0,0,undef,undef,0, 0, undef);
+my ($automatic, $manual, $site, $sender, $debug, $docid, $sitename, $test_receiver) = (0,0,undef,undef,0, 0, undef, undef);
 
 GetOptions('automatic'   => \$automatic,
            'manual'      => \$manual,
@@ -28,7 +28,9 @@ GetOptions('automatic'   => \$automatic,
            'sender=s'    => \$sender,
            'docid=i'     => \$docid,
            'debug'       => \$debug,
-           'sitename=s'  => \$sitename);
+           'sitename=s'  => \$sitename,
+           'test-receiver=s' => \$test_receiver
+    );
 
 my $log = new Obvius::Log ($debug ? 'debug' : 'alert');
 
@@ -61,6 +63,43 @@ print STDERR "No subscriptions sent\n";
 
 exit(0);
 
+
+sub send_to_subscriber {
+    my ($subscriber_, $vdoc, $docs, $mailtemplate)  = @_;
+    # Hmmm, DBIx::RecordSet thinks you are trying to update the DB
+    # when you modify the subscriber object, so we clone it.
+    #
+    # This is a know bug, it's been fixed in a revision of the
+    # Debian packages, but upstream hasn't released a new
+    # version.
+    # See <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=133165>
+    #
+    # A workaround (explicitly setting !TieRow to 0) has been
+    # added to Obvius.pm.
+    # See <>
+
+    unless ( $subscriber_) {
+        warn "** warning: subscriber with id $subscriber_->{subscriber} is not present in the subscribers table -- remove the subscription manually\n";
+        return;
+    }
+
+    my $subscriber = {};
+    for(keys %$subscriber_) {
+        $subscriber->{$_} = $subscriber_->{$_};
+    }
+    return if ($subscriber->{suspended});
+
+
+    $subscriber->{subscriptions} = [ {
+        title => $vdoc->Title,
+        docs => $docs,
+        url=>$obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
+        docid => $vdoc->DocId
+                                     } ];
+    my $mail_error = send_mail($sender, $subscriber, $mailtemplate);
+    return $mail_error;
+}
+
 sub send_manual {
     my $docid = shift;
 
@@ -80,53 +119,35 @@ sub send_manual {
     my $subscriptions = $obvius->get_subscriptions({ docid => $docid });
 
     my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
+
     my $seven_days_ago = strftime('%Y-%m-%d %H:%M:%S', localtime(time() - 24*60*60*7));
+    if ($test_receiver) {
+        my $s = { email => $test_receiver,
+                  name => "Test receiver",
+                  userid => 1,
+                  suspended => 0,
+                  last_update => $seven_days_ago
+        };
+        my @docs_2_send = grep { $seven_days_ago lt $_->{published} } @$new_docs;
+        send_to_subscriber($s, $vdoc, \@docs_2_send, $mailtemplate);
 
-
-    for my $s (@$subscriptions) {
-        my $last_update = $s->{last_update};
-        $last_update = $seven_days_ago if ($last_update le '0000-01-01 00:00:00');
-        my @docs_2_send = grep { $last_update lt $_->{published} } @$new_docs;
-        if(scalar(@docs_2_send)) {
-
-            # Hmmm, DBIx::RecordSet thinks you are trying to update the DB
-            # when you modify the subscriber object, so we clone it.
-            #
-            # This is a know bug, it's been fixed in a revision of the
-            # Debian packages, but upstream hasn't released a new
-            # version.
-            # See <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=133165>
-            #
-            # A workaround (explicitly setting !TieRow to 0) has been
-            # added to Obvius.pm.
-            # See <>
-
+    } else {
+        for my $s (@$subscriptions) {
             my $subscriber_ = $obvius->get_subscriber({id => $s->{subscriber}});
-            unless ( $subscriber_) {
-                warn "** warning: subscriber with id $s->{subscriber} is not present in the subscribers table -- remove the subscription manually\n";
-                next;
+
+            my $last_update = $s->{last_update};
+            $last_update = $seven_days_ago if ($last_update le '0000-01-01 00:00:00');
+            my @docs_2_send = grep { $last_update lt $_->{published} } @$new_docs;
+
+            my $mail_error;
+            if(scalar(@docs_2_send)) {
+                $mail_error = send_to_subscriber($s, $vdoc, \@docs_2_send, $mailtemplate);
             }
-
-            my $subscriber = {};
-            for(keys %$subscriber_) {
-                $subscriber->{$_} = $subscriber_->{$_};
-            }
-            next if ($subscriber->{suspended});
-
-            $subscriber->{subscriptions} = [ {
-                                                title => $vdoc->Title,
-                                                docs => \@docs_2_send,
-                                                url=>$obvius->get_doc_uri($obvius->get_doc_by_id($vdoc->DocId)),
-                                                docid => $vdoc->DocId
-                                             } ];
-
-            my $mail_error = send_mail($sender, $subscriber, $mailtemplate);
-
             if($mail_error) {
                 print STDERR "Warning: Mail system failure: $mail_error";
             } else {
                 unless($debug) {
-                    $obvius->update_subscription({ last_update => $now}, $s->{subscriber}, $docid);
+                    # $obvius->update_subscription({ last_update => $now}, $s->{subscriber}, $docid);
                 }
             }
         }
@@ -175,7 +196,7 @@ sub send_automatic {
     #     documents that will be sent
     #
     for(@$subscribers) {
-	next if ($_->{suspended});
+        next if ($_->{suspended});
         my $subscriber_categories=$obvius->get_subscriber_categories($_->{id});
         my %subscriber_categories=map { ($_=>1) } @{$_->{categories}} if ($subscriber_categories);
 
@@ -293,14 +314,11 @@ sub get_subdocs_recursive {
 sub send_mail {
     my ($from, $subscriber, $mailtemplate) = @_;
 
-
     my $mailmsg;
     my $mail_error;
     my $mailto = $subscriber->{email};
 
-    my $parser = new HTML::Mason::Parser;
     my $interp = new HTML::Mason::Interp(
-                                        parser => $parser,
                                         comp_root => $base_dir . '/mason/mail/',
                                         data_dir => $base_dir . '/var/mail/',
                                         out_method => \$mailmsg
@@ -323,9 +341,11 @@ sub send_mail {
         } else {
             my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => $debug);
             $mail_error = "Failed to specify a sender [$sender]\n"      unless ($smtp->mail($sender));
-            $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
+            $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to('troels@magenta-aps.dk'));
+
             $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailmsg]));
             $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
+
         }
     }
 
