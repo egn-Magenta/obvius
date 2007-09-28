@@ -103,7 +103,7 @@ sub send_to_subscriber {
 sub send_manual {
     my $docid = shift;
     use Data::Dumper;
-    print STDERR "Here I am\n";
+
     my $doc = $obvius->get_doc_by_id($docid);
     die "No doc with id $docid\n" unless($doc);
 
@@ -121,8 +121,7 @@ sub send_manual {
 
     my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
 
-    my $seven_days_ago = strftime('%Y-%m-%d %H:%M:%S', localtime(time() - 24*60*60*7));
-    print STDERR Dumper($subscriptions);
+    my $seven_days_ago = strftime('%Y-%m-%d %H:%M:%S', localtime(time() - 24*60*60*
 
     if ($test_receiver) {
         my $s = { email => $test_receiver,
@@ -142,10 +141,6 @@ sub send_manual {
             $last_update = $seven_days_ago if ($last_update le '0000-01-01 00:00:00');
             my @docs_2_send = grep { $last_update lt $_->{published} } @$new_docs;
 
-            use Data::Dumper;
-            print STDERR Dumper($new_docs);
-            print STDERR Dumper(\@docs_2_send);
-
             my $mail_error;
             if(scalar(@docs_2_send)) {
                 $mail_error = send_to_subscriber($s, $vdoc, \@docs_2_send, $mailtemplate);
@@ -154,7 +149,7 @@ sub send_manual {
                 print STDERR "Warning: Mail system failure: $mail_error";
             } else {
                 unless($debug) {
-                    # $obvius->update_subscription({ last_update => $now}, $s->{subscriber}, $docid);
+                    $obvius->update_subscription({ last_update => $now}, $s->{subscriber}, $docid);
                 }
             }
         }
@@ -319,7 +314,7 @@ sub get_subdocs_recursive {
 }
 
 sub send_mail {
-    my ($from, $subscriber, $mailtemplate) = @_;
+    my ($sender, $subscriber, $mailtemplate) = @_;
 
     my $mailmsg;
     my $mail_error;
@@ -332,11 +327,6 @@ sub send_mail {
                                     );
     $mailtemplate = '/automatic' unless($mailtemplate and -f $base_dir . '/mason/mail' . $mailtemplate);
     my $retval = $interp->exec($mailtemplate, obvius => $obvius, subscriber => $subscriber);
-
-    # Create Postfix-compatible Variable Envelope Return Path:
-    my ($from_user, $from_domain)=split /@/, $mailto, 2;
-    my ($sender_user, $sender_domain)=split /@/, $from, 2;
-    my $sender=$sender_user . '+' . $from_user . '=' . $from_domain . '@' . $sender_domain;
 
     if($debug) {
         print STDERR "Not sending this mail (because of DEBUG), sender: $sender\n";
