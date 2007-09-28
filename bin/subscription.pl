@@ -139,6 +139,10 @@ sub send_manual {
             $last_update = $seven_days_ago if ($last_update le '0000-01-01 00:00:00');
             my @docs_2_send = grep { $last_update lt $_->{published} } @$new_docs;
 
+            use Data::Dumper;
+            print STDERR Dumper($new_docs);
+            print STDERR Dumper(\@docs_2_send);
+
             my $mail_error;
             if(scalar(@docs_2_send)) {
                 $mail_error = send_to_subscriber($s, $vdoc, \@docs_2_send, $mailtemplate);
