@@ -338,7 +338,7 @@ sub send_mail {
         } else {
             my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => $debug);
             $mail_error = "Failed to specify a sender [$sender]\n"      unless ($smtp->mail($sender));
-            $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to('troels@magenta-aps.dk'));
+            $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
 
             $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailmsg]));
             $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
