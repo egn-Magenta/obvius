@@ -38,7 +38,7 @@ Show error/perl command:
 %  $command .= " --sitename=$sitename";
 %  $command .= "  --manual --docid=" . $doc->Id;
 %  $command .= " | at '$d_hour:$d_min $d_month/$d_day/$d_year'";
-%  my $retval = 0; #system($command);
+%  my $retval = system($command);
     <tr>
       <td>
         Forsinket abonnementudsendelse afsendt.
@@ -78,7 +78,7 @@ Show error/perl command:
 % if($go) {
 %  my $command = "perl -w /var/www/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
 %  $command .= " --test-receiver=$test_receiver" if $test_receiver;
-%  my $retval = 0; # system($command);
+%  my $retval = system($command);
     <tr>
       <td>
         Abonnement udsendt.
