@@ -84,6 +84,7 @@ sub send_to_subscriber {
     }
 
     my $subscriber = {};
+
     for(keys %$subscriber_) {
         $subscriber->{$_} = $subscriber_->{$_};
     }
@@ -141,7 +142,7 @@ sub send_manual {
 
             my $mail_error;
             if(scalar(@docs_2_send)) {
-                $mail_error = send_to_subscriber($s, $vdoc, \@docs_2_send, $mailtemplate);
+                $mail_error = send_to_subscriber($subscriber_, $vdoc, \@docs_2_send, $mailtemplate);
             }
             if($mail_error) {
                 print STDERR "Warning: Mail system failure: $mail_error";
@@ -317,10 +318,6 @@ sub send_mail {
     my $mailmsg;
     my $mail_error;
     my $mailto = $subscriber->{email};
-    use Data::Dumper;
-    print STDERR Dumper($subscriber);
-    print STDERR "Mailto: $mailto";
-    print STDERR "Sender: $sender";
 
     my $interp = new HTML::Mason::Interp(
                                         comp_root => $base_dir . '/mason/mail/',
