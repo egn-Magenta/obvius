@@ -39,6 +39,7 @@ Show error/perl command:
 %  $command .= "  --manual --docid=" . $doc->Id;
 %  $command .= " | at '$d_hour:$d_min $d_month/$d_day/$d_year'";
 %  my $retval = system($command);
+% print STDERR $command;
     <tr>
       <td>
         Forsinket abonnementudsendelse afsendt.
@@ -77,8 +78,9 @@ Show error/perl command:
 %} else {
 % if($go) {
 %  my $command = "perl -w /var/www/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
-%  $command .= " --test-receiver=$test_receiver" if $test_receiver;
+%  $command .= " --test-receiver=$test_receiver" if ($test_receiver && $test_receiver !~ /^\s*$/);
 %  my $retval = system($command);
+% print STDERR $command;
     <tr>
       <td>
         Abonnement udsendt.
