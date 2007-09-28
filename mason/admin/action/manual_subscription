@@ -38,8 +38,7 @@ Show error/perl command:
 %  $command .= " --sitename=$sitename";
 %  $command .= "  --manual --docid=" . $doc->Id;
 %  $command .= " | at '$d_hour:$d_min $d_month/$d_day/$d_year'";
-%  my $retval = system($command);
-%  print STDERR $command . "\n";
+%  my $retval = 0; #system($command);
     <tr>
       <td>
         Forsinket abonnementudsendelse afsendt.
@@ -64,6 +63,8 @@ Show error/perl command:
     </tr>
 %   $counter++;
 %   }
+    <input type="text" name="test_receiver">
+
     <tr>
       <td valign="top" colspan="2">
             <input type="hidden" name="obvius_op" value="manual_subscription">
@@ -76,7 +77,8 @@ Show error/perl command:
 %} else {
 % if($go) {
 %  my $command = "perl -w /var/www/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
-%  my $retval = system($command);
+%  $command .= " --test-receiver=$test_receiver" if $test_receiver;
+%  my $retval = 0; # system($command);
     <tr>
       <td>
         Abonnement udsendt.
@@ -106,10 +108,16 @@ Show error/perl command:
     <tr>
       <td valign="top">
             <input type="checkbox" name="m_s_switch" onclick="do_switch()">
+              Klik her hvis du vil sende abonnementmail forskudt.<br>
       </td>
+      <br>
       <td valign="top">
-            Klik her hvis du vil sende abonnementmail forskudt.<br>
-            <br>
+        <input type="text" name="test_receiver">
+        Skriv din email her hvis du vil sende et test-mail til dig selv.
+      </td>
+      <br>
+
+      <td valign="top">
             <input type="hidden" name="obvius_op" value="manual_subscription">
             <input type="hidden" name="go" value="yes">
             <input type="text" name="delayed" value="0000-01-01 00:00:00" style="display: none;">
@@ -125,6 +133,7 @@ Show error/perl command:
 $delayed=>undef
 $accept=>undef
 $go=>undef
+$test_receiver => undef
 </%args>
 <%init>
 use Date::Calc qw(Today_and_Now Add_Delta_DHMS);
