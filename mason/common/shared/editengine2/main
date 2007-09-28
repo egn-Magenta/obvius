@@ -24,6 +24,7 @@
     return $raw;
   }
 </%perl>
+
 <& $scheme . '/' . $type, editscheme=>$editscheme, session=>$session, storage=>$storage, history=>$history, style=>$style &>
 <%args>
  # Edit session history of previous selections etc.
@@ -89,17 +90,17 @@ if (!scalar(@confirmations)) {
 
   if ( exists $editscheme->{callback}) {
         my $events = $m->comp('history:split_events', history=>$history);
-        my %relations = map { 
-	     my ( $relation, $object) = $m->comp('history:extract_event_info', event => $_);
-	     ( $relation, $object);
-	} @$events;
-	$m-> comp( $editscheme->{callback}, 
-	     relations   => \%relations,
-	     storage     => $storage,
-	     editscheme  => $editscheme,
-	     session     => $session,
-	     history     => $history,
-	);
+        my %relations = map {
+             my ( $relation, $object) = $m->comp('history:extract_event_info', event => $_);
+             ( $relation, $object);
+        } @$events;
+        $m-> comp( $editscheme->{callback},
+             relations   => \%relations,
+             storage     => $storage,
+             editscheme  => $editscheme,
+             session     => $session,
+             history     => $history,
+        );
   }
 }
 else {
@@ -139,7 +140,9 @@ else {
         my %values;
         foreach my $value (@editengine_values) {
             my ($history, $object_id, $value_id) = $value =~ /^(.*)editengine_value:(.*):(.*)$/;
-            $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
+            # The input from forms must be utf-8 encoded. This is commonly done by adding:
+            # accept-charset="UTF-8" as a form attribute.
+            $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}));
         }
 
 
@@ -252,7 +255,7 @@ else {
 
             #            print STDERR "Inserting from <main>\n";
 
-	    $m->comp('flow:insert', execute=>$execute, objects=>\%objects, history=>$confirmation_path, session=>$session);
+            $m->comp('flow:insert', execute=>$execute, objects=>\%objects, history=>$confirmation_path, session=>$session);
             $m->comp('main:confirmation', redirect_to => $redirect_to, obvius=>$obvius, session=>$session);
         }
 
@@ -310,7 +313,7 @@ while ($m->comp('flow', session=>$session)) {
 
   # Set up a new storage object based on the description i $editscheme->{storage}:
   my $storage = $m->comp('toolbox:setup_storage', editscheme=>$editscheme, obvius=>$obvius, session=>$session);
-  
+
   # If the scheme is of a template type go through a special
   # template component. Outdated: This should probably be done in all cases to
   # allow for type and range checking (and the succeding user
@@ -320,23 +323,23 @@ while ($m->comp('flow', session=>$session)) {
       ($status, $message, $results)=$m->comp("store:$minortype", history=>$history, objects=>$objects, session=>$session, obvius=>$obvius);
   } else {
       if ($execute !~ /^CANCEL$/) {
-	  # Note that $path needs to be extracted _before_ control is
-	  # passed to the perl modules (since they don't have easy access
-	  # to the mason components)
-	  ($status, $message, $results)=$storage->execute($execute, $objects, $session, $history);
+          # Note that $path needs to be extracted _before_ control is
+          # passed to the perl modules (since they don't have easy access
+          # to the mason components)
+          ($status, $message, $results)=$storage->execute($execute, $objects, $session, $history);
       } else {
-	  # This should no longer be possible
-	  die "confirmation CANCEL uncaught?!\n";
-	  ($status, $message, $results)=$storage->cancel($execute, $objects, $session, $path, $history);
+          # This should no longer be possible
+          die "confirmation CANCEL uncaught?!\n";
+          ($status, $message, $results)=$storage->cancel($execute, $objects, $session, $path, $history);
       }
-      
+
       # Do the hooks in the relevant editschemes.
       my $hook = "post_" . $execute . "_hook";
       my $func = $editscheme->{$hook};
       $m->comp($func) if (defined $func);
   }
 
-  
+
   # Collect data for the status report
   $status_report->{$history} = {status=>$status, message=>$message};
   if ($parent) {
@@ -346,7 +349,7 @@ while ($m->comp('flow', session=>$session)) {
       push @{$predecessors->{''}}, $history;
   }
 
-  # Flow: the vertex has "store" status now, 
+  # Flow: the vertex has "store" status now,
   # and this apparently redirects to another page.
   $m->comp('flow:route', vertex=>$vertex."[$execute]store", redirect_to => $redirect_to, data=>$results, session=>$session);
 }
