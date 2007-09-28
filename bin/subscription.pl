@@ -103,6 +103,7 @@ sub send_to_subscriber {
 sub send_manual {
     my $docid = shift;
 
+    print STDERR "Here I am\n";
     my $doc = $obvius->get_doc_by_id($docid);
     die "No doc with id $docid\n" unless($doc);
 
@@ -121,6 +122,7 @@ sub send_manual {
     my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
 
     my $seven_days_ago = strftime('%Y-%m-%d %H:%M:%S', localtime(time() - 24*60*60*7));
+
     if ($test_receiver) {
         my $s = { email => $test_receiver,
                   name => "Test receiver",
