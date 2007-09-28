@@ -79,7 +79,7 @@ sub send_to_subscriber {
     # See <>
 
     unless ( $subscriber_) {
-        warn "** warning: subscriber with id $subscriber_->{subscriber} is not present in the subscribers table -- remove the subscription manually\n";
+        warn "** warning: subscriber is not present in the subscribers table -- remove the subscription manually\n";
         return;
     }
 
