@@ -121,18 +121,16 @@ sub send_manual {
 
     my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
 
-    my $seven_days_ago = strftime('%Y-%m-%d %H:%M:%S', localtime(time() - 24*60*60*
+    my $seven_days_ago = strftime('%Y-%m-%d %H:%M:%S', localtime(time() - 24*60*60*7));
 
     if ($test_receiver) {
         my $s = { email => $test_receiver,
                   name => "Test receiver",
                   userid => 1,
                   suspended => 0,
-                  last_update => $seven_days_ago
-        };
+                  last_update => $seven_days_ago};
         my @docs_2_send = grep { $seven_days_ago lt $_->{published} } @$new_docs;
         send_to_subscriber($s, $vdoc, \@docs_2_send, $mailtemplate);
-
     } else {
         for my $s (@$subscriptions) {
             my $subscriber_ = $obvius->get_subscriber({id => $s->{subscriber}});
