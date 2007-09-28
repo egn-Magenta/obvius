@@ -317,6 +317,8 @@ sub send_mail {
     my $mailmsg;
     my $mail_error;
     my $mailto = $subscriber->{email};
+    print STDERR $mailto;
+    print STDERR $sender;
 
     my $interp = new HTML::Mason::Interp(
                                         comp_root => $base_dir . '/mason/mail/',
