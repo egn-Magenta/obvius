@@ -45,9 +45,9 @@ use WebObvius::Template::Provider;
 use WebObvius::Cache::Flushing;
 use WebObvius::Cache;
 
-use WebObvius::Apache 
-	Constants	=> qw(:common :methods :response),
-	File		=> ''
+use WebObvius::Apache
+        Constants       => qw(:common :methods :response),
+        File            => ''
 ;
 
 use HTML::Mason;
@@ -73,97 +73,97 @@ use Fcntl ':flock';
 
 ########################################################################
 #
-#	Construction
+#       Construction
 #
 ########################################################################
 
 sub new
 {
-	my ( $class, %options) = @_;
+        my ( $class, %options) = @_;
 
-	my $new = $class-> SUPER::new( %options);
+        my $new = $class-> SUPER::new( %options);
 
-	my $basedir = $options{base};
+        my $basedir = $options{base};
 
-	unless ( $new_mason) {
-		$new->{parser} = new HTML::Mason::Parser(
-		 	in_package    => $class,
-		 	# XXX have both $mcms and $obvius here!
-		 	allow_globals => [qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
-		);
-	}
+        unless ( $new_mason) {
+                $new->{parser} = new HTML::Mason::Parser(
+                        in_package    => $class,
+                        # XXX have both $mcms and $obvius here!
+                        allow_globals => [qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
+                );
+        }
 
-	my %interp_conf = (
-		comp_root       => $options{comp_root},
-		data_dir        => "$basedir/var/$options{site}/",
-		max_recurse     => 64, # Default is 32
-	);
+        my %interp_conf = (
+                comp_root       => $options{comp_root},
+                data_dir        => "$basedir/var/$options{site}/",
+                max_recurse     => 64, # Default is 32
+        );
 
-	if ($new_mason) {
-		$interp_conf{autoflush}        = 0;
-		$interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
-		                                        # we need it for compability with the old admin.
-		$interp_conf{preamble}         = 
-			"my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
-	} else {
-		$interp_conf{parser}           = $new->{parser};
-		$interp_conf{static_file_root} = "$basedir/docs";
-		$interp_conf{out_mode}         = 'batch';
-	}
+        if ($new_mason) {
+                $interp_conf{autoflush}        = 0;
+                $interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
+                                                        # we need it for compability with the old admin.
+                $interp_conf{preamble}         =
+                        "my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
+        } else {
+                $interp_conf{parser}           = $new->{parser};
+                $interp_conf{static_file_root} = "$basedir/docs";
+                $interp_conf{out_mode}         = 'batch';
+        }
 
 
-	if (defined $options{out_method}) {
-		$interp_conf{out_method}       = $options{out_method};
-		$new->param( SITE_SCALAR_REF   => $options{out_method});
-	}
+        if (defined $options{out_method}) {
+                $interp_conf{out_method}       = $options{out_method};
+                $new->param( SITE_SCALAR_REF   => $options{out_method});
+        }
 
-	if (!$new_mason) {
-		# Interp was a Mason<1.10 thing. In later Masonae all options
-		# are passed to ApacheHandler instead.
-		$new-> {interp} = new HTML::Mason::Interp( %interp_conf);
-	}
+        if (!$new_mason) {
+                # Interp was a Mason<1.10 thing. In later Masonae all options
+                # are passed to ApacheHandler instead.
+                $new-> {interp} = new HTML::Mason::Interp( %interp_conf);
+        }
 
-	# If $class ends in ::Common or ::Public, set auto_send_headers to
-	# false (we still want headers sent automatically in admin,
-	# because less of the handler() is used there (and more is handled
-	# in Mason in admin):
-	my %apachehandler_options = (
-		apache_status_title => 'HTML::Mason: ' . $class,
-		# error_mode        => $options{debug} ? 'html' : 'fatal',
-		decline_dirs        => 0,
-		auto_send_headers  => (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
-	);
+        # If $class ends in ::Common or ::Public, set auto_send_headers to
+        # false (we still want headers sent automatically in admin,
+        # because less of the handler() is used there (and more is handled
+        # in Mason in admin):
+        my %apachehandler_options = (
+                apache_status_title => 'HTML::Mason: ' . $class,
+                # error_mode        => $options{debug} ? 'html' : 'fatal',
+                decline_dirs        => 0,
+                auto_send_headers  => (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
+        );
 
-	if ($new_mason) {
-		%apachehandler_options = ( %apachehandler_options, %interp_conf);
-		$apachehandler_options{allow_globals} = [
-			qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
-		];
-		$apachehandler_options{args_method}   = 'mod_perl';
-	}
-	else {
-		$apachehandler_options{interp}        = $new->{interp};
-	}
+        if ($new_mason) {
+                %apachehandler_options = ( %apachehandler_options, %interp_conf);
+                $apachehandler_options{allow_globals} = [
+                        qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
+                ];
+                $apachehandler_options{args_method}   = 'mod_perl';
+        }
+        else {
+                $apachehandler_options{interp}        = $new->{interp};
+        }
 
-	$new-> {handler} = new HTML::Mason::ApacheHandler( %apachehandler_options);
+        $new-> {handler} = new HTML::Mason::ApacheHandler( %apachehandler_options);
 
-	if (!$new_mason) {
-		# In Mason<1.10 this has to be done "manually":
-		# It would be nice, if the user Apache runs as could be detected, instead of this:
-		my $httpd_user  = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
-		my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
-		chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
-	}
+        if (!$new_mason) {
+                # In Mason<1.10 this has to be done "manually":
+                # It would be nice, if the user Apache runs as could be detected, instead of this:
+                my $httpd_user  = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
+                my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
+                chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
+        }
 
-	$new->{is_admin} = $options{is_admin};
+        $new->{is_admin} = $options{is_admin};
 
-	return bless $new, $class;
+        return bless $new, $class;
 }
 
 
 ########################################################################
 #
-#	Cache
+#       Cache
 #
 ########################################################################
 
@@ -178,7 +178,7 @@ sub can_use_cache {
     return '' if ($req->no_cache);
     return '' unless ($req->method_number == M_GET);
     return '' unless ($this->{WEBOBVIUS_CACHE_INDEX} and
-		      $this->{WEBOBVIUS_CACHE_DIRECTORY});
+                      $this->{WEBOBVIUS_CACHE_DIRECTORY});
     return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
     return '' if (-e $this->{WEBOBVIUS_CACHE_INDEX} . "-off");
     return '' if $req-> notes('nocache');
@@ -231,7 +231,7 @@ sub save_in_cache {
     unlink($file);
 
     my $fh = new Apache::File('>'.$file);
-    
+
     if ($fh) {
         $log->debug("Cache file open ok");
         print $fh (ref($s) ? $$s : $s);
@@ -244,16 +244,16 @@ sub save_in_cache {
 
         # Add to cache-db
         if ($fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX})) {
-	    my $real_path=$req->uri();
-	    # If handle_path_info() is true on the doctype
-	    # (see WebObvius::Site::obvius_document),
-	    # obvius_path_info needs to be added:
-	    $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
-	    print $fh $real_path,$extra, "\t", $req->notes('cache_url'), "\n";
-	    $log->debug(" ADDED TO CACHE: " . $req->uri);
-	} else {
-	    $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
-	}
+            my $real_path=$req->uri();
+            # If handle_path_info() is true on the doctype
+            # (see WebObvius::Site::obvius_document),
+            # obvius_path_info needs to be added:
+            $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
+            print $fh $real_path,$extra, "\t", $req->notes('cache_url'), "\n";
+            $log->debug(" ADDED TO CACHE: " . $req->uri);
+        } else {
+            $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
+        }
     }
     $log->debug("Cache file done");
 }
@@ -273,16 +273,16 @@ sub dirty_url_in_cache {
     # XXX This should be called when a document is
     # published/unpublished. And when it expires(!)
 
-     # Ole: This is so stupid. Why does it have to be so hard? 
+     # Ole: This is so stupid. Why does it have to be so hard?
      # I'm trying to implement a WAY better cache handling for KU,
      # so I need to implement a feature that can disable all form of
      # cache-clearing. I'd like to handle it MY WAY!
- 
+
      if ( ! $obvius->config->param("handle_document_cache_locally") )
      {
         WebObvius::Cache::Flushing::flush($url,$this->{WEBOBVIUS_CACHE_DIRECTORY} . 'flush.db', $this->{WEBOBVIUS_CACHE_INDEX});
      }
-    
+
 
 }
 
@@ -303,7 +303,7 @@ sub clear_cache {
 
 ########################################################################
 #
-#	Handlers
+#       Handlers
 #
 ########################################################################
 
@@ -336,10 +336,10 @@ sub access_handler ($$) {
     # The problem with that is, that we only know if there is an
     # alternate location much later (in handler, below), so it takes a
     # little more work to change it.
-    
+
     # ... and we auto-slash any uri without .'s in it except on admin where it's
     # handled in Mason ...
-	if ($orig_uri !~ m!/$! and $orig_uri !~ /[.]/ and !$this->param('is_admin')) {
+        if ($orig_uri !~ m!/$! and $orig_uri !~ /[.]/ and !$this->param('is_admin')) {
         # If on a subsite system (eg. roothost is set) always redirect to the roothost
         # or we will get a double subsite rewrite. A better way to handle this would be
         # good since we now wil get 3 redirects if a user ommits the ending /:
@@ -353,21 +353,19 @@ sub access_handler ($$) {
 
     # The orig_uri case from above does not apply to admin, however, so it's
     # not needed here.
-    return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external') 
-    	if (!$this->param('is_admin') and ($uri =~ s{[.]html/$}{.html}i)); 
-	# ... and we auto-deslash any uri which ends in .html.
+    return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external')
+        if (!$this->param('is_admin') and ($uri =~ s{[.]html/$}{.html}i));
+        # ... and we auto-deslash any uri which ends in .html.
 
     my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
     return SERVER_ERROR unless ($obvius);
 
     # Cache these structures: (they should be dirtied when the db is updated... XXX)
     map { unless ($this->{SUBSITE}->{$_}) { $obvius->log->debug("$this->{SUBSITE}: CACHING $_"); $this->{SUBSITE}->{$_}=$obvius->{$_}} }
-	qw(DOCTYPES FIELDTYPES FIELDSPECS);
+        qw(DOCTYPES FIELDTYPES FIELDSPECS);
 
     my $doc    =$this->obvius_document($req, $uri);
-    print STDERR "Found document Here2\n";
     return NOT_FOUND unless ($doc);
-    print STDERR "Found document Here\n";
 
     $req->pnotes('document'=>$doc);
     $req->pnotes('site'    =>$this);
@@ -391,48 +389,48 @@ sub handler ($$) {
     my $doc=$req->pnotes('document');
 
     unless ($this->param('is_admin')) {
-#	return NOT_FOUND unless ($obvius->is_public_document($doc));
-	my $vdoc = $this->obvius_document_version($req, $doc);
-	return NOT_FOUND unless ($vdoc);
+#       return NOT_FOUND unless ($obvius->is_public_document($doc));
+        my $vdoc = $this->obvius_document_version($req, $doc);
+        return NOT_FOUND unless ($vdoc);
 
-	return FORBIDDEN if ($vdoc->Expires lt $req->notes('now'));
-	
-	my $doctype = $obvius->get_version_type($vdoc);
+        return FORBIDDEN if ($vdoc->Expires lt $req->notes('now'));
+
+        my $doctype = $obvius->get_version_type($vdoc);
 
         my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
 
     # The document can have a "alternate_location" method if the user should be redirected to a different URL.
     # The method should return a path or URL to the new location.
-	if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri)) {
-	    return NOT_FOUND if (Apache->define('NOREDIR'));
-	    return $this->redirect($req, $alternate, 'force-external');
-	}
-	
-	# Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
-	# by the browser should have a method called "raw_document_data"
-	
-	my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data(
-		$doc, $vdoc, $obvius, 
-	    WebObvius::Apache::apache_module('Request')-> new($req), 
-	    $output
-	    );
-	
-	if ($data) {
-	    $mime_type ||= 'application/octet-stream';
+        if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri)) {
+            return NOT_FOUND if (Apache->define('NOREDIR'));
+            return $this->redirect($req, $alternate, 'force-external');
+        }
 
-	    $obvius->log->debug(" Serving raw_document_data from db: $mime_type");
+        # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
+        # by the browser should have a method called "raw_document_data"
 
-	    $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
-	    $req->content_type($mime_type);
-	    if($filename) {
-	        $con_disp ||= 'attachment';
-	        $req->header_out("Content-Disposition", "$con_disp; filename=$filename");
+        my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data(
+                $doc, $vdoc, $obvius,
+            WebObvius::Apache::apache_module('Request')-> new($req),
+            $output
+            );
+
+        if ($data) {
+            $mime_type ||= 'application/octet-stream';
+
+            $obvius->log->debug(" Serving raw_document_data from db: $mime_type");
+
+            $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
+            $req->content_type($mime_type);
+            if($filename) {
+                $con_disp ||= 'attachment';
+                $req->header_out("Content-Disposition", "$con_disp; filename=$filename");
                 # Microsoft Internet Explorer/Adobe Reader has
                 # problems if Vary is set at the same time as
                 # Content-Disposition is(!) - so we unset Vary if we
                 # set Content-Disposition.
                 $req->header_out('Vary'=>undef);
-	    }
+            }
 
             # The spec. says that it is not necessary to advertise this:
             # $req->header_out('Accept-Ranges'=>'bytes');
@@ -464,21 +462,21 @@ sub handler ($$) {
 
             # Add to cache:
             if ($this->can_use_cache($req,$output) and not scalar($req->args)) {
-	        $this->save_in_cache($req, \$data);
-	    }
+                $this->save_in_cache($req, \$data);
+            }
             else {
-	        $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
-	    }
+                $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
+            }
 
-	    return OK;
-	}
+            return OK;
+        }
 
-	$req->content_type('text/html') unless $req->content_type;
-	$req->content_type('text/html') if $req->content_type =~ /directory$/;
-	return -1 unless ($req->content_type eq 'text/html');
+        $req->content_type('text/html') unless $req->content_type;
+        $req->content_type('text/html') if $req->content_type =~ /directory$/;
+        return -1 unless ($req->content_type eq 'text/html');
     }
     else {
-	# XXX $req->no_cache(1);
+        # XXX $req->no_cache(1);
     }
 
     $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
@@ -487,9 +485,9 @@ sub handler ($$) {
     my $status=$this->execute_mason($req);
 
     if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
-	my $html="Couldn't generate page. Yikes.";
-	if ($status==OK) {
-	    $html=${$this->{'SITE_SCALAR_REF'}};
+        my $html="Couldn't generate page. Yikes.";
+        if ($status==OK) {
+            $html=${$this->{'SITE_SCALAR_REF'}};
         }
         ${$this->{'SITE_SCALAR_REF'}}='';
 
@@ -519,11 +517,11 @@ sub handler ($$) {
 
         # Add to cache:
         if ($this->can_use_cache($req) and $status==OK) {
-	    $this->save_in_cache($req, \$html);
-	}
+            $this->save_in_cache($req, \$html);
+        }
         else {
-	    $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
-	}
+            $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
+        }
 
     }
 
@@ -593,23 +591,23 @@ sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cac
         # (or do we define that it's up to dirty_url_in_cache to worry about that?)
         map { #print STDERR "  dirty_url: $_\n";
               $this->dirty_url_in_cache($obvius, $_); } keys %dirty_urls;
-	
+
         # Handle the Mason-cache:
         $this->handle_mason_cache($obvius, \%dirty_docids);
-	
+
         # Turn object-cache back on:
         $obvius->cache(1);
     }
 
     if ( $obvius->config->param("handle_document_cache_locally") )
     {
-	my $modified_docid=$obvius->list_modified_docid();
-	if (scalar(@$modified_list)) 
-	{
-	  $this->handle_mason_cache($obvius, $modified_docid, 1 );
-	}
+        my $modified_docid=$obvius->list_modified_docid();
+        if (scalar(@$modified_list))
+        {
+          $this->handle_mason_cache($obvius, $modified_docid, 1 );
+        }
     }
-    
+
 }
 
 # handle_mason_cache - given a hash-ref to dirty docids, calls the
@@ -723,8 +721,8 @@ sub authen_handler ($$) {
 
     my $login = $req->connection->user;
     unless ($login and $pw) {
-	$req->note_basic_auth_failure;
-	return AUTH_REQUIRED;
+        $req->note_basic_auth_failure;
+        return AUTH_REQUIRED;
     }
 
     # Check password
@@ -778,69 +776,69 @@ sub authz_handler ($$) {
     return $this->access_handler($req);
 }
 
-sub rulebased_authen_handler ($$) 
+sub rulebased_authen_handler ($$)
 {
-	my ($this, $req) = @_;
+        my ($this, $req) = @_;
 
-	Obvius::log->debug(" Mason::authz_handler_rulebased ($this : " . $req->uri . ")");
-	
-	my $doc = $req-> pnotes('document');
-	return NOT_FOUND unless $doc;
-		
-	my ( $login, $uid, $obvius);
+        Obvius::log->debug(" Mason::authz_handler_rulebased ($this : " . $req->uri . ")");
 
-	# stage 1: try to access the document as nobody
-	$obvius = $this-> obvius_connect(
-		$req, 
-		$login = 'nobody', undef, 
-		$this->{SUBSITE}->{DOCTYPES}, 
-		$this->{SUBSITE}->{FIELDTYPES}, 
-		$this->{SUBSITE}->{FIELDSPECS}
-	);
-	return SERVER_ERROR unless $obvius;
-	
-	$uid = $obvius-> get_user( $login);
-	return SERVER_ERROR unless $uid;
-	$req-> notes( user => $login);
+        my $doc = $req-> pnotes('document');
+        return NOT_FOUND unless $doc;
 
-	# check if the user can view the document
-	my $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
-	return OK if $caps->{view};
+        my ( $login, $uid, $obvius);
 
-	# stage 2: cannot access the document anonymously, try to authenticate
-	my ( $have_user, $password) = $req-> get_basic_auth_pw;
-	goto AUTH_FAIL unless $have_user == OK;
-	$login = $req-> connection-> user;
-	goto AUTH_FAIL unless $login and $password;
+        # stage 1: try to access the document as nobody
+        $obvius = $this-> obvius_connect(
+                $req,
+                $login = 'nobody', undef,
+                $this->{SUBSITE}->{DOCTYPES},
+                $this->{SUBSITE}->{FIELDTYPES},
+                $this->{SUBSITE}->{FIELDSPECS}
+        );
+        return SERVER_ERROR unless $obvius;
 
-	$obvius-> {USER}     = $login;
-	$obvius-> {PASSWORD} = $password;
-	goto AUTH_FAIL unless $obvius-> validate_user;
+        $uid = $obvius-> get_user( $login);
+        return SERVER_ERROR unless $uid;
+        $req-> notes( user => $login);
 
-	# authenticated, can view?
-	$uid = $obvius-> get_user( $login);
-	return SERVER_ERROR unless $uid;
-	$req-> notes( user => $login);
+        # check if the user can view the document
+        my $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
+        return OK if $caps->{view};
 
-	unless ( $uid-> {admin}) {
-		$caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
-		goto AUTH_FAIL unless $caps->{view};
-	}
+        # stage 2: cannot access the document anonymously, try to authenticate
+        my ( $have_user, $password) = $req-> get_basic_auth_pw;
+        goto AUTH_FAIL unless $have_user == OK;
+        $login = $req-> connection-> user;
+        goto AUTH_FAIL unless $login and $password;
 
-	# finally, turn server cache off for the protected documents
-    	$req-> notes('nocache', 1) unless $have_user == OK;
+        $obvius-> {USER}     = $login;
+        $obvius-> {PASSWORD} = $password;
+        goto AUTH_FAIL unless $obvius-> validate_user;
 
-	return OK;
+        # authenticated, can view?
+        $uid = $obvius-> get_user( $login);
+        return SERVER_ERROR unless $uid;
+        $req-> notes( user => $login);
+
+        unless ( $uid-> {admin}) {
+                $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
+                goto AUTH_FAIL unless $caps->{view};
+        }
+
+        # finally, turn server cache off for the protected documents
+        $req-> notes('nocache', 1) unless $have_user == OK;
+
+        return OK;
 
 AUTH_FAIL:
-	$req-> note_basic_auth_failure;
-	return AUTH_REQUIRED;
+        $req-> note_basic_auth_failure;
+        return AUTH_REQUIRED;
 }
 
 
 #######################################################################
 #
-#	Public handling functions
+#       Public handling functions
 #
 #######################################################################
 
@@ -878,7 +876,7 @@ sub create_output_object {
 
 sub expand_output {
     my ($this, $site, $output, $req) = @_;
-    
+
     my $benchmark = Obvius::Benchmark-> new('mason::expand output') if $this-> {BENCHMARK};
 
     # XXX Hvordan pokker håndteres dette? XXX
@@ -895,7 +893,7 @@ sub expand_output {
     my $s='We have an anomaly, the subsite centerpiece was unable to generate.';
     # Ou wee, handle this better (subsite_scalar_ref must be emptied for each request):
     if ($status==OK) {
-	$s=${$this->{'SITE_SCALAR_REF'}};
+        $s=${$this->{'SITE_SCALAR_REF'}};
     }
     ${$this->{'SITE_SCALAR_REF'}}='';
 
