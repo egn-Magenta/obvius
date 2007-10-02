@@ -4,6 +4,10 @@
 $obvius_version => undef
 </%args>
 <%init>
+# All the global variables, ought to be undef here.
+# unfortunately they do not always appears to be so. Therefore $vdoc is set explicitly to undef here.
+
+
 $prefix=$r->notes('prefix');
 $uri=$r->notes('uri');
 $obvius=$r->pnotes('obvius');
@@ -13,11 +17,12 @@ my @params=$r->param;
 
 $r->no_cache(1) unless scalar(@params)==0;
 
+$vdoc = undef;
 if ($obvius_version) {
     if ($obvius_version eq "latest") {
-	$vdoc = $obvius->get_latest_version($doc);
+        $vdoc = $obvius->get_latest_version($doc);
     } else {
-	$vdoc =  $obvius->get_version($doc, $obvius_version);
+        $vdoc =  $obvius->get_version($doc, $obvius_version);
     }
 }
 
