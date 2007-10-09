@@ -9,14 +9,18 @@ my ($year, $mon, $day) = $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
 
 if ($month eq 'long') {
     my $long_month = $m->scomp('/shared/msg', text=>$month_desc[$mon]);
-    $display_date = "$day. $long_month $year";
+    if ($vdoc->Lang eq 'da') {
+        $display_date = "$day. $long_month $year";
+    } else {
+        $display_date = "$year-$mon-$day";
+    }
 } elsif ($month eq 'dot-numeric') {
     if ($vdoc->Lang eq 'da') {
-	#Dansk punktformat
-	$display_date = "$day.$mon.$year";
+        #Dansk punktformat
+        $display_date = "$day.$mon.$year";
     } else {
-	#International ditto.
-	$display_date = "$year.$mon.$day";
+        #International ditto.
+        $display_date = "$year.$mon.$day";
     }
 } else {
     my $short_month = $m->scomp('/shared/msg', text=>$month_short[$mon]);
