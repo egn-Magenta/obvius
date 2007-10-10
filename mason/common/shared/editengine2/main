@@ -142,7 +142,11 @@ else {
             my ($history, $object_id, $value_id) = $value =~ /^(.*)editengine_value:(.*):(.*)$/;
             # The input from forms must be utf-8 encoded. This is commonly done by adding:
             # accept-charset="UTF-8" as a form attribute.
-            $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}));
+            if (! ref $ARGS{$value}) {
+                $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}));
+            } else {
+                $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
+            }
         }
 
 
