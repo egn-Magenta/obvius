@@ -6,7 +6,7 @@ package Obvius::DocType::Form;
 #
 # Copyright (C) 2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Author: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ sub raw_document_data {
     my $entries_xml = '';
 
     $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
-    
+
     # Remove  xml declaration:
 
     $xmldata .= "<entries>" . $entries_xml . "</entries>";
@@ -156,7 +156,7 @@ sub raw_document_data {
 sub flush_xml {
     my ($this, $id, $obvius) = @_;
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
-					     '!Table'      => 'formdata'});
+                                             '!Table'      => 'formdata'});
     $set->Delete(docid=>$id);
     $set->Disconnect;
     return OBVIUS_OK;
@@ -165,26 +165,27 @@ sub flush_xml {
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-    
+
     # Flushing of XML-file in admin:
     if ($input->param('flush_xml')) {
-	if ($input->param('is_admin')) {
-	    $output->param('flush_xml' => 1);
-	    my $status = $this->flush_xml($doc->{Id}, $obvius);
-	    if($status != OBVIUS_OK) {
-		print STDERR "Couldn't flush formdata\n";
-		return $status;
-	    }
-	} else {
-	    print STDERR "None-admin tried to flush formula data\n";
-	    return OBVIUS_OK;
-	}
+        if ($input->param('is_admin')) {
+            $output->param('flush_xml' => 1);
+            my $status = $this->flush_xml($doc->{Id}, $obvius);
+            if($status != OBVIUS_OK) {
+                print STDERR "Couldn't flush formdata\n";
+                return $status;
+            }
+        } else {
+            print STDERR "None-admin tried to flush formula data\n";
+            return OBVIUS_OK;
+        }
     }
 
 
     $obvius->get_version_fields($vdoc, ['formdata' ]);
 
-    my $formdata = XMLin(   $vdoc->field('formdata'),
+    my $data = $this->utf8ify($vdoc->field('formdata'));
+    my $formdata = XMLin(   $data,
                             keyattr=>[],
                             forcearray => [ 'field', 'option', 'validaterule' ],
                             suppressempty => ''
@@ -313,24 +314,24 @@ sub action {
     my %unique_failed;
 
     if(scalar(%unique)) {
-	
+
 #      Get data from datafile:
-	my $entries = $this->get_xml_entries($obvius, docid => $doc->{Id}) || [];
-	
+        my $entries = $this->get_xml_entries($obvius, docid => $doc->{Id}) || [];
+
 #      For each entry, check all fields and see if they're unique and, if they
 #      are, match them up against the submitted value for that field.
-	for(@$entries) {
-	    my $entry = XMLin($_);
-	    my $fields = $entry->{fields}->{field} || [];
-	    	    
-	    for(@$fields) {
-		if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
-		    $unique_failed{$_->{fieldname}} = 1;
-		}
-	    }
-	}
+        for(@$entries) {
+            my $entry = XMLin($_);
+            my $fields = $entry->{fields}->{field} || [];
+
+            for(@$fields) {
+                if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
+                    $unique_failed{$_->{fieldname}} = 1;
+                }
+            }
+        }
     }
-	
+
 
     my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
     my @not_unique = map {$_->{name}} grep { $unique_failed{$_->{name}} } @{$formdata->{field}};
@@ -349,8 +350,8 @@ sub action {
         for(@{$formdata->{field}}) {
             push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
         }
-	
-	$this->insert_xml_entry($doc->Id, \%entry, $obvius);
+
+        $this->insert_xml_entry($doc->Id, \%entry, $obvius);
 
         $output->param('submitted_data_ok' => 1);
         $output->param('formdata' => $formdata);
@@ -359,37 +360,37 @@ sub action {
     return OBVIUS_OK;
 }
 
-    
+
 sub get_xml_entries {
     my ($this, $obvius, @how) = @_;
-    my @entries;    
+    my @entries;
 
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
-					     '!Table'      => 'formdata'});					  
+                                             '!Table'      => 'formdata'});
     $set->Search(@how);
 
     while (my $rec = $set->Next) {
-	push @entries, $rec->{entry};
+        push @entries, $rec->{entry};
     }
     $set->Disconnect();
 
     return (wantarray ? @entries : \@entries);
 }
-	
+
 sub insert_xml_entry {
     my ($this, $id, $entry, $obvius) = @_;
 
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
-					     '!Table'      => 'formdata'});
-    my $xml = XMLout($entry, 
-		     rootname => 'entry',
-		     noattr => 1);
+                                             '!Table'      => 'formdata'});
+    my $xml = XMLout($entry,
+                     rootname => 'entry',
+                     noattr => 1);
     $set->Insert( {docid => $id, entry => $xml });
 
     $set->Disconnect();
 }
-    
-	
+
+
 sub unutf8ify {
     my ($this, $obj)=@_;
 
