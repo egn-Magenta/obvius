@@ -168,7 +168,7 @@ function obvius_navigator_get_arguments(current_document_elt) {
       return('?'+hrefparts[1]);
     }
   }
-  return '?obvius_app_navigator=1&fieldname=href'; /* Fallback */
+  return '?obvius_app_navigator=1&fieldname=' + obvius_navigator_fieldname; /* Fallback */
 }
 
 function obvius_navigator_fold(id) {
@@ -188,7 +188,7 @@ function obvius_navigator_fold(id) {
 function obvius_navigator_done(selected) {
   if (obvius_navigator_fieldname!='') {
     /* Transfer the selected value to the field in the original window: */
-    
+
     /* Look through the forms, insert into fields with the right name: */
     var found=0;
     for(var i=0; i<window.opener.document.forms.length; i++) {
