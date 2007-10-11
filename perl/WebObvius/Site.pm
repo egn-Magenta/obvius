@@ -210,7 +210,7 @@ sub obvius_document {
 }
 
 sub obvius_document_version {
-    my ($this, $req, $doc) = @_;
+    my ($this, $req, $doc) = @_; 
 
     $this->tracer($req, $doc) if ($this->{DEBUG});
 
