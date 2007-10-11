@@ -50,9 +50,9 @@ use constant TRANSLATION_FILENAME => 'translations';
 use constant TRANSLATION_SUFFIXES => ('_local.xml', '.xml');
 
 use WebObvius::Apache
-	Constants	=> qw(:common :methods :response),
-	Util		=> '',
-	Cookie		=> ''
+        Constants       => qw(:common :methods :response),
+        Util            => '',
+        Cookie          => ''
 ;
 
 use Digest::MD5 qw(md5_hex);
@@ -65,18 +65,18 @@ use Unicode::String qw(utf8 latin1);
 
 sub new
 {
-	my $self = shift-> SUPER::new(@_);
+        my $self = shift-> SUPER::new(@_);
 
-	$self-> {LANGUAGE_PREFERENCES} = [];
-	$self-> load_translation_fileset();
+        $self-> {LANGUAGE_PREFERENCES} = [];
+        $self-> load_translation_fileset();
 
-	return $self;
+        return $self;
 }
 
 
 ########################################################################
 #
-#	Language handling
+#       Language handling
 #
 ########################################################################
 
@@ -129,7 +129,7 @@ sub get_language_preferences {
 
 ########################################################################
 #
-#	Obvius interface methods
+#       Obvius interface methods
 #
 ########################################################################
 
@@ -229,7 +229,7 @@ sub obvius_document_version {
 
 ########################################################################
 #
-#	Apache request helpers
+#       Apache request helpers
 #
 ########################################################################
 
@@ -240,36 +240,36 @@ sub redirect {
     $this->tracer($req, $uri, $force_external||'undef') if ($this->{DEBUG});
 
     if ($uri =~ m!^(=)?/!) {
-	if ($1) {
-	    $uri =~ s/^=//;
-	    $force_external = 1;
-	}
+        if ($1) {
+            $uri =~ s/^=//;
+            $force_external = 1;
+        }
 
-	if ($req->method_number == M_GET and $req->args) {
-	    if (index($uri, '?') < 0) {
-		$uri .= '?' . $req->args;
-	    } else {
-		$uri .= ';' . $req->args;
-	    }
-	}
+        if ($req->method_number == M_GET and $req->args) {
+            if (index($uri, '?') < 0) {
+                $uri .= '?' . $req->args;
+            } else {
+                $uri .= ';' . $req->args;
+            }
+        }
 
-	if ($force_external) {
+        if ($force_external) {
             # Jason: Added to detect whether to redirect to https
             my $script_uri = $req->subprocess_env('script_uri');
             my $protocol = ($script_uri =~ /^https/ or $req->subprocess_env('https')) ? 'https' : 'http';
             my $port=$req->get_server_port;
             $uri = sprintf('%s://%s%s', $protocol, $req->hostname,
                            (($port!=80 and $port!=81) ? ':'.$port : '')) . $uri;
-	} else {
-	    $req->internal_redirect($uri);
-	    return DONE;
-	}
+        } else {
+            $req->internal_redirect($uri);
+            return DONE;
+        }
     }
 
     if ($req->method_number == M_POST) {
-	$req->method('GET');
-	$req->method_number(M_GET);
-	$req->headers_in->unset('Content-Length');
+        $req->method('GET');
+        $req->method_number(M_GET);
+        $req->headers_in->unset('Content-Length');
     }
 
     $req->status(REDIRECT);
@@ -286,51 +286,51 @@ sub set_expire_header {
     my $ttl=$options{expire_in} || 15*60; # 15 minutes time to live default
 
     if ($req->no_cache) {
-	my $agent = $req->headers_in->{'User-Agent'};
-	# See this address for explanation of the -1
-	# http://support.microsoft.com/support/kb/articles/Q234/0/67.ASP
-	if ($agent =~ m/[Mm][Ss][Ii][Ee]/) {
-	    $req->header_out('Expires', -1);
-	} else {
-	    $req->header_out('Expires', Apache::Util::ht_time($req->request_time));
-	}
-	$req->headers_out->add('Pragma' => 'no-cache');
-	$req->header_out('Cache-Control', 'no-cache');
+        my $agent = $req->headers_in->{'User-Agent'};
+        # See this address for explanation of the -1
+        # http://support.microsoft.com/support/kb/articles/Q234/0/67.ASP
+        if ($agent =~ m/[Mm][Ss][Ii][Ee]/) {
+            $req->header_out('Expires', -1);
+        } else {
+            $req->header_out('Expires', Apache::Util::ht_time($req->request_time));
+        }
+        $req->headers_out->add('Pragma' => 'no-cache');
+        $req->header_out('Cache-Control', 'no-cache');
 
-	if (defined $output) {
-	    $output->param(http_equiv=>[
-					{ name=>'Pragma',
-					  value=>'no-cache',
-					}
-				       ]);
-	}
+        if (defined $output) {
+            $output->param(http_equiv=>[
+                                        { name=>'Pragma',
+                                          value=>'no-cache',
+                                        }
+                                       ]);
+        }
     } else {
-	$req->header_out('Expires', Apache::Util::ht_time($req->request_time + $ttl));
+        $req->header_out('Expires', Apache::Util::ht_time($req->request_time + $ttl));
 
-	# If another Cache-Control header was specified, use that one:
+        # If another Cache-Control header was specified, use that one:
         my $cache_control=$req->header_out('Cache-Control');
         unless ($cache_control) {
             $cache_control="max-age=" . $ttl;
             $req->header_out('Cache-Control', $cache_control);
         }
 
-	if (defined $output) {
-	    $output->param(http_equiv=>[
-					{ name=>'Expires',
-					  value=>Apache::Util::ht_time($req->request_time + $ttl),
-					},
-					{ name=>'Cache-Control',
-					  value=>$cache_control,
-					},
-				       ]);
-	}
+        if (defined $output) {
+            $output->param(http_equiv=>[
+                                        { name=>'Expires',
+                                          value=>Apache::Util::ht_time($req->request_time + $ttl),
+                                        },
+                                        { name=>'Cache-Control',
+                                          value=>$cache_control,
+                                        },
+                                       ]);
+        }
     }
 }
 
 
 ########################################################################
 #
-#	Content Handler
+#       Content Handler
 #
 ########################################################################
 
@@ -348,16 +348,16 @@ sub create_input_object {
     my $input=new Obvius::Data;
     my $parms = $req->param;
     foreach (keys %$parms) {
-	my @value=$req->param($_);
-	$input->param($_=> (scalar(@value)>1 ? \@value : $value[0]));
+        my @value=$req->param($_);
+        $input->param($_=> (scalar(@value)>1 ? \@value : $value[0]));
     }
     $input->param(NOW=>$req->notes('now'));
     $input->param(THE_REQUEST=>$req->the_request);
     $input->param(REMOTE_IP=>$req->connection->remote_ip);
     $input->param(IS_ADMIN => (defined $options{is_admin} ? $options{is_admin} : 0));
     if (my $cookies=Apache::Cookie->fetch) {
-	$cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
-	$input->param('OBVIUS_COOKIES'=>$cookies);
+        $cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
+        $input->param('OBVIUS_COOKIES'=>$cookies);
     }
     $input->param('OBVIUS_HEADERS_IN'=> scalar( $req->headers_in() ));
     if (my $obvius_session_id=$req->param('obvius_session_id')) {
@@ -367,7 +367,7 @@ sub create_input_object {
         # webserver not returning anything.
         warn "The session $obvius_session_id has not been released by admin/public-Mason; WebObvius::Site->create_input_object hangs now!" if ($req->pnotes('obvius_session'));
         my $session=$this->get_session($obvius_session_id);
-	$input->param(SESSION=>$session);
+        $input->param(SESSION=>$session);
     }
     my @uploads = $req->upload;
     for(@uploads) {
@@ -416,9 +416,9 @@ sub handle_operation {
     $output->param("_incoming_$_" => $input->param($_)) for ($input->param);
 
     return ($doctype->action($input, $output, $doc, $vdoc, $obvius)
-	    ? OK
-	    : SERVER_ERROR
-	   );
+            ? OK
+            : SERVER_ERROR
+           );
 }
 
 # Helper for subclasses
@@ -442,64 +442,64 @@ sub generate_page {
     my $benchmark = Obvius::Benchmark-> new('site::generate page') if $this-> {BENCHMARK};
 
     if ($this->{SUBSITE}) {
-	print STDERR "GENERATE_PAGE: calling subsite\n" if ($this->{DEBUG});
+        print STDERR "GENERATE_PAGE: calling subsite\n" if ($this->{DEBUG});
 
-	my $sdata = $this->{SUBSITE}->generate_subsite($site, $req, $doc, $vdoc, $doctype, $obvius, %options);
-	unless (defined $sdata) {
-	    printf(STDERR scalar localtime(), ": GENERATE_PAGE: subsite FAILED - status %s\n", $req->status);
-	    return undef;
-	}
-	printf(STDERR "GENERATE_PAGE: subsite returned - status %s\n", $req->status)
-	    if ($this->{DEBUG});
+        my $sdata = $this->{SUBSITE}->generate_subsite($site, $req, $doc, $vdoc, $doctype, $obvius, %options);
+        unless (defined $sdata) {
+            printf(STDERR scalar localtime(), ": GENERATE_PAGE: subsite FAILED - status %s\n", $req->status);
+            return undef;
+        }
+        printf(STDERR "GENERATE_PAGE: subsite returned - status %s\n", $req->status)
+            if ($this->{DEBUG});
 
-	if (ref $sdata) {
-	    if (ref $sdata eq 'HASH') {
-		while (my ($k, $v) = each %$sdata) {
-		    $output->param("subsite_$k" => $v);
-		}
-	    } else {
-		# XXX what now ????
-		# $output->param(subsite => 'Houston, we have a problem!');
-		die('generate_subsite() returned malformed output');
-	    }
-	} else {
-	    $output->param(subsite => $sdata);
-	}
+        if (ref $sdata) {
+            if (ref $sdata eq 'HASH') {
+                while (my ($k, $v) = each %$sdata) {
+                    $output->param("subsite_$k" => $v);
+                }
+            } else {
+                # XXX what now ????
+                # $output->param(subsite => 'Houston, we have a problem!');
+                die('generate_subsite() returned malformed output');
+            }
+        } else {
+            $output->param(subsite => $sdata);
+        }
     } else {
-	print STDERR "GENERATE_PAGE: calling site operation\n"
-	    if ($this->{DEBUG});
+        print STDERR "GENERATE_PAGE: calling site operation\n"
+            if ($this->{DEBUG});
 
-	$benchmark-> lap( "operation " . $doctype->Name) if $benchmark;
+        $benchmark-> lap( "operation " . $doctype->Name) if $benchmark;
 
-	my $input=$this->create_input_object($req, %options);
-	my $status = $site->handle_operation($input, $output, $doc, $vdoc, $doctype, $obvius);
+        my $input=$this->create_input_object($req, %options);
+        my $status = $site->handle_operation($input, $output, $doc, $vdoc, $doctype, $obvius);
 
-	my $outgoing_cookies=$output->param('OBVIUS_COOKIES') || {};
-	foreach my $k (keys %$outgoing_cookies) {
-	    # To keep backwards compatibility we do something like this,
-	    # even though it would have been nicer to keep compatibility
-	    # with the Apache::Cookie/CGI::Cookie interface (eg. make
-	    # a session cookie if expires is undef).
+        my $outgoing_cookies=$output->param('OBVIUS_COOKIES') || {};
+        foreach my $k (keys %$outgoing_cookies) {
+            # To keep backwards compatibility we do something like this,
+            # even though it would have been nicer to keep compatibility
+            # with the Apache::Cookie/CGI::Cookie interface (eg. make
+            # a session cookie if expires is undef).
 
-	    my $expires = $outgoing_cookies->{$k}->{expires} || '+3M';
-	    $expires = undef if($expires eq 'session');
-	    my $cookie=new Apache::Cookie($req,
-					  -name => $k,
-					  -value => $outgoing_cookies->{$k}->{value},
-					  -expires => $expires,
-					  -path => '/',
-					 );
-	    $cookie->bake($req);
-	}
-	$output->param(OBVIUS_COOKIES => undef); # clear
+            my $expires = $outgoing_cookies->{$k}->{expires} || '+3M';
+            $expires = undef if($expires eq 'session');
+            my $cookie=new Apache::Cookie($req,
+                                          -name => $k,
+                                          -value => $outgoing_cookies->{$k}->{value},
+                                          -expires => $expires,
+                                          -path => '/',
+                                         );
+            $cookie->bake($req);
+        }
+        $output->param(OBVIUS_COOKIES => undef); # clear
 
-	$output->param('IS_ADMIN'=>$input->param('IS_ADMIN'));
+        $output->param('IS_ADMIN'=>$input->param('IS_ADMIN'));
 
         # If there was a session on the input object, release it now
         # that the operation, for which $input is input, has run:
-	if (my $session=$input->param('SESSION')) {
-	    $this->release_session($session);
-	}
+        if (my $session=$input->param('SESSION')) {
+            $this->release_session($session);
+        }
 
         # If the operation has put data in the output-objects
         # SESSION-param (which does not correspond to a real session),
@@ -507,30 +507,32 @@ sub generate_page {
         # set SESSION_ID, so the id can be used by the template system
         # for making links etc.: See
         #  <http://cvs.magenta-aps.dk/cgi-bin/viewcvs.cgi/mcms/perl/WebMCMS/Site/Site.pm?rev=1.2.2.20&content-type=text/vnd.viewcvs-markup>
-	if (my $session_data=$output->param('SESSION')) {
-	    my $session=$this->get_session();
-	    foreach (keys %$session_data) {
-		$session->{$_}=$session_data->{$_};
-	    }
-	    $output->param(SESSION_ID=>$session->{_session_id});
-	    $this->release_session($session);
-	    $output->param(SESSION=>''); # "clear"
-	}
+        if (my $session_data=$output->param('SESSION')) {
+            my $session=$this->get_session();
+            foreach (keys %$session_data) {
+                $session->{$_}=$session_data->{$_};
+            }
+            $output->param(SESSION_ID=>$session->{_session_id});
+            $this->release_session($session);
+            $output->param(SESSION=>''); # "clear"
+        }
 
-	if (my $redir=$output->param('OBVIUS_REDIRECT')) {
-	    $this->redirect($req, $redir, 1);
-	}
+        if (my $redir=$output->param('OBVIUS_REDIRECT')) {
+            $this->redirect($req, $redir, 1);
+        }
 
-	print STDERR "GENERATE_PAGE: calling site operation returned $status\n"
-	    if ($this->{DEBUG});
+        print STDERR "GENERATE_PAGE: calling site operation returned $status\n"
+            if ($this->{DEBUG});
 
-	unless ($status == OK) {
-	    $req->status($status);
-	    return undef;
-	}
+        print STDERR "Status : $status\n";
+        unless ($status == OK) {
+            $req->status($status);
+            $req->no_cache(1);
+            return undef;
+        }
 
-	$req->no_cache(1) unless ($doctype->is_cacheable);
-	$this->set_expire_header($req, output=>$output);
+        $req->no_cache(1) unless ($doctype->is_cacheable);
+        $this->set_expire_header($req, output=>$output);
     }
     print STDERR "GENERATE_PAGE: expanding site outputs\n" if ($this->{DEBUG});
 
@@ -543,20 +545,20 @@ sub read_request {
 
     $this->tracer($req) if ($this->{DEBUG});
 
-    $req = new Apache::Request($req, 
-			       POST_MAX => $this->{POST_MAX} || 1,
-			       DISABLE_UPLOADS => $this->{DISABLE_UPLOADS} || 0,
-			      );
+    $req = new Apache::Request($req,
+                               POST_MAX => $this->{POST_MAX} || 1,
+                               DISABLE_UPLOADS => $this->{DISABLE_UPLOADS} || 0,
+                              );
 
     my $status = $req->parse;
     if ($status != OK) {
-	$req->log->error(__PACKAGE__ , '::read_request:',
-			 "Request parsing failed: $status (", $req->notes("error-notes"), ")");
-	return undef;
+        $req->log->error(__PACKAGE__ , '::read_request:',
+                         "Request parsing failed: $status (", $req->notes("error-notes"), ")");
+        return undef;
     }
 
     map { print(STDERR "PARM $_ => ", $req->param($_), "\n"); } $req->param
-	if ($this->{DEBUG});
+        if ($this->{DEBUG});
 
     # This should probably go somewhere else but where
     $req->notes(now => strftime('%Y-%m-%d %H:%M:%S', localtime($req->request_time)));
@@ -574,7 +576,7 @@ sub handler ($$) {
 
     my $uri = $req->uri;
     return $this->redirect($req, "$uri/", 'force-external')
-	if ($req->method_number == M_GET and $uri !~ /\/$/ and $uri !~ /\./);
+        if ($req->method_number == M_GET and $uri !~ /\/$/ and $uri !~ /\./);
 
     my $obvius = $this->obvius_connect($req);
     return SERVER_ERROR unless ($obvius);
@@ -588,8 +590,8 @@ sub handler ($$) {
     my $doctype = $obvius->get_version_type($vdoc);
 
     if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius)) {
-	return NOT_FOUND if (Apache->define('NOREDIR'));
-	return $this->redirect($req, $alternate, 'force-external');
+        return NOT_FOUND if (Apache->define('NOREDIR'));
+        return $this->redirect($req, $alternate, 'force-external');
     }
 
     $benchmark-> lap( 'raw data') if $benchmark;
@@ -597,20 +599,20 @@ sub handler ($$) {
     my ($mime_type, $data) = $doctype->raw_document_data($doc, $vdoc, $obvius);
 
     if ($data) {
-	$mime_type ||= 'application/octet-stream';
+        $mime_type ||= 'application/octet-stream';
     } else {
-	$req = $this->read_request($req);
-	return SERVER_ERROR unless ($req);
+        $req = $this->read_request($req);
+        return SERVER_ERROR unless ($req);
 
-	$data = $this->generate_page($this, $req, $doc, $vdoc, $doctype, $obvius);
-	return $req->status unless (defined $data);
+        $data = $this->generate_page($this, $req, $doc, $vdoc, $doctype, $obvius);
+        return $req->status unless (defined $data);
 
-	if ($this->can("output_filter")) {
+        if ($this->can("output_filter")) {
             $benchmark-> lap( 'filter start') if $benchmark;
-	    $this->output_filter($req, \$data);
-	}
+            $this->output_filter($req, \$data);
+        }
 
-	$mime_type ||= 'text/html';
+        $mime_type ||= 'text/html';
     }
 
     $benchmark-> lap( 'making response') if $benchmark;
@@ -628,7 +630,7 @@ sub handler ($$) {
 
 ########################################################################
 #
-#	Session handling
+#       Session handling
 #
 ########################################################################
 
@@ -637,15 +639,15 @@ sub get_session {
 
     my %session;
     eval {
-	tie %session, 'Apache::Session::File',
-	    $id, { Directory => $this->{EDIT_SESSIONS},
-		   LockDirectory => $this->{EDIT_SESSIONS} . '/LOCKS',
-		 };
+        tie %session, 'Apache::Session::File',
+            $id, { Directory => $this->{EDIT_SESSIONS},
+                   LockDirectory => $this->{EDIT_SESSIONS} . '/LOCKS',
+                 };
     };
     my $error=$@;
     if ($error) {
-	warn "Can't get session data $id: $error\n\t";
-	return undef;
+        warn "Can't get session data $id: $error\n\t";
+        return undef;
     }
 
     return \%session;
@@ -697,7 +699,7 @@ sub public_login_cookie {
         if($users) {
             my $user = $users->[0];
             $obvius->param('public_user' => $user);
-	}
+        }
     }
 }
 
@@ -734,11 +736,11 @@ sub expire_public_login_cookie {
     my ($this, $req, $obvius) = @_;
 
     my %options=(
-		 -name    =>  'obvius_public_login',
-		 -value   =>  '',
-		 -expires =>  '-3M',
-		 -path    =>  '/'
-		 );
+                 -name    =>  'obvius_public_login',
+                 -value   =>  '',
+                 -expires =>  '-3M',
+                 -path    =>  '/'
+                 );
     my $domain=$obvius->config->param('cookiedomain');
     $options{'-domain'}=$domain if ($domain);
 
@@ -749,7 +751,7 @@ sub expire_public_login_cookie {
 
 ########################################################################
 #
-#	Translations
+#       Translations
 #
 ########################################################################
 
@@ -769,78 +771,78 @@ sub split_language_preferences {
 }
 
 # xml files are loaded statically and never reloaded, because it is a costly
-# operation to reload in every child apache process, and I cannot see how to 
+# operation to reload in every child apache process, and I cannot see how to
 # reload xml in the the server apache process. Once it is figured out, xml files
 # can be reverted back to automatic loading.
 
-sub L ($) { utf8( $_[0] || '')-> latin1 } # XML::Parser loves UTF8 
+sub L ($) { utf8( $_[0] || '')-> latin1 } # XML::Parser loves UTF8
 
 # static call
 sub load_translation_file
 {
-	my $filename = shift;
+        my $filename = shift;
 
-	return if $xml_cache{$filename};
+        return if $xml_cache{$filename};
 
-	my $xml = eval {
-		XMLin( $filename,
-			keyattr      => {translation=>'lang'},
-		);
-	};
-	if ( $@) {
-		warn "Translation file $filename: XML error: $@";
-		$xml_cache{$filename} = {};
-		return;
-	}
-	# print STDERR "$filename loaded ok\n"
+        my $xml = eval {
+                XMLin( $filename,
+                        keyattr      => {translation=>'lang'},
+                );
+        };
+        if ( $@) {
+                warn "Translation file $filename: XML error: $@";
+                $xml_cache{$filename} = {};
+                return;
+        }
+        # print STDERR "$filename loaded ok\n"
 
-	my $t = {};
-	$xml-> {text} = [ $xml->{text} ] if ref $xml->{text} eq 'HASH';
-	for my $item ( @{$xml-> {text}}) {
-		next unless $item-> {key};
-		my $x = $item-> {translation};
-		$t-> { L $item->{key} } = {
-			map {
-				$_ => L $x-> {$_}-> {content}
-			} keys %$x
-		};
-	}
+        my $t = {};
+        $xml-> {text} = [ $xml->{text} ] if ref $xml->{text} eq 'HASH';
+        for my $item ( @{$xml-> {text}}) {
+                next unless $item-> {key};
+                my $x = $item-> {translation};
+                $t-> { L $item->{key} } = {
+                        map {
+                                $_ => L $x-> {$_}-> {content}
+                        } keys %$x
+                };
+        }
 
-	$xml_cache{$filename} = $t;
+        $xml_cache{$filename} = $t;
 }
 
 # XXX detect inode, if file is a link to avoid loading same file twice
 sub normalize_path
 {
-	my $path = shift;
-	$path =~ s[//][/]g;
-	$path;
+        my $path = shift;
+        $path =~ s[//][/]g;
+        $path;
 }
 
 # read all files, and record path to these files, for each object instance
 # should only be run initially ( see comments about apache server above )
 sub load_translation_fileset
 {
-	my ( $self) = @_;
-	
-	$self-> {TRANSLATION_FILESET} = [];
+        my ( $self) = @_;
 
-	my $file = TRANSLATION_FILENAME;
-	my @path = map { $$_[1] } @{$self-> {COMP_ROOT}};
+        $self-> {TRANSLATION_FILESET} = [];
 
-	for my $suffix ( TRANSLATION_SUFFIXES) {
+        my $file = TRANSLATION_FILENAME;
+        my @path = map { $$_[1] } @{$self-> {COMP_ROOT}};
 
-		my $filename;
-		for my $path ( @path) {
-			my $f = normalize_path( "$path/$file$suffix");
-			next unless -f $f;
-			push @{$self-> {TRANSLATION_FILESET}}, $filename = $f;
-			last;
-		}
-		next if not defined $filename;
-		print STDERR "load file: $filename\n" if $self-> {DEBUG};
-		load_translation_file( $filename);
-	}
+        for my $suffix ( TRANSLATION_SUFFIXES) {
+
+                my $filename;
+                for my $path ( @path) {
+                        my $f = normalize_path( "$path/$file$suffix");
+                        next unless -f $f;
+                        push @{$self-> {TRANSLATION_FILESET}}, $filename = $f;
+                        last;
+                }
+                next if not defined $filename;
+                print STDERR "load file: $filename\n" if $self-> {DEBUG};
+                load_translation_file( $filename);
+        }
 }
 
 # resets search path for translation xml files, but only allows
@@ -848,77 +850,77 @@ sub load_translation_fileset
 # ( see comments about apache server above )
 sub set_translation_fileset
 {
-	my ( $self, @path) = @_;
+        my ( $self, @path) = @_;
 
-	$self-> {TRANSLATION_FILESET} = [];
-	unshift @path, map { $$_[1] } @{$self-> {COMP_ROOT}};
-	
-	my $file = TRANSLATION_FILENAME;
-	for my $suffix ( TRANSLATION_SUFFIXES) {
-		for my $path ( @path) {
-			my $f = normalize_path( "$path/$file$suffix");
-			next unless exists $xml_cache{$f};
-			push @{$self-> {TRANSLATION_FILESET}}, $f;
-			last;
-		}
-	}
+        $self-> {TRANSLATION_FILESET} = [];
+        unshift @path, map { $$_[1] } @{$self-> {COMP_ROOT}};
+
+        my $file = TRANSLATION_FILENAME;
+        for my $suffix ( TRANSLATION_SUFFIXES) {
+                for my $path ( @path) {
+                        my $f = normalize_path( "$path/$file$suffix");
+                        next unless exists $xml_cache{$f};
+                        push @{$self-> {TRANSLATION_FILESET}}, $f;
+                        last;
+                }
+        }
 
 }
 
 sub set_language_preferences
 {
-	my ( $self, $r, $lang) = @_;
-	
-	my %lang;
-	if ($lang =~ /^=/) {
-		%lang = split_language_preferences(substr($lang, 1));
-#		print STDERR "$$ force lang $lang\n";
-	} elsif ( $r) {
-		my $accept_language = $r->headers_in->{'Accept-Language'};
-		
-		if ($accept_language) {
-#			print STDERR "$$ accept lang $accept_language\n";
-			%lang = split_language_preferences( $accept_language);
+        my ( $self, $r, $lang) = @_;
 
-			my @vary;
-			push @vary, $r-> header_out('Vary') if $r-> header_out('Vary');
-			push @vary, "Accept-Language";
-			$r-> header_out( 'Vary', join(', ', @vary));
-		}
+        my %lang;
+        if ($lang =~ /^=/) {
+                %lang = split_language_preferences(substr($lang, 1));
+#               print STDERR "$$ force lang $lang\n";
+        } elsif ( $r) {
+                my $accept_language = $r->headers_in->{'Accept-Language'};
 
-		my %site_pref = split_language_preferences( $lang, 1);
-		$lang{$_} ||= $site_pref{$_} for keys %site_pref;
-	}
+                if ($accept_language) {
+#                       print STDERR "$$ accept lang $accept_language\n";
+                        %lang = split_language_preferences( $accept_language);
 
-	
-	$self-> {LANGUAGE_PREFERENCES} = [ sort { $lang{$b} <=> $lang{$a} } keys %lang ];
-#	print STDERR "$$ lang_pref = ", join(",", @{$self-> {LANGUAGE_PREFERENCES}}), "\n";
+                        my @vary;
+                        push @vary, $r-> header_out('Vary') if $r-> header_out('Vary');
+                        push @vary, "Accept-Language";
+                        $r-> header_out( 'Vary', join(', ', @vary));
+                }
+
+                my %site_pref = split_language_preferences( $lang, 1);
+                $lang{$_} ||= $site_pref{$_} for keys %site_pref;
+        }
+
+
+        $self-> {LANGUAGE_PREFERENCES} = [ sort { $lang{$b} <=> $lang{$a} } keys %lang ];
+#       print STDERR "$$ lang_pref = ", join(",", @{$self-> {LANGUAGE_PREFERENCES}}), "\n";
 }
 
 sub translate
 {
-	my ( $self, $text, $lang) = @_;
-#	print STDERR "$$ $self translates $text\n";
-	for (keys %xml_cache) {
-	    next unless exists $xml_cache{$_}->{$text};
-	    my $k = $xml_cache{$_}->{$text};
+        my ( $self, $text, $lang) = @_;
+#       print STDERR "$$ $self translates $text\n";
+        for (keys %xml_cache) {
+            next unless exists $xml_cache{$_}->{$text};
+            my $k = $xml_cache{$_}->{$text};
 
-	    # For backward compatibility, $lang is accepted as undefined
-	    # and the user's language->preference will then be found...
-	    # However, this should be ideally be handled much earlier 
-	    # in the request,so $vdoc->Lang should be passed as the 
-	    # second argument in all new code( third if counting self).
-	    if (defined $lang) {
-		return $k->{$lang} if exists ($k->{$lang});
-	    } else {
+            # For backward compatibility, $lang is accepted as undefined
+            # and the user's language->preference will then be found...
+            # However, this should be ideally be handled much earlier
+            # in the request,so $vdoc->Lang should be passed as the
+            # second argument in all new code( third if counting self).
+            if (defined $lang) {
+                return $k->{$lang} if exists ($k->{$lang});
+            } else {
 
-		for ( @{$self-> {LANGUAGE_PREFERENCES}}) {
-		    return $k->{$_} if exists $k->{$_};
-		}
-	    }
-	}
-	warn "Cannot find translation for '$text'\n" if $self->{DEBUG};
-	return $text;
+                for ( @{$self-> {LANGUAGE_PREFERENCES}}) {
+                    return $k->{$_} if exists $k->{$_};
+                }
+            }
+        }
+        warn "Cannot find translation for '$text'\n" if $self->{DEBUG};
+        return $text;
 }
 
 1;
