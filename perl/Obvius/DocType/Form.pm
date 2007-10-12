@@ -157,7 +157,7 @@ sub flush_xml {
     my ($this, $id, $obvius) = @_;
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
                                              '!Table'      => 'formdata'});
-    $set->Delete(docid=>$id);
+    $set->Delete({'docid' => $id});
     $set->Disconnect;
     return OBVIUS_OK;
 }
@@ -165,12 +165,11 @@ sub flush_xml {
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-
     # Flushing of XML-file in admin:
-    if ($input->param('flush_xml')) {
+
+    if($input->param('flush_xml')) {
         if ($input->param('is_admin')) {
-            $output->param('flush_xml' => 1);
-            my $status = $this->flush_xml($doc->{Id}, $obvius);
+            my $status = $this->flush_xml($doc->{ID}, $obvius);
             if($status != OBVIUS_OK) {
                 print STDERR "Couldn't flush formdata\n";
                 return $status;
@@ -180,6 +179,7 @@ sub action {
             return OBVIUS_OK;
         }
     }
+
 
 
     $obvius->get_version_fields($vdoc, ['formdata' ]);
@@ -316,7 +316,7 @@ sub action {
     if(scalar(%unique)) {
 
 #      Get data from datafile:
-        my $entries = $this->get_xml_entries($obvius, docid => $doc->{Id}) || [];
+        my $entries = $this->get_xml_entries($obvius, docid => $doc->{ID}) || [];
 
 #      For each entry, check all fields and see if they're unique and, if they
 #      are, match them up against the submitted value for that field.
@@ -351,7 +351,7 @@ sub action {
             push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
         }
 
-        $this->insert_xml_entry($doc->Id, \%entry, $obvius);
+        $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
 
         $output->param('submitted_data_ok' => 1);
         $output->param('formdata' => $formdata);
@@ -367,7 +367,7 @@ sub get_xml_entries {
 
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
                                              '!Table'      => 'formdata'});
-    $set->Search(@how);
+    $set->Search({@how});
 
     while (my $rec = $set->Next) {
         push @entries, $rec->{entry};
