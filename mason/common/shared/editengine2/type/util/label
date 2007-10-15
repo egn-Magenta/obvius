@@ -1,3 +1,6 @@
+%if (defined $tooltip_url) {
+<div style="height: 0px; width: 0px;" id="<% $name |h %>_tooltip"></div>
+%}
 % if (defined $subtitle) {
 <h4><& /shared/msg, text=>$subtitle &></h4>
 % }
@@ -10,7 +13,7 @@
 <!--    <a href="#" onmouseover="ajax_showTooltip('<% $tooltip_url %>', this)" onmouseout="ajax_hideTooltip()"> -->
 <!--    <a href="#" onclick="ajax_showTooltip('<% $tooltip_url %>', this)">  -->
 
-      <img src="/grafik/spg.gif" alt="?" style="cursor: pointer; cursor: hand" onclick="ajax_showTooltip('<% $tooltip_url %>', this)" />
+      <img src="/grafik/spg.gif" alt="?" style="cursor: pointer; cursor: hand" onclick="ajax_showTooltip('<% $tooltip_url %>', document.getElementById('<% $name |h %>_tooltip'))" />
 <!--    </a> -->
 %}
 <br />\
