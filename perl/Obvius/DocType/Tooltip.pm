@@ -63,7 +63,7 @@ sub raw_document_data {
 
         $text = $parent_text;
     } else {
-        $text .= $vdoc->field('content');
+        $text = $vdoc->field('content');
     }
 
 
