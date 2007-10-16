@@ -63,11 +63,12 @@ sub raw_document_data {
 
         $text = $parent_text;
     } else {
-        $text = $vdoc->field('content');
+        $text = "<img src='/grafik/close.gif' class='close' onclick='ajax_hideTooltip();' />\n" . $text;
+        $text .= $vdoc->field('content');
     }
 
 
-    $text = "<img src='/grafik/close.gif' class='close' onclick='ajax_hideTooltip();' />\n" . $text;
+
 
 
     return ( 'text/html', $text );
