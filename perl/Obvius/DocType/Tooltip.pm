@@ -21,7 +21,7 @@ package Obvius::DocType::Tooltip;
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 ########################################################################
 
@@ -45,27 +45,30 @@ sub action {
 }
 
 sub raw_document_data {
-    my ( $this, $doc, $vdoc, $obvius, $input) = @_; 
+    my ( $this, $doc, $vdoc, $obvius, $input) = @_;
     return unless $input->param('obvius_bare');
     return if (!defined $doc || !defined $vdoc);
 
     my $text;
-    $text = "<img src='/grafik/close.gif' class='close' onclick='ajax_hideTooltip();' />";
-    
-    # If text is enot set, use the parent-text.
+
     $obvius->get_version_field($vdoc, 'content');
     $obvius->get_version_field($vdoc, 'parent');
 
+    # If text is not set, use the parent-text.
     if ($vdoc->field('content') =~ /^\s*$/ && !($vdoc->field('parent') eq '')) {
-	$doc = $obvius->lookup_document($vdoc->field('parent'));
+        $doc = $obvius->lookup_document($vdoc->field('parent'));
         $vdoc = $obvius->get_public_version($doc);
         $vdoc ||= $obvius->get_latest_version($doc);
-	my ($mime_type, $parent_text) = raw_document_data($this, $doc, $vdoc, $obvius, $input);
+        my ($mime_type, $parent_text) = raw_document_data($this, $doc, $vdoc, $obvius, $input);
 
-	$text .= $parent_text;
+        $text = $parent_text;
     } else {
         $text .= $vdoc->field('content');
     }
+
+
+    $text = "<img src='/grafik/close.gif' class='close' onclick='ajax_hideTooltip();' />\n" . $text;
+
 
     return ( 'text/html', $text );
 
