@@ -1,0 +1,102 @@
+<%method block>\
+<div>
+<script type="text/javascript">
+function <% $add_element_function %> () {
+  var textfield = document.getElementById('<% $textfield_name %>');
+  var list = document.getElementById('<% $list_name %>');
+  var elm = document.createElement('option');
+
+  elm.text = textfield.value;
+  elm.value = textfield.value;
+  try {
+    list.add(elm, null);
+  } catch (ex) {
+    list.add(elm);
+  }
+}
+
+function <% $remove_element_function %> () {
+  var list = document.getElementById('<% $list_name %>');
+  for (var i = 0 ; i < list.options.length; i++) {
+    if(list.options[i].selected) {
+       list.remove(i);
+    }
+  }
+}
+function <% $onsubmit_function %>() {
+    var select = document.getElementById('<% $list_name %>');
+    for(var i=0; i<select.length; i++) {
+        select[i].selected=1;
+    }
+    return true;
+}
+
+onsubmit_array[onsubmit_array.length] = <% $onsubmit_function %>;
+
+</script>
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<select id="<% $list_name %>" name="<% $list_name %>" multiple size="8">
+%  for my $item (@data) {
+    <option value="<% $item %>"> <% $item %> </option>
+% }
+</select>
+<input type="button" value="remove" name="remove" id="remove" onclick="javascript:<% $remove_element_function %> ()"><BR/>
+<input type="text" id="<% $textfield_name %>">
+<input type="button" value="add" name="add" onclick="javascript:<% $add_element_function %>()">
+%
+</div>
+<%args>
+$prefix
+$field
+$validation
+$value=>''
+$style
+</%args>
+%
+<%init>
+my $list_name = $prefix . $field->{name};
+my $textfield_name = $field->{name} . "_element";
+my $add_element_function = "add_from_" . $textfield_name . "_to_list";
+my $remove_element_function = "remove_from_list";
+my $onsubmit_function = "onsubmit_$textfield_name";
+my $disabled = (defined $style->{disabled} and $style->{disabled});
+
+my @data  = ();
+
+@data = grep { $_ !~ /^\s*$/ } split /;/, $value->{value} if ($value->{value});
+
+my @choices = @data;
+my %labels=map { $_ => $_ } @data;
+my @selected=();
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>\
+<% $value->{value} |h %>\
+%
+<%args>
+ $value
+</%args>
+</%method>
+%
+%
+%
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+$value = [$value] unless (ref $value eq 'ARRAY');
+my @email = grep { $_ =~ /^[^@]+@[^@]+\.[^@]+$/} @$value;
+my $val = join ";", @email;
+$data->{$id} = $val;
+
+return 'OK';
+</%init>
