@@ -10,12 +10,10 @@ $output
 </%args>
 <%init>
 $obvius->get_version_fields($vdoc, ['aftersubmittext', 'mailto']);
-my @mailto = split /;/, $vdoc->field('mailto');
-print $vdoc->field('mailto');
-
-my $mail_error = '';
+my @mailto = split /;/, $vdoc->field('mailtos');
 
 for my $mailto  (@mailto) {
+    my $mail_error = '';
     my $mailtxt = $m->scomp('mail/formdata.txt', mailto=>$mailto, output=>$output);
 
      $mail_error = "Kunne ikke generere mail besked" unless($mailtxt);
@@ -33,7 +31,7 @@ my $redirect_uri = $uri;
 if(my $siterootmap = $m->comp('/shared/get_subsite_siterootmap')) {
     $redirect_uri = $siterootmap->translate_uri($uri, $r->hostname);
 }
-$m->comp('/shared/redirect', location=>$redirect_uri . "?show_aftersubmit=1&mail_error=" . uri_escape($mail_error));
+$m->comp('/shared/redirect', location=>$redirect_uri . "?show_aftersubmit=1");
 </%init>
 <%once>
 use URI::Escape;
