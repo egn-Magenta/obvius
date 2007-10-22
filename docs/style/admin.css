@@ -1270,6 +1270,25 @@ div.obvius-ac-editbuttons {
 	padding: 5px 5px 5px 5px;
 }
 
+/* Doc params */
+.old_docparams {	
+}
+
+#new_docparams {
+  margin-left: 6px;
+}
+
+.docparams input {
+	width: 250px; 
+	float: left;
+	margin-top: 1px;
+}
+
+.docparams textarea {
+	width: 400px;
+	height: 200px;
+	margin-left: 15px;
+}
 
 
 /*

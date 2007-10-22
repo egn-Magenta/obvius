@@ -2,17 +2,25 @@
 <script type="text/javascript" src="/scripts/admin_accessrules.js"></script>
 
 <script type="text/javascript">
+<!--
 function add_key_value () {
  var key = document.getElementById('new_key');
  var value = document.getElementById('new_value');
  var divsect = document.getElementById('old_docparams');
- divsect.innerHTML += '<input type="text" name="docparam_key" id="docparam_key" value="' + key.value + '">';
- divsect.innerHTML += '<textarea name="docparam_value" id="docparam_value" value="' + value.value + '">' +
-   value.value + '</textarea><BR />';
+
+ var tmp = '';
+ 
+ tmp += '<div class="docparams">';
+ tmp += '<input type="text" name="docparam_key" id="docparam_key" value="' + key.value + '">';
+ tmp += '<textarea name="docparam_value" id="docparam_value" value="' + value.value + '">' + value.value + '</textarea>';
+ tmp += '</div>';
+
+ divsect.innerHTML += tmp;
+
  value.value='';
  key.value='';
 }
-
+-->
 </script>
 
 
@@ -43,18 +51,20 @@ function add_key_value () {
 %     $rows=5 if ($rows<5);
       <textarea <% $show->{inactive} ? 'disabled="disabled" ' : '' %>cols="68" rows="<% $rows |h %>" name="<% $show->{name} |h %>"><% $show->{value} |h %></textarea>
 % } elsif (defined $show->{type} and $show->{type} eq 'docparams') {
-    <div id="old_docparams">
+<div id="old_docparams">
 %    while (my ($k, $v) = each %{$show->{value}}) {
 %     print  STDERR "$k = $v";
-    <input type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
-      <textarea name="docparam_value" id="docpara_value"><% $v %></textarea><BR />
+    <div class="docparams">
+	<input type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
+        <textarea name="docparam_value" id="docpara_value"><% $v %></textarea>
+    </div>
 % }
 </div>
-<div id="new_docparam">
+<div id="new_docparams" class="docparams">
   <input type="text" name="new_key" id="new_key" />
   <textarea name="new_value" id="new_value"></textarea><BR />
-    <input type="button" value="add" onclick="javascript:add_key_value()" />
 </div>
+    <input type="button" value="<& /shared/msg, text=>"Add" &>" onclick="javascript:add_key_value()" />
 
 % } elsif (defined $show->{type} and $show->{type} eq 'dropdown') {
       <select <% $show->{inactive} ? 'disabled="disabled" ' : '' %>name="<% $show->{name} |h %>">
