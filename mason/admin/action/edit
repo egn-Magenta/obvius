@@ -85,7 +85,8 @@ my $actions={
 my $editpages=$obvius->get_editpages($edit_doctype);
 
 my @all_nums=();
-foreach my $editpage_key (keys %$editpages) {
+
+foreach my $editpage_key (sort keys %$editpages) {
     next if ($editpage_key eq 'P');
     push @all_nums, $editpage_key;
     my $editpage=$editpages->{$editpage_key};
