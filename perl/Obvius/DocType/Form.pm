@@ -89,8 +89,8 @@ sub raw_document_data {
 
     if($format eq 'excel') {
 
-        my $data = $this->utf8ify($xmldata);
-        my $xml_data = XMLin(   $data,
+        my $d = $this->utf8ify($xmldata);
+        my $xml_data = XMLin(   $d,
                                 keyattr=>[],
                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
                                 suppressempty => ''
