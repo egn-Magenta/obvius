@@ -89,11 +89,14 @@ sub raw_document_data {
 
     if($format eq 'excel') {
 
-        my $xml_data = XMLin(   $xmldata,
+        my $data = $this->utf8ify($xmldata);
+        my $xml_data = XMLin(   $data,
                                 keyattr=>[],
                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
                                 suppressempty => ''
                             );
+        $xml_data = $this->unutf8ify($xml_data);
+
         my @headers;
 
         for(@{$xml_data->{fields}->{field} || [] }) {
