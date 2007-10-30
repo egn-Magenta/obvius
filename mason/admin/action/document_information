@@ -9,7 +9,7 @@ function add_key_value () {
  var divsect = document.getElementById('old_docparams');
 
  var tmp = '';
- 
+
  tmp += '<div class="docparams">';
  tmp += '<input type="text" name="docparam_key" id="docparam_key" value="' + key.value + '">';
  tmp += '<textarea name="docparam_value" id="docparam_value" value="' + value.value + '">' + value.value + '</textarea>';
@@ -52,11 +52,11 @@ function add_key_value () {
       <textarea <% $show->{inactive} ? 'disabled="disabled" ' : '' %>cols="68" rows="<% $rows |h %>" name="<% $show->{name} |h %>"><% $show->{value} |h %></textarea>
 % } elsif (defined $show->{type} and $show->{type} eq 'docparams') {
 <div id="old_docparams">
-%    while (my ($k, $v) = each %{$show->{value}}) {
-%     print  STDERR "$k = $v";
+% my $dp = $show->{value};
+%   for my $k ( sort keys %$dp) {
     <div class="docparams">
-	<input type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
-        <textarea name="docparam_value" id="docpara_value"><% $v %></textarea>
+        <input type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
+        <textarea name="docparam_value" id="docpara_value"><% $dp->{$k} %></textarea>
     </div>
 % }
 </div>
