@@ -342,7 +342,7 @@ sub perform_command_copy {
         return ($status, $message);
     }
     else {
-        return _copy_single_document($obvius, $doc, $destdoc);
+        return _copy_single_document($obvius, $doc, $destdoc, $dest_name);
     }
 }
 
