@@ -9,6 +9,7 @@
     <div>
       <& /shared/msg, text=>'Are you sure you want to copy these' &> <% $num %> <& /shared/msg, text=>'documents to' &> <% $obvius_destination |h %>?
       <input type="hidden" name="obvius_destination" value="<% $obvius_destination |h %>" />
+      <input type="hidden" name="obvius_new_name" value="<% $obvius_new_name |h %>" />
       <input type="hidden" name="obvius_copy_recursive" value="1" />
       <input type="hidden" name="obvius_copy_recursive_confirm" value="1" />
     </div>
@@ -22,7 +23,11 @@
       <label><& /shared/msg, text=>'Destination' &></label>
       <input type="text" name="obvius_destination" value="<% $obvius_destination |h %>" size="35" /><input onclick="<& /portal/util/navigator_link_start:onclick, fieldname=>'obvius_destination' &>" type="button" value="<& /shared/msg, text=>'Find' &> ..." />
     </div>
-    <div<% $r->notes('inactive_recursive_copy') ? ' class="obvius-inactive"' : '' %>>
+    <div>
+      <label><& /shared/msg, text => 'Rename' &> </label>
+      <input type="text" name="obvius_new_name" value="<% $doc->Name . '_kopi' %>" size="35" />
+    </div>
+    <div>
       <& /shared/msg, text=>'Also copy subdocuments' &>?<br />
 %     my $inactive_string=$r->notes('inactive_recursive_copy') ? ' disabled="disabled" class="obvius-inactive"' : '';
       <input type="radio" name="obvius_copy_recursive" value="1" id="yes" <% $inactive_string %>/><label for="yes" style="display: inline"><& /shared/msg, text=>'Yes' &></label>
@@ -40,6 +45,7 @@
 <%args>
 $obvius_copy_recursive=>0
 $obvius_destination=>''
+$obvius_new_name => ''
 </%args>
 %
 <%init>
@@ -94,12 +100,15 @@ $obvius_copy_recursive=>0
 $obvius_copy_recursive_confirm=>0
 $obvius_destination=>undef
 $obvius_later_date
+$obvius_new_name => ''
 </%args>
 %
 <%init>
 # Destination exists?
 #  XXX Isn't this an error in lookup_document?
-$obvius_destination='/' . $obvius_destination unless ($obvius_destination=~m!^/!);
+$obvius_destination = '/' . $obvius_destination unless ($obvius_destination=~m!^/!);
+$obvius_new_name ||= $doc->Name;
+
 my $dest_doc=$obvius->lookup_document($obvius_destination);
 if (!$dest_doc) {
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Destination document', ' ', $obvius_destination, ' ', 'does not exist']);
@@ -107,8 +116,8 @@ if (!$dest_doc) {
 }
 
 # Destination has subdocs already?
-if ($obvius->get_doc_by_name_parent($doc->Name, $dest_doc->Id)) {
-    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Destination document', ' ', $obvius->get_doc_uri($dest_doc), ' ', 'already has a sub-document called', ' "', $doc->Name, '"']);
+if ($obvius->get_doc_by_name_parent($obvius_new_name, $dest_doc->Id)) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Destination document', ' ', $obvius->get_doc_uri($dest_doc), ' ', 'already has a sub-document called', ' "', $obvius_new_name, '"']);
     return ''; # XXX Just fail - would be better to return to the first copy-page...
 }
 
@@ -123,6 +132,7 @@ if (!$obvius_copy_recursive or ($obvius_copy_recursive and $obvius_copy_recursiv
                                                user=>$obvius->user,
                                                command=>'copy',
                                                args=>{
+                                                      new_name => $obvius_new_name,
                                                       destination=>$obvius_destination,
                                                       recursive=>$obvius_copy_recursive,
                                                      },
