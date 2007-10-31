@@ -276,10 +276,10 @@ sub perform_command_delete {
 }
 
 sub _copy_documents_recursive {
-    my ($obvius, $source_doc, $dest_doc)=@_;
+    my ($obvius, $source_doc, $dest_doc, $new_doc_name)=@_;
 
     my $count=0;
-    my ($result, $message, $new_dest_doc)=_copy_single_document($obvius, $source_doc, $dest_doc);
+    my ($result, $message, $new_dest_doc)=_copy_single_document($obvius, $source_doc, $dest_doc, $new_doc_name);
     return ($result, $message, $count) if ($result ne 'OK');
     $count++;
 
@@ -297,15 +297,14 @@ sub _copy_documents_recursive {
 }
 
 sub _copy_single_document {
-    my ($obvius, $source_doc, $dest_doc)=@_;
+    my ($obvius, $source_doc, $dest_doc, $new_doc_name) = @_;
+    $new_doc_name ||= $source_doc->Name;
 
     my $source_vdoc=$obvius->get_public_version($source_doc) ||
         $obvius->get_latest_version($source_doc);
 
     $obvius->get_version_fields($source_vdoc, 255);
     my $error ='';
-
-    my $new_doc_name=$source_doc->Name;
 
     my ($new_docid, $new_version)=$obvius->create_new_document($dest_doc, $new_doc_name,
                                                                $source_vdoc->Type, $source_vdoc->Lang,
@@ -331,6 +330,7 @@ sub perform_command_copy {
 
     my $destination=$info{args}->{destination};
     my $destdoc=$obvius->lookup_document($destination);
+    my $dest_name = $info{args}->{new_name};
     return ('ERROR', [ 'Could not get destination document', ' (', $destination, ')' ]) unless ($destdoc);
 
     return ('ERROR', [ 'No permission to create documents under', ' ', $destination ]) unless ($obvius->can_create_new_document($destdoc));
@@ -338,7 +338,7 @@ sub perform_command_copy {
     if ($info{args}->{recursive}) {
         return ('ERROR', ['Can not recursively copy a document underneath itself']) if ($obvius->is_doc_below_doc($destdoc, $doc) or $destdoc->Id eq $doc->Id);
 
-        my ($status, $message)=_copy_documents_recursive($obvius, $doc, $destdoc);
+        my ($status, $message)=_copy_documents_recursive($obvius, $doc, $destdoc, $dest_name);
         return ($status, $message);
     }
     else {
