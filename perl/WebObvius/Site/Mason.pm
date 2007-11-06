@@ -827,6 +827,9 @@ sub rulebased_authen_handler ($$)
 
         # finally, turn server cache off for the protected documents
         $req-> notes('nocache', 1) unless $have_user == OK;
+        $req-> notes( "OBVIUS_SIDE_EFFECTS", 1 );
+	$req->no_cache(1);
+			
 
         return OK;
 
