@@ -5,13 +5,16 @@
 <!--
 function add_key_value () {
  var key = document.getElementById('new_key');
- var value = document.getElementById('new_value');
+ var value = document.getElementById('new_value').value;
  var divsect = document.getElementById('old_docparams');
+ value.replace('<', "&lt;");
+ value.replace('>', "&gt;");
 
  var tmp = '';
 
  tmp += '<div class="docparams">';
  tmp += '<input type="text" name="docparam_key" id="docparam_key" value="' + key.value + '">';
+
  tmp += '<textarea name="docparam_value" id="docparam_value">' + value.value + '</textarea>';
  tmp += '</div>';
 
