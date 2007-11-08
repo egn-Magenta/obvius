@@ -299,6 +299,12 @@ my $remove = $ARGS{'Remove'};
 
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
+for (@$docparam_value) {
+    $_ =~ s|&gt;|>|ig;
+    $_ =~ s|&lt;|<|ig;
+}
+
+
 my %docparams = map {$docparam_key->[$_] => $docparam_value->[$_]} (0.. (scalar @{$docparam_value}) - 1);
 
 if (defined $remove) {
