@@ -8,10 +8,9 @@ function add_key_value () {
  var value_field = document.getElementById('new_value');
  var divsect = document.getElementById('old_docparams');
  value = value_field.value;
- alert(value)
- value.replace("<", "&lt;");
- value.replace(">", "&gt;");
- alert(value)
+ alert(value);
+ value.replace(/\<\/\s*textarea\s*\>/, '&lt;/textarea>');
+ alert(value);
  var tmp = '';
 
  tmp += '<div class="docparams">';
@@ -298,14 +297,16 @@ $docparam_key => undef
 %
 <%init>
 my $remove = $ARGS{'Remove'};
+use Data::Dumper;
 
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
+print STDERR Dumper($docparam_value);
+
 for (@$docparam_value) {
     $_ =~ s|&gt;|>|ig;
     $_ =~ s|&lt;|<|ig;
 }
-
 
 my %docparams = map {$docparam_key->[$_] => $docparam_value->[$_]} (0.. (scalar @{$docparam_value}) - 1);
 
