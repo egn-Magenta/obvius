@@ -15,7 +15,7 @@ function add_key_value () {
  tmp += '<div class="docparams">';
  tmp += '<input type="text" name="docparam_key" id="docparam_key" value="' + key.value + '">';
 
- tmp += '<textarea name="docparam_value" id="docparam_value">' + value.value + '</textarea>';
+ tmp += '<textarea name="docparam_value" id="docparam_value">' + value + '</textarea>';
  tmp += '</div>';
 
  divsect.innerHTML += tmp;
