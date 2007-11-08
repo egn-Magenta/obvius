@@ -9,7 +9,9 @@ function add_key_value () {
  var divsect = document.getElementById('old_docparams');
  value = value_field.value;
  alert(value);
- value = value.replace(/<\/\s*textarea\s*>/ig, '&lt;/textarea>');
+ value = value.replace(/</gi, '&lt');
+ alert(value)
+ value = value.replace(/<\/\s*textarea[^>]+>/ig, '&lt;/textarea>');
  alert(value);
  var tmp = '';
 
