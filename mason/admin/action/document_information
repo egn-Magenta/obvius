@@ -5,11 +5,13 @@
 <!--
 function add_key_value () {
  var key = document.getElementById('new_key');
- var value = document.getElementById('new_value').value;
+ var value_field = document.getElementById('new_value');
  var divsect = document.getElementById('old_docparams');
- value.replace('<', "&lt;");
- value.replace('>', "&gt;");
-
+ value = value_field.value;
+ alert(value)
+ value.replace("<", "&lt;");
+ value.replace(">", "&gt;");
+ alert(value)
  var tmp = '';
 
  tmp += '<div class="docparams">';
@@ -20,7 +22,7 @@ function add_key_value () {
 
  divsect.innerHTML += tmp;
 
- value.value='';
+ value_field.value='';
  key.value='';
 }
 -->
