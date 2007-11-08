@@ -9,7 +9,7 @@ function add_key_value () {
  var divsect = document.getElementById('old_docparams');
  value = value_field.value;
  alert(value);
- value.replace(/\<\/\s*textarea\s*\>/, '&lt;/textarea>');
+ value = value.replace(/\<\/\s*textarea\s*\>/, '&lt;/textarea>');
  alert(value);
  var tmp = '';
 
