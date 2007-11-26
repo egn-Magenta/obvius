@@ -56,16 +56,16 @@ function add_key_value () {
 % my $dp = $show->{value};
 %   for my $k ( sort keys %$dp) {
     <div class="docparams">
-        <input type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
-        <textarea name="docparam_value" id="docparam_value"><% $dp->{$k} %></textarea>
+        <input <% disabled($show) %> type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
+        <textarea <% disabled($show) %> name="docparam_value" id="docparam_value"><% $dp->{$k} %></textarea>
     </div>
 % }
 </div>
 <div id="new_docparams" class="docparams">
-  <input type="text" name="new_key" id="new_key" />
-  <textarea name="new_value" id="new_value"></textarea><BR />
+  <input <% disabled($show) %> type="text" name="new_key" id="new_key" />
+  <textarea <% disabled ($show) %> name="new_value" id="new_value"></textarea><BR />
 </div>
-    <input type="button" value="<& /shared/msg, text=>"Add" &>" onclick="javascript:add_key_value()" />
+    <input <% disabled($show) %> type="button" value="<& /shared/msg, text=>"Add" &>" onclick="javascript:add_key_value()" />
 
 % } elsif (defined $show->{type} and $show->{type} eq 'dropdown') {
       <select <% $show->{inactive} ? 'disabled="disabled" ' : '' %>name="<% $show->{name} |h %>">
@@ -271,13 +271,19 @@ $r->notes(inactive_information=>1);
 $r->notes(inactive_editing=>1);
 $r->notes(inactive_newsboxes=>1);
 </%init>
+<%once>
+sub disabled {
+ my $show = shift;
+ return "disabled='disabled'" if $show->{inactive};
+ return "";
+}
+</%once>
 %
 %
 %
 <%method cancel>
 <& /shared/set_status_message, message=>'CANCEL' &>
 </%method>
-%
 %
 %
 <%method do>
