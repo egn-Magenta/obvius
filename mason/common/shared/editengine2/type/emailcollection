@@ -94,6 +94,7 @@ $validation
 my $value=$data->{$id};
 
 $value = [$value] unless (ref $value eq 'ARRAY');
+
 my @email = grep { $_ =~ /^[^@]+@[^@]+\.[^@]+$/} @$value;
 my $val = join ";", @email;
 $data->{$id} = $val;
