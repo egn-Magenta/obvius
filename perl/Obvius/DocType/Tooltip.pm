@@ -67,12 +67,8 @@ sub raw_document_data {
         $text .= $vdoc->field('content');
     }
 
-
-
-
-
+    print STDERR "text: $text\n";
     return ( 'text/html', $text );
-
 }
 
 
