@@ -415,6 +415,11 @@ sub handler ($$) {
             $output
             );
 
+        if( $mime_type =~ /text\/html/) {
+            print $data;
+            return OK;
+        }
+
         if ($data) {
             $mime_type ||= 'application/octet-stream';
 
@@ -828,8 +833,7 @@ sub rulebased_authen_handler ($$)
         # finally, turn server cache off for the protected documents
         $req-> notes('nocache', 1) unless $have_user == OK;
         $req-> notes( "OBVIUS_SIDE_EFFECTS", 1 );
-	$req->no_cache(1);
-			
+        $req->no_cache(1);
 
         return OK;
 
