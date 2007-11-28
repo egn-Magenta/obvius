@@ -36,7 +36,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 ########################################################################
 #
-#	User and group information retrieval
+#       User and group information retrieval
 #
 ########################################################################
 
@@ -95,7 +95,7 @@ sub validate_user {
 
     if ( $this->{USER} eq 'nobody') {
         # nobody can never login interactively, but only programmatically
-	# with password set to undef
+        # with password set to undef
         return not defined $this-> {PASSWORD};
     }
 
@@ -125,7 +125,7 @@ sub read_user_and_group_info {
 
 ########################################################################
 #
-#	Changing users and groups
+#       Changing users and groups
 #
 ########################################################################
 
@@ -155,12 +155,12 @@ sub delete_user {
     return undef unless $this->can_create_new_user();
 
     return undef unless $this->get_user($userid);
-	
+
     # we change owner to "nobody"
     my $nobody = $this-> get_userid('nobody');
     unless ( defined $nobody) {
         $this->{DB_Error} = "User 'nobody' is not found; cannot relocate documents";
-	return undef;
+        return undef;
     }
 
     $this->db_begin;
@@ -168,22 +168,22 @@ sub delete_user {
         my $set = DBIx::Recordset->SetupObject ( {
             '!DataSource' => $this->{DB},
             '!Table'      => 'documents',
-	});
+        });
         $set-> Update( { owner => $nobody }, { owner => $userid } );
         $set-> Disconnect;
-        
-	$this->db_delete_user($userid);
-	$this->db_delete_user_grp($userid);
 
-	$this->db_commit;
+        $this->db_delete_user($userid);
+        $this->db_delete_user_grp($userid);
+
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Delete user ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Delete user ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -205,18 +205,18 @@ sub create_new_user {
     my $userid;
     $this->db_begin;
     eval {
-	$userid=$this->db_insert_user($user);
-	die "No userid returned" unless $userid;
-	$this->db_insert_user_grp($userid, $user->{grp});
-	$this->db_commit;
+        $userid=$this->db_insert_user($user);
+        die "No userid returned" unless $userid;
+        $this->db_insert_user_grp($userid, $user->{grp});
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Create new user ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Create new user ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -233,31 +233,31 @@ sub create_new_user {
 sub update_user {
     my ($this, $user) = @_;
 
-    return undef unless $this->can_create_new_user(); # Perhaps different?
+    return undef unless ($this->can_create_new_user() || ($this->{USER} eq $user->{login}));
 
     $user->{passwd}=$this->encrypt_password($user->{password})
-	if (defined $user->{password} and $user->{password});
+        if (defined $user->{password} and $user->{password});
 
     $user->{grp}=[$user->{grp}] if (defined $user->{grp} and ref $user->{grp} ne 'ARRAY');
 
     #print STDERR "update_user, user: " . Dumper($user);
     $this->db_begin;
     eval {
-	die "No user id!" unless $user->{id};
+        die "No user id!" unless $user->{id};
 
-	$this->db_update_user($user);
-	$this->db_delete_user_grp($user->{id});
-	$this->db_insert_user_grp($user->{id}, $user->{grp})
-	    if (defined $user->{grp});
-	$this->db_commit;
+        $this->db_update_user($user);
+        $this->db_delete_user_grp($user->{id});
+        $this->db_insert_user_grp($user->{id}, $user->{grp})
+            if (defined $user->{grp});
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Delete group ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Delete group ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -274,19 +274,19 @@ sub delete_group {
 
     $this->db_begin;
     eval {
-	$this->db_delete_group($grpid);
-	$this->db_delete_grp_user($grpid);
-	# XXX If this groups contains documents, what to do? Change group to something else?
-	#     Don't delete the group? What?
-	$this->db_commit;
+        $this->db_delete_group($grpid);
+        $this->db_delete_grp_user($grpid);
+        # XXX If this groups contains documents, what to do? Change group to something else?
+        #     Don't delete the group? What?
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Delete group ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Delete group ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -310,18 +310,18 @@ sub create_new_group {
     my $grpid;
     $this->db_begin;
     eval {
-	$grpid=$this->db_insert_group($group);
-	die "No grpid returned" unless $grpid;
-	$this->db_insert_grp_user($grpid, $group->{user});
-	$this->db_commit;
+        $grpid=$this->db_insert_group($group);
+        die "No grpid returned" unless $grpid;
+        $this->db_insert_grp_user($grpid, $group->{user});
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Create new group ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Create new group ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -338,21 +338,21 @@ sub update_group {
 
     $this->db_begin;
     eval {
-	die "No group id!" unless $group->{id};
+        die "No group id!" unless $group->{id};
 
-	$this->db_update_group($group);
-	$this->db_delete_grp_user($group->{id});
-	$this->db_insert_grp_user($group->{id}, $group->{user})
-	    if (defined $group->{user});
-	$this->db_commit;
+        $this->db_update_group($group);
+        $this->db_delete_grp_user($group->{id});
+        $this->db_insert_grp_user($group->{id}, $group->{user})
+            if (defined $group->{user});
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Update group ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Update group ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
