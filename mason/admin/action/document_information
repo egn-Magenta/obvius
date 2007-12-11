@@ -10,9 +10,9 @@ function add_key_value () {
  var value = value_field.value;
  var tmp = '';
 
+
  tmp += '<div class="docparams">';
  tmp += '<input type="text" name="docparam_key" id="docparam_key" value="' + key.value + '">';
-
  tmp += '<textarea name="docparam_value" id="docparam_value">' + value + '</textarea>';
  tmp += '</div>';
 
@@ -340,6 +340,16 @@ if ($obvius->can_set_docparams($doc)) {
         $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Could not update document parameters', ' (', $error, ')']);
     return 'document_information';
     }
+
+}
+
+if ( $obvius->config->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
+{
+    # Clear the cache
+    my $dirty_docids;
+    push( @$dirty_docids, $doc->Parent );
+    my $uri = $obvius->get_doc_uri( $doc );
+    $m->comp('/default/dirty_cache_local', sitebase=>'', dirty_docids=>$dirty_docids, force=>'1', force_uri=>$uri );
 }
 
 $m->comp('/shared/set_status_message', message=>'Document updated');
