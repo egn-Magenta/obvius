@@ -221,7 +221,7 @@ my @info = (
                                 )
                         }) .
                         '</div>',
-                groups  => [
+                groups  => [ sort { lc($a) cmp lc($b) }
                         map {
                                 $obvius->get_group($_)->{name}
                         } keys %{
