@@ -32,13 +32,16 @@ if ( !$universal_rules) {
 }
 $universal_rules = $universal_rules-> AccessRules;
 
-my $groups = sort { lc($a) cmp lc($b)} [
-        map {
-                $obvius->get_group($_)->{name}
-        } @{
-                $obvius->get_user_groups($obvius->get_userid($obvius->user))
-        }
-];
+my $groups =
+  [ sort { lc($a) cmp lc($b)}
+    (
+     map {
+         $obvius->get_group($_)->{name}
+     } @{
+         $obvius->get_user_groups($obvius->get_userid($obvius->user))
+     }
+    )
+  ];
 
 my $users = [
         ['ALL', 'All users'],
