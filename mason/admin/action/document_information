@@ -55,9 +55,12 @@ function add_key_value () {
 <div id="old_docparams">
 % my $dp = $show->{value};
 %   for my $k ( sort keys %$dp) {
+
     <div class="docparams">
-        <input <% disabled($show) %> type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
-        <textarea <% disabled($show) %> name="docparam_value" id="docparam_value"><% $dp->{$k} %></textarea>
+
+      <input <% disabled($show) %> type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
+       <textarea <% disabled($show) %> name="docparam_value" id="docparam_value"><% $dp->{$k} |h%></textarea>
+
     </div>
 % }
 </div>
