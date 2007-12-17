@@ -98,7 +98,7 @@ use Obvius::Queue;
 
 ########################################################################
 #
-#	Construction and connection
+#       Construction and connection
 #
 ########################################################################
 
@@ -106,32 +106,32 @@ sub new {
     my($class, $obvius_config, $user, $password, $doctypes, $fieldtypes, $fieldspecs, %options) = @_;
 
     croak("Configuration missing")
-	unless ($obvius_config);
+        unless ($obvius_config);
 
     my $this = $class->SUPER::new(OBVIUS_CONFIG => $obvius_config,
-				  USER        => $user,
-				  PASSWORD    => $password,
-				  DB          => undef,
-				  DEBUG       => $obvius_config->param('DEBUG'),
-				  BENCHMARK   => $obvius_config->param('BENCHMARK'),
-				  LOG         => (defined $options{'log'} ? $options{'log'} : new Obvius::Log $obvius_config->param('DEBUG')),
-				  DOCTYPES    => (defined $doctypes ? $doctypes : []),
-				  FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
-				  FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
-				  LANGUAGES   => {},
+                                  USER        => $user,
+                                  PASSWORD    => $password,
+                                  DB          => undef,
+                                  DEBUG       => $obvius_config->param('DEBUG'),
+                                  BENCHMARK   => $obvius_config->param('BENCHMARK'),
+                                  LOG         => (defined $options{'log'} ? $options{'log'} : new Obvius::Log $obvius_config->param('DEBUG')),
+                                  DOCTYPES    => (defined $doctypes ? $doctypes : []),
+                                  FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
+                                  FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
+                                  LANGUAGES   => {},
                                   MODIFICATIONS=>[],
-				  MODIFIED_DOCIDS=>[],
-				 );
+                                  MODIFIED_DOCIDS=>[],
+                                 );
 
     $this->tracer($obvius_config, $user||'', $password||'') if ($this->{DEBUG});
 
     croak("No database specified")
-	unless ( $this->Obvius_Config->DSN );
+        unless ( $this->Obvius_Config->DSN );
 
     $this->connect;
     if ($this->{USER} and not $this->validate_user) {
-	print STDERR "User not valid.\n";
-	return undef;
+        print STDERR "User not valid.\n";
+        return undef;
     }
 
     return $this;
@@ -151,24 +151,24 @@ sub connect {
     #          using $this->{LOG} as backend.
     #
     if ($this->{DEBUG}>1) {
-	$DBIx::Recordset::Debug = 2;
-	*DBIx::Recordset::LOG = \*STDERR;
+        $DBIx::Recordset::Debug = 2;
+        *DBIx::Recordset::LOG = \*STDERR;
     }
 
     my $config = $this->{OBVIUS_CONFIG};
     my $db = new DBIx::Database( {'!DataSource' => $config->param('DSN'),
-				  '!Username'   => $config->param('normal_db_login'),
-				  '!Password'   => $config->param('normal_db_passwd'),
-				  '!KeepOpen'   => 1,
-				  '!DBIAttr'    => {
-						    AutoCommit => 0,
-						    RaiseError => 1,
-						    PrintError => 1,
-						    ShowErrorStatement => ($this->{DEBUG} ? 1 : 0),
-						   },
-				 } );
+                                  '!Username'   => $config->param('normal_db_login'),
+                                  '!Password'   => $config->param('normal_db_passwd'),
+                                  '!KeepOpen'   => 1,
+                                  '!DBIAttr'    => {
+                                                    AutoCommit => 0,
+                                                    RaiseError => 1,
+                                                    PrintError => 1,
+                                                    ShowErrorStatement => ($this->{DEBUG} ? 1 : 0),
+                                                   },
+                                 } );
     croak(ref($this), ": failed to connect to database")
-	unless (defined($db));
+        unless (defined($db));
 
     $db->TableAttr('*', '!TieRow' => 0);
     $db->TableAttr('*', '!Debug'  => 2) if ($this->{DEBUG});
@@ -180,12 +180,12 @@ sub connect {
     $this->{DB} = $db;
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
     unless (scalar(@{$this->{DOCTYPES}}) and
-	    scalar(@{$this->{FIELDTYPES}}) and
-	    scalar($this->{FIELDSPECS}->param)) {
-	 $this->{LOG}->debug(" READING DT, FT and FS: ($$) " .
-	    join(", ", scalar(@{$this->{DOCTYPES}}), scalar(@{$this->{FIELDTYPES}}),
-		 scalar($this->{FIELDSPECS}->param)) );
-	$this->read_type_info(1)
+            scalar(@{$this->{FIELDTYPES}}) and
+            scalar($this->{FIELDSPECS}->param)) {
+         $this->{LOG}->debug(" READING DT, FT and FS: ($$) " .
+            join(", ", scalar(@{$this->{DOCTYPES}}), scalar(@{$this->{FIELDTYPES}}),
+                 scalar($this->{FIELDSPECS}->param)) );
+        $this->read_type_info(1)
     }
     $this->read_user_and_group_info;
 
@@ -212,7 +212,7 @@ sub user {
 
 ########################################################################
 #
-#	Object cache
+#       Object cache
 #
 ########################################################################
 
@@ -220,9 +220,9 @@ sub cache {
     my ($this, $onoff) = @_;
 
     if ($onoff) {
-	$this->{CACHE} = new Obvius::Cache unless ($this->{CACHE});
+        $this->{CACHE} = new Obvius::Cache unless ($this->{CACHE});
     } else {
-	undef $this->{CACHE};
+        undef $this->{CACHE};
     }
 
     return 1;
@@ -247,8 +247,8 @@ sub cache_find {
 #
 ########################################################################
 
-our $LOG;                 # Log-object used if no $obvius object is available 
-$LOG ||= new Obvius::Log 0; 
+our $LOG;                 # Log-object used if no $obvius object is available
+$LOG ||= new Obvius::Log 0;
 
 sub log {
     my ($this) = @_;
@@ -265,25 +265,25 @@ sub log {
 
 ########################################################################
 #
-#	Path to document mapping and vice versa
+#       Path to document mapping and vice versa
 #
 ########################################################################
 
 sub get_root_document
 {
-	my ($this) = @_;
-	#XXX Assumes root is 1 !!
-	return $this->get_doc_by_id(1);
+        my ($this) = @_;
+        #XXX Assumes root is 1 !!
+        return $this->get_doc_by_id(1);
 }
 
 sub get_universal_document
 {
-	my $this = $_[0];
+        my $this = $_[0];
 
-	# Assume 'universal' is 5, but check for older database layouts
-	my $universal = $this-> get_doc_by_id(5);
-	return ( defined($universal) && $universal-> Name eq 'universal') ? 
-		$universal : undef;
+        # Assume 'universal' is 5, but check for older database layouts
+        my $universal = $this-> get_doc_by_id(5);
+        return ( defined($universal) && $universal-> Name eq 'universal') ?
+                $universal : undef;
 }
 
 sub lookup_document {
@@ -292,14 +292,14 @@ sub lookup_document {
     $this->tracer($path) if ($this->{DEBUG});
 
     if (wantarray) {
-	my $path_info;
-	if (my @path = $this->get_doc_by_path($path, \$path_info)) {
-	    return ($path[-1], $path_info);
-	}
-	return ();
+        my $path_info;
+        if (my @path = $this->get_doc_by_path($path, \$path_info)) {
+            return ($path[-1], $path_info);
+        }
+        return ();
     }
     if (my @path = $this->get_doc_by_path($path)) {
-	return $path[-1];
+        return $path[-1];
     }
     return undef;
 }
@@ -314,7 +314,7 @@ sub get_doc_by_path {
     $this->tracer($uri, $path_info||'') if ($this->{DEBUG});
 
     if ($uri =~ /^\/(\d+).docid\/?$/) {
-	return ($this->get_doc_by_id($1));
+        return ($this->get_doc_by_id($1));
     }
 
     my $id = 1; # XXX DOC ROOT
@@ -323,31 +323,31 @@ sub get_doc_by_path {
 
     my @path = ($root);
     if ($uri eq '/') {
-	$$path_info = undef if (defined $path_info);
-	return @path;
+        $$path_info = undef if (defined $path_info);
+        return @path;
     }
 
     my @uri = split('/+', $uri);
 
     shift(@uri);
     while (my $name = shift(@uri)) {
-	 my $vec;
-	 my $parent;
+         my $vec;
+         my $parent;
 
-	 $this->{LOG}->debug("get_doc_by_path: searching $name parent $id");
+         $this->{LOG}->debug("get_doc_by_path: searching $name parent $id");
 
-	 $parent = $this->get_doc_by_name_parent($name, $id);
-	 unless ($parent) {
-	     return () unless ($path_info);
+         $parent = $this->get_doc_by_name_parent($name, $id);
+         unless ($parent) {
+             return () unless ($path_info);
 
-	     $$path_info = join('/', $name, @uri);
-	     return @path;
-	 }
+             $$path_info = join('/', $name, @uri);
+             return @path;
+         }
 
-	 $id = $parent->_id;
-	 $this->{LOG}->debug("get_doc_by_path: got id $id");
+         $id = $parent->_id;
+         $this->{LOG}->debug("get_doc_by_path: got id $id");
 
-	 push(@path, $parent);
+         push(@path, $parent);
     }
 
     $this->{LOG}->debug("get_doc_by_path: done");
@@ -362,10 +362,10 @@ sub get_doc_path {
     $this->tracer($doc) if ($this->{DEBUG});
 
     my @path = ( $doc );
-    while ($doc->_id != 1) {		# XXX DOC ROOT
-	my $parent = $this->get_doc_by_id($doc->_parent);
-	unshift(@path, $parent);
-	$doc = $parent;
+    while ($doc->_id != 1) {            # XXX DOC ROOT
+        my $parent = $this->get_doc_by_id($doc->_parent);
+        unshift(@path, $parent);
+        $doc = $parent;
     }
 
     return @path;
@@ -375,7 +375,7 @@ sub get_doc_uri {
     my ($this, $doc) = @_;
 
     my @path = $this->get_doc_path($doc);
-    shift(@path);			# remove root
+    shift(@path);                       # remove root
 
     return '/' unless (@path);
     my $uri = '/' . join('/', map { $_->param('name') } @path) . '/';
@@ -402,7 +402,7 @@ sub is_doc_below_doc {
 
 ########################################################################
 #
-#	Look up documents by id or (name,parent)
+#       Look up documents by id or (name,parent)
 #
 ########################################################################
 
@@ -431,13 +431,13 @@ sub get_doc_by {
     return $doc if ($doc);
 
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $this->{DB},
-					     '!Table'      => 'documents',
-					    } );
+                                             '!Table'      => 'documents',
+                                            } );
     $set->Search( {@how} );
     if (my $rec = $set->Next) {
-	$doc = new Obvius::Document($rec);
-	$this->cache_add($doc);
-	croak "More than one document matched by get_doc_by\n" if $set->Next;
+        $doc = new Obvius::Document($rec);
+        $this->cache_add($doc);
+        croak "More than one document matched by get_doc_by\n" if $set->Next;
     }
 
     $set->Disconnect;
@@ -458,17 +458,17 @@ sub get_docs_by {
     $this->tracer(@how) if ($this->{DEBUG});
 
     my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $this->{DB},
-					     '!Table'      => 'documents',
-					    } );
+                                             '!Table'      => 'documents',
+                                            } );
     my @subdocs;
     $set->Search( {@how} );
     while (my $rec = $set->Next) {
-	my $doc = $this->cache_find('Obvius::Document', @how);
-	unless ($doc) {
-	    $doc = new Obvius::Document($rec);
-	    $this->cache_add($doc);
-	}
-	push @subdocs, $doc;
+        my $doc = $this->cache_find('Obvius::Document', @how);
+        unless ($doc) {
+            $doc = new Obvius::Document($rec);
+            $this->cache_add($doc);
+        }
+        push @subdocs, $doc;
     }
 
     $set->Disconnect;
@@ -479,7 +479,7 @@ sub get_docs_by {
 
 ########################################################################
 #
-#	Public document check
+#       Public document check
 #
 ########################################################################
 
@@ -493,8 +493,8 @@ sub is_public_document {
 
     $this->tracer($doc) if ($this->{DEBUG});
     unless ($doc) {
-	warn "IS_PUBLIC_DOCUMENT CALLED ON AN UNDEFINED DOC - there's a bug somewhere calling is_public_document. Go hunt.";
-	return 0;
+        warn "IS_PUBLIC_DOCUMENT CALLED ON AN UNDEFINED DOC - there's a bug somewhere calling is_public_document. Go hunt.";
+        return 0;
     }
 
     # Take advantage of the hint that $doc _is_ public itself by
@@ -505,16 +505,16 @@ sub is_public_document {
 
     my @path=$this->get_doc_path($doc);
     for (@path) {
-	my $public = 0;
-	if ($this->get_public_version($_)) {
-	    $public = 1;
-	}
+        my $public = 0;
+        if ($this->get_public_version($_)) {
+            $public = 1;
+        }
 
-	#printf STDERR ("ID %5d NAME %-20s PUBLIC %d\n",
-	#	       $_->_id, $_->_name, $public)
-	#    if ($this->{DEBUG});
+        #printf STDERR ("ID %5d NAME %-20s PUBLIC %d\n",
+        #              $_->_id, $_->_name, $public)
+        #    if ($this->{DEBUG});
 
-	return '' if ($public == 0);
+        return '' if ($public == 0);
     }
 
     return 1;
@@ -524,7 +524,7 @@ sub is_public_document {
 
 ########################################################################
 #
-#	Multilingual helpers
+#       Multilingual helpers
 #
 ########################################################################
 
@@ -546,11 +546,11 @@ sub select_best_language_match {
 
     my $best = 0;
     for (@$vdocs) {
-	my $lang = $_->param('lang');
-	if (($prefs->{$lang} ||= 0) > $best) {
-	    $vdoc = $_;
-	    $best = $prefs->{$lang};
-	}
+        my $lang = $_->param('lang');
+        if (($prefs->{$lang} ||= 0) > $best) {
+            $vdoc = $_;
+            $best = $prefs->{$lang};
+        }
     }
     return $vdoc;
 }
@@ -565,25 +565,25 @@ sub select_best_language_match_multiple {
 
     my $prefs = $this->{LANGUAGES};
 
-    my %best;				# best weight by docid
-    my %vdocs;				# version by docid
+    my %best;                           # best weight by docid
+    my %vdocs;                          # version by docid
 
     for (@$vdocs) {
-	my $lang = $_->param('lang');
-	my $docid = $_->param('docid');
+        my $lang = $_->param('lang');
+        my $docid = $_->param('docid');
 
-	unless ($vdocs{$docid}) {
-	    $best{$docid} = 0;
-	    $vdocs{$docid} = $_;
-	}
+        unless ($vdocs{$docid}) {
+            $best{$docid} = 0;
+            $vdocs{$docid} = $_;
+        }
 
         # If language-preference is equal, we prefer the newer version:
-	if (($prefs->{$lang} ||= 0) > $best{$docid} or
+        if (($prefs->{$lang} ||= 0) > $best{$docid} or
             (($prefs->{$lang} ||= 0) == $best{$docid}  and
              $_->{VERSION} gt $vdocs{$docid}->{VERSION})) {
-	    $vdocs{$docid} = $_;
-	    $best{$docid} = $prefs->{$lang};
-	}
+            $vdocs{$docid} = $_;
+            $best{$docid} = $prefs->{$lang};
+        }
     }
 
     return [ grep { $vdocs{$_->_docid} == $_ } @$vdocs ];
@@ -593,7 +593,7 @@ sub select_best_language_match_multiple {
 
 ########################################################################
 #
-#	Look up versions of a document
+#       Look up versions of a document
 #
 ########################################################################
 
@@ -678,8 +678,8 @@ sub get_versions {
     #  return $doc->param('public_versions') if ($doc->param('public_versions'));
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
-					    '!Table'      => 'versions',
-					   });
+                                            '!Table'      => 'versions',
+                                           });
 
     $set->Search({ docid=>$doc->_id, %options });
     my @versions;
@@ -695,7 +695,7 @@ sub get_versions {
 
 ########################################################################
 #
-#	Look up document public subdocs (returns array of Obvius::Version)
+#       Look up document public subdocs (returns array of Obvius::Version)
 #
 ########################################################################
 
@@ -714,15 +714,15 @@ sub get_document_subdocs {
     # Changed select_blah_blah to do that (search calls that). Hope it
     # doesn't break anything.
     my $subdocs=$this->search(
-			      [],
-			      'parent = ' . $doc->Id,
-			      needs_document_fields=>[qw(parent)],
-			      sortvdoc => $sortvdoc,
-			      # notexpired=>,
-			      # nothidden=>,
-			      public=>1, # Results in max one version per language per docid
-			      %options,  # which is what select_best_lang...() expects.
-			     );
+                              [],
+                              'parent = ' . $doc->Id,
+                              needs_document_fields=>[qw(parent)],
+                              sortvdoc => $sortvdoc,
+                              # notexpired=>,
+                              # nothidden=>,
+                              public=>1, # Results in max one version per language per docid
+                              %options,  # which is what select_best_lang...() expects.
+                             );
 
     $subdocs=[] unless $subdocs; # Empty list if there are no subdocs
     return $subdocs;
@@ -788,7 +788,7 @@ sub get_nr_of_subdocs {
 
 ########################################################################
 #
-#	Search for documents (returns array of Obvius::Version)
+#       Search for documents (returns array of Obvius::Version)
 #
 ########################################################################
 
@@ -807,13 +807,13 @@ sub calc_order_for_query {
     my @sort_fields;
     my $sortdoctype=$this->get_document_type($sortvdoc);
     if (my $sortorder_field=$sortdoctype->param('sortorder_field_is')) {
-	my $sortorder=$this->get_version_field($sortvdoc, $sortorder_field);
-	@sort_fields=split /,/, $sortorder;
+        my $sortorder=$this->get_version_field($sortvdoc, $sortorder_field);
+        @sort_fields=split /,/, $sortorder;
     }
     else { # No sortorder field - do by sequence:
-	@sort_fields=qw(+seq);
+        @sort_fields=qw(+seq);
 # Do it silently
-#	warn "Document type does not have sortorder_field_is information, sorting by sequence.";
+#       warn "Document type does not have sortorder_field_is information, sorting by sequence.";
     }
 
     foreach (@sort_fields) {
@@ -988,17 +988,17 @@ sub search {
     $where =~ s/$regex/$1 . $map{$2}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
-                                            '!Table'	    => join(', ', @table) . " " . join(" ", @left_join_table),
+                                            '!Table'        => join(', ', @table) . " " . join(" ", @left_join_table),
                                             '!TabRelation'  => join(' AND ', @join),
-                                            '!Fields'	    => join(', ', @fields),
-#                                           '!Debug'		=> 2,
+                                            '!Fields'       => join(', ', @fields),
+#                                           '!Debug'            => 2,
                                         });
 
     $having = ($having ? " HAVING $having" : '');
 
     my $query = {
-                    '$where'	=> join(' AND ', @where, "($where)"),
-                    '$group'	=> "versions.docid, versions.version, versions.lang $having",
+                    '$where'    => join(' AND ', @where, "($where)"),
+                    '$group'    => "versions.docid, versions.version, versions.lang $having",
                 };
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
@@ -1034,91 +1034,91 @@ sub search {
 # $root_id is either a document id, or an array of document ids.
 sub search_subtree
 {
-	my ( $self, $root_docid, $fields, $where, %options) = @_;
+        my ( $self, $root_docid, $fields, $where, %options) = @_;
 
-	my @root_docids =
-		( ref( $root_docid) and ref( $root_docid) eq 'ARRAY') ?
-			@$root_docid :
-			( $root_docid || 0);
+        my @root_docids =
+                ( ref( $root_docid) and ref( $root_docid) eq 'ARRAY') ?
+                        @$root_docid :
+                        ( $root_docid || 0);
 
-	@root_docids = (0) unless @root_docids;
+        @root_docids = (0) unless @root_docids;
 
-	if ( grep { $_ == 0 or $_ == 1 } @root_docids ) {
-		# search in all documents
-		return $self-> search( $fields, $where, %options);
-	}
+        if ( grep { $_ == 0 or $_ == 1 } @root_docids ) {
+                # search in all documents
+                return $self-> search( $fields, $where, %options);
+        }
 
 
-	my @parents = sort { $a <=> $b } $self-> get_documents_subtree( @root_docids);
-	my $result = [];
-	my @user_where_statement = length($where) ? ($where) : ();
+        my @parents = sort { $a <=> $b } $self-> get_documents_subtree( @root_docids);
+        my $result = [];
+        my @user_where_statement = length($where) ? ($where) : ();
 
-	# add doc fields needed
-	$options{needs_document_fields} ||= [];
-	@{$options{needs_document_fields}} = grep {
-		$_ ne 'id' and $_ ne 'parent'
-	} @{$options{needs_document_fields}};
-	push @{$options{needs_document_fields}}, qw(id parent);
+        # add doc fields needed
+        $options{needs_document_fields} ||= [];
+        @{$options{needs_document_fields}} = grep {
+                $_ ne 'id' and $_ ne 'parent'
+        } @{$options{needs_document_fields}};
+        push @{$options{needs_document_fields}}, qw(id parent);
 
-	do {
-		my $max = 256 - @root_docids;  # XXX approx max query length is 2K
-		$max = 0 if $max < 0;
-		my @slice = splice( @parents, 0, $max);
+        do {
+                my $max = 256 - @root_docids;  # XXX approx max query length is 2K
+                $max = 0 if $max < 0;
+                my @slice = splice( @parents, 0, $max);
 
-		my @where;
-		push @where, 'parent IN (' . join(',', @slice) . ')'
-			if @slice;
-		if ( @root_docids) {
-			push @where, 'id IN (' . join(',', @root_docids) . ')';
-			@root_docids = ();
-		}
+                my @where;
+                push @where, 'parent IN (' . join(',', @slice) . ')'
+                        if @slice;
+                if ( @root_docids) {
+                        push @where, 'id IN (' . join(',', @root_docids) . ')';
+                        @root_docids = ();
+                }
 
-		@where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
+                @where = ( '(' . join( ' OR ', @where) . ')' ) if @where;
 
-		push @$result, @{$self-> search(
-			$fields,
-			join( ' AND ', @user_where_statement, @where),
-			%options
-		) || []};
+                push @$result, @{$self-> search(
+                        $fields,
+                        join( ' AND ', @user_where_statement, @where),
+                        %options
+                ) || []};
 
-	} while (@parents);
+        } while (@parents);
 
-	$result;
+        $result;
 }
 
 # traverses root_docid and returns set of parent ids for all documents ids under the root
 sub get_documents_subtree
 {
-	my ( $self, @root_docids) = @_;
+        my ( $self, @root_docids) = @_;
 
-	@root_docids = (0) unless @root_docids;
-	my $set = DBIx::Recordset-> SetupObject({
-		'!DataSource'	=> $self-> {DB},
-		'!Table'	=> 'documents',
-		'!Fields'	=> 'id,parent'
-	});
+        @root_docids = (0) unless @root_docids;
+        my $set = DBIx::Recordset-> SetupObject({
+                '!DataSource'   => $self-> {DB},
+                '!Table'        => 'documents',
+                '!Fields'       => 'id,parent'
+        });
 
-	my ( %result, @current, %seen);
-	@current = @root_docids;
+        my ( %result, @current, %seen);
+        @current = @root_docids;
 
-	while ( @current) {
-		my @slice = splice( @current, 0, 256); # XXX approx max query length is 2K
+        while ( @current) {
+                my @slice = splice( @current, 0, 256); # XXX approx max query length is 2K
 
-		$set-> Search({
-			'$where'	=> 'parent IN (' . join(',', @slice) . ')',
-		});
+                $set-> Search({
+                        '$where'        => 'parent IN (' . join(',', @slice) . ')',
+                });
 
-    		while ( my $rec = $set-> Next) {
-			next if $seen{ $rec->{id} };
-			$seen{ $rec->{id} } = 1;
-			$result{ $rec->{parent} } = 1;
-			push @current, $rec->{id} ;
-		}
-	}
+                while ( my $rec = $set-> Next) {
+                        next if $seen{ $rec->{id} };
+                        $seen{ $rec->{id} } = 1;
+                        $result{ $rec->{parent} } = 1;
+                        push @current, $rec->{id} ;
+                }
+        }
 
-	$set-> Disconnect;
+        $set-> Disconnect;
 
-	keys %result;
+        keys %result;
 }
 
 sub get_distinct_vfields {
@@ -1180,7 +1180,7 @@ sub get_distinct_vfields {
 
 ########################################################################
 #
-#	Methods to get fields of versions
+#       Methods to get fields of versions
 #
 ########################################################################
 
@@ -1194,20 +1194,20 @@ sub get_version_fields_by_threshold {
     my @fields;
 
     if(ref $threshold) {
-	@fields = grep { defined $doctype->field($_, undef, $type) } @$threshold;
+        @fields = grep { defined $doctype->field($_, undef, $type) } @$threshold;
     } else {
-	$threshold = 0 unless (defined $threshold and $threshold >= 0);
-	$threshold = 255 if ($threshold > 255);
+        $threshold = 0 unless (defined $threshold and $threshold >= 0);
+        $threshold = 255 if ($threshold > 255);
 
-	@fields = grep {
-	    $doctype->field($_, undef, $type)->Threshold <= $threshold
-	} @{$doctype->fields_names($type)};
+        @fields = grep {
+            $doctype->field($_, undef, $type)->Threshold <= $threshold
+        } @{$doctype->fields_names($type)};
     }
     #local $, = ',';
     #$this->{LOG}->debug("First list of fields: @fields");
 
     if (my $fields = $version->fields($type)) {
-	@fields = grep { not $fields->exists($_) } @fields;
+        @fields = grep { not $fields->exists($_) } @fields;
     }
     #$this->{LOG}->debug("Second list of fields: @fields");
 
@@ -1227,54 +1227,54 @@ sub get_version_fields {
     my $doctype = $this->get_version_type($version);
 
     for (@$needed) {
-	my $fspec = $doctype->field($_, undef, $type);
-	#print STDERR "VFIELD FROM TYPE $_ (threshold $fspec->{THRESHOLD})\n";
-	if ($fspec->Repeatable) {
-	    $fields->param($_ => []);
-	} else {
-	    $fields->param($_ => $fspec->param('default_value'));
-	}
+        my $fspec = $doctype->field($_, undef, $type);
+        #print STDERR "VFIELD FROM TYPE $_ (threshold $fspec->{THRESHOLD})\n";
+        if ($fspec->Repeatable) {
+            $fields->param($_ => []);
+        } else {
+            $fields->param($_ => $fspec->param('default_value'));
+        }
     }
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'=>$this->{DB},
-					    '!Table'     =>'vfields',
-					   });
+                                            '!Table'     =>'vfields',
+                                           });
 
     #printf STDERR " get_version_fields %5d %s", $version->Docid, $version->Version;
     #print STDERR " ", (join ", ", @$needed), "\n";
 
-    $set->Search({docid	     => $version->_docid,
-		  version    => $version->_version,
-		  name       => $needed,
-		  '$fields'  => 'name, text_value, int_value, double_value, date_value',
-		 });
+    $set->Search({docid      => $version->_docid,
+                  version    => $version->_version,
+                  name       => $needed,
+                  '$fields'  => 'name, text_value, int_value, double_value, date_value',
+                 });
     while (my $rec = $set->Next) {
-	my $fspec = $doctype->field($rec->{name}, undef, $type);
-	next unless ($fspec);
-	my $field = $fspec->param('fieldtype')->param('value_field') . '_value';
-	#print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
+        my $fspec = $doctype->field($rec->{name}, undef, $type);
+        next unless ($fspec);
+        my $field = $fspec->param('fieldtype')->param('value_field') . '_value';
+        #print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
 
-	my $value = $fields->param($rec->{name});
-	# Apparantly the db returns -1.0 as -1, which is not what we want:
-	my $field_value = $rec->{$field};
-	$field_value=sprintf "%1.1f", $field_value if ($field eq 'double_value' and
-							defined $field_value and $field_value eq '-1');
-	if ((ref $value || '') eq 'ARRAY') {
-	    push(@$value, $field_value);
-	} else {
-	    $fields->param($rec->{name} => $field_value);
-	}
+        my $value = $fields->param($rec->{name});
+        # Apparantly the db returns -1.0 as -1, which is not what we want:
+        my $field_value = $rec->{$field};
+        $field_value=sprintf "%1.1f", $field_value if ($field eq 'double_value' and
+                                                        defined $field_value and $field_value eq '-1');
+        if ((ref $value || '') eq 'ARRAY') {
+            push(@$value, $field_value);
+        } else {
+            $fields->param($rec->{name} => $field_value);
+        }
     }
     $set->Disconnect;
 
     #print STDERR Dumper($fields);
 
     for (@$needed) {
-	#print STDERR "VFIELD STORE $_\n";
-	my $fspec = $doctype->field($_, undef, $type);
-	my $ftype = $fspec->param('fieldtype');
+        #print STDERR "VFIELD STORE $_\n";
+        my $fspec = $doctype->field($_, undef, $type);
+        my $ftype = $fspec->param('fieldtype');
 
-	my $value;
+        my $value;
         if ($fspec->Repeatable) {
             $value = [
                       grep {
@@ -1286,10 +1286,10 @@ sub get_version_fields {
         } else {
             $value = $ftype->copy_in($this, $fspec, $fields->param($_));
         }
-	# $value='' unless (defined $value); # This is questionable...?
-	# 20020112 asjo Indeeeeeed so. It messes up prepare_edit so that empty fields becomes ''
-	# become 0! But does changing this break all sorts of other things? XXX MUST TEST!
-	$version->field($_ => $value, $type);
+        # $value='' unless (defined $value); # This is questionable...?
+        # 20020112 asjo Indeeeeeed so. It messes up prepare_edit so that empty fields becomes ''
+        # become 0! But does changing this break all sorts of other things? XXX MUST TEST!
+        $version->field($_ => $value, $type);
     }
 
     # print STDERR Dumper($version->fields($type));
@@ -1314,7 +1314,7 @@ sub get_version_field {
 
 ########################################################################
 #
-#	Look up document and field types
+#       Look up document and field types
 #
 ########################################################################
 
@@ -1353,7 +1353,7 @@ sub get_doctype_by_name {
     return undef unless($name);
     $this->tracer($name) if ($this->{DEBUG});
     for (@{$this->{DOCTYPES}}) {
-	return $_ if ($_ and $_->param('name') eq $name);
+        return $_ if ($_ and $_->param('name') eq $name);
     }
     return undef;
 }
@@ -1374,7 +1374,7 @@ sub get_fieldtype_by_name {
     my ($this, $name) = @_;
 
     foreach (@{$this->{FIELDTYPES}}) {
-	return $_ if (defined $_ and $name eq $_->param('name'));
+        return $_ if (defined $_ and $name eq $_->param('name'));
     }
     return undef;
 }
@@ -1395,13 +1395,13 @@ sub get_fieldspec {
     return undef unless (defined $this->{FIELDSPECS}->param($name));
 
     if (defined $doctype) {
-	return $this->{FIELDSPECS}->param($name)->param($doctype->Id);
+        return $this->{FIELDSPECS}->param($name)->param($doctype->Id);
     }
     else {
-	foreach ($this->{FIELDSPECS}->param($name)->param) {
-	    return $this->{FIELDSPECS}->param($name)->param($_);
-	}
-	# croak "Couldn't find fieldspec $name!";
+        foreach ($this->{FIELDSPECS}->param($name)->param) {
+            return $this->{FIELDSPECS}->param($name)->param($_);
+        }
+        # croak "Couldn't find fieldspec $name!";
     }
 
     return undef;
@@ -1413,7 +1413,7 @@ sub set_fieldspec {
     my $t;
     unless ($t=$this->{FIELDSPECS}->param($name)) {
         $t=new Obvius::Data;
-	$this->{FIELDSPECS}->param($name => $t);
+        $this->{FIELDSPECS}->param($name => $t);
     }
 
     $t->param($doctypeid=>$fspec);
@@ -1423,7 +1423,7 @@ sub set_fieldspec {
 
 ########################################################################
 #
-#	Document parameters
+#       Document parameters
 #
 ########################################################################
 
@@ -1570,7 +1570,7 @@ sub set_docparams {
 
 ########################################################################
 #
-#	Read and validate all info about doctypes, fieldtypes etc.
+#       Read and validate all info about doctypes, fieldtypes etc.
 #
 ########################################################################
 
@@ -1581,8 +1581,8 @@ sub breadth_first {
     my @process=qw(0);
     my $num;
     while (defined ($num=shift @process)) {
-	map { push @process, $_->{id} } @{$tree->{$num}->{children}};
-	push @list, $tree->{$num};
+        map { push @process, $_->{id} } @{$tree->{$num}->{children}};
+        push @list, $tree->{$num};
     }
     return @list;
 }
@@ -1593,100 +1593,100 @@ sub read_doctypes_table {
     $this->tracer($make_objects) if ($this->{DEBUG});
 
     my $set = DBIx::Recordset->SetupObject({ '!DataSource' => $this->{DB},
-					     '!Table'      => 'doctypes',
-					   } );
+                                             '!Table'      => 'doctypes',
+                                           } );
     $set->Search;
     my %tree=(0=>{id=>0, name=>'META_ROOT'});
     while (my $rec = $set->Next()) {
-	my $new=$tree{$rec->{id}} || {};
-	map { $new->{$_}=$rec->{$_} } keys(%$rec);
-	$new->{children}=[] unless (exists $new->{children});
-	$tree{$rec->{id}}=$new unless (exists $tree{$rec->{id}});
+        my $new=$tree{$rec->{id}} || {};
+        map { $new->{$_}=$rec->{$_} } keys(%$rec);
+        $new->{children}=[] unless (exists $new->{children});
+        $tree{$rec->{id}}=$new unless (exists $tree{$rec->{id}});
 
-	my $parent=$tree{$rec->{parent}} || {};
-	$parent->{children}=[] unless (exists $parent->{children});
-	push @{$parent->{children}}, $new;
-	$tree{$rec->{parent}}=$parent unless (exists $tree{$rec->{parent}});
+        my $parent=$tree{$rec->{parent}} || {};
+        $parent->{children}=[] unless (exists $parent->{children});
+        push @{$parent->{children}}, $new;
+        $tree{$rec->{parent}}=$parent unless (exists $tree{$rec->{parent}});
     }
     my @doctypelist=breadth_first(\%tree);
     shift @doctypelist; # Remove the META_ROOT
 
     while (my $rec=shift @doctypelist) {
-	#$this->log->debug("DocType $rec->{name}/$rec->{id}");
+        #$this->log->debug("DocType $rec->{name}/$rec->{id}");
 
         # Try each doctype in this order:
         #  websiteperlname::DocType::Name
         #  XTRA_TYPES::DocType::Name
         #  MCMS::DocType::Name
 
-	my @types = ( "Obvius::DocType::$rec->{name}" );
-	unshift(@types, "$this->{XTRA_TYPES}::DocType::$rec->{name}")
-	    if ($this->{XTRA_TYPES});
-	unshift (@types, $this->config->param('perlname') . "::DocType::$rec->{name}")
-	    if ($this->config->param('perlname'));
+        my @types = ( "Obvius::DocType::$rec->{name}" );
+        unshift(@types, "$this->{XTRA_TYPES}::DocType::$rec->{name}")
+            if ($this->{XTRA_TYPES});
+        unshift (@types, $this->config->param('perlname') . "::DocType::$rec->{name}")
+            if ($this->config->param('perlname'));
 
-	my $doctype;
-	my $tester;
+        my $doctype;
+        my $tester;
         my $ev_error='';
-	for (@types) {
-	    #$this->log->debug("TESTING $_");
+        for (@types) {
+            #$this->log->debug("TESTING $_");
 
-	    no strict 'refs';
-	    $tester = "${_}::VERSION";
-	    if (defined $$tester) {
-		#$this->log->debug("FOUND $_ SUCCESS");
-		$doctype = $_;
-		last;
-	    } else {
-		#$this->log->debug("LOADING $_");
+            no strict 'refs';
+            $tester = "${_}::VERSION";
+            if (defined $$tester) {
+                #$this->log->debug("FOUND $_ SUCCESS");
+                $doctype = $_;
+                last;
+            } else {
+                #$this->log->debug("LOADING $_");
 
-		eval "use $_";
+                eval "use $_";
                 $ev_error=$@;
 
-		if ( $@) {
-			# test if this is because a module cannot be found, or something more serious
-			my $fn = $_;
-			$fn =~ s/::/\//g;
-			croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/;
-		}
-            
-		if (defined $$tester) {
-		    #$this->log->debug("LOADING $_ SUCCESS");
-		    $doctype = $_;
-		    last;
-		}
-	    }
-	}
-	# If neither the doctype itself nor the XTRA_TYPES could be found, try the parent:
-	# For this to work, we need to handle parents before children:
-	unless (defined $$tester) {
-	    my $parentdoctype=$this->get_doctype_by_id($rec->{parent}) || $rec;
-	    my $doctypename="Obvius::DocType::$rec->{name}";
-	    my $parenttypename=ref $parentdoctype;
-	    $this->log->debug("FALLING BACK TO PARENT $parenttypename");
-	    my $r=eval "package $doctypename;
+                if ( $@) {
+                        # test if this is because a module cannot be found, or something more serious
+                        my $fn = $_;
+                        $fn =~ s/::/\//g;
+                        croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/;
+                }
+
+                if (defined $$tester) {
+                    #$this->log->debug("LOADING $_ SUCCESS");
+                    $doctype = $_;
+                    last;
+                }
+            }
+        }
+        # If neither the doctype itself nor the XTRA_TYPES could be found, try the parent:
+        # For this to work, we need to handle parents before children:
+        unless (defined $$tester) {
+            my $parentdoctype=$this->get_doctype_by_id($rec->{parent}) || $rec;
+            my $doctypename="Obvius::DocType::$rec->{name}";
+            my $parenttypename=ref $parentdoctype;
+            $this->log->debug("FALLING BACK TO PARENT $parenttypename");
+            my $r=eval "package $doctypename;
                         our \@ISA = ('$parenttypename');
                         our \$VERSION = '0.0.0.0';
                         1;
                         ";
-	    if (defined $r) {
-		$doctype=$doctypename;
-	    }
-	    else {
-		$this->log->warn(" FALLBACK FAILED: $ev_error");
-	    }
-	}
+            if (defined $r) {
+                $doctype=$doctypename;
+            }
+            else {
+                $this->log->warn(" FALLBACK FAILED: $ev_error");
+            }
+        }
 
-	if (defined $doctype) {
-	    if ($make_objects) {
-		#$this->log->debug("INSTANTIATING $doctype");
-		my $object = $doctype->new($rec);
-		$object->param(debug => $this->{DEBUG});
-		$this->set_doctype($rec->{id} => $object);
-	    }
-	} else {
-	    croak "Failed to resolve $rec->{name}\n";
-	}
+        if (defined $doctype) {
+            if ($make_objects) {
+                #$this->log->debug("INSTANTIATING $doctype");
+                my $object = $doctype->new($rec);
+                $object->param(debug => $this->{DEBUG});
+                $this->set_doctype($rec->{id} => $object);
+            }
+        } else {
+            croak "Failed to resolve $rec->{name}\n";
+        }
     }
     $set->Disconnect;
 }
@@ -1697,12 +1697,12 @@ sub read_fieldtypes_table {
     $this->tracer($make_objects) if ($this->{DEBUG});
 
     my $set = DBIx::Recordset->SetupObject({ '!DataSource' => $this->{DB},
-					     '!Table'      => 'fieldtypes',
-					   } );
+                                             '!Table'      => 'fieldtypes',
+                                           } );
     $set->Search;
     while (my $rec = $set->Next()) {
-	#print STDERR "FieldType $rec->{name}\n" if ($this->{DEBUG});
-	$this->{FIELDTYPES}->[$rec->{id}] = new Obvius::FieldType($rec);
+        #print STDERR "FieldType $rec->{name}\n" if ($this->{DEBUG});
+        $this->{FIELDTYPES}->[$rec->{id}] = new Obvius::FieldType($rec);
     }
     $set->Disconnect;
 
@@ -1721,28 +1721,28 @@ sub read_fieldspecs_table {
     $this->tracer($make_objects) if ($this->{DEBUG});
 
     my $set = DBIx::Recordset->SetupObject( { '!DataSource' => $this->{DB},
-					      '!Table'      => 'fieldspecs',
-					    } );
+                                              '!Table'      => 'fieldspecs',
+                                            } );
     $set->Search;
     while (my $rec = $set->Next()) {
-	#print STDERR "FieldSpec $rec->{name}/$rec->{doctypeid} Publish $rec->{publish}\n";
-	#    if ($this->{DEBUG});
+        #print STDERR "FieldSpec $rec->{name}/$rec->{doctypeid} Publish $rec->{publish}\n";
+        #    if ($this->{DEBUG});
 
-	croak "Document type $rec->{doctypeid} for fieldspec $rec->{name} not known"
-	    unless (defined $this->get_doctype($rec->{doctypeid}));
-	croak "Field type $rec->{type} for fieldspec $rec->{name}/$rec->{doctypeid} not known"
-	    unless (defined $this->get_fieldtype($rec->{type}));
+        croak "Document type $rec->{doctypeid} for fieldspec $rec->{name} not known"
+            unless (defined $this->get_doctype($rec->{doctypeid}));
+        croak "Field type $rec->{type} for fieldspec $rec->{name}/$rec->{doctypeid} not known"
+            unless (defined $this->get_fieldtype($rec->{type}));
 
-	my $fs = new Obvius::FieldSpec($rec);
-	$fs->param(fieldtype => $this->get_fieldtype($rec->{type}));
-	$this->set_fieldspec($rec->{name}, $rec->{doctypeid}, $fs);
+        my $fs = new Obvius::FieldSpec($rec);
+        $fs->param(fieldtype => $this->get_fieldtype($rec->{type}));
+        $this->set_fieldspec($rec->{name}, $rec->{doctypeid}, $fs);
 
-	my $doctype = $this->get_doctype($rec->{doctypeid});
-	if ($rec->{publish}) {
-	    $doctype->publish_field($rec->{name} => $fs);
-	} else {
-	    $doctype->field($rec->{name} => $fs);
-	}
+        my $doctype = $this->get_doctype($rec->{doctypeid});
+        if ($rec->{publish}) {
+            $doctype->publish_field($rec->{name} => $fs);
+        } else {
+            $doctype->field($rec->{name} => $fs);
+        }
     }
     $set->Disconnect;
 }
@@ -1764,62 +1764,62 @@ sub adjust_doctype_hierarchy {
     my ($this) = @_;
 
     for my $doctype (@{$this->{DOCTYPES}}) {
-	next unless $doctype;
-	#print STDERR "Copying to $doctype->{NAME}\n" if ($this->{DEBUG});
+        next unless $doctype;
+        #print STDERR "Copying to $doctype->{NAME}\n" if ($this->{DEBUG});
 
-	my $ancestor = $this->get_doctype($doctype->Parent);
-	while ($ancestor) {
-	    #print STDERR "\tfrom $ancestor->{NAME}\n" if ($this->{DEBUG});
-	    # sortorder_field_is is also inherited:
-	    $doctype->param('sortorder_field_is'=>$ancestor->param('sortorder_field_is'))
-		unless ($doctype->param('sortorder_field_is'));
-	    for ($ancestor->field) {
-		#print STDERR "\t\tfield $_\n" if ($this->{DEBUG});
+        my $ancestor = $this->get_doctype($doctype->Parent);
+        while ($ancestor) {
+            #print STDERR "\tfrom $ancestor->{NAME}\n" if ($this->{DEBUG});
+            # sortorder_field_is is also inherited:
+            $doctype->param('sortorder_field_is'=>$ancestor->param('sortorder_field_is'))
+                unless ($doctype->param('sortorder_field_is'));
+            for ($ancestor->field) {
+                #print STDERR "\t\tfield $_\n" if ($this->{DEBUG});
 
-		my $af = $ancestor->field($_);
-		my $df = $doctype->field($_);
+                my $af = $ancestor->field($_);
+                my $df = $doctype->field($_);
 
-		my $overwrite=0;
-		if (defined $df) {
-		    if ($af->Fieldtype->Value_field ne $df->Fieldtype->Value_field) {
-			warn "The value_fields of $_ in $doctype and it's ancestor DO NOT MATCH!\n";
-			$overwrite=1;
-		    }
-		}
+                my $overwrite=0;
+                if (defined $df) {
+                    if ($af->Fieldtype->Value_field ne $df->Fieldtype->Value_field) {
+                        warn "The value_fields of $_ in $doctype and it's ancestor DO NOT MATCH!\n";
+                        $overwrite=1;
+                    }
+                }
 
-		if (!defined $df or $overwrite) {
-		    $this->log->warn("OVERWRITING $_ in $doctype!") if (defined $df and $af->_doctypeid != $df->_doctypeid);
-		    $doctype->field($_ => $ancestor->field($_));
-		    if (my $fspec=$this->get_fieldspec($_, $ancestor)) {
-			$this->set_fieldspec($_, $doctype->Id, $fspec);
-		    }
-		}
-	    }
-	    for ($ancestor->publish_field) {
-		#print STDERR "\t\tpublish_field $_\n" if ($this->{DEBUG});
+                if (!defined $df or $overwrite) {
+                    $this->log->warn("OVERWRITING $_ in $doctype!") if (defined $df and $af->_doctypeid != $df->_doctypeid);
+                    $doctype->field($_ => $ancestor->field($_));
+                    if (my $fspec=$this->get_fieldspec($_, $ancestor)) {
+                        $this->set_fieldspec($_, $doctype->Id, $fspec);
+                    }
+                }
+            }
+            for ($ancestor->publish_field) {
+                #print STDERR "\t\tpublish_field $_\n" if ($this->{DEBUG});
 
-		my $af = $ancestor->publish_field($_);
-		my $df = $doctype->publish_field($_);
+                my $af = $ancestor->publish_field($_);
+                my $df = $doctype->publish_field($_);
 
-		my $overwrite=0;
-		if (defined $df) {
-		    if ($af->Fieldtype->Value_field ne $df->Fieldtype->Value_field) {
-			warn "The value_fields of $_ in $doctype and it's ancestor DO NOT MATCH!\n";
-			$overwrite=1;
-		    }
-		}
+                my $overwrite=0;
+                if (defined $df) {
+                    if ($af->Fieldtype->Value_field ne $df->Fieldtype->Value_field) {
+                        warn "The value_fields of $_ in $doctype and it's ancestor DO NOT MATCH!\n";
+                        $overwrite=1;
+                    }
+                }
 
-		if (!defined $df or $overwrite) {
-		    $this->log->warn("OVERWRITING $_") if (defined $df and $af->_doctypeid != $df->_doctypeid);
-		    $doctype->publish_field($_ => $ancestor->publish_field($_));
-		    if (my $fspec=$this->get_fieldspec($_, $ancestor)) {
-			$this->set_fieldspec($_, $doctype->Id, $fspec);
-		    }
-		}
+                if (!defined $df or $overwrite) {
+                    $this->log->warn("OVERWRITING $_") if (defined $df and $af->_doctypeid != $df->_doctypeid);
+                    $doctype->publish_field($_ => $ancestor->publish_field($_));
+                    if (my $fspec=$this->get_fieldspec($_, $ancestor)) {
+                        $this->set_fieldspec($_, $doctype->Id, $fspec);
+                    }
+                }
 
-	    }
-	    $ancestor = $this->get_doctype($ancestor->Parent);
-	}
+            }
+            $ancestor = $this->get_doctype($ancestor->Parent);
+        }
     }
 }
 
@@ -1840,19 +1840,19 @@ sub read_type_info {
 
 ########################################################################
 #
-#	Create a new document or a new version.
+#       Create a new document or a new version.
 #
 ########################################################################
 
-sub create_new_document {		# RS 20010819 - ok
+sub create_new_document {               # RS 20010819 - ok
     my ($this, $parent, $name, $type, $lang, $fields, $owner, $grp, $error) = @_;
 
     die "User " . $this->{USER} . " does not have access to create a document here (" .
-	$parent->Id . " " . $parent->Name . ")."
-	    unless $this->can_create_new_document($parent);
+        $parent->Id . " " . $parent->Name . ")."
+            unless $this->can_create_new_document($parent);
 
     die "create_new_document needs an owner and a group"
-	unless (defined $owner and defined $grp);
+        unless (defined $owner and defined $grp);
 
     # Procedure:
     # validate, insert document, insert version, insert fields, end.
@@ -1864,63 +1864,63 @@ sub create_new_document {		# RS 20010819 - ok
 
     $this->db_begin;
     eval {
-	die "Parent object is not an Obvius::Document\n"
-	    unless (ref $parent and $parent->UNIVERSAL::isa('Obvius::Document'));
+        die "Parent object is not an Obvius::Document\n"
+            unless (ref $parent and $parent->UNIVERSAL::isa('Obvius::Document'));
 
-	die "Document name is malformed\n" unless ($name and $name =~ /^[a-zA-Z0-9._-]+$/);
+        die "Document name is malformed\n" unless ($name and $name =~ /^[a-zA-Z0-9._-]+$/);
 
-	my $newdoc = $this->get_doc_by_name_parent($name, $parent->param('id'));
-	die "Document already exists\n" if ($newdoc);
+        my $newdoc = $this->get_doc_by_name_parent($name, $parent->param('id'));
+        die "Document already exists\n" if ($newdoc);
 
-	my $doctype = $this->get_doctype_by_id($type);
-	die "Document type does not exist\n" unless ($doctype);
+        my $doctype = $this->get_doctype_by_id($type);
+        die "Document type does not exist\n" unless ($doctype);
 
         if($doctype->UNIVERSAL::can('create_new_version_handler')) {
             my $retval = $doctype->create_new_version_handler($fields, $this);
             die "Doctype specific new_version handler failed\n" unless($retval == OBVIUS_OK);
         }
 
-	die "Language code invalid: $lang\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
+        die "Language code invalid: $lang\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
 
-	die "Fields object has no param() method\n"
-	    unless (ref $fields and $fields->UNIVERSAL::can('param'));
+        die "Fields object has no param() method\n"
+            unless (ref $fields and $fields->UNIVERSAL::can('param'));
 
-	my %status = $doctype->validate_fields($fields, $this);
-	$this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
-	$this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
-	$this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
+        my %status = $doctype->validate_fields($fields, $this);
+        $this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
+        $this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
+        $this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
 
-	my @fields = @{$status{valid}};
-	# Same as new_version:
-	push @fields, @{$status{invalid}}
-	    if ($status{invalid});
-	# This is necessary for searching; missing fields has to be in the database,
-	# but with the undef/NULL value.
-	push @fields, @{$status{missing}}
-	    if ($status{missing});
+        my @fields = @{$status{valid}};
+        # Same as new_version:
+        push @fields, @{$status{invalid}}
+            if ($status{invalid});
+        # This is necessary for searching; missing fields has to be in the database,
+        # but with the undef/NULL value.
+        push @fields, @{$status{missing}}
+            if ($status{missing});
 
-	$this->{LOG}->info("====> Inserting new document ... insert into documents");
-	$docid = $this->db_insert_document($name, $parent->param('id'), $type, $owner, $grp);
+        $this->{LOG}->info("====> Inserting new document ... insert into documents");
+        $docid = $this->db_insert_document($name, $parent->param('id'), $type, $owner, $grp);
 
-	$this->{LOG}->info("====> Inserting new document ... insert into versions");
-	$version = $this->db_insert_version($docid, $type, $lang);
+        $this->{LOG}->info("====> Inserting new document ... insert into versions");
+        $version = $this->db_insert_version($docid, $type, $lang);
 
-	$this->{LOG}->info("====> Inserting new document ... insert info vfields");
-	$this->db_insert_vfields($docid, $version, $fields, \@fields);
+        $this->{LOG}->info("====> Inserting new document ... insert info vfields");
+        $this->db_insert_vfields($docid, $version, $fields, \@fields);
 
-	$this->{LOG}->info("====> Inserting new document ... COMMIT");
-	$this->db_commit;
+        $this->{LOG}->info("====> Inserting new document ... COMMIT");
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	my $error_msg = $ev_error;
+    if ($ev_error) {                    # handle error
+        my $error_msg = $ev_error;
         ($error_msg) = ($error_msg =~ m/^(.*?)\n/) if $error_msg;
         $this->{DB_Error} = $error_msg;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Inserting new document ... failed ($error_msg)");
-	$$error = $error_msg if ($error_msg and defined($error));
-	return wantarray ? () : undef;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Inserting new document ... failed ($error_msg)");
+        $$error = $error_msg if ($error_msg and defined($error));
+        return wantarray ? () : undef;
     }
 
     undef $this->{DB_Error};
@@ -1934,7 +1934,7 @@ sub create_new_version {
     my ($this, $doc, $type, $lang, $fields) = @_;
 
     die "User $this->{USER} does not have access to edit the document."
-	unless $this->can_create_new_version($doc);
+        unless $this->can_create_new_version($doc);
 
     # Procedure:
     # validate, insert version, insert fields, end.
@@ -1946,56 +1946,56 @@ sub create_new_version {
 
     $this->db_begin;
     eval {
-	die "Document object is not an Obvius::Document\n"
-	    unless (ref $doc and $doc->UNIVERSAL::isa('Obvius::Document'));
+        die "Document object is not an Obvius::Document\n"
+            unless (ref $doc and $doc->UNIVERSAL::isa('Obvius::Document'));
 
-	my $docid = $doc->param('id');
-	die "Document id is invalid\n"
-	    unless (defined $docid and $docid =~ /^\d+$/ and $docid > 0);
+        my $docid = $doc->param('id');
+        die "Document id is invalid\n"
+            unless (defined $docid and $docid =~ /^\d+$/ and $docid > 0);
 
-	my $doctype = $this->get_doctype_by_id($type);
-	die "Document type does not exist\n" unless ($doctype);
+        my $doctype = $this->get_doctype_by_id($type);
+        die "Document type does not exist\n" unless ($doctype);
 
         if($doctype->UNIVERSAL::can('create_new_version_handler')) {
             my $retval = $doctype->create_new_version_handler($fields, $this);
             die "Doctype specific new_version handler failed" unless($retval == OBVIUS_OK);
         }
 
-	die "Language code invalid: $lang\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
+        die "Language code invalid: $lang\n" unless ($lang and $lang =~ /^\w\w(_\w\w)?$/);
 
-	die "Fields object has no param() method\n"
-	    unless (ref $fields and $fields->UNIVERSAL::can('param'));
+        die "Fields object has no param() method\n"
+            unless (ref $fields and $fields->UNIVERSAL::can('param'));
 
-	my %status = $doctype->validate_fields($fields, $this);
-	$this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
-	$this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
-	$this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
+        my %status = $doctype->validate_fields($fields, $this);
+        $this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
+        $this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
+        $this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
 
-	my @fields = @{$status{valid}};
-	# Equivalent to new_document:
-	push @fields, @{$status{invalid}}
-	    if ($status{invalid});
-	# This is necessary for searching; missing fields has to be in the database,
-	# but with the undef/NULL value.
-	push @fields, @{$status{missing}}
-	    if ($status{missing});
+        my @fields = @{$status{valid}};
+        # Equivalent to new_document:
+        push @fields, @{$status{invalid}}
+            if ($status{invalid});
+        # This is necessary for searching; missing fields has to be in the database,
+        # but with the undef/NULL value.
+        push @fields, @{$status{missing}}
+            if ($status{missing});
 
-	$this->{LOG}->info("====> Inserting new version ... insert into versions");
-	$version = $this->db_insert_version($docid, $type, $lang);
+        $this->{LOG}->info("====> Inserting new version ... insert into versions");
+        $version = $this->db_insert_version($docid, $type, $lang);
 
-	$this->{LOG}->info("====> Inserting new version ... insert into vfields");
-	$this->db_insert_vfields($docid, $version, $fields, \@fields);
+        $this->{LOG}->info("====> Inserting new version ... insert into vfields");
+        $this->db_insert_vfields($docid, $version, $fields, \@fields);
 
-	$this->{LOG}->info("====> Inserting new version ... COMMIT");
-	$this->db_commit;
+        $this->{LOG}->info("====> Inserting new version ... COMMIT");
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Inserting new version ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Inserting new version ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -2009,7 +2009,7 @@ sub create_new_version {
 
 ########################################################################
 #
-#	Delete a document, rename a document
+#       Delete a document, rename a document
 #
 ########################################################################
 
@@ -2017,52 +2017,52 @@ sub delete_document {
     my ($this, $doc) = @_;
 
     die "User $this->{USER} does not have access to delete the document."
-	unless $this->can_delete_document($doc);
+        unless $this->can_delete_document($doc);
 
     my $doc_uri=$this->get_doc_uri($doc);
     my $doc_parent_id=$doc->Parent;
 
     $this->db_begin;
     eval {
-	die "Document has sub documents\n"
-	    if ($this->get_docs_by_parent($doc->Id));
+        die "Document has sub documents\n"
+            if ($this->get_docs_by_parent($doc->Id));
 
-	$this->{LOG}->info("====> Deleting fields ... delete from vfields");
-	$this->db_delete_vfields($doc->Id);
-	$this->{LOG}->info("====> Deleting versions ... delete from versions");
-	$this->db_delete_versions($doc->Id);
+        $this->{LOG}->info("====> Deleting fields ... delete from vfields");
+        $this->db_delete_vfields($doc->Id);
+        $this->{LOG}->info("====> Deleting versions ... delete from versions");
+        $this->db_delete_versions($doc->Id);
 
-	# We could delete docparms as well:
+        # We could delete docparms as well:
 
-	#  print STDERR "====> Deleting document ... delete from docparms\n";
-	#  $this->db_delete_docparms($doc->Id);
+        #  print STDERR "====> Deleting document ... delete from docparms\n";
+        #  $this->db_delete_docparms($doc->Id);
 
-	# We could delete voters and votes as well:
+        # We could delete voters and votes as well:
 
-	#  print STDERR "====> Deleting document ... delete from voters\n";
-	#  $this->db_delete_voters($doc->Id);
-	#  print STDERR "====> Deleting document ... delete from votes\n";
-	#  $this->db_delete_votes($doc->Id);
+        #  print STDERR "====> Deleting document ... delete from voters\n";
+        #  $this->db_delete_voters($doc->Id);
+        #  print STDERR "====> Deleting document ... delete from votes\n";
+        #  $this->db_delete_votes($doc->Id);
 
-	$this->{LOG}->info("====> Deleting document ... delete from subscriptions");
-	$this->db_delete_subscriptions($doc->Id);
+        $this->{LOG}->info("====> Deleting document ... delete from subscriptions");
+        $this->db_delete_subscriptions($doc->Id);
 
-	$this->{LOG}->info("====> Deleting document ... delete from comments");
-	$this->db_delete_comments($doc->Id);
+        $this->{LOG}->info("====> Deleting document ... delete from comments");
+        $this->db_delete_comments($doc->Id);
 
-	$this->{LOG}->info("====> Deleting document ... delete from document");
-	$this->db_delete_document($doc->Id);
+        $this->{LOG}->info("====> Deleting document ... delete from document");
+        $this->db_delete_document($doc->Id);
 
-	$this->{LOG}->info("====> Deleting document ... COMMIT");
-	$this->db_commit;
+        $this->{LOG}->info("====> Deleting document ... COMMIT");
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
-	$this->db_rollback;
-	$this->{LOG}->error("====> Deleting document ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Deleting document ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -2083,7 +2083,7 @@ sub rename_document {
     }
 
     die "User $this->{USER} does not have access to rename/move the document."
-	unless $this->can_rename_document($doc);
+        unless $this->can_rename_document($doc);
 
     $new_uri =~ s/[.]html?$//;
     return undef unless ($new_uri);
@@ -2091,11 +2091,11 @@ sub rename_document {
     # Split path from name:
     my @new_path=grep {defined $_ and $_ ne ''} split m!/!, $new_uri;
     foreach (@new_path) {
-	unless (/^[a-zA-Z0-9._-]+$/) {
+        unless (/^[a-zA-Z0-9._-]+$/) {
             $$errmsg = 'Bad characters in name' if(defined $errmsg);
-	    $this->log->warn("Bad characters in name");
-	    return undef;
-	}
+            $this->log->warn("Bad characters in name");
+            return undef;
+        }
     }
     my $new_name=pop @new_path;
     my $new_path='/' . join '/', @new_path;
@@ -2108,47 +2108,47 @@ sub rename_document {
     unless ($new_parent) {
         $$errmsg = 'Parent does not exist' if(defined $errmsg);
         warn "Parent does not exist";
-	return undef;
+        return undef;
     }
     unless ($this->can_rename_document_create($new_parent)) {
         $$errmsg = 'You do not have access to move the document to this location.' if(defined $errmsg);
-	return undef;
+        return undef;
     }
 
     # Does the document exists already?
     if ($this->lookup_document("$new_path/$new_name")) {
-	warn "Another document by that name already exists";
-	return undef;
+        warn "Another document by that name already exists";
+        return undef;
     }
 
     # Don't move below myself:
     my @new_path_docs=$this->get_doc_by_path($new_path);
     foreach (@new_path_docs) {
-	next unless defined $_;
-	if ($_->Id eq $doc->Id) {
+        next unless defined $_;
+        if ($_->Id eq $doc->Id) {
             $$errmsg = "It is not possible to move the document under itself" if(defined $errmsg);
-	    $this->log->warn("It is not possible to move the document under itself");
-	    return undef;
-	}
+            $this->log->warn("It is not possible to move the document under itself");
+            return undef;
+        }
     }
 
     $this->db_begin;
     eval {
-	$this->{LOG}->info("====> Renaming/moving document ...");
-	$doc->param(parent=>$new_parent->Id);
-	$doc->param(name=>$new_name);
-	$this->db_update_document($doc, [qw(parent name)]);
+        $this->{LOG}->info("====> Renaming/moving document ...");
+        $doc->param(parent=>$new_parent->Id);
+        $doc->param(name=>$new_name);
+        $this->db_update_document($doc, [qw(parent name)]);
 
-	$this->{LOG}->info("====> Renaming/moving document ... COMMIT");
-	$this->db_commit;
+        $this->{LOG}->info("====> Renaming/moving document ... COMMIT");
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Renaming/moving document ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Renaming/moving document ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -2163,7 +2163,7 @@ sub rename_document {
 
 ########################################################################
 #
-#	Publish and unpublish versions
+#       Publish and unpublish versions
 #
 ########################################################################
 
@@ -2174,7 +2174,7 @@ sub publish_version {
     my ($this, $vdoc, $error, $delayed_publish) = @_;
 
     die "User $this->{USER} does not have access to publish the document."
-	unless $this->can_publish_version($vdoc);
+        unless $this->can_publish_version($vdoc);
 
     if($delayed_publish) {
         delete $vdoc->{PUBLISH_FIELDS}->{PUBLISHED};
@@ -2185,47 +2185,47 @@ sub publish_version {
 
     $this->db_begin;
     eval {
-	my $doctype = $this->get_version_type($vdoc);
-	die "Version document type does not exist\n" unless ($doctype);
+        my $doctype = $this->get_version_type($vdoc);
+        die "Version document type does not exist\n" unless ($doctype);
 
-	my %status = $doctype->validate_publish_fields($vdoc->publish_fields, $this);
+        my %status = $doctype->validate_publish_fields($vdoc->publish_fields, $this);
 
-	# published is not missing if we are doing a delayed publish.
-	if($delayed_publish) {
-	    my @missing_fields = @{$status{missing} || []};
-	    @missing_fields = grep {$_ ne 'PUBLISHED'} @missing_fields;
-	    if(scalar(@missing_fields)) {
-		$status{missing} = \@missing_fields;
-	    } else {
-		delete $status{missing};
-	    }
-	}
+        # published is not missing if we are doing a delayed publish.
+        if($delayed_publish) {
+            my @missing_fields = @{$status{missing} || []};
+            @missing_fields = grep {$_ ne 'PUBLISHED'} @missing_fields;
+            if(scalar(@missing_fields)) {
+                $status{missing} = \@missing_fields;
+            } else {
+                delete $status{missing};
+            }
+        }
 
-	die "Missing publish fields: @{$status{missing}}\n" if ($status{missing});
-	die "Invalid publish fields: @{$status{invalid}}\n" if ($status{invalid});
-	#warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
+        die "Missing publish fields: @{$status{missing}}\n" if ($status{missing});
+        die "Invalid publish fields: @{$status{invalid}}\n" if ($status{invalid});
+        #warn "Excess fields not stored: @{$status{excess}}\n" if ($status{excess});
 
-	my @fields = @{$status{valid}};
+        my @fields = @{$status{valid}};
 
-	unless($delayed_publish) {
-	    $this->{LOG}->info("====> Publishing version ... mark public");
-	    $this->db_update_version_mark_public($vdoc);
-	}
+        unless($delayed_publish) {
+            $this->{LOG}->info("====> Publishing version ... mark public");
+            $this->db_update_version_mark_public($vdoc);
+        }
 
-	$this->{LOG}->info("====> Publishing version ... publish fields");
-	$this->db_insert_vfields($vdoc->DocId, $vdoc->Version, $vdoc->publish_fields, \@fields);
+        $this->{LOG}->info("====> Publishing version ... publish fields");
+        $this->db_insert_vfields($vdoc->DocId, $vdoc->Version, $vdoc->publish_fields, \@fields);
 
-	$this->{LOG}->info("====> Publishing version ... COMMIT");
-	$this->db_commit;
+        $this->{LOG}->info("====> Publishing version ... COMMIT");
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Publishing version ... failed ($ev_error)");
-	($$error) = ($ev_error =~ /^(.*)\n/) if(defined($error));
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Publishing version ... failed ($ev_error)");
+        ($$error) = ($ev_error =~ /^(.*)\n/) if(defined($error));
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -2234,24 +2234,24 @@ sub publish_version {
     $this->register_modified_docid( $vdoc->Docid );
 
     if($delayed_publish) {
-	$this->{LOG}->info("====> Setting 'at' autopublishing job...");
+        $this->{LOG}->info("====> Setting 'at' autopublishing job...");
 
-	my $publish_on = $vdoc->{PUBLISH_FIELDS}->{PUBLISH_ON};
-	my ($year, $month, $day, $hour, $min) = ($publish_on =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/);
-	my $site = $this->{OBVIUS_CONFIG}->{NAME};
+        my $publish_on = $vdoc->{PUBLISH_FIELDS}->{PUBLISH_ON};
+        my ($year, $month, $day, $hour, $min) = ($publish_on =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/);
+        my $site = $this->{OBVIUS_CONFIG}->{NAME};
 
-	my $command = 
-		"echo perl -w ".
-		$this->config->param('prefix') . 
-		"/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
+        my $command =
+                "echo perl -w ".
+                $this->config->param('prefix') .
+                "/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
 
-	my $retval = system($command);
-	
-	if($retval) {
-	    $this->{LOG}->error("Error while running at/delaypublish, returncode: $retval");
-	    return undef;
-	}
-	$this->{LOG}->info("====> Setting 'at' autopublishing job ... done");
+        my $retval = system($command);
+
+        if($retval) {
+            $this->{LOG}->error("Error while running at/delaypublish, returncode: $retval");
+            return undef;
+        }
+        $this->{LOG}->info("====> Setting 'at' autopublishing job ... done");
     }
     return 1;
 }
@@ -2271,39 +2271,39 @@ sub unpublish_version {
         unless (ref $vdoc and $vdoc->UNIVERSAL::isa('Obvius::Version'));
 
     die "User $this->{USER} does not have access to hide the document."
-	unless $this->can_unpublish_version($vdoc);
+        unless $this->can_unpublish_version($vdoc);
 
     # XXX Should unpublish the public version on the same language as vdoc, if vdoc isn't the public one!!
 
     $this->db_begin;
     eval {
-	my $doctype = $this->get_version_type($vdoc);
-	my @fields = $doctype->publish_fields->param;
+        my $doctype = $this->get_version_type($vdoc);
+        my @fields = $doctype->publish_fields->param;
 
-	$this->{LOG}->info("====> Unpublishing version ... mark unpublic");
-	$this->db_update_version_mark_public($vdoc, 0);
+        $this->{LOG}->info("====> Unpublishing version ... mark unpublic");
+        $this->db_update_version_mark_public($vdoc, 0);
 
-	$this->{LOG}->info("====> Unpublishing version ... deleting publish vfields");
+        $this->{LOG}->info("====> Unpublishing version ... deleting publish vfields");
 
-	foreach (@fields) {
-	    if ($vdoc->DocId and $vdoc->Version and $_) {
-		$this->db_delete_vfield($vdoc->DocId, $vdoc->Version, $_);
-	    }
-	    else {
-		die "Trying to delete vfield gave problems";
-	    }
-	}
+        foreach (@fields) {
+            if ($vdoc->DocId and $vdoc->Version and $_) {
+                $this->db_delete_vfield($vdoc->DocId, $vdoc->Version, $_);
+            }
+            else {
+                die "Trying to delete vfield gave problems";
+            }
+        }
 
-	$this->{LOG}->info("====> Unpublishing version ... COMMIT");
-	$this->db_commit;
+        $this->{LOG}->info("====> Unpublishing version ... COMMIT");
+        $this->db_commit;
     };
 
     my $ev_error=$@;
-    if ($ev_error) {			# handle error
-	$this->{DB_Error} = $ev_error;
- 	$this->db_rollback;
-	$this->{LOG}->error("====> Unpublishing version ... failed ($ev_error)");
-	return undef;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Unpublishing version ... failed ($ev_error)");
+        return undef;
     }
 
     undef $this->{DB_Error};
@@ -2356,7 +2356,7 @@ sub delete_single_version {
         $this->db_commit;
     };
 
-    if ($@) {			# handle error
+    if ($@) {                   # handle error
         $this->{DB_Error} = $@;
         $this->db_rollback;
         $this->{LOG}->error("====> Deleting single version ... failed ($@)");
@@ -2373,7 +2373,7 @@ sub delete_single_version {
 
 ########################################################################
 #
-#	Registering modified docids
+#       Registering modified docids
 #
 ########################################################################
 
@@ -2401,7 +2401,7 @@ sub list_modified_docid {
 
 ########################################################################
 #
-#	Registering modifications
+#       Registering modifications
 #
 ########################################################################
 
@@ -2435,7 +2435,7 @@ sub list_modified {
 ########################################################################
 ########################################################################
 #
-#	Currently unused code.
+#       Currently unused code.
 #
 ########################################################################
 ########################################################################
@@ -2452,22 +2452,22 @@ sub get_field {
 
     my $versiontype = $version->get_version_type();
     if( my $fieldspec = $versiontype->get_fieldspec($name, $versiontype) ) {
-	my $value = $version->get_vfield($name);
-	$value=$fieldspec->_default_value unless $value;
+        my $value = $version->get_vfield($name);
+        $value=$fieldspec->_default_value unless $value;
 
-	$version->{$name} = $value;
-	return $value;
+        $version->{$name} = $value;
+        return $value;
     }
     else {
-	$this->{LOG}->warn("Asked for field $name, which does not exist in this document-type (ref($versiontype))!");
-	return undef;
+        $this->{LOG}->warn("Asked for field $name, which does not exist in this document-type (ref($versiontype))!");
+        return undef;
     }
 }
 
 
 ########################################################################
 #
-#	Class methods
+#       Class methods
 #
 ########################################################################
 
@@ -2480,13 +2480,13 @@ sub sanity_check {
     $this->tracer($config) if ($this->{DEBUG});
 
     my $set=DBIx::Recordset->SetupObject( {'!DataSource'=>$this->{DB},
-					   '!Table'     =>'doctypes',
-					  } );
+                                           '!Table'     =>'doctypes',
+                                          } );
     $set->Search();
     while (my $rec=$set->Next()) {
-	my $type='Obvius::DocType';
-	$type .= "::$rec->{name}";
-	eval "require $type" or croak "Couldn't load $type";
+        my $type='Obvius::DocType';
+        $type .= "::$rec->{name}";
+        eval "require $type" or croak "Couldn't load $type";
     }
     $set->Disconnect;
 }
@@ -2495,7 +2495,7 @@ sub sanity_check {
 
 ########################################################################
 #
-#	DocType external methods
+#       DocType external methods
 #
 ########################################################################
 
@@ -2516,20 +2516,20 @@ sub get_fieldspecs_XXX {
     return $doctype->{FIELDSPECS} if $doctype->{FIELDSPECS};
 
     my $set=DBIx::Recordset->SetupObject( {'!DataSource'=>$this->{DB},
-					   '!Table'     =>'fieldspecs',
-					  } );
+                                           '!Table'     =>'fieldspecs',
+                                          } );
     my %fieldspecs;
     my $type=$doctype;
     while( $type )
     {
-	print "  DOCTYPE: " . $type->_id . ", " . $type->_name . ", " . $type->_parent . "\n" if $this->{DEBUG};
-	$set->Search( { typeid=>$type->_id } );
-	while( my $rec=$set->Next )
-	{
-	    my $fieldspec= Obvius::FieldSpec->new($rec);
-	    $fieldspecs{$fieldspec->name}=$fieldspec;
-	}
-	$type=$this->get_doctype($type->_parent);
+        print "  DOCTYPE: " . $type->_id . ", " . $type->_name . ", " . $type->_parent . "\n" if $this->{DEBUG};
+        $set->Search( { typeid=>$type->_id } );
+        while( my $rec=$set->Next )
+        {
+            my $fieldspec= Obvius::FieldSpec->new($rec);
+            $fieldspecs{$fieldspec->name}=$fieldspec;
+        }
+        $type=$this->get_doctype($type->_parent);
     }
     $set->Disconnect;
 
@@ -2553,13 +2553,13 @@ sub get_editpages {
     return $doctype->{EDITPAGES} if $doctype->{EDITPAGES};
 
     my $set=DBIx::Recordset->SetupObject( {'!DataSource'=>$this->{DB},
-					   '!Table'     =>'editpages',
-					  } );
+                                           '!Table'     =>'editpages',
+                                          } );
     my $editpages={};
     $set->Search( { doctypeid=>$doctype->Id } );
     while( my $rec=$set->Next ) {
-	my $editpage=Obvius::EditPage->new($rec);
-	$editpages->{$editpage->Page}=$editpage;
+        my $editpage=Obvius::EditPage->new($rec);
+        $editpages->{$editpage->Page}=$editpage;
     }
     $set->Disconnect;
 
@@ -2575,32 +2575,32 @@ use Time::HiRes qw(gettimeofday);
 
 sub new
 {
-	my ( $self, $id, $filehandle) = @_;
+        my ( $self, $id, $filehandle) = @_;
 
-	$id = join(':', (caller)[1,2]) unless defined $id;
-	$filehandle ||= \*STDERR;
+        $id = join(':', (caller)[1,2]) unless defined $id;
+        $filehandle ||= \*STDERR;
 
-	return bless [ $id, scalar gettimeofday(), $filehandle, 1 ];
+        return bless [ $id, scalar gettimeofday(), $filehandle, 1 ];
 }
 
 sub lap
 {
-	my ( $self, $id) = @_;
+        my ( $self, $id) = @_;
 
-	return unless $self-> [3];
+        return unless $self-> [3];
 
-	$id = join(':', (caller)[1,2]) unless defined $id;
+        $id = join(':', (caller)[1,2]) unless defined $id;
 
-	my $now  = scalar gettimeofday();
-	my $diff = $now - $self->[1];
+        my $now  = scalar gettimeofday();
+        my $diff = $now - $self->[1];
 
-	printf { $self-> [2] } "$$ %.3f sec %s %s\n",
-		$diff,
-		$self-> [0], $id
-	if $diff >= 0.01; # who cares otherwise
+        printf { $self-> [2] } "$$ %.3f sec %s %s\n",
+                $diff,
+                $self-> [0], $id
+        if $diff >= 0.01; # who cares otherwise
 
-	$self-> [0] = $id;
-	$self-> [1] = $now;
+        $self-> [0] = $id;
+        $self-> [1] = $now;
 }
 
 sub disable { shift->[3] = 0 }
@@ -2649,17 +2649,17 @@ Obvius is the main object for accessing the content manager.
     sub a{
         my $b = Obvius::Benchmark-> new if $this-> {BENCHMARK};
         ... code ...
-    }	
-    
+    }
+
     sub b{
         my $b = Obvius::Benchmark-> new('sub b') if $this-> {BENCHMARK};
         ....
-	$b-> lap('point 1') if $b;
+        $b-> lap('point 1') if $b;
         ....
-	$b-> lap('point 2') if $b;
-	....
-	undef $b;  # <-- this is also a checkpoint
-    }	
+        $b-> lap('point 2') if $b;
+        ....
+        undef $b;  # <-- this is also a checkpoint
+    }
 
 =head2 EXPORT
 
