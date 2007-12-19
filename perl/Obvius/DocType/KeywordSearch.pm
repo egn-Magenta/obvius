@@ -153,9 +153,9 @@ sub action {
     }
     else {
         $kwdocs = $obvius->get_document_subdocs($basedoc,
-                                              sortvdoc=>$vdoc,
-                                              public=>!$is_admin,
-                                              notexpired=>!$is_admin,
+						sortvdoc=>$vdoc,
+						public=>!$is_admin,
+						notexpired=>!$is_admin,
                                             );
     }
 
