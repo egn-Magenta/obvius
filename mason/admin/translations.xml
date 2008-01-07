@@ -378,8 +378,8 @@
     <translation lang="da">slettet</translation>
   </text>
   <text key="rename">
-    <translation lang="en">rename</translation>
-    <translation lang="da">omdøb</translation>
+    <translation lang="en">Rename</translation>
+    <translation lang="da">Skift Url</translation>
   </text>
   <text key="Rename cancelled">
     <translation lang="en">Rename cancelled</translation>
