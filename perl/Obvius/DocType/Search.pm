@@ -139,7 +139,6 @@ sub get_search_words {
     my ($this, $words)=@_;
 
     return () unless ($words);
-
     
     if ($words =~ /Ã/) {
 	$words = lc(utf8($words)->latin1);
@@ -147,7 +146,7 @@ sub get_search_words {
 	$words = lc($words);
     }
     
-    return ($words =~ /\b(\w+[*]?)/g);
+    return ($words =~ /\b([æøåÅÆØ\w]+[*]?)/g);
 }
 
 sub do_search_page {
@@ -242,6 +241,8 @@ sub action {
 	$search_term = join(' and ', @words);
 	$search_method = 'boolean';
     }
+    
+
 
     my $search_type=$input->param('search_type');
     # Add _substring to the search_type if it's defined (backwards compability) _and_ there
@@ -262,13 +263,13 @@ sub action {
     $output->param(search_type => $search_type);
 
     my %args = (
-		words => $search_term,
-		method => $search_method,
-		format => 'short',
-		matchesperpage => 10,
-		config => $this->htdig_config_name($obvius, $input) . (defined $search_type ? '_' . $search_type : ''),
-		restrict => '',
-		exclude => '',
+	words => $search_term,
+	method => $search_method,
+	format => 'short',
+	matchesperpage => 10,
+	config => $this->htdig_config_name($obvius, $input) . (defined $search_type ? '_' . $search_type : ''),
+	restrict => '',
+	exclude => '',
 	       );
 
     my @data;
@@ -338,7 +339,7 @@ sub action {
 	foreach $part (@main_parts) {
 	    $args{restrict} = $base . lc($part->param('name')) . '/';
 
-	    $output->param(Obvius_SIDE_EFFECTS => 1); # htdig could do anything....
+	    $output->param(OBVIUS_SIDE_EFFECTS => 1); # htdig could do anything....
 	    my $lines = read_htdig_output(\%args, $part, 1, 1, $obvius);
 
 	    push(@data, ({
@@ -356,7 +357,7 @@ sub action {
 
 	$part = new Obvius::Version({title=>'Andet', name=>'andet'});
 
-	$output->param(Obvius_SIDE_EFFECTS => 1); # htdig could do anything....
+	$output->param(OBVIUS_SIDE_EFFECTS => 1); # htdig could do anything....
 	my $lines = read_htdig_output(\%args, $part, 1, 1, $obvius);
 
 	push(@data, ({
