@@ -150,7 +150,8 @@ sub get_search_words {
     } else {
 	$words = lc($words);
     }
-
+    
+    print STDERR "Words: $words\n";
     return ($words =~ /\b(\w+[*]?)/g);
 }
 
