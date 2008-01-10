@@ -140,10 +140,6 @@ sub get_search_words {
 
     return () unless ($words);
 
-    print STDERR "Words before: $words\n";
-    $words =~ s/%([\dA-Fa-f]{2})/chr hex $1/g;
-
-    print STDERR "words after: $words\n";
     
     if ($words =~ /Ã/) {
 	$words = lc(utf8($words)->latin1);
@@ -151,7 +147,6 @@ sub get_search_words {
 	$words = lc($words);
     }
     
-    print STDERR "Words: $words\n";
     return ($words =~ /\b(\w+[*]?)/g);
 }
 
