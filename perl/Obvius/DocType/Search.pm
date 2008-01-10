@@ -139,8 +139,11 @@ sub get_search_words {
     my ($this, $words)=@_;
 
     return () unless ($words);
-    
+
+    print STDERR "Words before: $words\n";
     $words =~ s/%([\dA-Fa-f]{2})/chr hex $1/g;
+
+    print STDERR "words after: $words\n";
     
     if ($words =~ /Ã/) {
 	$words = lc(utf8($words)->latin1);
