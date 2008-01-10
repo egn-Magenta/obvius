@@ -37,7 +37,7 @@ sub read_htdig_output {
     my $cmd;
 
 
-    # convert the incoming args to an url like string
+    # convert the incoming args to an url-like string
     if (ref $args) {
     	my %map;
 
@@ -139,7 +139,9 @@ sub get_search_words {
     my ($this, $words)=@_;
 
     return () unless ($words);
-
+    
+    $words =~ s/%([\dA-Fa-f]{2})/chr hex $1/g;
+    
     if ($words =~ /Ã/) {
 	$words = lc(utf8($words)->latin1);
     } else {
