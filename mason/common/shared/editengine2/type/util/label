@@ -30,9 +30,17 @@ $name=>undef
 %
 <%init>
 use WebObvius::Tooltip qw(get_tooltip_path);
-
-my $doctype = $obvius->get_document_type($doc);
 my ($docname, $tooltip_url);
+
+#    print $session->{obvius_new_doctypeid};
+
+#find out if document is new. (that means $session->{obvius_new_doctypeid is set})
+my $session = $r->pnotes('obvius_session');
+my $doctype_id = $session->{obvius_new_doctypeid} if (defined $session);
+my $doctype = $obvius->get_doctype_by_id($doctype_id) if (defined $doctype_id);
+
+#If document was not new.
+$doctype ||= $obvius->get_document_type($doc);
 
 if ($field->{tooltip}) {
     $docname = $field->{tooltip};
