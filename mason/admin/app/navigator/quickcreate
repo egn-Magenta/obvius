@@ -105,13 +105,14 @@ if ($obvius_quickcreate_do) {
         $field_values->param(size=>$data->{size});
     }
 
+    $field_values->param(expires => "9999-01-01 18:00");
     # Normalize name:
     $name=$1 if ($name=~m!([^/\\]+)$!);
     $name=~s/[^a-zA-Z0-9._-]//g;
 
     # Set grpid (XXX this should, perhaps, be selectable):
     my $grpid=$obvius->get_user_groups($obvius->get_userid($obvius->user))->[0];
-
+    
     my %args=(
               name=>$name,
               grpid=>$grpid,
