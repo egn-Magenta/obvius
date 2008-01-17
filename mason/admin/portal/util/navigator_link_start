@@ -1,36 +1,21 @@
-<a onclick="<& navigator_link_start:onclick &>" href="<& navigator_link_start:href, %ARGS &>">\
-%
-%
-<%method href>\
-%
 <%args>
-$path=>undef
-$fieldname=>undef
-</%args>
-%
-./?obvius_app_navigator=1<% defined $fieldname ? '&amp;fieldname=' . $fieldname : '' %><% defined $path ? '&amp;path=' . $path : '' %>\
-%
-</%method>
-%
-%
-<%method onclick>\
-%
-<%args>
-$fieldname=>undef
-</%args>
-%
-javascript:return obvius_open_window(<% $href %>, 'obvius_navigator', 'width=800', 'height=432', 'status=yes');\
-%
-%
+$path => '/'
+$purpose => 'browser'
+$fieldname => undef
+</%args> 
+<a href="#" onclick="javascript:window.open(<% $url %>, 'navigator', 800, 500)">
+<img
+
 <%init>
-my $href='this.href';
-$href="'" . $m->scomp('navigator_link_start:href', %ARGS) . "'" if (defined $fieldname);
+use Digest::MD5(md5_hex);
+
+$obvius->read_user_and_group_info();
+
+my $user = $obvius->{USER};
+my $passwd = $obvius->{USERS}{$user}{passwd};
+my $time = time();
+
+my $phrase = md5_hex($passwd . $time);
+my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
+$url .= "&fieldname=$fieldname" if (defined($fieldname));
 </%init>
-%
-</%method>
-%
-%
-<%args>
-$path=>undef
-$fieldname=>undef
-</%args>
