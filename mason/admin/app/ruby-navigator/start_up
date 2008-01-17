@@ -1,0 +1,21 @@
+<%args>
+$path => '/'
+$purpose => 'browser'
+$fieldname => undef
+</%args> 
+function obvius_open_navigator() {
+         window.open(<% $url %>);
+}
+<%init>
+use Digest::MD5(md5_hex);
+
+$obvius->read_user_and_group_info();
+
+my $user = $obvius->{USER};
+my $passwd = $obvius->{USERS}{$user}{passwd};
+my $time = time();
+
+my $phrase = md5_hex($passwd . $time);
+my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
+$url .= "&fieldname=$fieldname" if (defined($fieldname));
+</%init>
