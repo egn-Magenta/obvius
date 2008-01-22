@@ -1,0 +1,21 @@
+<%args>
+</%args>
+<%init>
+use Digest::MD5(md5_hex);
+
+$obvius->read_user_and_group_info();
+
+my $user	= $obvius->{USER};
+my $passwd	= $obvius->{USERS}{$user}{passwd};
+my $time	= time();
+my $path	= $ARGS{path} || '/';
+my $purpose	= $ARGS{purpose} || 'open_one';
+my $fieldname	= $ARGS{fieldname};
+
+my $phrase	= md5_hex($passwd . $time);
+my $url		= "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose&path=$path";
+$url .		= "&fieldname=$fieldname" if (defined($fieldname));
+
+$m->comp(/shared/redirect, location => $url);
+
+</%init>
