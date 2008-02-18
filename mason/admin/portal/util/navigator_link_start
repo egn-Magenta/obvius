@@ -7,7 +7,7 @@ $fieldname => undef
 <img
 
 <%init>
-use Digest::MD5(md5_hex);
+use Digest::MD5 qw(md5_hex);
 
 $obvius->read_user_and_group_info();
 
