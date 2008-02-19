@@ -60,9 +60,13 @@ die "Could not get Obvius object for $site" unless(defined($obvius));
 $obvius->{USER} = 'admin';
 
 # XXX Handle this path some other way? (.conf?)
-require '/var/www/' . $conf->Sitename . '/conf/setup.pl';
-my $adminsite = eval { 
+
+eval { 
     no strict;
+    require '/var/www/' . $conf->Sitename . '/conf/setup.pl';
+};
+
+my $adminsite = eval { 
     eval "\$" . $conf->Perlname . "::Site::Admin";
 };
 die "Could not instantiate Site::Admin-object" unless (ref $adminsite);
