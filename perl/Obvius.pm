@@ -1550,8 +1550,9 @@ sub set_docparams {
         $this->db_delete_docparams($doc);
         $this->{LOG}->info("====> Setting docparams ... inserting new");
         $this->db_insert_docparams($doc, $params);
+	$this->db_commit;
     };
-
+    
     if($@) {
         $this->{DB_Error} = $@;
         $this->db_rollback;
