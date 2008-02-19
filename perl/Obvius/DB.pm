@@ -118,6 +118,7 @@ sub db_error { return shift->{DB_Error}; };
 sub db_begin {
     my $this = shift;
     $this->{LOG}->info("**** DB TRANSACTION BEGIN");
+    $this->{DB}->DBHdl->begin_work;
     return 1;
 }
 
@@ -624,6 +625,16 @@ sub db_insert_grp_user {
     return;
 }
 
+sub database_call {
+    my ($this, $func, $error_msg);
+    
+    $this->db_begin;
+    eval { &$func(); $this->db_commit };
+    
+    if($@) {
+	
+	
+    
 # db_insert_comment - given a hash-ref containing key-value pairs for
 #                     a comment (docid, name, email and text - date is
 #                     set to now automatically), inserts the comment
@@ -634,7 +645,7 @@ sub db_insert_comment {
     $this->tracer($data) if ($this->{DEBUG});
 
     $this->{LOG}->info("====> Inserting comment ($data->{docid}, $data->{name}) ...");
-
+    
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
 					     '!Table'      => 'comments',
 					    });
@@ -817,7 +828,7 @@ sub db_insert_docparams {
 
     $this->{LOG}->info("====> Inserting docparams for docid " . $doc->Id . "...");
 
-
+    
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
                                             '!Table'      => 'docparms',
                                             });
