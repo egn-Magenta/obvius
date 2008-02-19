@@ -161,7 +161,7 @@ sub connect {
                                   '!Password'   => $config->param('normal_db_passwd'),
                                   '!KeepOpen'   => 1,
                                   '!DBIAttr'    => {
-                                                    AutoCommit => 0,
+                                                    AutoCommit => 1,
                                                     RaiseError => 1,
                                                     PrintError => 1,
                                                     ShowErrorStatement => ($this->{DEBUG} ? 1 : 0),
