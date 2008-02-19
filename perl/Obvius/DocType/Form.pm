@@ -383,14 +383,27 @@ sub get_xml_entries {
 sub insert_xml_entry {
     my ($this, $id, $entry, $obvius) = @_;
 
-    my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
-                                             '!Table'      => 'formdata'});
+
     my $xml = XMLout($entry,
                      rootname => 'entry',
                      noattr => 1);
-    $set->Insert( {docid => $id, entry => $xml });
 
-    $set->Disconnect();
+    $obvius->db_begin;    
+    eval {
+	my $set = DBIx::Recordset->SetupObject( 
+	    {'!DataSource' => $obvius->{DB}, '!Table'      => 'formdata'});
+	$set->Insert( {docid => $id, entry => $xml }); 
+	$set->Disconnect();
+
+	$obvius->db_commit;
+    }
+    
+    if ($@) {
+	$this->{DB_Error} = $@;
+	$obvius->db_rollback;
+	$this->{LOG}->error("====> updating form... failed ($@)");
+	print STDERR "Couldn't update forms.\n";
+    }
 }
 
 
