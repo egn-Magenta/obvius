@@ -383,12 +383,12 @@ sub get_xml_entries {
 sub insert_xml_entry {
     my ($this, $id, $entry, $obvius) = @_;
 
-
     my $xml = XMLout($entry,
                      rootname => 'entry',
                      noattr => 1);
+    
+    $obvius->db_begin;
 
-    $obvius->db_begin;    
     eval {
 	my $set = DBIx::Recordset->SetupObject( 
 	    {'!DataSource' => $obvius->{DB}, '!Table'      => 'formdata'});
@@ -396,7 +396,7 @@ sub insert_xml_entry {
 	$set->Disconnect();
 
 	$obvius->db_commit;
-    }
+    };
     
     if ($@) {
 	$obvius->db_rollback;
