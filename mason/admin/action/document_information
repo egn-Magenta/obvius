@@ -309,7 +309,7 @@ use Data::Dumper;
 
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
-if ($new_key != /^\s*$/) {
+if ($new_key !~ /^\s*$/) {
     push @$docparam_value, $new_value;
     push @$docparam_key, $new_key;
 }
