@@ -62,11 +62,11 @@ $obvius->{USER} = 'admin';
 # XXX Handle this path some other way? (.conf?)
 
 eval { 
-    no strict;
+    no strict "subs";
     require '/var/www/' . $conf->Sitename . '/conf/setup.pl';
 };
 
-print $@;
+
 my $adminsite = eval "\$" . $conf->Perlname . "::Site::Admin";
 die "Could not instantiate Site::Admin-object($@)" unless (ref $adminsite);
 
