@@ -399,8 +399,8 @@ sub insert_xml_entry {
     }
     
     if ($@) {
-	$this->{DB_Error} = $@;
 	$obvius->db_rollback;
+	$this->{DB_Error} = $@;
 	$this->{LOG}->error("====> updating form... failed ($@)");
 	print STDERR "Couldn't update forms.\n";
     }
