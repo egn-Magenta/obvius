@@ -24,7 +24,7 @@ use Obvius::Queue;
 
 use Getopt::Long;
 
-ENV{MOD_PERL} = "mod_perl/2"; # make sure everyone thinks mod_perl is 2.
+$ENV{MOD_PERL} = "mod_perl/2"; # make sure everyone thinks mod_perl is 2.
 # Try to set effective user id to www-data:
 my $www_data_uid=scalar(getpwnam('www-data'));
 $> = $www_data_uid;
