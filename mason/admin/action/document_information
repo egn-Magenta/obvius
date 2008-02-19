@@ -295,6 +295,8 @@ sub disabled {
 $owner=>undef
 $group=>undef
 $accessrules=>undef
+$new_key => undef
+$new_value => undef
 $docparam_value => undef
 $docparam_key => undef
 </%args>
@@ -307,6 +309,10 @@ use Data::Dumper;
 
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
+if ($new_key != /^\s*$/) {
+    push @$docparam_value, $new_value;
+    push @$docparam_key, $new_key;
+}
 
 my %docparams = map {$docparam_key->[$_] => $docparam_value->[$_]} (0.. (scalar @{$docparam_value}) - 1);
 
