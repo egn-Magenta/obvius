@@ -66,9 +66,8 @@ eval {
     require '/var/www/' . $conf->Sitename . '/conf/setup.pl';
 };
 
-my $adminsite = eval { 
-    eval "\$" . $conf->Perlname . "::Site::Admin";
-};
+my $adminsite = eval "\$" . $conf->Perlname . "::Site::Admin";
+
 die "Could not instantiate Site::Admin-object" unless (ref $adminsite);
 
 my $order=$obvius->get_table_record('queue', { id=>$id });
