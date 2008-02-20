@@ -262,7 +262,7 @@ sub create_document
 	my $new_uri = get( $document, 'obvius_dump_doc_uri');
 
 	$new_uri =~ s!^\Q$remove_prefix\E!! if $remove_prefix;
-	$new_uri = $add_prefix . $new_uri;
+	$new_uri = $add_prefix . '/' . $new_uri;
 	$new_uri =~ s[//][/]g;
 
 	say "$document->{obvius_dump_doc_uri} -> $new_uri\n";
