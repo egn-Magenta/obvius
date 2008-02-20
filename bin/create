@@ -37,7 +37,8 @@ my %unresolved_links;
 GetOptions(
 	'path=s',          => \$add_prefix,
 	'remove_prefix=s'  => \$remove_prefix,
-	'owner=s'          => \$force_owner,
+        'remove_parent'    => \$remove_parent,
+ 	'owner=s'          => \$force_owner,
 	'group=s'          => \$force_group,
 	'usermap=s'        => \$usermap,
 	'verbose'          => \$verbose,
@@ -189,8 +190,14 @@ $data->{document} = [ $data->{document} ] unless ref($data->{document}) eq 'ARRA
 my $default_doctype = $obvius->get_doctype_by_name('Standard');
 die "Could not get default doctype Standard, stopping" unless $default_doctype;
 
+
+$remove_prefix = $data->{document}->[0]->{obvius_dump_parent_uri} if 
+    ($remove_parent && !remove_prefix);
+
 say "creating documents...\n";
 my $num = 0;
+
+    
 foreach my $document (@{$data->{document}}) { # Must be in parent-before-child order!
 	$num++ if create_document( $document);
 }
@@ -405,6 +412,11 @@ sub create_obvius_document
 		my $name	= pop @parent_uri;
 		my $parent_uri	= join '/', @parent_uri;
 		my $parent	= $obvius-> lookup_document($parent_uri);
+
+		if (!$parent) {
+		    die "Error finding: $parent_uri\n";
+		}
+
 		my $owner = get_usermap_id(
 			'user',
 			$new_uri,
