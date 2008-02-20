@@ -27,7 +27,7 @@ use Unicode::String qw(utf8);
 use Getopt::Long;
 
 my (
-	$site, $remove_prefix, $help, $verbose,
+	$site, $remove_prefix, $help, $verbose, $remove_parent,
 	$force_owner, $force_group, %map_owners, %map_groups
 );
 my $add_prefix = '/';
