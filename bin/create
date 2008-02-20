@@ -192,7 +192,7 @@ die "Could not get default doctype Standard, stopping" unless $default_doctype;
 
 
 $remove_prefix = $data->{document}->[0]->{obvius_dump_parent_uri} if 
-    ($remove_parent && !remove_prefix);
+    ($remove_parent && !$remove_prefix);
 
 say "creating documents...\n";
 my $num = 0;
