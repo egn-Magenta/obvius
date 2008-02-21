@@ -1,0 +1,79 @@
+<& /shared/editengine2/init, editscheme=>$subscribers, relation=>'subscribers', edges=>$edges, &>
+<%once>
+
+  my $subscribers = {
+		     type => 'scheme/table',
+		     label => 'Subscribers',
+		     arguments => {},
+		     display => [
+			    {
+			     name=>'id',      content=>'data',   label=>'Name', filter => 'str'
+			    },			    
+			    {
+			     name=>'name',      content=>'data',   label=>'Name', filter => 'str'
+			    },
+
+				],
+                     storage => {
+                                 organization => {
+                                                  class => 'CustomDb',
+						  list_sql => 'SELECT * FROM documents where id=1'
+                                                 },
+                                 data => {
+                                          id      => { type => 'integer' },
+                                          name    => { type => 'text' },
+                                         },
+				},
+		     functions => {
+				   create => {
+					      label     => 'Create new',
+					      relation  => 'new_subscriber',
+					      anonymous => '1',
+					     },
+				   update => {
+					      label    => 'Edit',
+					      relation => 'update_subscriber',
+					     },
+				   remove => {
+					      label    => 'Delete',
+					      relation => 'delete_subscriber',
+					     },
+				  },
+		     relations => {
+				   new_subscriber => {
+						      
+						      projection => 'pipe',
+						      mappings => {
+								   id => 'uid',
+								  },
+						     },
+				   
+				  }
+		    };
+
+
+
+
+my $edges = {
+             'subscribers:new_subscriber:subscriber[create]store' => {
+                                                                      'subscribers:new_subscriber:subscriptions[execute]store' => {
+                                                                                                                                   merge     => 'insert',
+                                                                                                                                   obj_maps  => {id=>'uid'},
+                                                                                                                                   data_maps => {id=>'subscriber'},
+                                                                                                                                  },
+                                                                     },
+            };
+
+</%once>
+%
+<%init>
+$r->pnotes('obvius_session')->{action}='editengine';
+
+$r->notes(inactive_handlingarea=>1);
+$r->notes(inactive_path=>1);
+$r->notes(inactive_subdocs=>1);
+$r->notes(inactive_versions=>1);
+$r->notes(inactive_information=>1);
+$r->notes(inactive_editing=>1);
+$r->notes(inactive_newsboxes=>1);
+</%init>
