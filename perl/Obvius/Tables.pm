@@ -186,6 +186,7 @@ sub insert_table_record {
     my ($this, $table, $rec) = @_;
 
     my $ret;
+    $this->db_begin;
     eval {
         my %conf=(
                   '!DataSource' => $this->{DB},
@@ -204,11 +205,12 @@ sub insert_table_record {
         $ret=(defined $last_serial ? $last_serial : $ret);
 
         $set->Disconnect;
-
+	$this->db_commit;
     };
 
     my $ev_error=$@;
     if ($ev_error) {
+	$this->db_rollback;
         return undef;
     }
 
