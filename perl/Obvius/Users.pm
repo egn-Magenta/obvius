@@ -230,10 +230,38 @@ sub create_new_user {
 #               admin-user has the power to create a new user on the
 #               document given. Returns undef on error and true on
 #               success.
+
+sub update_user_passwd {
+    my ($this, $user);
+    
+    return undef unless ($this->can_create_new_user() || ($this->{USER} eq $user->{login}));
+
+    $user->{passwd}=$this->encrypt_password($user->{password})
+        if (defined $user->{password} and $user->{password});
+    
+    $this->db_begin;
+    eval {
+	$this->db_update_user($user);
+	$this->db_commit;
+    }
+
+    my $ev_error=$@;
+    if ($ev_error) {                    # handle error
+        $this->{DB_Error} = $ev_error;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Delete group ... failed ($ev_error)");
+        return undef;
+    }
+    
+    undef $this->{DB_Error};
+    $this->{LOG}->info("====> Update user ... done");
+    return 1;
+}
+    
 sub update_user {
     my ($this, $user) = @_;
 
-    return undef unless ($this->can_create_new_user() || ($this->{USER} eq $user->{login}));
+    return undef unless $this->can_create_new_user();
 
     $user->{passwd}=$this->encrypt_password($user->{password})
         if (defined $user->{password} and $user->{password});
