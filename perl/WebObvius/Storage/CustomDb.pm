@@ -20,31 +20,20 @@ sub query_append {
      my ($this, $o) = @_;
      
      my $as = "";
-     my @args;
 
-     if ($o->{sort}) {
-	  $as .= "ORDER BY " . $o->{sort} . ($o->{reverse} ? ' DESC ' : ' ASC ');
-     }
-     if ($o->{start}) {
-	  $as .= ' OFFSET ? ';
-	  push @args, $o->{start};
-     }
-     if ($o->{max}) {
-	  $as .= ' LIMIT ? ';
-	  push @args, $o->{max}
-     }
+     $as .= "ORDER BY " . $o->{sort} . ($o->{reverse} ? ' DESC ' : ' ASC ');
+     $as .= ' OFFSET ' . $o->{start};
+     $as .= ' LIMIT ' . $o->{max} if($o->{max});
 
-     return ($as, \@args);
+     return $as;
 }
 
 sub exec_query {
      my ($this, $query, $args, $handler, $options) = @_;
 
-     my ($as, $append_args) = $this->query_append($options) if $options;
+     my $as = $this->query_append($options) if $options;
      
      $query .= $as if ($as);
-     my @args = @$args;
-     @args = (@args, @$append_args) if ($append_args);
 
      print STDERR "exec_query: $query\n";
      print STDERR "args: " . Dumper(\@args);
