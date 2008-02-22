@@ -35,9 +35,6 @@ sub exec_query {
      
      $query .= $as if ($as);
 
-     print STDERR "exec_query: $query\n";
-     print STDERR "args: " . Dumper($args);
-
      my $dbh = $this->{obvius}->{DB}->DBHdl;
      die "No dbhdl in obvius" if (!$dbh);
 
