@@ -118,7 +118,7 @@ sub db_error { return shift->{DB_Error}; };
 sub db_begin {
     my $this = shift;
     $this->{LOG}->info("**** DB TRANSACTION BEGIN");
-    $this->{DB}->DBHdl->begin_work;
+    $this->{DB}->DBHdl->begin_work or die "Horror....\n" . $this->{DB}->DBHdl->errstr;
     return 1;
 }
 
