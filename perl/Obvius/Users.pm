@@ -239,22 +239,9 @@ sub update_user_passwd {
     $user->{passwd}=$this->encrypt_password($user->{password})
         if (defined $user->{password} and $user->{password});
     
-    $this->db_begin;
-    eval {
-	$this->db_update_user($user);
-	$this->db_commit;
-    };
-
-    my $ev_error=$@;
-    if ($ev_error) {                    # handle error
-        $this->{DB_Error} = $ev_error;
-        $this->db_rollback;
-        $this->{LOG}->error("====> Delete group ... failed ($ev_error)");
-        return undef;
-    }
     
-    undef $this->{DB_Error};
-    $this->{LOG}->info("====> Update user ... done");
+    $this->db_update_user($user);
+
     return 1;
 }
     
