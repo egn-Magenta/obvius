@@ -243,7 +243,7 @@ sub update_user_passwd {
     eval {
 	$this->db_update_user($user);
 	$this->db_commit;
-    }
+    };
 
     my $ev_error=$@;
     if ($ev_error) {                    # handle error
