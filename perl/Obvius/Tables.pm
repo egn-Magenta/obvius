@@ -185,7 +185,6 @@ sub get_table_record {
 sub insert_table_record {
     my ($this, $table, $rec) = @_;
 
-    $this->db_begin;
     my $ret;
     eval {
         my %conf=(
@@ -206,12 +205,10 @@ sub insert_table_record {
 
         $set->Disconnect;
 
-        $this->db_commit;
     };
 
     my $ev_error=$@;
     if ($ev_error) {
-        $this->db_rollback;
         return undef;
     }
 
