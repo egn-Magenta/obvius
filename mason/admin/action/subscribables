@@ -317,7 +317,7 @@ END
 
 my $subscribers = {
 		   type => 'scheme/table',
-		   label => 'Subscribers',
+		   label => 'Subscriptions',
 		   display => [
 			  {
 			     name=>'title',      content=>'data',   label=>'Name', filter => 'str'

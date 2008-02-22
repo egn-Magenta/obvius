@@ -21,9 +21,9 @@ sub query_append {
      
      my $as = "";
 
-     $as .= "ORDER BY " . $o->{sort} . ($o->{reverse} ? ' DESC ' : ' ASC ');
-     $as .= ' OFFSET ' . $o->{start};
+     $as .= "ORDER BY " . $o->{sort} . ($o->{reverse} ? ' DESC ' : ' ASC ') if ($o->{sort});
      $as .= ' LIMIT ' . $o->{max} if($o->{max});
+     $as .= ' OFFSET ' . $o->{start} if ($o->{start});
 
      return $as;
 }
