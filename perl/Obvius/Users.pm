@@ -232,13 +232,16 @@ sub create_new_user {
 #               success.
 
 sub update_user_passwd {
-    my ($this, $user);
+    my ($this, $user) = @_;
     
     return undef unless ($this->can_create_new_user() || ($this->{USER} eq $user->{login}));
 
-    $user->{passwd}=$this->encrypt_password($user->{password})
-        if (defined $user->{password} and $user->{password});
-    
+    if (defined $user->{password} and $user->{password}) {
+	$user->{passwd}=$this->encrypt_password($user->{password});
+    } else {
+	return;
+    }
+
     
     $this->db_update_user($user);
 
