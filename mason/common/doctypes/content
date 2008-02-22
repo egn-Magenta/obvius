@@ -1,5 +1,4 @@
 % if ($htmlize) {
-% print STDERR "Going here2\n";
 <& /shared/htmlize, text=>$content &>
 % } else {
 <% $content %>
