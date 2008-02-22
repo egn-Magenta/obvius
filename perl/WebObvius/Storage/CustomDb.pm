@@ -36,12 +36,13 @@ sub exec_query {
      $query .= $as if ($as);
 
      print STDERR "exec_query: $query\n";
-     print STDERR "args: " . Dumper(\@args);
+     print STDERR "args: " . Dumper($args);
+
      my $dbh = $this->{obvius}->{DB}->DBHdl;
      die "No dbhdl in obvius" if (!$dbh);
 
      my $sth = $dbh->prepare($query);
-     $sth->execute(@args);
+     $sth->execute(@$args);
 
      my @res;
      while (my $row = $sth->fetchrow_hashref) {
