@@ -46,6 +46,8 @@ sub exec_query {
      my @args = @$args;
      @args = (@args, @$append_args) if ($append_args);
 
+     print STDERR "exec_query: $query\n";
+     print STDERR "args: " . Dumper(\@args);
      my $dbh = $this->{obvius}->{DB}->DBHdl;
      die "No dbhdl in obvius" if (!$dbh);
 
