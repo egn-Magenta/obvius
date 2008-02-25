@@ -52,7 +52,7 @@ sub make_sure_is_utf8 {
 	    $n = encode('iso-8859-1', $n);
 	    if (length ($$str)) {
 		$n .= substr ($$str, 0, 1);
-		$str = substr($$str,1, length($$str) - 1);
+		$$str = substr($$str,1, length($$str) - 1);
 	    }
 	    $string .= $n;
 	}
