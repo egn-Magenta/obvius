@@ -88,20 +88,19 @@ sub raw_document_data {
     $xmldata .= "  <downloaddate>" . strftime('%Y-%m-%d %H:%M:%S', localtime) . "</downloaddate>\n";
 
     my $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
+    make_sure_is_utf8(\$entries_xml);
     
     
     # Remove  xml declaration:
 
     $xmldata .= "<entries>" . $entries_xml . "</entries>";
 
+
     my $formdata_xml = $vdoc->field('formdata') || '';
-    
     make_sure_is_utf8(\$formata_xml);
-    make_sure_is_utf8(\$entries_xml);
 
-    $entries_xml =~ s/^/  /m;
     $xmldata .= $formdata_xml . "\n";
-
+    
     $xmldata .= "</formexport>\n";
 
     my $name = $doc->Name || $doc->Id;
