@@ -51,7 +51,9 @@ sub make_sure_is_utf8 {
 	$$str =~ s/\xd8/\xc3\x98/g;
 	$$str =~ s/\xc6/\xc3\x86/g;
 	$$str =~ s/\xc5/\xc3\x85/g;
-	
+	$$str =~ s/\xe8/\xc3\xa8/g;
+	$$str =~ s/\xe9/\xc3\xa9/g;
+
 	Encode::_utf8_on($$str);
     }
 }
