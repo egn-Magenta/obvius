@@ -34,8 +34,27 @@ use Obvius::DocType;
 use Data::Dumper;
 use XML::Simple;
 use POSIX qw(strftime);
+use Encode;
 use Unicode::String qw(utf8 latin1);
 use Spreadsheet::WriteExcel;
+
+sub make_sure_is_utf8 {
+    my $str_list = shift;
+    
+    $str_list = [$str_list] if (ref $str_list ne 'ARRAY');
+    for my $str (@$str_list) {
+	Encode::_utf8_off($$str);
+
+	$$str =~ s/\xf8/\xc3\xb8/g;
+	$$str =~ s/\xe6/\xc3\xa6/g;
+	$$str =~ s/\xe5/\xc3\xa5/g;
+	$$str =~ s/\xd8/\xc3\x98/g;
+	$$str =~ s/\xc6/\xc3\x86/g;
+	$$str =~ s/\xc5/\xc3\x85/g;
+	
+	Encode::_utf8_on($$str);
+    }
+}
 
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -68,15 +87,17 @@ sub raw_document_data {
     $xmldata .= "  <version>" . $vdoc->Version . "</version>\n";
     $xmldata .= "  <downloaddate>" . strftime('%Y-%m-%d %H:%M:%S', localtime) . "</downloaddate>\n";
 
-    my $entries_xml = '';
-
-    $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
-
+    my $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
+    
+    
     # Remove  xml declaration:
 
     $xmldata .= "<entries>" . $entries_xml . "</entries>";
 
     my $formdata_xml = $vdoc->field('formdata') || '';
+    
+    make_sure_is_utf8(\$formata_xml);
+    make_sure_is_utf8(\$entries_xml);
 
     $entries_xml =~ s/^/  /m;
     $xmldata .= $formdata_xml . "\n";
