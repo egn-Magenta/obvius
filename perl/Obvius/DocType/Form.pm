@@ -42,19 +42,21 @@ sub make_sure_is_utf8 {
     my $str_list = shift;
     
     $str_list = [$str_list] if (ref $str_list ne 'ARRAY');
+
     for my $str (@$str_list) {
-	Encode::_utf8_off($$str);
+	my $string = '';
 
-	$$str =~ s/\xf8/\xc3\xb8/g;
-	$$str =~ s/\xe6/\xc3\xa6/g;
-	$$str =~ s/\xe5/\xc3\xa5/g;
-	$$str =~ s/\xd8/\xc3\x98/g;
-	$$str =~ s/\xc6/\xc3\x86/g;
-	$$str =~ s/\xc5/\xc3\x85/g;
-	$$str =~ s/\xe8/\xc3\xa8/g;
-	$$str =~ s/\xe9/\xc3\xa9/g;
-
-	Encode::_utf8_on($$str);
+	while($$str) {
+	    # Apparently decode, does magic with $str.
+	    my $n = decode('utf-8', $$str, Encode::FB_QUIET);
+	    $n = encode('iso-8859-1', $n);
+	    if (length ($$str)) {
+		$n .= substr ($$str, 0, 1);
+		$str = substr($$str,1, length($$str) - 1);
+	    }
+	    $string .= $n;
+	}
+	$$str = utf8::upgrade($string);
     }
 }
 
