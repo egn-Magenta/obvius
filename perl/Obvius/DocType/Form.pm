@@ -97,7 +97,7 @@ sub raw_document_data {
 
 
     my $formdata_xml = $vdoc->field('formdata') || '';
-    make_sure_is_utf8(\$formata_xml);
+    make_sure_is_utf8(\$formdata_xml);
 
     $xmldata .= $formdata_xml . "\n";
     
