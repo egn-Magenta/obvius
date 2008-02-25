@@ -56,7 +56,8 @@ sub make_sure_is_utf8 {
 	    }
 	    $string .= $n;
 	}
-	$$str = utf8::upgrade($string);
+	utf8::upgrade($string);
+	$$str = $string;
     }
 }
 
@@ -92,7 +93,6 @@ sub raw_document_data {
     $xmldata .= "  <downloaddate>" . strftime('%Y-%m-%d %H:%M:%S', localtime) . "</downloaddate>\n";
 
     my $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
-    make_sure_is_utf8(\$entries_xml);
     
     
     # Remove  xml declaration:
@@ -101,12 +101,13 @@ sub raw_document_data {
 
 
     my $formdata_xml = $vdoc->field('formdata') || '';
-    make_sure_is_utf8(\$formdata_xml);
+
 
     $xmldata .= $formdata_xml . "\n";
     
     $xmldata .= "</formexport>\n";
 
+    make_sure_is_utf8(\$xmldata);
     my $name = $doc->Name || $doc->Id;
 
     my $format = $input->param('format') || '';
