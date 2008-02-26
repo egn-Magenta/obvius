@@ -82,7 +82,7 @@ my $group_storage = {
                                      },
                      data => {
                               id    => { type => 'integer' },
-                              name  => { type => 'line'    },
+                              name  => { type => 'line'   , validation_regexp => '^[\w_\d][\w_ \d]+[\w_\d]$'}
                              },
                     };
 
