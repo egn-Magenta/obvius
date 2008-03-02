@@ -18,8 +18,8 @@ sub AUTOLOAD {
      my ($method) = $AUTOLOAD =~ /::([^:]+)$/;
      my @result;
      
-     print STDERR "Here: $method \n";
      for my $cache (@{$this->{collection}}) {
+	  next if (!$cache);
 	  if (my $sub = $cache->UNIVERSAL::can($method)) {
 	       push @result, &$sub($cache,@args);
 	  }
@@ -33,7 +33,6 @@ sub request_values {
      my ($this, @values) = @_;
      my @result;
      
-     print STDERR "in request_values\n";
      for my $cache (@{$this->{collection}}) {
 	  my %res = map {$_ => $cache->{$_}} @values;
 	  push @result, \%res;
