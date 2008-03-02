@@ -31,6 +31,11 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 *new = \&create_hostmap;
 
+sub new_with_obvius {
+     my ($class, $obvius) = @_;
+     return $class->create_hostmap($obvius->{OBVIUS_CONFIG}{HOSTMAP_FILE}, $obvius->{OBVIUS_CONFIG}{ROOTHOST});
+}
+
 sub create_hostmap {
     my ($this, $path, $roothost, %options) = @_;
 
@@ -154,6 +159,14 @@ sub translate_uri {
     } else {
         return $uri;
     }
+}
+
+sub find_host_prefix {
+     my ($this, $uri) = @_;
+     
+     my ($best_prefix) = $uri =~ /$this->{regexp}/;
+     
+     return $best_prefix;
 }
 
 1;
