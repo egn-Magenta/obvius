@@ -13,11 +13,10 @@ sub new {
                $obvius->lookup_document($obj{url});
      
      return if (!$doc);
-     
-     return bless {docid  => $obj{docid} || $doc->Id,
-		   uri    => $obj{uri}   || $obvius->get_doc_uri($doc),
-		   clear_leftmenu  => $obj{clear_leftmenu}
-		   }, $class;
+
+     $obj{docid} ||= $doc->Id;
+     $obj{uri}   ||= $obvius->get_doc_uri($doc);
+     return bless {%obj}, $class;
 }
 
 1;
