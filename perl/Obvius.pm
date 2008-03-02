@@ -39,6 +39,9 @@ require 5.008;
 require Exporter;
 use Obvius::Data;
 
+use WebObvius::Cache::CacheObjects; 
+use WebObvius::Cache::ApacheCache qw(is_relevant_for_leftmenu_cache);
+
 our @ISA = qw(  Obvius::Data
                 Obvius::DB
                 Obvius::Access
@@ -75,6 +78,7 @@ use Data::Dumper;
 use Obvius::Data;
 use Obvius::Config;
 use Obvius::Cache;
+
 use Obvius::Document;
 use Obvius::DocType;
 use Obvius::EditPage;
@@ -118,9 +122,7 @@ sub new {
                                   DOCTYPES    => (defined $doctypes ? $doctypes : []),
                                   FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
-                                  LANGUAGES   => {},
-                                  MODIFICATIONS=>[],
-                                  MODIFIED_DOCIDS=>[],
+                                  LANGUAGES   => {}
                                  );
 
     $this->tracer($obvius_config, $user||'', $password||'') if ($this->{DEBUG});
@@ -150,6 +152,7 @@ sub connect {
     # ACHTUNG: We should really make DBIx::Recordset::LOG a tied filehandle
     #          using $this->{LOG} as backend.
     #
+
     if ($this->{DEBUG}>1) {
         $DBIx::Recordset::Debug = 2;
         *DBIx::Recordset::LOG = \*STDERR;
@@ -424,7 +427,7 @@ sub get_doc_by_name_parent {
 
 sub get_doc_by {
     my ($this, @how) = @_;
-
+    
     $this->tracer(@how) if ($this->{DEBUG});
 
     my $doc = $this->cache_find('Obvius::Document', @how);
@@ -437,7 +440,7 @@ sub get_doc_by {
     if (my $rec = $set->Next) {
         $doc = new Obvius::Document($rec);
         $this->cache_add($doc);
-        croak "More than one document matched by get_doc_by\n" if $set->Next;
+        confess "More than one document matched by get_doc_by\n" if $set->Next;
     }
 
     $set->Disconnect;
@@ -1188,6 +1191,7 @@ sub get_version_fields_by_threshold {
     my ($this, $version, $threshold, $type) = @_;
     $type=(defined $type ? $type : 'FIELDS');
 
+#    print STDERR "entering";
     $this->tracer($version, $threshold||'N/A', $type) if ($this->{DEBUG});
 
     my $doctype = $this->get_version_type($version);
@@ -1211,11 +1215,14 @@ sub get_version_fields_by_threshold {
     }
     #$this->{LOG}->debug("Second list of fields: @fields");
 
+#    print STDERR "exiting";
     return @fields ? \@fields : undef;
 }
 
 sub get_version_fields {
     my ($this, $version, $threshold, $type) = @_;
+#    print STDERR "Entering get_version_fields";
+
     $type=(defined $type ? $type : 'FIELDS');
 
     $this->tracer($version, $threshold||'N/A', $type) if ($this->{DEBUG});
@@ -1228,7 +1235,7 @@ sub get_version_fields {
 
     for (@$needed) {
         my $fspec = $doctype->field($_, undef, $type);
-        #print STDERR "VFIELD FROM TYPE $_ (threshold $fspec->{THRESHOLD})\n";
+#        print STDERR "VFIELD FROM TYPE $_ (threshold $fspec->{THRESHOLD})\n";
         if ($fspec->Repeatable) {
             $fields->param($_ => []);
         } else {
@@ -1240,11 +1247,11 @@ sub get_version_fields {
                                             '!Table'     =>'vfields',
                                            });
 
-    #printf STDERR " get_version_fields %5d %s", $version->Docid, $version->Version;
-    #print STDERR " ", (join ", ", @$needed), "\n";
+#    printf STDERR " get_version_fields %5d %s", $version->Docid, $version->Version;
+#    print STDERR " ", (join ", ", @$needed), "\n";
 
-    $set->Search({docid      => $version->_docid,
-                  version    => $version->_version,
+    $set->Search({docid      => $version->Docid,
+                  version    => $version->Version,
                   name       => $needed,
                   '$fields'  => 'name, text_value, int_value, double_value, date_value',
                  });
@@ -1252,7 +1259,7 @@ sub get_version_fields {
         my $fspec = $doctype->field($rec->{name}, undef, $type);
         next unless ($fspec);
         my $field = $fspec->param('fieldtype')->param('value_field') . '_value';
-        #print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
+#        print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
 
         my $value = $fields->param($rec->{name});
         # Apparantly the db returns -1.0 as -1, which is not what we want:
@@ -1267,10 +1274,10 @@ sub get_version_fields {
     }
     $set->Disconnect;
 
-    #print STDERR Dumper($fields);
+#    print STDERR Dumper($fields);
 
     for (@$needed) {
-        #print STDERR "VFIELD STORE $_\n";
+#        print STDERR "VFIELD STORE $_\n";
         my $fspec = $doctype->field($_, undef, $type);
         my $ftype = $fspec->param('fieldtype');
 
@@ -1293,6 +1300,7 @@ sub get_version_fields {
     }
 
     # print STDERR Dumper($version->fields($type));
+#    print STDERR "Exiting same";
 
     return $version->fields($type);
 }
@@ -1648,7 +1656,7 @@ sub read_doctypes_table {
                         # test if this is because a module cannot be found, or something more serious
                         my $fn = $_;
                         $fn =~ s/::/\//g;
-                        croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/;
+                        croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/; #'
                 }
 
                 if (defined $$tester) {
@@ -1926,8 +1934,7 @@ sub create_new_document {               # RS 20010819 - ok
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new document ... done");
-    $this->register_modified(docid=>$docid);
-    $this->register_modified_docid( $docid );
+    $this->register_modified(docid => $docid);
     return wantarray ? ($docid, $version) : [$docid, $version];
 }
 
@@ -2001,8 +2008,9 @@ sub create_new_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new version ... done");
-    $this->register_modified(docid=>$doc->Id);
-    $this->register_modified_docid( $doc->Id );
+
+    print STDERR "Creating new version\n";
+    $this->register_modified( docid => $doc->Id);
     return $version;
 }
 
@@ -2020,9 +2028,10 @@ sub delete_document {
     die "User $this->{USER} does not have access to delete the document."
         unless $this->can_delete_document($doc);
 
+    my $docid = $doc->Id;
     my $doc_uri=$this->get_doc_uri($doc);
     my $doc_parent_id=$doc->Parent;
-
+    
     $this->db_begin;
     eval {
         die "Document has sub documents\n"
@@ -2070,9 +2079,8 @@ sub delete_document {
     $this->{LOG}->info("====> Deleting document ... done");
     # The document doesn't exist any more, so we say the uri of it is
     # modified, and its parent:
-    $this->register_modified(url=>$doc_uri);
-    $this->register_modified(docid=>$doc->Parent);
-    $this->register_modified_docid( $doc->Id );
+    $this->register_modified(uri  => $doc_uri, docid => $docid, clear_leftmenu => 1);
+    $this->register_modified(docid => $doc_parent_id);
     return 1;
 }
 
@@ -2154,10 +2162,9 @@ sub rename_document {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Renaming/moving document ... done");
-    $this->register_modified(docid=>$old_parent_id);
-    $this->register_modified(url=>$old_uri); # Because the doc does no longer refers to this
-    $this->register_modified(docid=>$doc->Id);
-    $this->register_modified_docid( $doc->Id );
+    $this->register_modified(uri   => $old_uri); # Because the doc does no longer refers to this
+    $this->register_modified(docid => $old_parent_id, clear_leftmenu => 1);
+    $this->register_modified(docid => $doc->Id, clear_leftmenu => 1);
     return 1;
 }
 
@@ -2176,13 +2183,16 @@ sub publish_version {
 
     die "User $this->{USER} does not have access to publish the document."
         unless $this->can_publish_version($vdoc);
-
+    
     if($delayed_publish) {
         delete $vdoc->{PUBLISH_FIELDS}->{PUBLISHED};
     }
-
+    
     # Procedure:
     # validate, update version, insert pfields, end.
+    #For the leftmenu cache, check if any
+    
+    my $related = is_relevant_for_leftmenu_cache($this, $vdoc->Docid, $vdoc);
 
     $this->db_begin;
     eval {
@@ -2231,8 +2241,7 @@ sub publish_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done");
-    $this->register_modified(docid=>$vdoc->Docid);
-    $this->register_modified_docid( $vdoc->Docid );
+    $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => $related);
 
     if($delayed_publish) {
         $this->{LOG}->info("====> Setting 'at' autopublishing job...");
@@ -2242,7 +2251,7 @@ sub publish_version {
         my $site = $this->{OBVIUS_CONFIG}->{NAME};
 
         my $command =
-                "echo perl -w ".
+                "echo perl -w " .
                 $this->config->param('prefix') .
                 "/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
 
@@ -2268,6 +2277,7 @@ sub publish_version {
 sub unpublish_version {
     my ($this, $vdoc) = @_;
 
+    print STDERR "Unpublishing version\n";
     croak "vdoc not an Obvius::Version\n"
         unless (ref $vdoc and $vdoc->UNIVERSAL::isa('Obvius::Version'));
 
@@ -2309,8 +2319,7 @@ sub unpublish_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Unpublishing version ... done");
-    $this->register_modified(docid=>$vdoc->Docid);
-    $this->register_modified_docid( $vdoc->Docid );
+    $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => 1);
     return 1;
 }
 
@@ -2367,36 +2376,8 @@ sub delete_single_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Deleting single version ... done");
     $this->register_modified(docid=>$vdoc->Docid);
-    $this->register_modified_docid( $vdoc->Docid );
     return 1;
 }
-
-
-########################################################################
-#
-#       Registering modified docids
-#
-########################################################################
-
-# register_modified_docid(docid) - register that a docid was modified,
-#                                  so we can use it when the cache
-#                                  is about to be changed.
-#                                  This function looks almost exactly
-#                                  like register_modified(), but this
-#                                  one should ONLY contain the DOCID
-#                                  and nothing else! Not the parent,
-#                                  not anything related.
-sub register_modified_docid {
-    my ($this, $docid)=@_;
-
-    push @{$this->{MODIFIED_DOCIDS}}, $docid;
-}
-
-sub list_modified_docid {
-    my ($this)=@_;
-    return $this->{MODIFIED_DOCIDS};
-}
-
 
 
 
@@ -2406,30 +2387,20 @@ sub list_modified_docid {
 #
 ########################################################################
 
-# register_modified(%options) - register that a document was modified,
-#                               for later retrieval and processing.
-#                               %options can be url=>$string,
-#                               docid=>$number, or what have you -
-#                               it's up the the reader of the list to
-#                               decide whether it's useful information
-#                               or not. Please do not pass objects in;
-#                               keep the information simple scalars.
 sub register_modified {
     my ($this, %options)=@_;
-
-    push @{$this->{MODIFICATIONS}}, \%options;
+    
+    if (!$this->{MODIFIED}) {
+	 $this->{MODIFIED} = WebObvius::Cache::CacheObjects->new($this);
+    }
+    print STDERR "Options being sent\n" . Dumper(\%options);
+    $this->{MODIFIED}->add_to_cache($this, %options);
 }
 
-# list_modified() - returns a ref to a chronological list of hash-refs
-#                   containing the modifications registered on this
-#                   $obvius instance.
-#                   Notice that the referred docs can be brand new, deleted
-#                   (no longer existing!) or docs already present.
-#                   Do not remove or change information the list returned, please.
-sub list_modified {
+sub modified {
     my ($this)=@_;
 
-    return $this->{MODIFICATIONS};
+    return $this->{MODIFIED};
 }
 
 
