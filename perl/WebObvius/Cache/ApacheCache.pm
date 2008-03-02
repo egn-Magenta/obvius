@@ -52,51 +52,78 @@ sub can_request_use_cache_p {
 
     my $output = $req->pnotes('OBVIUS_OUTPUT');
     
-    return !(
-	($output && $output->param('OBVIUS_SIDE_EFFECTS'))	||
-	$req->no_cache						||
-	$req->method_number != 0				|| # 0 er M_GET, mod_perl bug.
-	$req->notes('nocache')
-	);
+    return !((
+             $output && $output->param('OBVIUS_SIDE_EFFECTS'))	||
+	     $req->no_cache					||
+	     $req->method_number != 0				|| # 0 er M_GET, mod_perl bug.
+	     $req->notes('nocache')
+	    );
 }
 
 
 sub find_cache_filename {
     my ($this, $req) = @_;
 
-    return md5_hex($req->hostname . ':' . $req->the_request);
+    my $ct = $req->content_type;
+    $ct =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|;
+    my $lang_array = $req->content_languages();
+    my $lang = scalar @$lang_array ? $lang_array->[0] : 'da';
+    my $code = md5_hex($req->hostname . ':' . $req->the_request);
+
+    return ((join '/', ($ct, $lang)) . '/', $code);
+}
+
+sub make_sure_exist {
+     my $path = shift;
+     my @path = split '/', $path;
+     
+     shift @path;
+     my $p = '/';
+     while (scalar @path ) {
+	  $p .= (shift @path) . '/';
+	  if (! -d $p) {
+	       mkdir $p, 0775 || return 1;
+	       chmod 0775, $p;
+	  }
+     }
+
+     return 0;
 }
 
 sub save_request_result_in_cache
 {
-    my ($this, $req, $s) = @_;
+     my ($this, $req, $s) = @_;
+     
+     return if (!$this->can_request_use_cache_p($req));
+     
+     my ($fp, $fn) = $this->find_cache_filename($req);
+     my $local_dir = $fp . $fn;
+     return if (!$fn);
+     
+     my $dir = $this->{cache_dir} . $fp;
+     make_sure_exist($dir);
+     
+     open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
+     flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
+     print F (ref $s ? $$s : $s);
+     flock F, LOCK_UN;
+     close F;
 
-    return if (!$this->can_request_use_cache_p($req));
-
-    my $fn = $this->find_cache_filename($req);
-    return if (!$fn);
-
-    open F, '>', $this->{cache_dir} . $fn || (warn "Couldn't write cache\n", return);
-    flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
-    print F (ref $s ? $$s : $s);
-    flock F, LOCK_UN;
-    close F;
-
-    #Save image info.
-    my ($args) = ($req->args =~ /(?:^|&)(size=\d+(?:x\d+|\%))(?:$|&)/) if ($req->args);
-    $args ||= "";
-
-    my $path=$req->uri();
-
-    open F, ">>", $this->{cache_index} || (warn "Failed to open " . $this->{cache_index}, return);
-    flock F, LOCK_EX || (warn "couldn't get lock", goto close);
-    print F $path, $args, "\t", '/cache/' . $fn, "\n";
-    flock F, LOCK_UN;
-
-  close:
-    close F;
-    
-    return;
+     #Save image info.
+     my ($args) = ($req->args =~ /(?:^|&)(size=\d+(?:x\d+|\%))(?:$|&)/) if ($req->args);
+     $args ||= "";
+     
+     my $path=$req->uri();
+     
+     open F, ">>", $this->{cache_index} || (warn "Failed to open " . $this->{cache_index}, return);
+     flock F, LOCK_EX || (warn "couldn't get lock", goto close);
+     print F $path, $args, "\t", '/cache/' . $local_dir, "\n";
+     flock F, LOCK_UN;
+     
+   close:
+     close F;
+     
+     return;
 }
 
 sub flush {
@@ -232,6 +259,7 @@ sub perform_command_clear_doctype {
 SELECT DISTINCT(docid) FROM 
     documents d INNER JOIN versions v ON (v.docid = d.id)
 WHERE
+
     v.public = 1 AND (d.type = ? OR v.type = ?);
 END
      my $docids = $this->execute_query($query, $doctype->Id, $doctype->Id);
