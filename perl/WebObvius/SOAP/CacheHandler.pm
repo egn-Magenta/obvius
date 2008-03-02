@@ -17,14 +17,12 @@ sub import {
 
 sub flush {
      my ($this, $commands) = @_;
-     
+
      my $obvius = Obvius->new($obvius_config); 
      my $ac = WebObvius::Cache::ApacheCache->new($obvius);
      $ac->flush($commands);
 
      return 0;
-}
-     
-
+} 
 
 1;
