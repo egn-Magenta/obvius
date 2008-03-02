@@ -34,6 +34,7 @@ package WebObvius::Site::Mason;
 use strict;
 use warnings;
 
+use Data::Dumper;
 use WebObvius::Site;
 
 our @ISA = qw( WebObvius::Site );
@@ -43,7 +44,7 @@ use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;
 
 use WebObvius::Cache::Flushing;
-use WebObvius::Cache;
+use WebObvius::Cache::Cache;
 
 use WebObvius::Apache
         Constants       => qw(:common :methods :response),
@@ -128,10 +129,11 @@ sub new
         # because less of the handler() is used there (and more is handled
         # in Mason in admin):
         my %apachehandler_options = (
-                apache_status_title => 'HTML::Mason: ' . $class,
-                # error_mode        => $options{debug} ? 'html' : 'fatal',
-                decline_dirs        => 0,
-                auto_send_headers  => (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
+                apache_status_title	=> 'HTML::Mason: ' . $class,
+                error_mode		=> 'fatal',
+                error_format		=> 'line',
+                decline_dirs		=> 0,
+                auto_send_headers	=> (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
         );
 
         if ($new_mason) {
@@ -156,149 +158,10 @@ sub new
         }
 
         $new->{is_admin} = $options{is_admin};
-
+	
         return bless $new, $class;
 }
 
-
-########################################################################
-#
-#       Cache
-#
-########################################################################
-
-# can_use_cache - Check if the given request is fit for being cached or not.
-#                 Note: this method is also present in WebObvius::Site::MultiMason
-sub can_use_cache {
-    my ($this, $req, $output) = @_;
-
-    $output ||= $req->pnotes('OBVIUS_OUTPUT');
-
-    return '' if ($output && $output->param('OBVIUS_SIDE_EFFECTS'));
-    return '' if ($req->no_cache);
-    return '' unless ($req->method_number == M_GET);
-    return '' unless ($this->{WEBOBVIUS_CACHE_INDEX} and
-                      $this->{WEBOBVIUS_CACHE_DIRECTORY});
-    return '' if($req->dir_config('WEBOBVIUS_NOCACHE'));
-    return '' if (-e $this->{WEBOBVIUS_CACHE_INDEX} . "-off");
-    return '' if $req-> notes('nocache');
-
-    my $vdoc=$output->param('version');
-    my $lang=$vdoc->Lang || 'UNKNOWN'; # Should always be there
-
-    my $content_type = $req->content_type;
-    return '' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
-                                            # Not really the RFC2045 definition but should work most of the time
-    $req->content_type($content_type);
-
-    my $id = md5_hex($req-> hostname . ':'. $req->the_request);
-    $id .= '.gz' if ($req->notes('gzipped_output'));
-
-    $req->notes('cache_id' => $id);
-    $req->notes('cache_dir' => join '/', $this->{WEBOBVIUS_CACHE_DIRECTORY}, $lang, $req->content_type, substr($id, 0, 2));
-    $req->notes('cache_file' => $req->notes('cache_dir') .  '/' . $id);
-    $req->notes('cache_url' => join '/', '/cache', $lang, $req->content_type, substr($id, 0, 2), $id);
-
-    Obvius::log->debug("Cache file name ", $req->notes('cache_file'), "\n");
-
-    return 1;
-}
-
-# save_in_cache - Saves the data in $s in the document cache.
-#                 can_use_cache should always be called before calling this method.
-#                 Note: this method is also present in WebObvius::Site::MultiMason
-sub save_in_cache {
-    my ($this, $req, $s) = @_;
-
-    my $obvius=$req->notes('obvius');
-
-    my $log;
-    if (defined $obvius) {
-        $log = $obvius->log;
-    } else {
-        $log = Obvius::log();
-    }
-
-    my $id = $req->notes('cache_id');
-    return unless ($id);
-    return unless ($this->{WEBOBVIUS_CACHE_INDEX}
-                   and $this->{WEBOBVIUS_CACHE_DIRECTORY});
-
-    my $dir = $req->notes('cache_dir');
-    my $file = $req->notes('cache_file');
-
-    $log->debug("Cache file name $file");
-    unlink($file);
-
-    my $fh = new Apache::File('>'.$file);
-
-    if ($fh) {
-        $log->debug("Cache file open ok");
-        print $fh (ref($s) ? $$s : $s);
-        $fh->close;
-        my $extra = '';
-        my $qstring = $req->args;
-        if ($qstring and $qstring =~ /^size=\d+(x\d+|\%)$/) {
-            $extra = $qstring;
-        }
-
-        # Add to cache-db
-        if ($fh = new Apache::File('>>' . $this->{WEBOBVIUS_CACHE_INDEX})) {
-            my $real_path=$req->uri();
-            # If handle_path_info() is true on the doctype
-            # (see WebObvius::Site::obvius_document),
-            # obvius_path_info needs to be added:
-            $real_path.=$req->notes('obvius_path_info') . '/' if (defined $req->notes('obvius_path_info'));
-            print $fh $real_path,$extra, "\t", $req->notes('cache_url'), "\n";
-            $log->debug(" ADDED TO CACHE: " . $req->uri);
-        } else {
-            $log->debug("Couldn't lock WEBOBVIUS_CACHE_INDEX-file");
-        }
-    }
-    $log->debug("Cache file done");
-}
-
-sub dirty_url_in_cache {
-    my ($this, $obvius, $url) = @_;
-
-    # XXX This should just remove the url from the CACHE_INDEX and
-    # (possibly) delete the corresponding file in the
-    # CACHE_DIRECTORY. That would be nice. Well. Any search document
-    # that finds the document should be removed as well. And if it's
-    # on a newsbox, then...  Conclusion: clear the whole she-bang:
-
-    # 20020619 New conclusion: Remove the dirty url immediately and
-    # clear the rest slowly.
-
-    # XXX This should be called when a document is
-    # published/unpublished. And when it expires(!)
-
-     # Ole: This is so stupid. Why does it have to be so hard?
-     # I'm trying to implement a WAY better cache handling for KU,
-     # so I need to implement a feature that can disable all form of
-     # cache-clearing. I'd like to handle it MY WAY!
-
-     if ( ! $obvius->config->param("handle_document_cache_locally") )
-     {
-        WebObvius::Cache::Flushing::flush($url,$this->{WEBOBVIUS_CACHE_DIRECTORY} . 'flush.db', $this->{WEBOBVIUS_CACHE_INDEX});
-     }
-
-
-}
-
-sub clear_cache {
-    my ($this, $obvius) = @_;
-
-    return 0 unless ($this->{WEBOBVIUS_CACHE_INDEX});
-
-    WebObvius::Cache::Flushing::immediate_flush($this->{WEBOBVIUS_CACHE_DIRECTORY} . 'flush.db', $this->{WEBOBVIUS_CACHE_INDEX});
-
-    # Notice that handle_mason_cache is only called if the
-    # $obvius-argument is defined, for backward compability (the old
-    # admin does not need handle_mason_cache and does not pass
-    # $obvius).
-    $this->handle_mason_cache($obvius, undef) if (defined $obvius);
-}
 
 
 ########################################################################
@@ -373,21 +236,23 @@ sub access_handler ($$) {
     return OK;
 }
 
-# handler - Handles incoming Apacghe requests when using Mason as template system.
+# handler - Handles incoming Apache requests when using Mason as template system.
 sub handler ($$) {
     my ($this, $req) = @_;
 
+    my $obvius = $this->obvius_connect($req);
+
     # Does we need to do this before fetching $obvius-object?
     Obvius::log->debug(" Mason::handler ($this : " . $req->uri . ")");
-
+    
     $this->tracer($req) if ($this->{DEBUG});
     my $benchmark = Obvius::Benchmark-> new('mason::handler') if $this-> {BENCHMARK};
 
     $req->notes(now => strftime('%Y-%m-%d %H:%M:%S', localtime($req->request_time)));
 
-    my $obvius=$req->pnotes('obvius');
     my $doc=$req->pnotes('document');
 
+    print STDERR "Got request\n";
     unless ($this->param('is_admin')) {
 #       return NOT_FOUND unless ($obvius->is_public_document($doc));
         my $vdoc = $this->obvius_document_version($req, $doc);
@@ -410,12 +275,12 @@ sub handler ($$) {
         # by the browser should have a method called "raw_document_data"
 
         my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data(
-                $doc, $vdoc, $obvius,
+         	   $doc, $vdoc, $obvius,
             WebObvius::Apache::apache_module('Request')-> new($req),
             $output
             );
 
-        if( $mime_type =~ /text\/html/) {
+        if( $mime_type && ($mime_type =~ /text\/html/)) {
             print $data;
             return OK;
         }
@@ -465,35 +330,25 @@ sub handler ($$) {
                 $req->print($data) unless ($req->header_only);
             }
 
-            # Add to cache:
-            if ($this->can_use_cache($req,$output) and not scalar($req->args)) {
-                $this->save_in_cache($req, \$data);
-            }
-            else {
-                $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
-            }
-
+	    execute_cache($obvius, $req, $data);
             return OK;
-        }
+       }
 
         $req->content_type('text/html') unless $req->content_type;
         $req->content_type('text/html') if $req->content_type =~ /directory$/;
-        return -1 unless ($req->content_type eq 'text/html');
-    }
-    else {
-        # XXX $req->no_cache(1);
+        if ($req->content_type ne 'text/html') {
+	     execute_cache($obvius, $req);
+	     return -1;
+	}
     }
 
     $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
     $req->filename($req->document_root . $req->notes('prefix') . "/dhandler"); # default handler
 
     my $status=$this->execute_mason($req);
-
+    my $html;
     if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
-        my $html="Couldn't generate page. Yikes.";
-        if ($status==OK) {
-            $html=${$this->{'SITE_SCALAR_REF'}};
-        }
+        $html = ${$this->{'SITE_SCALAR_REF'}} if ($status == OK);
         ${$this->{'SITE_SCALAR_REF'}}='';
 
         # Set headers from the hashref $output->param('OBVIUS_HEADERS_OUT'), if present.
@@ -519,178 +374,27 @@ sub handler ($$) {
         $req->send_http_header;
 
         $req->print($html) unless ($req->header_only or $status!=OK);
-
-        # Add to cache:
-        if ($this->can_use_cache($req) and $status==OK) {
-            $this->save_in_cache($req, \$html);
-        }
-        else {
-            $obvius->log->debug(" NOT ADDED TO CACHE: " . $req->notes('uri'));
-        }
+	execute_cache($obvius, $req, $html);
 
     }
 
-    $this->handle_modified_docs_cache($obvius);
+    execute_cache($obvius, $req, $html);
 
     return $status;
 }
 
-sub handle_modified_docs_cache { # See also obvius/mason/admin/default/dirty_cache
-    my ($this, $obvius)=@_;
-
-    #print STDERR __PACKAGE__, '->handle_modified_cache', "\n";
-    my $modified_list=$obvius->list_modified();
-    if (scalar(@$modified_list)) {
-        my %dirty_urls=();
-        my %dirty_docids=();
-
-        # Turn of object-cache (otherwise we get wrong parents after a move!):
-        $obvius->cache(0);
-
-        #print STDERR " docs modified:\n";
-        my $i=1;
-        foreach my $modified (@$modified_list) {
-            # Find document:
-            my $mod_doc=undef;
-            if (defined $modified->{docid}) {
-                $mod_doc=$obvius->get_doc_by_id($modified->{docid});
-            }
-            elsif (defined $modified->{url}) {
-                $mod_doc=$obvius->lookup_document($modified->{url});
-            }
-            # Find url:
-            my $mod_url=undef;
-            if (defined $modified->{url}) {
-                $mod_url=$modified->{url};
-            }
-            elsif (defined $mod_doc) {
-                $mod_url=$obvius->get_doc_uri($mod_doc);
-            }
-
-            #print STDERR "  (", $i++, ") ", ($modified->{docid} || $modified->{url}), " ";
-            if ($mod_doc) { # The doc exists, evict it:
-                #print STDERR "doc exists ";
-                if ($mod_url) {
-                    $dirty_urls{$mod_url}=1;
-                    $dirty_docids{$mod_doc->Id}=1;
-                }
-                if (my $mod_parent=$obvius->get_doc_by_id($mod_doc->Parent)) {
-                    #print STDERR "parent ", $mod_parent->Id, " ";
-                    if (my $mod_parent_url=$obvius->get_doc_uri($mod_parent)) {
-                        $dirty_urls{$mod_parent_url}=1;
-                        $dirty_docids{$mod_parent->Id}=1;
-                    }
-                }
-            }
-            elsif ($modified->{url}) { # A doc couldn't be found for
-                                       # this url, but do pass it
-                                       # anyway, in case some caches
-                                       # uses url as key:
-                $dirty_urls{$modified->{url}}=2; # 2 is just for
-                                                 # debugging, true is
-                                                 # all that is used
-            }
-            #print STDERR "\n";
-        }
-        # Consider only doing this for the public ones:
-        # (or do we define that it's up to dirty_url_in_cache to worry about that?)
-        map { #print STDERR "  dirty_url: $_\n";
-              $this->dirty_url_in_cache($obvius, $_); } keys %dirty_urls;
-
-        # Handle the Mason-cache:
-        $this->handle_mason_cache($obvius, \%dirty_docids);
-
-        # Turn object-cache back on:
-        $obvius->cache(1);
-    }
-
-    if ( $obvius->config->param("handle_document_cache_locally") )
-    {
-        my $modified_docid=$obvius->list_modified_docid();
-        if (scalar(@$modified_list))
-        {
-          $this->handle_mason_cache($obvius, $modified_docid, 1 );
-        }
-    }
-
-}
-
-# handle_mason_cache - given a hash-ref to dirty docids, calls the
-#                      mason-component that invalidates the
-#                      cache-entries accordingly, in its own
-#                      namespace. If no hash-ref is given, the
-#                      components clears the entire cache. Returns the
-#                      status if the mason-component run. False on
-#                      failure.
-sub handle_mason_cache {
-    my ($this, $obvius, $dirty_docids, $call_local_component)=@_;
-
-    # Only do this, if the website uses a newer admin - check if the
-    # CacheHandling-package is there:
-    my $package=$obvius->config->param('perlname') . '::Site';
-    my $cachehandling_package=$package . '::Admin::CacheHandling';
-    my $str="\$" . $cachehandling_package . '::VERSION;';
-    my $res=eval $str;
-    my $error=$@;
-    if (!$res) {
-        my $config=$obvius->config;
-        warn "Package $cachehandling_package not defined. If this website uses an obsolete admin, please set 'suppress_obsolete_admin_warning=1' in the websites .conf-file" unless ($config->param('suppress_obsolete_admin_warning'));
-        return;
-    }
-
-    # This method must be callable from ::Public as well as ::Admin
-    # (think CreateDocument and similar doctypes).
-    #
-    # So we get the Admin-object from the Perlname::Site-package:
-    $str="\$" . $package . '::Admin;';
-    my $admin=eval $str;
-
-    # Run Mason by hand:
-    my $string='';
-    my $status;
-    my $interp;
-    if ($new_mason) {
-        $interp=HTML::Mason::Interp->new(
-                                         allow_globals=>[qw($obvius)],
-                                         in_package=>$cachehandling_package,
-                                         comp_root=>$admin->{handler}->interp()->comp_root(),
-                                         data_dir=>$admin->{handler}->interp()->data_dir(),
-                                         data_cache_api=>'1.0',
-                                         out_method=>\$string,
-                                        );
-    }
-    else {
-        my $parser=HTML::Mason::Parser->new(
-                                            allow_globals=>[qw($obvius)],
-                                            in_package=>$cachehandling_package,
-                                           );
-        $interp=HTML::Mason::Interp->new(
-                                         parser=>$parser,
-                                         comp_root=>$admin->{interp}->comp_root(),
-                                         data_dir=>$admin->{interp}->data_dir(),
-                                         out_method=>\$string
-                                        );
-    }
-
-    $interp->set_global(obvius=>$obvius);
-
-    if ( defined( $call_local_component ) )
-    {
-      $status = $interp->exec('/default/dirty_cache_local', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
-    }
-    else
-    {
-      # XXX Should pass dirty_urls as well, in case some caches use url as key:
-      $status=$interp->exec('/default/dirty_cache', sitebase=>$admin->Base, dirty_docids=>$dirty_docids);
-    }
-
-    if (!$status) {
-        warn "Error when running dirty_cache: $status ($string)";
-    }
-    $string=undef;
-
-    return $status;
-}
+sub execute_cache {     
+     my ($obvius, $req, $data ) = @_;
+     
+     my $cache = WebObvius::Cache::Cache->new($obvius);
+     $cache->save_request_result_in_cache($req, \$data) if ($data);
+     
+     if ($obvius->modified) {
+	  $cache->quick_flush($obvius->modified);
+	  $req->push_handlers(PerlCleanupHandler => sub { print STDERR Dumper($obvius); $cache->find_and_flush($obvius->modified) });
+     }
+     
+} 
 
 sub execute_mason {
     my ($this, $req)=@_;
@@ -698,17 +402,8 @@ sub execute_mason {
     # Run mason on the request:
     my $status=$this->{handler}->handle_request($req);
 
+    print STDERR "masonstatus: $status";
     # Clean up globals (we don't clean up $r; we didn't make it):
-    if ($new_mason) {
-        # XXX IMPLEMENT FOR NEWER, >=1.10, MASONAE!
-        # warn "Need to implement cleaning up globals for Mason =>1.10\n";
-    }
-    else {
-        map { $this->{handler}->interp->set_global($_=>undef) }
-            grep { $_ ne '$r' }
-                $this->{handler}->interp->parser->allow_globals();
-    }
-
     return $status;
 }
 
@@ -894,7 +589,7 @@ sub expand_output {
     my $filename=$site->param('comp_root')->[0]->[1] . '/switch'; # Grab the docroot from the setup.pl
     $req->filename($filename);
     $req->pnotes('OBVIUS_OUTPUT'=>$output);
-
+    
     my $status=$this->execute_mason($req);
 
     my $s='We have an anomaly, the subsite centerpiece was unable to generate.';
