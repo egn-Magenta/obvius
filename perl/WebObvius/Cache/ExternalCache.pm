@@ -24,6 +24,7 @@ sub find_and_flush {
      
      @$commands = grep {$_} @$commands;
 
+     print STDERR Dumper($commands);
      if (scalar @$commands) {
 	  $this->flush($commands);
 	  $this->send_commands($commands);
