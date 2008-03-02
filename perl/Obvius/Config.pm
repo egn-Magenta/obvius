@@ -31,6 +31,7 @@ package Obvius::Config;
 use strict;
 use warnings;
 
+use Data::Dumper;
 use Obvius::Data;
 
 our @ISA = qw( Obvius::Data );
@@ -40,28 +41,36 @@ our $confdir = '/etc/obvius';
 our $defaults = 'defaults';
 
 # use Data::Dumper;
+sub parse_file {
+     my $file = shift;
+     
+     my %data;
+
+     open F, "<", $file or return undef;
+     for (grep { ! ( /^\#/ or /^\s*$/ ) } <F>) {
+	  chomp;
+	  my ($key, $val) = split(/\s*=\s*/, $_, 2);
+	  if (my ($list) = $val =~ /^\s*\((.*)\)\s*$/) {
+	       my @vals = split /\s*,\s*/, $list;
+	       $val = [@vals];
+	  }
+	  $data{uc $key} = $val;
+     }
+     close F;
+     
+     return \%data;
+}
+     
 
 sub read_config_file {
     my ($name) = @_;
 
-    my $fh;
+    my @files = ("$confdir/$defaults", "$confdir/$name.conf");
     my %data;
-
-    # Default and/or host-wide configuration
-    if (open($fh, "<$confdir/$defaults")) {
-        for (grep { ! ( /^\#/ or /^\s*$/ ) } <$fh>) {
-            chomp;
-	    my @x = split(/\s*=\s*/, $_, 2);
-            $data{uc $x[0]} = $x[1];
-        }
-    }
-				
-    # A site specific config file is required for now
-    open($fh, "<$confdir/$name.conf") or return undef;
-    for (grep { ! ( /^\#/ or /^\s*$/ ) } <$fh>) {
-	chomp;
-	my @x = split(/\s*=\s*/, $_, 2);
-	$data{uc $x[0]} = $x[1];
+    
+    for (@files) {
+	 my $data = parse_file($_);
+	 %data = (%data, %$data) if ($data);
     }
 
     #print STDERR "read_config_file: ", Dumper(\%data);
