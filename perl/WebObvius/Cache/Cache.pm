@@ -1,21 +1,23 @@
-package WebObvius::Site::Mason::Cache;
+package WebObvius::Cache::Cache;
 
-use WebObvius::Cache::MasonCache;
+use strict;
+use warnings;
+use WebObvius::Cache::LeftmenuMasonCache;
 use WebObvius::Cache::ExternalCache;
-use WebObvius::Cache::CacheCollection;
+use WebObvius::Cache::Collection;
 
-our @mason_cache = (['/portal/subdocs', 'get_subs']);
-our @ISA = qw( WebObvius::Cache::CacheCollection );
+our @ISA = qw( WebObvius::Cache::Collection );
 
 sub new {
-     my ($class, $mason_base, $obvius) = @_;
+     my ($class, $obvius) = @_;
      
-     my @mason_caches;
-     push @mason_caches, WebObvius::Cache::MasonCache->new($mason_base, @$_) for @mason_cache;
+     my $leftmenu_cache = WebObvius::Cache::LeftmenuMasonCache->new($obvius->{OBVIUS_CONFIG}{SITEBASE}, 
+							    '/portal/subdocs', 'get_subs');
 
-     my $apache_cache = WebObvius::Cache::ApacheCache->new($obvius);
+     my $external_cache = WebObvius::Cache::ExternalCache->new($obvius);
      
-     return $class::SUPER->new($external_cache, @mason_caches);
+     return $class->SUPER::new($external_cache, $leftmenu_cache);
+
 }
 
 1;
