@@ -1934,7 +1934,7 @@ sub create_new_document {               # RS 20010819 - ok
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new document ... done");
-    $this->register_modified(docid => $docid);
+    $this->register_modified(docid => $docid, clear_admin_leftmenu => 1);
     return wantarray ? ($docid, $version) : [$docid, $version];
 }
 
@@ -2162,8 +2162,7 @@ sub rename_document {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Renaming/moving document ... done");
-    $this->register_modified(uri   => $old_uri); # Because the doc does no longer refers to this
-    $this->register_modified(docid => $old_parent_id, clear_leftmenu => 1);
+    $this->register_modified(uri   => $old_uri, clear_leftmenu => 1); # Because the doc does no longer refers to this
     $this->register_modified(docid => $doc->Id, clear_leftmenu => 1);
     return 1;
 }

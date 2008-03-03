@@ -21,7 +21,8 @@ sub find_dirty {
 
      my $cache_objects = $cache_objects->request_values('docid', 'clear_leftmenu');
      
-     @$cache_objects = map { $_->{docid} } grep { $_->{clear_leftmenu}} @$cache_objets;
+     @$cache_objects = map { $_->{docid} } 
+         grep { $_->{clear_leftmenu} || $_->{clear_admin_leftmenu}} @$cache_objets;
 
      for (@$cache_objects) {
 	  my $doc = $obvius->get_doc_by_id($_->{docid});
