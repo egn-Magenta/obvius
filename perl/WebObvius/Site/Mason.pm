@@ -391,7 +391,12 @@ sub execute_cache {
      
      if ($obvius->modified) {
 	  $cache->quick_flush($obvius->modified);
-	  $req->push_handlers(PerlCleanupHandler => sub { print STDERR Dumper($obvius); $cache->find_and_flush($obvius->modified) });
+	  $req->push_handlers(PerlCleanupHandler => sub { 
+				   $cache->find_and_flush($obvius->modified);
+				   my $db = $obvius->{DB};
+				   my $dbh = $db->DBHdl if ($db);
+				   $dbh->disconnect() if $dbh;
+			      });
      }
      
 } 

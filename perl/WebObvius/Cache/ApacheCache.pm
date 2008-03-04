@@ -141,6 +141,7 @@ sub flush {
     return $this->flush_by_pattern(
             sub {
 		 my $uri = shift;
+		 $uri =~ s|/size=.*$||;
 		 $flush_simple{lc $uri} and return 1;
 		 $uri =~ /$_/ and return 1 for (@flush_regexps);
 		 $uri !~ /$_/ and return 1 for (@flush_not_regexps);
@@ -316,7 +317,9 @@ sub find_dirty {
        (@$referrers, 
 	@related, 
 	@$special_actions,
-	map { { command => 'clear_uri', uri => $_}} @uris);
+	map { { command => 'clear_uri', uri => $_}} @uris,
+	map { { commands => 'clear_uri', uri => "/$_.docid" }} @docids
+       );
      
      return uniquify_commands(\@commands);
 }
