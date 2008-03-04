@@ -19,6 +19,7 @@ sub find_dirty {
 
      my $obvius = $this->{obvius};
      
+     $obvius->connect if (!$obvius->{DB});
      my $values = $cache_objects->request_values('docid', 'clear_leftmenu', 'clear_admin_leftmenu');
      my @docids = map { $_->{docid} } 
        grep { $_->{clear_admin_leftmenu} || $_->{clear_leftmenu}} @$values;
@@ -47,7 +48,6 @@ sub flush {
 
 sub find_and_flush {
      my ($this, $cache_objects) = @_;
-     
    
      my $dirty = $this->find_dirty($cache_objects);
      $this->flush($dirty);
