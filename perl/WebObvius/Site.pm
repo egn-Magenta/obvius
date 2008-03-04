@@ -36,8 +36,9 @@ use warnings;
 
 use Obvius;
 use Obvius::Data;
-
+use Data::Dumper;
 use WebObvius;
+use WebObvius::Cache::Cache;
 
 use Image::Size;
 
@@ -66,10 +67,10 @@ use Unicode::String qw(utf8 latin1);
 sub new
 {
         my $self = shift-> SUPER::new(@_);
-
+	
         $self-> {LANGUAGE_PREFERENCES} = [];
         $self-> load_translation_fileset();
-
+	
         return $self;
 }
 
@@ -146,16 +147,26 @@ sub obvius_connect {
 
     my $obvius = $req->pnotes('obvius');
     return $obvius if ($obvius);
+    
+    $doctypes   = $this->{OBVIUS_ARGS}->{doctypes};
+    $fieldtypes = $this->{OBVIUS_ARGS}->{fieldtypes};
+    $fieldspecs = $this->{OBVIUS_ARGS}->{fieldspecs};
 
     $this->tracer($req, $user||'-user', $passwd||'-passwd') if ($this->{DEBUG});
-
+    
     $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs, log => $this->{LOG});
     return undef unless ($obvius);
     $obvius->param(LANGUAGES=>$this->get_language_preferences($req));
 
     $obvius->cache(1);
-    $req->register_cleanup(sub { $obvius->cache(0); $obvius->{DB}=undef; 1; } );
-
+    $req->register_cleanup(sub {
+				if ($obvius->modified) {
+				     my $cache = WebObvius::Cache::Cache->new($obvius);
+				     $cache->find_and_flush($obvius->modified);
+				}
+				$obvius->{DB} = undef;
+				return 1;
+			   });
     $req->pnotes(obvius => $obvius);
     return $obvius;
 }
