@@ -14,8 +14,9 @@ sub new {
      
      return if (!$doc);
 
-     $obj{docid} ||= $doc->Id;
-     $obj{uri}   ||= $obvius->get_doc_uri($doc);
+     $obj{docid} = $doc->Id;
+     $obj{uri}   = $obvius->get_doc_uri($doc);
+
      return bless {%obj}, $class;
 }
 
