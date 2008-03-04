@@ -40,6 +40,7 @@ require Exporter;
 use Obvius::Data;
 
 use WebObvius::Cache::CacheObjects; 
+use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
 use WebObvius::Cache::ApacheCache qw(is_relevant_for_leftmenu_cache);
 
 our @ISA = qw(  Obvius::Data
@@ -1934,7 +1935,8 @@ sub create_new_document {               # RS 20010819 - ok
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new document ... done");
-    $this->register_modified(docid => $docid, clear_admin_leftmenu => 1);
+    $this->register_modified(docid => $docid);
+    $this->register_modified(admin_leftmenu => [$parent->Id]);
     return wantarray ? ($docid, $version) : [$docid, $version];
 }
 
@@ -2008,8 +2010,10 @@ sub create_new_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new version ... done");
+    
+    $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent])  
+      if (cache_new_version_p($this, $doc->Id, $lang));
 
-    print STDERR "Creating new version\n";
     $this->register_modified( docid => $doc->Id);
     return $version;
 }
@@ -2080,7 +2084,8 @@ sub delete_document {
     # The document doesn't exist any more, so we say the uri of it is
     # modified, and its parent:
     $this->register_modified(uri  => $doc_uri, docid => $docid, clear_leftmenu => 1);
-    $this->register_modified(docid => $doc_parent_id);
+    $this->register_modified(docid => $doc_parent_id, clear_leftmenu => 1);
+    $this->register_modified(admin_leftmenu => [$docid, $doc_parent_id]);
     return 1;
 }
 
@@ -2161,9 +2166,10 @@ sub rename_document {
     }
 
     undef $this->{DB_Error};
+    $this->register_modified(uri   => $old_uri, clear_leftmenu => 1);
+    $this->register_modified(admin_leftmenu => [$old_parent_id, $new_parent->Id, $doc->Id]);
+
     $this->{LOG}->info("====> Renaming/moving document ... done");
-    $this->register_modified(uri   => $old_uri, clear_leftmenu => 1); # Because the doc does no longer refers to this
-    $this->register_modified(docid => $doc->Id, clear_leftmenu => 1);
     return 1;
 }
 
@@ -2239,8 +2245,10 @@ sub publish_version {
     }
 
     undef $this->{DB_Error};
-    $this->{LOG}->info("====> Publishing version ... done");
+    $this->{LOG}->info("====> Publishing version ... done"); 
     $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => $related);
+    my $doc = $this->get_doc_by_id($vdoc->Docid);
+    $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
 
     if($delayed_publish) {
         $this->{LOG}->info("====> Setting 'at' autopublishing job...");
@@ -2319,6 +2327,8 @@ sub unpublish_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Unpublishing version ... done");
     $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => 1);
+    my $doc = $this->get_doc_by_id($vdoc->Docid);
+    $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
     return 1;
 }
 
@@ -2374,7 +2384,6 @@ sub delete_single_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Deleting single version ... done");
-    $this->register_modified(docid=>$vdoc->Docid);
     return 1;
 }
 
@@ -2392,7 +2401,6 @@ sub register_modified {
     if (!$this->{MODIFIED}) {
 	 $this->{MODIFIED} = WebObvius::Cache::CacheObjects->new($this);
     }
-    print STDERR "Options being sent\n" . Dumper(\%options);
     $this->{MODIFIED}->add_to_cache($this, %options);
 }
 
