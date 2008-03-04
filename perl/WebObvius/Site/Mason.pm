@@ -252,7 +252,6 @@ sub handler ($$) {
 
     my $doc=$req->pnotes('document');
 
-    print STDERR "Got request\n";
     unless ($this->param('is_admin')) {
 #       return NOT_FOUND unless ($obvius->is_public_document($doc));
         my $vdoc = $this->obvius_document_version($req, $doc);
@@ -397,7 +396,6 @@ sub execute_mason {
     # Run mason on the request:
     my $status=$this->{handler}->handle_request($req);
 
-    print STDERR "masonstatus: $status";
     # Clean up globals (we don't clean up $r; we didn't make it):
     return $status;
 }
