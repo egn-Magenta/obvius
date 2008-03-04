@@ -317,8 +317,7 @@ sub find_dirty {
        (@$referrers, 
 	@related, 
 	@$special_actions,
-	map { { command => 'clear_uri', uri => $_}} @uris,
-	map { { commands => 'clear_uri', uri => "/$_.docid" }} @docids
+	map { { command => 'clear_uri', uri => $_}} @uris
        );
      
      return uniquify_commands(\@commands);

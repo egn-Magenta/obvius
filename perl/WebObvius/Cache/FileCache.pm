@@ -24,6 +24,14 @@ sub flush {
      $cache->remove($_) for (@$dirty);
 }
 
+sub flush_completely {
+     my $this = shift;
+     my $cache = Cache::FileCache->new({cache_root => $this->{cache_root},
+					namespace => $this->{namespace}});
+     
+     $cache->Clear();
+}
+
 sub find_and_flush {
      my ($this, $cache_objects) = @_;
    
