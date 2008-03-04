@@ -220,7 +220,7 @@ sub access_handler ($$) {
         if (!$this->param('is_admin') and ($uri =~ s{[.]html/$}{.html}i));
         # ... and we auto-deslash any uri which ends in .html.
 
-    my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+    my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef);
     return SERVER_ERROR unless ($obvius);
 
     # Cache these structures: (they should be dirtied when the db is updated... XXX)
@@ -374,9 +374,7 @@ sub handler ($$) {
         $req->send_http_header;
 
         $req->print($html) unless ($req->header_only or $status!=OK);
-	execute_cache($obvius, $req, $html);
-
-    }
+   }
 
     execute_cache($obvius, $req, $html);
 
@@ -388,18 +386,10 @@ sub execute_cache {
      
      my $cache = WebObvius::Cache::Cache->new($obvius);
      $cache->save_request_result_in_cache($req, \$data) if ($data);
-     
-     if ($obvius->modified) {
-	  $cache->quick_flush($obvius->modified);
-	  $req->push_handlers(PerlCleanupHandler => sub { 
-				   $cache->find_and_flush($obvius->modified);
-				   my $db = $obvius->{DB};
-				   my $dbh = $db->DBHdl if ($db);
-				   $dbh->disconnect() if $dbh;
-			      });
-     }
-     
-} 
+     $cache->quick_flush($obvius->modified) if ($obvius->modified);
+
+
+}    
 
 sub execute_mason {
     my ($this, $req)=@_;
