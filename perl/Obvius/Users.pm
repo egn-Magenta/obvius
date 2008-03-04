@@ -110,16 +110,27 @@ sub validate_user {
 sub read_user_and_group_info {
     my ($this) = @_;
 
-    return if (defined $this->{USERS} and defined $this->{GROUPS} and defined $this->{USER_GROUPS});
-
-    my $users=$this->get_table_data_hash('users', [qw(id login)]); # logins must not be digits only
-    $this->{USERS}=$users;
-    my $groups=$this->get_table_data_hash('groups', 'id');
-    $this->{GROUPS}=$groups;
-    my $user_groups=$this->get_table_data_hash_array('grp_user', 'user');
-    $this->{USER_GROUPS}=$user_groups;
-    my $group_users=$this->get_table_data_hash_array('grp_user', 'grp');
-    $this->{GROUP_USERS}=$group_users;
+    my @ops = (
+	  {name => 'USERS', 
+	   fetch_data => sub {return $this->get_table_data_hash('users', [qw(id login)])}},
+	  {name => 'GROUPS',
+	   fetch_data => sub { return $this->get_table_data_hash('groups', 'id') }},
+	  { name => 'USER_GROUPS', 
+	    fetch_data => sub { return $this->get_table_data_hash_array('grp_user', 'user') }},
+	  { name => 'GROUP_USERS',
+	    fetch_data => sub { return $this->get_table_data_hash_array('grp_user', 'grp') }});
+	    
+    my $cache = new Cache::FileCache({cache_root => $this->{OBVIUS_CONFIG}{FILECACHE_DIRECTORY},
+				      namespace => 'user_data'});
+    
+    for my $op (@ops) {
+	 my $entity = $cache->get($op->{name});
+	 if (!$entity) {
+	      $entity = &{$op->{fetch_data}};
+	      $cache->set($op->{name}, $entity);
+	 }
+	 $this->{$op->{name}} = $entity;
+    }
 }
 
 
@@ -187,6 +198,7 @@ sub delete_user {
     }
 
     undef $this->{DB_Error};
+    $this->register_modified('users' => 1);
     $this->{LOG}->info("====> Delete user ... done");
     return $userid;
 }
@@ -221,6 +233,7 @@ sub create_new_user {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Create new user ... done");
+    $this->register_modified('users' => 1);
     return $userid;
 }
 
@@ -280,6 +293,7 @@ sub update_user {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Update user ... done");
+    $this->register_modified('users' => 1);
     return 1;
 }
 
@@ -309,6 +323,7 @@ sub delete_group {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Delete group ... done");
+    $this->register_modified('users' => 1);
     return $grpid;
 }
 
@@ -344,6 +359,7 @@ sub create_new_group {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Create new group ... done");
+    $this->register_modified('users' => 1);
     return $grpid;
 }
 
@@ -375,6 +391,7 @@ sub update_group {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Update group ... done");
+    $this->register_modified('users' => 1);
     return 1;
 }
 
