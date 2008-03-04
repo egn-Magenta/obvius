@@ -38,6 +38,8 @@ require 5.008;
 
 require Exporter;
 use Obvius::Data;
+use Data::Dumper;
+use Cache::FileCache;
 
 use WebObvius::Cache::CacheObjects; 
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
@@ -67,14 +69,13 @@ use constant OBVIUS_ERROR => 0;
 use constant OBVIUS_OK => 1;
 use constant OBVIUS_DECLINE => 2;
 
-use Carp;
-
 use POSIX qw(strftime);
 
 use DBIx::Recordset;
 use Params::Validate qw(validate);
 
 use Data::Dumper;
+use Carp qw(cluck confess carp croak);
 
 use Obvius::Data;
 use Obvius::Config;
@@ -126,15 +127,13 @@ sub new {
                                   LANGUAGES   => {}
                                  );
 
-    $this->tracer($obvius_config, $user||'', $password||'') if ($this->{DEBUG});
-
     croak("No database specified")
         unless ( $this->Obvius_Config->DSN );
-
+    
     $this->connect;
     if ($this->{USER} and not $this->validate_user) {
-        print STDERR "User not valid.\n";
-        return undef;
+	 print STDERR "User not valid.\n";
+	 return undef;
     }
 
     return $this;
@@ -183,18 +182,16 @@ sub connect {
 
     $this->{DB} = $db;
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
-    unless (scalar(@{$this->{DOCTYPES}}) and
-            scalar(@{$this->{FIELDTYPES}}) and
-            scalar($this->{FIELDSPECS}->param)) {
-         $this->{LOG}->debug(" READING DT, FT and FS: ($$) " .
-            join(", ", scalar(@{$this->{DOCTYPES}}), scalar(@{$this->{FIELDTYPES}}),
-                 scalar($this->{FIELDSPECS}->param)) );
+    unless (scalar(@{$this->{DOCTYPES}}) and 
+	    scalar(@{$this->{FIELDTYPES}}) and 
+	    scalar ($this->{FIELDSPECS}->param)) 
+    {
         $this->read_type_info(1)
     }
     $this->read_user_and_group_info;
 
     #print STDERR Dumper($db->MetaData('documents'));
-
+    
     return $db;
 }
 
@@ -1836,8 +1833,9 @@ sub adjust_doctype_hierarchy {
 sub read_type_info {
     my ($this, $make_objects) = @_;
 
+    print STDERR "In read type info\n";
     $this->tracer() if ($this->{DEBUG});
-
+    
     $this->read_doctypes_table($make_objects);
     $this->read_fieldtypes_table($make_objects);
     $this->read_fieldspecs_table($make_objects);
@@ -2247,8 +2245,10 @@ sub publish_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done"); 
     $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => $related);
-    my $doc = $this->get_doc_by_id($vdoc->Docid);
-    $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
+    if ($related) {
+	 my $doc = $this->get_doc_by_id($vdoc->Docid);
+	 $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
+    }
 
     if($delayed_publish) {
         $this->{LOG}->info("====> Setting 'at' autopublishing job...");
