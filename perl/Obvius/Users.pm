@@ -259,6 +259,7 @@ sub update_user_passwd {
 
     
     $this->db_update_user($user);
+    $this->register_modified('users' => 1);
 
     return 1;
 }
