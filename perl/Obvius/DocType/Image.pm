@@ -69,7 +69,7 @@ sub get_resized_data {
     my($this, $size, $vdoc, $obvius, $r) = @_;
 
     my $siteobj = $r->pnotes('site');
-    my $cachedir = $siteobj->param('webobvius_cache_directory');
+    my $cachedir = $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY};
 
     my $imagedir = $cachedir . '/sizedimagecache/' . $vdoc->DocId . '/' . $vdoc->Version . '/';
 
