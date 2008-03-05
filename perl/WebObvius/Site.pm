@@ -36,12 +36,12 @@ use warnings;
 
 use Obvius;
 use Obvius::Data;
-use Data::Dumper;
+
 use WebObvius;
 use WebObvius::Cache::Cache;
 
 use Image::Size;
-
+use Data::Dumper;
 our @ISA = qw( Obvius::Data WebObvius );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
