@@ -173,6 +173,7 @@ else {
             my %errors;
             my $accumulated_errors;
             my @invalid_field_titles=();
+
             foreach my $history (keys %objects) {
                 # 1) Lookup the data description in the storage section of the editscheme
                 my $scheme_path = $m->comp('history:extract_path', history=>$history);
@@ -334,13 +335,11 @@ while ($m->comp('flow', session=>$session)) {
       } else {
           # This should no longer be possible
           die "confirmation CANCEL uncaught?!\n";
-          ($status, $message, $results)=$storage->cancel($execute, $objects, $session, $path, $history);
       }
 
       # Do the hooks in the relevant editschemes.
-      my $hook = "post_" . $execute . "_hook";
-      my $func = $editscheme->{$hook};
-      $m->comp($func) if (defined $func);
+      my $callback = $editscheme->{post_execute_callback};
+      $m->comp($callback) if ($callback);
   }
 
 
