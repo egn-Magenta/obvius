@@ -17,6 +17,7 @@ my $users = {
                                    name => { type => 'line'    },
                                   },
                          },
+	           post_execute_callback => '/action/users:clear_user_cache',
              };
 
 my $memberships = {
@@ -32,6 +33,7 @@ my $memberships = {
                                      user => { type => 'integer' },
                                     },
                            },
+	           post_execute_callback => '/action/users:clear_user_cache',
                };
 
 
@@ -84,6 +86,8 @@ my $group_storage = {
                               id    => { type => 'integer' },
                               name  => { type => 'line'   , validation_regexp => '^[\w_\d][\w_ \d]+[\w_\d]$'}
                              },
+	             post_execute_callback => '/action/users:clear_user_cache',	
+
                     };
 
 
@@ -100,7 +104,7 @@ my $create_group = {
                                 functions => {
                                               create => { label => 'Create' }
                                              },
-                               }
+                               },
                    };
 
 
@@ -112,7 +116,7 @@ my $update_group = {
                                 functions => {
                                               update => { label => 'Update' }
                                              },
-                               }
+                               },
                    };
 
 
@@ -128,6 +132,8 @@ my $delete_group = {
                                              },
                                },
 	            callback => '/action/groups:delete',
+                    post_execute_callback => '/action/users:clear_user_cache',	
+
                    };
 
 my $input_form = {
@@ -178,7 +184,7 @@ my $create = {
                                                    gid => 'id',
                                                   },
                                      },
-                          }
+                          },
              };
 
 
@@ -201,7 +207,7 @@ my $update = {
                                                    gid => 'id',
                                                   },
                                      },
-                          }
+                          },
              };
 
 my $groups = {
