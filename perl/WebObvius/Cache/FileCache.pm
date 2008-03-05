@@ -27,9 +27,10 @@ sub flush {
 sub flush_completely {
      my $this = shift;
      my $cache = Cache::FileCache->new({cache_root => $this->{cache_root},
-					namespace => $this->{namespace}});
+					namespace  => $this->{namespace}
+				       });
      
-     $cache->Clear();
+     $cache->clear();
 }
 
 sub find_and_flush {

@@ -1,10 +1,13 @@
 package WebObvius::Cache::UserCache;
 
+use warnings;
+use strict;
+
+use Data::Dumper;
 use WebObvius::Cache::FileCache;
 
 our @ISA = qw( WebObvius::Cache::FileCache );
-use warnings;
-use strict;
+
 
 sub new {
      my ($class, $obvius) = @_;
@@ -12,13 +15,13 @@ sub new {
 }
 
 sub find_and_flush {
-     my ($this, $class_objects) = @_;
-     
-     my $relevant = $class_objects->retrieve_values('users');
+     my ($this, $cache_objects) = @_;
+
+     my $relevant = $cache_objects->request_values('users');
      
      my $flush = grep { $_->{users} } @$relevant;
 
-     $this->flush_completely if $flush;
+     $this->flush_completely if ($flush);
 }
 
 1;

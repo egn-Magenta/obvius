@@ -32,6 +32,8 @@ package Obvius::Users;
 use strict;
 use warnings;
 
+use Cache::FileCache;
+
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 ########################################################################
@@ -263,7 +265,7 @@ sub update_user_passwd {
     
 sub update_user {
     my ($this, $user) = @_;
-
+    
     return undef unless $this->can_create_new_user();
 
     $user->{passwd}=$this->encrypt_password($user->{password})
