@@ -164,7 +164,7 @@ sub translate_uri {
 sub find_host_prefix {
      my ($this, $uri) = @_;
      
-     my ($best_prefix) = $uri =~ /$this->{regexp}/;
+     my ($best_prefix) = $uri =~ /$this->{regexp}/i;
      
      return $best_prefix;
 }
