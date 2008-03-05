@@ -311,7 +311,7 @@ sub find_dirty {
      my @clear_recursively = map {{command => 'clear_by_regexp', regexp => "^" . $_->{uri}}}
        grep { $_->{uri} and $_->{clear_recursively}} @$vals;
      
-     my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris
+     my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
 
      my $referrers = $this->find_referrers(\@docids);
      my @related = map { $this->find_related($_) } @leftmenu_uris;
