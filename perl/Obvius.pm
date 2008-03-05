@@ -1567,6 +1567,7 @@ sub set_docparams {
         return undef;
     }
 
+    $this->register_modified('docid' => $doc->Id, clear_recursively => 1);
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Setting docparams ... done");
     return 1;
@@ -2398,10 +2399,12 @@ sub delete_single_version {
 sub register_modified {
     my ($this, %options)=@_;
     
+    print STDERR "Register modified\n";
     if (!$this->{MODIFIED}) {
 	 $this->{MODIFIED} = WebObvius::Cache::CacheObjects->new($this);
     }
     $this->{MODIFIED}->add_to_cache($this, %options);
+    print STDERR Dumper($this->modified);
 }
 
 sub modified {
