@@ -289,7 +289,9 @@ sub special_actions {
      for (@$docids) {
      
 	  my $doc = $obvius->get_doc_by_id($_);
+	  next if (!$doc);
 	  my $doctype = $obvius->get_doctype_by_id($doc->Type);
+	  next if (!$doctype);
 	  
 	  if (my $cmd = $special_op_per_doctype{$doctype->{NAME}}) {
 	       my $func = "perform_command_" . $cmd->{command};
