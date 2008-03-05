@@ -304,25 +304,25 @@ sub special_actions {
 sub find_dirty {
      my ($this, $cache_objects) = @_;
 
-     my $vals = $cache_objects->request_values('uri', 'docid', 'clear_leftmenu');
+     my $vals = $cache_objects->request_values('uri', 'docid', 'clear_leftmenu', 'clear_recursively');
      my @uris		= grep { $_ } map { $_->{uri}   } @$vals;
      my @docids		= grep { $_ } map { $_->{docid} } @$vals;
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
-     my @clear_recursively = map { 
-       { 
-	    command => 'clear_by_regexp',
-	    regexp => "^" . $_->{uri} 
-       }} grep { $_->{uri} and $_->{clear_recursively}} @$vals;
+     my @clear_recursively = map {{command => 'clear_by_regexp', regexp => "^" . $_->{uri}}}
+       grep { $_->{uri} and $_->{clear_recursively}} @$vals;
+     
+     my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris
 
      my $referrers = $this->find_referrers(\@docids);
      my @related = map { $this->find_related($_) } @leftmenu_uris;
      my $special_actions = $this->special_actions(\@docids);
      
      my @commands = grep { $_ } 
-       (@$referrers, 
+       (@clear_recursively,
+	@$referrers, 
 	@related, 
 	@$special_actions,
-	map { { command => 'clear_uri', uri => $_}} @uris
+	@uris_to_clear
        );
      
      return uniquify_commands(\@commands);
@@ -356,7 +356,7 @@ sub commands_equal_p {
 sub quick_flush {
     my ($this, $cache_objects) = @_;;
     
-    my $uris = $cache_objects->retrieve_values('uri', 'quick');
+    my $uris = $cache_objects->request_values('uri', 'quick');
     my %uris = map { $_->{uri} => 1} grep { $_->{uri} and $_->{quick} } @$uris;
     
     $this->flush_by_pattern(sub {return 1 if $uris{shift}; return 0; }) if(scalar keys %uris);
