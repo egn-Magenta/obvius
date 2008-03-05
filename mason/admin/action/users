@@ -19,7 +19,9 @@ my $groups = {
                                    name => { type => 'line'    },
                                   },
                          },
-             };
+
+		post_execute_callback => '/action/users:clear_user_cache',	
+	    };
 
 my $memberships = {
                 type => 'scheme/table',
@@ -34,6 +36,7 @@ my $memberships = {
                                      user => { type => 'integer' },
                                     },
                            },
+	       post_execute_callback => '/action/users:clear_user_cache',	
                };
 
 
@@ -62,7 +65,7 @@ my $group_membership = {
                                                         },
                                              },
                                 data => {
-                                         uid => { type => 'integer' },
+					      uid => { type => 'integer' },
                                         },
                                },
                     relations => {
@@ -97,6 +100,8 @@ my $user_storage = {
                              can_manage_users  => { type => 'radio'    },
                              can_manage_groups  => { type => 'radio'    },
                             },
+    	           post_execute_callback => '/action/users:clear_user_cache',
+
                    };
 
 
@@ -203,6 +208,7 @@ my $create = {
                                                  },
                                     },
                            },
+	     post_execute_callback => '/action/users:clear_user_cache',	
              };
 
 
@@ -381,5 +387,13 @@ $history
 </%args>
 <%init>
 can_edit_user( $session, 'edit', $relations-> {user}-> {id});
+</%init>
+</%method>
+
+<%method clear_user_cache>
+<%args>
+</%args>
+<%init>
+$obvius->register_modified('users' => 1);
 </%init>
 </%method>
