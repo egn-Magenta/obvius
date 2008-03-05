@@ -308,7 +308,12 @@ sub find_dirty {
      my @uris		= grep { $_ } map { $_->{uri}   } @$vals;
      my @docids		= grep { $_ } map { $_->{docid} } @$vals;
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
-     
+     my @clear_recursively = map { 
+       { 
+	    command => 'clear_by_regexp',
+	    regexp => "^" . $_->{uri} 
+       }} grep { $_->{uri} and $_->{clear_recursively}} @$vals;
+
      my $referrers = $this->find_referrers(\@docids);
      my @related = map { $this->find_related($_) } @leftmenu_uris;
      my $special_actions = $this->special_actions(\@docids);
@@ -375,6 +380,7 @@ sub find_related {
      my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
 
      my $host_prefix = $hostmap->find_host_prefix($uri);
+
      if ($host_prefix) {
 	  return { command => 'clear_by_regexp', regexp => "^$host_prefix" } 
      } else {
