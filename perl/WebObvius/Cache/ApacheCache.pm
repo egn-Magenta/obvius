@@ -283,7 +283,7 @@ sub special_actions {
      my @commands;
      my %special_op_per_doctype = ( 
 				   Nyhed => {command => 'clear_doctype',  args => ['Nyhedsliste'] },
-				   CalendarEvent => {command => 'clear_doctype', args => ['Arragementsliste']}
+				   CalendarEvent => {command => 'clear_doctype', args => ['Arrangementsliste']}
 				  );
      
      for (@$docids) {
@@ -327,6 +327,7 @@ sub find_dirty {
 	@uris_to_clear
        );
      
+     print STDERR Dumper(\@commands);
      return uniquify_commands(\@commands);
 }
 
