@@ -17,6 +17,8 @@ use warnings;
 
 use Net::SMTP;
 
+use WebObvius::Cache::Cache;
+
 use Obvius;
 use Obvius::Config;
 use Obvius::Log;
@@ -26,10 +28,10 @@ use Getopt::Long;
 
 $ENV{MOD_PERL} = "mod_perl/2"; # make sure everyone thinks mod_perl is 2.
 # Try to set effective user id to www-data:
-my $www_data_uid=scalar(getpwnam('www-data'));
+my $www_data_uid=scalar(getpwnam('apache'));
 $> = $www_data_uid;
 # If it wasn't possible, die:
-die "Please run as user www-data, not as $ENV{USER}. Stopping" unless ($> eq $www_data_uid);
+die "Please run as user apache, not as $ENV{USER}. Stopping" unless ($> eq $www_data_uid);
 
 my ($site, $help)=(undef, undef);
 GetOptions('site=s'=>\$site, 'help'=>\$help);
@@ -60,16 +62,6 @@ die "Could not get Obvius object for $site" unless(defined($obvius));
 $obvius->{USER} = 'admin';
 
 # XXX Handle this path some other way? (.conf?)
-
-eval { 
-    no strict "subs";
-    require '/var/www/' . $conf->Sitename . '/conf/setup.pl';
-};
-
-
-my $adminsite = eval "\$" . $conf->Perlname . "::Site::Admin";
-die "Could not instantiate Site::Admin-object($@)" unless (ref $adminsite);
-
 my $order=$obvius->get_table_record('queue', { id=>$id });
 
 if (!$order) {
@@ -109,14 +101,16 @@ $obvius->{USER}=$user->{login};
 my ($status, $message)=$obvius->perform_order(%do_order);
 
 # Set status and message:
-report_status_message($order, $status, $message);
+#report_status_message($order, $status, $message);
 
 # Handle modified docs (cache):
-$adminsite->handle_modified_docs_cache($obvius);
+#$adminsite->handle_modified_docs_cache($obvius);
+my $cache = WebObvius::Cache::Cache->new($obvius);
+$cache->find_and_flush($obvius->modified);
 
 # Send email:
 my $smtp=Net::SMTP->new('localhost');
-my $from='bitbucket@' . $obvius->config->Sitename;
+my $from='noreply@' . $obvius->config->Sitename;
 my $to=$user->{email};
 my $now=localtime;
 my $subject=$obvius->config->Sitename . ': ' . $order->{command} . ' ' . $order->{status};
