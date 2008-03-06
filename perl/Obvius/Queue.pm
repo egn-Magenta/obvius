@@ -122,7 +122,7 @@ sub store_order {
         my $time_part=$2;
         $ENV{PATH}='';
         system "/bin/echo '".
-            $obvius->config->param('prefix') . "/bin/perform_order --site " .
+            $obvius->config->param('obvius_dir') . "/bin/perform_order --site " .
             $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
 
         # Notice that we are returning this as a warning, because that
@@ -390,7 +390,7 @@ sub perform_command_new_version {
     return ('ERROR', [ 'Could not get document', ' (', $info{docid}, ')' ]) unless ($doc);
 
     # XXX This command does NOT support delayed execution
-
+    
     if (my $new_version=$obvius->create_new_version($doc, $info{args}->{doctypeid}, $info{args}->{lang}, $info{args}->{fields})) {
         return ('OK', ['New version created', ' (', $new_version, ')']);
         # XXX The format of this message is used by admin/action/edit!
