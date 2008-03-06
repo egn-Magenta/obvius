@@ -51,7 +51,7 @@ sub parse_file {
 	  chomp;
 	  my ($key, $val) = split(/\s*=\s*/, $_, 2);
 	  if (my ($list) = $val =~ /^\s*\((.*)\)\s*$/) {
-	       my @vals = split /\s*,\s*/, $list;
+	       my @vals = grep { $_ and !/^\s*$/ } split /\s*,\s*/, $list;
 	       $val = [@vals];
 	  }
 	  $data{uc $key} = $val;
