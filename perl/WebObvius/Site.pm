@@ -164,6 +164,7 @@ sub obvius_connect {
 				     my $cache = WebObvius::Cache::Cache->new($obvius);
 				     $cache->find_and_flush($obvius->modified);
 				}
+				$obvius->{DB} = undef;
 # 				for (keys %$obvius) {
 # 				     delete $obvius->{$_};
 # 				}
