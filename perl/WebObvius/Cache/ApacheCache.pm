@@ -52,11 +52,15 @@ sub can_request_use_cache_p {
 
     my $output = $req->pnotes('OBVIUS_OUTPUT');
     
+    my $args = $req->args;
+    $args_ok = (!$args || $args =~ /size=\d+(?:x\d+|%)/);
+
     return !((
              $output && $output->param('OBVIUS_SIDE_EFFECTS'))	||
 	     $req->no_cache					||
 	     $req->method_number != 0				|| # 0 er M_GET, mod_perl bug.
-	     $req->notes('nocache')
+	     $req->notes('nocache')                             ||
+	     $args_ok
 	    );
 }
 
