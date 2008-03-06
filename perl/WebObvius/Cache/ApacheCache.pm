@@ -237,7 +237,7 @@ sub is_relevant_for_leftmenu_cache {
      return 0 if (!$doc);
 
      my $old_vdoc = $obvius->get_public_version($doc);
-     return 0 if (!$old_vdoc);
+     return 1 if (!$old_vdoc);
      
      $obvius->get_version_fields($old_vdoc, \@relevant_fields);
      $obvius->get_version_fields($vdoc, \@relevant_fields);
