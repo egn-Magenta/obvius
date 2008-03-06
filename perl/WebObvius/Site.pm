@@ -114,7 +114,7 @@ sub get_language_preferences {
     }
 
     # Find out if somebody specified ?lang=XX on the URL, if so, give it even more weight:
-    my %args=$req->args;
+    my %args = map { split /=/ } split /&/, $req->args if ($req->args);
     if ($args{lang}) {
         my %user_pref = split_language_preferences($args{lang}, 4000); # Override
         for (keys %user_pref) {
@@ -164,7 +164,12 @@ sub obvius_connect {
 				     my $cache = WebObvius::Cache::Cache->new($obvius);
 				     $cache->find_and_flush($obvius->modified);
 				}
-				$obvius->{DB} = undef;
+# 				for (keys %$obvius) {
+# 				     delete $obvius->{$_};
+# 				}
+# 				my @l = $req->pnotes;
+# 				delete $req->pnotes->{$_} for (@l);
+				
 				return 1;
 			   });
     $req->pnotes(obvius => $obvius);
@@ -192,16 +197,13 @@ sub obvius_document {
         my $doctype=$obvius->get_document_type($doc); # XXX Should look at the public version?
 
         # It can:
-        if ($doctype->handle_path_info()) {
-            $req->notes('obvius_path_info'=>$path_info);
-            my $handle_uri=$obvius->get_doc_uri($doc);
-            $req->notes(uri=>$handle_uri);
-            $req->uri($handle_uri);
-            return $doc;
-        }
+        return if (!$doctype->handle_path_info());
 
-        # It couldn't:
-        return undef;
+	$req->notes('obvius_path_info'=>$path_info);
+	my $handle_uri=$obvius->get_doc_uri($doc);
+	$req->notes(uri=>$handle_uri);
+	$req->uri($handle_uri);
+	return $doc;
     }
     else {
         # Need some comment about when path isn't defined here...
