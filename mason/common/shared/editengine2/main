@@ -239,9 +239,10 @@ else {
                 $m->comp('history:get_current_event', history=>$return_history);
                 $m->comp('main', history=>$return_history);
 
-                $session->{status}='WARNING';
-                $session->{message}=['Invalid data', ' (', ((map { $_, ', ' } @invalid_field_titles[0..scalar(@invalid_field_titles)-2]), $invalid_field_titles[-1]), '), ', 'please correct and try again'];
+		my $message = ['Invalid data', ' (', (join ',', @invalid_field_titles), '), ', 'please correct and try again'];
                 # (the mumbo-jumbo above just serves the purpose of putting ', ' between the field titles).
+
+		$m->comp('/shared/set_status_message', message => $message, status => 'Warning');
 
                 return;
             }

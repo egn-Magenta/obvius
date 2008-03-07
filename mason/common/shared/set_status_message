@@ -7,8 +7,11 @@ $message=>''
 my $session=$r->pnotes('obvius_session');
 
 if (defined $session) {
-    $session->{status}=$status;
-    $session->{message}=$message;
+    $session->{status}  = $status;
+    $message = join '', @$message if (ref $message eq 'ARRAY');
+    $session->{message} = join '', @{$session->{message}} if (ref $session->{message} eq 'ARRAY');
+    $session->{message} ||= '';
+    $session->{message} .= $message;
 }
 else {
     $r->pnotes(status=>$status);
