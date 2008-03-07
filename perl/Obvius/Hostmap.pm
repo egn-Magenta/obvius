@@ -107,6 +107,13 @@ sub get_hostmap {
     return $this->{hostmap};
 }
 
+sub host_uri_belongs_to {
+     my ($this, $uri) = @_;
+     
+     my ($uri_part) = $uri =~ /$this->{regexp}/i;
+     return $uri_part ? $this->{hostmap}{$uri_part} : undef;
+}
+     
 # sub translate_uri - Given an uri and the current host translates the uri
 #                     using the hostmap. The transformation follows these rules:
 #                     If a match is found in the hostmap, the part of the uri
