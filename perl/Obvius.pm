@@ -1875,7 +1875,8 @@ sub create_new_document {               # RS 20010819 - ok
     eval {
         die "Parent object is not an Obvius::Document\n"
             unless (ref $parent and $parent->UNIVERSAL::isa('Obvius::Document'));
-
+	
+	$name = lc $name; # Make sure name is lowercased.
         die "Document name is malformed\n" unless ($name and $name =~ /^[a-zA-Z0-9._-]+$/);
 
         my $newdoc = $this->get_doc_by_name_parent($name, $parent->param('id'));
@@ -2191,7 +2192,8 @@ sub publish_version {
     if($delayed_publish) {
         delete $vdoc->{PUBLISH_FIELDS}->{PUBLISHED};
     }
-    
+
+    print STDERR "In publish_version\n";
     # Procedure:
     # validate, update version, insert pfields, end.
     #For the leftmenu cache, check if any
@@ -2239,7 +2241,8 @@ sub publish_version {
         $this->{DB_Error} = $ev_error;
         $this->db_rollback;
         $this->{LOG}->error("====> Publishing version ... failed ($ev_error)");
-        ($$error) = ($ev_error =~ /^(.*)\n/) if(defined($error));
+        $$error = chomp $ev_error if (defined($error));
+
         return undef;
     }
 
@@ -2258,11 +2261,13 @@ sub publish_version {
         my ($year, $month, $day, $hour, $min) = ($publish_on =~ /^\d\d(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/);
         my $site = $this->{OBVIUS_CONFIG}->{NAME};
 
+
         my $command =
                 "echo perl -w " .
                 $this->config->param('prefix') .
                 "/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
 
+	print STDERR "Command: $command";
         my $retval = system($command);
 
         if($retval) {
