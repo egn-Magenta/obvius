@@ -39,7 +39,7 @@ $validation
 <%init>
 # Use uploaded file, if there is one:
 
-my $max_upload = (2 << 19); #512K
+my $max_upload = 2;# << 19; #512K
 
 my @uploads=$r->upload;
 my $match=':' . $id . "_upload\$";
@@ -47,8 +47,11 @@ foreach my $upload (@uploads) {
     my $name=$upload->name;
     next unless ($name=~/$match/o); # XXX This is editengine-naming dependent, since I do not get prefix here...
     # Here goes size of max_upload...
-    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh
-	and (!(defined $max_upload) or $upload->size < $max_upload)) {
+    if (defined $max_upload and $upload->size > $max_upload) {
+       $m->comp('/shared/set_status_message', message => 'Error file uploaded to large. Limit is 500K. ', status => 'WARNING');
+       return 'Error';
+    }
+    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
       local $/ = undef;
       my $value=<$fh>;
       # Check if the file contains non-printable characters (and therefore is in reality binary)
