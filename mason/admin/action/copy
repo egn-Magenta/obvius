@@ -24,7 +24,7 @@
       <input type="text" name="obvius_destination" value="<% $obvius_destination |h %>" size="35" /><input onclick="<& /portal/util/navigator_link_start:onclick, fieldname=>'obvius_destination' &>" type="button" value="<& /shared/msg, text=>'Find' &> ..." />
     </div>
     <div>
-      <label><& /shared/msg, text => 'Rename' &> </label>
+      <label><& /shared/msg, text => 'New uri' &> </label>
       <input type="text" name="obvius_new_name" value="<% $doc->Name . '_kopi' %>" size="35" />
     </div>
     <div>
