@@ -10,8 +10,11 @@ if (defined $session) {
     $session->{status}  = $status;
     $message = join '', @$message if (ref $message eq 'ARRAY');
     $session->{message} = join '', @{$session->{message}} if (ref $session->{message} eq 'ARRAY');
-    $session->{message} ||= '';
-    $session->{message} .= $message;
+    if ($session->{message}) { 
+        $session->{message} .=  "<BR/>$message";
+    } else {
+        $session->{message} = $message;
+    }
 }
 else {
     $r->pnotes(status=>$status);
