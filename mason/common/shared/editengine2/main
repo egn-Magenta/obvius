@@ -143,9 +143,7 @@ else {
             # The input from forms must be utf-8 encoded. This is commonly done by adding:
             # accept-charset="UTF-8" as a form attribute.
             if (! ref $ARGS{$value}) {
-	    print STDERR "Field: " . $ARGS{$value};
                 $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}), Encode::FB_HTMLCREF);
-		print STDERR $objects{$history}{$object_id}{$value_id};
             } else {
                 $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
             }
