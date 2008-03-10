@@ -143,7 +143,9 @@ else {
             # The input from forms must be utf-8 encoded. This is commonly done by adding:
             # accept-charset="UTF-8" as a form attribute.
             if (! ref $ARGS{$value}) {
-                $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}));
+	    print STDERR "Field: " . $ARGS{$value};
+                $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}), Encode::FB_HTMLCREF);
+		print STDERR $objects{$history}{$object_id}{$value_id};
             } else {
                 $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
             }
@@ -239,8 +241,7 @@ else {
                 $m->comp('history:get_current_event', history=>$return_history);
                 $m->comp('main', history=>$return_history);
 
-		my $message = ['Invalid data', ' (', (join ',', @invalid_field_titles), '), ', 'please correct and try again'];
-                # (the mumbo-jumbo above just serves the purpose of putting ', ' between the field titles).
+		my $message = 'Invalid data (' . (join ', ', @invalid_field_titles) . '), please correct and try again';
 
 		$m->comp('/shared/set_status_message', message => $message, status => 'Warning');
 
