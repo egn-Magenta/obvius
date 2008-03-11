@@ -91,7 +91,7 @@ my $user_storage = {
                                     },
                     data => {
                              id     => { type => 'integer'  },
-                             login  => { type => 'line'     , validation_regexp => '^[\w\d_][\w\d_ ]+[\w\d_]$'},
+                             login  => { type => 'line'     , validation_regexp => '^[\w\d_.][\w\d_. ]+[\w\d_.]$'},
                              name   => { type => 'line'     },
                              notes  => { type => 'text'     },
                              email  => { type => 'email'    },
