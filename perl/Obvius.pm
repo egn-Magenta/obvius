@@ -2486,6 +2486,38 @@ sub sanity_check {
 #
 ########################################################################
 
+
+sub execute_command {
+     my ($this, $sql, @args) = @_;
+
+     my $sth = $this->{DB}->DBHdl->prepare($sql);
+     
+     $sth->execute(@args);
+}
+     
+sub execute_select {
+     my ($this, $sql, @args) = @_;
+
+     my $sth = $this->{DB}->DBHdl->prepare($sql);
+     
+     $sth->execute(@args);
+     my @res;
+
+     while (my $row = $sth->fetchrow_hashref) {
+	  push @res, $row;
+     }
+     
+     $sth->finish;
+     return \@res;
+}
+
+sub just_publish_fucking_version {
+     my ($this, $docid, $version) = @_;
+
+     $this->execute_command('update versions set public=0');
+     $this->execute_command('update versions set public=1 WHERE docid=? AND version=?', $docid, $version);
+}
+     
 sub get_fieldspec_XXX {
     my ($this, $doctype, $name) = @_;
 
@@ -2555,6 +2587,9 @@ sub get_editpages {
     return $doctype->{EDITPAGES};
 }
 
+
+
+# Preview stuff.
 package Obvius::Benchmark;
 
 use strict;

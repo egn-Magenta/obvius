@@ -62,7 +62,7 @@ use POSIX qw(strftime);
 
 use XML::Simple;
 use Unicode::String qw(utf8 latin1);
-
+use Obvius::PreviewDocument;
 
 sub new
 {
@@ -185,6 +185,11 @@ sub obvius_document {
 
     $this->tracer($req, $path||'NULL') if ($this->{DEBUG});
 
+    if (my ($docid) = $path =~ m|^/preview/(\d+)/?$|) {
+	 $req->no_cache(1);
+	 return Obvius::PreviewDocument->new($obvius, $docid);
+    }
+    
     if ($path) { # Specific path lookup
         my $found_doc=$obvius->lookup_document($path);
         return $found_doc if (defined $found_doc); # Document found - return it.
