@@ -135,7 +135,12 @@ sub save {
         map { $store->{$identifiers->{key}}->{$_}=$object->{$_} } keys %$object;
     }
 
+    print STDERR "In here for some very peculiar reason\n";
     return ('OK', 'Entry stored');
+}
+
+sub preview {
+     return save(@_);
 }
 
 sub remove {
