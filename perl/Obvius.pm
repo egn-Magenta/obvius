@@ -2514,8 +2514,8 @@ sub execute_select {
 sub just_publish_fucking_version {
      my ($this, $docid, $version) = @_;
 
-     $this->execute_command('update versions set public=0');
-     $this->execute_command('update versions set public=1 WHERE docid=? AND version=?', $docid, $version);
+     $this->execute_command('update versions set public=0 where docid=?', $docid);
+     $this->execute_command('update versions set public=1 where docid=? and version=?', $docid, $version);
 }
      
 sub get_fieldspec_XXX {
