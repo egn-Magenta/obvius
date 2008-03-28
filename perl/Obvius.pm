@@ -719,8 +719,6 @@ sub get_document_subdocs {
                               'parent = ' . $doc->Id,
                               needs_document_fields=>[qw(parent)],
                               sortvdoc => $sortvdoc,
-                              # notexpired=>,
-                              # nothidden=>,
                               public=>1, # Results in max one version per language per docid
                               %options,  # which is what select_best_lang...() expects.
                              );
@@ -813,8 +811,6 @@ sub calc_order_for_query {
     }
     else { # No sortorder field - do by sequence:
         @sort_fields=qw(+seq);
-# Do it silently
-#       warn "Document type does not have sortorder_field_is information, sorting by sequence.";
     }
 
     foreach (@sort_fields) {
@@ -2033,6 +2029,7 @@ sub delete_document {
         unless $this->can_delete_document($doc);
 
     my $docid = $doc->Id;
+    my $doctype = $doc->type;
     my $doc_uri=$this->get_doc_uri($doc);
     my $doc_parent_id=$doc->Parent;
     
@@ -2083,7 +2080,7 @@ sub delete_document {
     $this->{LOG}->info("====> Deleting document ... done");
     # The document doesn't exist any more, so we say the uri of it is
     # modified, and its parent:
-    $this->register_modified(uri  => $doc_uri, docid => $docid, clear_leftmenu => 1);
+    $this->register_modified(uri  => $doc_uri, docid => $docid, clear_leftmenu => 1, doctype => $doctype);
     $this->register_modified(docid => $doc_parent_id, clear_leftmenu => 1);
     $this->register_modified(admin_leftmenu => [$docid, $doc_parent_id]);
     return 1;
