@@ -60,6 +60,7 @@ sub can_request_use_cache_p {
 	     $req->no_cache					||
 	     $req->method_number != 0				|| # 0 er M_GET, mod_perl bug.
 	     $req->notes('nocache')                             ||
+	     $req->uri =~ m|^/preview/|                         ||
 	     !$args_ok
 	    );
 }
@@ -254,6 +255,20 @@ sub is_relevant_for_leftmenu_cache {
 }
 
 
+sub make_clear_uris {
+     my ($this, $docids) = @_;
+     my $obvius = $this->{obvius};
+     my @commands;
+
+     for(@$docids) {
+	  my $doc = $obvius->get_doc_by_id($_->{docid});
+	  my $path = $obvius->get_doc_uri($doc) if ($doc); 
+	  push @commands, {command => 'clear_uri', uri => $path} if($path);
+     }
+
+     return \@commands;
+}
+
 sub perform_command_clear_doctype {
      my ($this, $doctype_name) = @_;
      my $obvius = $this->{obvius};
@@ -269,38 +284,52 @@ WHERE
 END
      my $docids = $this->execute_query($query, $doctype->Id, $doctype->Id);
      
-     my @commands;
-     
-     for (@$docids) {
-	  my $doc = $obvius->get_doc_by_id($_->{docid});
-	  my $path = $obvius->get_doc_uri($doc) if ($doc); 
-	  push @commands, {command => 'clear_uri', uri => $path} if($path);
-     }
-     
-     return \@commands;
+     return make_clear_uris($docids);
 }
 	 
+sub perform_command_sophisticated_newslist_rightbox_clear {
+     my $this = shift;
+
+     my $query = <<END ; 
+select distinct(docid) from 
+    vfields vf natural join versions v, 
+    (select concat("^[0-9]+:", re, "$") re from
+	           (select group_concat(concat(id, "\\.docid") separator '|') re
+                   from (select id from documents where 
+                   type = (select id from doctypes where name="Nyhedsliste" limit 1) ) id) r ) r where 
+	   public=1 and 
+           name="rightboxes" and 
+           text_value regexp re
+END
+     
+     my $docids = $this->execute_query($query);
+     return make_clear_uris($docids);
+}
+
+
 sub special_actions {
      my ($this, $docids) = @_;
      my $obvius = $this->{obvius};
 
      my @commands;
-     my %special_op_per_doctype = ( 
-				   Nyhed => {command => 'clear_doctype',  args => ['Nyhedsliste'] },
+    my %special_op_per_doctype = ( 
+				   Nyhed => [{command => 'clear_doctype',  args => ['Nyhedsliste'] }, {command => 'sophisticated_newslist_rightbox_clear', args => [] }],
 				   CalendarEvent => {command => 'clear_doctype', args => ['Arrangementsliste']}
 				  );
      
      for (@$docids) {
-     
 	  my $doc = $obvius->get_doc_by_id($_);
 	  next if (!$doc);
 	  my $doctype = $obvius->get_doctype_by_id($doc->Type);
 	  next if (!$doctype);
 	  
-	  if (my $cmd = $special_op_per_doctype{$doctype->{NAME}}) {
-	       my $func = "perform_command_" . $cmd->{command};
-	       my $cmds = $this->$func(@{$cmd->{args}});
-	       push @commands, @$cmds;
+	  if (my $cmd_list = $special_op_per_doctype{$doctype->{NAME}}) {
+	       $cmd_list = [$cmd_list] if (ref $cmd_list ne 'ARRAY');
+	       for my $cmd (@$cmd_list) {
+		    my $func = "perform_command_" . $cmd->{command};
+		    my $cmds = $this->$func(@{$cmd->{args}});
+		    push @commands, @$cmds;
+	       }
 	  }
      }
 
@@ -331,7 +360,6 @@ sub find_dirty {
 	@uris_to_clear
        );
      
-     print STDERR Dumper(\@commands);
      return uniquify_commands(\@commands);
 }
 
