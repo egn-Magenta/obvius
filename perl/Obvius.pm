@@ -2592,7 +2592,7 @@ sub new
         my ( $self, $id, $filehandle) = @_;
 	
         $id = join(':', (caller)[1,2]) unless defined $id;
-	open $filehandle, '<', "/tmp/obvius_benchmark" if(!$filehandle)
+	open $filehandle, '<', "/tmp/obvius_benchmark" if(!$filehandle);
 
         return bless [ $id, scalar gettimeofday(), $filehandle, 1 ];
 }
