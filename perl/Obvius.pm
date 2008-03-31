@@ -1830,7 +1830,6 @@ sub adjust_doctype_hierarchy {
 sub read_type_info {
     my ($this, $make_objects) = @_;
 
-    print STDERR "In read type info\n";
     $this->tracer() if ($this->{DEBUG});
     
     $this->read_doctypes_table($make_objects);
@@ -2190,7 +2189,6 @@ sub publish_version {
         delete $vdoc->{PUBLISH_FIELDS}->{PUBLISHED};
     }
 
-    print STDERR "In publish_version\n";
     # Procedure:
     # validate, update version, insert pfields, end.
     #For the leftmenu cache, check if any
@@ -2264,7 +2262,6 @@ sub publish_version {
                 $this->config->param('prefix') .
                 "/bin/delaypublish.pl --site=$site | at '$hour:$min $month/$day/$year'";
 
-	print STDERR "Command: $command";
         my $retval = system($command);
 
         if($retval) {
@@ -2401,12 +2398,10 @@ sub delete_single_version {
 sub register_modified {
     my ($this, %options)=@_;
     
-    print STDERR "Register modified\n";
     if (!$this->{MODIFIED}) {
 	 $this->{MODIFIED} = WebObvius::Cache::CacheObjects->new($this);
     }
     $this->{MODIFIED}->add_to_cache($this, %options);
-    print STDERR Dumper($this->modified);
 }
 
 sub modified {
@@ -2595,9 +2590,9 @@ use Time::HiRes qw(gettimeofday);
 sub new
 {
         my ( $self, $id, $filehandle) = @_;
-
+	
         $id = join(':', (caller)[1,2]) unless defined $id;
-        $filehandle ||= \*STDERR;
+	open $filehandle, '<', "/tmp/obvius_benchmark" if(!$filehandle)
 
         return bless [ $id, scalar gettimeofday(), $filehandle, 1 ];
 }
@@ -2609,11 +2604,12 @@ sub lap
         return unless $self-> [3];
 
         $id = join(':', (caller)[1,2]) unless defined $id;
-
-        my $now  = scalar gettimeofday();
+	
+	my $now  = scalar gettimeofday();
         my $diff = $now - $self->[1];
+	my $now_string = scalar localtime;
 
-        printf { $self-> [2] } "$$ %.3f sec %s %s\n",
+        printf { $self-> [2] } "$now_string $$ %.3f sec %s %s\n",
                 $diff,
                 $self-> [0], $id
         if $diff >= 0.01; # who cares otherwise
@@ -2624,7 +2620,7 @@ sub lap
 
 sub disable { shift->[3] = 0 }
 
-sub DESTROY { shift-> lap('') }
+sub DESTROY { my $self = shift; $self->lap(''); close $self->[2]; }
 
 1;
 __END__
