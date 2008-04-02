@@ -2028,7 +2028,7 @@ sub delete_document {
         unless $this->can_delete_document($doc);
 
     my $docid = $doc->Id;
-    my $doctype = $doc->type;
+    my $doctype = $doc->Type;
     my $doc_uri=$this->get_doc_uri($doc);
     my $doc_parent_id=$doc->Parent;
     
