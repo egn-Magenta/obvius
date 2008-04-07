@@ -325,23 +325,26 @@ sub perform_command_vfield_search {
 sub special_actions {
      my ($this, $docs) = @_;
      my $obvius = $this->{obvius};
+     $docs = uniquify (sub { return ($_[0]->{docid} == $_[1]->{docid}) }, $docs);
      
      my @commands;
      my %special_op_per_doctype = ( 
-				   Nyhed         => 
-				   [{
-				     command => 'clear_doctype', 
-				     args => ['Nyhedsliste'] 
-				    }, {
-					command => 'sophisticated_rightbox_clear', 
-					args => ['Nyhedsliste'] 
-				       }],
+				   Nyhed         => [
+						{
+						 command => 'clear_doctype', 
+						 args => ['Nyhedsliste'] 
+						}, 
+						{
+						 command => 'sophisticated_rightbox_clear', 
+						 args => ['Nyhedsliste'] 
+						}],
 				   CalendarEvent => [
 						{
 						 command => 'clear_doctype', 
 						 args => ['Arrangementsliste']
 						}, 
-						{command => 'sophisticated_rightbox_clear', 
+						{
+						 command => 'sophisticated_rightbox_clear', 
 						 args => ['Arrangementsliste']
 						}],
 				   FileUpload    => [{command => 'vfield_search', args => []}],
