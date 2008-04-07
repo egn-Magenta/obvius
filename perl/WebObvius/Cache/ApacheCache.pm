@@ -106,7 +106,7 @@ sub save_request_result_in_cache
      return if (!$fn);
      
      my $dir = $this->{cache_dir} . $fp;
-     make_sure_exist($dir);
+     make_sure_exist($dir) || return 1;
      
      open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
      flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
@@ -172,65 +172,69 @@ sub flush_by_pattern {
     flock F, LOCK_UN;
   close:
     close F;
+}
     
-    return;
-}
-
 sub execute_query {
-     my ($this, $sql, @args) = @_;
-
-     my $obvius = $this->{obvius};
-     $obvius->connect if (!$obvius->{DB});
-     my $sth = $obvius->{DB}->DBHdl->prepare($sql);
+     my ($this, @args) = @_;
      
-     $sth->execute(@args);
-     my @res;
-
-     while (my $row = $sth->fetchrow_hashref) {
-	  push @res, $row;
-     }
-     
-     $sth->finish;
-     return \@res;
+     return $this->{obvius}->execute_select(@args);
 }
 
-sub check_vfields_for_docids {
-     my ($this, $docids) = @_;
+sub check_rightboxes {
+     my ($this, $docs) = @_;
      
-     my @docids = grep { /^\d+$/ } @$docids;
+     return $this->check_vfields_for_docids($docs, [ 'rightboxes' ]);
+}
+
+sub bring_forth_sql_for_docsearch {
+     my ($this, $docs, $str) = @_;
+     
+     my @docids = grep { /^\d+$/ } grep { $_ } map { $_->{docid} } @$docs;
      return if (!scalar @docids);
-     my @regexp_query = map { "vf.text_value REGEXP '(^|[^0-9])$_\\\.docid'" } @docids;
+
+     my $docids = uniquify (sub { return ($_[0] == $_[1]) }, \@docids);
      
-     my $append = "( " . (join " OR ", @regexp_query) . ")";
+     my @docid_query = map { "$str LIKE '%/$_.docid%'" } @$docids;
+     
+     my $sql = join " OR ", @docid_query;
+     return $sql;
+}
+     
+sub check_vfields_for_docids {
+     my ($this, $docs, $fields) = @_;
+     my $obvius = $this->{obvius};
+
+     my @fields = map { s/'/''/; $_ } @$fields if ref($fields); #'
+     
+     my @append;
+     
+     push @append, join " OR ", map { "name = '$_'" } @fields if (scalar(@fields));
+     push @append, $this->bring_forth_sql_for_docsearch($docs, "text_value");
+     @append = map { "( $_  )" } @append;
+     my $append = join " AND ", @append;
+
      my $sql = <<END;
-SELECT DISTINCT(vf.docid) FROM
-       versions v INNER JOIN vfields vf ON 
-       (v.docid = vf.docid AND v.version = vf.version)
-WHERE
-       v.public = 1 AND $append
+select distinct(docid) from
+       versions natural join vfields
+where
+       public = 1 AND $append
 END
      my @res = map { $_->{docid}} @{$this->execute_query($sql)};
      
      return \@res;
 }
 
-			      
-sub find_referrers {
-     my ($this, $docids) = @_;
-     
-     my $obvius = $this->{obvius};
-     $docids = $this->check_vfields_for_docids($docids);
-     
-     my @uris;
 
-     for my $docid (@$docids) {
-	  my $doc = $obvius->get_doc_by_id($docid);
-	  push @uris, $obvius->get_doc_uri($doc) if ($doc);
-     }
-     my @res = map { {command => 'clear_uri', uri => $_} } @uris;
      
-     return \@res;
+sub find_referrers {
+     my ($this, $docs) = @_;
+
+     my $docids = $this->check_rightboxes($docs);
+
+     my $res = $this->make_clear_uris($docids);
+     return $res;
 }
+
      
 sub is_relevant_for_leftmenu_cache {
      my ($this, $docid, $vdoc) = @_; 
@@ -261,7 +265,7 @@ sub make_clear_uris {
      my @commands;
 
      for(@$docids) {
-	  my $doc = $obvius->get_doc_by_id($_->{docid});
+	  my $doc = $obvius->get_doc_by_id($_);
 	  my $path = $obvius->get_doc_uri($doc) if ($doc); 
 	  push @commands, {command => 'clear_uri', uri => $path} if($path);
      }
@@ -274,62 +278,89 @@ sub perform_command_clear_doctype {
      my $obvius = $this->{obvius};
      
      my $doctype = $obvius->get_doctype_by_name($doctype_name);
-
+     
      my $query = <<END;
-SELECT DISTINCT(docid) FROM 
-    documents d INNER JOIN versions v ON (v.docid = d.id)
-WHERE
-
+select distinct(docid) from 
+    documents d inner join versions v on (v.docid = d.id)
+where
     v.public = 1 AND (d.type = ? OR v.type = ?);
 END
      my $docids = $this->execute_query($query, $doctype->Id, $doctype->Id);
-     
-     return make_clear_uris($docids);
+
+     my @docids = map { $_->{docid} } @$docids;
+     return $this->make_clear_uris(\@docids);
 }
 	 
-sub perform_command_sophisticated_newslist_rightbox_clear {
-     my $this = shift;
-
-     my $query = <<END ; 
+sub perform_command_sophisticated_rightbox_clear {
+     my ($this, $doctype) = @_;
+     
+     $doctype =~ s/'/''/;
+     my $query = <<END; 
 select distinct(docid) from 
     vfields vf natural join versions v, 
-    (select concat("^[0-9]+:", re, "$") re from
-	           (select group_concat(concat(id, "\\.docid") separator '|') re
+    (select concat('^[0-9]+:', re, '\$') re from (select group_concat(concat(id, '\\\\.docid') separator '|') re
                    from (select id from documents where 
-                   type = (select id from doctypes where name="Nyhedsliste" limit 1) ) id) r ) r where 
-	   public=1 and 
-           name="rightboxes" and 
-           text_value regexp re
+                   type = (select id from doctypes where name ='$doctype' limit 1) ) id) r ) r where 
+     public = 1 and
+     name='rightboxes' and 
+     text_value regexp re;
 END
-     
+     #'
+     print STDERR "Query: $query\n";
+     $this->{obvius}->execute_command('set group_concat_max_len=60000;');
      my $docids = $this->execute_query($query);
-     return make_clear_uris($docids);
+     
+     my @docids = map { $_->{docid} } @$docids;
+     return $this->make_clear_uris(\@docids);
 }
 
+sub perform_command_vfield_search {
+     my ($this, $docs) = @_;
+     
+     $docs = $this->check_vfields_for_docids($docs);
+
+     return $this->make_clear_uris($docs);
+}
 
 sub special_actions {
-     my ($this, $docids) = @_;
+     my ($this, $docs) = @_;
      my $obvius = $this->{obvius};
-
+     
      my @commands;
-    my %special_op_per_doctype = ( 
-				   Nyhed => [{command => 'clear_doctype',  args => ['Nyhedsliste'] }, {command => 'sophisticated_newslist_rightbox_clear', args => [] }],
-				   CalendarEvent => {command => 'clear_doctype', args => ['Arrangementsliste']}
+     my %special_op_per_doctype = ( 
+				   Nyhed         => 
+				   [{
+				     command => 'clear_doctype', 
+				     args => ['Nyhedsliste'] 
+				    }, {
+					command => 'sophisticated_rightbox_clear', 
+					args => ['Nyhedsliste'] 
+				       }],
+				   CalendarEvent => [
+						{
+						 command => 'clear_doctype', 
+						 args => ['Arrangementsliste']
+						}, 
+						{command => 'sophisticated_rightbox_clear', 
+						 args => ['Arrangementsliste']
+						}],
+				   FileUpload    => [{command => 'vfield_search', args => []}],
+				   Image         => [{command => 'vfield_search', args => []}]
 				  );
      
-     for (@$docids) {
-	  my $doc = $obvius->get_doc_by_id($_);
-	  next if (!$doc);
-	  my $doctype = $obvius->get_doctype_by_id($doc->Type);
-	  next if (!$doctype);
+     for my $doc (@$docs) {
+	  next if (!$doc->{doctype});
+	  my $doctype = $obvius->get_doctype_by_id($doc->{doctype});
 	  
-	  if (my $cmd_list = $special_op_per_doctype{$doctype->{NAME}}) {
-	       $cmd_list = [$cmd_list] if (ref $cmd_list ne 'ARRAY');
-	       for my $cmd (@$cmd_list) {
-		    my $func = "perform_command_" . $cmd->{command};
-		    my $cmds = $this->$func(@{$cmd->{args}});
-		    push @commands, @$cmds;
-	       }
+	  my $cmd_list = $special_op_per_doctype{$doctype->{NAME}};
+	  next if (!$cmd_list);
+	  $cmd_list = [$cmd_list] if (ref $cmd_list ne 'ARRAY');
+	  
+	  for my $cmd (@$cmd_list) {
+	       my $func = "perform_command_" . $cmd->{command};
+	       my @args = (@{$cmd->{args}}, [$doc]);
+	       my $cmds = $this->$func(@args);
+	       push @commands, @$cmds;
 	  }
      }
 
@@ -339,19 +370,21 @@ sub special_actions {
 sub find_dirty {
      my ($this, $cache_objects) = @_;
 
-     my $vals = $cache_objects->request_values('uri', 'docid', 'clear_leftmenu', 'clear_recursively');
+     my $vals = $cache_objects->request_values('uri', 'doctype', 'docid', 'clear_leftmenu', 'clear_recursively');
      my @uris		= grep { $_ } map { $_->{uri}   } @$vals;
-     my @docids		= grep { $_ } map { $_->{docid} } @$vals;
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
      my @clear_recursively = map {{command => 'clear_by_regexp', regexp => "^" . $_->{uri}}}
        grep { $_->{uri} and $_->{clear_recursively}} @$vals;
-     
      my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
 
-     my $referrers = $this->find_referrers(\@docids);
      my @related = map { $this->find_related($_) } @leftmenu_uris;
-     my $special_actions = $this->special_actions(\@docids);
      
+     my @docids_doctypes = map { {docid => $_->{docid}, doctype => $_->{doctype}, uri => $_->{uri}}} grep { $_->{docid}} @$vals;
+     my $special_actions = $this->special_actions(\@docids_doctypes);
+
+     my @docids		= grep { $_ } map { {docid => $_->{docid}, uri => $_->{uri} }} @$vals; 
+     my $referrers = $this->find_referrers(\@docids);
+    
      my @commands = grep { $_ } 
        (@clear_recursively,
 	@$referrers, 
@@ -360,17 +393,22 @@ sub find_dirty {
 	@uris_to_clear
        );
      
-     return uniquify_commands(\@commands);
+     my $unique = uniquify_commands(\@commands);
+     return $unique;
 }
 
 sub uniquify_commands {
-     my $commands = shift;
+     return uniquify(\&commands_equal_p, shift);
+}
+	  
+sub uniquify {
+     my ($equals, $commands) = @_;
      
      my @result;
      
      OUTER: for my $cmd1 (@$commands) {
 	  for my $cmd2 (@result) {
-	       next OUTER if (commands_equal_p($cmd1, $cmd2));
+	       next OUTER if ($equals->($cmd1, $cmd2));
 	  }
 	  push @result, $cmd1;
      }
@@ -403,7 +441,7 @@ sub find_and_flush {
      my $commands = $this->find_dirty($cache_objs);
      
      @$commands = grep {$_} @$commands;
-
+     
      $this->flush($commands) if scalar(@$commands);
 }
 
