@@ -26,9 +26,14 @@ function add_key_value () {
 
 
 <div class="obvius-command obvius-command-document-information obvius-link-decor">
-  <h2><& /shared/msg, text=>'Document information' &></h2>
+<h2><& /shared/msg, text=>'Document information' &></h2>
 
-  <form name="obvius-accessrules" action="./" method="post">
+<form name="obvius-accessrules" action="./" method="post">
+<div class="clear_cache">
+     <a href="./?obvius_command_clear_cache=1&obvius_perform_do=1">Clear Cache for Document</a><br/>
+     <a href="./?obvius_command_clear_cache=1&recursively=1&obvius_perform_do=1">Clear Cache Recursively</a>
+</div>							   
+
 % my $i=0;
 % foreach my $show (@info) {
     <div>
