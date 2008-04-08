@@ -115,7 +115,7 @@ sub save_request_result_in_cache
      close F;
 
      #Save image info.
-     my ($args) = ($req->args =~ /(?:^|&)(size=\d+(?:x\d+|\%))(?:$|&)/) if ($req->args);
+     my ($args) = ($req->args =~ /^(size=\d+(?:x\d+|\%))$/) if ($req->args);
      $args ||= "";
      
      my $path=$req->uri();

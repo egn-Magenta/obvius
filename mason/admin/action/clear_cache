@@ -1,0 +1,12 @@
+<%method do>
+<%args>
+	$recursively=>0
+</%args>
+<%init>
+my @args = (docid => $doc->Id);
+push @args, (clear_recursively => 1) if ($recursively);
+$obvius->register_modified(@args);
+
+return 'document_information';
+</%init>
+</%method>
