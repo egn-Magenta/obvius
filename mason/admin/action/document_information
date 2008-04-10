@@ -157,7 +157,8 @@ push @versions, { name => $_->Version . ' Language: ' . $_->Lang,
 
 my $can_access    = $obvius->can_set_access_data($doc);
 my $can_docparams = $obvius->can_set_docparams($doc);
-my $ownername     = $obvius->get_user($doc->Owner)->{name};
+my $user     = $obvius->get_user($doc->Owner);
+my $ownername = $user ? $user->{name} : "---BAD OWNER---";
 
 my @info = (
         {
