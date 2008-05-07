@@ -363,8 +363,7 @@ sub can_update_comment {
 sub can_delete_comment {
     my ($this, $docid) = @_;
     
-    
-    my $doc = ref($docid) eq 'Document' ? $docid : $this->get_doc_by_id($docid);
+    my $doc = ref($docid) eq 'Obvius::Document' ? $docid : $this->get_doc_by_id($docid);
     return $this->user_has_capabilities($doc, qw(delete));
 }
 
