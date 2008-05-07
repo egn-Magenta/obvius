@@ -318,7 +318,7 @@ sub _copy_single_document {
         return('OK', ['Copy of', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', " <a href=\"/admin$dest_uri\">$dest_uri</a> ", 'succeeded'], $new_doc);
     }
     else {
-        return('ERROR', ['Copy of', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', ' ', $obvius->get_doc_uri($dest_doc) . $new_doc_name . '/', ' ', 'failed']);
+        return('ERROR', ['Copy of', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', ' ', $obvius->get_doc_uri($dest_doc) . $new_doc_name . '/', ' ', 'failed. Name may only contain letters, digits and dash (-), dot(.) and underscore (_).]);
      }
 }
 
@@ -342,7 +342,9 @@ sub perform_command_copy {
         return ($status, $message);
     }
     else {
-        return _copy_single_document($obvius, $doc, $destdoc, $dest_name);
+        my @result = _copy_single_document($obvius, $doc, $destdoc, $dest_name);
+	return @result;
+	
     }
 }
 
