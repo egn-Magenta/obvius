@@ -110,6 +110,12 @@ $obvius_destination = '/' . $obvius_destination unless ($obvius_destination=~m!^
 $obvius_new_name ||= $doc->Name;
 
 my $dest_doc=$obvius->lookup_document($obvius_destination);
+
+if ($obvius_new_name !~ /^[\w\d._-]+$/) {
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Failed to copy document to destination, document may only contain alpanumeric characters and dot(.), dash(-), and underscore(_)']);
+    return '';
+}
+
 if (!$dest_doc) {
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Destination document', ' ', $obvius_destination, ' ', 'does not exist']);
     return ''; # XXX Just fail - would be better to return to the first copy-page...
