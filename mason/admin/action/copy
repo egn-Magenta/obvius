@@ -113,23 +113,23 @@ my $dest_doc=$obvius->lookup_document($obvius_destination);
 
 if ($obvius_new_name !~ /^[\w\d._-]+$/) {
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Failed to copy document to destination, document may only contain alpanumeric characters, dot(.), dash(-), and underscore(_).']);
-    return '';
+    return 'copy';
 }
 
 if (!$dest_doc) {
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Destination document', ' ', $obvius_destination, ' ', 'does not exist']);
-    return ''; # XXX Just fail - would be better to return to the first copy-page...
+    return 'copy'; # XXX Just fail - would be better to return to the first copy-page...
 }
 
 # Destination has subdocs already?
 if ($obvius->get_doc_by_name_parent($obvius_new_name, $dest_doc->Id)) {
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Destination document', ' ', $obvius->get_doc_uri($dest_doc), ' ', 'already has a sub-document called', ' "', $obvius_new_name, '"']);
-    return ''; # XXX Just fail - would be better to return to the first copy-page...
+    return 'copy'; # XXX Just fail - would be better to return to the first copy-page...
 }
 
 if ($obvius_copy_recursive and ($obvius->is_doc_below_doc($dest_doc, $doc) or $dest_doc->Id eq $doc->Id)) {
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Can not recursively copy a document underneath itself']);
-    return ''; # XXX Just fail - would be better to return to the first copy-page...
+    return 'copy'; # XXX Just fail - would be better to return to the first copy-page...
 }
 
 if (!$obvius_copy_recursive or ($obvius_copy_recursive and $obvius_copy_recursive_confirm)) {
