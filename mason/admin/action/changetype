@@ -39,7 +39,8 @@ my $docparams = $obvius->get_docparams_recursive($doc);
 if(my $dt_value = $docparams->param('admin_doctypes_available')) {
     if(my $dt_list = $dt_value->param('value')) {
         $restricted = 1;
-        $available_doctypes{$_}++ for split /\s*,\s*/, $dt_list;
+	chomp $dt_list;
+        $available_doctypes{$_}++ for split /(?:\s*,\s*)|(?:\s*\n\s*)/, $dt_list;
     }
 }
 
