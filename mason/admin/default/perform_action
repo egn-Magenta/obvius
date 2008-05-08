@@ -8,13 +8,6 @@ $obvius_redirect_to=>undef
 <%init>
 my $command;
 
-use Obvius::Helpers qw (unescape_uri_argument);
-
-# This is specifically for the preview function, if anyone comes up
-# with a better way of doing all of this (escaping, sending the argument)
-# feel free to contact me(Troels) or change it.
-$obvius_redirect_to = unescape_uri_argument($obvius_redirect_to);
-
 my $session = $r->pnotes('obvius_session');
 $command=$session->{action} if ($session);
 
@@ -43,8 +36,7 @@ if ($obvius_perform_do) {
     }
     else {
 	$m->comp('perform_action_local', %ARGS);
-	my $redirect_to = $obvius_redirect_to ||
-	                  $r->notes('obvius_redirect_to');
+	my $redirect_to = $r->notes('obvius_redirect_to');
 	my $joiner=($redirect_to=~/[?]/ ? '&' : '?');
 	$m->comp('/shared/redirect', location=>$redirect_to . $joiner . 'obvius_session_id=' . $session->{_session_id});
     }
