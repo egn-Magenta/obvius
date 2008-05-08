@@ -112,7 +112,7 @@ $obvius_new_name ||= $doc->Name;
 my $dest_doc=$obvius->lookup_document($obvius_destination);
 
 if ($obvius_new_name !~ /^[\w\d._-]+$/) {
-    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Failed to copy document to destination, document may only contain alpanumeric characters and dot(.), dash(-), and underscore(_)']);
+    $m->comp('/shared/set_status_message', status=>'WARNING', message=>['Failed to copy document to destination, document may only contain alpanumeric characters, dot(.), dash(-), and underscore(_).']);
     return '';
 }
 
