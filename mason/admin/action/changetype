@@ -20,7 +20,7 @@
 <& /shared/editengine2/type/util/dropdown, name=>'obvius_new_doctypeid', choices=>\@choices, labels=>\%labels, value=>$value || $doctype->Id &>
 <p>
 %if($restricted and $user_is_admin) {
-<& /shared/msg, text=>'Doctypes marked with (*) are normally resticted in this area, but are visible to users with admin-rights.' &>
+<& /shared/msg, text=>'Doctypes marked with (*) are normally restricted in this area, but are visible to users with admin-rights.' &>
 %}
 %
 <%args>
