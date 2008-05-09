@@ -246,7 +246,7 @@ my @info = (
                         map {
                                 [ $_->{login}, $_->{name} ]
                         } sort {
-                                $a->{name} cmp $b->{name}
+                                lc($a->{name}) cmp lc($b->{name})
                         } map {
                                 $obvius->{USERS}->{$_}
                         } grep {
