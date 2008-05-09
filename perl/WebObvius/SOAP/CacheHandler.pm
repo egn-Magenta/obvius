@@ -6,7 +6,6 @@ use warnings;
 use Obvius;
 use Obvius::Config; 
 use Data::Dumper;
-use WebObvius::Cache::ApacheCache;
 
 my $obvius_config;
 
@@ -15,13 +14,26 @@ sub import {
      $obvius_config = Obvius::Config->new($config);
 }
 
+my @good_caches = qw( WebObvius::Cache::UserCache WebObvius::Cacche::ApacheCache );
+
 sub flush {
-     my ($this, $commands) = @_;
+     my ($this, $command) = @_;
 
      my $obvius = Obvius->new($obvius_config); 
-     my $ac = WebObvius::Cache::ApacheCache->new($obvius);
-     $ac->flush($commands);
+     my $cache = $command->{cache};
+     goto end if (!scalar(grep { $_ eq $cache }));
+     
+     my $cache_obj;
 
+     eval { "use $cache;\n \$cache_obj = $cache->new(\$obvius);"};
+     goto end if ($@ || !$cache_obj);
+     
+     my $commands = $command->{commands};
+     
+     $cache_obj->flush($commands);
+
+   end:
+     undef $obvius->{DB};
      return 0;
 } 
 
