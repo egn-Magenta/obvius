@@ -14,13 +14,23 @@ sub new {
      return $class->SUPER::new($obvius, 'user_data');
 }
 
+sub flush {
+     my ($this, $cmd) = @_;
+
+     if (ref($cmd) eq 'HASH' && $cmd->{all}) {
+	  $this->flush_completely();
+	  return;
+     }
+
+     return $this->SUPER::flush(@_);
+}
 sub find_and_flush {
      my ($this, $cache_objects) = @_;
 
      my $relevant = $cache_objects->request_values('users');
      
      my $flush = grep { $_->{users} } @$relevant;
-
+     
      $this->flush_completely if ($flush);
 }
 
