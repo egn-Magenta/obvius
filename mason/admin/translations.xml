@@ -3,7 +3,7 @@
   <!-- Handling area buttons: -->
   <text key="Preview">
     <translation lang="en">Preview</translation>
-    <translation lang="da">Smugkig</translation>
+    <translation lang="da">Preview</translation>
   </text>
   <text key="View public">
     <translation lang="en">View public</translation>

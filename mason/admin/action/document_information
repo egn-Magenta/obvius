@@ -175,7 +175,7 @@ my @info = (
                 inactive=> 1 - $can_access,
                 choices => [
                         sort {
-                                $a->{name} cmp $b->{name}
+                                lc($a->{name}) cmp lc($b->{name})
                         } map {
                                 $obvius->{USERS}->{$_}
                         } grep {
@@ -191,6 +191,9 @@ my @info = (
                 type    => 'dropdown',
                 inactive=> 1 - $can_access,
                 choices => [
+			sort {
+			     lc($_->{name}) cmp lc($_->{name})
+			}
                         map {
                                 my $group = $obvius->get_group($_);
                                 {
