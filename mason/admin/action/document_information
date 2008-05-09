@@ -192,7 +192,7 @@ my @info = (
                 inactive=> 1 - $can_access,
                 choices => [
 			sort {
-			     lc($_->{name}) cmp lc($_->{name})
+			     lc($a->{name}) cmp lc($b->{name})
 			}
                         map {
                                 my $group = $obvius->get_group($_);
@@ -361,17 +361,7 @@ if ($obvius->can_set_docparams($doc)) {
 
 }
 
-if ( $obvius->config->{HANDLE_DOCUMENT_CACHE_LOCALLY} )
-{
-    # Clear the cache
-    my $dirty_docids;
-    push( @$dirty_docids, $doc->Parent );
-    my $uri = $obvius->get_doc_uri( $doc );
-    $m->comp('/default/dirty_cache_local', sitebase=>'', dirty_docids=>$dirty_docids, force=>'1', force_uri=>$uri );
-}
-
 $m->comp('/shared/set_status_message', message=>'Document updated');
-print STDERR "This far\n";
 return 'document_information';
 </%init>
 %
