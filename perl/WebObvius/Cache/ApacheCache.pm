@@ -87,12 +87,12 @@ sub make_sure_exist {
      while (scalar @path ) {
 	  $p .= (shift @path) . '/';
 	  if (! -d $p) {
-	       mkdir $p, 0775 || return 1;
+	       mkdir $p, 0775 || return 0;
 	       chmod 0775, $p;
 	  }
      }
 
-     return 0;
+     return 1;
 }
 
 sub save_request_result_in_cache
@@ -347,8 +347,13 @@ sub special_actions {
 						 command => 'sophisticated_rightbox_clear', 
 						 args => ['Arrangementsliste']
 						}],
-				   FileUpload    => [{command => 'vfield_search', args => []}],
-				   Image         => [{command => 'vfield_search', args => []}]
+				   FileUpload    => [{
+						      command => 'vfield_search', 
+						      args => []
+						     }],
+				   Image         => [{
+						      command => 'vfield_search', args => []
+						     }]
 				  );
      
      for my $doc (@$docs) {
