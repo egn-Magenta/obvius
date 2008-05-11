@@ -13,7 +13,7 @@ sub new {
 }
 
 sub find_and_flush {
-     my ($this, $cache_objs) = @_;
+     my ($this, $cache_objects) = @_;
      
      my $relevant = $cache_objects->request_values('users');
      my $flush = grep { $_->{users} } @$relevant;

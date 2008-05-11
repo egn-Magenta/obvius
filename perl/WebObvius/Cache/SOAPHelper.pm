@@ -9,7 +9,7 @@ use SOAP::Lite;
 sub send_command {
      my ($cache, $cmds) = @_;
      
-     my $obvius = $this->{obvius};
+     my $obvius = $cache->{obvius};
      return if (!$obvius);
      my $other_servers = $obvius->{OBVIUS_CONFIG}{OTHER_SERVERS};
      return if (!$other_servers);

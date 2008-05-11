@@ -16,14 +16,16 @@ sub new {
 
 sub flush {
      my ($this, $cmd) = @_;
-
+     
      if (ref($cmd) eq 'HASH' && $cmd->{all}) {
 	  $this->flush_completely();
 	  return;
      }
-
+     
+     shift @_;
      return $this->SUPER::flush(@_);
 }
+
 sub find_and_flush {
      my ($this, $cache_objects) = @_;
 
@@ -31,7 +33,7 @@ sub find_and_flush {
      
      my $flush = grep { $_->{users} } @$relevant;
      
-     $this->flush_completely if ($flush);
+     $this->flush_completely() if ($flush);
 }
 
 1;
