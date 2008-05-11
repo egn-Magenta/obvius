@@ -9,14 +9,13 @@ use WebObvius::Cache::SOAPHelper;
 our @ISA = qw( WebObvius::Cache::UserCache );
 
 sub new {
-     return shift->SUPER::new(@args);
+     return shift->SUPER::new(@_);
 }
 
 sub find_and_flush {
      my ($this, $cache_objs) = @_;
      
      my $relevant = $cache_objects->request_values('users');
-     
      my $flush = grep { $_->{users} } @$relevant;
      
      if ($flush) {
@@ -24,7 +23,6 @@ sub find_and_flush {
 	  $this->flush($commands);
 	  
 	  my $command = {cache => 'WebObvius::Cache::UserCache', commands => $commands};
-
 	  WebObvius::Cache::SOAPHelper->send_command($this, $command);
      }
 }
