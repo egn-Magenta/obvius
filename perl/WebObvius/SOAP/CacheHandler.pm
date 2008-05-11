@@ -25,7 +25,7 @@ sub flush {
      
      my $cache_obj;
 
-     eval { "use $cache;\n \$cache_obj = $cache->new(\$obvius);"};
+     eval "use $cache;\n \$cache_obj = $cache->new(\$obvius);";
      goto end if ($@ || !$cache_obj);
      
      my $commands = $command->{commands};
