@@ -26,3 +26,5 @@ sub find_and_flush {
 	  WebObvius::Cache::SOAPHelper->send_command($this, $command);
      }
 }
+
+1;

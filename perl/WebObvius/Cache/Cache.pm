@@ -18,7 +18,7 @@ sub new {
 
      my $apache_cache = WebObvius::Cache::ExternalApacheCache->new($obvius);
      
-     return $class->SUPER::new($user_cache, $leftmenu_cache, $external_cache);
+     return $class->SUPER::new($user_cache, $leftmenu_cache, $apache_cache);
 }
 
 1;
