@@ -27,7 +27,7 @@ sub find_and_flush {
  	  print STDERR "Commands: " .  Dumper($commands);
 
 	  my $command = {cache => 'WebObvius::Cache::UserCache', commands => $commands};
-	  WebObvius::Cache::SOAPHelper->send_command($this, $command);
+	  WebObvius::Cache::SOAPHelper::send_command($this, $command);
      }
 }
 
