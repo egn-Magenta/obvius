@@ -14,14 +14,14 @@ sub import {
      $obvius_config = Obvius::Config->new($config);
 }
 
-my @good_caches = qw( WebObvius::Cache::UserCache WebObvius::Cacche::ApacheCache );
+my @good_caches = qw( WebObvius::Cache::UserCache WebObvius::Cache::ApacheCache );
 
 sub flush {
      my ($this, $command) = @_;
 
      my $obvius = Obvius->new($obvius_config); 
      my $cache = $command->{cache};
-     goto end if (!scalar(grep { $_ eq $cache }));
+     goto end if (!scalar(grep { $_ eq $cache } @good_caches));
      
      my $cache_obj;
 
