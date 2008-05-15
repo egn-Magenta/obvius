@@ -6,7 +6,7 @@ use Obvius::Config;
 use JSON;
 
 use WebObvius::Cache::Cache;
-
+use Apache2::Request;
 
 my @dispatch_table = ({expr => qr|/flush/|, func => \&flush});
 		      
@@ -17,7 +17,9 @@ sub handler {
      my $obvius_config = $req->dir_config('ObviusConfig');
      my $config = Obvius::Config->new($obvius_config);
      my $obvius = Obvius->new($config);
-
+     
+     my $apache2_request = Apache2::Request->new($req);
+     print STDERR "Params: " . $apache2_request->param();
      my $uri = $req->uri();
      $uri =~ s|$remove_prefix||;
 
@@ -26,6 +28,8 @@ sub handler {
 	       $dispatcher->func($obvius, $req);
 	  }
      }
+     
+     
 }
      
 sub flush {
