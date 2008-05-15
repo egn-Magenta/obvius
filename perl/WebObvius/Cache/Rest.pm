@@ -28,8 +28,6 @@ sub handler {
 	       $dispatcher->func($obvius, $req);
 	  }
      }
-     
-     
 }
      
 sub flush {
