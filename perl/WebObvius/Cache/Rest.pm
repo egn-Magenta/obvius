@@ -17,15 +17,13 @@ sub handler {
      my $obvius_config = $req->dir_config('ObviusConfig');
      my $config = Obvius::Config->new($obvius_config);
      my $obvius = Obvius->new($config);
-     
-     my $apache2_request = Apache2::Request->new($req);
-     print STDERR "\nParams: " . $apache2_request->param() ."\n";
+
      my $uri = $req->uri();
      $uri =~ s|$remove_prefix||;
 
      for my $dispatcher (@dispatch_table) {
 	  if ($uri =~ /$dispatcher->{expr}/) {
-	       $dispatcher->{func}->($obvius, $req);
+	       return $dispatcher->{func}->($obvius, $req);
 	  }
      }
 }
@@ -33,13 +31,15 @@ sub handler {
 sub flush {
      my ($obvius, $req) = @_;
      
-     my $args = $req->param('cache');
+     my $ap2_req = Apache2::Request->new($req);
+     my $args = $ap2_req->param('cache');
      my $data = from_json($args);
 
      $obvius->register_modified($_) for @$data;
 
      my $cache = WebObvius::Cache::Cache->new($obvius);
      $cache->find_and_flush($obvius->modified);
+     return 200;
 }
 
 1;
