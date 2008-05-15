@@ -25,7 +25,7 @@ sub handler {
 
      for my $dispatcher (@dispatch_table) {
 	  if ($uri =~ /$dispatcher->{expr}/) {
-	       $dispatcher->func($obvius, $req);
+	       $dispatcher->{func}->($obvius, $req);
 	  }
      }
 }
