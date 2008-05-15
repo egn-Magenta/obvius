@@ -8,7 +8,7 @@ use JSON;
 use WebObvius::Cache::Cache;
 
 
-my @dispatch_table = ({expr => qr|/flush/|, func => \&flush})
+my @dispatch_table = ({expr => qr|/flush/|, func => \&flush});
 		      
 sub handler {
      my $req = shift;
