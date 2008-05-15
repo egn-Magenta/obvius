@@ -1,4 +1,4 @@
-package WebObvius::Cache::Rest
+package WebObvius::Cache::Rest;
   
 use Obvius;
 use Obvius::Config;
@@ -20,6 +20,7 @@ sub handler {
 
      my $uri = $req->uri();
      $uri =~ s|$remove_prefix||;
+
      for my $dispatcher (@dispatch_table) {
 	  if ($uri =~ /$dispatcher->{expr}/) {
 	       $dispatcher->func($obvius, $req);
