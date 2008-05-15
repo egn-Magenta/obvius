@@ -19,7 +19,7 @@ sub handler {
      my $obvius = Obvius->new($config);
      
      my $apache2_request = Apache2::Request->new($req);
-     print STDERR "Params: " . $apache2_request->param();
+     print STDERR "\nParams: " . $apache2_request->param() ."\n";
      my $uri = $req->uri();
      $uri =~ s|$remove_prefix||;
 
