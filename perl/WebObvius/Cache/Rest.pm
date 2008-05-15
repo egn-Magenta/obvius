@@ -23,7 +23,9 @@ sub handler {
 
      for my $dispatcher (@dispatch_table) {
 	  if ($uri =~ /$dispatcher->{expr}/) {
-	       return $dispatcher->{func}->($obvius, $req);
+	       my $status = $dispatcher->{func}->($obvius, $req);
+	       undef $obvius->{DB};
+	       return $status;
 	  }
      }
 }
