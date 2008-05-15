@@ -37,7 +37,7 @@ sub flush {
      my $args = $ap2_req->param('cache');
      my $data = from_json($args);
 
-     $obvius->register_modified($_) for @$data;
+     $obvius->register_modified(%$_) for @$data;
 
      my $cache = WebObvius::Cache::Cache->new($obvius);
      $cache->find_and_flush($obvius->modified);
