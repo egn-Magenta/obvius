@@ -114,7 +114,7 @@ sub read_docfile {
     my %doctypes;
 
     while ($_ = <DOCFILE>) {
-	if (/DocType: (\w+)/) {
+	if (/DocType: (\w+)/i) {
 	    $current_doctype = $1;
 	    if (/parent=(\w+)/) {
 		my $parent = $1;
