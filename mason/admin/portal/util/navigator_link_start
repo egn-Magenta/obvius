@@ -18,4 +18,5 @@ my $time = time();
 my $phrase = md5_hex($passwd . $time);
 my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
+$url .= "&path=$path" if ($path);
 </%init>

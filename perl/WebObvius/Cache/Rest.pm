@@ -24,7 +24,7 @@ sub handler {
      for my $dispatcher (@dispatch_table) {
 	  if ($uri =~ /$dispatcher->{expr}/) {
 	       my $status = $dispatcher->{func}->($obvius, $req);
-	       undef $obvius->{DB};
+	       $obvius->{DB} = undef;
 	       return $status;
 	  }
      }
@@ -39,9 +39,13 @@ sub flush {
      
      return 400 if (ref $data ne 'ARRAY');
      (ref($_) eq 'HASH' && $obvius->register_modified(%$_)) for @$data;
-
-     my $cache = WebObvius::Cache::Cache->new($obvius);
-     $cache->find_and_flush($obvius->modified);
+     
+     if ($obvius->modified) {
+	  my $cache = WebObvius::Cache::Cache->new($obvius);
+	  $cache->quick_flush($obvius->modified);
+	  $cache->find_and_flush($obvius->modified);
+     }
+     
      return 200;
 }
 
