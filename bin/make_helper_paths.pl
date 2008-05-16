@@ -19,7 +19,7 @@ GetOptions("doctypes=s" => \$doctypes_file,
     );
 
 $login = 'admin';
-$passwd = 'OCms4KU!';
+$passwd = 'OCms4KU!test';
 
 (scalar @ARGV) == 1 or usage();
 
@@ -78,22 +78,25 @@ sub make_path {
     }
     my $doc = $obvius->get_root_document;
     my $parent; 
-    for(@path) {
+    for my $comp (@path) {
+    	print STDERR "Comp: $comp\n";
 	$parent = $doc;
-	$doc = $obvius->get_doc_by_name_parent($_, $parent->{ID});
+	$doc = $obvius->get_doc_by_name_parent($comp, $parent->{ID});
 	my $now = strftime('%Y-%m-%d %H:%M:%S', localtime);
  	if (! defined $doc) {
 	    my ($docid, $version) = $obvius->create_new_document($parent, 
-								 $_, 
+								 $comp,
  								 $doctype->{ID},
  								 'en', 
- 								 new Obvius::Data (title => $_,
+ 								 new Obvius::Data (title => $comp,
 										   content => "", parent => $parent_path), 
  								 1, 
  								 1);
 	    return -1 unless defined ($docid);
+	    print STDERR "Created $parent, $comp\n";
 	    $doc = $obvius->get_doc_by_id($docid);
 	}
+	print STDERR "Continuing\n";
     }
     return 0;
 }
