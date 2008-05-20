@@ -38,7 +38,6 @@ sub flush {
      if (ref($cmd) eq 'HASH' && $cmd->{all}) {
 	  $this->check_and_fix_abandoned_documents();
 	  $this->flush_completely();
-	  
 	  return;
      }
      
