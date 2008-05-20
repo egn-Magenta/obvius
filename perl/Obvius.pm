@@ -2496,7 +2496,8 @@ sub execute_select {
      my @res;
 
      while (my $row = $sth->fetchrow_hashref) {
-	  push @res, $row;
+	  my %row = %$row;
+	  push @res, \%row;
      }
      
      $sth->finish;
