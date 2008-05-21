@@ -1,7 +1,7 @@
 package Obvius::Queue;
 
 ########################################################################
-#ds
+#
 # Queue.pm - Queue and order-handling for Obvius.
 #
 # Copyright (C) 2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
@@ -394,7 +394,7 @@ sub perform_command_new_version {
     # XXX This command does NOT support delayed execution
     
     if (my $new_version=$obvius->create_new_version($doc, $info{args}->{doctypeid}, $info{args}->{lang}, $info{args}->{fields})) {
-        return ('OK', ['New version created', ' (', $new_version, ')']);
+        return ('OK', ['New version created', ' (', $new_version, ')'], $version);
         # XXX The format of this message is used by admin/action/edit!
     }
 
