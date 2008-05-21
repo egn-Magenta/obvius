@@ -16,6 +16,7 @@ $obvius_command_edit=>1
 %
 <%once>
 use URI::Escape;
+use WebObvius::InternalProxy;
 
 my %text_map=(
               combinededitor=>'text',
@@ -31,19 +32,26 @@ my %text_map=(
 </%once>
 %
 <%init>
+
 # This is purely set-up code, the control is then handed off to the
 # edit engine:
 my $session=$r->pnotes('obvius_session');
 $session->{old_action}='edit';
 $session->{action}='editengine';
 
+my $edit_doctype = $internal_proxy->is_internal_proxy_document(
 # New document name given (i.e. we are creating a new document):
 my $new_document=(defined $session->{obvius_new_document_name} ? $session->{obvius_new_document_name} : undef);
 
-# New document type given?
-my $edit_doctype=$doctype;
+my $internal_proxy = WebObvius::InternalProxy->new($obvius);
+my $internal_proxy_doctype = $obvius->get_doctype_by_name('InternalProxy');
+
+my $edit_doctype;
 $edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid})
- if ($session->{obvius_new_doctypeid});
+  if ($session->{obvius_new_doctypeid});
+$edit_doctype = $internal_proxy_doctype if 
+   (!$new_document && $internal_proxy->is_internal_proxy_document($doc));
+$edit_doctype ||= $doctype;
 
 my $edit_version={
                   label=>'Edit',
@@ -200,8 +208,15 @@ return '';
 my $session=$r->pnotes('obvius_session');
 delete $session->{action}; # Return to nothing (i.e. view)
 
-my $edit_doctype=$doctype;
-$edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid}) if ($session->{obvius_new_doctypeid});
+my $internal_proxy = WebObvius::InternalProxy->new($obvius);
+my $internal_proxy_doctype = $obvius->get_doctype_by_name('InternalProxy');
+
+my $edit_doctype;
+$edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid})
+  if ($session->{obvius_new_doctypeid});
+$edit_doctype = $internal_proxy_doctype if 
+   (!$new_document && $internal_proxy->is_internal_proxy_document($doc));
+$edit_doctype ||= $doctype;
 
 # XXX Temporary place to fish out the values:
 my $values=$session->{Temporary_Data}->{KRAKOW};
@@ -218,15 +233,48 @@ $obvius->log->info("Missing fields not stored: @{$status{missing}}\n") if ($stat
 $obvius->log->info("Excess fields not stored: @{$status{excess}}") if ($status{excess});
 $obvius->log->debug("Valid fields: @{$status{valid}}") if ($status{valid});
 
+my ($status, $message);
 if ($status{invalid}) {
     # a) not ok, return to interface
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Invalid data entered, please correct.');
 
     # XXX Do the values entered stay when we do this? NO! Fix it!
     return 'edit';
-}
-else {
-    #   b) ok, send order
+} elsif ($edit_doctype->Id == $internal_proxy_doctype->Id) {
+    my $new_document = define $session->{obvius_new_document_name};
+    my ($docid, $version);
+    
+    if ($new_document) {
+	 eval {
+	      ($docid, $version) = 
+		$internal_proxy->create_internal_proxy_document(
+								owner => $obvius->user,
+								parent => $doc->Id,
+								name => $session->{obvius_new_document_name},
+								grpid => $session->{obvius_new_grpid};
+								lang => $session->{obvius_new_language} || $vdoc->Lang,
+								fields => $values);
+	 };
+    } else {
+	 eval { 
+	      $version = 
+		$internal_proxy->create_internal_proxy_version(docid => $doc->Id,
+							       lang => $session->{obvius_new_language} || $vdoc->Lang,
+							       owner = $obvius->user,
+							       fields => $values);
+	 };
+    }
+    
+    
+    $status = 'OK';
+    $message = "Document created successfully";
+
+    if ($@) {
+	 $status = 'ERROR';
+	 $message = $@;
+    }
+} else {
+#   b) ok, send order
     my $command;
     my %args;
     if (defined $session->{obvius_new_document_name}) { # It's a whole new document:
@@ -239,7 +287,7 @@ else {
                fields=>$field_values,
               );
     }
-    else { # It's a new version of an existing document:
+    else { # It's a new version of an existing document:(
         $command='new_version';
         %args=(
                lang=>$session->{obvius_new_language} || $vdoc->Lang,
@@ -247,39 +295,38 @@ else {
                fields=>$field_values,
               );
     }
-
+    
     # Put (XXX perhaps only the valid?) fields into args:
-    my ($status, $message)=$obvius->send_order(
+    ($status, $message)=$obvius->send_order(
                                                docid=>$doc->Id,
                                                user=>$obvius->user,
                                                command=>$command,
                                                args=>\%args,
-                                               #date=>'', # Always create now
+					       #date=>'', # Always create now
                                               );
+}
     $m->comp('/shared/set_status_message', status=>$status, message=>$message);
-
-    # Do NOT return to the old version:
+     # Do NOT return to the old version:
     delete $session->{obvius_version};
     # Remove the doctypeid, so that /portal/editing doesn't display
     # the new versions tabs, but the current, again:
     delete $session->{obvius_new_doctypeid};
-
+    
     if ($status ne 'ERROR') {
-        if ($command eq 'new_document') {
-            # Redirect to the new document
-            $r->notes('obvius_redirect_to'=>$prefix . $uri . $args{name} . '/');
-        }
-        else {
-            # Go to the new version (common does not pick up version from
-            # the session, so we need to specify obvius_version
-            # explicitly, in a redirect):
-            $r->notes('obvius_redirect_to'=>$prefix . $uri . '?obvius_version=' . uri_escape($message->[2]));
-            # XXX This depends on the message set in Obvius::Queue::perform_new_version!
-        }
+	 if ($command eq 'new_document') {
+	      $r->notes('obvius_redirect_to'=>$prefix . $uri . $args{name} . '/');
+	 }
+	 else {
+	      # Go to the new version (common does not pick up version from
+	      # the session, so we need to specify obvius_version
+	      # explicitly, in a redirect):
+	      $r->notes('obvius_redirect_to'=>$prefix . $uri . '?obvius_version=' . uri_escape($message->[2]));
+	      # XXX This depends on the message set in Obvius::Queue::perform_new_version!
+	 }
     }
-
+    
     return '';
-}
 </%init>
 %
 </%method>
+
