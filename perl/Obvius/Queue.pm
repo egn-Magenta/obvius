@@ -394,7 +394,7 @@ sub perform_command_new_version {
     # XXX This command does NOT support delayed execution
     
     if (my $new_version=$obvius->create_new_version($doc, $info{args}->{doctypeid}, $info{args}->{lang}, $info{args}->{fields})) {
-        return ('OK', ['New version created', ' (', $new_version, ')'], $version);
+        return ('OK', ['New version created', ' (', $new_version, ')'], $new_version);
         # XXX The format of this message is used by admin/action/edit!
     }
 
