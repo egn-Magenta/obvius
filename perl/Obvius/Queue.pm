@@ -1,7 +1,7 @@
 package Obvius::Queue;
 
 ########################################################################
-#
+#ds
 # Queue.pm - Queue and order-handling for Obvius.
 #
 # Copyright (C) 2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
