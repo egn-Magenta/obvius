@@ -114,7 +114,7 @@ sub get_language_preferences {
     }
 
     # Find out if somebody specified ?lang=XX on the URL, if so, give it even more weight:
-    my %args = map { split /=/ } split /&/, $req->args if ($req->args);
+    my %args = map { split /=/ } grep { /=/ } split /&/, $req->args if ($req->args);
     if ($args{lang}) {
         my %user_pref = split_language_preferences($args{lang}, 4000); # Override
         for (keys %user_pref) {
@@ -165,11 +165,6 @@ sub obvius_connect {
 				     $cache->find_and_flush($obvius->modified);
 				}
 				$obvius->{DB} = undef;
-# 				for (keys %$obvius) {
-# 				     delete $obvius->{$_};
-# 				}
-# 				my @l = $req->pnotes;
-# 				delete $req->pnotes->{$_} for (@l);
 				
 				return 1;
 			   });
@@ -188,7 +183,7 @@ sub obvius_document {
     if (my ($docid) = $path =~ m|^/preview/(\d+)/?$|) {
 	 $req->no_cache(1);
 	 return Obvius::PreviewDocument->new($obvius, $docid);
-    }
+    } 
     
     if ($path) { # Specific path lookup
         my $found_doc=$obvius->lookup_document($path);
