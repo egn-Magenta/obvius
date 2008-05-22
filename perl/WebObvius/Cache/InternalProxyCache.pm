@@ -25,7 +25,7 @@ sub find_and_flush {
 sub flush {
      my ($this, $relations) = @_;
      
-     my $internal_proxy = WebObvius::InternalProxyCache->new($this->{obvius});
+     my $internal_proxy = WebObvius::InternalProxy->new($this->{obvius});
      
      return $internal_proxy->check_and_update_internal_proxies($relations);
 }
