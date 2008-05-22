@@ -1,8 +1,11 @@
 package WebObvius::Cache::InternalProxyCache;
 
+use strict;
+use warnings;
+
 use Obvius;
 use Data::Dumper;
-use WebObvius::InternalProxyCache;
+use WebObvius::InternalProxy;
 
 sub new {
      my ($class, $obvius) = @_;
@@ -26,4 +29,7 @@ sub flush {
      
      return $internal_proxy->check_and_update_internal_proxies($relations);
 }
+
+1;
+
      

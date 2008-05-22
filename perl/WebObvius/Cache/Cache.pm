@@ -7,6 +7,7 @@ use WebObvius::Cache::ExternalUserCache;
 use WebObvius::Cache::ExternalApacheCache;
 use WebObvius::Cache::Collection;
 use WebObvius::Cache::AdminLeftmenuCache;
+use WebObvius::Cache::InternalProxyCache;
 
 our @ISA = qw( WebObvius::Cache::Collection );
 
