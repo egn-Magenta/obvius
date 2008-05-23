@@ -33,6 +33,7 @@ use strict;
 use warnings;
 
 use Obvius::Data;
+use WebObvius::InternalProxy;
 
 our @ISA = qw( Obvius::Data );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -69,6 +70,17 @@ sub list_valid_keys {
 	   ];
 }
 
+sub real_doctype {
+     my ($this, $obvius) = @_;
+     my $ip = WebObvius::InternalProxy->new($obvius);
+
+     if($ip->is_internal_proxy_document) {
+	  return $obvius->get_doctype_by_name('InternalProxy');
+     } else {
+	  return $obvius->get_doctype_by_id($this->Type);
+     }
+}
+     
 
 #
 # AUTOLOAD - special for fetching the fields
@@ -100,7 +112,10 @@ sub AUTOLOAD {
     return $oldvalue;
 }
 
+
 
+     
+
 sub fields {
     my ($this, $type) = @_;
     $type=(defined $type ? $type : 'FIELDS');
