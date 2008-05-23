@@ -160,10 +160,15 @@ sub obvius_connect {
 
     $obvius->cache(1);
     $req->register_cleanup(sub {
-				if ($obvius->modified) {
+				my $i = 0;
+				while ($i < 5 && $obvius->modified) {
 				     my $cache = WebObvius::Cache::Cache->new($obvius);
-				     $cache->find_and_flush($obvius->modified);
+				     my $modifed = $obvius->modifed;
+				     $obvius->clear_modified;
+				     $cache->find_and_flush($modified);
+				     $i++;
 				}
+				warn "Error: updated $i times\n" if ($i >= 5);
 				$obvius->{DB} = undef;
 				
 				return 1;
