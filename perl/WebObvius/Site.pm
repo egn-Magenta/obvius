@@ -163,7 +163,7 @@ sub obvius_connect {
 				my $i = 0;
 				while ($i < 5 && $obvius->modified) {
 				     my $cache = WebObvius::Cache::Cache->new($obvius);
-				     my $modified = $obvius->modifed;
+				     my $modified = $obvius->modified;
 				     $obvius->clear_modified;
 				     $cache->find_and_flush($modified);
 				     $i++;
