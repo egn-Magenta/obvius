@@ -2404,6 +2404,10 @@ sub register_modified {
     $this->{MODIFIED}->add_to_cache($this, %options);
 }
 
+sub clear_modified {
+     shift->{MODIFIED} = undef;
+}
+
 sub modified {
     my ($this)=@_;
 
