@@ -354,7 +354,8 @@ sub create_obvius_document
 		} elsif ( $fieldname eq 'url' and $value =~ m[^/] ) {
 			my $oldurl = $value;
 			$value =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
-			$value = $add_prefix . $value;
+			$value = $add_prefix . '/' . $value;
+			$value =~ s|/+|/|g;
 			say "  -- $oldurl => $value\n";
 		}
 
@@ -511,12 +512,15 @@ sub unurlify
 	if ( $path =~ /^(.*?[:])(.*)$/) {
 		# .docid scheme does not tell where the link begins. baaaad.
 		my ( $prefix, $link) = ( $1, $2);
-		return $prefix . unurlify( $link, $uri, $final, $unresolved_paths);
+		my $tmp =  $prefix . '/' . unurlify( $link, $uri, $final, $unresolved_paths);
+		$tmp =~ s|/+|/|g;
+		return $tmp;
 	}
 
 	unless ( $final) {
 		$path =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
-		$path = $add_prefix . $path;
+		$path = $add_prefix . '/' . $path;
+		$path =~ s|/+|/|g;
 	} else {
 		return "/$path.docid" if $path =~ /^\/?\d+$/; # avoid double lookup
 	}
