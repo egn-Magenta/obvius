@@ -7,7 +7,7 @@ use Data::Dumper;
 use Obvius;
 use Obvius::Data;
 
-my @overloaded_vfields = qw( title short_title seq rightboxes internal_proxy_path );
+my @overloaded_vfields = qw( title short_title seq internal_proxy_path internal_proxy_overload_rightboxes );
 
 sub new {
      my ($class, $obvius) = @_;
@@ -19,46 +19,64 @@ sub is_internal_proxy_document {
      
      my $obvius = $this->{obvius};
 
-     my $query = <<END;
-select * from internal_proxy_documents i
-where i.referrer_docid = ?;
-END
-     my $res = @{$obvius->execute_select($query, $docid)};
+     my $query = "call is_internal_proxy_document();";
+     my $res = $obvius->execute_select($query, $docid)->[0]{is_};
      
      return $res;
 }
 
-sub get_fields_doctype_and_version {
-     my ($this, $reference_doc, $fields) = @_;;
+sub get_doctype {
+     my ($this, $doc) = @_;
+     my $version = $obvius->get_public_version($reference_doc) || $obvius->get_latest_version($reference_doc);
+     die "Couldn't get version." if (!$version);
+
+     my $reference_doctype = $obvius->get_version_type($version);
+     die "Couldn't get doctype." if (!$reference_doctype);
+     return $reference_doctype;
+}
+
+sub get_fields_and_doctype {
+     my ($this, $reference_doc) = @_;;
      my $obvius = $this->{obvius};
 
      my $version = $obvius->get_public_version($reference_doc) || $obvius->get_latest_version($reference_doc);
      die "Couldn't get version." if (!$version);
-     
+
      my $reference_doctype = $obvius->get_version_type($version);
      die "Couldn't get doctype." if (!$reference_doctype);
 
      my @fieldnames = map { lc } @{$reference_doctype->fields_names};
      die "No fieldnames" if (!@fieldnames);
 
-     my %field_values = map {
-	  lc($_->{name}) => $_->{text_value} || $_->{int_value} || $_->{date_value} || $_->{double_value}
-     }
-       @{$obvius->execute_select("select * from vfields where docid=? and version=?", 
-				 $reference_doc->Id, $version->Version)};
+     my $vfields = $obvius->execute_select("select * from vfields where docid=? and version=?", 
+					   $reference_doc->Id, $version->Version);
+
+     my %fields;
+     for my $field (@$vfields) {
+	 $fields{$field->{name}} ||= [];
+	 my $val = $field->{text_value} || $field->{int_value} || $field->{double_value} || $field->{date_value}
+	 push @{$fields{$field->{name}}}, $val;
+    }
      
-     %field_values = map { $_ => $field_values{$_} } @fieldnames;
-     for my $field (@overloaded_vfields) {
-	  if ($fields->{$field}) {
-	       $field_values{$field} = $fields->{$field};
-	  } else {
-	       delete $field_values{$field} if (exists $field_values{$field});
-	  }
-     }
-     print STDERR "Field_values: " . Dumper(\%field_values);
-     return ($reference_doctype->Id, \%field_values);
+     return ($reference_doctype->Id, \%fields);
 }
      
+
+sub assemble_fields {
+     my ($this, $referrer_fields, $reference_fields) = @_;
+
+     my %fields = %$reference_fields;
+     
+     for my $field (@overloaded_vfields) {
+	  $fields{$field} = [$referrer_fields->{$field}]
+     }
+
+     if ($referrer_fields->{internal_proxy_overload_rightboxes}) {
+	  $fields{rightboxes} = $referrer_fields->{rightboxes};
+     }
+     
+     return \%fields;
+}
      
 sub make_old_obvius_data_from_hash {
      my ($this, $hash) = @_;
@@ -101,6 +119,7 @@ sub any_cycles_p {
 
      return 0;
 }
+
 sub create_internal_proxy_document {
      my $this = shift;
      my $obvius = $this->{obvius};
@@ -117,12 +136,14 @@ sub create_internal_proxy_document {
 	   !$options{fields}{internal_proxy_path});
 
      my %fields = %{$options{fields}};
-     
+          
      my $reference_docid = $fields{internal_proxy_path};
      my $reference_doc = $obvius->get_doc_by_id($reference_docid);
      die "Couldn't find document: $reference_docid" if (!$reference_doc);
 
-     my ($doctype_id, $fields) = $this->get_fields_doctype_and_version($reference_doc, $options{fields});
+     my ($doctype_id, $fields) = $this->get_fields_and_doctype($reference_doc);
+     $fields = $this->assemble_fields(\%fields, $fields);
+     
      my $compatible_field_values = $this->make_old_obvius_data_from_hash($fields);
      
      my $parent = $obvius->get_doc_by_id($options{parent});
@@ -157,6 +178,8 @@ sub create_internal_proxy_version {
 			       !$options{fields}{internal_proxy_path});
      
      
+     my %fields = %{$options{fields}};
+
      my $reference_docid = $options{fields}{internal_proxy_path};
      my $referrer_doc = $obvius->get_doc_by_id($options{docid});
      die "Illegal docid." if (!$referrer_doc);
@@ -167,8 +190,8 @@ sub create_internal_proxy_version {
        $obvius->get_doc_by_id($reference_docid);
      die "Couldn't find document: $reference_docid" if (!$reference_doc);
 
-     my ($doctype_id, $fields)		= 
-       $this->get_fields_doctype_and_version($reference_doc, $options{fields});
+     my ($doctype_id, $fields) = $this->get_fields_and_doctype($reference_doc);
+     $fields = $this->assemble_fields(\%fields, $fields);
      my $compatible_field_values	= $this->make_old_obvius_data_from_hash($fields);
      
      my $error;
@@ -310,49 +333,71 @@ sub find_nice_order {
      return $l;
 }
      
+sub endemic_fields {
+     my ($this, $docid, $version) = @_;
+
+     my @fields = (@overloaded_fields, ('rightboxes'));
+     my $fields_query = join ",", map { '"' . $_ . '"' } @fields;
+
+     my $query = "select * from vfields where docid=? and version=? and name in ($field_query);";
+     
+     my $fields = $this->{obvius}->execute_select($query, $docid, $version);
+
+     my %fields;
+     for my $field (@$fields) {
+	 $fields{$field->{name}} ||= [];
+	 my $val = $field->{text_value} || $field->{int_value} || $field->{double_value} || $field->{date_value}
+	 push @{$fields{$field->{name}}}, $val;
+    }
+}
+
 sub update_proxy {
      my ($this, $dv) = @_;
      my $obvius = $this->{obvius};
      
      my $doc = $obvius->get_doc_by_id($dv->{reference_docid});
 
-     my ($doctype_id, $fields) = eval {$this->get_fields_doctype_and_version($doc, {})};
+     my $endemic_fields = eval { $this->endemic_fields($dv->{referrer_docid}, $dv->{referrer_version})};
      if ($@) {
 	  warn $@;
 	  return;
      }
-     
-     print STDERR Dumper($dv);
-     $this->run_copy_query($dv->{id}, $fields);
+
+     my ($doctype_id, $fields) = eval {$this->get_fields_doctype_and_version($doc)};
+     if ($@) {
+	  warn $@;
+	  return;
+     }
+
+     $fields = $this->assemble_fields($endemic_fields, $fields);
+     $this->run_copy_query($dv, $fields);
      $obvius->register_modified(docid => $dv->{referrer_docid}, dont_internal_proxy_this => 1);
 }
-     
+
 sub run_copy_query {
-     my ($this, $id, $fields) = @_;
-     
-     my $obvius = $this->{obvius};
+     my ($this, $dv, $fields) = @_;
 
-     my $field_names = join ",", map { '"' . $_ . '"' } keys %$fields;
+     my $delete_query = "delete v from internal_proxy_documents i join vfields v on
+                         (v.docid = i.referrer_docid AND v.version = i.referrer_version) where 
+                         i.id = ?";
      
-     my $query = <<END_QUERY;
-update 
- internal_proxy_documents i 
-  join
-     (select docid, version, public,type from versions v2 where 
-      public = 1 or version=
-           (select max(version) from versions v3 where v2.docid=v3.docid )
-      group by docid having (public = max(public))) v on (i.reference_docid = v.docid)
-  join 
-  vfields vf on (vf.docid = v.docid and vf.version = v.version) join
-  vfields vf2 on (i.referrer_version = vf2.version and 
-                  i.referrer_docid   = vf2.docid and vf.name=vf2.name) join
-  versions v4 on (vf2.docid = v4.docid and vf2.version = v4.version) 
-                  set v4.type = v.type, vf2.text_value = vf.text_value, vf2.double_value = vf.double_value,
-                      vf2.int_value = vf.int_value, vf2.date_value = vf.date_value 
-                   where vf.name in ($field_names) and i.id = ?;
-END_QUERY
+     $this->execute_command($delete_query, $dv->{id});
+     
+     my $data_fields = $this->make_old_obvius_data_from_hash($fields);
+     $obvius->db_insert_vfields($dv->{referrer_docid}, $dv->{referrer_version}, $data_fields);
+     
+     my $update_query = <<END
+update versions v join internal_proxy_documents i on 
+                        (i.referrer_docid = v.docid and i.referrer_version = v.version) join
+                        (select docid, version, public,type from versions v2 where 
+                          public = 1 or version=
+                          (select max(version) from versions v3 where v2.docid=v3.docid )
+                          group by docid having (public = max(public))) ve on 
+                          (i.reference_docid = v.docid)
+                         set v.type = ve.type where i.id = ?;
+END
 
-     $obvius->execute_command($query, $id);
+     $obvius->execute_command($update_query, $dv->{id});
 }
 
 1;
