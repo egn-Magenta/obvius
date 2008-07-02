@@ -109,4 +109,11 @@ begin
                           from versions v3 where v3.docid = did)))) limit 1;
 end $$
 
+drop procedure if exists add_vfield;
+create procedure add_vfield(docid integer unsigned, version datetime, text_value varchar(16384), int_value integer, double_value double, date_value date)
+begin
+	insert into vfields (docid, version, text_value, int_value, double_value, date_value) values
+	       (docid, version, text_value, int_value,double_value, date_value);
+end $$
+
 delimiter ;
