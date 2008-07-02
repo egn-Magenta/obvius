@@ -11,6 +11,7 @@ my @overloaded_vfields = qw( title short_title seq internal_proxy_path internal_
 
 sub new {
      my ($class, $obvius) = @_;
+     die "Illegal argument" if (ref($obvius) ne 'Obvius');
      return bless {obvius => $obvius}, $class;
 }
 
@@ -27,7 +28,9 @@ sub is_internal_proxy_document {
 
 sub get_doctype {
      my ($this, $doc) = @_;
-     my $version = $obvius->get_public_version($reference_doc) || $obvius->get_latest_version($reference_doc);
+     my $obvius = $this->{obvius};
+
+     my $version = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc);
      die "Couldn't get version." if (!$version);
 
      my $reference_doctype = $obvius->get_version_type($version);
@@ -44,9 +47,7 @@ sub make_old_obvius_data_from_hash {
 }
      
 sub create_internal_proxy_document {
-     my $this = shift;
-     my $obvius = $this->{obvius};
-     my %options = @_;
+     my ($this, %options) = @_;
 
      die "Please send me the correct values." 
        if (!$options{parent}			||
@@ -59,12 +60,14 @@ sub create_internal_proxy_document {
 	   !$options{fields}{internal_proxy_path});
 
      my %fields = %{$options{fields}};
-          
+     my $obvius = $this->{obvius};
+     
      my $reference_docid = $fields{internal_proxy_path};
      my $reference_doc = $obvius->get_doc_by_id($reference_docid);
      die "Couldn't find document: $reference_docid" if (!$reference_doc);
 
      my $doctype_id = $this->get_doctype($reference_doc);
+     warn $doctype_id;
      
      my $compatible_field_values = $this->make_old_obvius_data_from_hash(\%fields);
 
@@ -73,11 +76,11 @@ sub create_internal_proxy_document {
 	  
      my $parent = $obvius->get_doc_by_id($options{parent});
      my $error;
-
+     
      my ($docid, $version) = $obvius->create_new_document (
 							    $parent,
 							    $options{name},
-	                				    $doctype_id,
+	                				    $doctype_id->Id,
 							    $options{lang},
 							    $compatible_field_values,
 							    $options{owner},
@@ -93,12 +96,12 @@ sub create_internal_proxy_document {
 sub new_internal_proxy_entry {
      my ($this, $docid, $depends_on, $fields) = @_;
      
-     my $query = "call new_internal_proxy_entry(?, ?, ?);"
-
-     my $str = join @$fields, ",";
-     my $res = $this->{obvius}->execute_transaction($query, $docid, $depends_on, $str);
-     
-     die "Error creating internal_proxy_entry: $res\n" if ($res);
+     my $str = join ",", @$fields;
+     eval {$this->{obvius}->dbprocedures->new_internal_proxy_entry($docid, $depends_on, $str); };
+     if ($@) {
+	  die "Error creating internal_proxy_entry: $@\n";
+     }
+	  
 }
      
 sub create_internal_proxy_version {
@@ -145,13 +148,13 @@ sub create_internal_proxy_version {
      return $new_version;
 }
      
-sub check_and_update_internal_proxies {
+sub update_internal_proxies {
      my ($this, $docids) = @_;
      
+     $docids = [$docids] if (!ref($docids));
      return if (!@$docids);
-     my $res = $this->{obvius}->execute_transaction(join ',', @$docids );
-     warn $res if ($res);
-     return $res;
+     eval { $this->{obvius}->dbprocedures->update_internal_proxy_docids(join ',', @$docids )};
+     warn $@ if ($@);
 }
 
 1;
