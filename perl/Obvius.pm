@@ -45,6 +45,8 @@ use WebObvius::Cache::CacheObjects;
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
 use WebObvius::Cache::ApacheCache qw(is_relevant_for_leftmenu_cache);
 
+use Obvius::DBProcedures;
+
 our @ISA = qw(  Obvius::Data
                 Obvius::DB
                 Obvius::Access
@@ -136,7 +138,12 @@ sub new {
 	 return undef;
     }
 
+    $this->{dbprocedures} = Obvius::DBProcedures->new($this->dbh);
     return $this;
+}
+
+sub dbprocedures {
+     return shift->{dbprocedures};
 }
 
 sub connect {
@@ -194,6 +201,7 @@ sub connect {
     
     return $db;
 }
+
 
 sub dbh { shift-> {DB}->{'*DBHdl'} }
 
@@ -2489,7 +2497,27 @@ sub execute_command {
      my $sth = $this->{DB}->DBHdl->prepare($sql);
      
      $sth->execute(@args);
+     $sth->finish;
 }
+
+sub execute_transaction {
+     my ($this, $sql, @args) = @_;
+
+     my $sth = $this->{DB}->DBHdl->prepare($sql);
+     
+     eval { $sth->execute(@args); };
+
+     $sth->finish();
+     
+     if ($@) {
+	  $sth = $this->{DB}->DBHdl->prepare('rollback;');
+	  $sth->finish();
+	  return $@;
+     }
+     
+     return 0;
+}
+
      
 sub execute_select {
      my ($this, $sql, @args) = @_;
@@ -2507,6 +2535,7 @@ sub execute_select {
      $sth->finish;
      return \@res;
 }
+
 
 sub just_publish_fucking_version {
      my ($this, $docid, $version) = @_;
