@@ -25,7 +25,7 @@ sub add_to_cache {
 
      for (@cache_objects) {
 	  my $obj = eval ($_ . '->new($obvius, %object);' );
-	  print STDERR "error: $@";
+	  print STDERR "error: $@" if ($@);
 	  next if (!$obj);
 	  
 	  push @{$this->{collection}}, $obj;
