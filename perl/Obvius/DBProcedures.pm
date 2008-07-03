@@ -112,11 +112,7 @@ sub make_cmd {
      my ($this, $cmd, $args, $options)  = @_;
      
      my $nr_args = scalar(@$args);
-     my @a;
-
-     for (my $i = 0; $i < $nr_args; $i++) {
-	  push @a, "?";
-     }
+     my @a = ('?') x $nr_args;
 
      my $query = "call $cmd(" . (join ",", @a) . ");";
      
@@ -147,7 +143,8 @@ sub make_cmd {
 	  
 	  if ($@) {
 	       $this->rollback if ($options->{transactional});
-	       die $@;
+	       warn $@;
+	       return undef;
 	  }
 	  
 	  $this->commit if ($options->{explicit_transactional});

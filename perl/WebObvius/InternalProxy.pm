@@ -72,7 +72,7 @@ sub create_internal_proxy_document {
      my $compatible_field_values = $this->make_old_obvius_data_from_hash(\%fields);
 
      my @overloaded_fields = @overloaded_vfields;
-     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_vfields});
+     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_rightboxes});
 	  
      my $parent = $obvius->get_doc_by_id($options{parent});
      my $error;
@@ -89,6 +89,16 @@ sub create_internal_proxy_document {
 							  );
      die $error if ($error);
      
+     $this->dbprocedures->add_vfield({docid => $docid, 
+				      version => $version, 
+				      name => "internal_proxy_overloaded_rightboxes",
+				      int_value => $fields{internal_proxy_overloaded_rightboxes}});
+     $this->dbprocedures->add_vfield({docid => $docid, 
+				      version => $version, 
+				      name => "internal_proxy_path"
+				      int_value => $fields{internal_proxy_path}});
+     
+				      
      $this->new_internal_proxy_entry($docid, $reference_doc->Id, \@overloaded_fields);
      return ($docid, $version);
 }
@@ -142,6 +152,19 @@ sub create_internal_proxy_version {
 
      my @overloaded_fields = @overloaded_vfields;
      push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_vfields});
+
+     $this->dbprocedures->add_vfield({
+				      docid => $docid, 
+				      version => $new_version, 
+				      name => "internal_proxy_overloaded_rightboxes",
+				      int_value => $fields{internal_proxy_overloaded_rightboxes}
+				     });
+     $this->dbprocedures->add_vfield({
+				      docid => $docid, 
+				      version => $new_version, 
+				      name => "internal_proxy_path"
+				      int_value => $fields{internal_proxy_path}
+				     });
 
      $this->new_internal_proxy_databasen_entry($options{docid}, $new_version, \@overloaded_fields);
 
