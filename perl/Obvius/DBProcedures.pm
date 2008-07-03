@@ -13,10 +13,12 @@ my $commands = [
 	    command => 'read_vfields_from_pol',
 	    args => [ qw(docid names) ],
 	    options => {output => 1}
+	   },
 	   {
 	    command => "add_vfield",
-	    args => [qw( docid version name text_value, int_value double_value date_value )],
+	    args => [qw( docid version name text_value int_value double_value date_value )],
 	    options => {explicit_transactional => 1}
+	   },
 	   {
 	    command => "do_search", 
 	    args => [qw( path pattern owner grp newer_than older_than )], 

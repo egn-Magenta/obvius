@@ -95,7 +95,7 @@ sub create_internal_proxy_document {
 				      int_value => $fields{internal_proxy_overloaded_rightboxes}});
      $this->dbprocedures->add_vfield({docid => $docid, 
 				      version => $version, 
-				      name => "internal_proxy_path"
+				      name => "internal_proxy_path",
 				      int_value => $fields{internal_proxy_path}});
      
 				      
@@ -154,15 +154,15 @@ sub create_internal_proxy_version {
      push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_vfields});
 
      $this->dbprocedures->add_vfield({
-				      docid => $docid, 
+				      docid => $referrer_doc->Id, 
 				      version => $new_version, 
 				      name => "internal_proxy_overloaded_rightboxes",
 				      int_value => $fields{internal_proxy_overloaded_rightboxes}
 				     });
      $this->dbprocedures->add_vfield({
-				      docid => $docid, 
+				      docid => $referrer_doc->Id, 
 				      version => $new_version, 
-				      name => "internal_proxy_path"
+				      name => "internal_proxy_path",
 				      int_value => $fields{internal_proxy_path}
 				     });
 
