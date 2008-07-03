@@ -170,9 +170,7 @@ AUTOLOAD {
      my ($method) = $AUTOLOAD =~ /::([^:]+)$/;
      
      my $fun = $this->{DBProcedures}{$method};
-     if ($fun) {
-	  return $fun->($this, @args);
-     }
+     return $fun->($this, @args) if ($fun);
 
      die "Function not found: $AUTOLOAD\n";
 }
