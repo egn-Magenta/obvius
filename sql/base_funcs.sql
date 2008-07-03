@@ -1,7 +1,6 @@
 delimiter $$
 
 create table if not exists docid_path (
-       id integer unsigned primary key auto_increment, 
        path varchar(1024), 
        docid integer unsigned,
        index (path),
@@ -82,7 +81,7 @@ begin
         set pattern = concat('%', replace(in_pattern, '*', '%'), '%');
 
         select distinct(d.id) from
-               documents d join docid_path dp on (d.id = dp.docid and dp.path like path)
+               documents d join docid_path dp on (d.id = dp.docid and path like dp.path)
                left join versions v on (d.id = v.docid)
                left join vfields vf1 on 
                     (v.docid = vf1.docid and vf1.version = v.version and 
