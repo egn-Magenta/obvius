@@ -2,9 +2,8 @@ delimiter $$
 
 create table if not exists docid_path (
        path varchar(1024), 
-       docid integer unsigned,
-       index (path),
-       index (docid)) engine=innodb $$
+       docid integer unsigned primary key,
+       index (path)) engine=innodb $$
 
 drop procedure if exists find_doc_by_path $$
 create procedure find_doc_by_path (path varchar(1024), out docid integer unsigned)
@@ -113,6 +112,36 @@ create procedure add_vfield(docid integer unsigned, version datetime, name varch
 begin
 	insert into vfields (docid, version, name, text_value, int_value, double_value, date_value) values
 	       (docid, version, name, text_value, int_value,double_value, date_value);
+end $$
+
+drop procedure if exists read_vfields $$
+create procedure read_vfields(docid integer unsigned, version datetime, names varchar(16384))
+begin
+	declare pos integer unsigned default 0;
+	declare len integer unsigned default 0;
+	
+	create temporary table if not exists read_vfields_helper (name varchar(1024) primary key) engine = heap;
+	delete r from read_vfields_helper r;
+
+	set len = length(names) - length(replace(names, ",", ""));
+	while pos < len or (pos = 0 and len = 0) do
+	      insert into read_vfields_helper values (substring_index(substring_index(names, ",", pos + 1), ",", -1));
+	end while;
+	
+	select vf.* from vfields vf join read_vfields_helper r on (vf.docid = docid and vf.version = version and vf.name = r.name);
+end $$
+
+drop procedure if exists read_vfields_from_pol $$
+create procedure read_vfields_from_pol(docid integer unsigned, names varchar(16384))
+begin
+	declare version datetime default null;
+	
+	call public_or_latest_version(docid, version);
+	if version is null then
+	   call ERROR_NO_PUBLIC_OR_LATEST_VERSION();
+	end if;	
+	
+	call read_vfields(docid, version, names);
 end $$
 
 delimiter ;
