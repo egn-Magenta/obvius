@@ -110,10 +110,10 @@ begin
 end $$
 
 drop procedure if exists add_vfield;
-create procedure add_vfield(docid integer unsigned, version datetime, text_value varchar(16384), int_value integer, double_value double, date_value date)
+create procedure add_vfield(docid integer unsigned, version datetime, name varchar(1024), text_value varchar(16384), int_value integer, double_value double, date_value date)
 begin
-	insert into vfields (docid, version, text_value, int_value, double_value, date_value) values
-	       (docid, version, text_value, int_value,double_value, date_value);
+	insert into vfields (docid, version, name, text_value, int_value, double_value, date_value) values
+	       (docid, version, name, text_value, int_value,double_value, date_value);
 end $$
 
 delimiter ;
