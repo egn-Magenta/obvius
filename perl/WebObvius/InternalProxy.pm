@@ -88,18 +88,26 @@ sub create_internal_proxy_document {
 							    \$error
 							  );
      die $error if ($error);
+
+     $this->new_internal_proxy_entry($docid, $reference_doc->Id, \@overloaded_fields);
      
-     $this->dbprocedures->add_vfield({docid => $docid, 
-				      version => $version, 
-				      name => "internal_proxy_overloaded_rightboxes",
-				      int_value => $fields{internal_proxy_overloaded_rightboxes}});
-     $this->dbprocedures->add_vfield({docid => $docid, 
-				      version => $version, 
-				      name => "internal_proxy_path",
-				      int_value => $fields{internal_proxy_path}});
+     eval {
+	  $obvius->dbprocedures->add_vfield({
+					     docid => $docid, 
+					     version => $version, 
+					     name => "internal_proxy_path",
+					     int_value => $fields{internal_proxy_path}
+					    });
+	  $obvius->dbprocedures->add_vfield({
+					     docid => $docid, 
+					     version => $version, 
+					     name => "internal_proxy_overloaded_rightboxes",
+					     int_value => $fields{internal_proxy_overloaded_rightboxes}
+					    });
+     };
+     warn @$ if ($@);
      
 				      
-     $this->new_internal_proxy_entry($docid, $reference_doc->Id, \@overloaded_fields);
      return ($docid, $version);
 }
      
@@ -138,13 +146,13 @@ sub create_internal_proxy_version {
        $obvius->get_doc_by_id($reference_docid);
      die "Couldn't find document: $reference_docid" if (!$reference_doc);
 
-     my $doctype_id = $this->get_fields_and_doctype($reference_doc);
+     my $doctype = $this->get_doctype($reference_doc);
      my $compatible_field_values	= $this->make_old_obvius_data_from_hash(\%fields);
      
      my $error;
 
      my $new_version = $obvius->create_new_version($referrer_doc,
-						   $doctype_id,
+						   $doctype->Id,
 						   $options{lang},
 						   $compatible_field_values);
      
@@ -153,20 +161,22 @@ sub create_internal_proxy_version {
      my @overloaded_fields = @overloaded_vfields;
      push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_vfields});
 
-     $this->dbprocedures->add_vfield({
-				      docid => $referrer_doc->Id, 
-				      version => $new_version, 
-				      name => "internal_proxy_overloaded_rightboxes",
-				      int_value => $fields{internal_proxy_overloaded_rightboxes}
-				     });
-     $this->dbprocedures->add_vfield({
+     $this->new_internal_proxy_entry($options{docid}, $new_version, \@overloaded_fields);
+
+     $obvius->dbprocedures->add_vfield({
 				      docid => $referrer_doc->Id, 
 				      version => $new_version, 
 				      name => "internal_proxy_path",
 				      int_value => $fields{internal_proxy_path}
 				     });
 
-     $this->new_internal_proxy_databasen_entry($options{docid}, $new_version, \@overloaded_fields);
+     $obvius->dbprocedures->add_vfield({
+				      docid => $referrer_doc->Id, 
+				      version => $new_version, 
+				      name => "internal_proxy_overloaded_rightboxes",
+				      int_value => $fields{internal_proxy_overloaded_rightboxes}
+				     });
+
 
      return $new_version;
 }
