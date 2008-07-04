@@ -20,10 +20,8 @@ create table if not exists internal_proxy_fields (
 drop procedure if exists new_internal_proxy_entry $$
 create procedure new_internal_proxy_entry(docid integer unsigned, depends_on integer unsigned, fields varchar(16384))
 begin
-	start transaction;
 	call insert_internal_proxy_entry(docid, depends_on, fields);
 	call update_internal_proxies(docid);
-	commit;
 end $$
 
 drop procedure if exists update_internal_proxy_docids $$
@@ -35,7 +33,7 @@ begin
       
       start transaction;
       set len = length(docids) - length(replace(docids, ',', ''));
-      while pos < len or (len = 0 and pos=0) do
+      while pos < len + 1 do
             set cur = substring_index(substring_index(docids, ',', pos + 1), ',', -1);
 	    call internal_proxy_when_document_updated(convert(cur, unsigned));
 	    set pos = pos + 1;
@@ -63,7 +61,7 @@ begin
 
 	delete i from internal_proxy_fields i where relation_id = id;
 	set len = length(fields) - length(replace(fields, ',', ''));
-	while pos < len do 
+	while pos < len + 1 do
 	      set cur = substring_index(substring_index(fields, ',', pos + 1), ',', -1);
 	      insert into internal_proxy_fields (relation_id, name) values (id, cur);
 	      set pos = pos + 1;

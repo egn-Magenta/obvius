@@ -37,7 +37,7 @@ my $commands = [
 	   {
 	    command => "new_internal_proxy_entry",
 	    args =>  [qw( docid depends_on fields) ],
-	    options => { transactional => 1}
+	    options => { explicit_transactional => 1}
 	   },
 	   {
 	    command => "update_internal_proxy_docids",
@@ -70,29 +70,43 @@ sub new {
      return $this;
 }
 
-sub execute_command {
+sub execute_output {
      my ($this, $sql, @args) = @_;
+     my @result;
 
      my $sth = $this->db->prepare($sql);
      
      $sth->execute(@args);
-     return $sth;
+     if ($sth) {
+	  while (my $res = $sth->fetchrow_hashref()) {
+	       push @result, {map { $_ => $res->{$_} } keys(%$res)};
+	  }
+     }
+     $sth->finish();
+
+     return \@result;
 }
 
 sub db {
      return shift->{db};
 }
 
+sub do {
+     my ($this, $query, @args) = @_;
+
+     return $this->db->do($query, undef, @args);
+}
+
 sub rollback {
-     return shift->db->do("rollback;");
+     return shift->db->rollback;
 }
 
 sub start_transaction {
-     return shift->db->do("start transaction;");
+     return shift->db->begin_work;
 }
 
 sub commit {
-     return shift->db->do("commit;");
+     return shift->db->commit;
 }
 
 sub make_cmds {
@@ -123,14 +137,15 @@ sub make_cmd {
 
      return sub {
 	  my ($this, @args) = @_;
-	  my @result;
+	  my $result;
 	  
+	  $this->db->{RaiseError} = 1;
 	  
 	  my @qargs;
 	  if (scalar(@args) == 1 && ref($args[0]) eq 'HASH') {
 	       my $arg = $args[0];
 	       for my $n (@$args) {
-		     if ($arg->{$n}) {
+		     if (exists $arg->{$n}) {
 			  push @qargs, $arg->{$n};
 		     } else {
 			  push @qargs, undef;
@@ -140,25 +155,28 @@ sub make_cmd {
 	       @qargs = (@args, (undef) x ($nr_args - scalar(@args)));
 	  }
 	  
+	  use Data::Dumper;
+	  print $query;
+	  print Dumper(\@qargs);
 	  $this->start_transaction if ($options->{explicit_transactional});
-	  my $sth = eval { $this->execute_command($query, @qargs); };
+	  
+	  print "Starting transaction";
+	  eval {
+	       if ($options->{output}) {
+		    $result = $this->execute_output($query, @qargs);
+	       } else {
+		    $result = $this->do($query, @qargs);
+	       }
+	  };
 	  
 	  if ($@) {
 	       $this->rollback if ($options->{transactional});
-	       warn $@;
-	       return undef;
+	       warn "Error: $@";
+	       die "Error: $@";
 	  }
 	  
 	  $this->commit if ($options->{explicit_transactional});
-	  
-	  if ($options->{output} && $sth) {
-	       while (my $res = $sth->fetchrow_hashref()) {
-		    push @result, {map { $_ => $res->{$_} } keys(%$res)};
-	       }
-	  }
-	  
-	  $sth->finish;
-	  return \@result;
+	  return $result;
      }
 }
 
