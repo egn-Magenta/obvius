@@ -92,7 +92,7 @@ create procedure really_delete_tree()
 begin 
 	declare done integer default 0;
 	declare a integer unsigned;
-     	declare c cursor for (select * from recursive_subdocs_table);
+     	declare c cursor for (select * from recursive_subdocs_table r);
         declare continue handler for not found set done=1;
 		
 	open c;
