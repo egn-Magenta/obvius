@@ -162,8 +162,8 @@ sub create_internal_proxy_version {
      $obvius->dbprocedures->add_vfield({
 				      docid => $referrer_doc->Id, 
 				      version => $new_version, 
-				      name => "internal_proxy_overloaded_rightboxes",
-				      int_value => $fields{internal_proxy_overloaded_rightboxes}
+				      name => "internal_proxy_overload_rightboxes",
+				      int_value => $fields{internal_proxy_overload_rightboxes}
 				     });
 
 
