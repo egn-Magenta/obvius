@@ -142,7 +142,6 @@ sub make_cmd {
 
      my $query = "call $cmd(" . (join ",", @a) . ");";
      
-     print "Query: $query\n";
      $options->{transactional} ||= $options->{explicit_transactional};
 
      return sub {
@@ -165,12 +164,8 @@ sub make_cmd {
 	       @qargs = (@args, (undef) x ($nr_args - scalar(@args)));
 	  }
 	  
-	  use Data::Dumper;
-	  print $query;
-	  print Dumper(\@qargs);
 	  $this->start_transaction if ($options->{explicit_transactional});
 	  
-	  print "Starting transaction";
 	  eval {
 	       if ($options->{output}) {
 		    $result = $this->execute_output($query, @qargs);
