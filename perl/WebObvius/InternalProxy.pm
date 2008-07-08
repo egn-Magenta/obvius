@@ -15,17 +15,6 @@ sub new {
      return bless {obvius => $obvius}, $class;
 }
 
-sub is_internal_proxy_document {
-     my ($this, $docid) = @_;
-     
-     my $obvius = $this->{obvius};
-
-     my $query = "call is_internal_proxy_document();";
-     my $res = $obvius->execute_select($query, $docid)->[0]{is_};
-     
-     return $res;
-}
-
 sub get_doctype {
      my ($this, $doc) = @_;
      my $obvius = $this->{obvius};
@@ -72,7 +61,7 @@ sub create_internal_proxy_document {
      my $compatible_field_values = $this->make_old_obvius_data_from_hash(\%fields);
 
      my @overloaded_fields = @overloaded_vfields;
-     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_rightboxes});
+     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overload_rightboxes});
 	  
      my $parent = $obvius->get_doc_by_id($options{parent});
      my $error;

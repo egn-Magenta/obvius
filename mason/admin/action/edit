@@ -39,7 +39,6 @@ my $session=$r->pnotes('obvius_session');
 $session->{old_action}='edit';
 $session->{action}='editengine';
 
-my $edit_doctype = $internal_proxy->is_internal_proxy_document(
 # New document name given (i.e. we are creating a new document):
 my $new_document=(defined $session->{obvius_new_document_name} ? $session->{obvius_new_document_name} : undef);
 
@@ -50,7 +49,7 @@ my $edit_doctype;
 $edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid})
   if ($session->{obvius_new_doctypeid});
 $edit_doctype = $internal_proxy_doctype if 
-   (!$new_document && $internal_proxy->is_internal_proxy_document($doc));
+   (!$new_document && $obvius->dbprocedures->is_internal_proxy_document($doc));
 $edit_doctype ||= $doctype;
 
 my $edit_version={
@@ -215,7 +214,7 @@ my $edit_doctype;
 $edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid})
   if ($session->{obvius_new_doctypeid});
 $edit_doctype = $internal_proxy_doctype if 
-   (!$new_document && $internal_proxy->is_internal_proxy_document($doc));
+   (!$new_document && $obvius->dbprocedures->is_internal_proxy_document($doc));
 $edit_doctype ||= $doctype;
 
 # XXX Temporary place to fish out the values:
