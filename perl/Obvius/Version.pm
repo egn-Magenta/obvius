@@ -72,9 +72,8 @@ sub list_valid_keys {
 
 sub real_doctype {
      my ($this, $obvius) = @_;
-     my $ip = WebObvius::InternalProxy->new($obvius);
 
-     if($ip->is_internal_proxy_document($this->Docid)) {
+     if($obvius->dbprocedures->is_internal_proxy_document($this->Docid)) {
 	  return $obvius->get_doctype_by_name('InternalProxy');
      } else {
 	  return $obvius->get_doctype_by_id($this->Type);

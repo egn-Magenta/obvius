@@ -58,8 +58,18 @@ my $commands = [
 	    command => "delete_tree",
 	    args =>[ qw( docid ) ],
 	    options =>{ explicit_transactional => 1}
-	   }
-       ];
+	   },
+	   {
+	    command => "is_internal_proxy_document",
+	    args => [ qw( docid ) ],
+	    options => {output => 1, post_hook => 
+			sub {
+			     my $res = shift;
+			     if (ref($res) eq 'ARRAY' && scalar(@$res) == 1) {
+				  return $res->[0]{is_};
+			     } 
+			     return 0;
+			}}}];
 		
 		
 sub new {
@@ -176,6 +186,8 @@ sub make_cmd {
 	  }
 	  
 	  $this->commit if ($options->{explicit_transactional});
+	  
+	  return $options->{post_hook}->($result) if ($options->{post_hook});
 	  return $result;
      }
 }
