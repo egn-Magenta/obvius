@@ -44,7 +44,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub start_tag {
     my ($self, $tag, $text, $attr) = @_;
 
-    return unless ($tag =~ /^(td|a|input)$/);
+    return unless ($tag =~ /^(td|a|input|div)$/);
 
     if($self->{state} eq 'look_for_title') {
         if($tag eq 'a' and $attr->{class} and $attr->{class} eq 'docSel-titleLink') {
@@ -61,7 +61,7 @@ sub start_tag {
             $self->{tmp_link} = "http://europa.eu/rapid/" . $link;
         }
     } else {
-        if($tag eq 'td' and $attr->{class} and $attr->{class} eq 'bluetext11') {
+        if($tag eq 'div' and $attr->{class} and $attr->{class} eq 'orangetitle15') {
             $self->{state} = 'get_docdate';
         } elsif($tag eq 'input' and $attr->{name} and $attr->{name} eq 'checkReleases') {
             $self->{doc}->{checkReleases} = $attr->{value};
@@ -250,7 +250,7 @@ sub find_title {
 
     return unless ($tag eq 'td');
 
-    if($attr->{class} and $attr->{class} eq 'bluetitle14') {
+    if($attr->{class} and $attr->{class} eq 'orangetitle20') {
         $self->handler(text => sub {
                         my $self = shift;
                         $self->{new_title} .= ' ' . shift;
