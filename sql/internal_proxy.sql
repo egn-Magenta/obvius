@@ -73,8 +73,8 @@ drop procedure if exists check_internal_proxy_status $$
 create procedure check_internal_proxy_status(out good integer unsigned)
 begin
 	declare times integer unsigned default 10;
-	create temporary table if not exists internal_proxy_status_table (docid integer unsigned auto_increment primary key ) engine = heap;
-	create temporary table if not exists internal_proxy_status_table2 (docid integer unsigned auto_increment primary key ) engine = heap;
+	create temporary table if not exists internal_proxy_status_table (docid integer unsigned auto_increment primary key ) engine = innodb;
+	create temporary table if not exists internal_proxy_status_table2 (docid integer unsigned auto_increment primary key ) engine = innodb;
 
 	delete ip from internal_proxy_status_table ip;
 	delete ip2 from internal_proxy_status_table ip2;
@@ -155,10 +155,10 @@ begin
 
 	create temporary table if not exists internal_proxy_docid_update_table(id integer unsigned auto_increment primary key, 
 	       		       					               docid integer unsigned, 
-								               unique(docid)) engine=heap;
+								               unique(docid)) engine=innodb;
 	create temporary table if not exists internal_proxy_docid_update_table2(id integer unsigned auto_increment primary key, 
 	       		       					                docid integer unsigned, 
-								                unique (docid)) engine=heap;
+								                unique (docid)) engine=innodb;
 	delete d from internal_proxy_docid_update_table d;
 	delete d2 from internal_proxy_docid_update_table2 d2;
 	
@@ -224,8 +224,8 @@ begin
 	   update internal_proxy_documents i join internal_proxy_documents i2 on 
 	   	      (i.docid = i2.dependent_on) set i2.dependent_on = i.dependent_on 
 	       	      where i.id = a;
-	   delete r from internal_proxy_fields r where r.id = a;
-	   delete i from internal_proxy_documents i where i.id = a;
+	   delete from internal_proxy_fields where id = a;
+	   delete from internal_proxy_documents where id = a;
 	end if;
 end $$
 
