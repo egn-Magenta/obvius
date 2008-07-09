@@ -90,8 +90,8 @@ sub create_internal_proxy_document {
 	  $obvius->dbprocedures->add_vfield({
 					     docid => $docid, 
 					     version => $version, 
-					     name => "internal_proxy_overloaded_rightboxes",
-					     int_value => $fields{internal_proxy_overloaded_rightboxes}
+					     name => "internal_proxy_overload_rightboxes",
+					     int_value => $fields{internal_proxy_overload_rightboxes}
 					    });
      };
      warn @$ if ($@);
@@ -148,24 +148,25 @@ sub create_internal_proxy_version {
      die "error creating new version" if(!$new_version);
 
      my @overloaded_fields = @overloaded_vfields;
-     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overloaded_vfields});
+     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overload_rightboxes});
 
-     $this->new_internal_proxy_entry($options{docid}, $new_version, \@overloaded_fields);
-
-     $obvius->dbprocedures->add_vfield({
-				      docid => $referrer_doc->Id, 
-				      version => $new_version, 
-				      name => "internal_proxy_path",
-				      int_value => $fields{internal_proxy_path}
-				     });
-
-     $obvius->dbprocedures->add_vfield({
-				      docid => $referrer_doc->Id, 
-				      version => $new_version, 
-				      name => "internal_proxy_overload_rightboxes",
-				      int_value => $fields{internal_proxy_overload_rightboxes}
-				     });
-
+     $this->new_internal_proxy_entry($options{docid}, $fields{internal_proxy_path}, \@overloaded_fields);
+     eval {
+	  $obvius->dbprocedures->add_vfield({
+					     docid => $referrer_doc->Id, 
+					     version => $new_version, 
+					     name => "internal_proxy_path",
+					     int_value => $fields{internal_proxy_path}
+					    });
+	  
+	  $obvius->dbprocedures->add_vfield({
+					     docid => $referrer_doc->Id, 
+					     version => $new_version, 
+					     name => "internal_proxy_overload_rightboxes",
+					     int_value => $fields{internal_proxy_overload_rightboxes}
+					    });
+     };
+     warn $@ if ($@);
 
      return $new_version;
 }
