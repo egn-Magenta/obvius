@@ -36,13 +36,18 @@ my $commands = [
 	   },
 	   {
 	    command => "new_internal_proxy_entry",
-	    args =>  [qw( docid depends_on fields) ],
+	    args =>  [qw( docid version depends_on fields) ],
 	    options => { explicit_transactional => 1}
 	   },
 	   {
 	    command => "update_internal_proxy_docids",
 	    args => [qw( docids )],
 	    options =>{ transactional => 1}
+	   },
+	   {
+	    command => "update_internal_proxy_document",
+	    args => [ qw( docid version) ],
+	    options => {explicit_transactional => 1}
 	   },
 	   {
 	    command => "move_document",

@@ -31,7 +31,7 @@ sub flush {
      
      my $internal_proxy = WebObvius::InternalProxy->new($this->{obvius});
      
-     return $internal_proxy->check_and_update_internal_proxies($relations);
+     return $internal_proxy->update_internal_proxies($relations);
 }
 
 1;

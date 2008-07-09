@@ -78,7 +78,7 @@ sub create_internal_proxy_document {
 							  );
      die $error if ($error);
 
-     $this->new_internal_proxy_entry($docid, $reference_doc->Id, \@overloaded_fields);
+     $this->new_internal_proxy_entry($docid, $version, $reference_doc->Id, \@overloaded_fields);
      
      eval {
 	  $obvius->dbprocedures->add_vfield({
@@ -101,10 +101,10 @@ sub create_internal_proxy_document {
 }
      
 sub new_internal_proxy_entry {
-     my ($this, $docid, $depends_on, $fields) = @_;
+     my ($this, $docid, $version, $depends_on, $fields) = @_;
      
      my $str = join ",", @$fields;
-     eval {$this->{obvius}->dbprocedures->new_internal_proxy_entry($docid, $depends_on, $str); };
+     eval {$this->{obvius}->dbprocedures->new_internal_proxy_entry($docid, $version, $depends_on, $str); };
      if ($@) {
 	  die "Error creating internal_proxy_entry: $@\n";
      }
@@ -150,7 +150,7 @@ sub create_internal_proxy_version {
      my @overloaded_fields = @overloaded_vfields;
      push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overload_rightboxes});
 
-     $this->new_internal_proxy_entry($options{docid}, $fields{internal_proxy_path}, \@overloaded_fields);
+     $this->new_internal_proxy_entry($options{docid}, $new_version, $fields{internal_proxy_path}, \@overloaded_fields);
      eval {
 	  $obvius->dbprocedures->add_vfield({
 					     docid => $referrer_doc->Id, 
