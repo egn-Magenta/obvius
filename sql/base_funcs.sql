@@ -80,17 +80,18 @@ begin
         set pattern = concat('%', replace(in_pattern, '*', '%'), '%');
 
         select distinct(d.id) from
-               documents d join docid_path dp on (d.id = dp.docid and path like dp.path)
-               left join versions v on (d.id = v.docid)
+               documents d join docid_path dp on (d.id = dp.docid and dp.path like path)
+               join versions v on (d.id = v.docid)
                left join vfields vf1 on 
                     (v.docid = vf1.docid and vf1.version = v.version and 
                     vf1.name in ('content', 'title', 'short_title'))
         where    
+		(v.public = 1 or v.version = (select max(v2.version) from versions v2 where v2.docid  = d.id)) and
                 (pattern is null or vf1.text_value like pattern or d.name like pattern) and
                 (owner is null or d.owner = owner) and
                 (grp is null or d.grp = grp) and
                 (older_than is null or v.version < older_than) and
-                (newer_than is null or v.version > newer_than) limit 50;
+                (newer_than is null or v.version > newer_than);
 end $$                               
 
 drop procedure if exists public_or_latest_version $$
