@@ -148,11 +148,14 @@ my $current_access_rules = join '<br />', map {
 } $obvius->get_capability_rules($doc);
 
 my $dummy = $obvius->get_versions($doc);
-map { $obvius->get_version_fields($_) } @$dummy;
-my @versions = ();
-push @versions, { name => $_->Version . ' Language: ' . $_->Lang,
-                  active => !$_->Public,
-                  value => $_->Version} for @$dummy;
+$obvius->get_version_fields($_) for @$dummy;
+my @versions = map {
+               my $user = $obvius->get_user($_->User);
+	       my $login = $user ? $user->{login} : 'Unknown';
+               { name => $_->Version . ' Language: ' . $_->Lang . ' User: ' . $login,
+                 active => !$_->Public,
+                 value => $_->Version
+	       }} @$dummy;
 @versions = sort { $b->{value} cmp $a->{value} } @versions;
 
 my $can_access    = $obvius->can_set_access_data($doc);
