@@ -1,0 +1,21 @@
+<%args>
+$startdate
+$starttime => undef
+$enddate => undef
+$endtime => undef
+</%args>
+<& /shared/display_date, date=>$startdate &> 
+% if ($starttime) {
+  <% $starttime %>
+%}
+% if (($endtime && ($starttime || $enddate)) || $enddate) {
+    - 
+% if ($enddate) {
+    <& /shared/display_date, date => $enddate &>
+%}
+% if ($endtime) {
+<% $endtime %>
+%}
+%}
+<%init>
+</%init>
