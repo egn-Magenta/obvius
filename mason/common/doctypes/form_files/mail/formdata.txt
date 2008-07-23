@@ -67,7 +67,7 @@ for(@$fields) {
     # Only documentation on windows CSV I could find said to use
     # ~ for linebreaks.
     $val =~ s!\r?\n!~!g;
-    $val =~ s|;||;
+    $val =~ s|;||g;
 
     push(@csv_values, $val);
 }
