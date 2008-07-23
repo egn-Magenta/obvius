@@ -11,6 +11,7 @@ $output
 <%init>
 $obvius->get_version_fields($vdoc, ['aftersubmittext', 'mailto']);
 my @mailto = split /;/, $vdoc->field('mailtos');
+my $server = $obvius->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
 for my $mailto  (@mailto) {
     my $mail_error = '';
@@ -18,7 +19,7 @@ for my $mailto  (@mailto) {
 
      $mail_error = "Kunne ikke generere mail besked" unless($mailtxt);
 
-     my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => 1);
+     my $smtp = Net::SMTP->new($server, Timeout=>30, Debug => 1);
      my $from = $r->notes('formdata_mail_from') || $mailto;
 
      $mail_error = "Failed to specify a sender [$from]\n"        unless ($mail_error or $smtp->mail($from));
