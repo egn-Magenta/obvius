@@ -108,7 +108,7 @@ sub action {
                                         'pagesize'
                                         ]);
 
-    my @fields = ( 'docdate' );
+    my @fields = ( 'docdate', '~enddate' );
 
     my $where = "type = " . $event_doctype->param('ID') . " and ";
 
@@ -146,7 +146,7 @@ sub action {
 
     if($startdate and $enddate) {
         $where .= "docdate > '" . $startdate . "' and ";
-        $where .= "docdate < '" . $enddate . "' and ";
+        $where .= "(docdate < '" . $enddate . "' or enddate < '" . $enddate . "') and ";
     }
     if($vdoc->field('s_event_place')) {
         push(@fields, 'eventplace');
@@ -377,7 +377,8 @@ sub export_eventlist {
                                         'eventplace',
                                         'contactinfo',
                                         'eventinfo',
-                                        'enddate'
+                                        'enddate',
+					'endtime' 
                                     ]
                                 );
         push(@events, {
@@ -386,6 +387,7 @@ sub export_eventlist {
                         'eventtype' => $_->field('eventtype'),
                         'date' => $_->DocDate,
                         'enddate' => $_->field('enddate'),
+		        'endtime' => $_->field('endtime'),
                         'time' => $_->field('eventtime'),
                         'place' => $_->field('eventplace'),
                         'contactinfo' => $_->field('contactinfo'),
