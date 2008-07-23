@@ -174,7 +174,7 @@ sub connect {
                                                     AutoCommit => 1,
                                                     RaiseError => 1,
                                                     PrintError => 1,
-                                                    ShowErrorStatement => ($this->{DEBUG} ? 1 : 0),
+                                                    ShowErrorStatement => 1,
                                                    },
                                  } );
     croak(ref($this), ": failed to connect to database")
@@ -854,7 +854,7 @@ sub search {
 
     $this->tracer($fields, $where, %options) if ($this->{DEBUG});
 
-    my @table = ( 'versions' );
+    my @table;
     my @left_join_table;
     my @join;
     my @fields = ( 'versions.*' );
@@ -942,8 +942,7 @@ sub search {
         if($do_left_join) {
             # Since mysql 5 we have to join with the table to the left of the
             # LEFT JOIN statement
-            my $last_table = $i ? ("vf" . ($i - 1)) : "versions";
-            push(@left_join_table, "LEFT JOIN vfields AS vf$i ON ($last_table.docid=vf$i.docid AND $last_table.version=vf$i.version AND vf$i.name='$_')");
+            push(@left_join_table, "LEFT JOIN vfields AS vf$i ON (versions.docid=vf$i.docid AND versions.version=vf$i.version AND vf$i.name='$_')");
         } else {
             push(@table,   "vfields AS vf$i");
             push(@join,  "(versions.docid=vf$i.docid AND versions.version=vf$i.version)");
@@ -993,7 +992,7 @@ sub search {
     $where =~ s/$regex/$1 . $map{$2}/gie;
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
-                                            '!Table'        => join(', ', @table) . " " . join(" ", @left_join_table),
+                                            '!Table'        => join(', ', (@table, 'versions'))  . " " . join(" ", @left_join_table),
                                             '!TabRelation'  => join(' AND ', @join),
                                             '!Fields'       => join(', ', @fields),
 #                                           '!Debug'            => 2,
@@ -1911,6 +1910,7 @@ sub create_new_document {               # RS 20010819 - ok
         # but with the undef/NULL value.
         push @fields, @{$status{missing}}
             if ($status{missing});
+	
 
         $this->{LOG}->info("====> Inserting new document ... insert into documents");
         $docid = $this->db_insert_document($name, $parent->param('id'), $type, $owner, $grp);
