@@ -18,4 +18,10 @@ $endtime => undef
 %}
 %}
 <%init>
+if ($startdate ge $enddate) {
+   $enddate = undef;
+}
+if ($starttime ge $endtime && !$enddate) {
+   $endtime = undef;
+}
 </%init>
