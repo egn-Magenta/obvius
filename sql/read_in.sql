@@ -5,3 +5,4 @@
 \. document_triggers.sql
 \. internal_proxy.sql
 \. user_triggers.sql
+\. time_funcs.sql
