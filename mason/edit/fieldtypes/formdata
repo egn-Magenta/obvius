@@ -48,6 +48,7 @@ onsubmit_array[onsubmit_array.length] = obvius_<% $name %>_save;
 <& SELF:msg, text=>"Add new field" &>:
 <select name="obvius_<% $name %>_new_field_type" style="vertical-align: middle;">
     <option></option>
+    <option value="email"><& /shared/msg, text=>"Email" &></option>
     <option value="text"><& SELF:msg, text=>"Text" &></option>
     <option value="password"><& SELF:msg, text=>"Password" &></option>
     <option value="textarea"><& SELF:msg, text=>"Textarea" &></option>
@@ -120,6 +121,7 @@ var formdata_translations = {
                                 'cant_edit_valrule' : "<& SELF:msg, text=>"can't edit validaterule" &>",
                                 'cant_save_valrule' : "<& SELF:msg, text=>"can't save validaterule" &>",
                                 'unknown_validate_type': "<& SELF:msg, text=>'Unkown validation type' &>",
+				"field_type_email": "<& /shared/msg, text => "email" &>",
                                 "field_type_text" : "<& SELF:msg, text=>"Text" &>",
                                 "field_type_password" : "<& SELF:msg, text=>"Password" &>",
                                 "field_type_textarea" : "<& SELF:msg, text=>"Textarea" &>",
