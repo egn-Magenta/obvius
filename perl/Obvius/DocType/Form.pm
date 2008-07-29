@@ -202,7 +202,7 @@ Vi takker for modtagelsen af dit formular
 
 END
 
-     $obvius->send_mail($value, $mailmsg, $from);
+     $obvius->send_mail($to, $mailmsg, $from);
 }
 
 sub action {
