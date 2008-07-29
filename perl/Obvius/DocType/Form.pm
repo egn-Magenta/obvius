@@ -190,6 +190,21 @@ sub flush_xml {
     return OBVIUS_OK;
 }
 
+sub send_mail {
+     my ($this, $to, $obvius) = @_;
+     my $from = 'noreply@adm.ku.dk';
+     my $mailmsg = <<END;
+To:      $value
+From:    $from
+Subject: Tak for dit svar
+
+Vi takker for modtagelsen af dit formular
+
+END
+
+     $obvius->send_mail($value, $mailmsg, $from);
+}
+
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
@@ -232,6 +247,7 @@ sub action {
     for my $field (@{$formdata->{field}}) {
         my $value = $input->param($field->{name});
 
+	$this->send_mail($value, $obvius) if ($field->{type} eq 'email' && $value =~ m|.+@.+|);
         # Make sure we have arrays for "multiple" fieldtypes
         if($field->{type} eq 'checkbox' or $field->{type} eq 'selectmultiple') {
             $value ||= [];
@@ -473,36 +489,3 @@ sub utf8ify {
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
-
-=head1 NAME
-
-Obvius::DocType::Form - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Obvius::DocType::Form;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Obvius::DocType::Form, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
-
-=head1 SEE ALSO
-
-L<perl>.
-
-=cut

@@ -2614,11 +2614,11 @@ sub get_editpages {
 }
 
 sub send_mail {
-     my ($to, $msg, $from) = @_;
+     my ($this, $to, $msg, $from) = @_;
      
      $from ||= 'noreply@adm.ku.dk';
 
-     my $server = $obvius->{OBVIUS_CONFIG}{SMTP} || 'localhost';
+     my $server = $this->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
      use Net::SMTP;
      my $smtp = Net::SMTP->new($server, Timeout => 30, Debug => 1);
