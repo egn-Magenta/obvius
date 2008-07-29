@@ -116,7 +116,7 @@ end $$
 drop procedure if exists copy_docparams $$
 create procedure copy_docparams (fromid integer unsigned, toid integer unsigned)
 begin
-	replace into docparms (docid, name, value, type) select (toid, name, value, type) from docparms where docid=fromid;
+	replace into docparms (docid, name, value, type) select toid, name, value, type from docparms where docid=fromid;
 end $$
 
 delimiter ;
