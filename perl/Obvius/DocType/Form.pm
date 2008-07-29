@@ -194,7 +194,7 @@ sub send_mail {
      my ($this, $to, $obvius) = @_;
      my $from = 'noreply@adm.ku.dk';
      my $mailmsg = <<END;
-To:      $value
+To:      $to
 From:    $from
 Subject: Tak for dit svar
 
