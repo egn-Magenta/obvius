@@ -4,6 +4,11 @@ use strict;
 use warnings;
 
 my $commands = [
+	   {
+	    command => 'copy_docparams',
+	    args    => [ qw(from to) ],
+	    options => {explicit_transactional => 1}
+	   },
            {
 	    command => 'read_vfields',
 	    args => [ qw(docid version names) ],
