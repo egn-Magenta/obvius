@@ -2613,9 +2613,24 @@ sub get_editpages {
     return $doctype->{EDITPAGES};
 }
 
+sub send_mail {
+     my ($to, $msg, $from) = @_;
+     
+     $from ||= 'noreply@adm.ku.dk';
+
+     my $server = $obvius->{OBVIUS_CONFIG}{SMTP} || 'localhost';
+
+     use Net::SMTP;
+     my $smtp = Net::SMTP->new($server, Timeout => 30, Debug => 1);
+ 
+     $smtp->mail($from) or return;
+     $smtp->to($to) or return;
+     $smtp->data([$msg]) or return;
+     $smtp->quit or return;
+}
+     
 
 
-# Preview stuff.
 package Obvius::Benchmark;
 
 use strict;
