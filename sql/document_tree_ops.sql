@@ -113,4 +113,10 @@ begin
        call restore_recursive_subdocs();
 end $$
 
+drop procedure if exists copy_docparams $$
+create procedure copy_docparams (fromid integer unsigned, toid integer unsigned)
+begin
+	replace into docparms (docid, name, value, type) select (fromid, name, value, type) from docparms where toid=docid;
+end $$
+
 delimiter ;
