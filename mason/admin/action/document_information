@@ -69,6 +69,14 @@ function add_key_value () {
     </div>
 % }
 </div>
+<div id="copy_docparams" class="docparams">
+  Kopier fra: 
+  <form method="post" action="./">
+    <input type="text" width="100" name="copy_docparams_from" id="copy_docparams_from" />
+    <br />
+    <input type="button" value="Kopier" />
+</div>
+  
 <div id="new_docparams" class="docparams">
   <input <% disabled($show) %> type="text" name="new_key" id="new_key" />
   <textarea <% disabled ($show) %> name="new_value" id="new_value"></textarea><BR />
@@ -316,11 +324,19 @@ $docparam_key => undef
 <& /shared/set_status_message, message=>'OK' &>
 %
 <%init>
+my $copy_docparams_path = $ARGS{copy_docparams_from};
 my $remove = $ARGS{'Remove'};
-use Data::Dumper;
 
+if ($copy_docparams) {
+     my $from_doc  = $obvius->lookup($copy_docparams_path);
+     my $from_docid = $from_doc->Id if ($from_doc);
+     
+     eval { $obvius->dbprocedures({from => $from_docid, to => $doc->Id})};
+}
+     
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
+
 if ($new_key !~ /^\s*$/) {
     push @$docparam_value, $new_value;
     push @$docparam_key, $new_key;
