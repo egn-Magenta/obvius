@@ -61,20 +61,13 @@ function add_key_value () {
 % my $dp = $show->{value};
 %   for my $k ( sort keys %$dp) {
 
-    <div class="docparams">
-
+     <div class="docparams">
+       <a href="./obvius_command_copy_docparams=1">Kopier dokumentparametre</a>
       <input <% disabled($show) %> type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
        <textarea <% disabled($show) %> name="docparam_value" id="docparam_value"><% $dp->{$k} |h%></textarea>
 
     </div>
 % }
-</div>
-<div id="copy_docparams" class="docparams">
-  Kopier fra: 
-  <form method="post" action="./">
-    <input type="text" width="100" name="copy_docparams_from" id="copy_docparams_from" />
-    <br />
-    <input type="button" value="Kopier" />
 </div>
   
 <div id="new_docparams" class="docparams">
@@ -324,16 +317,8 @@ $docparam_key => undef
 <& /shared/set_status_message, message=>'OK' &>
 %
 <%init>
-my $copy_docparams_path = $ARGS{copy_docparams_from};
 my $remove = $ARGS{'Remove'};
 
-if ($copy_docparams) {
-     my $from_doc  = $obvius->lookup($copy_docparams_path);
-     my $from_docid = $from_doc->Id if ($from_doc);
-     
-     eval { $obvius->dbprocedures({from => $from_docid, to => $doc->Id})};
-     $m->comp('/shared/set_status_message' => $@) if ($@);
-}
      
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
