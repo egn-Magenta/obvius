@@ -5,7 +5,8 @@
 $path => '/'
 $purpose => 'browser'
 $fieldname => undef
-</%args> 
+</%args>
+<% $url %> 
 <%init>
 use Digest::MD5 qw(md5_hex);
 
@@ -20,11 +21,16 @@ my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 $url .= "&path=$path" if ($path);
 
-return $url;
 </%init>
 </%method>
 <%method onclick>
-javascript: return window.open('<& navigator_link_start:href &>', 'navigator,800, 500);
+javascript: return window.open('<% $url %>', 'navigator',800, 500);
+<%init>
+my $url = $m->scomp('navigator_link_start:href', %ARGS);
+$url =~ s/\s//g;
+</%init>
 </%method>
+
+
 
 
