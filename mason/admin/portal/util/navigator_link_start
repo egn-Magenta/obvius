@@ -1,11 +1,12 @@
+<a onclick="<& navigator_link_start:onclick &>" href="<& navigator_link_start:href, %ARGS &>">\
+
+<%method href>
 <%args>
 $path => '/'
 $purpose => 'browser'
 $fieldname => undef
 </%args> 
-<a href="#" onclick="javascript:window.open(<% $url %>, 'navigator', 800, 500)">
-<img
-
+$url
 <%init>
 use Digest::MD5 qw(md5_hex);
 
@@ -20,3 +21,9 @@ my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 $url .= "&path=$path" if ($path);
 </%init>
+</%method>
+<%method onclick>
+"javascript: return obvius_open_window('<& navigator_link_start:href &>');"
+</%method>
+
+
