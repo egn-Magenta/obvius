@@ -6,7 +6,6 @@ $path => '/'
 $purpose => 'browser'
 $fieldname => undef
 </%args> 
-<% $url %>
 <%init>
 use Digest::MD5 qw(md5_hex);
 
@@ -20,10 +19,12 @@ my $phrase = md5_hex($passwd . $time);
 my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 $url .= "&path=$path" if ($path);
+
+return $url;
 </%init>
 </%method>
 <%method onclick>
-"javascript: return obvius_open_window('<& navigator_link_start:href &>');"
+javascript: return window.open('<& navigator_link_start:href &>', 'navigator,800, 500);
 </%method>
 
 
