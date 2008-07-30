@@ -57,19 +57,20 @@ function add_key_value () {
 %     $rows=5 if ($rows<5);
       <textarea <% $show->{inactive} ? 'disabled="disabled" ' : '' %>cols="68" rows="<% $rows |h %>" name="<% $show->{name} |h %>"><% $show->{value} |h %></textarea>
 % } elsif (defined $show->{type} and $show->{type} eq 'docparams') {
+
+<a href="./?obvius_command_copy_docparams=1">Kopier dokumentparametre</a>
+
 <div id="old_docparams">
+
 % my $dp = $show->{value};
 %   for my $k ( sort keys %$dp) {
-
      <div class="docparams">
-       <a href="./obvius_command_copy_docparams=1">Kopier dokumentparametre</a>
       <input <% disabled($show) %> type="text" name="docparam_key" value="<% $k %>" id="docparam_key" />
-       <textarea <% disabled($show) %> name="docparam_value" id="docparam_value"><% $dp->{$k} |h%></textarea>
+      <textarea <% disabled($show) %> name="docparam_value" id="docparam_value"><% $dp->{$k} |h%></textarea>
 
     </div>
 % }
 </div>
-  
 <div id="new_docparams" class="docparams">
   <input <% disabled($show) %> type="text" name="new_key" id="new_key" />
   <textarea <% disabled ($show) %> name="new_value" id="new_value"></textarea><BR />
@@ -101,7 +102,6 @@ function add_key_value () {
       <& /portal/util/identifier, pass=>{ obvius_command_document_information=>1 } &>
       <& util/do_cancel, do_text=>'Opdatér', no_later_date=>1 &>
     </p>
-  </form>
 </div>
 
 <%init>
@@ -240,9 +240,9 @@ my @info = (
                 groups  => [ sort { lc($a) cmp lc($b) }
                         map {
                                 $obvius->get_group($_)->{name}
-                        } keys %{
+                            } keys %{
                                 $obvius->{GROUPS}
-                        }],
+                            }],
                 users   => [
                         ['ALL', 'All users'],
                         ['OWNER', 'The owner'],
@@ -319,7 +319,6 @@ $docparam_key => undef
 <%init>
 my $remove = $ARGS{'Remove'};
 
-     
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
 $docparam_key = [$docparam_key] if (! ref $docparam_key);
 
