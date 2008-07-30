@@ -332,6 +332,7 @@ if ($copy_docparams) {
      my $from_docid = $from_doc->Id if ($from_doc);
      
      eval { $obvius->dbprocedures({from => $from_docid, to => $doc->Id})};
+     $m->comp('/shared/set_status_message' => $@) if ($@);
 }
      
 $docparam_value = [$docparam_value] if (! ref $docparam_value);
