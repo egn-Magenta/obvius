@@ -6,7 +6,7 @@ $path => '/'
 $purpose => 'browser'
 $fieldname => undef
 </%args> 
-$url
+<% $url %>
 <%init>
 use Digest::MD5 qw(md5_hex);
 
