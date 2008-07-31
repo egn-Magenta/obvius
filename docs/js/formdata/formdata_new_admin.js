@@ -269,7 +269,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         document.getElementById('options').style.display = 'none';
     }
 
-    if(type == 'fieldset' || type == 'fieldset_end') {
+    if(type == 'fieldset' || type == 'fieldset_end' || type == 'email') {
         // Only edit name on title on fieldset:
         document.getElementById('options').style.display = 'none';
         document.getElementById('validaterules').style.display = 'none';
