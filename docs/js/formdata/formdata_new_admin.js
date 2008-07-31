@@ -264,12 +264,19 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 
     var type = fieldObj.type || '';
 
-    if(type == 'text' || type == 'password' || type == 'textarea' || type =='email') {
+    if(type == 'text' || type == 'password' || type == 'textarea') {
         // Hide options and validaterules:
         document.getElementById('options').style.display = 'none';
     }
 
-    if(type == 'fieldset' || type == 'fieldset_end' || type == 'email') {
+    if (type == 'email' ) {
+        document.getElementById('options').style.display = 'none';
+        document.getElementById('validaterules').style.display = 'none';
+        document.getElementById('image').style.display = 'none';
+        document.getElementById('description').style.display = 'none';
+        document.getElementById('unique').style.display = 'none';
+    }
+    if(type == 'fieldset' || type == 'fieldset_end') {
         // Only edit name on title on fieldset:
         document.getElementById('options').style.display = 'none';
         document.getElementById('validaterules').style.display = 'none';
