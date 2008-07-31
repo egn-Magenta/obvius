@@ -244,10 +244,19 @@ sub action {
 
     my %fields_by_name;
 
+    my @emails;
     for my $field (@{$formdata->{field}}) {
         my $value = $input->param($field->{name});
 
-	$this->send_mail($value, $obvius) if ($field->{type} eq 'email' && $value =~ m|.+@.+|);
+	if ($field->{type} eq 'email') {
+	     if ($value =~ m|.+@.+|) {
+		  push @emails, $value;
+	     } else {
+		  $field->{invalid} = 'Invalid emailadresse';
+	     }
+	     next;
+	}
+	
         # Make sure we have arrays for "multiple" fieldtypes
         if($field->{type} eq 'checkbox' or $field->{type} eq 'selectmultiple') {
             $value ||= [];
@@ -264,7 +273,7 @@ sub action {
         }
 
         $field->{_submitted_value} = $value;
-
+	
 
         my $valrules = $field->{validaterules};
         if($valrules) {
@@ -386,21 +395,25 @@ sub action {
     } else {
         # Form filled ok, now save/mail the submitted data
 
-        my %entry;
-
-        $entry{date} = $input->param('NOW');
-        $entry{fields} = { field => [] };
-
-        for(@{$formdata->{field}}) {
-            push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
-        }
-
-        $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
-
-        $output->param('submitted_data_ok' => 1);
-        $output->param('formdata' => $formdata);
+	 for my $value (@emails) {
+	      $this->send_mail($value, $obvius) if ($field->{type} eq 'email' && $value =~ m|.+@.+|);
+	 }
+	 
+	 my %entry;
+	 
+	 $entry{date} = $input->param('NOW');
+	 $entry{fields} = { field => [] };
+	 
+	 for(@{$formdata->{field}}) {
+	      push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
+	 }
+	 
+	 $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
+	 
+	 $output->param('submitted_data_ok' => 1);
+	 $output->param('formdata' => $formdata);
     }
-
+    
     return OBVIUS_OK;
 }
 
