@@ -221,6 +221,11 @@
     <translation lang="en">Hide</translation>
     <translation lang="da">Skjul</translation>
   </text>
+  <text key="Rename">
+    <translation lang="en">Rename</translation>
+    <translation lang="da">Omdøb</translation>
+  </text>
+      
   <text key="Reference">
     <translation lang="en">Reference</translation>
     <translation lang="da">Reference</translation>
