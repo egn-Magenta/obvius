@@ -61,7 +61,7 @@ sub create_internal_proxy_document {
      my $compatible_field_values = $this->make_old_obvius_data_from_hash(\%fields);
 
      my @overloaded_fields = @overloaded_vfields;
-     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overload_rightboxes});
+     push @overloaded_fields, "rightboxes" if (!$fields{internal_proxy_overload_rightboxes});
 	  
      my $parent = $obvius->get_doc_by_id($options{parent});
      my $error;
@@ -148,7 +148,7 @@ sub create_internal_proxy_version {
      die "error creating new version" if(!$new_version);
 
      my @overloaded_fields = @overloaded_vfields;
-     push @overloaded_fields, "rightboxes" if ($fields{internal_proxy_overload_rightboxes});
+     push @overloaded_fields, "rightboxes" if (!$fields{internal_proxy_overload_rightboxes});
 
      $this->new_internal_proxy_entry($options{docid}, $new_version, $fields{internal_proxy_path}, \@overloaded_fields);
      eval {
