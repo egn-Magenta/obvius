@@ -264,7 +264,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 
     var type = fieldObj.type || '';
 
-    if(type == 'text' || type == 'password' || type == 'textarea') {
+    if(type == 'text' || type == 'password' || type == 'textarea' || type =='email') {
         // Hide options and validaterules:
         document.getElementById('options').style.display = 'none';
     }
@@ -369,11 +369,11 @@ function formdata_populate_validaterules(fieldNode) {
 
     // Get validation nodes:
     var valNodes = fieldNode.getElementsByTagName('validaterule');
-    for(var i=0;i<valNodes.getLength();i++) {
+    for(var i = 0;i<valNodes.getLength();i++) {
         var valNode = valNodes.item(i);
         var valObj = formdata_objectify_node(valNode);
 
-        var tr = document.createElement('tr')
+      var tr = document.createElement('tr');
 
         var type_td = document.createElement('td');
         type_td.innerHTML = formdata_translations['validate_type_' + valObj.validationtype] || valObj.validationtype;
@@ -391,7 +391,7 @@ function formdata_populate_validaterules(fieldNode) {
         var edit_a = document.createElement('a');
         edit_a.href = document.location.href;
 
-        var edit_url = "/admin/?obvius_app_formdata&mode=edit_validaterule&rulenr=" + i
+	var edit_url = "/admin/?obvius_app_formdata&mode=edit_validaterule&rulenr=" + i;
         var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height;
         eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit_valrule', '" + window_options + "'); return false;}");
         edit_a.innerHTML = formdata_translations['Edit'];
@@ -877,7 +877,7 @@ function formdata_validate_options_dialog() {
 
 function formdata_validate_and_save_option(ruleNr) {
     if(! formdata_validate_options_dialog()) {
-        return false
+      return false;
     }
 
     var fieldNode = window.opener.fieldNode;
@@ -898,7 +898,7 @@ function formdata_validate_and_save_option(ruleNr) {
 
 function formdata_validate_and_add_option() {
     if(! formdata_validate_options_dialog()) {
-        return false
+      return false;
     }
 
     var fieldNode = window.opener.fieldNode;
@@ -1131,7 +1131,7 @@ function formdata_validate_valrule_dialog() {
 
 function formdata_validate_and_save_valrule(ruleNr) {
     if(! formdata_validate_valrule_dialog()) {
-        return false
+      return false;
     }
 
     var fieldNode = window.opener.fieldNode;
@@ -1152,7 +1152,7 @@ function formdata_validate_and_save_valrule(ruleNr) {
 
 function formdata_validate_and_add_valrule() {
     if(! formdata_validate_valrule_dialog()) {
-        return false
+      return false;
     }
 
     var fieldNode = window.opener.fieldNode;
@@ -1199,7 +1199,7 @@ function formdata_move_field(name, nr, direction) {
 
     var secondClone = secondElem.cloneNode(true);
     secondElem.getParentNode().removeChild(secondElem);
-    firstElem.getParentNode().insertBefore(secondClone, firstElem)
+    firstElem.getParentNode().insertBefore(secondClone, firstElem);
 
     formdata_populate_fieldtable(name);
 }
@@ -1225,7 +1225,7 @@ function formdata_move_valrule(nr, direction) {
 
     var secondClone = secondElem.cloneNode(true);
     secondElem.getParentNode().removeChild(secondElem);
-    firstElem.getParentNode().insertBefore(secondClone, firstElem)
+    firstElem.getParentNode().insertBefore(secondClone, firstElem);
 
     formdata_populate_validaterules(fieldNode);
 }
@@ -1250,7 +1250,7 @@ function formdata_move_option(nr, direction) {
 
     var secondClone = secondElem.cloneNode(true);
     secondElem.getParentNode().removeChild(secondElem);
-    firstElem.getParentNode().insertBefore(secondClone, firstElem)
+    firstElem.getParentNode().insertBefore(secondClone, firstElem);
 
     formdata_populate_options(fieldNode);
 }
