@@ -191,14 +191,19 @@ sub flush_xml {
 }
 
 sub send_mail {
-     my ($this, $to, $obvius) = @_;
+     my ($this, $to, $obvius, $vdoc) = @_;
+     $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
+     
+     my $subject = $vdoc->field('subject');
+     my $text = $vdoc->field($text);
+
      my $from = 'noreply@adm.ku.dk';
      my $mailmsg = <<END;
 To:      $to
 From:    $from
-Subject: Tak for dit svar
+Subject: $subject
 
-Vi takker for modtagelsen af dit formular
+$text
 
 END
 
@@ -393,7 +398,7 @@ sub action {
         $output->param('not_unique' => \@not_unique);
     } else {
         # Form filled ok, now save/mail the submitted data
-	 $this->send_mail($_, $obvius) for (@emails);
+	 $this->send_mail($_, $obvius, $vdoc) for (@emails);
 	 
 	 my %entry;
 	 
