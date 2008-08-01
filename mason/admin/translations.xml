@@ -1623,5 +1623,12 @@
     <translation lang="en">oct</translation>
     <translation lang="da">okt</translation>
   </text>
-
+  <text key="Kopier fra: ">
+    <translation lang="en">copy from</translation>
+    <translation lang="da">Kopier fra:</translation>
+  </text>
+  <text key="copy_docparams_warning">
+    <translation lang="en"> IMPORTANT! This procedure will overwrite any existing document parameters on this document.</translation>
+    <translation lang="da">  VIGTIGT! Du overskriver alle dette dokuments eksisterende dokumentparametre med det valgte dokuments dokumentparametre.</translation>
+  </text>
 </messages>
