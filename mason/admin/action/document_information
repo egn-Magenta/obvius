@@ -58,7 +58,7 @@ function add_key_value () {
       <textarea <% $show->{inactive} ? 'disabled="disabled" ' : '' %>cols="68" rows="<% $rows |h %>" name="<% $show->{name} |h %>"><% $show->{value} |h %></textarea>
 % } elsif (defined $show->{type} and $show->{type} eq 'docparams') {
 
-<a href="./?obvius_command_copy_docparams=1">Kopier dokumentparametre</a>
+<a href="./?obvius_command_copy_docparams=1"><& /shared/msg, text => "Kopier dokumentparametre" &></a>
 
 <div id="old_docparams">
 

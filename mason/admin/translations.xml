@@ -1631,4 +1631,9 @@
     <translation lang="en"> IMPORTANT! This procedure will overwrite any existing document parameters on this document.</translation>
     <translation lang="da">  VIGTIGT! Du overskriver alle dette dokuments eksisterende dokumentparametre med det valgte dokuments dokumentparametre.</translation>
   </text>
+  <text key="Kopier dokumentparametre">
+    <translation lang="en">Copy document parameters</translation>
+    <translation lang="da">Kopier dokumentparametre</translation>
+  </text>
+    
 </messages>
