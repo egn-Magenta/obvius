@@ -394,7 +394,6 @@ sub action {
         $output->param('not_unique' => \@not_unique);
     } else {
         # Form filled ok, now save/mail the submitted data
-
 	 for my $value (@emails) {
 	      $this->send_mail($value, $obvius) if ($field->{type} eq 'email' && $value =~ m|.+@.+|);
 	 }
