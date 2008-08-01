@@ -194,8 +194,8 @@ sub send_mail {
      my ($this, $to, $obvius, $vdoc) = @_;
      $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
      
-     my $subject = $vdoc->field('subject');
-     my $text = $vdoc->field($text);
+     my $subject = $vdoc->field('email_subject');
+     my $text = $vdoc->field('email_text');
 
      my $from = 'noreply@adm.ku.dk';
      my $mailmsg = <<END;
