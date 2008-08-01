@@ -254,7 +254,6 @@ sub action {
 	     } else {
 		  $field->{invalid} = 'Invalid emailadresse';
 	     }
-	     next;
 	}
 	
         # Make sure we have arrays for "multiple" fieldtypes
