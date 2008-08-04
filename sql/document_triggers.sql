@@ -36,6 +36,7 @@ begin
 
         while not done do
               call find_path_by_docid(a, path);
+	      delete from docid_path where docid=a;
               replace into docid_path (docid, path) values (a, path);
               fetch curs into a;
         end while;
