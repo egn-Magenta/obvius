@@ -51,10 +51,10 @@ begin
       declare new_docid integer unsigned;
 
       declare curs cursor for 
-              (select r.id, t.new_docid from 
-                      documents d join recursive_subdocs_table r on (r.id = d.id)
+              (select recursive_subdocs_table.id, t.new_docid from 
+                      documents d join recursive_subdocs_table on (recursive_subdocs_table.id = d.id)
                       join tree_copier_helper t on (d.parent = t.old_docid) 
-                      where not exists (select * from batch_copier_helper b where b.id = r.id));
+                      where not exists (select * from batch_copier_helper b where b.id = recursive_subdocs_table.id));
      declare continue handler for not found set done=1;
 
      create temporary table if not exists batch_copier_helper (id integer unsigned primary key) engine=heap;
@@ -62,7 +62,7 @@ begin
      insert into batch_copier_helper (id) select old_docid from tree_copier_helper t;
 
      select not count(*) into finally from 
-             recursive_subdocs_table r left join tree_copier_helper t on (t.old_docid = r.id) 
+             recursive_subdocs_table left join tree_copier_helper t on (t.old_docid = recursive_subdocs_table.id) 
              where t.old_docid is null;
 
      if not finally then
@@ -92,13 +92,13 @@ create procedure really_delete_tree()
 begin 
 	declare done integer default 0;
 	declare a integer unsigned;
-     	declare c cursor for (select * from recursive_subdocs_table r);
+     	declare c cursor for (select * from recursive_subdocs_table);
         declare continue handler for not found set done=1;
 		
 	open c;
 	fetch c into a;
 	while not done do call delete_document(a); fetch c into a; end while;
-	delete r from recursive_subdocs_table r;
+	delete from recursive_subdocs_table;
 
 	close c;
 end $$

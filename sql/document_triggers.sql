@@ -52,7 +52,6 @@ begin
 
  	call update_move_internal();
  	call restore_recursive_subdocs();
-	drop temporary table recursive_subdocs_table;
 end $$      
 
 drop   trigger post_document_update $$
