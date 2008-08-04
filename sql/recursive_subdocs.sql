@@ -59,7 +59,8 @@ create procedure restore_recursive_subdocs()
 begin
 	declare id integer unsigned;
 
-	delete from recursive_subdocs_table;
+	drop temporary table recursive_subdocs_table;
+	create temporay table if not exists recursive_subdocs_table (id integer unsigned primary key auto_increment);
 
 	select max(id) into id from recursive_subdocs_backup_list rl;
 	insert into recursive_subdocs_table

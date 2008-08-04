@@ -31,7 +31,6 @@ begin
         declare curs cursor for (select * from recursive_subdocs_table);
         declare continue handler for not found set done=1;
 
-
         open curs;
         fetch curs into a;
 
@@ -47,11 +46,11 @@ end $$
 drop procedure if exists update_move $$
 create procedure update_move (docid integer unsigned) 
 begin
-	call backup_recursive_subdocs();
+	create temporary table recursive_subdocs_table (id integer unsigned primary key);
         call recursive_subdocs(docid);
 
  	call update_move_internal();
- 	call restore_recursive_subdocs();
+	drop temporary table recursive_subdocs_table;
 end $$      
 
 drop   trigger post_document_update $$
