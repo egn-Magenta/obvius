@@ -31,12 +31,12 @@ begin
         declare curs cursor for (select * from recursive_subdocs_table);
         declare continue handler for not found set done=1;
 
+
         open curs;
         fetch curs into a;
 
         while not done do
               call find_path_by_docid(a, path);
-              delete docid_path from docid_path where docid = a;
               replace into docid_path (docid, path) values (a, path);
               fetch curs into a;
         end while;
@@ -50,9 +50,9 @@ begin
 	call backup_recursive_subdocs();
         call recursive_subdocs(docid);
 
-	call update_move_internal();
-
-	call restore_recursive_subdocs();
+ 	call update_move_internal();
+ 	call restore_recursive_subdocs();
+	drop temporary table recursive_subdocs_table;
 end $$      
 
 drop   trigger post_document_update $$
