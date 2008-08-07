@@ -340,7 +340,8 @@ sub handler ($$) {
 
      $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
      $req->filename($req->document_root . $req->notes('prefix') . "/dhandler"); # default handler
-
+     
+     $this->pre_mason_hook($req, $obvius);
      my $status=$this->execute_mason($req);
      my $html;
      if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
@@ -384,7 +385,6 @@ sub execute_cache {
      $cache->save_request_result_in_cache($req, \$data) if ($data);
      $cache->quick_flush($obvius->modified) if ($obvius->modified);
 
-
 }    
 
 sub execute_mason {
@@ -410,11 +410,12 @@ sub authen_handler ($$) {
      return $res unless ($res == OK);
 
      my $login = $req->connection->user;
-     unless ($login and $pw) {
-	  $req->note_basic_auth_failure;
-	  return AUTH_REQUIRED;
+     if (!$login || !$pw) {
+	       $req->note_basic_auth_failure;
+	       return AUTH_REQUIRED;
+	  }
      }
-
+     
      # Check password
      my $obvius = $this->obvius_connect($req, $login, $pw, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
      unless ($obvius) {
@@ -434,6 +435,22 @@ sub authen_handler ($$) {
      return OK;
 }
 
+sub pre_mason_hooks {
+     my ($this, $r, $obvius) = @_;
+     
+     my $output = $r->pnotes('OBVIUS_OUTPUT');
+     return if (!$output);
+
+     my $doctype =  $output->param('DOCTYPE');
+     return if (!$doctype);
+     eval {
+	  $doctype->pre_mason_hook($r, $obvius);
+     };
+     
+     if ($@) {
+	  print STDERR "error running pre mason hook for doctype: $doctype\n $@";
+     }
+}
 # public_authen_handler - this method is called by Apache with a
 #                         request object (notice the prototype, which
 #                         is necessary for Apache) during the
