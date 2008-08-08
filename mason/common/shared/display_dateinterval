@@ -6,15 +6,15 @@ $endtime => undef
 </%args>
 <& /shared/display_date, date=>$startdate &> 
 % if ($starttime) {
-  <% $starttime %>
+  
 %}
 % if (($endtime && ($starttime || $enddate)) || $enddate) {
-    <& /shared/msg, text => 'to' &>
+  <& print_time, time => $starttime &>
 % if ($enddate) {
     <& /shared/display_date, date => $enddate &>
 %}
 % if ($endtime) {
-<% $endtime %>
+<% print_time, time => $endtime %>
 %}
 %}
 <%init>
@@ -22,3 +22,13 @@ if ($startdate ge $enddate) {
    $enddate = undef;
 }
 </%init>
+
+<%method print_time>
+<%args>
+$time
+</%args>
+  <& /shared/msg, text => "kl." &>
+  <% $time %>
+  <& /shared/msg, text => "O'clock" &>
+</%mehod>
+  
