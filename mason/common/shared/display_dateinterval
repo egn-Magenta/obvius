@@ -9,7 +9,7 @@ $endtime => undef
   <% $starttime %>
 %}
 % if (($endtime && ($starttime || $enddate)) || $enddate) {
-    - 
+    <& /shared/msg, text => 'to' &>
 % if ($enddate) {
     <& /shared/display_date, date => $enddate &>
 %}
