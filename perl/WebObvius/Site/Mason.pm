@@ -340,7 +340,7 @@ sub handler ($$) {
 
      $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
      $req->filename($req->document_root . $req->notes('prefix') . "/dhandler"); # default handler
-     
+
      my $status=$this->execute_mason($req);
      my $html;
      if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
@@ -384,6 +384,7 @@ sub execute_cache {
      $cache->save_request_result_in_cache($req, \$data) if ($data);
      $cache->quick_flush($obvius->modified) if ($obvius->modified);
 
+
 }    
 
 sub execute_mason {
@@ -409,12 +410,11 @@ sub authen_handler ($$) {
      return $res unless ($res == OK);
 
      my $login = $req->connection->user;
-     if (!$login || !$pw) {
-	       $req->note_basic_auth_failure;
-	       return AUTH_REQUIRED;
-	  }
+     unless ($login and $pw) {
+	  $req->note_basic_auth_failure;
+	  return AUTH_REQUIRED;
      }
-     
+
      # Check password
      my $obvius = $this->obvius_connect($req, $login, $pw, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
      unless ($obvius) {
