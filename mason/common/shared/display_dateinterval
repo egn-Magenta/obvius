@@ -29,6 +29,5 @@ $time
 </%args>
   <& /shared/msg, text => "kl." &>
   <% $time %>
-  <& /shared/msg, text => "O'clock" &>
 </%def>
   
