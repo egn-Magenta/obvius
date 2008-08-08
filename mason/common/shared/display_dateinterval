@@ -30,5 +30,5 @@ $time
   <& /shared/msg, text => "kl." &>
   <% $time %>
   <& /shared/msg, text => "O'clock" &>
-</%mehod>
+</%method>
   
