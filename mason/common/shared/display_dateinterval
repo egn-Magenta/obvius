@@ -23,12 +23,12 @@ if ($startdate ge $enddate) {
 }
 </%init>
 
-<%method print_time>
+<%def print_time>
 <%args>
 $time
 </%args>
   <& /shared/msg, text => "kl." &>
   <% $time %>
   <& /shared/msg, text => "O'clock" &>
-</%method>
+</%def>
   
