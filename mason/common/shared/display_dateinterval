@@ -6,10 +6,10 @@ $endtime => undef
 </%args>
 <& /shared/display_date, date=>$startdate &> 
 % if ($starttime) {
-  
+  <& print_time, time => $starttime &>
 %}
 % if (($endtime && ($starttime || $enddate)) || $enddate) {
-  <& print_time, time => $starttime &>
+     <& /shared/msg, text => 'to' &>
 % if ($enddate) {
     <& /shared/display_date, date => $enddate &>
 %}
