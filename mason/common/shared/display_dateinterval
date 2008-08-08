@@ -14,7 +14,7 @@ $endtime => undef
     <& /shared/display_date, date => $enddate &>
 %}
 % if ($endtime) {
-<% print_time, time => $endtime %>
+<& print_time, time => $endtime &>
 %}
 %}
 <%init>
