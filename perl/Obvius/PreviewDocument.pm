@@ -48,7 +48,8 @@ sub Id {
      my $i= 0;
      my @caller;
      do {
-	  @caller = caller 0;
+	  @caller = caller $i;
+	  $i++;
 	  my $caller = $caller[3];
 
 	  return $this->{doc}->{ID} if ($caller =~ /docparam/i);
