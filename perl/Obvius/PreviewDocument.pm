@@ -2,6 +2,7 @@ package Obvius::PreviewDocument;
 
 use strict;
 use warnings;
+
 use Obvius::Document;
 use Data::Dumper;
 
@@ -24,7 +25,7 @@ sub create_new_preview {
 	  $version = $obvius->create_new_version($preview_doc, $doc->Type, $lang, $fields);
      }
      
-     
+# Be sure to not make any extra work.
      my $res = $obvius->just_publish_fucking_version($docid, $version);
 }
      
@@ -44,7 +45,7 @@ sub new {
 sub Id {
      my $this = shift;
 
-     my @caller = caller 0;
+     my @caller = caller 1;
      my $caller = $caller[3];
      return $this->{doc}->{ID} if ($caller =~ /docparam/i);
      
