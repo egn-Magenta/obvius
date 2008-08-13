@@ -271,63 +271,27 @@ sub handler ($$) {
 	  # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
 	  # by the browser should have a method called "raw_document_data"
 
-	  my ($mime_type, $data, $filename, $con_disp) = $doctype->raw_document_data(
+	  my ($mime_type, $data, $filename, $con_disp, $path) = $doctype->raw_document_data(
 										     $doc, $vdoc, $obvius,
 										     WebObvius::Apache::apache_module('Request')-> new($req),
 										     $output
 										    );
-
-	  if ( $mime_type && ($mime_type =~ /text\/html/)) {
-	       print $data;
-	       return OK;
-	  }
-
-	  if ($data) {
-	       $mime_type ||= 'application/octet-stream';
-
-	       $obvius->log->debug(" Serving raw_document_data from db: $mime_type");
-
-	       $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
-	       $req->content_type($mime_type);
-	       if ($filename) {
-		    $con_disp ||= 'attachment';
-		    $req->header_out("Content-Disposition", "$con_disp; filename=$filename");
-		    # Microsoft Internet Explorer/Adobe Reader has
-		    # problems if Vary is set at the same time as
-		    # Content-Disposition is(!) - so we unset Vary if we
-		    # set Content-Disposition.
-		    $req->header_out('Vary'=>undef);
-	       }
-
-	       # The spec. says that it is not necessary to advertise this:
-	       # $req->header_out('Accept-Ranges'=>'bytes');
-
-	       # Handle Range: N-M
-	       my $range=$req->headers_in->{Range};
-	       if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
-		    my ($start, $stop)=($1 || 0, $2 || length($data));
-
-		    # Sanity check range:
-		    if ($start>length($data) or $stop>length($data) or $start>$stop) {
-			 $req->header_out('Content-Range'=>'0-0/' . length($data));
-			 $req->status(416); # "Requested range not satisfiable"
-			 $req->send_http_header;
-			 return OK;
-		    }
-
-		    $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . length($data));
-		    $req->set_content_length($stop-$start);
-		    $req->status(206); # "Partial content"
-		    $req->send_http_header;
-		    $req->print(substr($data, $start, $stop-$start));
+	  if ($data || $path) {
+	       my %args = (mime_type => $mime_type, 
+			   data => $data, 
+			   output_filename => $filename, 
+			   con_disp => $con_disp,
+			   path => $path);
+	       
+	       my $status;
+	       if ($data ) {
+		    $status = $this->output_data($req, %args);
 	       } else {
-		    $req->set_content_length(length($data));
-		    $req->send_http_header;
-		    $req->print($data) unless ($req->header_only);
+		    $status = $this->output_file($req, %args);
 	       }
 
-	       execute_cache($obvius, $req, $data);
-	       return OK;
+	       execute_cache($obvius, $req, $data) if ($status == OK);
+	       return $status;
 	  }
 
 	  $req->content_type('text/html') unless $req->content_type;
@@ -590,6 +554,97 @@ sub expand_output {
      ${$this->{'SITE_SCALAR_REF'}}='';
 
      return $s;
+}
+
+sub set_mime_type_and_content_disposition {
+     my ($this, $req, %options) = @_;
+     
+     my $mime_type = $options{mime_type} || 'application/octet-stream';
+     
+     $req->content_type($mime_type);
+     $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
+     
+     if ($options{output_filename}) {
+	  my $con_disp = options{con_disp} || 'attachment';
+	  $req->header_out("Content-Disposition", "$con_disp; filename=" . $options{output_filename});
+	  # Microsoft Internet Explorer/Adobe Reader has
+	  # problems if Vary is set at the same time as
+	  # Content-Disposition is(!) - so we unset Vary if we
+	  # set Content-Disposition.
+	  $req->header_out('Vary'=>undef);
+     }
+}
+
+sub output_data {
+     my ($this, $req, %options) = @_;
+     
+     my $con_disp = $options{con_disp};
+     my $data = $options{data};
+
+     $this->set_mime_type_and_content_disposition($req, %options);
+     # The spec. says that it is not necessary to advertise this:
+     # $req->header_out('Accept-Ranges'=>'bytes');
+     
+     # Handle Range: N-M
+     my $range=$req->headers_in->{Range};
+     if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
+	  my ($start, $stop)=($1 || 0, $2 || length($data));
+	  
+	  # Sanity check range:
+	  if ($start>length($data) or $stop>length($data) or $start>$stop) {
+	       $req->header_out('Content-Range'=>'0-0/' . length($data));
+	       $req->status(416); # "Requested range not satisfiable"
+	       $req->send_http_header;
+	       return OK;
+	  }
+	  
+	  $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . length($data));
+	  $req->set_content_length($stop-$start);
+	  $req->status(206); # "Partial content"
+	  $req->send_http_header;
+	  $req->print(substr($data, $start, $stop-$start));
+     } else {
+	  $req->set_content_length(length($data));
+	  $req->send_http_header;
+	  $req->print($data) unless ($req->header_only);
+     }
+}
+
+sub output_file {
+     my ($this, $req, %options) = @_;
+     $this->set_mime_type_and_content_disposition($req, %options);
+     
+     my $path = $options{path};
+     my $range=$req->headers_in->{Range};
+     
+     my @file_stats = stat($path);
+     die "Couldn't find file" if (!scalar(@file_stats));
+     my $size = $file_stats[7];
+
+     if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
+	  my ($start, $stop)=($1 || 0, $2 || $size);
+	  
+	  # Sanity check range:
+	  if ($start >= $stop || $stop > $size ) {
+	       $req->header_out('Content-Range'=>'0-0/' . $size);
+	       $req->status(416); # "Requested range not satisfiable"
+	       $req->send_http_header;
+	       return OK;
+	  }
+	       
+	  $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . $size);
+	  $req->set_content_length($stop-$start);
+	  $req->status(206); # "Partial content"
+	  $req->send_http_header;
+	  $req->sendfile($path, $start, $stop - $start);
+	  return OK;
+     } 
+
+     $req->set_content_length($size);
+     $req->send_http_header;
+     $req->sendfile($path) unless ($req->header_only);
+     return OK;
+
 }
 
 1;
