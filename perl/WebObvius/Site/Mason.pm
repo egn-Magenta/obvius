@@ -274,7 +274,7 @@ sub handler ($$) {
      }
      # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
      # by the browser should have a method called "raw_document_data"
-     if (!$is_admin || $req->uri =~ m|/$|) {
+     if (!$is_admin || $req->uri !~ m|/$|) {
 	  my ($mime_type, $data, $filename, $con_disp, $path) = $doctype->raw_document_data(
 											    $doc, $vdoc, $obvius,
 											    WebObvius::Apache::apache_module('Request')-> new($req),
@@ -294,7 +294,7 @@ sub handler ($$) {
 		    $status = $this->output_file($req, %args);
 	       }
 	       
-	       execute_cache($obvius, $req, $data) if ($status == OK);
+	       execute_cache($obvius, $req, $data) if ($status == OK && !$is_admin);
 	       return $status;
 	  }
      }
@@ -569,7 +569,7 @@ sub set_mime_type_and_content_disposition {
      $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
      
      if ($options{output_filename}) {
-	  my $con_disp = options{con_disp} || 'attachment';
+	  my $con_disp = $options{con_disp} || 'attachment';
 	  $req->header_out("Content-Disposition", "$con_disp; filename=" . $options{output_filename});
 	  # Microsoft Internet Explorer/Adobe Reader has
 	  # problems if Vary is set at the same time as
