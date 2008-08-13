@@ -15,10 +15,12 @@ sub create_new_preview {
      my $preview_path = $preview_base_path . $doc->Id;
 
      my $preview_doc = $obvius->lookup_document($preview_path);
-     $obvius->execute_command("delete from documents  where id=?", $preview_doc->Id);
-     $obvius->execute_command("delete from versions where docid=?", $preview_doc->Id);
-     $obvius->execute_command("delete from vfields where docid=?", $preview_doc->Id);
-     
+     if ($preview_doc) {
+	  $obvius->execute_command("delete from documents  where id=?", $preview_doc->Id);
+	  $obvius->execute_command("delete from versions where docid=?", $preview_doc->Id);
+	  $obvius->execute_command("delete from vfields where docid=?", $preview_doc->Id);
+     }
+
      my $parent = $obvius->lookup_document($preview_base_path);
      die "No such document: $preview_path\n" if (!$parent);
      ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $doc->Owner, $doc->Grp);
