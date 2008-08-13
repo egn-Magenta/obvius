@@ -234,48 +234,52 @@ sub access_handler ($$) {
      return OK;
 }
 
+     
 # handler - Handles incoming Apache requests when using Mason as template system.
 sub handler ($$) {
      my ($this, $req) = @_;
-
+     
      my $obvius = $this->obvius_connect($req);
-
+     
+     my $is_admin = $this->param('is_admin');
      # Does we need to do this before fetching $obvius-object?
      Obvius::log->debug(" Mason::handler ($this : " . $req->uri . ")");
-    
+     
      $this->tracer($req) if ($this->{DEBUG});
      my $benchmark = Obvius::Benchmark-> new('mason::handler') if $this-> {BENCHMARK};
-
+     
      $req->notes(now => strftime('%Y-%m-%d %H:%M:%S', localtime($req->request_time)));
 
      my $doc=$req->pnotes('document');
 
-     unless ($this->param('is_admin')) {
-	  return NOT_FOUND unless ($obvius->is_public_document($doc));
-	  my $vdoc = $this->obvius_document_version($req, $doc);
-	  return NOT_FOUND unless ($vdoc);
+     return NOT_FOUND unless ($obvius->is_public_document($doc));
+     my $vdoc = $this->obvius_document_version($req, $doc);
+     
+     return NOT_FOUND unless ($vdoc);
 	 
-	  return FORBIDDEN if ($vdoc->Expires lt $req->notes('now'));
-	 
-	  my $doctype = $obvius->get_version_type($vdoc);
-	 
-	  my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
-
-	  # The document can have a "alternate_location" method if the user should be redirected to a different URL.
-	  # The method should return a path or URL to the new location.
-	  if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri)) {
-	       return NOT_FOUND if (Apache->define('NOREDIR'));
-	       return $this->redirect($req, $alternate, 'force-external');
-	  }
-
-	  # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
-	  # by the browser should have a method called "raw_document_data"
-
+     return FORBIDDEN if ($vdoc->Expires lt $req->notes('now'));
+     return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
+     
+     my $doctype = $obvius->get_version_type($vdoc);
+     
+     my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
+     
+     # The document can have a "alternate_location" method if the user should be redirected to a different URL.
+     # The method should return a path or URL to the new location.
+     my $alternate;
+     $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri) if (!$is_admin);
+     if($alternate) {
+	  return NOT_FOUND if (Apache->define('NOREDIR'));
+	  return $this->redirect($req, $alternate, 'force-external');
+     }
+     # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
+     # by the browser should have a method called "raw_document_data"
+     if (!$is_admin || $req->uri =~ m|/$|) {
 	  my ($mime_type, $data, $filename, $con_disp, $path) = $doctype->raw_document_data(
-										     $doc, $vdoc, $obvius,
-										     WebObvius::Apache::apache_module('Request')-> new($req),
-										     $output
-										    );
+											    $doc, $vdoc, $obvius,
+											    WebObvius::Apache::apache_module('Request')-> new($req),
+											    $output
+											   );
 	  if ($data || $path) {
 	       my %args = (mime_type => $mime_type, 
 			   data => $data, 
@@ -289,19 +293,19 @@ sub handler ($$) {
 	       } else {
 		    $status = $this->output_file($req, %args);
 	       }
-
+	       
 	       execute_cache($obvius, $req, $data) if ($status == OK);
 	       return $status;
 	  }
-
-	  $req->content_type('text/html') unless $req->content_type;
-	  $req->content_type('text/html') if $req->content_type =~ /directory$/;
-	  if ($req->content_type ne 'text/html') {
-	       execute_cache($obvius, $req);
-	       return -1;
-	  }
      }
-
+     
+     $req->content_type('text/html') unless $req->content_type;
+     $req->content_type('text/html') if $req->content_type =~ /directory$/;
+     if ($req->content_type ne 'text/html') {
+	  execute_cache($obvius, $req);
+	  return -1;
+     }
+     
      $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
      $req->filename($req->document_root . $req->notes('prefix') . "/dhandler"); # default handler
 
