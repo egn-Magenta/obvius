@@ -9,7 +9,7 @@ Title:     <% $vdoc->Title %><br>
 Short title: <% $vdoc->field('short_title') %><br>
 Mimetype:  <% $vdoc->Mimetype %><br>
 Size:      <% $vdoc->Size %> bytes<br>
-File:      <a href="<% $linkuri %>" title="Download file"><% $linkuri %></a>
+File:      <a href="<% $download_uri %>" title="Download file"><% $doc->Name %></a>
 </p>
 %
 % #####################
@@ -23,6 +23,6 @@ $obvius->get_version_fields($vdoc, [qw(title short_title teaser size mimetype up
 
 my $obvius_version=$output->param('_incoming_obvius_version');
 
-my $linkuri=$uri;		
-$linkuri =~ s|/+$||;   
+my $download_uri = $prefix . $uri;
+$download_uri =~ s|/+$||;
 </%init>
