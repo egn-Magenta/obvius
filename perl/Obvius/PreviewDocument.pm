@@ -45,9 +45,14 @@ sub new {
 sub Id {
      my $this = shift;
 
-     my @caller = caller 1;
-     my $caller = $caller[3];
-     return $this->{doc}->{ID} if ($caller =~ /docparam/i);
+     my $i= 0;
+     my @caller;
+     do {
+	  @caller = caller 0;
+	  my $caller = $caller[3];
+
+	  return $this->{doc}->{ID} if ($caller =~ /docparam/i);
+     } while (!scalar(@caller));
      
      return $this->{preview_doc}->{ID};
 }
