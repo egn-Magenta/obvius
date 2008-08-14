@@ -22,7 +22,7 @@ sub create_new_preview {
 
 	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $doc->Owner, $doc->Grp);
 	  $preview_doc = $obvius->get_doc_by_id($docid);
-	  $obvius->set_access_data($doc->owner, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes');
+	  $obvius->set_access_data($preview_doc, $doc->owner, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes');
      } else {
 	  $docid = $preview_doc->Id;
 	  $version = $obvius->create_new_version($preview_doc, $doc->Type, $lang, $fields);
