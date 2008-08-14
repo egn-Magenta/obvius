@@ -20,7 +20,7 @@ sub create_new_preview {
 	  
 	  die "No such document: $preview_path\n" if (!$parent);
 
-	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $doc->Owner, $doc->Grp);
+	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $obvius->{USER}, $doc->Grp);
 	  $preview_doc = $obvius->get_doc_by_id($docid);
 	  $obvius->set_access_data($preview_doc, $doc->Owner, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes');
      } else {
