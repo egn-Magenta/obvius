@@ -15,16 +15,18 @@ sub create_new_preview {
      my $preview_path = $preview_base_path . $doc->Id;
 
      my $preview_doc = $obvius->lookup_document($preview_path);
-     if ($preview_doc) {
-	  $obvius->execute_command("delete from documents  where id=?", $preview_doc->Id);
-	  $obvius->execute_command("delete from versions where docid=?", $preview_doc->Id);
-	  $obvius->execute_command("delete from vfields where docid=?", $preview_doc->Id);
-     }
+     if (!$preview_doc) {
+	  my $parent = $obvius->lookup_document($preview_base_path);
+	  
+	  die "No such document: $preview_path\n" if (!$parent);
 
-     my $parent = $obvius->lookup_document($preview_base_path);
-     die "No such document: $preview_path\n" if (!$parent);
-     ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $doc->Owner, $doc->Grp);
-     $preview_doc = $obvius->get_doc_by_id($docid);
+	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $doc->Owner, $doc->Grp);
+	  $preview_doc = $obvius->get_doc_by_id($docid);
+	  $obvius->set_access_data($doc->owner, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes');
+     } else {
+	  $docid = $preview_doc->Id;
+	  $version = $obvius->create_new_version($preview_doc, $doc->Type, $lang, $fields);
+     }
      
 # Be sure to not make any extra work.
      my $res = $obvius->just_publish_fucking_version($docid, $version);
