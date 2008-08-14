@@ -56,7 +56,8 @@ sub Id {
 	  @caller = caller $i;
 	  $i++;
 	  my $caller = $caller[3];
-
+	  
+	  print STDERR Dumper(\@caller);
 	  return $this->{doc}->{ID} if ($caller =~ /docparam/i);
      } while (!scalar(@caller) && $i < 20);
      
