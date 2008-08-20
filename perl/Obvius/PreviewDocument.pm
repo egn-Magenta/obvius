@@ -24,7 +24,6 @@ sub create_new_preview {
 	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $userid || $doc->Id, $doc->Grp);
 	  $preview_doc = $obvius->get_doc_by_id($docid);
 	  eval { $obvius->set_access_data($preview_doc, $doc->Owner, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes'); };
-	  print STDERR "PreviewDocument: $@\n";
      } else {
 	  $docid = $preview_doc->Id;
 	  $version = $obvius->create_new_version($preview_doc, $doc->Type, $lang, $fields);
@@ -51,15 +50,10 @@ sub Id {
      my $this = shift;
 
      my $i= 0;
-     my @caller;
-     do {
-	  @caller = caller $i;
-	  $i++;
-	  my $caller = $caller[3];
+     my @caller = caller 1;
+     my $caller = $caller[3];
 	  
-	  print STDERR Dumper(\@caller);
-	  return $this->{doc}->{ID} if ($caller =~ /docparam/i);
-     } while (!scalar(@caller) && $i < 20);
+     return $this->{doc}->{ID} if ($caller =~ /docparam/i);
      
      return $this->{preview_doc}->{ID};
 }
@@ -67,7 +61,9 @@ sub Id {
 sub param {
      my ($this, $name, $value) = @_;
      if (lc $name eq 'id' ) {
-	  return $this->Id;
+	  my @caller = caller 1;
+	  my $caller = $caller[3];
+	  return $this->{doc}->{ID} if ($caller =~ /docparam/i);
      }
      
      return $this->{preview_doc}->param($name, $value);
