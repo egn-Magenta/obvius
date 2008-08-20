@@ -14,6 +14,7 @@ sub create_new_preview {
      my ($docid, $version);
      my $preview_path = $preview_base_path . $doc->Id;
 
+     my $type = $vdoc->Type || $doc->Type;
      my $preview_doc = $obvius->lookup_document($preview_path);
      if (!$preview_doc) {
 	  my $parent = $obvius->lookup_document($preview_base_path);
@@ -22,12 +23,12 @@ sub create_new_preview {
 	  
 	  my $userid = $obvius->get_userid( $obvius->{USER});
 	  $userid ||= $doc->Owner;
-	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $userid, $doc->Grp);
+	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $type, $lang, $fields, $userid, $doc->Grp);
 	  $preview_doc = $obvius->get_doc_by_id($docid);
 	  eval { $obvius->set_access_data($preview_doc, $userid, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes'); };
      } else {
 	  $docid = $preview_doc->Id;
-	  $version = $obvius->create_new_version($preview_doc, $vdoc->Type, $lang, $fields);
+	  $version = $obvius->create_new_version($preview_doc, $type, $lang, $fields);
      }
      
 # Be sure to not make any extra work.
