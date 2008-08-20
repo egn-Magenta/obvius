@@ -10,7 +10,7 @@ our $preview_base_path = '/admin/previews/';
 our @ISA = qw( Obvius::Document );
 
 sub create_new_preview {
-     my ($obvius, $doc, $fields, $lang) = @_;
+     my ($obvius, $doc, $vdoc, $fields, $lang) = @_;
      my ($docid, $version);
      my $preview_path = $preview_base_path . $doc->Id;
 
@@ -21,12 +21,12 @@ sub create_new_preview {
 	  die "No such document: $preview_path\n" if (!$parent);
 	  
 	  my $userid = $obvius->get_userid( $obvius->{USER});
-	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $userid || $doc->Id, $doc->Grp);
+	  ($docid, $version) = $obvius->create_new_document($parent, $doc->Id, $doc->Type, $lang, $fields, $userid || $doc->Owner, $doc->Grp);
 	  $preview_doc = $obvius->get_doc_by_id($docid);
 	  eval { $obvius->set_access_data($preview_doc, $doc->Owner, $doc->Grp, 'ALL=view,create,edit,publish,delete,modes'); };
      } else {
 	  $docid = $preview_doc->Id;
-	  $version = $obvius->create_new_version($preview_doc, $doc->Type, $lang, $fields);
+	  $version = $obvius->create_new_version($preview_doc, $vdoc->Type, $lang, $fields);
      }
      
 # Be sure to not make any extra work.
