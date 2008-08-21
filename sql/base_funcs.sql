@@ -5,6 +5,7 @@ create table if not exists docid_path (
        docid integer unsigned primary key,
        index (path)) engine=innodb $$
 
+    					    
 drop procedure if exists find_doc_by_path $$
 create procedure find_doc_by_path (path varchar(1024), out docid integer unsigned)
 begin
@@ -81,12 +82,11 @@ begin
 
         select distinct(d.id) from
                documents d join docid_path dp on (d.id = dp.docid and dp.path like path)
-               join versions v on (d.id = v.docid)
+               join versions v on (d.id = v.docid and (v.public = 1 or v.version = (select max(v2.version) from versions v2 where v2.docid  = d.id)))
                left join vfields vf1 on 
                     (v.docid = vf1.docid and vf1.version = v.version and 
                     vf1.name in ('content', 'title', 'short_title'))
         where    
-		(v.public = 1 or v.version = (select max(v2.version) from versions v2 where v2.docid  = d.id)) and
                 (pattern is null or vf1.text_value like pattern or d.name like pattern) and
                 (owner is null or d.owner = owner) and
                 (grp is null or d.grp = grp) and
