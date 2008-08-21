@@ -22,13 +22,38 @@ create trigger post_document_insert after insert on documents
 for each row call insert_docid_path(new.id) $$
 
 
+drop procedure if exists recursive_subdocs_trigger $$
+create procedure recursive_subdocs_trigger (docid integer unsigned) 
+begin
+        declare old_len integer unsigned default 0;
+        declare new_len integer unsigned default 1;
+	
+	create temporary table if not exists recursive_subdocs_table2 
+	       (id integer unsigned primary key) engine=heap;
+	
+	delete from recursive_subdocs_trigger_table;
+        insert into recursive_subdocs_trigger_table set id=docid;
+	
+        subdocs:while old_len != new_len do
+                      set old_len = new_len;
+		      delete r2 from recursive_subdocs_table2 r2;
+		      insert ignore into recursive_subdocs_table2 (id)
+		      	     select id from recursive_subdocs_trigger_table;
+                      insert ignore into recursive_subdocs_trigger_table (id) select                 
+                             d.id from recursive_subdocs_table2 r2 join 
+                             documents d on (r2.id = d.parent); 
+                       select count(*) into new_len from recursive_subdocs_trigger_table;
+         end while;
+	 drop temporary table recursive_subdocs_table2;
+end $$
+
 drop procedure if exists update_move_internal $$
 create procedure update_move_internal() 
 begin
         declare path varchar(1024);
         declare a int unsigned default 0;
         declare done int default 0;
-        declare curs cursor for (select * from recursive_subdocs_table);
+        declare curs cursor for (select * from recursive_subdocs_trigger_table);
         declare continue handler for not found set done=1;
 
         open curs;
@@ -36,7 +61,7 @@ begin
 
         while not done do
               call find_path_by_docid(a, path);
-	      delete from docid_path where docid=a;
+	      delete docid_path from docid_path where docid=a;
               replace into docid_path (docid, path) values (a, path);
               fetch curs into a;
         end while;
@@ -47,11 +72,11 @@ end $$
 drop procedure if exists update_move $$
 create procedure update_move (docid integer unsigned) 
 begin
-	create temporary table recursive_subdocs_table (id integer unsigned primary key);
-        call recursive_subdocs(docid);
+	create temporary table recursive_subdocs_trigger_table (id integer unsigned primary key);
+        call recursive_subdocs_trigger(docid);
 
  	call update_move_internal();
-	drop temporary table recursive_subdocs_table;
+	drop temporary table recursive_subdocs_trigger_table;
 end $$      
 
 drop   trigger post_document_update $$

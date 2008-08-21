@@ -26,7 +26,6 @@ begin
 	insert into recursive_subdocs_backup (backup_id, recursive_id) 
 	       select id,recursive_subdocs_table.id from recursive_subdocs_table;
 	
-	delete from recursive_subdocs_table;
 end $$
 
 
@@ -52,6 +51,7 @@ begin
                              documents d on (r2.id = d.parent); 
                        select count(*) into new_len from recursive_subdocs_table;
          end while;
+	 drop temporary table recursive_subdocs_table2;
 end $$
 
 drop procedure if exists restore_recursive_subdocs $$
@@ -60,7 +60,7 @@ begin
 	declare id integer unsigned;
 
 	drop temporary table recursive_subdocs_table;
-	create temporay table if not exists recursive_subdocs_table (id integer unsigned primary key auto_increment);
+	create temporary table if not exists recursive_subdocs_table (id integer unsigned primary key auto_increment);
 
 	select max(id) into id from recursive_subdocs_backup_list rl;
 	insert into recursive_subdocs_table
