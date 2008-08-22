@@ -15,6 +15,10 @@ sub new {
      return bless {obvius => $obvius}, $class;
 }
 
+sub can_preview {
+     return 0;
+}
+
 sub get_doctype {
      my ($this, $doc) = @_;
      my $obvius = $this->{obvius};
@@ -56,7 +60,6 @@ sub create_internal_proxy_document {
      die "Couldn't find document: $reference_docid" if (!$reference_doc);
 
      my $doctype_id = $this->get_doctype($reference_doc);
-     warn $doctype_id;
      
      my $compatible_field_values = $this->make_old_obvius_data_from_hash(\%fields);
 
@@ -149,7 +152,7 @@ sub create_internal_proxy_version {
 
      my @overloaded_fields = @overloaded_vfields;
      push @overloaded_fields, "rightboxes" if (!$fields{internal_proxy_overload_rightboxes});
-
+     
      $this->new_internal_proxy_entry($options{docid}, $new_version, $fields{internal_proxy_path}, \@overloaded_fields);
      eval {
 	  $obvius->dbprocedures->add_vfield({
