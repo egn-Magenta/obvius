@@ -252,12 +252,12 @@ sub handler ($$) {
 
      my $doc=$req->pnotes('document');
 
-     return NOT_FOUND unless ($obvius->is_public_document($doc) && !$is_admin);
+     return NOT_FOUND if (!$obvius->is_public_document($doc) && !$is_admin);
      my $vdoc = $this->obvius_document_version($req, $doc);
      
      return NOT_FOUND unless ($vdoc);
 	 
-     return FORBIDDEN if (!$is_admin && $vdoc->Expires lt $req->notes('now'));
+     return FORBIDDEN if (!$is_admin && ($vdoc->Expires lt $req->notes('now')));
      return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
      
      my $doctype = $obvius->get_version_type($vdoc);
