@@ -60,7 +60,7 @@ function obvius_display_on(elementid) {
 
     var on='block';
     if (elt.nodeName=="SPAN") { on='inline'; };
-    
+
     if (elt) {
       if (elt.style.display!=on) {
         elt.style.display=on;
@@ -249,4 +249,14 @@ function get_trailing_num(string) {
 function obvius_update_seq() {
 
 
+}
+
+function OpenWin(url, w, h) {
+  window.name="main";
+  if (w == null || w == 0) w = 350;
+  if (h == null || h == 0) h = 450;
+  var features = ('toolbar=0,location=0,directories=0,status=0,'
+		  +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
+		  +'width='+w+',height='+h);
+  window.open (url + '', '', features);
 }
