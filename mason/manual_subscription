@@ -65,7 +65,7 @@
 % }
 %} else {
 % if($go) {
-%  my $command = "perl -w /var/www/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
+%  my $command = "nohup perl -w /var/www/obvius/bin/subscription.pl --sender=$sender --site=$site --sitename=$sitename  --manual --docid=" . $doc->Id;
 %  my $retval = system($command);
     <tr>
       <td>
