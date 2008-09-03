@@ -10,7 +10,7 @@ $output
 </%args>
 <%init>
 $obvius->get_version_fields($vdoc, ['aftersubmittext', 'mailto']);
-my @mailto = split /;/, $vdoc->field('mailtos');
+my @mailto = split /;/, $vdoc->field('mailto');
 my $server = $obvius->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
 for my $mailto  (@mailto) {
