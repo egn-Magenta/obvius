@@ -34,7 +34,7 @@ function <% $onsubmit_function %>() {
 onsubmit_array[onsubmit_array.length] = <% $onsubmit_function %>;
 
 </script>
-<& util/label, name=>$prefix . $field->{name}, label=>$field->{labe~l}, field=>$field &>
+<& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
 <select id="<% $list_name %>" name="<% $list_name %>" multiple size="8">
 %  for my $item (@data) {
     <option value="<% $item %>"> <% $item %> </option>
