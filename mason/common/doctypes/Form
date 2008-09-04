@@ -1,4 +1,8 @@
 <!-- Form doctype: -->
+%if (scalar(@$invalid)) {
+    <div class="error">
+    <& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &>
+% }
 %if($output->param('flush_xml')) {
 <& form_files/flush_xml, %ARGS &>
 %} else {
@@ -23,7 +27,7 @@
 %} else {
 <& teaser &>
 
-<& /shared/htmlize, text=>$vdoc->field('formtext') || '' &>
+<& /shared/2htmlize, text=>$vdoc->field('formtext') || '' &>
 
 <div class="obviusform">
 
@@ -61,10 +65,10 @@
 <& 'form_files/fieldtypes/' . $_->{type}, fielddata=>$_ &>
 %} else {
 <div class="formfield">
-    <a name="<% $_->{name} %>"></a>
-    <label for="<% $_->{name} %>">
-        <% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
-    </label>
+<a name="<% $_->{name} %>"></a>
+<label for="<% $_->{name} %>">
+% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
+</label>
 %
 %if($_->{invalid}) {
     <p class="error">
