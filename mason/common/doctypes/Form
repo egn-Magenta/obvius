@@ -27,7 +27,7 @@
 %} else {
 <& teaser &>
 
-<& /shared/2htmlize, text=>$vdoc->field('formtext') || '' &>
+<& /shared/htmlize, text=>$vdoc->field('formtext') || '' &>
 
 <div class="obviusform">
 
