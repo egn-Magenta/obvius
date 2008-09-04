@@ -124,8 +124,6 @@ sub ListTablesFunc
     eval { @tabs = $hdl -> tables } ;
     
     @tabs = map { s/`//g; s/ku\.//g; $_} @tabs; #`
-    use Data::Dumper;
-    print STDERR Dumper(\@tabs);
     # try the _ListTables function for DBD::mysql before 1.21..
     @tabs = $hdl -> func('_ListTables' ) if ($#tabs < 0 || $@) ;
 
