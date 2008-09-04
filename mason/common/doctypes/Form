@@ -2,6 +2,7 @@
 %if (scalar(@$invalid)) {
     <div class="error">
     <p><& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &></p>
+    </div>
 % }
 %if($output->param('flush_xml')) {
 <& form_files/flush_xml, %ARGS &>
