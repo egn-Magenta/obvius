@@ -67,7 +67,7 @@
 <div class="formfield">
 <a name="<% $_->{name} %>"></a>
 <label for="<% $_->{name} %>">
-% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
+<% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
 </label>
 %
 %if($_->{invalid}) {
