@@ -1,7 +1,7 @@
 <!-- Form doctype: -->
 %if (scalar(@$invalid)) {
     <div class="error">
-    <& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &>
+    <p><& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &></p>
 % }
 %if($output->param('flush_xml')) {
 <& form_files/flush_xml, %ARGS &>
