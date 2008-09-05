@@ -1259,18 +1259,20 @@ sub get_version_fields {
     while (my $rec = $set->Next) {
         my $fspec = $doctype->field($rec->{name}, undef, $type);
         next unless ($fspec);
+	my $escape_me = !$fspec->param('dont_escape_me');
         my $field = $fspec->param('fieldtype')->param('value_field') . '_value';
-#        print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
-
+#       print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
+	
         my $value = $fields->param($rec->{name});
         # Apparantly the db returns -1.0 as -1, which is not what we want:
         my $field_value = $rec->{$field};
         $field_value=sprintf "%1.1f", $field_value if ($field eq 'double_value' and
                                                         defined $field_value and $field_value eq '-1');
-        if ((ref $value || '') eq 'ARRAY') {
+        if (ref $value eq 'ARRAY') {
             push(@$value, $field_value);
         } else {
-            $fields->param($rec->{name} => $field_value);
+	     $field_value =~ s|<|&lt|g if ($escape_me);
+	     $fields->param($rec->{name} => $field_value);
         }
     }
     $set->Disconnect;
