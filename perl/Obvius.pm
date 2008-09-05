@@ -1271,7 +1271,7 @@ sub get_version_fields {
         if (ref $value eq 'ARRAY') {
             push(@$value, $field_value);
         } else {
-	     $field_value =~ s|<|&lt|g if ($escape_me);
+	     $field_value =~ s|<|&lt;|g if ($escape_me);
 	     $fields->param($rec->{name} => $field_value);
         }
     }
