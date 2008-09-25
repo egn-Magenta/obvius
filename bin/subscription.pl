@@ -60,7 +60,7 @@ my $lock_file = "/tmp/$sitename.newsletter.lock";
 open F, ">$lock_file";
 flock F, LOCK_EX;
 my $lock_now = localtime();
-print F, $lock_now;
+print F $lock_now;
 
 eval {
      if ($automatic) {
