@@ -17,6 +17,7 @@ use Getopt::Long;
 use Carp;
 
 use locale;
+use Fcntl ':flock';
 
 use Data::Dumper;
 
@@ -55,14 +56,24 @@ my $base_dir = '/var/www/'. $sitename;
 
 ## "Main" program part
 
-do { send_automatic(); exit (0) } if ($automatic);
+my $lock_file = "/tmp/$sitename.newsletter.lock";
+open F, ">$lock_file";
+flock F, LOCK_EX;
+my $lock_now = localtime();
+print F, $lock_now;
 
-do { send_manual($docid); exit (0) } if ($manual);
-
-print STDERR "No subscriptions sent\n";
-
+eval {
+     if ($automatic) {
+	  send_automatic(); 
+     } elsif ($manual) {
+	  send_manual($docid);
+     } 
+     print STDERR "No subscriptions sent\n";
+     
+}
+flock F, LOCK_UN; 
+close F;
 exit(0);
-
 
 sub send_to_subscriber {
     my ($subscriber_, $vdoc, $docs, $mailtemplate)  = @_;
