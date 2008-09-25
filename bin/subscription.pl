@@ -70,7 +70,7 @@ eval {
      } 
      print STDERR "No subscriptions sent\n";
      
-}
+};
 flock F, LOCK_UN; 
 close F;
 exit(0);
