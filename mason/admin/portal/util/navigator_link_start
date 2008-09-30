@@ -1,4 +1,4 @@
-<a onclick="<& navigator_link_start:onclick &>" href="<& navigator_link_start:href, %ARGS &>">\
+<a onclick="<& navigator_link_start:onclick &>" href="#">\
 
 <%method href>
 <%args>
@@ -30,7 +30,5 @@ my $url = $m->scomp('navigator_link_start:href', %ARGS);
 $url =~ s/\s//g;
 </%init>
 </%method>
-
-
 
 
