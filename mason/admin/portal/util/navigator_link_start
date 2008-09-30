@@ -1,4 +1,4 @@
-<a onclick="<& navigator_link_start:onclick &>" href="#">\
+<a onclick="<& navigator_link_start:onclick, %ARGS &>" href="#">
 
 <%method href>
 <%args>
@@ -9,7 +9,6 @@ $fieldname => undef
 <% $url %> 
 <%init>
 use Digest::MD5 qw(md5_hex);
-
 $obvius->read_user_and_group_info();
 
 my $user = $obvius->{USER};
