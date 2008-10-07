@@ -23,6 +23,7 @@ use Obvius;
 use Obvius::Config;
 use Obvius::Log;
 use Obvius::Queue;
+use Obvius::Hostmap;
 
 use Getopt::Long;
 
@@ -58,6 +59,8 @@ die "Could not get logging" unless(defined($log));
 my $obvius=Obvius->new($conf, undef, undef, undef, undef, undef, log=>$log);
 die "Could not get Obvius object for $site" unless(defined($obvius));
 $obvius->{USER} = 'admin';
+
+my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
 
 # XXX Handle this path some other way? (.conf?)
 my $order=$obvius->get_table_record('queue', { id=>$id });
@@ -113,7 +116,9 @@ my $to=$user->{email};
 my $now=localtime;
 my $subject=$obvius->config->Sitename . ': ' . $order->{command} . ' ' . $order->{status};
 my $doc=$obvius->get_doc_by_id($order->{docid});
-my $url=($doc ? $obvius->get_doc_uri($doc) : '');
+my $uri=($doc ? $obvius->get_doc_uri($doc) : '');
+my $complete_uri = "http://" . $hostmap->absolute_uri($uri) if ($uri);
+
 my %status_regards=(
                     OK=>'Have a nice day',
                     WARNING=>'Best regards',
@@ -130,7 +135,7 @@ $smtp->datasend("Content-Type: text/plain; charset=iso-8859-1\n");
 $smtp->datasend("Content-Transfer-Encoding: 8bit\n");
 $smtp->datasend("\n");
 $smtp->datasend("Command " . $order->{command}. " performed at $now\n");
-$smtp->datasend("on the document: <http://" . $obvius->config->Sitename . "$url>\n");
+$smtp->datasend("on the document: <$complete_uri>");
 $smtp->datasend("with the arguments:\n");
 $smtp->datasend("\n" . $order->{args} . "\n");
 $smtp->datasend("The result was:\n");
