@@ -4,17 +4,22 @@ $starttime => undef
 $enddate => undef
 $endtime => undef
 </%args>
+
 <& /shared/display_date, date=>$startdate &> 
 % if ($starttime) {
+  <& /shared/trans, 'da' => 'kl. ', en => '' &>
   <% $starttime %>
 %}
-% if (($endtime && ($starttime || $enddate)) || $enddate) {
+% if (($endtime && $starttime) || $enddate) {
     <& /shared/msg, text => 'to' &>
 % if ($enddate) {
     <& /shared/display_date, date => $enddate &>
 %}
 % if ($endtime) {
-<% $endtime %>
+% if ($enddate) {
+  <& /shared/trans, 'da' => 'kl. ', en => '' &>
+%}
+  <% $endtime %>  
 %}
 %}
 <%init>
