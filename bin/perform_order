@@ -135,7 +135,7 @@ $smtp->datasend("Content-Type: text/plain; charset=iso-8859-1\n");
 $smtp->datasend("Content-Transfer-Encoding: 8bit\n");
 $smtp->datasend("\n");
 $smtp->datasend("Command " . $order->{command}. " performed at $now\n");
-$smtp->datasend("on the document: <$complete_uri>");
+$smtp->datasend("on the document: <$complete_uri>\n");
 $smtp->datasend("with the arguments:\n");
 $smtp->datasend("\n" . $order->{args} . "\n");
 $smtp->datasend("The result was:\n");
