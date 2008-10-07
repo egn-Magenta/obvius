@@ -107,11 +107,26 @@ sub get_hostmap {
     return $this->{hostmap};
 }
 
+#Finds the longest subsite the uri belongs to.
 sub host_uri_belongs_to {
      my ($this, $uri) = @_;
      
      my ($uri_part) = $uri =~ /$this->{regexp}/i;
      return $uri_part ? $this->{hostmap}{$uri_part} : undef;
+}
+    
+sub absolute_uri {
+     my ($this, $uri) = @_;
+     
+     my $host = $this->host_uri_belongs_to($uri);
+     $uri =~ s/$this->{regexp}//i if ($host);
+	  
+     $host ||= $this->{roothost};
+     
+     my $candidate = "$host/$uri";
+     $candidate =~ s|/+|/|g;
+     
+     return $candidate;
 }
      
 # sub translate_uri - Given an uri and the current host translates the uri
