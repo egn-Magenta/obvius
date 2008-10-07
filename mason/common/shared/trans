@@ -1,0 +1,16 @@
+<% $text %>
+<%init>
+my $default = 'en';
+my $langs = $r->pnotes('site')-> {LANGUAGE_PREFERENCES};
+my $text;
+
+for my $lang (@$langs, $default) {
+     $lang =~ s|^(.{2})|$1|;
+
+     if (defined $ARGS{$lang}) {
+	  $text = $ARGS{$lang};
+	  last;
+     }
+}
+
+</%init>
