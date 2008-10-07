@@ -1287,7 +1287,7 @@ function formdata_objectify_node(node) {
         var child = children.item(i);
         var content = child.getChildNodes().item(0);
         if(content && content.getNodeType() == 3) {
-            obj[child.getNodeName()] = content.getXML();
+          obj[child.getNodeName()] = __unescapeString(content.getXML());
         }
     }
 
@@ -1320,15 +1320,4 @@ function formdata_load_rootDoc_data(elem) {
 
 function formdata_extract_name(name) {
     return name.replace(/.*:([^:]+)$/, "$1");
-}
-
-
-function OpenWin(url, w, h) {
-  window.name="main";
-  if (!w) w = 350;
-  if (!h) h = 450;
-  var features = ('toolbar=0,location=0,directories=0,status=0,'
-		  +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
-		  +'width='+w+',height='+h);
-  window.open (url + '', '', features);
 }
