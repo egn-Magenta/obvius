@@ -1,7 +1,7 @@
 <!-- Form doctype: -->
 %if (scalar(@$invalid)) {
-    <div class="error">
-    <p><& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &></p>
+    <div class="error" style="background-color: #ff6; padding: 10px; font-size: 14px; color: #901a1e; text-align: center; border: solid 3px #901A1E; margin: 0 0 1em 0;">
+    <span>! <& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &> &iexcl;</span>
     </div>
 % }
 %if($output->param('flush_xml')) {
@@ -27,7 +27,7 @@
 <& form_files/after_submit, %ARGS, output=>$output &>
 %} else {
 <& teaser &>
-
+	   
 <& /shared/htmlize, text=>$vdoc->field('formtext') || '' &>
 
 <div class="obviusform">
