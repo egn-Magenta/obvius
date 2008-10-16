@@ -1,0 +1,67 @@
+<%method block>
+<%args>
+$prefix
+$field
+$value=>''
+$style
+</%args>
+%# <input type="text" id="<% $prefix . $name %>"  name="<% $prefix . $name %>" value="<% $val |h %>" tabindex="10" />
+<br>
+ <& /shared/msg, text=>'Vælg bruger' &> <br />
+%# <select name="_distinct_<% $name %>" onChange="document.getElementById( '<% $prefix . $name %>' ).value = this.options[this.selectedIndex].value" tabindex="10">
+  <select id="<% $prefix . $name %>" name="<% $prefix . $name %>" tabindex="10">
+%           for(@options) {
+   <option <%  $_->{id} == $val ? 'selected="selected"' : '' %> value="<% $_->{id} | h %>"><% $_->{name} . " (" . $_->{login} . ")" %></option>
+%           }
+ </select>
+<%init>
+
+my $size= 1;
+
+my $name = $field->{name};
+
+my $val = $value->{value};
+unless (defined($val)) {
+    $val = $obvius->{USER};
+}
+
+my @options;
+my %options;
+
+my $users = $obvius->param('users');
+while( my ( $name, $user) = each %$users) {
+    $options{ $user->{name} } = $user;
+}
+
+@options = map { $options{$_} } sort { lc $a cmp lc $b } keys %options;
+
+</%init>
+</%method>
+%
+%
+<%method inline>\
+<% $user->{name} |h %>\
+%
+<%args>
+ $value
+</%args>
+<%init>
+my $user_id = $value->{value};
+my $user = $obvius->get_user($user_id);
+</%init>
+</%method>
+
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK';
+</%init>
