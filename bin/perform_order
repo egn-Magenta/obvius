@@ -109,8 +109,10 @@ my ($status, $message)=$obvius->perform_order(%do_order);
 my $cache = WebObvius::Cache::Cache->new($obvius);
 $cache->find_and_flush($obvius->modified);
 
+my $smtp = $obvius->config->param('smtp') || 'localhost';
+print $smtp;
 # Send email:
-my $smtp=Net::SMTP->new('localhost');
+$smtp=Net::SMTP->new($smtp);
 my $from='noreply@' . $obvius->config->Sitename;
 my $to=$user->{email};
 my $now=localtime;
