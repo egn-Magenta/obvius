@@ -36,6 +36,7 @@
 <%once>
 use Apache::File;
 use Text::Format;
+use Obvius::Hostmap;
 </%once>
 %
 <%init>
@@ -69,6 +70,7 @@ $obvius_show_url
 </%args>
 %
 <%init>
+my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
 # Find text:
 my $sitename = $obvius->config->param('send_email_sitename') || $r->pnotes('site')->Sitename;
 $obvius->get_version_field($vdoc, qw(title));
@@ -92,6 +94,8 @@ $data
 EOT
 my $datatext=`/usr/bin/w3m -T text/html -dump '$tmpnam'`;
 $tmpfh->close();
+my $absolute_uri = $hostmap->absolute_uri($uri);
+my ($host, $uri_part) = $absolute_uri =~ m|^([^/]+)/(.*)|;
 
 # Format email
 my $email_text='';
@@ -101,8 +105,8 @@ $email_text.=join "\n",
     map { my $t=(length($_)>72 ? $formatter->format($_) : $_ . "\n"); $t }
     split "\r?\n\r?\n", $obvius_text;
 $email_text.="\n\n";
-$email_text.=" * http://" . $sitename . "$uri\n" if ($obvius_show_url eq 'public');
-$email_text.=" * http://" . $sitename . "/admin$uri?obvius_version=" . $m->scomp('/shared/escape_u', text=>$vdoc->Version) . "\n" if ($obvius_show_url eq 'admin');
+$email_text.=" * http://$host/$uri_part\n" if ($obvius_show_url eq 'public');
+$email_text.=" * http://$host/admin/$uri_part?obvius_version=" . $m->scomp('/shared/escape_u', text=>$vdoc->Version) . "\n" if ($obvius_show_url eq 'admin');
 $email_text.="\n== == ==\n\n";
 $email_text.=$datatext;
 
