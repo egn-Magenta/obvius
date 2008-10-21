@@ -111,7 +111,7 @@ $email_text.="\n== == ==\n\n";
 $email_text.=$datatext;
 
 # Send
-$m->comp('/shared/send_email', to=>$obvius_to, from=>$obvius_from, subject=>$obvius_subject, text=>$email_text, debug=>1);
+$m->comp('/shared/send_email', to=>$obvius_to, from=>$obvius_from, subject=>$obvius_subject, text=>$email_text, debug=>1, encoding=>'utf-8');
 
 $m->comp('/shared/set_status_message', status=>'OK', message=>['Email sent to', ' ', $obvius_to, '.']);
 
