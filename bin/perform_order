@@ -110,16 +110,20 @@ my $cache = WebObvius::Cache::Cache->new($obvius);
 $cache->find_and_flush($obvius->modified);
 
 my $smtp = $obvius->config->param('smtp') || 'localhost';
-print $smtp;
 # Send email:
+
+my $doc=$obvius->get_doc_by_id($order->{docid});
+my $uri=($doc ? $obvius->get_doc_uri($doc) : '');
+my $complete_uri;
+$complete_uri = $hostmap->absolute_uri($uri) if ($uri);
+my ($host) = $complete_uri =~ m|^([^/]+)|;
+
 $smtp=Net::SMTP->new($smtp);
 my $from='noreply@' . $obvius->config->Sitename;
 my $to=$user->{email};
 my $now=localtime;
-my $subject=$obvius->config->Sitename . ': ' . $order->{command} . ' ' . $order->{status};
-my $doc=$obvius->get_doc_by_id($order->{docid});
-my $uri=($doc ? $obvius->get_doc_uri($doc) : '');
-my $complete_uri = "http://" . $hostmap->absolute_uri($uri) if ($uri);
+my $subject= "$host: " . $order->{command} . ' ' . $order->{status};
+$complete_uri = "http://" . $complete_uri if ($complete_uri);
 
 my %status_regards=(
                     OK=>'Have a nice day',
