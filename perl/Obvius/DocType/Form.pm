@@ -254,7 +254,7 @@ sub action {
         my $value = $input->param($field->{name});
 
 	if ($field->{type} eq 'email') {
-	     if ($value =~ m|.+@.+|) {
+	     if ($value =~ m|.+@.+\..+|) {
 		  push @emails, $value;
 	     } else {
 		  $field->{invalid} = 'Invalid emailadresse';
@@ -381,6 +381,8 @@ sub action {
             my $entry = XMLin($_);
             my $fields = $entry->{fields}->{field} || [];
 
+	    $fields = [$fields] if ref $fields ne 'ARRAY' ;
+	    
             for(@$fields) {
                 if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
                     $unique_failed{$_->{fieldname}} = 1;
@@ -392,7 +394,7 @@ sub action {
 
     my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
     my @not_unique = map {$_->{name}} grep { $unique_failed{$_->{name}} } @{$formdata->{field}};
-    if(scalar(@invalid)) { # or scalar(@not_unique)) {
+    if(scalar(@invalid) or scalar(@not_unique)) {
         $output->param('formdata' => $formdata);
         $output->param('invalid' => \@invalid);
         $output->param('not_unique' => \@not_unique);
