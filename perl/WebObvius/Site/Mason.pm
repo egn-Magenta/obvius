@@ -478,7 +478,7 @@ sub rulebased_authen_handler ($$)
      return SERVER_ERROR unless $uid;
      $req-> notes( user => $login);
 
-     unless ( $uid-> {admin}) {
+     if ( $uid-> {can_manage_users} < 2) {
 	  $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
 	  goto AUTH_FAIL unless $caps->{view};
      }
