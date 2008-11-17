@@ -242,7 +242,7 @@ sub handler ($$) {
      my $obvius = $this->obvius_connect($req);
      
      my $is_admin = $this->param('is_admin');
-     # Does we need to do this before fetching $obvius-object?
+
      Obvius::log->debug(" Mason::handler ($this : " . $req->uri . ")");
      
      $this->tracer($req) if ($this->{DEBUG});
@@ -264,7 +264,8 @@ sub handler ($$) {
      
      my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
      
-     # The document can have a "alternate_location" method if the user should be redirected to a different URL.
+     # The document can have a "alternate_location" method if the user
+     # should be redirected to a different URL.
      # The method should return a path or URL to the new location.
      my $alternate;
      $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri) if (!$is_admin);
@@ -275,11 +276,12 @@ sub handler ($$) {
      # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
      # by the browser should have a method called "raw_document_data"
      if (!$is_admin || $req->uri !~ m|/$|) {
-	  my ($mime_type, $data, $filename, $con_disp, $path) = $doctype->raw_document_data(
-											    $doc, $vdoc, $obvius,
-											    WebObvius::Apache::apache_module('Request')-> new($req),
-											    $output
-											   );
+	  my ($mime_type, $data, $filename, $con_disp, $path) = 
+	    $doctype->raw_document_data(
+					$doc, $vdoc, $obvius,
+					WebObvius::Apache::apache_module('Request')-> new($req),
+					$output
+				       );
 	  if ($data || $path) {
 	       my %args = (mime_type => $mime_type, 
 			   data => $data, 
@@ -294,6 +296,7 @@ sub handler ($$) {
 		    $status = $this->output_file($req, %args);
 	       }
 	       
+	       $req->nocache(1);
 	       execute_cache($obvius, $req, $data) if ($status == OK && !$is_admin);
 	       return $status;
 	  }
