@@ -273,6 +273,7 @@ sub handler ($$) {
 	  return NOT_FOUND if (Apache->define('NOREDIR'));
 	  return $this->redirect($req, $alternate, 'force-external');
      }
+
      # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
      # by the browser should have a method called "raw_document_data"
      if (!$is_admin || $req->uri !~ m|/$|) {
@@ -296,7 +297,6 @@ sub handler ($$) {
 		    $status = $this->output_file($req, %args);
 	       }
 	       
-	       $req->no_cache(1) if ($is_admin);
 	       execute_cache($obvius, $req, $data) if ($status == OK && !$is_admin);
 	       return $status;
 	  }
