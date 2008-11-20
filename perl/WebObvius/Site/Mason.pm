@@ -296,7 +296,7 @@ sub handler ($$) {
 	       } else {
 		    $status = $this->output_file($req, %args);
 	       }
-	       
+	       $req->no_cache(1) if ($is_admin);
 	       execute_cache($obvius, $req, $data) if ($status == OK && !$is_admin);
 	       return $status;
 	  }
@@ -615,6 +615,8 @@ sub output_data {
 	  $req->send_http_header;
 	  $req->print($data) unless ($req->header_only);
      }
+
+     return OK;
 }
 
 sub output_file {
