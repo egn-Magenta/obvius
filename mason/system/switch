@@ -1,0 +1,10 @@
+<& $next_comp, %ARGS &>
+<%init>
+use Data::Dumper;
+my $uri = $r->uri || '/system/';
+my @uri_parts = grep { $_ } split(/\//, $uri);
+my $next_comp = $uri_parts[1] || 'default';
+unless($m->comp_exists($next_comp)) {
+    $next_comp = 'default';
+}
+</%init>

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
+<head>
+<title>Obvius Logout</title>
+<style type="text/css">
+#mainarea {
+    width: 770px;
+    position: absolute;
+    left: 50%;
+    margin-left: -385px;
+}
+</style>
+</head>
+<body>
+<div id="mainarea">
+<h1>Obvius Logout at <% $r->hostname %></h1>
+<p>
+    You have logged out of the Obvius system at <% $r->hostname %>.
+</p>
+<p>
+    <a href="/system/login/?return=<% $return_uri |u %>">Click here to log in with a different user</a>.
+</p>
+</div>
+</body>
+</html>
+<%init>
+my $return_uri = $r->param('return') || "/admin/";
+my $cookie=new Apache::Cookie($r,
+                                -name => "obvius_login_session",
+                                -value => "",
+                                -expires => undef, # Undef means expire the cookie now
+                                -path => '/',
+                            );
+$cookie->bake($r);
+$r->no_cache(1);
+</%init>

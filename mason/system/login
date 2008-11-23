@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
+<head>
+<title>Obvius Login</title>
+<style type="text/css">
+#mainarea {
+    width: 770px;
+    position: absolute;
+    left: 50%;
+    margin-left: -385px;
+}
+#mainarea label {
+    float: left;
+    font-size: 1.0em;
+    width: 5em;
+    padding: 0;
+    margin: 0;
+}
+p.warning {
+    color: red;
+}
+</style>
+<script type="text/javascript" src="/scripts/md5.js"></script>
+<script type="text/javascript"><!--
+var alphanumchars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+function random_string(l) {
+    var ret = '';
+    for(var i=0; i<l; i++) {
+        ret += alphanumchars.charAt(parseInt(Math.random() * 61));
+    }
+
+    return ret;
+}
+
+
+/* unix_md5_crypt converted from perl implementation in Crypt::PasswdMD5 */
+
+var unix_md5_crypt_itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+function to64(v, n)
+{
+    var ret = '';
+    while (--n >= 0) {
+        ret += unix_md5_crypt_itoa64.substr(v & 0x3f, 1);
+        v >>= 6;
+    }
+    return ret;
+}
+
+function unix_md5_crypt(pw, salt)
+{
+    var passwd;
+
+    var magic = '$1$';
+
+    if ( salt ) {
+        // Remove first part of the salt if it's there:
+        if(salt.substr(0,3) == magic)
+            salt = salt.substr(3);
+
+        // Remove first occuring $ and anything following it
+        if(salt.indexOf('$') > -1) {
+            salt = salt.substr(0, salt.indexOf('$'));
+        }
+
+        // make sure salt is no longer than 8 chars
+        salt = salt.substr(0, 8);
+    }
+    else {
+        alert('No salt in unix_md5_crypt');
+    }
+
+    var ctx = '';
+    ctx += pw;
+    ctx += magic;
+    ctx += salt;
+
+    var final = '';
+    final += pw;
+    final += salt;
+    final += pw;
+    final = str_md5(final);
+
+    for (var pl = pw.length; pl > 0; pl -= 16) {
+        ctx += final.substr(0, (pl > 16 ? 16 : pl));
+    }
+
+    for (var i = pw.length; i; i >>= 1) {
+        if (i & 1) { 
+            ctx += String.fromCharCode(0); 
+        } else { 
+            ctx += pw.substr(0, 1); 
+        }
+    }
+
+    final = str_md5(ctx);
+    ctx = '';
+
+    for (var i = 0; i < 1000; i++) {
+        ctx1 = '';
+        if (i & 1) { 
+            ctx1 += pw; 
+        } else { 
+            ctx1 += final.substr(0, 16);
+        }
+        if (i % 3) { 
+            ctx1 += salt; 
+        }
+        if (i % 7) {
+            ctx1 += pw;
+        }
+        if (i & 1) { 
+            ctx1 += final.substr(0, 16);
+        }
+        else {
+            ctx1 += pw;
+        }
+        final = str_md5(ctx1);
+    }
+
+    passwd = '';
+    passwd += to64(parseInt(final.charCodeAt(0) << 16)
+                    | parseInt(final.charCodeAt(6) << 8)
+                    | parseInt(final.charCodeAt(12)), 4);
+    passwd += to64(parseInt(final.charCodeAt(1) << 16)
+                    | parseInt(final.charCodeAt(7) << 8)
+                    | parseInt(final.charCodeAt(13)), 4);
+    passwd += to64(parseInt(final.charCodeAt(2) << 16)
+                    | parseInt(final.charCodeAt(8) << 8)
+                    | parseInt(final.charCodeAt(14)), 4);
+    passwd += to64(parseInt(final.charCodeAt(3) << 16)
+                    | parseInt(final.charCodeAt(9) << 8)
+                    | parseInt(final.charCodeAt(15)), 4);
+    passwd += to64(parseInt(final.charCodeAt(4) << 16)
+                    | parseInt(final.charCodeAt(10) << 8)
+                    | parseInt(final.charCodeAt(5)), 4);
+    passwd += to64(parseInt(final.charCodeAt(11)), 2);
+
+    final = '';
+
+    return magic + salt + '$' + passwd;
+}
+
+
+
+function focus_on_load() {
+    var elem = document.getElementById('obvius_sessionlogin_login');
+    if(elem) {
+        elem.focus();
+        elem.select();
+    }
+}
+
+function secret_login() {
+    var login;
+    var password;
+    var login_elem = document.getElementById('obvius_sessionlogin_login');
+    if(login_elem)
+        login = login_elem.value;
+    var pw_elem = document.getElementById('obvius_sessionlogin_password');
+    if(pw_elem)
+        password = pw_elem.value;
+    if(! login || ! password) {
+        alert('Please enter login and password');
+        return false;
+    }
+
+    // Request the password seed to be used:
+    var request =  new XMLHttpRequest();
+    request.open("GET", '<% $return_uri %>?request_seed=1&obvius_sessionlogin_login=' + login, false);
+    request.send(null);
+    var seed = request.responseText || 'ERROR'
+    if(salt == 'ERROR') {
+        alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
+        return false;
+    }
+
+    var session_id = seed.substr(0, 32);
+    var salt = seed.substr(32, 12);
+    var secret = seed.substr(44, 22);
+
+    var crypted_password = unix_md5_crypt(password, salt);
+
+    var secret_elem = document.getElementById('obvius_sessionlogin_secret');
+    if(secret_elem)
+        secret_elem.value = session_id;
+
+    var message = crypted_password;
+    message += secret;
+    message += login;
+
+    var new_pw = hex_md5(message);
+    pw_elem.value = new_pw;
+
+    return true;
+}
+// -->
+</script>
+</head>
+<body onload="focus_on_load();">
+<div id="mainarea">
+<h1>Obvius Login at <% $r->hostname %></h1>
+<form action="<% $return_uri %>" method="post" id="loginform" onsubmit="secret_login();">
+<fieldset>
+<legend>Login</legend>
+<p>
+    You have requested a ressource for the Obvius setup at <% $r->hostname %> that requires you to log in.<br />
+    Enter your login in password in the form below.
+</p>
+%if($last_login_failed) {
+<p class="warning">
+    Login failed: The username and password you supplied is not valid. Please check your credentials and try again.
+</p>
+%}
+<div>
+    <label for="obvius_sessionlogin_login">Login:</label>
+    <input type="text" name="obvius_sessionlogin_login" id="obvius_sessionlogin_login" value="<% $r->param('obvius_sessionlogin_login') %>" />
+</div>
+<div>
+    <label for="obvius_sessionlogin_password">Password:</label>
+    <input type="password" name="obvius_sessionlogin_password" id="obvius_sessionlogin_password" value="" />
+</div>
+    <input type="hidden" name="obvius_sessionlogin_secret" id="obvius_sessionlogin_secret" value="" />
+%for(@param_names) {
+    <input type="hidden" name="<% $_ %>" value="<% $last_r->param($_) |h %>" />
+%}
+<br />
+<div>
+<input type="submit" name="obvius_sessionlogin_submit" value="Submit" />
+</div>
+</fieldset>
+</form>
+</div>
+</body>
+</html>
+<%init>
+my $return_uri = $r->param('return') || "/";
+my %extra_form_data;
+my $resubmit_params = 0;
+
+#Most likely we got here by an internal redirect, so pick up usefull stuff from it:
+my $last_r = $r->prev;
+my @param_names;
+my $last_login_failed = 0;
+if($last_r) {
+    # Do upgrading of request object:
+    $last_r = Apache2::Request->new($last_r);
+    $return_uri = $last_r->uri;
+    my @upload_names = $last_r->upload();
+    # We don't resubmit data if there's uploads present.
+    unless(@upload_names) {
+        @param_names = grep { ! /^obvius_sessionlogin_(login|password|submit|secret)$/ } $last_r->param;
+    }
+    $last_login_failed = $last_r->notes('login_failed');
+}
+</%init>

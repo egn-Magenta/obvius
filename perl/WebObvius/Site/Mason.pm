@@ -51,6 +51,8 @@ use WebObvius::Apache
   File            => ''
   ;
 
+use Digest::MD5 qw(md5_hex);
+
 use HTML::Mason;
 # Support Mason before version 1.10 and after simultaneously:
 my $new_mason;
@@ -403,6 +405,165 @@ sub authen_handler ($$) {
      $req->notes(user=>$login);
 
      return OK;
+}
+
+sub loginsession_authen_handler ($$) {
+    my ($this, $req) = @_;
+
+    Obvius::log->debug(" Mason::loginsession_authen_handler ($this : " . $req->uri . ")");
+
+    my $benchmark = Obvius::Benchmark-> new('mason::authen') if $this-> {BENCHMARK};
+
+    return OK unless ($req->is_initial_req); # Only check on the initial request, not
+
+    # First we have to get the session_id from cookies.
+    my $session_id;
+    my %cookies = Apache::Cookie->fetch;
+    $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
+
+    if($session_id) {
+        # We need a DB handle so we have to connect Obvius anonymously:
+        my $obvius = $this->obvius_connect($req, undef, undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+        my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
+        $session_id = $obvius->{DB}->DBHdl->quote($session_id);
+        my $session_result = $obvius->execute_select("SELECT login, last_access, UNIX_TIMESTAMP() AS now FROM login_sessions WHERE session_id=$session_id AND UNIX_TIMESTAMP() - last_access < $session_timeout AND validated=1");
+        if(my $res = $session_result->[0]) {
+            # Change the user for the obvius object
+            $obvius->{USER} = $res->{login};
+            # And update user information
+            $obvius->read_user_and_group_info;
+
+            # If more than a minute has passed since last login update the timestamp in the database as well:
+            if(($res->{now} - $res->{last_access}) > 60) {
+                my $res = $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP() where session_id=$session_id");
+                if($res) {
+                    $obvius->log->error("Could not update login session: $res");
+                    return SERVER_ERROR;
+                }
+            }
+
+            return OK;
+        }
+    }
+
+    my $r = WebObvius::Apache::apache_module('Request')-> new($req);
+
+    # Handle request of password seed
+    if((my $login = $r->param('obvius_sessionlogin_login')) && $r->param('request_seed')) {
+        my $session_id = md5_hex($req->request_time . $req->the_request);
+
+        my $obvius = $this->obvius_connect($req, undef, undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+        my $password = $obvius->{USERS}->{$login}->{passwd};
+
+        if($password) {
+            # Create a seed / secret to be used for the login:
+            my $seed = crypt(substr($password, 14, 3) . $session_id . substr($session_id, 17, 5), $password);
+            $r->notes('password_seed' => $session_id . $seed);
+            my $secret = substr($seed, 12);
+
+            # Create a session that can be used for the later validation
+            my $res = $obvius->execute_transaction("INSERT INTO login_sessions VALUES(NULL, '$login', '$session_id', UNIX_TIMESTAMP(), '$secret', 0);");
+            if($res) {
+                $obvius->log->error("Failed to create login session: $res");
+                return SERVER_ERROR;
+            }
+        } else {
+            # Send a bogus seed
+            $r->notes('password_seed' => $session_id . $obvius->encrypt_password($login . $session_id . $login));
+        }
+        $this->redirect($r, '/system/password_seed/');
+    }
+
+
+    if($r->param('obvius_sessionlogin_submit')) {
+        my $login = $r->param('obvius_sessionlogin_login');
+        my $password = $r->param('obvius_sessionlogin_password');
+
+
+        if($login && $password) {
+            # Do secret based login:
+            my $obvius = $r->pnotes('obvius');
+            my $session_id = '';
+            if($session_id = $r->param('obvius_sessionlogin_secret')) {
+                # Here $s is the session id and $password is md5_hex of crypt'ed password + secret + login
+
+                # Get an anonymous obvius object if we don't already have one.
+                $obvius ||= $this->obvius_connect($req, undef, undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+                my $s_quoted = $obvius->{DB}->DBHdl->quote($session_id);
+                my $secret = '';
+                my $session_result = $obvius->execute_select(
+                                                                "SELECT login, secret " .
+                                                                "FROM login_sessions WHERE session_id=$s_quoted " .
+                                                                "AND UNIX_TIMESTAMP() - last_access < 160 " .
+                                                                "AND validated=0");
+                if(my $res = $session_result->[0]) {
+                    $login = $res->{login};
+                    $secret = $res->{secret};
+                } else {
+                    $login = '';
+                }
+
+                if(my $userdata = $obvius->{USERS}->{$login}) {
+                    # If the hashed string we got from the client matches what we can generate locally, login is OK.
+                    my $hash = md5_hex($userdata->{passwd} . $secret . $login);
+                    if($password eq $hash) {
+                        $obvius->{USER} = $login;
+                        $obvius->read_user_and_group_info;
+                    } else {
+                        $obvius = undef;
+                    }
+                } else {
+                    $obvius = undef;
+                }                    
+            } else {
+                # Standard login:
+                if($obvius) {
+                    # validate the chosen user:
+                    $obvius->{USER} = $login;
+                    $obvius->{PASSWORD} = $password;
+                    unless($obvius->validate_user) {
+                        $obvius->{USER} = undef;
+                        $obvius->{PASSWORD} = undef;
+                        $obvius = undef;
+                    }
+                } else {
+                    $obvius = $this->obvius_connect($req, $login, $password, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+                }
+            }
+            
+            if($obvius) {
+                if($session_id) {
+                    # Session already exist, we just have to change it to a validated one (and remove the secret from it).
+                    my $s_quoted = $obvius->{DB}->DBHdl->quote($session_id);
+                    my $res = $obvius->execute_transaction("UPDATE login_sessions SET validated=1, secret='' WHERE session_id=$s_quoted;");
+                    if($res) {
+                        $obvius->log->error("Failed to create login session: $res");
+                        return SERVER_ERROR;
+                    }
+                } else {
+                    # Logged in with normal login procedure - create a new validated session.
+                    $session_id = md5_hex($req->request_time . $req->the_request);
+                    my $res = $obvius->execute_transaction("INSERT INTO login_sessions VALUES(NULL, '$login', '$session_id', UNIX_TIMESTAMP(), '', 1);");
+                    if($res) {
+                        $obvius->log->error("Failed to create login session: $res");
+                        return SERVER_ERROR;
+                    }
+                }
+                # Set a HttpOnly cookie (has to be done manually since neither Apache2::Cookie or CGI::Cookie supports HttpOnly)
+                $r->headers_out->add("Set-Cookie", "obvius_login_session=$session_id; path=/; HttpOnly");
+                return OK;
+            } else {
+                $req->notes('login_failed' => 1);
+            }
+        }
+    }
+
+    # if we get here we should redirect to the login-page if we're not already there
+    unless($r->uri eq '/system/login/') {
+        return $this->redirect($r, "/system/login/");
+    }
+
+    return OK;
 }
 
 # public_authen_handler - this method is called by Apache with a

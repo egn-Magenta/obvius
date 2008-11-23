@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
+<head>
+<title>Obvius system area</title>
+<style type="text/css">
+#mainarea {
+    width: 770px;
+    position: absolute;
+    left: 50%;
+    margin-left: -385px;
+}
+</style>
+</head>
+<body>
+<div id="mainarea">
+<h1>Obvius system area</h1>
+<p>
+    This is the system area for the Obvius setup at <% $r->hostname %>.
+</p>
+<p>
+    <a href="/">Click here to go to the frontpage of the Obvius website</a>.
+</p>
+<p>
+    <a href="/admin/">Click here to go to the admin system for the Obvius website</a>.
+</p>
+</div>
+</body>
+</html>
