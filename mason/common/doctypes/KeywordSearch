@@ -1,5 +1,5 @@
 <& headline &>
-<& teaser &>
+<& teaser, really_show_teaser => 1 &>
 %
 % if ($kwdocs) {
 <table border="0" class="content">
