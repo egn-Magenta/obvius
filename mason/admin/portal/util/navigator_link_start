@@ -16,7 +16,8 @@ my $passwd = $obvius->{USERS}{$user}{passwd};
 my $time = time();
 
 my $phrase = md5_hex($passwd . $time);
-my $url = "/navigator/default?user=$user&code=$phrase&time=$time";
+$purpose = "open_one" if defined $fieldname;
+my $url = "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 $url .= "&path=$path" if ($path);
 
