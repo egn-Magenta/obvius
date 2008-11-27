@@ -145,20 +145,18 @@ sub translate_uri {
     my $roothost = $this->{roothost} || '';
     $hostname ||= $roothost;
 
-    $uri = lc($uri);
-
     my $new_host = '';
     my $subsiteuri = '';
     my $levels_matched = 0;
 
-    if($uri =~ m!$this->{regexp}!) {
+    if($uri =~ m!$this->{regexp}!i) {
         $subsiteuri = $1;
         $new_host = $hostmap->{$1};
     }
 
     if($new_host) {
         # Remove the subsiteuri from the URI:
-        $uri =~ s!^\Q$subsiteuri\E!/!;
+        $uri =~ s!^\Q$subsiteuri\E!/!i;
 
         # If hostname is not the same as the current prefix the URI
         # with correct hostname:
