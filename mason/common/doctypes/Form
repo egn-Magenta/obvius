@@ -1,7 +1,7 @@
 <!-- Form doctype: -->
 %if (scalar(@$invalid)) {
-    <div class="error" style="background-color: #ff6; padding: 10px; font-size: 14px; color: #901a1e; text-align: center; border: solid 3px #901A1E; margin: 0 0 1em 0;">
-    <span>! <& /shared/msg, text => "Obs, fejl i udfyldningen af formularen" &> &iexcl;</span>
+    <div class="error" style="border: 1px solid rgb(144, 26, 30); margin: 0pt 0pt 1em; padding: 6px; background-color: rgb(243, 243, 243); font-size: 14px; color: rgb(144, 26, 30); text-align: center;">
+      <span><& /shared/msg, text => 'Obs, fejl i udfyldningen af formularen' &> </span>
     </div>
 % }
 %if($output->param('flush_xml')) {
