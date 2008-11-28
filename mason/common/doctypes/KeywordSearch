@@ -1,5 +1,7 @@
 <& headline &>
-<& teaser, really_show_teaser => 1 &>
+<& teaser &>
+
+<& /shared/htmlize, text => $introduction &>
 %
 % if ($kwdocs) {
 <table border="0" class="content">
@@ -86,7 +88,8 @@ $r->notes('show_subdocs'=>0);
 # Don't cache
 $output->param('OBVIUS_SIDE_EFFECTS' => 1);
 
-$obvius->get_version_fields($vdoc, [qw(teaser show_teaser show_searchdoc_url show_searchdoc_teaser show_searchdoc_date)]);
+$obvius->get_version_fields($vdoc, [qw(teaser show_teaser show_searchdoc_url show_searchdoc_teaser show_searchdoc_date introduction)]);
+my $introduction = $vdoc->field('introduction');
 my $show_teaser=(defined $vdoc->field('show_teaser') ? $vdoc->Show_teaser : 1);
 my $show_new_titles=$obvius->get_version_field($vdoc, qw(show_new_titles));
 
