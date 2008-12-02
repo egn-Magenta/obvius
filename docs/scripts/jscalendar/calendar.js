@@ -739,7 +739,8 @@ Calendar.prototype.create = function (_par) {
 	var div = Calendar.createElement("div");
 	this.element = div;
         div.className = "calendar";
-        div.style.zindex = 20;
+        div.style.zIndex = "50";
+
 	if (this.isPopup) {
 		div.style.position = "absolute";
 		div.style.display = "none";
