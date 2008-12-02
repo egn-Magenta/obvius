@@ -738,7 +738,8 @@ Calendar.prototype.create = function (_par) {
 
 	var div = Calendar.createElement("div");
 	this.element = div;
-	div.className = "calendar";
+        div.className = "calendar";
+        div.style.zindex = 20;
 	if (this.isPopup) {
 		div.style.position = "absolute";
 		div.style.display = "none";
@@ -1326,7 +1327,7 @@ Calendar.prototype.showAtElement = function (el, opts) {
 				br.x += window.scrollX;
 			} else {
 				// older IE
-				br.y += document.body.scrollTop; 
+				br.y += document.body.scrollTop;
 				br.x += document.body.scrollLeft;
 			}
 		} else {
