@@ -456,8 +456,9 @@ sub loginsession_authen_handler ($$) {
         my $password = $obvius->{USERS}->{$login}->{passwd};
 
         if($password) {
+            my $secret_seed = $obvius->config->param('loginsession_secret_seed') || 'S0m3th!ng';
             # Create a seed / secret to be used for the login:
-            my $seed = crypt(substr($password, 14, 3) . $session_id . substr($session_id, 17, 5), $password);
+            my $seed = crypt(substr($password, 14, 3) . $session_id . $secret_seed, $password);
             $r->notes('password_seed' => $session_id . $seed);
             my $secret = substr($seed, 12);
 
@@ -469,7 +470,9 @@ sub loginsession_authen_handler ($$) {
             }
         } else {
             # Send a bogus seed
-            $r->notes('password_seed' => $session_id . $obvius->encrypt_password($login . $session_id . $login));
+            my $secret_seed = $obvius->config->param('loginsession_secret_seed') || 'S0m3th!ng';
+            my $salt = '$1$' . substr(md5_hex($login . $secret_seed . $login), 5, 9) . '$';
+            $r->notes('password_seed' => $session_id . crypt($secret_seed . $session_id . $login, $salt));
         }
         $this->redirect($r, '/system/password_seed/');
     }
