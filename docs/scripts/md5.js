@@ -37,6 +37,12 @@ function md5_vm_test()
 /*
  * Calculate the MD5 of an array of little-endian words, and a bit length
  */
+var olda;
+var oldb;
+var oldc;
+var oldd;
+
+
 function core_md5(x, len)
 {
   /* append padding */
@@ -50,10 +56,10 @@ function core_md5(x, len)
 
   for(var i = 0; i < x.length; i += 16)
   {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
+    olda = a;
+    oldb = b;
+    oldc = c;
+    oldd = d;
 
     a = md5_ff(a, b, c, d, x[i+ 0], 7 , -680876936);
     d = md5_ff(d, a, b, c, x[i+ 1], 12, -389564586);
@@ -135,10 +141,46 @@ function core_md5(x, len)
 /*
  * These functions implement the four basic operations the algorithm uses.
  */
+
+
+var lsw;
+var msw;
+var result1;
+var result2;
+
 function md5_cmn(q, a, b, x, s, t)
 {
-  return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
+  //return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
+
+  // Unfolded for performance:
+
+
+  //result1 = safe_add(a, q);
+  lsw = (a & 0xFFFF) + (q & 0xFFFF);
+  msw = (a >> 16) + (q >> 16) + (lsw >> 16);
+  result1 = (msw << 16) | (lsw & 0xFFFF);
+
+  //result2 = safe_add(x, t);
+  lsw = (x & 0xFFFF) + (t & 0xFFFF);
+  msw = (x >> 16) + (t >> 16) + (lsw >> 16);
+  result2 = (msw << 16) | (lsw & 0xFFFF);
+
+
+  //result1 = safe_add(result1, result2);
+  lsw = (result1 & 0xFFFF) + (result2 & 0xFFFF);
+  msw = (result1 >> 16) + (result2 >> 16) + (lsw >> 16);
+  result1 = (msw << 16) | (lsw & 0xFFFF);
+
+  //result1 = bit_rol(result1, s);
+  result1 = (result1 << s) | (result1 >>> (32 - s));
+
+  //return safe_add(result1, b);  
+  lsw = (result1 & 0xFFFF) + (b & 0xFFFF);
+  msw = (result1 >> 16) + (b >> 16) + (lsw >> 16);
+  return (msw << 16) | (lsw & 0xFFFF);
+
 }
+
 function md5_ff(a, b, c, d, x, s, t)
 {
   return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
