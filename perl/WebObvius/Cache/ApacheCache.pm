@@ -306,7 +306,6 @@ select distinct(docid) from
      text_value regexp re;
 END
      #'
-     print STDERR "Query: $query\n";
      $this->{obvius}->execute_command('set group_concat_max_len=60000;');
      my $docids = $this->execute_query($query);
      
@@ -337,7 +336,16 @@ sub special_actions {
 						{
 						 command => 'sophisticated_rightbox_clear', 
 						 args => ['Nyhedsliste'] 
+						},
+						{
+						 command => 'clear_doctype', 
+						 args => ['NyNyhedsliste'] 
+						}, 
+						{
+						 command => 'sophisticated_rightbox_clear', 
+						 args => ['NyNyhedsliste'] 
 						}],
+
 				   CalendarEvent => [
 						{
 						 command => 'clear_doctype', 
@@ -346,7 +354,16 @@ sub special_actions {
 						{
 						 command => 'sophisticated_rightbox_clear', 
 						 args => ['Arrangementsliste']
+						},
+						{
+						 command => 'clear_doctype', 
+						 args => ['NyArrangementsliste']
+						}, 
+						{
+						 command => 'sophisticated_rightbox_clear', 
+						 args => ['NyArrangementsliste']
 						}],
+
 				   FileUpload    => [{
 						      command => 'vfield_search', 
 						      args => []
