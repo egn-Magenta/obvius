@@ -1,12 +1,14 @@
 <%args>
 $date
 $month =>'long'
+$year_format => 'long'
 </%args>
 %
 <%init>
 my $display_date;
 my ($year, $mon, $day) = $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
 
+$year =~ s|.*(\d{2})$|$1| if ($year eq 'short');
 if ($month eq 'long') {
     my $long_month = $m->scomp('/shared/msg', text=>$month_desc[$mon]);
     if ($vdoc->Lang eq 'da') {
