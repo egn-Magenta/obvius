@@ -292,12 +292,10 @@ sub handler ($$) {
 			   con_disp => $con_disp,
 			   path => $path);
 	       
-	       my $status;
-	       if ($data ) {
-		    $status = $this->output_data($req, %args);
-	       } else {
-		    $status = $this->output_file($req, %args);
-	       }
+	       my $status = defined $data ? 
+		 $this->output_data($req, %args) : 
+		 $this->output_file($req, %args);
+
 	       $req->no_cache(1) if ($is_admin);
 	       execute_cache($obvius, $req, $data) if ($status == OK && !$is_admin);
 	       return $status;
@@ -735,15 +733,16 @@ sub set_mime_type_and_content_disposition {
      $req->content_type($mime_type);
      $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
      
-     if ($options{output_filename}) {
-	  my $con_disp = $options{con_disp} || 'attachment';
-	  $req->header_out("Content-Disposition", "$con_disp; filename=" . $options{output_filename});
-	  # Microsoft Internet Explorer/Adobe Reader has
-	  # problems if Vary is set at the same time as
-	  # Content-Disposition is(!) - so we unset Vary if we
-	  # set Content-Disposition.
-	  $req->header_out('Vary'=>undef);
-     }
+     return if not $options{output_filename};
+     
+     my $con_disp = $options{con_disp} || 'attachment';
+     $req->header_out("Content-Disposition", "$con_disp; filename=$options{output_filename}");
+     
+     # Microsoft Internet Explorer/Adobe Reader has
+     # problems if Vary is set at the same time as
+     # Content-Disposition is(!) - so we unset Vary if we
+     # set Content-Disposition.
+     $req->header_out('Vary'=>undef);
 }
 
 sub output_data {
@@ -791,7 +790,7 @@ sub output_file {
      my $range=$req->headers_in->{Range};
      
      my @file_stats = stat($path);
-     die "Couldn't find file" if (!scalar(@file_stats));
+     die "Couldn't find file" if not @file_stats;
      my $size = $file_stats[7];
 
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
@@ -812,7 +811,7 @@ sub output_file {
 	  $req->sendfile($path, $start, $stop - $start);
 	  return OK;
      } 
-
+     
      $req->set_content_length($size);
      $req->send_http_header;
      $req->sendfile($path) unless ($req->header_only);
