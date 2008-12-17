@@ -36,6 +36,6 @@ $html_content =~ s/\$subsiteurl/$host/g;
 
 my $subsitelink = $host . $uri;
 $html_content =~ s/\$subsitelink/$subsitelink/g;
-
+$r->nocache(1);
 $r->notes('show_subdocs'=>$vdoc->Show_subdocs) if (defined $vdoc->field('show_subdocs'));
 </%init>
