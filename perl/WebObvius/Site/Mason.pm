@@ -736,7 +736,9 @@ sub set_mime_type_and_content_disposition {
      return if not $options{output_filename};
      
      my $con_disp = $options{con_disp} || 'attachment';
-     $req->header_out("Content-Disposition", "$con_disp; filename=$options{output_filename}");
+     my $con_disp_header = "$con_disp; ";
+     $con_disp_header .= "filename=$options{output_filename}" if lc($con_disp) eq 'attachment';
+     $req->header_out('Content-Disposition', $con_disp_header);
      
      # Microsoft Internet Explorer/Adobe Reader has
      # problems if Vary is set at the same time as
