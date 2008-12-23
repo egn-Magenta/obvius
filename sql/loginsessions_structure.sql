@@ -1,10 +1,11 @@
 DROP TABLE IF EXISTS login_sessions;
+DROP TABLE IF EXISTS login_secrets;
 
 CREATE TABLE login_secrets (
   login varchar(31) NOT NULL,
   secret varchar(32) NOT NULL,
   time int unsigned NOT NULL,
-  index (login)
+  index (login, secret)
 ) type = InnoDB;
      
 CREATE TABLE login_sessions (
