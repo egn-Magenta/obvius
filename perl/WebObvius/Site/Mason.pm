@@ -59,11 +59,11 @@ my $new_mason;
 BEGIN {
      # The way to specify args_method was changed from version 1.10 and onwards:
      if ($HTML::Mason::VERSION < 1.10) {
-	  eval "use HTML::Mason::ApacheHandler (args_method=>'mod_perl');";
-	  $new_mason=0;
+          eval "use HTML::Mason::ApacheHandler (args_method=>'mod_perl');";
+          $new_mason=0;
      } else {
-	  eval "use HTML::Mason::ApacheHandler;";
-	  $new_mason=1;
+          eval "use HTML::Mason::ApacheHandler;";
+          $new_mason=1;
      }
 }
 
@@ -88,41 +88,41 @@ sub new
      my $basedir = $options{base};
 
      unless ( $new_mason) {
-	  $new->{parser} = new HTML::Mason::Parser(
-						   in_package    => $class,
-						   # XXX have both $mcms and $obvius here!
-						   allow_globals => [qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
-						  );
+          $new->{parser} = new HTML::Mason::Parser(
+                                                   in_package    => $class,
+                                                   # XXX have both $mcms and $obvius here!
+                                                   allow_globals => [qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
+                                                  );
      }
 
      my %interp_conf = (
-			comp_root       => $options{comp_root},
-			data_dir        => "$basedir/var/$options{site}/",
-			max_recurse     => 64, # Default is 32
-		       );
+                        comp_root       => $options{comp_root},
+                        data_dir        => "$basedir/var/$options{site}/",
+                        max_recurse     => 64, # Default is 32
+                       );
 
      if ($new_mason) {
-	  $interp_conf{autoflush}        = 0;
-	  $interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
-	  # we need it for compability with the old admin.
-	  $interp_conf{preamble}         =
-	    "my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
+          $interp_conf{autoflush}        = 0;
+          $interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
+          # we need it for compability with the old admin.
+          $interp_conf{preamble}         =
+            "my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
      } else {
-	  $interp_conf{parser}           = $new->{parser};
-	  $interp_conf{static_file_root} = "$basedir/docs";
-	  $interp_conf{out_mode}         = 'batch';
+          $interp_conf{parser}           = $new->{parser};
+          $interp_conf{static_file_root} = "$basedir/docs";
+          $interp_conf{out_mode}         = 'batch';
      }
 
 
      if (defined $options{out_method}) {
-	  $interp_conf{out_method}       = $options{out_method};
-	  $new->param( SITE_SCALAR_REF   => $options{out_method});
+          $interp_conf{out_method}       = $options{out_method};
+          $new->param( SITE_SCALAR_REF   => $options{out_method});
      }
 
      if (!$new_mason) {
-	  # Interp was a Mason<1.10 thing. In later Masonae all options
-	  # are passed to ApacheHandler instead.
-	  $new-> {interp} = new HTML::Mason::Interp( %interp_conf);
+          # Interp was a Mason<1.10 thing. In later Masonae all options
+          # are passed to ApacheHandler instead.
+          $new-> {interp} = new HTML::Mason::Interp( %interp_conf);
      }
 
      # If $class ends in ::Common or ::Public, set auto_send_headers to
@@ -130,35 +130,35 @@ sub new
      # because less of the handler() is used there (and more is handled
      # in Mason in admin):
      my %apachehandler_options = (
-				  apache_status_title	=> 'HTML::Mason: ' . $class,
-				  error_mode		=> 'fatal',
-				  error_format		=> 'line',
-				  decline_dirs		=> 0,
-				  auto_send_headers	=> (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
-				 );
+                                  apache_status_title   => 'HTML::Mason: ' . $class,
+                                  error_mode            => 'fatal',
+                                  error_format          => 'line',
+                                  decline_dirs          => 0,
+                                  auto_send_headers     => (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
+                                 );
 
      if ($new_mason) {
-	  %apachehandler_options = ( %apachehandler_options, %interp_conf);
-	  $apachehandler_options{allow_globals} = [
-						   qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
-						  ];
-	  $apachehandler_options{args_method}   = 'mod_perl';
+          %apachehandler_options = ( %apachehandler_options, %interp_conf);
+          $apachehandler_options{allow_globals} = [
+                                                   qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
+                                                  ];
+          $apachehandler_options{args_method}   = 'mod_perl';
      } else {
-	  $apachehandler_options{interp}        = $new->{interp};
+          $apachehandler_options{interp}        = $new->{interp};
      }
 
      $new-> {handler} = new HTML::Mason::ApacheHandler( %apachehandler_options);
 
      if (!$new_mason) {
-	  # In Mason<1.10 this has to be done "manually":
-	  # It would be nice, if the user Apache runs as could be detected, instead of this:
-	  my $httpd_user  = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
-	  my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
-	  chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
+          # In Mason<1.10 this has to be done "manually":
+          # It would be nice, if the user Apache runs as could be detected, instead of this:
+          my $httpd_user  = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
+          my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
+          chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
      }
 
      $new->{is_admin} = $options{is_admin};
-	
+        
      return bless $new, $class;
 }
 
@@ -203,14 +203,14 @@ sub access_handler ($$) {
      # ... and we auto-slash any uri without .'s in it except on admin where it's
      # handled in Mason ...
      if ($orig_uri !~ m!/$! and $orig_uri !~ /[.]/ and !$this->param('is_admin')) {
-	  # If on a subsite system (eg. roothost is set) always redirect to the roothost
-	  # or we will get a double subsite rewrite. A better way to handle this would be
-	  # good since we now wil get 3 redirects if a user ommits the ending /:
-	  # http://subsite.somehost/someurl =>
-	  # http://roothost.somehost/somesubsite/someurl/ =>
-	  # http://subsite.somehost/someurl/
-	  my $host_part = $roothost ? ('http://' . $roothost) : '';
-	  return $this->redirect($req, $host_part . $req->notes('prefix') . $orig_uri . '/', 'force-external')
+          # If on a subsite system (eg. roothost is set) always redirect to the roothost
+          # or we will get a double subsite rewrite. A better way to handle this would be
+          # good since we now wil get 3 redirects if a user ommits the ending /:
+          # http://subsite.somehost/someurl =>
+          # http://roothost.somehost/somesubsite/someurl/ =>
+          # http://subsite.somehost/someurl/
+          my $host_part = $roothost ? ('http://' . $roothost) : '';
+          return $this->redirect($req, $host_part . $req->notes('prefix') . $orig_uri . '/', 'force-external')
      }
 
 
@@ -258,7 +258,7 @@ sub handler ($$) {
      my $vdoc = $this->obvius_document_version($req, $doc);
      
      return NOT_FOUND unless ($vdoc);
-	 
+         
      return FORBIDDEN if (!$is_admin && ($vdoc->Expires lt $req->notes('now')));
      return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
      
@@ -272,12 +272,15 @@ sub handler ($$) {
      my $alternate;
      $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri) if (!$is_admin);
      if($alternate) {
-	  return NOT_FOUND if (Apache->define('NOREDIR'));
-	  return $this->redirect($req, $alternate, 'force-external');
+          return NOT_FOUND if (Apache->define('NOREDIR'));
+          return $this->redirect($req, $alternate, 'force-external');
      }
 
-     # Documents returning data which shouldnt be handled by the portal (eg. a download document), but directly
+     # Documents returning data which shouldnt be handled by the portal 
+     # (eg. a download document), but directly
      # by the browser should have a method called "raw_document_data"
+     # Please also note that a slash at the end of an uri in admin signifies
+     # that we are getting the *raw* resource, not the obvius-wrapper (where that is appropriate)
      if (!$is_admin || $req->uri !~ m|/$|) {
 	  my ($mime_type, $data, $filename, $con_disp, $path) = 
 	    $doctype->raw_document_data(
@@ -305,8 +308,8 @@ sub handler ($$) {
      $req->content_type('text/html') unless $req->content_type;
      $req->content_type('text/html') if $req->content_type =~ /directory$/;
      if ($req->content_type ne 'text/html') {
-	  execute_cache($obvius, $req);
-	  return -1;
+          execute_cache($obvius, $req);
+          return -1;
      }
      
      $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
@@ -315,32 +318,32 @@ sub handler ($$) {
      my $status=$this->execute_mason($req);
      my $html;
      if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
-	  $html = ${$this->{'SITE_SCALAR_REF'}} if ($status == OK);
-	  ${$this->{'SITE_SCALAR_REF'}}='';
+          $html = ${$this->{'SITE_SCALAR_REF'}} if ($status == OK);
+          ${$this->{'SITE_SCALAR_REF'}}='';
 
-	  # Set headers from the hashref $output->param('OBVIUS_HEADERS_OUT'), if present.
-	  # XXX Consider whether checking if each header is already set should be done,
-	  #     and how conflicts should be resolved?
-	  my $headers_out=$req->pnotes('OBVIUS_OUTPUT')->param('OBVIUS_HEADERS_OUT');
-	  if ($headers_out) {
-	       map { $req->header_out($_=>$headers_out->{$_}); } keys %$headers_out;
-	  }
+          # Set headers from the hashref $output->param('OBVIUS_HEADERS_OUT'), if present.
+          # XXX Consider whether checking if each header is already set should be done,
+          #     and how conflicts should be resolved?
+          my $headers_out=$req->pnotes('OBVIUS_OUTPUT')->param('OBVIUS_HEADERS_OUT');
+          if ($headers_out) {
+               map { $req->header_out($_=>$headers_out->{$_}); } keys %$headers_out;
+          }
 
-	  # Previously the ::Common object would send the headers, so
-	  # the Public-object had to not do that.  Now the
-	  # WebObvius::Site::Mason::new()-method sets auto_send_header to
-	  # false if the objects name ends in ::Common or ::Public, so the
-	  # the Public-object must (can!) send the headers here, now.
-	  #
-	  # The benefit is that we can set_content_length, and that
-	  # means that browser can keepalive the connection, and don't
-	  # have to make another one to get the rest of the stuff. That
-	  # should amount to an efficiency-improvement...
-	  $req->status($status) if ($status!=OK);
-	  $req->set_content_length(length($html)) unless ($req->header_only or $status!=OK);
-	  $req->send_http_header;
+          # Previously the ::Common object would send the headers, so
+          # the Public-object had to not do that.  Now the
+          # WebObvius::Site::Mason::new()-method sets auto_send_header to
+          # false if the objects name ends in ::Common or ::Public, so the
+          # the Public-object must (can!) send the headers here, now.
+          #
+          # The benefit is that we can set_content_length, and that
+          # means that browser can keepalive the connection, and don't
+          # have to make another one to get the rest of the stuff. That
+          # should amount to an efficiency-improvement...
+          $req->status($status) if ($status!=OK);
+          $req->set_content_length(length($html)) unless ($req->header_only or $status!=OK);
+          $req->send_http_header;
 
-	  $req->print($html) unless ($req->header_only or $status!=OK);
+          $req->print($html) unless ($req->header_only or $status!=OK);
      }
 
      execute_cache($obvius, $req, $html);
@@ -382,22 +385,22 @@ sub authen_handler ($$) {
 
      my $login = $req->connection->user;
      unless ($login and $pw) {
-	  $req->note_basic_auth_failure;
-	  return AUTH_REQUIRED;
+          $req->note_basic_auth_failure;
+          return AUTH_REQUIRED;
      }
 
      # Check password
      my $obvius = $this->obvius_connect($req, $login, $pw, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
      unless ($obvius) {
-	  $req->note_basic_auth_failure;
-	  return AUTH_REQUIRED;
+          $req->note_basic_auth_failure;
+          return AUTH_REQUIRED;
      }
 
      # if there's no 'admin', it's an old table layout
      my $uid = $obvius-> get_user( $login);
      if ( exists $uid->{admin} and not $uid->{admin}) {
-	  $req->note_basic_auth_failure;
-	  return AUTH_REQUIRED;
+          $req->note_basic_auth_failure;
+          return AUTH_REQUIRED;
      }
 
      $req->notes(user=>$login);
@@ -405,168 +408,115 @@ sub authen_handler ($$) {
      return OK;
 }
 
+sub already_logged_in {
+     my ($this, $obvius) = @_;
+     
+     my $session_id;
+     my %cookies = Apache::Cookie->fetch;
+     $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
+     
+     return 0 if not $session_id;
+
+     my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
+     my $session_result = $obvius->execute_select("SELECT login, last_access, UNIX_TIMESTAMP() AS now FROM login_sessions 
+                                                   WHERE session_id=? AND UNIX_TIMESTAMP() - last_access < ? AND validated=1", 
+                                                  $session_id, $session_timeout);
+     my $res = $session_result->[0];
+     return 0 if not $res;
+     $obvius->{USER} = $res->{login};
+     $obvius->read_user_and_group_info;
+          
+     # If more than a minute has passed since last login update the 
+     # timestamp in the database as well:
+     $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP() 
+                                   where session_id=?", $session_id) 
+       if($res->{now} - $res->{last_access} > 60);
+
+     return 1;
+}
+
+     
 sub loginsession_authen_handler ($$) {
     my ($this, $req) = @_;
 
     Obvius::log->debug(" Mason::loginsession_authen_handler ($this : " . $req->uri . ")");
-
+    
     my $benchmark = Obvius::Benchmark-> new('mason::authen') if $this-> {BENCHMARK};
 
-    return OK unless ($req->is_initial_req); # Only check on the initial request, not
-
-    # First we have to get the session_id from cookies.
-    my $session_id;
-    my %cookies = Apache::Cookie->fetch;
-    $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
-
-    if($session_id) {
-        # We need a DB handle so we have to connect Obvius anonymously:
-        my $obvius = $this->obvius_connect($req, undef, undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
-        my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
-        $session_id = $obvius->{DB}->DBHdl->quote($session_id);
-        my $session_result = $obvius->execute_select("SELECT login, last_access, UNIX_TIMESTAMP() AS now FROM login_sessions WHERE session_id=$session_id AND UNIX_TIMESTAMP() - last_access < $session_timeout AND validated=1");
-        if(my $res = $session_result->[0]) {
-            # Change the user for the obvius object
-            $obvius->{USER} = $res->{login};
-            # And update user information
-            $obvius->read_user_and_group_info;
-
-            # If more than a minute has passed since last login update the timestamp in the database as well:
-            if(($res->{now} - $res->{last_access}) > 60) {
-                my $res = $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP() where session_id=$session_id");
-                if($res) {
-                    $obvius->log->error("Could not update login session: $res");
-                    return SERVER_ERROR;
-                }
-            }
-
-            return OK;
-        }
-    }
+    return OK if (not $req->is_initial_req);
+    my $obvius = $this->obvius_connect($req, undef, undef, 
+                                       $this->{SUBSITE}->{DOCTYPES}, 
+                                       $this->{SUBSITE}->{FIELDTYPES}, 
+                                       $this->{SUBSITE}->{FIELDSPECS});
+    return SERVER_ERROR if not $obvius;
+    return OK if $this->already_logged_in($obvius);
 
     my $r = WebObvius::Apache::apache_module('Request')-> new($req);
 
-    # Handle request of password seed
-    if((my $login = $r->param('obvius_sessionlogin_login')) && $r->param('request_seed')) {
-        my $session_id = md5_hex($req->request_time . $req->the_request);
+    return $this->redirect('/system/login') if not $login;
 
-        my $obvius = $this->obvius_connect($req, undef, undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
-        my $password = $obvius->{USERS}->{$login}->{passwd};
+    my $login = $r->param('obvius_sessionlogin_login');
+    my $password = $r->param('obvius_sessionlogin_password');
+    my $secret = $r->param('obvius_sessionlogin_secret') || '';
 
-        if($password) {
-            my $secret_seed = $obvius->config->param('loginsession_secret_seed') || 'S0m3th!ng';
-            # Create a seed / secret to be used for the login:
-            my $seed = crypt(substr($password, 14, 3) . $session_id . $secret_seed, $password);
-            $r->notes('password_seed' => $session_id . $seed);
-            my $secret = substr($seed, 12);
+    return $this->redirect('/system/login') if 
+      not $r->param('obvius_sessionlogin_submit') or not $password or not $login;
 
-            # Create a session that can be used for the later validation
-            my $res = $obvius->execute_transaction("INSERT INTO login_sessions VALUES(NULL, '$login', '$session_id', UNIX_TIMESTAMP(), '$secret', 0);");
-            if($res) {
-                $obvius->log->error("Failed to create login session: $res");
-                return SERVER_ERROR;
-            }
-        } else {
-            # Send a bogus seed
-            my $secret_seed = $obvius->config->param('loginsession_secret_seed') || 'S0m3th!ng';
-            my $salt = '$1$' . substr(md5_hex($login . $secret_seed . $login), 5, 9) . '$';
-            $r->notes('password_seed' => $session_id . crypt($secret_seed . $session_id . $login, $salt));
-        }
-        $this->redirect($r, '/system/password_seed/');
-    }
+    my $userdata = $obvius->{USERS}->{$login};
+    return $this->redirect('/system/login') if not $userdata;
+    
+    my $hash = md5_hex($userdata->{passwd} . $secret . $login);
 
+    if ($hash ne $password) {
+         $obvius->{USER} = $login;
+         $obvius->{PASSWORD} = $password;
+         return $this->redirect('/system/login') if not $obvius->validate_user;
+         $this->register_session($req, login => $login);
+         return OK;
+    } 
 
-    if($r->param('obvius_sessionlogin_submit')) {
-        my $login = $r->param('obvius_sessionlogin_login');
-        my $password = $r->param('obvius_sessionlogin_password');
+    my $session_result = $obvius->execute_select("SELECT 1
+                                                  FROM login_secrets WHERE 
+                                                  secret=? AND login=?
+                                                  AND UNIX_TIMESTAMP() - time < 160",
+                                                 $secret, $login);
 
+    return $this->redirect('/system/login') if not @$session_result;
 
-        if($login && $password) {
-            # Do secret based login:
-            my $obvius = $r->pnotes('obvius');
-            my $session_id = '';
-            if($session_id = $r->param('obvius_sessionlogin_secret')) {
-                # Here $s is the session id and $password is md5_hex of crypt'ed password + secret + login
-
-                # Get an anonymous obvius object if we don't already have one.
-                $obvius ||= $this->obvius_connect($req, undef, undef, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
-                my $s_quoted = $obvius->{DB}->DBHdl->quote($session_id);
-                my $secret = '';
-                my $session_result = $obvius->execute_select(
-                                                                "SELECT login, secret " .
-                                                                "FROM login_sessions WHERE session_id=$s_quoted " .
-                                                                "AND UNIX_TIMESTAMP() - last_access < 160 " .
-                                                                "AND validated=0");
-                if(my $res = $session_result->[0]) {
-                    $login = $res->{login};
-                    $secret = $res->{secret};
-                } else {
-                    $login = '';
-                }
-
-                if(my $userdata = $obvius->{USERS}->{$login}) {
-                    # If the hashed string we got from the client matches what we can generate locally, login is OK.
-                    my $hash = md5_hex($userdata->{passwd} . $secret . $login);
-                    if($password eq $hash) {
-                        $obvius->{USER} = $login;
-                        $obvius->read_user_and_group_info;
-                    } else {
-                        $obvius = undef;
-                    }
-                } else {
-                    $obvius = undef;
-                }                    
-            } else {
-                # Standard login:
-                if($obvius) {
-                    # validate the chosen user:
-                    $obvius->{USER} = $login;
-                    $obvius->{PASSWORD} = $password;
-                    unless($obvius->validate_user) {
-                        $obvius->{USER} = undef;
-                        $obvius->{PASSWORD} = undef;
-                        $obvius = undef;
-                    }
-                } else {
-                    $obvius = $this->obvius_connect($req, $login, $password, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
-                }
-            }
-            
-            if($obvius) {
-                if($session_id) {
-                    # Session already exist, we just have to change it to a validated one (and remove the secret from it).
-                    my $s_quoted = $obvius->{DB}->DBHdl->quote($session_id);
-                    my $res = $obvius->execute_transaction("UPDATE login_sessions SET validated=1, secret='' WHERE session_id=$s_quoted;");
-                    if($res) {
-                        $obvius->log->error("Failed to create login session: $res");
-                        return SERVER_ERROR;
-                    }
-                } else {
-                    # Logged in with normal login procedure - create a new validated session.
-                    $session_id = md5_hex($req->request_time . $req->the_request);
-                    my $res = $obvius->execute_transaction("INSERT INTO login_sessions VALUES(NULL, '$login', '$session_id', UNIX_TIMESTAMP(), '', 1);");
-                    if($res) {
-                        $obvius->log->error("Failed to create login session: $res");
-                        return SERVER_ERROR;
-                    }
-                }
-                # Set a HttpOnly cookie (has to be done manually since neither Apache2::Cookie or CGI::Cookie supports HttpOnly)
-                $r->headers_out->add("Set-Cookie", "obvius_login_session=$session_id; path=/; HttpOnly");
-                return OK;
-            } else {
-                $req->notes('login_failed' => 1);
-            }
-        }
-    }
-
-    # if we get here we should redirect to the login-page if we're not already there
-    unless($r->uri eq '/system/login/') {
-        return $this->redirect($r, "/system/login/");
-    }
+    $this->register_session($req, login => $login);
 
     return OK;
 }
 
+sub register_session {
+     my ($this, $req, %options) = @_;
+
+     my $login = $options{login};
+     
+     die "Illegal variables: $validated, $login, $wanted_session" if 
+       not defined $validated or not defined $login or 
+       not defined $wanted_session;
+     
+     my $try_n_times = 10;
+     my $res = 'go on';
+     my $session_id;
+     while ($try_n_times-- and $res) {
+	  $session_id = md5_hex($timestamp . int(rand(2<<31)));
+	  
+	  $res = $obvius->execute_command("insert into login_sessions
+                                           (login, session_id, last_access) values
+                                           (?, ?, UNIX_TIMESTAMP())", $login, $session_id);
+     }
+ 
+    die "Can't create session, maybe because of: $res" if $res;
+     
+     $req->headers_out->add("Set-Cookie", "obvius_login_session=$session_id; path=/; HttpOnly");
+     return $session_id;
+}
+     
+     
+     
+     
 # public_authen_handler - this method is called by Apache with a
 #                         request object (notice the prototype, which
 #                         is necessary for Apache) during the
@@ -612,12 +562,12 @@ sub rulebased_authen_handler ($$)
 
      # stage 1: try to access the document as nobody
      $obvius = $this-> obvius_connect(
-				      $req,
-				      $login = 'nobody', undef,
-				      $this->{SUBSITE}->{DOCTYPES},
-				      $this->{SUBSITE}->{FIELDTYPES},
-				      $this->{SUBSITE}->{FIELDSPECS}
-				     );
+                                      $req,
+                                      $login = 'nobody', undef,
+                                      $this->{SUBSITE}->{DOCTYPES},
+                                      $this->{SUBSITE}->{FIELDTYPES},
+                                      $this->{SUBSITE}->{FIELDSPECS}
+                                     );
      return SERVER_ERROR unless $obvius;
 
      $uid = $obvius-> get_user( $login);
@@ -644,8 +594,8 @@ sub rulebased_authen_handler ($$)
      $req-> notes( user => $login);
 
      if ( $uid-> {can_manage_users} < 2) {
-	  $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
-	  goto AUTH_FAIL unless $caps->{view};
+          $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
+          goto AUTH_FAIL unless $caps->{view};
      }
 
      # finally, turn server cache off for the protected documents
@@ -684,16 +634,16 @@ sub create_output_object {
      my $output = $req->pnotes('OBVIUS_OUTPUT');
 
      unless (defined $output) {
-	  $output = new Obvius::Data;
-	  $output->param(SERVER_NAME => $req->server->server_hostname);
-	  $output->param(PREFIX => $req->notes('prefix'));
-	  $output->param(URI => $req->uri);
-	  $output->param(PATH_INFO => $req->path_info);
-	  $output->param(NOW => $req->notes('now'));
-	  $output->param(VERSION=>$vdoc);
-	  $output->param(DOCUMENT=>$doc);
-	  $output->param(DOCTYPE=>$doctype);
-	  $req->pnotes(OBVIUS_OUTPUT => $output);
+          $output = new Obvius::Data;
+          $output->param(SERVER_NAME => $req->server->server_hostname);
+          $output->param(PREFIX => $req->notes('prefix'));
+          $output->param(URI => $req->uri);
+          $output->param(PATH_INFO => $req->path_info);
+          $output->param(NOW => $req->notes('now'));
+          $output->param(VERSION=>$vdoc);
+          $output->param(DOCUMENT=>$doc);
+          $output->param(DOCTYPE=>$doctype);
+          $req->pnotes(OBVIUS_OUTPUT => $output);
      }
 
      return $output;
@@ -718,7 +668,7 @@ sub expand_output {
      my $s='We have an anomaly, the subsite centerpiece was unable to generate.';
      # Ou wee, handle this better (subsite_scalar_ref must be emptied for each request):
      if ($status==OK) {
-	  $s=${$this->{'SITE_SCALAR_REF'}};
+          $s=${$this->{'SITE_SCALAR_REF'}};
      }
      ${$this->{'SITE_SCALAR_REF'}}='';
 
@@ -760,25 +710,25 @@ sub output_data {
      # Handle Range: N-M
      my $range=$req->headers_in->{Range};
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
-	  my ($start, $stop)=($1 || 0, $2 || length($data));
-	  
-	  # Sanity check range:
-	  if ($start>length($data) or $stop>length($data) or $start>$stop) {
-	       $req->header_out('Content-Range'=>'0-0/' . length($data));
-	       $req->status(416); # "Requested range not satisfiable"
-	       $req->send_http_header;
-	       return OK;
-	  }
-	  
-	  $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . length($data));
-	  $req->set_content_length($stop-$start);
-	  $req->status(206); # "Partial content"
-	  $req->send_http_header;
-	  $req->print(substr($data, $start, $stop-$start));
+          my ($start, $stop)=($1 || 0, $2 || length($data));
+          
+          # Sanity check range:
+          if ($start>length($data) or $stop>length($data) or $start>$stop) {
+               $req->header_out('Content-Range'=>'0-0/' . length($data));
+               $req->status(416); # "Requested range not satisfiable"
+               $req->send_http_header;
+               return OK;
+          }
+          
+          $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . length($data));
+          $req->set_content_length($stop-$start);
+          $req->status(206); # "Partial content"
+          $req->send_http_header;
+          $req->print(substr($data, $start, $stop-$start));
      } else {
-	  $req->set_content_length(length($data));
-	  $req->send_http_header;
-	  $req->print($data) unless ($req->header_only);
+          $req->set_content_length(length($data));
+          $req->send_http_header;
+          $req->print($data) unless ($req->header_only);
      }
 
      return OK;
@@ -796,22 +746,22 @@ sub output_file {
      my $size = $file_stats[7];
 
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
-	  my ($start, $stop)=($1 || 0, $2 || $size);
-	  
-	  # Sanity check range:
-	  if ($start >= $stop || $stop > $size ) {
-	       $req->header_out('Content-Range'=>'0-0/' . $size);
-	       $req->status(416); # "Requested range not satisfiable"
-	       $req->send_http_header;
-	       return OK;
-	  }
-	       
-	  $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . $size);
-	  $req->set_content_length($stop-$start);
-	  $req->status(206); # "Partial content"
-	  $req->send_http_header;
-	  $req->sendfile($path, $start, $stop - $start);
-	  return OK;
+          my ($start, $stop)=($1 || 0, $2 || $size);
+          
+          # Sanity check range:
+          if ($start >= $stop || $stop > $size ) {
+               $req->header_out('Content-Range'=>'0-0/' . $size);
+               $req->status(416); # "Requested range not satisfiable"
+               $req->send_http_header;
+               return OK;
+          }
+               
+          $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . $size);
+          $req->set_content_length($stop-$start);
+          $req->status(206); # "Partial content"
+          $req->send_http_header;
+          $req->sendfile($path, $start, $stop - $start);
+          return OK;
      } 
      
      $req->set_content_length($size);
