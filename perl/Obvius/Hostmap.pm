@@ -150,8 +150,8 @@ sub translate_uri {
     my $levels_matched = 0;
 
     if($uri =~ m!$this->{regexp}!i) {
-        $subsiteuri = $1;
-        $new_host = $hostmap->{$1};
+	 $subsiteuri = $1;
+	 $new_host = lc $hostmap->{lc $1};
     }
 
     if($new_host) {
