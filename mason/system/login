@@ -179,7 +179,6 @@ function secret_login() {
     }
 
     var crypted_password = unix_md5_crypt(password, salt);
-    alert(crypted_password);                                                        
     var secret = Math.random() + "" + Math.random();
     var secret_elem = document.getElementById('obvius_sessionlogin_secret');
     secret_elem.value = secret;
@@ -242,9 +241,6 @@ my $last_login_failed;
 if($last_r) {
     # Do upgrading of request object:
     $last_r = Apache2::Request->new($last_r);
-    print $last_r->param('obvius_sessionlogin_login');
-    print $last_r->param('obvius_sessionlogin_password');
-    print $last_r->param('obvius_sessionlogin_secret');
 
     $return_uri = $last_r->uri;
     my @upload_names = $last_r->upload();
