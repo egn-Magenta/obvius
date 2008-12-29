@@ -158,40 +158,33 @@ function secret_login() {
     var login;
     var password;
     var login_elem = document.getElementById('obvius_sessionlogin_login');
-    if(login_elem)
-        login = login_elem.value;
+    if(login_elem) login = login_elem.value;
+
+
     var pw_elem = document.getElementById('obvius_sessionlogin_password');
-    if(pw_elem)
-        password = pw_elem.value;
+    if(pw_elem) password = pw_elem.value;
+
     if(! login || ! password) {
         alert('Please enter login and password');
         return false;
     }
-
     // Request the password seed to be used:
     var request =  new XMLHttpRequest();
-    request.open("GET", '<% $return_uri %>?request_seed=1&obvius_sessionlogin_login=' + login, false);
+    request.open("GET", '/system/password_seed?login=' + login, false);
     request.send(null);
-    var seed = request.responseText || 'ERROR'
+    var salt = request.responseText || 'ERROR'
     if(salt == 'ERROR') {
         alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
         return false;
     }
 
-    var session_id = seed.substr(0, 32);
-    var salt = seed.substr(32, 12);
-    var secret = seed.substr(44, 22);
-
     var crypted_password = unix_md5_crypt(password, salt);
-
+    alert(crypted_password);                                                        
+    var secret = Math.random() + "" + Math.random();
     var secret_elem = document.getElementById('obvius_sessionlogin_secret');
-    if(secret_elem)
-        secret_elem.value = session_id;
+    secret_elem.value = secret;
 
-    var message = crypted_password;
-    message += secret;
-    message += login;
-
+    var message = login + crypted_password + secret;
     var new_pw = hex_md5(message);
     pw_elem.value = new_pw;
 
@@ -241,13 +234,18 @@ my $return_uri = $r->param('return') || "/";
 my %extra_form_data;
 my $resubmit_params = 0;
 
-#Most likely we got here by an internal redirect, so pick up usefull stuff from it:
+#Most likely we got here by an internal redirect, so pick up useful stuff from it:
 my $last_r = $r->prev;
 my @param_names;
-my $last_login_failed = 0;
+my $last_login_failed;
+
 if($last_r) {
     # Do upgrading of request object:
     $last_r = Apache2::Request->new($last_r);
+    print $last_r->param('obvius_sessionlogin_login');
+    print $last_r->param('obvius_sessionlogin_password');
+    print $last_r->param('obvius_sessionlogin_secret');
+
     $return_uri = $last_r->uri;
     my @upload_names = $last_r->upload();
     # We don't resubmit data if there's uploads present.
