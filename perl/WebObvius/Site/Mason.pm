@@ -241,7 +241,6 @@ sub access_handler ($$) {
 sub handler ($$) {
      my ($this, $req) = @_;
 
-     print STDERR "ARRIVED AT HANDLER:\n " . $req->uri . "\n";
      my $obvius = $this->obvius_connect($req);
      
      my $is_admin = $this->param('is_admin');
