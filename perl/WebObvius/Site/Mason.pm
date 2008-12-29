@@ -240,7 +240,8 @@ sub access_handler ($$) {
 # handler - Handles incoming Apache requests when using Mason as template system.
 sub handler ($$) {
      my ($this, $req) = @_;
-     
+
+     print STDERR "ARRIVED AT HANDLER:\n " . $req->uri . "\n";
      my $obvius = $this->obvius_connect($req);
      
      my $is_admin = $this->param('is_admin');
@@ -258,7 +259,7 @@ sub handler ($$) {
      my $vdoc = $this->obvius_document_version($req, $doc);
      
      return NOT_FOUND unless ($vdoc);
-         
+     
      return FORBIDDEN if (!$is_admin && ($vdoc->Expires lt $req->notes('now')));
      return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
      
@@ -314,7 +315,7 @@ sub handler ($$) {
      
      $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
      $req->filename($req->document_root . $req->notes('prefix') . "/dhandler"); # default handler
-
+     
      my $status=$this->execute_mason($req);
      my $html;
      if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
@@ -409,7 +410,7 @@ sub authen_handler ($$) {
 }
 
 sub already_logged_in {
-     my ($this, $obvius) = @_;
+     my ($this, $obvius, $req) = @_;
      
      my $session_id;
      my %cookies = Apache::Cookie->fetch;
@@ -418,99 +419,88 @@ sub already_logged_in {
      return 0 if not $session_id;
 
      my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
-     my $session_result = $obvius->execute_select("SELECT login, last_access, UNIX_TIMESTAMP() AS now FROM login_sessions 
-                                                   WHERE session_id=? AND UNIX_TIMESTAMP() - last_access < ? AND validated=1", 
-                                                  $session_id, $session_timeout);
+     my $session_result = $obvius->execute_select("SELECT login AS login FROM login_sessions WHERE session_id=?",
+                                                  $session_id);
      my $res = $session_result->[0];
      return 0 if not $res;
      $obvius->{USER} = $res->{login};
      $obvius->read_user_and_group_info;
-          
+     
+     $req->notes(user => $res->{login});
      # If more than a minute has passed since last login update the 
      # timestamp in the database as well:
      $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP() 
                                    where session_id=?", $session_id) 
        if($res->{now} - $res->{last_access} > 60);
-
+     
      return 1;
 }
 
      
-sub loginsession_authen_handler ($$) {
+sub session_authen_handler ($$) {
     my ($this, $req) = @_;
-
-    Obvius::log->debug(" Mason::loginsession_authen_handler ($this : " . $req->uri . ")");
-    
-    my $benchmark = Obvius::Benchmark-> new('mason::authen') if $this-> {BENCHMARK};
 
     return OK if (not $req->is_initial_req);
     my $obvius = $this->obvius_connect($req, undef, undef, 
                                        $this->{SUBSITE}->{DOCTYPES}, 
                                        $this->{SUBSITE}->{FIELDTYPES}, 
                                        $this->{SUBSITE}->{FIELDSPECS});
+    $req->pnotes(obvius => $obvius);
     return SERVER_ERROR if not $obvius;
-    return OK if $this->already_logged_in($obvius);
-
+    return OK if $this->already_logged_in($obvius, $req);
+    
     my $r = WebObvius::Apache::apache_module('Request')-> new($req);
-
-    return $this->redirect('/system/login') if not $login;
 
     my $login = $r->param('obvius_sessionlogin_login');
     my $password = $r->param('obvius_sessionlogin_password');
     my $secret = $r->param('obvius_sessionlogin_secret') || '';
 
-    return $this->redirect('/system/login') if 
+    goto redirect if 
       not $r->param('obvius_sessionlogin_submit') or not $password or not $login;
 
     my $userdata = $obvius->{USERS}->{$login};
-    return $this->redirect('/system/login') if not $userdata;
+    goto redirect if not $userdata;
     
-    my $hash = md5_hex($userdata->{passwd} . $secret . $login);
-
+    my $hash = md5_hex($login . $userdata->{passwd} . $secret);
+    
     if ($hash ne $password) {
          $obvius->{USER} = $login;
          $obvius->{PASSWORD} = $password;
-         return $this->redirect('/system/login') if not $obvius->validate_user;
-         $this->register_session($req, login => $login);
+         goto redirect if not $obvius->validate_user;
+         $this->register_session($obvius, $r, $login);
          return OK;
     } 
-
-    my $session_result = $obvius->execute_select("SELECT 1
-                                                  FROM login_secrets WHERE 
-                                                  secret=? AND login=?
-                                                  AND UNIX_TIMESTAMP() - time < 160",
-                                                 $secret, $login);
-
-    return $this->redirect('/system/login') if not @$session_result;
-
-    $this->register_session($req, login => $login);
-
+    
+    $this->register_session($obvius, $r, $login);
+    
     return OK;
+
+  redirect:
+    $req->notes(login_failed => 1);
+    return $this->redirect($r,'/system/login');
 }
 
 sub register_session {
-     my ($this, $req, %options) = @_;
+     my ($this, $obvius, $req, $login) = @_;
 
-     my $login = $options{login};
-     
-     die "Illegal variables: $validated, $login, $wanted_session" if 
-       not defined $validated or not defined $login or 
-       not defined $wanted_session;
-     
      my $try_n_times = 10;
-     my $res = 'go on';
      my $session_id;
-     while ($try_n_times-- and $res) {
-	  $session_id = md5_hex($timestamp . int(rand(2<<31)));
+     while ($try_n_times-- and not $@) {
+	  $session_id = md5_hex(time . rand);
 	  
-	  $res = $obvius->execute_command("insert into login_sessions
+	  eval {
+               $obvius->execute_command("insert into login_sessions
                                            (login, session_id, last_access) values
                                            (?, ?, UNIX_TIMESTAMP())", $login, $session_id);
+               };
      }
  
-    die "Can't create session, maybe because of: $res" if $res;
+     die "Can't create session, maybe because of: $@" if $@;
      
      $req->headers_out->add("Set-Cookie", "obvius_login_session=$session_id; path=/; HttpOnly");
+     $req->notes(user => $login);
+     $obvius->{USER} = $login;
+
      return $session_id;
 }
      
@@ -563,7 +553,8 @@ sub rulebased_authen_handler ($$)
      # stage 1: try to access the document as nobody
      $obvius = $this-> obvius_connect(
                                       $req,
-                                      $login = 'nobody', undef,
+                                      $login = 'nobody', 
+                                      undef,
                                       $this->{SUBSITE}->{DOCTYPES},
                                       $this->{SUBSITE}->{FIELDTYPES},
                                       $this->{SUBSITE}->{FIELDSPECS}
@@ -739,12 +730,12 @@ sub output_file {
      $this->set_mime_type_and_content_disposition($req, %options);
      
      my $path = $options{path};
-     my $range=$req->headers_in->{Range};
      
      my @file_stats = stat($path);
      die "Couldn't find file" if not @file_stats;
      my $size = $file_stats[7];
 
+     my $range=$req->headers_in->{Range};
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
           my ($start, $stop)=($1 || 0, $2 || $size);
           
