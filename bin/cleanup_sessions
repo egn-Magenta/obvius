@@ -1,0 +1,15 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Obvius::Config;
+use Obvius;
+my $timeout = 60*60;
+
+my $conf = Obvius::Config->new('ku');
+my $obvius = Obvius->new($conf);
+
+$obvius->dbh->do("delete from login_sessions where last_access + ? < UNIX_TIMESTAMP()", 
+            {}, $timeout);
+
