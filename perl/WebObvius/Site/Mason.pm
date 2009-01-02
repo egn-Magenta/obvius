@@ -484,7 +484,7 @@ sub register_session {
 
      my $try_n_times = 10;
      my $session_id;
-     while ($try_n_times-- and not $@) {
+     do {
 	  $session_id = md5_hex(time . rand);
 	  
 	  eval {
@@ -492,7 +492,7 @@ sub register_session {
                                            (login, session_id, last_access) values
                                            (?, ?, UNIX_TIMESTAMP())", $login, $session_id);
                };
-     }
+     } while ($try_n_times-- and $@);
  
      die "Can't create session, maybe because of: $@" if $@;
      
