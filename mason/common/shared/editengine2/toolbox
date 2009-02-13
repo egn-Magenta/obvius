@@ -137,7 +137,7 @@ return %old_protocol;
 <%method get_scheme_parameters>\
 <% join '&amp;', @$parameters %>\
 <%args>
- $options => {}
+ $options => {},
  $history
 </%args>
 <%init>

@@ -152,7 +152,6 @@ if(defined($value)) {
 }
 $out = '';
 $p->parse($value);
-$m->scomp( '/common/shared/from_utf8', dataref => \$out);
 $p->eof;
 $value = $out;
 return $value;

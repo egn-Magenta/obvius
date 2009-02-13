@@ -133,7 +133,6 @@ if(defined($value)) {
 $out = '';
 $p->parse($value);
 $p->eof;
-$m->scomp( '/shared/from_utf8', dataref => \$out);
 $value = $out;
 $value = $m->scomp('/common/shared/editorhtml2xhtml', html=>$value);
 
@@ -222,5 +221,4 @@ my $p = HTML::Parser->new(api_version=>3,
                                         $out.=$text;
                                         },
                                         "self, text" ]);
-$p->attr_encoded(1); # Don't decode entities in attributes
 </%once>

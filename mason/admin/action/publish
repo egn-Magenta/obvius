@@ -23,7 +23,6 @@ my $actions={
             };
 my $publish_scheme={
                     label=>'Publish',
-		    save_button_name => 'Publish',
                     type=>'scheme/editsheet',
                     style=>{context=>'editpage'},
                     storage=>{

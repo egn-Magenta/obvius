@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: login,v 1.5 2006/07/07 12:28:50 dk Exp $
 %#
 %if($login_failed) {
 <p>

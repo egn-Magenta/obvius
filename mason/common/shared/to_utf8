@@ -2,7 +2,7 @@
 $dataref
 </%args>
 <%once>
-# $Id$
+# $Id: to_utf8,v 1.2 2007/02/26 13:59:47 dk Exp $
 
 # Single place to convert internal obvius representation to unicode scalars.
 # Input  - scalar with utf8 bit set off, in either utf8 or latin1 (or anything else)

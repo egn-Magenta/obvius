@@ -4,7 +4,7 @@
 <& /shared/htmlize, text=>$vdoc->field('content') &>
 % if ($url) {
 <p>
-Link: <a href="<% $url %>" title="<% $title %>"><% $name |h %></a>
+Link: <a href="<% $url %>" title="<% $title %>"><% $url |h %></a>
 </p>
 % }
 
@@ -22,6 +22,4 @@ $obvius->get_version_fields($vdoc, [qw(title teaser content url)]);
 
 my $title=$vdoc->Title;
 my $url=$vdoc->field('url');
-my $name = $url;
-$url ="mailto:$url" if ($url =~ /^[^@]+@[^.]+\..*$/);
 </%init>

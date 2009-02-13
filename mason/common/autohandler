@@ -1,8 +1,7 @@
 <% $m->call_next %>\
 %
 <%args>
-  $obvius_version => undef
-  $obvius_session_id => undef
+$obvius_version=>undef
 </%args>
 %
 <%init>
@@ -11,37 +10,22 @@ $uri=$r->notes('uri');
 $obvius=$r->pnotes('obvius');
 $doc=$r->pnotes('document');
 
-my $session = $r->pnotes('site')->get_session($obvius_session_id)
-  if ($obvius_session_id);
-
 $vdoc=undef; # Be sure to look up a vdoc
-if ($r->pnotes('site')->param('is_admin') ||
-    ($session && ($uri eq $session->{allow_access_to}))) {
-    delete $session->{allow_access_to};
-    # Remove access to the preview page for this session id
-    # so it can't be hijacked.
+if ($r->pnotes('site')->param('is_admin')) {
     if ($obvius_version) {
-        if ($obvius_version eq "latest") {
-            $vdoc = $obvius->get_latest_version($doc);
-        } else {
-            $vdoc =  $obvius->get_version($doc, $obvius_version);
-        }
+	$vdoc=$obvius->get_version($doc, $obvius_version);
     }
     if (!$vdoc) {
-        $vdoc=$r->pnotes('version');
-        $vdoc ||= $obvius->get_public_version($doc);
-        $vdoc ||= $obvius->get_latest_version($doc);
+	$vdoc=$r->pnotes('version');
+	$vdoc=$obvius->get_public_version($doc) unless ($vdoc);
+	$vdoc=$obvius->get_latest_version($doc) unless ($vdoc);
     }
 }
 else {
     $vdoc=$obvius->get_public_version($doc);
 }
-
-if (! defined $vdoc) {
-    $m->clear_and_abort(404);
-}
 $doctype=$obvius->get_version_type($vdoc);
-#$r->pnotes('version' =>$vdoc);
+$r->pnotes('version' =>$vdoc);
 $r->pnotes('doctype' =>$doctype);
 
 $m->comp('/shared/path_section');
@@ -57,9 +41,9 @@ $r->notes('siteflag' =>$siteflag);
 my $language;
 
 if ($siteflag =~ m/_en$/) {
-    $language = 'en';
+$language = 'en';
 } else {
-    $language = 'da';
+$language = 'da';
 }
 
 $r->notes('language' =>$language);

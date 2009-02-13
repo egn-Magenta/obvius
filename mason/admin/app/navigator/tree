@@ -11,7 +11,7 @@ $base_vdoc
 $path
 $fieldname=>undef
 $i=>undef
-$len=>34
+$len=>20
 </%args>
 %
   <ul>

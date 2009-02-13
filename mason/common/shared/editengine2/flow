@@ -56,7 +56,7 @@
      die "unsatisfied node " . Dumper($node) if $node eq $n2;
  }
 
-# use Data::Dumper; print STDERR '$node: ' . Dumper($node);
+#use Data::Dumper; print STDERR '$node: ' . Dumper($node);
 # use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
 
 
@@ -82,7 +82,6 @@
  $session
  $vertex
  $data
- $redirect_to => undef
 </%args>
 <%init>
 #use Data::Dumper; print STDERR "\t" . '<flow:route> $vertex: ' . "$vertex";
@@ -111,17 +110,16 @@
          #      existence of a method named 'do' onto the component!?
          #      What are the possibilities from the 'public' side?
          my ($act, $do) = $action =~ /^(.+):(.+)$/;
-#        print STDERR "\t\tact: $act, do: $do\n";
+         #print STDERR "\t\tact: $act, do: $do\n";
          if ($do) {
-	   $r->pnotes('obvius_session')->{action}=$act;
-
-	   use Obvius::Helpers qw (escape_uri_argument);
-	   my $escaped_uri = escape_uri_argument($redirect_to);
-	   $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}&obvius_perform_$do=1" . 
-		    ($redirect_to ? "&obvius_redirect_to=" . $escaped_uri : '' ));
-	 } else {
-	   $r->pnotes('obvius_session')->{action}=$action;
-	   $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}");
+             # XXX Why use pnotes here, when $session is available?
+             $r->pnotes('obvius_session')->{action}=$act;
+             $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}&obvius_perform_$do=1");
+         }
+         else {
+             # XXX Why use pnotes here, when $session is available?
+             $r->pnotes('obvius_session')->{action}=$action;
+             $m->comp('/shared/redirect', location=>"./?obvius_session_id=$session->{_session_id}");
          }
      }
      else {
@@ -211,7 +209,7 @@
 #print STDERR "<flow:source>";
  if ($source->{merge} eq 'insert') {
 #    use Data::Dumper; print STDERR '$node: ' . Dumper($node);
-#    use Data::Dumper; print STDERR '$pool: ' . Dumper($pool);
+# use Data::Dumper; print STDERR '$pool: ' . Dumper($pool);
 
    # Note: This assumes only one object
    my ($source_object_id) = keys %$pool;

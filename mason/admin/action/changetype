@@ -20,7 +20,7 @@
 <& /shared/editengine2/type/util/dropdown, name=>'obvius_new_doctypeid', choices=>\@choices, labels=>\%labels, value=>$value || $doctype->Id &>
 <p>
 %if($restricted and $user_is_admin) {
-<& /shared/msg, text=>'Doctypes marked with (*) are normally restricted in this area, but are visible to users with admin-rights.' &>
+<& /shared/msg, text=>'Doctypes marked with (*) are normally resticted in this area, but are visible to users with admin-rights.' &>
 %}
 %
 <%args>
@@ -39,8 +39,7 @@ my $docparams = $obvius->get_docparams_recursive($doc);
 if(my $dt_value = $docparams->param('admin_doctypes_available')) {
     if(my $dt_list = $dt_value->param('value')) {
         $restricted = 1;
-	chomp $dt_list;
-        $available_doctypes{$_}++ for split /(?:\s*,\s*)|(?:\s*\n\s*)/, $dt_list;
+        $available_doctypes{$_}++ for split /\s*,\s*/, $dt_list;
     }
 }
 

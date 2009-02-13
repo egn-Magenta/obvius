@@ -7,11 +7,7 @@ $vdoc=undef; # Be sure to look up a vdoc
 
 # Check if there's an argument saying what version to use:
 if ($obvius_version) {
-    if ($obvius_version eq "latest") {
-	$vdoc=$obvius->get_latest_version($doc);
-    } else {
-	$vdoc=$obvius->get_version($doc, $obvius_version);
-    }
+    $vdoc=$obvius->get_version($doc, $obvius_version);
 }
 elsif (my $session=$r->pnotes('obvius_session')) { # Otherwise, check if it's given in a sesssion:
     $vdoc=$obvius->get_version($doc, $session->{obvius_version}) if (exists $session->{obvius_version});

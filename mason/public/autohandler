@@ -1,38 +1,15 @@
 <% $m->call_next %>\
 %
-<%args>
-$obvius_version => undef
-</%args>
 <%init>
-# All the global variables, ought to be undef here.
-# unfortunately they do not always appears to be so. Therefore $vdoc is set explicitly to undef here.
-
-
 $prefix=$r->notes('prefix');
 $uri=$r->notes('uri');
 $obvius=$r->pnotes('obvius');
 $doc=$r->pnotes('document');
 
 my @params=$r->param;
-
 $r->no_cache(1) unless scalar(@params)==0;
 
-$vdoc = undef;
-if ($obvius_version) {
-    if ($obvius_version eq "latest") {
-        $vdoc = $obvius->get_latest_version($doc);
-    } else {
-        $vdoc =  $obvius->get_version($doc, $obvius_version);
-    }
-}
-
-$vdoc ||= $obvius->get_public_version($doc);
-
-
-if (! defined $vdoc) {
-    $m->clear_and_abort(404);
-    print STDERR "Huh Undefined VDOC, and I am going\n"
-}
+$vdoc=$obvius->get_public_version($doc);
 $doctype=$obvius->get_version_type($vdoc);
 $r->pnotes('version' =>$vdoc);
 $r->pnotes('doctype' =>$doctype);

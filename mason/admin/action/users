@@ -308,6 +308,9 @@ my $edges = {
 <%init>
 $m->comp('/default/check_access', can=>'can_create_new_user');
 
+print STDERR "User: " . $obvius->{USER} . "\n";
+print STDERR "can_manage_users: " . $obvius->can_create_new_user;
+print STDERR "\n";
 if ( $obvius-> can_create_new_user > 1) {
 	$groups->{storage}->{organization}->{where} = undef;
 } else {

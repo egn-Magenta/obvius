@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: universal_accessrules,v 1.3 2007/12/12 13:17:38 troels Exp $
 <script type="text/javascript" src="/scripts/admin_accessrules.js"></script>
 
 <div class="obvius-command obvius-command-document-information obvius-link-decor">

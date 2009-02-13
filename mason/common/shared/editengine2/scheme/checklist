@@ -1,12 +1,12 @@
 % unless ($ARGS{display_style}) {
 <h2><& /shared/msg, text=>$editscheme->{label} &></h2>
 % }
-% #  and
+% #  and 
 % if ($func_h and ($func_h->{object} eq 'new' or $func_h->{object} eq 'existing')) {
 %     # Find element from $storage->param('identifier') in parameters:
 %     my $element=($func_h->{object} eq 'new' ? {} : $storage->get_element(%{$r->pnotes('obvius_object_identifier')}));
 %
-<form id="obvius_editengine_main_form" action="./" method="get" enctype="multipart/form-data">
+<form action="./" method="get" enctype="multipart/form-data">
   <input type="hidden" name="obvius_session_id" value="<% $r->pnotes('obvius_session')->{'_session_id'} |h %>" />
 %     foreach my $identifier (@{$storage->param('identifiers')}) {
   <input type="hidden" name="obvius_object_identifier" value="<% $identifier |h %>=<% $r->pnotes('obvius_object_identifier')->{$identifier} |h %>" />

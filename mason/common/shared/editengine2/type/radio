@@ -8,7 +8,7 @@ $validation
 $value
 </%args>
 %
-<& util/label, name => $field->{name}, label=>$field->{label}, field=>$field &>
+<& util/label, label=>$field->{label}, field=>$field &>
 % if ($validation->{repeatable}) {
 <& util/checkboxes, name=>$prefix . $field->{name}, choices=>\@choices, labels=>\%labels, value=>$value->{value}, &>
 % }

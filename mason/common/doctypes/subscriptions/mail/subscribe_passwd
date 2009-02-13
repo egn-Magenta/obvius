@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: subscribe_passwd,v 1.6 2006/07/11 12:02:17 bjarni Exp $
 From: <% $from %>
 Subject: Ændring af abonnement
 To: <% $email %>

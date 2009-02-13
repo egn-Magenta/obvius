@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: seqselect,v 1.2 2005/05/30 09:59:46 asjo Exp $
 <div class="lys" style="padding: 0.5em; border-bottom: solid 1px black; margin-bottom: 0.5em">
 <strong><% $this_doc->param('short_title') || $this_doc->Title %>: sekvensnummer</strong>
 </div>

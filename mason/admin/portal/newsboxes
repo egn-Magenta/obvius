@@ -37,14 +37,6 @@
 <%init>
 $r->notes(inactive_newsboxes=>1) if ($obvius->get_docparam_value_recursive($doc, 'admin_no_newsboxes'));
 
-# active for members of Admin group only
-my $admin = $obvius-> get_grpid('Admin');
-$admin = -1 unless defined $admin;
-$r->notes( inactive_newsboxes => 1) 
-	unless grep { $admin == $_ } @{ 
-		$obvius-> get_user_groups( $obvius->get_userid( $obvius-> {USER} )) 
-	};
-
 $obvius->get_version_fields($vdoc, [qw(expires)]);
 my $expires=$vdoc->field('expires') || '9999-01-01 10:10:10';
 

@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: edit_subscriber,v 1.4 2006/07/07 12:28:50 dk Exp $
 %#
 <form method="post" action="<% $prefix . $uri %>">
 <input type="hidden" name="op" value="subscribe">

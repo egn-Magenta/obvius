@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: new_subscriber,v 1.8 2006/07/11 12:02:17 bjarni Exp $
 From: <% $from %>
 Reply-To: abonnement+<% $password %>=<% $remail %>@<% $r->pnotes('site')->Sitename %>
 Subject: Tilmelding til nyhedsservice ::<% $cookie %>::<% $email %>

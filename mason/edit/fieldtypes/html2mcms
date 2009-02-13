@@ -81,7 +81,6 @@ if ($docidify_links) {
     $out = '';
     $p->parse($value);
     $p->eof;
-    $m->scomp( '/shared/from_utf8', dataref => \$out);
     $value = $out;
 }
 return $value;

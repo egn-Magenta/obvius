@@ -45,7 +45,7 @@ my $p = HTML::Parser->new(api_version=>3,
 
                                                     $out.=$text;
 
-                                                } elsif($tagname eq 'img' || $tagname eq 'embed') {
+                                                } elsif($tagname eq 'img') {
 
                                                     # Make images relative to / and convert to .docid format if possible:
 

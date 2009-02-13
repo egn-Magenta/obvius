@@ -1,4 +1,4 @@
-%# $Id$
+%# $Id: Subscribe,v 1.2 2003/09/01 13:09:25 lisa Exp $
 <& headline &>
 <& $include, output=>$output &>
 <%args>

@@ -7,7 +7,7 @@
 % else {
  <a href="../"><img width="16" height="11" src="/pics/icons/up.png" alt="<& /shared/msg, text=>'Up' &>" /></a>\
 % }
- <& util/navigator_link_start, path => $uri &><img width="16" height="11" src="/pics/icons/navigator<% $r->notes('inactive_subdocs') ? '-inactive' : '' %>.png" alt="<& /shared/msg, text=>'Navigator' &>" /></a></h3>
+ <& util/navigator_link_start &><img width="16" height="11" src="/pics/icons/navigator<% $r->notes('inactive_subdocs') ? '-inactive' : '' %>.png" alt="<& /shared/msg, text=>'Navigator' &>" /></a></h3>
 
        <ul>
 % # Current:
@@ -94,7 +94,7 @@ if(my $cached_value=$m->cache(action=>'retrieve', key=>$cache_key, busy_lock=>'3
     #print STDERR $base_doc->Id . '|' . $base_vdoc->Version . " USING CACHED SUBS\n";
     return $cached_value;
 }
-#print STDERR $base_doc->Id . '|' . $base_vdoc->Version . " CACHING SUBS\n";
+print STDERR $base_doc->Id . '|' . $base_vdoc->Version . " CACHING SUBS\n";
 
 my $subvdocs=$obvius->get_document_subdocs($base_doc, sortvdoc=>$base_vdoc, public=>0);
 my @subs=map {

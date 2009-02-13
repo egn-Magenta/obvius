@@ -1,5 +1,5 @@
 %# Handle image doctype when saving
-%# $Id$
+%# $Id: handle_image_doctype,v 1.1.1.1 2003/03/10 07:07:31 jubk Exp $
 <%args>
 $session
 </%args>
