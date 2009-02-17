@@ -75,7 +75,7 @@ my $commands = [
 	    options => {output => 1, post_hook => 
 			sub {
 			     my $res = shift;
-			     if (ref($res) eq 'ARRAY' && scalar(@$res) == 1) {
+			     if (ref $res eq 'ARRAY' && 1 == @$res) {
 				  return $res->[0]{is_};
 			     } 
 			     return 0;
@@ -161,7 +161,7 @@ sub make_cmd {
 	  $this->db->{RaiseError} = 1;
 	  
 	  my @qargs;
-	  if (scalar(@args) == 1 && ref($args[0]) eq 'HASH') {
+	  if (scalar(@args) == 1 && ref $args[0] eq 'HASH') {
 	       my $arg = $args[0];
 	       for my $n (@$args) {
 		     if (exists $arg->{$n}) {
@@ -171,7 +171,7 @@ sub make_cmd {
 		     }
 		}
 	  } else {
-	       @qargs = (@args, (undef) x ($nr_args - scalar(@args)));
+	       @qargs = (@args, (undef) x ($nr_args - @args));
 	  }
 	  
 	  $this->start_transaction if ($options->{explicit_transactional});

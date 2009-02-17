@@ -57,8 +57,6 @@ my $editscheme;
 my $storage;
 
 if (!scalar(@confirmations)) {
-  #use Data::Dumper; print STDERR '$r->pnotes("obvius_editengine_protocol"): ' . Dumper($r->pnotes("obvius_editengine_protocol"));
-
   # Setup editscheme
   $path = $m->comp('history:extract_path', history=>$history);
 

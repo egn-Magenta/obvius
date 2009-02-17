@@ -88,8 +88,7 @@ $object_description = '' if $object_description eq 'anonymous';
  $history
 </%args>
 <%init>
- $history='' unless $history; # Just to avoid 'use on uninitialized value in split' warning
- my @events = split '___', $history;
+ my @events = $history ? split '___', $history ? ();
  return \@events;
 </%init>
 </%method>

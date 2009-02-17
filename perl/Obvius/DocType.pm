@@ -50,7 +50,7 @@ our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #     PUBLISH_FIELDS: Fields which can be changed without creating a new
 #                     version. These fields are usually associated with a 
 #                     published version of the document and usually 
-#                     dropped once the document is no longer published.     
+#                     dropped once the document is no longer published.
 sub new {
     my ($class, $rec) = @_;
 

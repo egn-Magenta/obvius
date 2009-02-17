@@ -13,12 +13,7 @@ our @ISA = qw( WebObvius::Cache::Collection );
 our @cache_objects = qw( WebObvius::Cache::CacheDoc
 		         WebObvius::Cache::StandardHashCache );
 
-sub new {
-     my ($class, $obvius) = @_;
-     
-     my $obj = $class->SUPER::new;
-     return $obj;
-}
+sub new {return shift->SUPER::new;}
      
 sub add_to_cache {
      my ($this, $obvius, %object) = @_;;
@@ -26,12 +21,12 @@ sub add_to_cache {
      for (@cache_objects) {
 	  my $obj = eval ($_ . '->new($obvius, %object);' );
 	  print STDERR "error: $@" if ($@);
-	  next if (!$obj);
+	  next if !$obj;
 	  
 	  push @{$this->{collection}}, $obj;
 	  return $obj;
-     } 
+     }
      
-     return 0;
+     return undef;
 }
      

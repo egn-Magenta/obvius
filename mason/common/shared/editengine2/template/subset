@@ -103,8 +103,8 @@ if ($set_transformer eq 'sort') {
 	@$list = sort {lc($a->{name}->{value}) cmp lc($b->{name}->{value})} @$list;
 	return $list;
     };
-    $set = sorter($set) if (defined $set_transformer);
-} else {
+    @$set = sort {lc($a->{name}->{value}) cmp lc($b->{name}->{value})} @$set;
+} elsif ($set_transformer) {
     print STDERR "Unknown set_transformer: $set_transformer";
 }
 

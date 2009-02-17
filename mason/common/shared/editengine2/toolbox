@@ -20,7 +20,7 @@
 <%doc>
 
 Translates the current object (from the protocol) to a nice,
-'::/--' -separated form usefull for identifying objects in forms etc.
+'::/--' -separated form useful for identifying objects in forms etc.
 
 [!] Note, that this disallows '::' and '--' in identifier
     names _and_ values!

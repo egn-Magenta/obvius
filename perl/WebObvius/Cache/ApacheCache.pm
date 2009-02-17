@@ -159,7 +159,7 @@ sub flush_by_pattern {
     my ($this, $pred) = @_;
 
     open F, '+<', $this->{cache_index} || return;
-    flock F, LOCK_EX || goto close;
+    flock F, LOCK_EX or goto close;
     my @lines;
     while(my $line = <F>) {
         my ($local_uri) = ($line =~ m/^(\S+)/);
@@ -208,10 +208,10 @@ sub check_vfields_for_docids {
      
      my @append;
      
-     push @append, join " OR ", map { "name = '$_'" } @fields if (scalar(@fields));
+     push @append, join " or ", map { "name = '$_'" } @fields if (scalar(@fields));
      push @append, $this->bring_forth_sql_for_docsearch($docs, "text_value");
      @append = map { "( $_  )" } @append;
-     my $append = join " AND ", @append;
+     my $append = join " and ", @append;
 
      my $sql = <<END;
 select distinct(docid) from
@@ -293,8 +293,7 @@ END
 	 
 sub perform_command_sophisticated_rightbox_clear {
      my ($this, $doctype) = @_;
-     
-     $doctype =~ s/'/''/;
+
      my $query = <<END; 
 select distinct(docid) from 
     vfields vf natural join versions v, 
@@ -305,7 +304,7 @@ select distinct(docid) from
      name='rightboxes' and 
      text_value regexp re;
 END
-     #'
+
      $this->{obvius}->execute_command('set group_concat_max_len=60000;');
      my $docids = $this->execute_query($query);
      
@@ -363,14 +362,6 @@ sub special_actions {
 						 command => 'sophisticated_rightbox_clear', 
 						 args => ['NyArrangementsliste']
 						}],
-
-				   FileUpload    => [{
-						      command => 'vfield_search', 
-						      args => []
-						     }],
-				   Image         => [{
-						      command => 'vfield_search', args => []
-						     }]
 				  );
      
      for my $doc (@$docs) {
@@ -445,7 +436,7 @@ sub commands_equal_p {
      my ($cmd1, $cmd2) = @_;
      
      for (keys %$cmd1, keys %$cmd2) {
-	  return 0 if ($cmd1->{$_} and $cmd2->{$_} and $cmd1->{$_} ne $cmd2->{$_});
+	  return 0 if (exists $cmd1->{$_} && exists $cmd2->{$_} && $cmd1->{$_} ne $cmd2->{$_});
      }
 
      return 1;

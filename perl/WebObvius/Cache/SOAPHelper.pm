@@ -10,14 +10,14 @@ sub send_command {
      my ($cache, $cmds) = @_;
      
      my $obvius = $cache->{obvius};
-     return if (!$obvius);
+     return if !$obvius;
      my $other_servers = $obvius->{OBVIUS_CONFIG}{OTHER_SERVERS};
-     return if (!$other_servers);
+     return if !$other_servers;
+     
+     $other_servers = [$other_servers] if !ref $other_servers;
 
-     print STDERR "Sending command: \n"; 
-     print STDERR Dumper($cmds);
      for my $host (@$other_servers) {
-	  my $uri =SOAP::Lite->uri("http://$host/WebObvius::SOAP::CacheHandler");
+	  my $uri = SOAP::Lite->uri("http://$host/WebObvius::SOAP::CacheHandler");
 	  my $proxy = $uri->proxy("http://$host/soap");
 	  $proxy->flush($cmds);
      }

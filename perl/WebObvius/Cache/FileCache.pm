@@ -16,7 +16,7 @@ sub new {
 
 sub flush {
      my ($this, $dirty) = @_;
-     $dirty = [ $dirty] if (!ref $dirty);
+     $dirty = [$dirty] if !ref $dirty;
      
      my $cache = Cache::FileCache->new({cache_root => $this->{cache_root},
 					namespace => $this->{namespace}});
