@@ -190,13 +190,13 @@ sub bring_forth_sql_for_docsearch {
      my ($this, $docs, $str) = @_;
      
      my @docids = grep { /^\d+$/ } grep { $_ } map { $_->{docid} } @$docs;
-     return if (!scalar @docids);
+     return if !@docids;
 
      my $docids = uniquify (sub { return ($_[0] == $_[1]) }, \@docids);
      
-     my @docid_query = map { "$str LIKE '%/$_.docid%'" } @$docids;
+     my @docid_query = map { "$str like '%/$_.docid%'" } @$docids;
      
-     my $sql = join " OR ", @docid_query;
+     my $sql = join " or ", @docid_query;
      return $sql;
 }
      
@@ -204,14 +204,18 @@ sub check_vfields_for_docids {
      my ($this, $docs, $fields) = @_;
      my $obvius = $this->{obvius};
 
-     my @fields = map { s/'/''/; $_ } @$fields if ref($fields); #'
-     
      my @append;
      
-     push @append, join " or ", map { "name = '$_'" } @fields if (scalar(@fields));
-     push @append, $this->bring_forth_sql_for_docsearch($docs, "text_value");
-     @append = map { "( $_  )" } @append;
+     push @append, join " or ", map { "name = '$_'" } @$fields;
+     my $sql = $this->bring_forth_sql_for_docsearch($docs, "text_value");
+     return [] if !$sql;
+     
+     push @append, $sql;
+
+     @append = map { "( $_ )" } @append;
      my $append = join " and ", @append;
+
+     return [] if !$append;
 
      my $sql = <<END;
 select distinct(docid) from
@@ -297,7 +301,7 @@ sub perform_command_sophisticated_rightbox_clear {
      my $query = <<END; 
 select distinct(docid) from 
     vfields vf natural join versions v, 
-    (select concat('^[0-9]+:', re, '\$') re from (select group_concat(concat(id, '\\\\.docid') separator '|') re
+    (select concat('^[0-9]+:(', re, ')\$') re from (select group_concat(concat(id, '\\\\.docid') separator '|') re
                    from (select id from documents where 
                    type = (select id from doctypes where name ='$doctype' limit 1) ) id) r ) r where 
      public = 1 and
@@ -327,8 +331,8 @@ sub special_actions {
      
      my @commands;
      my %special_op_per_doctype = ( 
-				   Nyhed         => [
-						{
+				   Nyhed => [
+                                                {
 						 command => 'clear_doctype', 
 						 args => ['Nyhedsliste'] 
 						}, 
@@ -383,16 +387,40 @@ sub special_actions {
      return \@commands;
 }
 
+sub clear_moved {
+     my ($this, @uris) = @_;
+     
+     my @docids;
+     for my $uri (@uris) {
+          $uri .= '%';
+          my $res = $this->execute_query("select docid from docid_path where path like ?", $uri);
+          push @docids, map { $_->{docid} } @$res;
+     }
+     
+     my @to_clear;
+     for my $docid (@docids) {
+          push @to_clear, @{$this->check_vfields_for_docids([{docid => $docid}], ['content', 'teaser'])};
+     }
+
+     return $this->make_clear_uris(\@to_clear);
+}
+     
+     
+          
 sub find_dirty {
      my ($this, $cache_objects) = @_;
 
-     my $vals = $cache_objects->request_values('uri', 'doctype', 'docid', 'clear_leftmenu', 'clear_recursively');
+     my $vals = $cache_objects->request_values('uri', 'doctype', 'docid', 'clear_leftmenu', 
+                                               'clear_recursively', 'document_moved');
      my @uris		= grep { $_ } map { $_->{uri}   } @$vals;
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
      my @clear_recursively = map {{command => 'clear_by_regexp', regexp => "^" . $_->{uri}}}
        grep { $_->{uri} and $_->{clear_recursively}} @$vals;
      my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
-
+     
+     my @moved_documents = grep { $_ } map { $_->{uri} } grep {$_->{document_moved} } @$vals;
+     my $moved_documents = $this->clear_moved(@moved_documents);
+     
      my @related = map { $this->find_related($_) } @leftmenu_uris;
      
      my @docids_doctypes = map { {docid => $_->{docid}, doctype => $_->{doctype}, uri => $_->{uri}}} grep { $_->{docid}} @$vals;
@@ -403,10 +431,11 @@ sub find_dirty {
     
      my @commands = grep { $_ } 
        (@clear_recursively,
-	@$referrers, 
-	@related, 
+	@$referrers,
+	@related,
 	@$special_actions,
-	@uris_to_clear
+	@uris_to_clear,
+        @$moved_documents
        );
      
      my $unique = uniquify_commands(\@commands);

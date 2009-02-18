@@ -11,11 +11,25 @@ use Obvius::DocType;
 our @ISA = qw( Obvius::DocType );
 our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-sub alternate_location {
-    my ($this, $doc, $vdoc, $obvius) = @_;
+sub raw_document_data {
+     my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
 
-    my $url=$obvius->get_version_field($vdoc, 'uploadfile');
-    return $url;
+     my $path = $obvius->get_version_field($vdoc, 'UPLOADFILE');
+     return undef if !$path;
+
+     $path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . $path;
+     $path =~ s|/+|/|g;
+     
+     $obvius->get_version_fields($vdoc, ['MIMETYPE', 'TITLE']);
+     my $mime_type = $vdoc->field('MIMETYPE');
+     my $title = $vdoc->field('TITLE');
+     
+     local $/;
+     open $fh, $path;
+     my $data = <$fh>;
+     close $fh;
+
+     return ($mime_type, \$data);
 }
 
 1;

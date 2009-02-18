@@ -2172,7 +2172,8 @@ sub rename_document {
     }
 
     undef $this->{DB_Error};
-    $this->register_modified(uri   => $old_uri, clear_leftmenu => 1);
+    $this->register_modified(docid => $doc->Id, document_moved => 1);
+    $this->register_modified(uri => $old_uri, clear_leftmenu => 1);
     $this->register_modified(admin_leftmenu => [$old_parent_id, $new_parent->Id, $doc->Id]);
 
     $this->{LOG}->info("====> Renaming/moving document ... done");

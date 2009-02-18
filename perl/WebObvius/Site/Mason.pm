@@ -300,7 +300,8 @@ sub handler ($$) {
 		 $this->output_file($req, %args);
 
 	       $req->no_cache(1) if ($is_admin);
-	       execute_cache($obvius, $req, $data) if ($status == OK && !$is_admin);
+	       execute_cache($obvius, $req, $data) if ($status == OK);
+               
 	       return $status;
 	  }
      }
@@ -691,7 +692,10 @@ sub output_data {
      my ($this, $req, %options) = @_;
      
      my $con_disp = $options{con_disp};
-     my $data = $options{data};
+     my $new_data = $options{data};
+     
+     my $data;
+     $data = \$new_data if !ref $new_data;
 
      $this->set_mime_type_and_content_disposition($req, %options);
      # The spec. says that it is not necessary to advertise this:
@@ -699,26 +703,28 @@ sub output_data {
      
      # Handle Range: N-M
      my $range=$req->headers_in->{Range};
+     my $len = length($$data);
+
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
-          my ($start, $stop)=($1 || 0, $2 || length($data));
+          my ($start, $stop)=($1 || 0, $2 || $len);
           
           # Sanity check range:
-          if ($start>length($data) or $stop>length($data) or $start>$stop) {
-               $req->header_out('Content-Range'=>'0-0/' . length($data));
+          if ($start>length($data) or $stop>$len or $start>$stop) {
+               $req->header_out('Content-Range'=>'0-0/' . $len);
                $req->status(416); # "Requested range not satisfiable"
                $req->send_http_header;
                return OK;
           }
           
-          $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . length($data));
+          $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . $len);
           $req->set_content_length($stop-$start);
           $req->status(206); # "Partial content"
           $req->send_http_header;
-          $req->print(substr($data, $start, $stop-$start));
+          $req->print(substr($$data, $start, $stop-$start));
      } else {
-          $req->set_content_length(length($data));
+          $req->set_content_length($len);
           $req->send_http_header;
-          $req->print($data) unless ($req->header_only);
+          $req->print($$data) unless ($req->header_only);
      }
 
      return OK;
