@@ -204,7 +204,7 @@ sub check_vfields_for_docids {
      my ($this, $docs, $fields) = @_;
      my $obvius = $this->{obvius};
 
-     my @fields = map { s/'/''/; $_ } @$fields if ref($fields); #'
+     my @fields = map { s/[^\d\w]//g; $_ } @$fields if ref($fields);
      
      my @append;
      
@@ -223,7 +223,6 @@ END
      
      return \@res;
 }
-
 
      
 sub find_referrers {
@@ -294,7 +293,7 @@ END
 sub perform_command_sophisticated_rightbox_clear {
      my ($this, $doctype) = @_;
      
-     $doctype =~ s/'/''/;
+     $doctype =~ s/[^\w\d]//g;
      my $query = <<END; 
 select distinct(docid) from 
     vfields vf natural join versions v, 
