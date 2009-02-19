@@ -183,36 +183,40 @@ sub execute_query {
 sub check_rightboxes {
      my ($this, $docs) = @_;
      
-     return $this->check_vfields_for_docids($docs, [ 'rightboxes' ]);
+     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3'],
+                                           anchored_regexp => 1);
 }
 
 sub bring_forth_sql_for_docsearch {
-     my ($this, $docs, $str) = @_;
+     my ($this, $docs, $str, %options) = @_;
      
-     my @docids = grep { /^\d+$/ } grep { $_ } map { $_->{docid} } @$docs;
+     my @docids = grep { /^\d+$/ } map { ref $_ ? $_->{docid} : $_ } @$docs;
      return if !@docids;
 
      my $docids = uniquify (sub { return ($_[0] == $_[1]) }, \@docids);
      
-     my @docid_query = map { "$str like '%/$_.docid%'" } @$docids;
-     
+     my @docid_query;
+     if ($options{anchored_regexp}) {
+          my $docids = join '|', @$docids;
+          push @docid_query, "$str regexp '^[0-9]+:/($docids).docid'";
+     } else {
+          @docid_query = map { "$str like '%/$_.docid%'" } @$docids;
+     }
+
      my $sql = join " or ", @docid_query;
      return $sql;
 }
      
 sub check_vfields_for_docids {
-     my ($this, $docs, $fields) = @_;
+     my ($this, $docs, $fields, %options) = @_;
      my $obvius = $this->{obvius};
 
-<<<<<<< HEAD:perl/WebObvius/Cache/ApacheCache.pm
-=======
-     my @fields = map { s/[^\d\w]//g; $_ } @$fields if ref($fields);
-     
->>>>>>> b46742fa2277b77713f7c8bb06172633914b6d30:perl/WebObvius/Cache/ApacheCache.pm
+     $fields = [ $fields ] if !ref $fields;
+     $docs = [ $docs ] if !ref $docs;
      my @append;
      
      push @append, join " or ", map { "name = '$_'" } @$fields;
-     my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value");
+     my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
      return [] if !$docsearch_sql;
      
      push @append, $docsearch_sql;
@@ -302,28 +306,28 @@ END
 	 
 sub perform_command_sophisticated_rightbox_clear {
      my ($this, $doctype) = @_;
-<<<<<<< HEAD:perl/WebObvius/Cache/ApacheCache.pm
-
-=======
      
-     $doctype =~ s/[^\w\d]//g;
->>>>>>> b46742fa2277b77713f7c8bb06172633914b6d30:perl/WebObvius/Cache/ApacheCache.pm
-     my $query = <<END; 
-select distinct(docid) from 
-    vfields vf natural join versions v, 
-    (select concat('^[0-9]+:(', re, ')\$') re from (select group_concat(concat(id, '\\\\.docid') separator '|') re
-                   from (select id from documents where 
-                   type = (select id from doctypes where name ='$doctype' limit 1) ) id) r ) r where 
-     public = 1 and
-     name='rightboxes' and 
-     text_value regexp re;
-END
-
-     $this->{obvius}->execute_command('set group_concat_max_len=60000;');
-     my $docids = $this->execute_query($query);
+     my $query = "select distinct docid from versions v join doctypes dt on (dt.id = v.type)
+                  where v.public = 1 and dt.name = ?";
+     my @docids = map { $_->{docid} } @{$this->execute_query($query, $doctype )};
      
-     my @docids = map { $_->{docid} } @$docids;
-     return $this->make_clear_uris(\@docids);
+     my @docids_to_clear;
+     while (my @cur_docids = splice @docids, 0, 1000) {
+          push @docids_to_clear, 
+               @{$this->check_vfields_for_docids(\@cur_docids, 
+                                                 ['rightboxes', 'boxes1', 'boxes2', 'boxes3'],
+                                                 anchored_regexp => 1
+                                                )};
+     }
+     
+     
+     my @res_docids;
+     my %seen;
+     for my $docid (@docids_to_clear) {
+          push @res_docids, $docid if(!$seen{$docid}++);
+     }
+
+     return $this->make_clear_uris(\@res_docids);
 }
 
 sub perform_command_vfield_search {
@@ -397,7 +401,6 @@ sub special_actions {
      return \@commands;
 }
 
-use Data::Dumper;
 sub clear_moved {
      my ($this, @uris) = @_;
      
