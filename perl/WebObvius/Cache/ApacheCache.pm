@@ -213,28 +213,19 @@ sub check_vfields_for_docids {
 
      $fields = [ $fields ] if !ref $fields;
      $docs = [ $docs ] if !ref $docs;
-     my @append;
-     my $name_query = "name in (" . (join ',', (map { "'$_'" } @$fields)) . ")";
-     push @append, $name_query;
 
+     my $name_query = "name in (" . (join ',', (map { "'$_'" } @$fields)) . ")";
      my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
      return [] if !$docsearch_sql;
      
-     push @append, $docsearch_sql;
-
-     @append = map { "( $_ )" } @append;
-     my $append = join " and ", @append;
-
-     return [] if !$append;
-
      my $sql = <<END;
-select distinct(docid) from
-       versions natural join vfields
-where
-       public = 1 AND $append
+select docid from
+       (select docid, text_value from versions natural join vfields where 
+        public = 1 AND $name_query) t where $docsearch_sql
 END
      my @res = map { $_->{docid}} @{$this->execute_query($sql)};
      
+     print STDERR Dumper(\@res);
      return \@res;
 }
 
