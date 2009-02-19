@@ -38,7 +38,7 @@ require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw( handler );
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub handler {
     my $r = shift;

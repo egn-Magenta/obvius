@@ -39,7 +39,7 @@ use Obvius;
 use Obvius::UriCache;
 
 our @ISA = qw( Obvius Obvius::UriCache Exporter );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub new {
     my($class, $obvius_config, $user, $password, $doctypes, $fieldtypes, $fieldspecs, %options) = @_;

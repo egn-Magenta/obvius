@@ -10,7 +10,7 @@ use Obvius::DocType;
 use Date::Calc qw( Week_of_Year Add_Delta_YMD Monday_of_Week);
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;

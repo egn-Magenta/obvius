@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 1;
 __END__

@@ -61,7 +61,7 @@ our @ISA = qw(  Obvius::Data
                 Obvius::Queue
                 Exporter
             );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 our @EXPORT = qw(OBVIUS_OK OBVIUS_DECLINE OBVIUS_ERROR);
 our @EXPORT_OK = ();
@@ -321,7 +321,7 @@ sub get_doc_by_path {
     my ($this, $uri, $path_info) = @_;
 
     $this->tracer($uri, $path_info||'') if ($this->{DEBUG});
-
+    
     if ($uri =~ /^\/(\d+).docid\/?$/) {
         return ($this->get_doc_by_id($1));
     }
@@ -1259,9 +1259,8 @@ sub get_version_fields {
     while (my $rec = $set->Next) {
         my $fspec = $doctype->field($rec->{name}, undef, $type);
         next unless ($fspec);
-	my $escape_me = !$fspec->param('dont_escape_me');
+#	my $escape_me = !$fspec->param('dont_escape_me');
         my $field = $fspec->param('fieldtype')->param('value_field') . '_value';
-#       print STDERR "VFIELD FROM DB $rec->{name} = $field (threshold $fspec->{THRESHOLD})\n";
 	
         my $value = $fields->param($rec->{name});
         # Apparantly the db returns -1.0 as -1, which is not what we want:
@@ -1271,7 +1270,7 @@ sub get_version_fields {
         if (ref $value eq 'ARRAY') {
             push(@$value, $field_value);
         } else {
-	     $field_value =~ s|<|&lt;|g if ($escape_me);
+#	     $field_value =~ s|<|&lt;|g if ($escape_me);
 	     $fields->param($rec->{name} => $field_value);
         }
     }

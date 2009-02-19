@@ -35,7 +35,7 @@ use Carp;
 use Obvius::Data;
 
 our @ISA = qw( Obvius::Data );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub execute {
     my ($this, $function, $data, $session, $path_prefix)=@_;

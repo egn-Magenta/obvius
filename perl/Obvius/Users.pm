@@ -34,7 +34,7 @@ use warnings;
 
 use Cache::FileCache;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 ########################################################################
 #

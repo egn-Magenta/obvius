@@ -8,7 +8,7 @@ use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( get_xml_simple );
 our @EXPORT = qw();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use XML::Simple;
 use URI::Escape qw(uri_escape);

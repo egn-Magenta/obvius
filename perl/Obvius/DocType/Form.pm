@@ -62,7 +62,7 @@ sub make_sure_is_utf8 {
 }
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # raw_document_data($document, $version, $obvius)
 #    - generates a XML document with the colledted form data and returns

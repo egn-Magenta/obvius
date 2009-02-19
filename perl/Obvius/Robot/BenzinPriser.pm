@@ -14,7 +14,7 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_benzinpriser_xml);
 our @EXPORT = ();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use XML::Parser;
 use URI::Escape;

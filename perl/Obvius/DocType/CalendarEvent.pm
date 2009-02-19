@@ -33,7 +33,7 @@ use Obvius::DocType;
 use Date::ICal;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # recursively encode an array into ICal text scalar
 sub encode_ical

@@ -13,7 +13,7 @@ use locale; # Danish letters
 use Unicode::String qw(utf8 latin1);
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub htdig_config_name {
     my ($this, $obvius) = @_;

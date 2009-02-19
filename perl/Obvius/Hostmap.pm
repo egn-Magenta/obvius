@@ -27,7 +27,7 @@ package Obvius::Hostmap;
 use strict;
 use warnings;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 *new = \&create_hostmap;
 

@@ -35,7 +35,7 @@ require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw( parse_editpage_fieldlist );
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub parse_editpage_fieldlist {
     my ($this, $fieldlist, $doctype, $obvius) = @_;

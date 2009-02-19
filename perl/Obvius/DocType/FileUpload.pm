@@ -9,27 +9,31 @@ use Obvius;
 use Obvius::DocType;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub raw_document_data {
      my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
 
-     my $path = $obvius->get_version_field($vdoc, 'UPLOADFILE');
+     $obvius->get_version_fields($vdoc, ['mimetype', 'title', 'uploadfile']);
+     my $path = $vdoc->field('uploadfile');
      return undef if !$path;
 
      $path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . $path;
      $path =~ s|/+|/|g;
      
-     $obvius->get_version_fields($vdoc, ['MIMETYPE', 'TITLE']);
-     my $mime_type = $vdoc->field('MIMETYPE');
-     my $title = $vdoc->field('TITLE');
+     my $mime_type = $vdoc->field('mimetype');
      
+     
+     my ($filename) = $path =~ m|/([^/]+)$|;
+     $filename ||= $vdoc->field('title');
+
      local $/;
-     open $fh, $path;
+     my $fh;
+     open $fh, $path or die "File not found: $path";
      my $data = <$fh>;
      close $fh;
-
-     return ($mime_type, \$data);
+     
+     return ($mime_type, \$data, $filename);
 }
 
 1;

@@ -40,7 +40,7 @@ use Digest::MD5 qw(md5_hex);
 use Fcntl ':flock';
 
 our @ISA = qw( WebObvius::Site::Mason );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # Note that this method is meant to override the one in WebObvius::Site:
 

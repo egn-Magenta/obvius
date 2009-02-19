@@ -35,7 +35,7 @@ use warnings;
 use WebObvius::Template;
 
 our @ISA = qw( WebObvius::Template );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use locale;
 

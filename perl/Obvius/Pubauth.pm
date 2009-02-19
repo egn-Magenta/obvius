@@ -30,7 +30,7 @@ use warnings;
 
 use POSIX qw(strftime);
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # get_public_users($how) -
 # Gets a list of public users matching the $how statement. Returns

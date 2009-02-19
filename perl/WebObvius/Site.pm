@@ -43,7 +43,7 @@ use WebObvius::Cache::Cache;
 use Image::Size;
 use Data::Dumper;
 our @ISA = qw( Obvius::Data WebObvius );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 our %xml_cache;
 

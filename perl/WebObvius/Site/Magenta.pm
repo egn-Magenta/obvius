@@ -9,7 +9,7 @@ use warnings;
 use WebObvius::Site;
 
 our @ISA = qw( WebObvius::Site );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;

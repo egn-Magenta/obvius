@@ -41,7 +41,7 @@ use Image::Magick;
 use File::Path;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub raw_document_data {
     my ($this, $doc, $vdoc, $obvius, $input) = @_;

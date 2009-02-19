@@ -6,7 +6,7 @@ use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( get_infopaq_docs );
 our @EXPORT = qw();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use XML::Parser;
 use URI::Escape;

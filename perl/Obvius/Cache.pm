@@ -35,7 +35,7 @@ use strict;
 use warnings;
 
 our @ISA = qw();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub new {
     my ($class) = @_;

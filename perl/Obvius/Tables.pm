@@ -32,7 +32,7 @@ use warnings;
 
 use Carp;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 ########################################################################
 #

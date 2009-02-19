@@ -39,7 +39,7 @@ use URI::Escape;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(parse_document_list set_lang_and_links retrieve_real_title get_keywords);
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub start_tag {
     my ($self, $tag, $text, $attr) = @_;

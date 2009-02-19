@@ -3,7 +3,7 @@ package Obvius::UriCache;
 use strict;
 use warnings;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 
 sub remove_from_uricache {

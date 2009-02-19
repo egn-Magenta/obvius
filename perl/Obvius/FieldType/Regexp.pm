@@ -9,7 +9,7 @@ use warnings;
 use Obvius::FieldType;
 
 our @ISA = qw( Obvius::FieldType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub validate {
     my ($this, $obvius, $fspec, $value, $input) = @_;

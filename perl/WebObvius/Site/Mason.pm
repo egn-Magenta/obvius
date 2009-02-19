@@ -38,7 +38,7 @@ use Data::Dumper;
 use WebObvius::Site;
 
 our @ISA = qw( WebObvius::Site );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;
@@ -281,6 +281,7 @@ sub handler ($$) {
      # by the browser should have a method called "raw_document_data"
      # Please also note that a slash at the end of an uri in admin signifies
      # that we are getting the *raw* resource, not the obvius-wrapper (where that is appropriate)
+
      if (!$is_admin || $req->uri !~ m|/$|) {
 	  my ($mime_type, $data, $filename, $con_disp, $path) = 
 	    $doctype->raw_document_data(
@@ -300,7 +301,7 @@ sub handler ($$) {
 		 $this->output_file($req, %args);
 
 	       $req->no_cache(1) if ($is_admin);
-	       execute_cache($obvius, $req, $data) if ($status == OK);
+	       execute_cache($obvius, $req, $data, $filename) if ($status == OK);
                
 	       return $status;
 	  }
@@ -347,29 +348,26 @@ sub handler ($$) {
           $req->print($html) unless ($req->header_only or $status!=OK);
      }
 
-     execute_cache($obvius, $req, $html);
+     execute_cache($obvius, $req, \$html);
 
      return $status;
 }
 
 sub execute_cache {     
-     my ($obvius, $req, $data ) = @_;
+     my ($obvius, $req, $data, $filename ) = @_;
      
      my $cache = WebObvius::Cache::Cache->new($obvius);
-     $cache->save_request_result_in_cache($req, \$data) if ($data);
+     if ($data) {
+          my $new_data = ref $data ? $data : \$data;
+          $cache->save_request_result_in_cache($req, $new_data, $filename);
+     }
      $cache->quick_flush($obvius->modified) if ($obvius->modified);
-
-
 }    
 
 sub execute_mason {
      my ($this, $req)=@_;
 
-     # Run mason on the request:
-     my $status=$this->{handler}->handle_request($req);
-
-     # Clean up globals (we don't clean up $r; we didn't make it):
-     return $status;
+     return $this->{handler}->handle_request($req);
 }
 
 sub authen_handler ($$) {
@@ -674,13 +672,15 @@ sub set_mime_type_and_content_disposition {
      $req->content_type($mime_type);
      $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
      
-     return if not $options{output_filename};
+     my @con_disps;
+     push @con_disps, $options{con_disp} if $options{con_disp};
+     push @con_disps,  "filename=$options{output_filename}" if $options{output_filename};
      
-     my $con_disp = $options{con_disp} || 'attachment';
-     my $con_disp_header = "$con_disp; ";
-     $con_disp_header .= "filename=$options{output_filename}" if lc($con_disp) eq 'attachment';
-     $req->header_out('Content-Disposition', $con_disp_header);
-     
+     if (@con_disps) {
+          my $con_disp_header = join ';', @con_disps;
+          $req->header_out('Content-Disposition', $con_disp_header);
+     }
+
      # Microsoft Internet Explorer/Adobe Reader has
      # problems if Vary is set at the same time as
      # Content-Disposition is(!) - so we unset Vary if we
@@ -694,8 +694,7 @@ sub output_data {
      my $con_disp = $options{con_disp};
      my $new_data = $options{data};
      
-     my $data;
-     $data = \$new_data if !ref $new_data;
+     my $data = ref $new_data ? $new_data : \$new_data;
 
      $this->set_mime_type_and_content_disposition($req, %options);
      # The spec. says that it is not necessary to advertise this:

@@ -39,7 +39,7 @@ use locale;
 use Carp;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
