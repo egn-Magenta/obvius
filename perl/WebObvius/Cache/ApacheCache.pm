@@ -187,13 +187,26 @@ sub check_rightboxes {
                                             anchored_regexp => 1);
 }
 
+sub uniquify_simple {
+     my ($elems) = @_;
+     my %seen;
+     my @res;
+     
+     for my $elem (@$elems) {
+          next if $seen{$elem}++;
+          push @res, $elem;
+     }
+     
+     return \@res;
+}
+
 sub bring_forth_sql_for_docsearch {
      my ($this, $docs, $str, %options) = @_;
      
      my @docids = grep { /^\d+$/ } map { ref $_ ? $_->{docid} : $_ } @$docs;
      return if !@docids;
 
-     my $docids = uniquify (sub { return ($_[0] == $_[1]) }, \@docids);
+     my $docids = uniquify_simple(\@docids);
      
      my @docid_query;
      if ($options{anchored_regexp}) {
@@ -214,17 +227,20 @@ sub check_vfields_for_docids {
      $fields = [ $fields ] if !ref $fields;
      $docs = [ $docs ] if !ref $docs;
 
-     my $name_query = "name in (" . (join ',', (map { "'$_'" } @$fields)) . ")";
      my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
      return [] if !$docsearch_sql;
-     
+
      my $sql = <<END;
-select docid from
-       (select docid, text_value from versions natural join vfields where 
-        public = 1 AND $name_query) t where $docsearch_sql
+select distinct docid from versions v natural join vfields vf where
+     vf.name = ? and v.public=1
 END
-     my @res = map { $_->{docid}} @{$this->execute_query($sql)};
      
+     my @res;
+     for my $field (@$fields) {
+          my $query_sql = $sql . " and $docsearch_sql";
+          push @res, map { $_->{docid}} @{$this->execute_query($query_sql, $field)};
+     }
+
      print STDERR Dumper(\@res);
      return \@res;
 }
@@ -324,10 +340,23 @@ sub perform_command_sophisticated_rightbox_clear {
      return $this->make_clear_uris(\@res_docids);
 }
 
+sub uniquify_docs {
+     my ($docs) = @_;
+     my %seen;
+     my @res;
+
+     for my $doc (@$docs) {
+          next if $seen{$doc->{docid}}++;
+          push @res, $doc;
+     }
+     return \@res;
+}
+
 sub special_actions {
      my ($this, $docs) = @_;
      my $obvius = $this->{obvius};
-     $docs = uniquify (sub { return ($_[0]->{docid} == $_[1]->{docid}) }, $docs);
+
+     $docs = uniquify_docs($docs);
      
      my @commands;
      my %special_op_per_doctype = ( 
@@ -410,14 +439,13 @@ sub find_dirty {
      my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
 
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
-
+     my @related = map { $this->find_related($_) } @leftmenu_uris;
+     
      my @clear_recursively = map {{command => 'clear_by_regexp', regexp => "^" . $_->{uri}}}
        grep { $_->{uri} and $_->{clear_recursively}} @$vals;
      
      my @moved_documents = grep { $_ } map { $_->{uri} } grep {$_->{document_moved} } @$vals;
      my $moved_documents = $this->clear_moved(@moved_documents);
-     
-     my @related = map { $this->find_related($_) } @leftmenu_uris;
      
      my @docids_doctypes = map { {docid => $_->{docid}, doctype => $_->{doctype}, uri => $_->{uri}}} 
        grep { $_->{docid}} @$vals;
