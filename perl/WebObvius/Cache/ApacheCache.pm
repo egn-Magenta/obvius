@@ -468,32 +468,20 @@ sub find_dirty {
 }
 
 sub uniquify_commands {
-     return uniquify(\&commands_equal_p, shift);
-}
-	  
-sub uniquify {
-     my ($equals, $commands) = @_;
+     my ($commands) = @_;
      
-     my @result;
-     
-     OUTER: for my $cmd1 (@$commands) {
-	  for my $cmd2 (@result) {
-	       next OUTER if ($equals->($cmd1, $cmd2));
-	  }
-	  push @result, $cmd1;
+     my @res;
+   OUTER: for my $cmd1 (@$commands) {
+          for my $cmd2 (@res) {
+               for (keys %$cmd1, keys %$cmd2) {
+                    next OUTER if 
+                      (exists $cmd1->{$_} && exists $cmd2->{$_} && $cmd1->{$_} ne $cmd2->{$_});
+               }
+               push @res, $cmd1;
+          }
      }
-
-     return \@result;
-}
-
-sub commands_equal_p {
-     my ($cmd1, $cmd2) = @_;
      
-     for (keys %$cmd1, keys %$cmd2) {
-	  return 0 if (exists $cmd1->{$_} && exists $cmd2->{$_} && $cmd1->{$_} ne $cmd2->{$_});
-     }
-
-     return 1;
+     return \@res;
 }
 
 sub quick_flush {
