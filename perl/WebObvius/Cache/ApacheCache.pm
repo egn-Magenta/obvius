@@ -183,7 +183,8 @@ sub execute_query {
 sub check_rightboxes {
      my ($this, $docs) = @_;
      
-     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3']);
+     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3'],
+                                            anchored_regexp => 1);
 }
 
 sub bring_forth_sql_for_docsearch {
@@ -197,7 +198,7 @@ sub bring_forth_sql_for_docsearch {
      my @docid_query;
      if ($options{anchored_regexp}) {
           my $docids = join '|', @$docids;
-          push @docid_query, "$str regexp '^[0-9]+:/($docids).docid'";
+          push @docid_query, "$str regexp '^[0-9]+:/($docids)\\\\.docid'";
      } else {
           @docid_query = map { "$str like '%/$_.docid%'" } @$docids;
      }
@@ -213,8 +214,9 @@ sub check_vfields_for_docids {
      $fields = [ $fields ] if !ref $fields;
      $docs = [ $docs ] if !ref $docs;
      my @append;
-     
-     push @append, join " or ", map { "name = '$_'" } @$fields;
+     my $name_query = "name in (" . (join ',', (map { "'$_'" } @$fields)) . ")";
+     push @append, $name_query;
+
      my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
      return [] if !$docsearch_sql;
      
@@ -316,9 +318,9 @@ sub perform_command_sophisticated_rightbox_clear {
      my @docids_to_clear;
      while (my @cur_docids = splice @docids, 0, 5000) {
           push @docids_to_clear, 
-               @{$this->check_vfields_for_docids(\@cur_docids, 
-                                                 ['rightboxes', 'boxes1', 'boxes2', 'boxes3']
-                                                )};
+               @{$this->check_rightboxes(\@cur_docids, 
+                                         ['rightboxes', 'boxes1', 'boxes2', 'boxes3'],
+                                         anchored_regexp => 1)};
      }
      
      
@@ -329,14 +331,6 @@ sub perform_command_sophisticated_rightbox_clear {
      }
 
      return $this->make_clear_uris(\@res_docids);
-}
-
-sub perform_command_vfield_search {
-     my ($this, $docs) = @_;
-     
-     $docs = $this->check_vfields_for_docids($docs);
-
-     return $this->make_clear_uris($docs);
 }
 
 sub special_actions {
