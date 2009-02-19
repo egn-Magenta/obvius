@@ -36,7 +36,7 @@ use warnings;
 use POSIX qw(strftime);
 use DBIx::Recordset;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # Various hacks to override DBIx::Recordset specifics
 my %DBIx;

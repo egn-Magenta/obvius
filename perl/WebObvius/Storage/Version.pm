@@ -34,7 +34,7 @@ use Carp;
 use WebObvius::Storage;
 
 our @ISA = qw( WebObvius::Storage );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # Internal methods:
 

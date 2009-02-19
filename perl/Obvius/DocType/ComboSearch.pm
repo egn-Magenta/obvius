@@ -13,7 +13,7 @@ use Obvius::DocType::ComboSearch::Parser qw(combo_search_parse);
 #use Data::Dumper;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 
 sub action {

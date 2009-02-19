@@ -12,7 +12,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 
 our @ISA = qw( Obvius::FieldType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # Given the thing that is in the database-field, give back the relevant
 # piece of data (object, whatever):

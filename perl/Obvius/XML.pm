@@ -20,7 +20,7 @@ use MIME::Base64 qw(encode_base64);
 use Storable qw(lock_retrieve);
 
 our @ISA = qw( Obvius::Data );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 
 sub new {

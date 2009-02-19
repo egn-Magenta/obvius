@@ -38,7 +38,7 @@ use Obvius;
 use Obvius::Data;
 
 our @ISA = qw( Obvius::Data );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # new ($class, $rec)
 #   - TODO: Document instantiation...

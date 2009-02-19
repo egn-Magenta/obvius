@@ -67,14 +67,14 @@ sub can_request_use_cache_p {
 
 
 sub find_cache_filename {
-    my ($this, $req) = @_;
+    my ($this, $req, $filename) = @_;
 
     my $ct = $req->content_type;
     $ct =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|;
     my $lang_array = $req->content_languages();
     my $lang = scalar @$lang_array ? $lang_array->[0] : 'da';
     my $code = md5_hex($req->hostname . ':' . $req->the_request);
-
+    $code .= "_$filename"  if $filename;
     return ((join '/', ($ct, $lang)) . '/', $code);
 }
 
@@ -97,16 +97,16 @@ sub make_sure_exist {
 
 sub save_request_result_in_cache
 {
-     my ($this, $req, $s) = @_;
+     my ($this, $req, $s, $filename) = @_;
      
-     return if (!$this->can_request_use_cache_p($req));
+     return if !$this->can_request_use_cache_p($req);
      
-     my ($fp, $fn) = $this->find_cache_filename($req);
+     my ($fp, $fn) = $this->find_cache_filename($req, $filename);
      my $local_dir = $fp . $fn;
      return if (!$fn);
      
      my $dir = $this->{cache_dir} . $fp;
-     make_sure_exist($dir) || return 1;
+     make_sure_exist($dir) or return;
      
      open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
      flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
@@ -212,10 +212,10 @@ sub check_vfields_for_docids {
      my @append;
      
      push @append, join " or ", map { "name = '$_'" } @$fields;
-     my $sql = $this->bring_forth_sql_for_docsearch($docs, "text_value");
-     return [] if !$sql;
+     my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value");
+     return [] if !$docsearch_sql;
      
-     push @append, $sql;
+     push @append, $docsearch_sql;
 
      @append = map { "( $_ )" } @append;
      my $append = join " and ", @append;
@@ -286,7 +286,8 @@ sub perform_command_clear_doctype {
      my $obvius = $this->{obvius};
      
      my $doctype = $obvius->get_doctype_by_name($doctype_name);
-     
+     return [] if !$doctype;
+
      my $query = <<END;
 select distinct(docid) from 
     documents d inner join versions v on (v.docid = d.id)
@@ -396,21 +397,24 @@ sub special_actions {
      return \@commands;
 }
 
+use Data::Dumper;
 sub clear_moved {
      my ($this, @uris) = @_;
      
      my @docids;
+
      for my $uri (@uris) {
           $uri .= '%';
-          my $res = $this->execute_query("select docid from docid_path where path like ?", $uri);
+          my $res = $this->execute_query("select docid from docid_path dp natural join versions v
+                                          where v.public = 1 and  path like ?", $uri);
           push @docids, map { $_->{docid} } @$res;
      }
      
      my @to_clear;
      for my $docid (@docids) {
-          push @to_clear, @{$this->check_vfields_for_docids([{docid => $docid}], ['content', 'teaser'])};
+          push @to_clear, @{$this->check_vfields_for_docids([{docid => $docid}], ['content', 'teaser', 'html_content', 'introduction', 'introduktion'])};
      }
-
+     
      return $this->make_clear_uris(\@to_clear);
 }
      
@@ -422,17 +426,20 @@ sub find_dirty {
      my $vals = $cache_objects->request_values('uri', 'doctype', 'docid', 'clear_leftmenu', 
                                                'clear_recursively', 'document_moved');
      my @uris		= grep { $_ } map { $_->{uri}   } @$vals;
+     my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
+
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
+
      my @clear_recursively = map {{command => 'clear_by_regexp', regexp => "^" . $_->{uri}}}
        grep { $_->{uri} and $_->{clear_recursively}} @$vals;
-     my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
      
      my @moved_documents = grep { $_ } map { $_->{uri} } grep {$_->{document_moved} } @$vals;
      my $moved_documents = $this->clear_moved(@moved_documents);
      
      my @related = map { $this->find_related($_) } @leftmenu_uris;
      
-     my @docids_doctypes = map { {docid => $_->{docid}, doctype => $_->{doctype}, uri => $_->{uri}}} grep { $_->{docid}} @$vals;
+     my @docids_doctypes = map { {docid => $_->{docid}, doctype => $_->{doctype}, uri => $_->{uri}}} 
+       grep { $_->{docid}} @$vals;
      my $special_actions = $this->special_actions(\@docids_doctypes);
 
      my @docids		= grep { $_ } map { {docid => $_->{docid}, uri => $_->{uri} }} @$vals; 

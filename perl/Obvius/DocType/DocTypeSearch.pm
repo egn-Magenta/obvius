@@ -33,7 +33,7 @@ use Obvius;
 use Obvius::DocType;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # action - given the usual band of objects, either presents a
 #          search-form by consulting the editpage and the field

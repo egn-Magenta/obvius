@@ -37,7 +37,7 @@ use Obvius::DocType;
 use Carp;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # action - looks at the mode-parameter to determine what to do; puts
 #          stuff on the output-object for the template-system to use;

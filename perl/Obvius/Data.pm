@@ -31,7 +31,7 @@ use strict;
 use warnings;
 
 our @ISA = ();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use Carp;
 

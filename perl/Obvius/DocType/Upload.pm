@@ -36,7 +36,7 @@ use Obvius;
 use Obvius::DocType;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # XXX consider adding an alternate_location-method that, if we are not
 # in admin and the url ends in a slash, redirects to the url without

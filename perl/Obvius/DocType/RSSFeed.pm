@@ -39,7 +39,7 @@ use XML::RSS;
 use Unicode::String qw(utf8 latin1);
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;;
+our $VERSION="1.0";
 
 # raw_document_data - Returns raw XML data plus the correct mimetype
 sub raw_document_data {

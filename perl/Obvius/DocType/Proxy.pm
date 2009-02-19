@@ -38,7 +38,7 @@ use URI;
 use URI::Escape;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # action - retrieves and handles the url to be proxied. Returns
 #          OBVIUS_OK when done.

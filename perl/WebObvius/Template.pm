@@ -11,7 +11,7 @@ use Data::Dumper;
 # use Cwd;
 
 our @ISA = qw();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 our %Cache = ();			# template cache
 

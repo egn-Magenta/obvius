@@ -31,7 +31,7 @@ package Obvius::Access;
 use strict;
 use warnings;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 ########################################################################
 #

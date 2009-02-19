@@ -35,7 +35,7 @@ use warnings;
 use WebObvius;
 
 our @ISA = qw( WebObvius );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use Apache::Session;
 use Apache::Session::File;

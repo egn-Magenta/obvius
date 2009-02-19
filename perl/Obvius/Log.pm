@@ -29,7 +29,7 @@ package Obvius::Log;
 use strict;
 use warnings;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 our $AUTOLOAD;
 
 # At least implement the same functions as Apache::Log

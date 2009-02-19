@@ -13,7 +13,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Dumper;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;

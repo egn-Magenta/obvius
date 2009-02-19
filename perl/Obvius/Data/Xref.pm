@@ -9,7 +9,7 @@ use warnings;
 use Obvius::Data;
 
 our @ISA = qw( Obvius::Data );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub list_valid_keys {
     my ($this) = @_;

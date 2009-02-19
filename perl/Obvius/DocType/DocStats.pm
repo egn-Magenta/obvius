@@ -9,7 +9,7 @@ use Obvius;
 use Obvius::DocType;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Id$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub action
 {

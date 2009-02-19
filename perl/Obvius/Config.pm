@@ -35,7 +35,7 @@ use Data::Dumper;
 use Obvius::Data;
 
 our @ISA = qw( Obvius::Data );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 our $confdir = '/etc/obvius';
 our $defaults = 'defaults';

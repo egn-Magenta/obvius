@@ -30,7 +30,7 @@ use warnings;
 use Data::Dumper; # Not for debugging.
 use POSIX qw(strftime);
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # XXX XXX CHECK THAT USER IS USED (duh) CORRECTLY:
 

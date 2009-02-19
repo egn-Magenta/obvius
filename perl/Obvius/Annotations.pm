@@ -27,7 +27,7 @@ package Obvius::Annotations;
 use strict;
 use warnings;
 
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 sub get_annotation {
     my ($obvius, $vdoc)=@_;

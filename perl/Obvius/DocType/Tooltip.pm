@@ -34,7 +34,7 @@ use Obvius;
 use Obvius::DocType;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # action - just returns OK, as the "work" of the document type is done
 #          by the alternate_location-method.

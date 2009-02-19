@@ -10,7 +10,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(retrieve_uri post_uri request_uri request_post_uri);
 
-( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use LWP::UserAgent ();
 use HTTP::Request ();

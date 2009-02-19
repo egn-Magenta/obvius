@@ -35,7 +35,7 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( search_berlingske );
 our @EXPORT = qw();
-our ( $VERSION ) = '$Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 use HTML::Parser ();
 use URI;
