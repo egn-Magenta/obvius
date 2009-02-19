@@ -183,8 +183,7 @@ sub execute_query {
 sub check_rightboxes {
      my ($this, $docs) = @_;
      
-     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3'],
-                                           anchored_regexp => 1);
+     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3']);
 }
 
 sub bring_forth_sql_for_docsearch {
@@ -305,18 +304,20 @@ END
 }
 	 
 sub perform_command_sophisticated_rightbox_clear {
-     my ($this, $doctype) = @_;
+     my ($this, @doctypes) = @_;
      
+     my @doctypes_sql = ('?') x @doctypes;
+     my $doctypes_sql = '(' . (join ',', @doctypes_sql) . ')';
+
      my $query = "select distinct docid from versions v join doctypes dt on (dt.id = v.type)
-                  where v.public = 1 and dt.name = ?";
-     my @docids = map { $_->{docid} } @{$this->execute_query($query, $doctype )};
+                  where v.public = 1 and dt.name in $doctypes_sql";
+     my @docids = map { $_->{docid} } @{$this->execute_query($query, @doctypes)};
      
      my @docids_to_clear;
-     while (my @cur_docids = splice @docids, 0, 1000) {
+     while (my @cur_docids = splice @docids, 0, 5000) {
           push @docids_to_clear, 
                @{$this->check_vfields_for_docids(\@cur_docids, 
-                                                 ['rightboxes', 'boxes1', 'boxes2', 'boxes3'],
-                                                 anchored_regexp => 1
+                                                 ['rightboxes', 'boxes1', 'boxes2', 'boxes3']
                                                 )};
      }
      
@@ -352,14 +353,10 @@ sub special_actions {
 						}, 
 						{
 						 command => 'sophisticated_rightbox_clear', 
-						 args => ['Nyhedsliste'] 
+						 args => ['Nyhedsliste', 'NyNyhedsliste'] 
 						},
 						{
 						 command => 'clear_doctype', 
-						 args => ['NyNyhedsliste'] 
-						}, 
-						{
-						 command => 'sophisticated_rightbox_clear', 
 						 args => ['NyNyhedsliste'] 
 						}],
 
@@ -370,16 +367,12 @@ sub special_actions {
 						}, 
 						{
 						 command => 'sophisticated_rightbox_clear', 
-						 args => ['Arrangementsliste']
+						 args => ['Arrangementsliste', 'NyArrangementsliste']
 						},
 						{
 						 command => 'clear_doctype', 
 						 args => ['NyArrangementsliste']
-						}, 
-						{
-						 command => 'sophisticated_rightbox_clear', 
-						 args => ['NyArrangementsliste']
-						}],
+						}]
 				  );
      
      for my $doc (@$docs) {
