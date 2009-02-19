@@ -204,6 +204,11 @@ sub check_vfields_for_docids {
      my ($this, $docs, $fields) = @_;
      my $obvius = $this->{obvius};
 
+<<<<<<< HEAD:perl/WebObvius/Cache/ApacheCache.pm
+=======
+     my @fields = map { s/[^\d\w]//g; $_ } @$fields if ref($fields);
+     
+>>>>>>> b46742fa2277b77713f7c8bb06172633914b6d30:perl/WebObvius/Cache/ApacheCache.pm
      my @append;
      
      push @append, join " or ", map { "name = '$_'" } @$fields;
@@ -227,7 +232,6 @@ END
      
      return \@res;
 }
-
 
      
 sub find_referrers {
@@ -297,7 +301,12 @@ END
 	 
 sub perform_command_sophisticated_rightbox_clear {
      my ($this, $doctype) = @_;
+<<<<<<< HEAD:perl/WebObvius/Cache/ApacheCache.pm
 
+=======
+     
+     $doctype =~ s/[^\w\d]//g;
+>>>>>>> b46742fa2277b77713f7c8bb06172633914b6d30:perl/WebObvius/Cache/ApacheCache.pm
      my $query = <<END; 
 select distinct(docid) from 
     vfields vf natural join versions v, 
