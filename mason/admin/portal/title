@@ -4,5 +4,4 @@
 $obvius->get_version_fields($vdoc, [qw(title)]);
 my $title=$vdoc->Title . ' (' . $m->scomp('/shared/msg', text=>'admin') . ')';
 eval { $title = $doctype->generate_title($r, $doc, $vdoc, $obvius) };
-if ($@) { print STDERR "HORRIBLE GENERATE_TITLE ERROR: $@\n"; } else {print STDERR "GENERATE_TITLE WENT JUST FINE" };
 </%init>

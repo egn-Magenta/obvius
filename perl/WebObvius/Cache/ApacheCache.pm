@@ -138,6 +138,12 @@ sub flush {
     
     my %flush_simple = map { lc $_->{uri} => 1} 
         grep {$_->{command} eq 'clear_uri' } @$commands;
+    for (keys %flush_simple) {
+	s!/+$!!;
+	my $exp = $_ . '/';
+	$flush_simple{$exp} = 1;
+	$flush_simple{$_} = 1;
+    }
     my @flush_regexps = map { qr/$_->{regexp}/i } 
 	grep {$_->{command} eq 'clear_by_regexp'} @$commands;
     my @flush_not_regexps = map { qr/$_->{regexp}/i } 
@@ -462,8 +468,10 @@ sub find_dirty {
 	@uris_to_clear,
         @$moved_documents
        );
-     
+    
+	print STDERR "TO clear: " . Dumper(\@commands); 
      my $unique = uniquify_commands(\@commands);
+	print STDERR "TO CLEAR: " . Dumper($unique);
      return $unique;
 }
 
@@ -473,12 +481,15 @@ sub uniquify_commands {
      my @res;
    OUTER: for my $cmd1 (@$commands) {
           for my $cmd2 (@res) {
+	       my $same = 1;
                for (keys %$cmd1, keys %$cmd2) {
-                    next OUTER if 
-                      (exists $cmd1->{$_} && exists $cmd2->{$_} && $cmd1->{$_} ne $cmd2->{$_});
+                    if (!exists $cmd1->{$_} || !exists $cmd2->{$_} || $cmd1->{$_} ne $cmd2->{$_}) {
+			$same = 0;
+		    }
                }
-               push @res, $cmd1;
+	       next OUTER if $same;
           }
+	  push @res, $cmd1;
      }
      
      return \@res;
@@ -489,7 +500,7 @@ sub quick_flush {
     
     my $uris = $cache_objects->request_values('uri', 'quick');
     my %uris = map { $_->{uri} => 1} grep { $_->{uri} and $_->{quick} } @$uris;
-    
+   
     $this->flush_by_pattern(sub {return $uris{$_[0]}; }) if(scalar keys %uris);
 }
 
