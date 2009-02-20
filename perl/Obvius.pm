@@ -2029,7 +2029,6 @@ sub create_new_version {
 #       Delete a document, rename a document
 #
 ########################################################################
-
 sub delete_document {
     my ($this, $doc) = @_;
 

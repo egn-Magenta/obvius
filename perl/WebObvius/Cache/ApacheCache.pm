@@ -163,7 +163,7 @@ sub flush_by_pattern {
     my @lines;
     while(my $line = <F>) {
         my ($local_uri) = ($line =~ m/^(\S+)/);
-	push @lines, $line if ($local_uri && !(&$pred($local_uri)));
+	push @lines, $line if ($local_uri && !$pred->($local_uri));
     }
     seek F, 0, 0;
     truncate F, 0;
@@ -490,7 +490,7 @@ sub quick_flush {
     my $uris = $cache_objects->request_values('uri', 'quick');
     my %uris = map { $_->{uri} => 1} grep { $_->{uri} and $_->{quick} } @$uris;
     
-    $this->flush_by_pattern(sub {return 1 if $uris{shift}; return 0; }) if(scalar keys %uris);
+    $this->flush_by_pattern(sub {return $uris{$_[0]}; }) if(scalar keys %uris);
 }
 
 sub find_and_flush {
