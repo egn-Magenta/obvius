@@ -276,6 +276,7 @@ sub is_relevant_for_leftmenu_cache {
      $obvius->get_version_fields($vdoc, \@relevant_fields);
 
      for (@relevant_fields) {
+          print STDERR "Field: ", $vdoc->field($_), ", ", $vdoc->field($_), "\n";
 	  return 1 if ($vdoc->field($_) ne $old_vdoc->field($_));
      }
      
