@@ -113,12 +113,12 @@ sub save_request_result_in_cache
      print F (ref $s ? $$s : $s);
      flock F, LOCK_UN;
      close F;
-
+     
      #Save image info.
      my ($args) = ($req->args =~ /^(size=\d+(?:x\d+|\%))$/) if ($req->args);
      $args ||= "";
      
-     my $path=$req->uri();
+     my $path = $req->uri();
      
      open F, ">>", $this->{cache_index} || (warn "Failed to open " . $this->{cache_index}, return);
      flock F, LOCK_EX || (warn "couldn't get lock", goto close);
@@ -439,9 +439,13 @@ sub find_dirty {
 
      my $vals = $cache_objects->request_values('uri', 'doctype', 'docid', 'clear_leftmenu', 
                                                'clear_recursively', 'document_moved');
-     my @uris		= grep { $_ } map { $_->{uri}   } @$vals;
+     my @uris = grep { $_ } map { $_->{uri}   } @$vals;
      my @uris_to_clear = map { { command => 'clear_uri', uri => $_}} @uris;
-
+     my @docid_uris =  
+       map { {command => 'clear_uri', uri => "/$_->{docid}.docid" } } 
+       grep { $_->{docid} } @$vals;
+     push @uris_to_clear, @docid_uris;
+     
      my @leftmenu_uris	= map { $_->{uri} } grep {  $_->{uri} and $_->{clear_leftmenu}} @$vals;
      my @related = map { $this->find_related($_) } @leftmenu_uris;
      
@@ -467,9 +471,7 @@ sub find_dirty {
         @$moved_documents
        );
     
-	print STDERR "TO clear: " . Dumper(\@commands); 
      my $unique = uniquify_commands(\@commands);
-	print STDERR "TO CLEAR: " . Dumper($unique);
      return $unique;
 }
 

@@ -26,6 +26,8 @@ sub raw_document_data {
      
      my ($filename) = $path =~ m|/([^/]+)$|;
      $filename ||= $vdoc->field('title');
+     
+     $filename =~ s/\s+/_/g;
 
      local $/;
      my $fh;
