@@ -207,7 +207,7 @@ sub uniquify_simple {
 sub bring_forth_sql_for_docsearch {
      my ($this, $docs, $str, %options) = @_;
      
-     my @docids = grep { /^\d+$/ } map { ref $_ ? $_->{docid} : $_ } @$docs;
+     my @docids = grep { $_ && /^\d+$/ } map { ref $_ ? $_->{docid} : $_ } @$docs;
      return if !@docids;
 
      my $docids = uniquify_simple(\@docids);
@@ -471,7 +471,10 @@ sub find_dirty {
 	@uris_to_clear,
         @$moved_documents
        );
-    
+     
+     print STDERR "Clear recursively: " . Dumper(\@clear_recursively);
+     print STDERR "Related: " . Dumper(\@related);
+     print STDERR "To clear: " . Dumper(\@commands);
      my $unique = uniquify_commands(\@commands);
      return $unique;
 }
