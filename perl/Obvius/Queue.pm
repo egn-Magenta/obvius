@@ -168,33 +168,6 @@ sub perform_command_publish {
     my $vdoc=$obvius->get_version($doc, $info{args}->{version});
     return ('ERROR', [ 'Could not get version', ' (', $info{args}->{version}, ')' ]) unless ($vdoc);
 
-    # If this version is public now, unpublish it first:
-    #  or If another version is public in the same language, unpublish it first:
-    #   (XXX is this exactly the same behaviour as the original admin?)
-
-    # XXX The original admin doesn't do this the same way, I think. It
-    # leaves the publish fields there when another version is
-    # published instead (so you can pickup the old values). This
-    # means, I think, that you need to unpublish the version you want
-    # to publish (while it isn't public!) before publishing it.
-
-    my $public_versions=$obvius->get_public_versions($doc);
-    if ($public_versions) {
-        my $public_version_language;
-        foreach my $public_version (@$public_versions) {
-            if ($public_version->Lang eq $vdoc->Lang) {
-                $public_version_language=$public_version;
-                last;
-            }
-        }
-        if ($public_version_language) {
-            if (!$obvius->unpublish_version($public_version_language)) {
-                return ('ERROR', 'Could not hide version', ' (' . $public_version_language->Version . ')');
-            }
-        }
-    }
-
-    # Then publish this version:
     #  1) Update publish fields:
     $obvius->get_version_fields($vdoc, 255, 'PUBLISH_FIELDS'); # XXX A method should be added for this...
     my $new_publish_fields=$info{args}->{publish_fields};

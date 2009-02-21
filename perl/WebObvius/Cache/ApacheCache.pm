@@ -142,6 +142,7 @@ sub flush {
 	$uri =~ s!/+$!!;
 	$flush_simple{$uri} = $flush_simple{"$uri/"} = 1;
     }
+
     my @flush_regexps = map { qr/$_->{regexp}/i } 
 	grep {$_->{command} eq 'clear_by_regexp'} @$commands;
     my @flush_not_regexps = map { qr/$_->{regexp}/i } 
@@ -150,7 +151,7 @@ sub flush {
     return $this->flush_by_pattern(
             sub {
 		 my $uri = shift;
-		 $uri =~ s|/size=.*$||;
+		 $uri =~ s|/size=\d+x\d+$||;
 		 $flush_simple{lc $uri} and return 1;
 		 $uri =~ /$_/ and return 1 for (@flush_regexps);
 		 $uri !~ /$_/ and return 1 for (@flush_not_regexps);
