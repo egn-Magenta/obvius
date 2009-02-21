@@ -136,13 +136,11 @@ sub flush {
 
     $commands = [$commands] if (ref($commands) ne 'ARRAY');
     
-    my %flush_simple = map { lc $_->{uri} => 1} 
-        grep {$_->{command} eq 'clear_uri' } @$commands;
-    for (keys %flush_simple) {
-	s!/+$!!;
-	my $exp = $_ . '/';
-	$flush_simple{$exp} = 1;
-	$flush_simple{$_} = 1;
+    my %flush_simple;
+    my @uris = map { lc $_->{uri} } grep {$_->{command} eq 'clear_uri' } @$commands;
+    for my $uri (@uris) {
+	$uri =~ s!/+$!!;
+	$flush_simple{$uri} = $flush_simple{"$uri/"} = 1;
     }
     my @flush_regexps = map { qr/$_->{regexp}/i } 
 	grep {$_->{command} eq 'clear_by_regexp'} @$commands;
