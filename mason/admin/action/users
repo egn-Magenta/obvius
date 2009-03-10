@@ -91,9 +91,11 @@ my $user_storage = {
                                     },
                     data => {
                              id     => { type => 'integer'  },
-                             login  => { type => 'line'     , validation_regexp => '^(?:[\w\d_.]|[\w\d_.][\w\d_. ]*[\w\d_.])$'},
+                             login  => { type => 'line'     , 
+					 validation_regexp => '^(?:[\w\d_.]|[\w\d_.][\w\d_.]*[\w\d_.])$' }, #'
                              name   => { type => 'line'     },
                              notes  => { type => 'text'     },
+			     surveillance => { type => 'surveillance' }, 
                              email  => { type => 'email'    },
                              passwd => { type => 'password' },
                              admin  => { type => 'radio'    },
@@ -111,6 +113,8 @@ my $input_display = [
                      { name=>'email',  content=>'data',   label=>'E-mail', tooltip => '/users/'   },
                      { name=>'passwd', content=>'data',   label=>'Password', tooltip => '/users/' },
                      { name=>'notes',  content=>'data',   label=>'Notes'   , tooltip => '/users/' },
+		     { name=>'surveillance', options => {subtitle => 'Overvågning af websteder'}, 
+		       content => 'data', label => 'Udvalgte websider', tooltip => '/users/' },
                      { name=>'admin',  content=>'data',   label=>'Can login to admin interface', tooltip => '/users/', 
 		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
                      { name=>'can_manage_users',  content=>'data',   label=>'Can manage users', tooltip => '/users/',
@@ -308,9 +312,6 @@ my $edges = {
 <%init>
 $m->comp('/default/check_access', can=>'can_create_new_user');
 
-print STDERR "User: " . $obvius->{USER} . "\n";
-print STDERR "can_manage_users: " . $obvius->can_create_new_user;
-print STDERR "\n";
 if ( $obvius-> can_create_new_user > 1) {
 	$groups->{storage}->{organization}->{where} = undef;
 } else {
