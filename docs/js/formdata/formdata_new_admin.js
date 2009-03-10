@@ -1320,3 +1320,13 @@ function formdata_load_rootDoc_data(elem) {
 function formdata_extract_name(name) {
     return name.replace(/.*:([^:]+)$/, "$1");
 }
+
+function OpenWin(url, w, h) {
+  window.name="main";
+  if (w == null || w == 0) w = 350;
+  if (h == null || h == 0) h = 450;
+  var features = ('toolbar=0,location=0,directories=0,status=0,'
+                  +'menubar=0,scrollbars=1,resizable=1,copyhistory=0,'
+                  +'width='+w+',height='+h);
+  window.open (url + '', '', features);
+}
