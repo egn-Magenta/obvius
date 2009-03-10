@@ -24,7 +24,7 @@ package Obvius::DocType::Form;
 #
 ########################################################################
 
-# $Id$
+# $Id: Form.pm,v 1.12 2007/10/12 14:27:07 troels Exp $
 
 use strict;
 use warnings;
@@ -34,35 +34,11 @@ use Obvius::DocType;
 use Data::Dumper;
 use XML::Simple;
 use POSIX qw(strftime);
-use Encode;
 use Unicode::String qw(utf8 latin1);
 use Spreadsheet::WriteExcel;
 
-sub make_sure_is_utf8 {
-    my $str_list = shift;
-    
-    $str_list = [$str_list] if (ref $str_list ne 'ARRAY');
-
-    for my $str (@$str_list) {
-	my $string = '';
-
-	while($$str) {
-	    # Apparently decode, does magic with $str.
-	    my $n = decode('utf-8', $$str, Encode::FB_QUIET);
-	    $n = encode('iso-8859-1', $n);
-	    if (length ($$str)) {
-		$n .= substr ($$str, 0, 1);
-		$$str = substr($$str,1, length($$str) - 1);
-	    }
-	    $string .= $n;
-	}
-	utf8::upgrade($string);
-	$$str = $string;
-    }
-}
-
 our @ISA = qw( Obvius::DocType );
-our $VERSION="1.0";
+our ( $VERSION ) = '$Revision: 1.12 $ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # raw_document_data($document, $version, $obvius)
 #    - generates a XML document with the colledted form data and returns
@@ -92,36 +68,32 @@ sub raw_document_data {
     $xmldata .= "  <version>" . $vdoc->Version . "</version>\n";
     $xmldata .= "  <downloaddate>" . strftime('%Y-%m-%d %H:%M:%S', localtime) . "</downloaddate>\n";
 
-    my $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
-    
-    
+    my $entries_xml = '';
+
+    $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
+
     # Remove  xml declaration:
 
     $xmldata .= "<entries>" . $entries_xml . "</entries>";
 
-
     my $formdata_xml = $vdoc->field('formdata') || '';
 
-
+    $entries_xml =~ s/^/  /m;
     $xmldata .= $formdata_xml . "\n";
-    
+
     $xmldata .= "</formexport>\n";
 
-    make_sure_is_utf8(\$xmldata);
     my $name = $doc->Name || $doc->Id;
 
     my $format = $input->param('format') || '';
 
     if($format eq 'excel') {
 
-        my $d = $this->utf8ify($xmldata);
-        my $xml_data = XMLin(   $d,
+        my $xml_data = XMLin(   $xmldata,
                                 keyattr=>[],
                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
                                 suppressempty => ''
                             );
-        $xml_data = $this->unutf8ify($xml_data);
-
         my @headers;
 
         for(@{$xml_data->{fields}->{field} || [] }) {
@@ -190,26 +162,6 @@ sub flush_xml {
     return OBVIUS_OK;
 }
 
-sub send_mail {
-     my ($this, $to, $obvius, $vdoc) = @_;
-     $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
-     
-     my $subject = $vdoc->field('email_subject');
-     my $text = $vdoc->field('email_text');
-
-     my $from = 'noreply@adm.ku.dk';
-     my $mailmsg = <<END;
-To:      $to
-From:    $from
-Subject: $subject
-
-$text
-
-END
-
-     $obvius->send_mail($to, $mailmsg, $from);
-}
-
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
@@ -249,18 +201,9 @@ sub action {
 
     my %fields_by_name;
 
-    my @emails;
     for my $field (@{$formdata->{field}}) {
         my $value = $input->param($field->{name});
 
-	if ($field->{type} eq 'email') {
-	     if ($value =~ m|.+@.+\..+|) {
-		  push @emails, $value;
-	     } else {
-		  $field->{invalid} = 'Invalid emailadresse';
-	     }
-	}
-	
         # Make sure we have arrays for "multiple" fieldtypes
         if($field->{type} eq 'checkbox' or $field->{type} eq 'selectmultiple') {
             $value ||= [];
@@ -277,7 +220,7 @@ sub action {
         }
 
         $field->{_submitted_value} = $value;
-	
+
 
         my $valrules = $field->{validaterules};
         if($valrules) {
@@ -381,8 +324,6 @@ sub action {
             my $entry = XMLin($_);
             my $fields = $entry->{fields}->{field} || [];
 
-	    $fields = [$fields] if ref $fields ne 'ARRAY' ;
-	    
             for(@$fields) {
                 if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
                     $unique_failed{$_->{fieldname}} = 1;
@@ -394,29 +335,28 @@ sub action {
 
     my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
     my @not_unique = map {$_->{name}} grep { $unique_failed{$_->{name}} } @{$formdata->{field}};
-    if(scalar(@invalid) or scalar(@not_unique)) {
+    if(scalar(@invalid)) { # or scalar(@not_unique)) {
         $output->param('formdata' => $formdata);
         $output->param('invalid' => \@invalid);
         $output->param('not_unique' => \@not_unique);
     } else {
         # Form filled ok, now save/mail the submitted data
-	 $this->send_mail($_, $obvius, $vdoc) for (@emails);
-	 
-	 my %entry;
-	 
-	 $entry{date} = $input->param('NOW');
-	 $entry{fields} = { field => [] };
-	 
-	 for(@{$formdata->{field}}) {
-	      push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
-	 }
-	 
-	 $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
-	 
-	 $output->param('submitted_data_ok' => 1);
-	 $output->param('formdata' => $formdata);
+
+        my %entry;
+
+        $entry{date} = $input->param('NOW');
+        $entry{fields} = { field => [] };
+
+        for(@{$formdata->{field}}) {
+            push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
+        }
+
+        $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
+
+        $output->param('submitted_data_ok' => 1);
+        $output->param('formdata' => $formdata);
     }
-    
+
     return OBVIUS_OK;
 }
 
@@ -440,27 +380,14 @@ sub get_xml_entries {
 sub insert_xml_entry {
     my ($this, $id, $entry, $obvius) = @_;
 
+    my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
+                                             '!Table'      => 'formdata'});
     my $xml = XMLout($entry,
                      rootname => 'entry',
                      noattr => 1);
-    
-    $obvius->db_begin;
+    $set->Insert( {docid => $id, entry => $xml });
 
-    eval {
-	my $set = DBIx::Recordset->SetupObject( 
-	    {'!DataSource' => $obvius->{DB}, '!Table'      => 'formdata'});
-	$set->Insert( {docid => $id, entry => $xml }); 
-	$set->Disconnect();
-
-	$obvius->db_commit;
-    };
-    
-    if ($@) {
-	$obvius->db_rollback;
-	$this->{DB_Error} = $@;
-	$this->{LOG}->error("====> updating form... failed ($@)");
-	print STDERR "Couldn't update forms.\n";
-    }
+    $set->Disconnect();
 }
 
 
@@ -505,3 +432,36 @@ sub utf8ify {
 
 1;
 __END__
+# Below is stub documentation for your module. You better edit it!
+
+=head1 NAME
+
+Obvius::DocType::Form - Perl extension for blah blah blah
+
+=head1 SYNOPSIS
+
+  use Obvius::DocType::Form;
+  blah blah blah
+
+=head1 DESCRIPTION
+
+Stub documentation for Obvius::DocType::Form, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
+
+Blah blah blah.
+
+=head2 EXPORT
+
+None by default.
+
+
+=head1 AUTHOR
+
+A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+
+=head1 SEE ALSO
+
+L<perl>.
+
+=cut
