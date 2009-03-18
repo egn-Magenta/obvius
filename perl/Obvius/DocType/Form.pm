@@ -86,7 +86,7 @@ sub raw_document_data {
     my $name = $doc->Name || $doc->Id;
 
     my $format = $input->param('format') || '';
-
+    
     if($format eq 'excel') {
 
         my $xml_data = XMLin(   $xmldata,
@@ -373,7 +373,8 @@ sub get_xml_entries {
         push @entries, $rec->{entry};
     }
     $set->Disconnect();
-
+    
+    @entries = map { Encode::decode('latin-1', $_) } @entries;
     return (wantarray ? @entries : \@entries);
 }
 
