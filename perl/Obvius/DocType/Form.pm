@@ -29,6 +29,7 @@ package Obvius::DocType::Form;
 use strict;
 use warnings;
 
+use Encode;
 use Obvius;
 use Obvius::DocType;
 use Data::Dumper;
@@ -82,71 +83,73 @@ sub raw_document_data {
     $xmldata .= $formdata_xml . "\n";
 
     $xmldata .= "</formexport>\n";
-
+    
     my $name = $doc->Name || $doc->Id;
 
     my $format = $input->param('format') || '';
     
+    $xmldata = Encode::decode('latin1', $xmldata);
+    $xmldata = Encode::encode('utf8', $xmldata);
+
     if($format eq 'excel') {
-
-        my $xml_data = XMLin(   $xmldata,
-                                keyattr=>[],
-                                forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
-                                suppressempty => ''
-                            );
-        my @headers;
-
-        for(@{$xml_data->{fields}->{field} || [] }) {
-            my $header = $_->{title} . " (" . $_->{name} . ")";
-            $header = $this->unutf8ify($header);
-            push(@headers, $header);
+         
+         my $xml_data = XMLin(   $xmldata,
+                                 keyattr=>[],
+                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
+                                 suppressempty => ''
+                             );
+         my @headers;
+         
+         for(@{$xml_data->{fields}->{field} || [] }) {
+             my $header = $_->{title} . " (" . $_->{name} . ")";
+             push(@headers, $header);
         }
-
-
-        my @data;
-
-        my $tempfile="/tmp/" . $name . ".xls";
-        my $workbook=Spreadsheet::WriteExcel->new($tempfile);
-        my $worksheet=$workbook->addworksheet();
-
-        # Headers:
-        my $header_format=$workbook->addformat();
-        $header_format->set_bold();
-        $worksheet->write_row(0, 0, \@headers, $header_format);
-
-        # Data:
-        my $data_format=$workbook->addformat();
-        $data_format->set_align('top');
-        my $i=1;
-
-        for(@{ $xml_data->{entries}->{entry} || [] }) {
-            my @row;
-            my $fields = $_->{fields}->{field} || [];
-            for(@$fields) {
-                my $val = $_->{fieldvalue};
-
-                if(ref $val) {
-                    $val = join(", ", @$val);
+         
+         
+         my @data;
+         
+         my $tempfile="/tmp/" . $name . ".xls";
+         my $workbook=Spreadsheet::WriteExcel->new($tempfile);
+         my $worksheet=$workbook->addworksheet();
+         
+         # Headers:
+         my $header_format=$workbook->addformat();
+         $header_format->set_bold();
+         $worksheet->write_row(0, 0, \@headers, $header_format);
+         
+         # Data:
+         my $data_format=$workbook->addformat();
+         $data_format->set_align('top');
+         my $i=1;
+         
+         for(@{ $xml_data->{entries}->{entry} || [] }) {
+              my @row;
+              my $fields = $_->{fields}->{field} || [];
+              for(@$fields) {
+                   my $val = $_->{fieldvalue};
+                   
+                   $val = Encode::decode('utf8', $val);
+                   if(ref $val) {
+                        $val = join(", ", @$val);
                 }
-
-                $val = $this->unutf8ify($val);
-                push(@row, $val);
-            }
-
-            $worksheet->write_row($i, 0, \@row, $data_format);
-            $i++;
-        }
-
-        # Close $tempfile, read it and delete it:
-        my $data='';
-        $workbook->close();
-        my $fh;
-        open($fh, $tempfile) or die "Couldn't open $tempfile, stopping";
-        { local $/; $data=<$fh>; }
-        close $fh;
-        unlink $tempfile;
-
-        return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
+                   
+                   push(@row, $val);
+              }
+              
+              $worksheet->write_row($i, 0, \@row, $data_format);
+              $i++;
+         }
+         
+         # Close $tempfile, read it and delete it:
+         my $data='';
+         $workbook->close();
+         my $fh;
+         open($fh, $tempfile) or die "Couldn't open $tempfile, stopping";
+         { local $/; $data=<$fh>; }
+         close $fh;
+         unlink $tempfile;
+         
+         return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
     }
 
 
@@ -374,7 +377,6 @@ sub get_xml_entries {
     }
     $set->Disconnect();
     
-    @entries = map { Encode::decode('latin-1', $_) } @entries;
     return (wantarray ? @entries : \@entries);
 }
 
