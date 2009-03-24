@@ -211,13 +211,14 @@ sub action {
     $obvius->get_version_fields($vdoc, ['formdata' ]);
     
     my $data = $vdoc->field('formdata');
-    $data = Encode::decode('utf8', $data);
+    $data = Encode::decode('latin1', $data);
     my $formdata = XMLin(   $data,
                             keyattr=>[],
                             forcearray => [ 'field', 'option', 'validaterule' ],
                             suppressempty => ''
                         );
-
+    
+    $formdata = $this->unutf8ify($formdata);
     unless($input->param('obvius_form_submitted')) {
         # Form not submitted yet, just output the form:
         $output->param('formdata' => $formdata);
@@ -447,7 +448,7 @@ sub unutf8ify {
     my $ref=ref $obj;
 
     if (!$ref) { # Scalar:
-         return Encode::encode('latin1', $obj, Encode::FB_HTMLCREF);
+         return Encode::encode('latin-1', $obj, Encode::FB_HTMLCREF);
     }
     elsif ($ref eq 'ARRAY') { # Array:
         return [ map { $this->unutf8ify($_) } @$obj ];
