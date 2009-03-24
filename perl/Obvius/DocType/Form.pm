@@ -208,8 +208,9 @@ sub action {
 
 
 
-    my $data = $obvius->get_version_fields($vdoc, ['formdata' ]);
-
+    $obvius->get_version_fields($vdoc, ['formdata' ]);
+    
+    my $data = $vdoc->field('formdata');
     $data = Encode::decode('utf8', $data);
     my $formdata = XMLin(   $data,
                             keyattr=>[],
