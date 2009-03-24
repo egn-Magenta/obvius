@@ -24,22 +24,22 @@ package Obvius::DocType::Form;
 #
 ########################################################################
 
-# $Id: Form.pm,v 1.12 2007/10/12 14:27:07 troels Exp $
+# $Id$
 
 use strict;
 use warnings;
 
-use Encode;
 use Obvius;
 use Obvius::DocType;
 use Data::Dumper;
 use XML::Simple;
 use POSIX qw(strftime);
+use Encode;
 use Unicode::String qw(utf8 latin1);
 use Spreadsheet::WriteExcel;
 
 our @ISA = qw( Obvius::DocType );
-our ( $VERSION ) = '$Revision: 1.12 $ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION="1.0";
 
 # raw_document_data($document, $version, $obvius)
 #    - generates a XML document with the colledted form data and returns
@@ -47,6 +47,7 @@ our ( $VERSION ) = '$Revision: 1.12 $ ' =~ /\$Revision:\s+([^\s]+)/;
 #      content-disposition: attachment to make sure the xml file is
 #      downloaded correctly. Doesn't return anything unless in admin
 #      and get_file=1 is passed as an URL param
+
 sub raw_document_data {
     my ($this, $doc, $vdoc, $obvius, $input) = @_;
 
@@ -69,21 +70,21 @@ sub raw_document_data {
     $xmldata .= "  <version>" . $vdoc->Version . "</version>\n";
     $xmldata .= "  <downloaddate>" . strftime('%Y-%m-%d %H:%M:%S', localtime) . "</downloaddate>\n";
 
-    my $entries_xml = '';
-
-    $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
-
+    my $entries_xml = join "", $this->get_xml_entries($obvius, docid => $doc->Id);
+    
+    
     # Remove  xml declaration:
 
     $xmldata .= "<entries>" . $entries_xml . "</entries>";
 
+
     my $formdata_xml = $vdoc->field('formdata') || '';
 
-    $entries_xml =~ s/^/  /m;
-    $xmldata .= $formdata_xml . "\n";
 
-    $xmldata .= "</formexport>\n";
+    $xmldata .= $formdata_xml . "\n";
     
+    $xmldata .= "</formexport>\n";
+
     my $name = $doc->Name || $doc->Id;
 
     my $format = $input->param('format') || '';
@@ -92,67 +93,69 @@ sub raw_document_data {
     $xmldata = Encode::encode('utf8', $xmldata);
 
     if($format eq 'excel') {
-         
-         my $xml_data = XMLin(   $xmldata,
-                                 keyattr=>[],
-                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
-                                 suppressempty => ''
-                             );
-         my @headers;
-         
-         for(@{$xml_data->{fields}->{field} || [] }) {
-             my $header = $_->{title} . " (" . $_->{name} . ")";
-             push(@headers, $header);
+
+        my $xml_data = XMLin(   $xmldata,
+                                keyattr=>[],
+                                forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
+                                suppressempty => ''
+                            );
+
+        my @headers;
+
+        for(@{$xml_data->{fields}->{field} || [] }) {
+            my $header = $_->{title} . " (" . $_->{name} . ")";
+            $header = $this->unutf8ify($header);
+            push(@headers, $header);
         }
-         
-         
-         my @data;
-         
-         my $tempfile="/tmp/" . $name . ".xls";
-         my $workbook=Spreadsheet::WriteExcel->new($tempfile);
-         my $worksheet=$workbook->addworksheet();
-         
-         # Headers:
-         my $header_format=$workbook->addformat();
-         $header_format->set_bold();
-         $worksheet->write_row(0, 0, \@headers, $header_format);
-         
-         # Data:
-         my $data_format=$workbook->addformat();
-         $data_format->set_align('top');
-         my $i=1;
-         
-         for(@{ $xml_data->{entries}->{entry} || [] }) {
-              my @row;
-              my $fields = $_->{fields}->{field} || [];
-              for(@$fields) {
-                   my $val = $_->{fieldvalue};
-                   
-                   $val = Encode::decode('utf8', $val);
-                   if(ref $val) {
-                        $val = join(", ", @$val);
+
+
+        my @data;
+
+        my $tempfile="/tmp/" . $name . ".xls";
+        my $workbook=Spreadsheet::WriteExcel->new($tempfile);
+        my $worksheet=$workbook->addworksheet();
+
+        # Headers:
+        my $header_format=$workbook->addformat();
+        $header_format->set_bold();
+        $worksheet->write_row(0, 0, \@headers, $header_format);
+
+        # Data:
+        my $data_format=$workbook->addformat();
+        $data_format->set_align('top');
+        my $i=1;
+
+        for(@{ $xml_data->{entries}->{entry} || [] }) {
+            my @row;
+            my $fields = $_->{fields}->{field} || [];
+            for(@$fields) {
+                my $val = $_->{fieldvalue};
+
+                if(ref $val eq 'ARRAY') {
+                     $val = join(", ", map { Encode::decode('utf8', $_) } @$val);
+                } else {
+                     $val = Encode::decode('utf8', $val);
                 }
-                   
-                   push(@row, $val);
-              }
-              
-              $worksheet->write_row($i, 0, \@row, $data_format);
-              $i++;
-         }
-         
-         # Close $tempfile, read it and delete it:
-         my $data='';
-         $workbook->close();
-         my $fh;
-         open($fh, $tempfile) or die "Couldn't open $tempfile, stopping";
-         { local $/; $data=<$fh>; }
-         close $fh;
-         unlink $tempfile;
-         
-         return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
+
+                push(@row, $val);
+            }
+
+            $worksheet->write_row($i, 0, \@row, $data_format);
+            $i++;
+        }
+
+        # Close $tempfile, read it and delete it:
+        my $data='';
+        $workbook->close();
+        my $fh;
+        open($fh, $tempfile) or die "Couldn't open $tempfile, stopping";
+        { local $/; $data=<$fh>; }
+        close $fh;
+        unlink $tempfile;
+
+        return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
     }
-
-
+    
     return ("text/xml", $xmldata, $name . ".xml", "attachment");
 }
 
@@ -163,6 +166,26 @@ sub flush_xml {
     $set->Delete({'docid' => $id});
     $set->Disconnect;
     return OBVIUS_OK;
+}
+
+sub send_mail {
+     my ($this, $to, $obvius, $vdoc) = @_;
+     $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
+     
+     my $subject = $vdoc->field('email_subject');
+     my $text = $vdoc->field('email_text');
+
+     my $from = 'noreply@adm.ku.dk';
+     my $mailmsg = <<END;
+To:      $to
+From:    $from
+Subject: $subject
+
+$text
+
+END
+
+     $obvius->send_mail($to, $mailmsg, $from);
 }
 
 sub action {
@@ -185,16 +208,15 @@ sub action {
 
 
 
-    $obvius->get_version_fields($vdoc, ['formdata' ]);
+    my $data = $obvius->get_version_fields($vdoc, ['formdata' ]);
 
-    my $data = $this->utf8ify($vdoc->field('formdata'));
+    $data = Encode::decode('utf8', $data);
     my $formdata = XMLin(   $data,
                             keyattr=>[],
                             forcearray => [ 'field', 'option', 'validaterule' ],
                             suppressempty => ''
                         );
-    $formdata=$this->unutf8ify($formdata); # XMLin automatically generates utf8 data.
-                                           # We want the data as latin1, so converting here.
+    $this->unutf8ify($data);
 
     unless($input->param('obvius_form_submitted')) {
         # Form not submitted yet, just output the form:
@@ -204,9 +226,18 @@ sub action {
 
     my %fields_by_name;
 
+    my @emails;
     for my $field (@{$formdata->{field}}) {
         my $value = $input->param($field->{name});
 
+	if ($field->{type} eq 'email') {
+	     if ($value =~ m|.+@.+\..+|) {
+		  push @emails, $value;
+	     } else {
+		  $field->{invalid} = 'Invalid emailadresse';
+	     }
+	}
+	
         # Make sure we have arrays for "multiple" fieldtypes
         if($field->{type} eq 'checkbox' or $field->{type} eq 'selectmultiple') {
             $value ||= [];
@@ -223,7 +254,7 @@ sub action {
         }
 
         $field->{_submitted_value} = $value;
-
+	
 
         my $valrules = $field->{validaterules};
         if($valrules) {
@@ -327,6 +358,8 @@ sub action {
             my $entry = XMLin($_);
             my $fields = $entry->{fields}->{field} || [];
 
+	    $fields = [$fields] if ref $fields ne 'ARRAY' ;
+	    
             for(@$fields) {
                 if($unique{$_->{fieldname}} and ($unique{$_->{fieldname}} eq $_->{fieldvalue})) {
                     $unique_failed{$_->{fieldname}} = 1;
@@ -338,28 +371,29 @@ sub action {
 
     my @invalid = map {$_->{name}} grep { $_->{invalid} or $_->{mandatory_failed} } @{$formdata->{field}};
     my @not_unique = map {$_->{name}} grep { $unique_failed{$_->{name}} } @{$formdata->{field}};
-    if(scalar(@invalid)) { # or scalar(@not_unique)) {
+    if(scalar(@invalid) or scalar(@not_unique)) {
         $output->param('formdata' => $formdata);
         $output->param('invalid' => \@invalid);
         $output->param('not_unique' => \@not_unique);
     } else {
         # Form filled ok, now save/mail the submitted data
-
-        my %entry;
-
-        $entry{date} = $input->param('NOW');
-        $entry{fields} = { field => [] };
-
-        for(@{$formdata->{field}}) {
-            push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
-        }
-
-        $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
-
-        $output->param('submitted_data_ok' => 1);
-        $output->param('formdata' => $formdata);
+	 $this->send_mail($_, $obvius, $vdoc) for (@emails);
+	 
+	 my %entry;
+	 
+	 $entry{date} = $input->param('NOW');
+	 $entry{fields} = { field => [] };
+	 
+	 for(@{$formdata->{field}}) {
+	      push(@{$entry{fields}->{field}}, { fieldname => $_->{name}, fieldvalue => $_->{_submitted_value} });
+	 }
+	 
+	 $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
+	 
+	 $output->param('submitted_data_ok' => 1);
+	 $output->param('formdata' => $formdata);
     }
-
+    
     return OBVIUS_OK;
 }
 
@@ -376,21 +410,34 @@ sub get_xml_entries {
         push @entries, $rec->{entry};
     }
     $set->Disconnect();
-    
+
     return (wantarray ? @entries : \@entries);
 }
 
 sub insert_xml_entry {
     my ($this, $id, $entry, $obvius) = @_;
 
-    my $set = DBIx::Recordset->SetupObject( {'!DataSource' => $obvius->{DB},
-                                             '!Table'      => 'formdata'});
     my $xml = XMLout($entry,
                      rootname => 'entry',
                      noattr => 1);
-    $set->Insert( {docid => $id, entry => $xml });
+    
+    $obvius->db_begin;
 
-    $set->Disconnect();
+    eval {
+	my $set = DBIx::Recordset->SetupObject( 
+	    {'!DataSource' => $obvius->{DB}, '!Table'      => 'formdata'});
+	$set->Insert( {docid => $id, entry => $xml }); 
+	$set->Disconnect();
+
+	$obvius->db_commit;
+    };
+    
+    if ($@) {
+	$obvius->db_rollback;
+	$this->{DB_Error} = $@;
+	$this->{LOG}->error("====> updating form... failed ($@)");
+	print STDERR "Couldn't update forms.\n";
+    }
 }
 
 
@@ -400,7 +447,7 @@ sub unutf8ify {
     my $ref=ref $obj;
 
     if (!$ref) { # Scalar:
-        return utf8($obj)->latin1;
+         return Encode::encode('latin1', Encode::decode('utf8', $obj), Encode::FB_HTMLCREF);
     }
     elsif ($ref eq 'ARRAY') { # Array:
         return [ map { $this->unutf8ify($_) } @$obj ];
@@ -413,58 +460,6 @@ sub unutf8ify {
     }
 }
 
-sub utf8ify {
-    my ($this, $obj)=@_;
-
-    my $ref=ref $obj;
-
-    if (!$ref) { # Scalar:
-        return latin1($obj)->utf8;
-    }
-    elsif ($ref eq 'ARRAY') { # Array:
-        return [ map { $this->utf8ify($_) } @$obj ];
-    }
-    elsif ($ref eq 'HASH') { # Hash:
-        return { map { $_ => $this->utf8ify($obj->{$_}) } keys (%$obj) };
-    }
-    else {
-        return 'UNUTF8IFIABLE';
-    }
-}
-
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
-
-=head1 NAME
-
-Obvius::DocType::Form - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Obvius::DocType::Form;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Obvius::DocType::Form, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
-=head1 AUTHOR
-
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
-
-=head1 SEE ALSO
-
-L<perl>.
-
-=cut
