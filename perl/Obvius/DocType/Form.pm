@@ -217,7 +217,6 @@ sub action {
                             forcearray => [ 'field', 'option', 'validaterule' ],
                             suppressempty => ''
                         );
-    $this->unutf8ify($data);
 
     unless($input->param('obvius_form_submitted')) {
         # Form not submitted yet, just output the form:
@@ -448,7 +447,7 @@ sub unutf8ify {
     my $ref=ref $obj;
 
     if (!$ref) { # Scalar:
-         return Encode::encode('latin1', Encode::decode('utf8', $obj), Encode::FB_HTMLCREF);
+         return Encode::encode('latin1', $obj, Encode::FB_HTMLCREF);
     }
     elsif ($ref eq 'ARRAY') { # Array:
         return [ map { $this->unutf8ify($_) } @$obj ];
