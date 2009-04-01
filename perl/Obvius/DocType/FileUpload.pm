@@ -7,13 +7,17 @@ use warnings;
 
 use Obvius;
 use Obvius::DocType;
-
+use Digest::MD5 qw( md5_hex );
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
 
 sub raw_document_data {
      my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
-
+     my $data =	$req->hostname . ':' . $req->the_request;
+     
+     print STDERR "DATA: $data\n";
+     print STDERR "MD5: " . md5_hex($data) . "\n";
+    
      $obvius->get_version_fields($vdoc, ['mimetype', 'title', 'uploadfile']);
      my $path = $vdoc->field('uploadfile');
      return undef if !$path;
@@ -32,9 +36,8 @@ sub raw_document_data {
      local $/;
      my $fh;
      open $fh, $path or die "File not found: $path";
-     my $data = <$fh>;
+     $data = <$fh>;
      close $fh;
-     
      return ($mime_type, \$data, $filename);
 }
 
