@@ -4,30 +4,35 @@ use Obvius;
 use Obvius::Config;
 
 use JSON;
+use Data::Dumper;
 
 use WebObvius::Cache::Cache;
 use Apache2::Request;
 
-my @dispatch_table = ({expr => qr|/flush/|, func => \&flush});
+our @dispatch_table = ({expr => qr|/flush/|, func => \&flush});
 		      
 sub handler {
-     my $req = shift;
+     my ($this, $req) = @_;
      
      my $remove_prefix = $req->dir_config('RemovePrefix');
      my $obvius_config = $req->dir_config('ObviusConfig');
      my $config = Obvius::Config->new($obvius_config);
+
+     print STDERR "CAME HERE4 $config $obvius_config\n";
      my $obvius = Obvius->new($config);
 
      my $uri = $req->uri();
      $uri =~ s|$remove_prefix||;
-
+     
      for my $dispatcher (@dispatch_table) {
-	  if ($uri =~ /$dispatcher->{expr}/) {
-	       my $status = $dispatcher->{func}->($obvius, $req);
-	       $obvius->{DB} = undef;
-	       return $status;
-	  }
+          if ($uri =~ /$dispatcher->{expr}/) {
+               my $status = $dispatcher->{func}->($obvius, $req);
+               $obvius->{DB} = undef;
+               return $status;
+          }
      }
+     select($old);
+
 }
      
 sub flush {
@@ -36,6 +41,8 @@ sub flush {
      my $ap2_req = Apache2::Request->new($req);
      my $args = $ap2_req->param('cache');
      my $data = from_json($args);
+
+     print STDERR "ARgs is " . Dumper($args);
      return 400 if (ref $data ne 'ARRAY');
 
      (ref $_ eq 'HASH' and $obvius->register_modified(%$_)) for @$data;
