@@ -19,7 +19,10 @@ my $phrase = md5_hex($passwd . $time);
 $purpose = "open_one" if defined $fieldname;
 my $url = "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
-$url .= "&path=$path" if ($path);
+if ($path) {
+	$path =~ s/ /%20/g;
+	$url .= "&path=$path" if ($path);
+}
 
 </%init>
 </%method>
