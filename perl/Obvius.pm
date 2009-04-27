@@ -115,7 +115,7 @@ sub new {
 
     croak("Configuration missing")
         unless ($obvius_config);
-
+    
     my $this = $class->SUPER::new(OBVIUS_CONFIG => $obvius_config,
                                   USER        => $user,
                                   PASSWORD    => $password,
@@ -137,7 +137,7 @@ sub new {
 	 print STDERR "User not valid.\n";
 	 return undef;
     }
-
+    
     $this->{dbprocedures} = Obvius::DBProcedures->new($this->dbh);
     return $this;
 }
@@ -307,10 +307,12 @@ sub lookup_document {
         }
         return ();
     }
-    if (my @path = $this->get_doc_by_path($path)) {
-        return $path[-1];
-    }
-    return undef;
+
+    $path = $path . '/';
+    $path =~ s!/+!/!g;
+    my $paths = $this->execute_select("select d.* from docid_path dp join  documents d on 
+                                      (dp.docid = d.id) where dp.path = ?", $path);
+    return @$paths ? Obvius::Document->new($paths->[0]) : undef;
 }
 
 # Overveje at tilføje stiens id'er til Obvius::Document når de alligevel slås op hér
@@ -382,14 +384,13 @@ sub get_doc_path {
 
 sub get_doc_uri {
     my ($this, $doc) = @_;
-
-    my @path = $this->get_doc_path($doc);
-    shift(@path);                       # remove root
-
-    return '/' unless (@path);
-    my $uri = '/' . join('/', map { $_->param('name') } @path) . '/';
-    $uri =~ s!/+!/!g;
-    return $uri;
+    
+    return $doc->{path} if ref $doc && $doc->{path};
+    
+    my $docid = ref $doc ? $doc->Id : $doc;
+    my $paths = $this->execute_select("select path from docid_path where docid=?", $docid);
+    
+    return @$paths ? $paths->[0]{path} : undef;
 }
 
 # is_doc_below_doc - given two document-objects, returns true if the
@@ -2630,8 +2631,79 @@ sub send_mail {
      $smtp->data([$msg]) or return;
      $smtp->quit or return;
 }
-     
 
+sub find_closest_subsite {
+     my ($this, $doc) = @_;
+
+     my $uri = $this->get_doc_uri($doc);
+     my @uris;
+     
+     die "Url formatting is lacking" if $uri !~ m!^\/.*\/$!;
+
+     while ($uri) {
+          push @uris, $uri;
+          $uri =~ s/[^\/]*\/$//; 
+     }
+
+     my $question_marks = join ", ", (("?") x @uris);
+     my $query = "select d.*, dp.path 
+                  from docparms dpa join docid_path dp using (docid) join documents d on 
+                  (dp.docid = d.id) where  dp.path in ($question_marks) and 
+                  dpa.name = 'is_subsite' and dpa.value = '1' order by dp.path desc limit 1";
+     
+     my $res = $this->execute_select($query, @uris);
+     return @$res ? Obvius::Document->new($res->[0]) : undef;
+}
+
+sub shorten_url {
+     my ($url) = @_;
+
+     my @parts = split /\/+/, $url;
+     my @res;
+     for my $part (@parts) {
+          next if !$part;
+          next if $part eq '.';
+          if ($part eq '..') {
+               pop @res;
+          } else {
+               push @res, $part;
+          }
+     }
+
+     return '/' . (join '/', @res);
+}
+
+sub lang_uri {
+     my ($this, $lang, $doc) = @_;
+     
+     my $subsite_doc = $this->find_closest_subsite($doc);
+     my $docparams = $this->get_docparams($subsite_doc);
+
+     my $key = uc "${lang}_base";
+     my $base =  $docparams->{$key};
+     return undef if !$base;
+
+     $base = $base->Value;
+     my $path = $this->get_doc_uri($doc);
+     my $subsite_path = $this->get_doc_uri($subsite_doc);
+     $path =~ s/^\Q$subsite_path\E//;
+     
+     if ($base =~ m!^/!) {
+          $path = "$base/$path";
+          $path =~ s!/+!/!g;
+
+     } else {
+          $base = "$subsite_path/$base";
+          $base = shorten_url($base);
+
+          $path = "$base/$path";
+          $path =~ s!/+!/!g;
+     }
+     
+     return $this->lookup_document($path);
+}
+          
+          
 
 package Obvius::Benchmark;
 
