@@ -117,7 +117,11 @@ my $parent_doc = $obvius->get_doc_by_id($doc->Parent) || $doc; # Fall back to do
 my $inherited_docparams      = $obvius->get_docparams_recursive($parent_doc);
 my $inherited_docparams_show = join "<br />\n", map {
         my $docparam=$inherited_docparams->param($_);
-        lc($_) . '=' . $docparam->param('value')
+        my $val = $docparam->param('value');
+        $val =~ s/&/&amp;/g;
+        $val =~ s/</&lt;/g;
+        $val =~ s/>/&gt;/g;
+        lc($_) . '=' . $val;
 }
 sort $inherited_docparams->param();
 
