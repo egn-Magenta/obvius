@@ -2638,8 +2638,6 @@ sub find_closest_subsite {
      my $uri = $this->get_doc_uri($doc);
      my @uris;
      
-     die "Url formatting is lacking" if $uri !~ m!^\/.*\/$!;
-
      while ($uri) {
           push @uris, $uri;
           $uri =~ s/[^\/]*\/$//; 
@@ -2673,9 +2671,9 @@ sub shorten_url {
      return '/' . (join '/', @res);
 }
 
-sub lang_uri {
+sub get_lang_base {
      my ($this, $lang, $doc) = @_;
-     
+
      my $subsite_doc = $this->find_closest_subsite($doc);
      my $docparams = $this->get_docparams($subsite_doc);
 
@@ -2684,25 +2682,56 @@ sub lang_uri {
      return undef if !$base;
 
      $base = $base->Value;
+
+     my $subsite_path = $this->get_doc_uri($subsite_doc);
+
+     if ($base !~ m!^/!) {
+          $base = "$subsite_path/$base/";
+          $base = shorten_url($base);
+     }
+     
+     $base =~ s!/+!/!g;
+     return $base;
+}
+
+sub get_lang_uri {
+     my ($this, $lang, $doc) = @_;
+     
+     my $subsite_doc = $this->find_closest_subsite($doc);
      my $path = $this->get_doc_uri($doc);
+
      my $subsite_path = $this->get_doc_uri($subsite_doc);
      $path =~ s/^\Q$subsite_path\E//;
      
-     if ($base =~ m!^/!) {
-          $path = "$base/$path";
-          $path =~ s!/+!/!g;
-
-     } else {
-          $base = "$subsite_path/$base";
-          $base = shorten_url($base);
-
-          $path = "$base/$path";
-          $path =~ s!/+!/!g;
-     }
+     my $base = $this->get_lang_base($lang, $doc);
+     $path = "$base/$path";
+     $path =~ s!/+!/!g;
      
-     return $this->lookup_document($path);
+     return $path;
 }
-          
+
+sub get_lang_path_or_base {
+     my ($this, $lang, $doc) = @_;
+     
+     my $uri = $this->get_lang_uri($lang, $doc);
+     return $this->lookup_document($uri) ? $uri : $this->get_lang_base($lang, $doc);
+}
+
+sub alternative_langs {
+     my ($this, $doc) = @_;
+     
+     my $subsite_doc = $this->find_closest_subsite($doc);
+     my $docparams = $this->get_docparams($subsite_doc);
+     my @langs;
+
+     for my $param (keys %$docparams) {
+          my ($lang) = $param =~ /^\s*(\w+)_base\s*$/i;
+          next if !$lang;
+          push @langs, $lang;
+     }
+
+     return \@langs;
+}
           
 
 package Obvius::Benchmark;
