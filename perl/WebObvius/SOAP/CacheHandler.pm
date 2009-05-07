@@ -14,7 +14,9 @@ sub import {
      $obvius_config = Obvius::Config->new($config);
 }
 
-my @good_caches = qw( WebObvius::Cache::UserCache WebObvius::Cache::ApacheCache );
+my @good_caches = qw( WebObvius::Cache::UserCache 
+                      WebObvius::Cache::ApacheCache 
+                      WebObvius::Cache::MedarbejderoversigtCache );
 
 sub flush {
      my ($this, $command) = @_;
