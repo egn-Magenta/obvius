@@ -8,6 +8,7 @@ use WebObvius::Cache::ExternalApacheCache;
 use WebObvius::Cache::Collection;
 use WebObvius::Cache::AdminLeftmenuCache;
 use WebObvius::Cache::InternalProxyCache;
+use WebObvius::Cache::ExternalMedarbejderoversigtCache;
 
 our @ISA = qw( WebObvius::Cache::Collection );
 
@@ -20,7 +21,13 @@ sub new {
      my $apache_cache = WebObvius::Cache::ExternalApacheCache->new($obvius);
      my $internal_proxy_cache = WebObvius::Cache::InternalProxyCache->new($obvius);
      
-     return $class->SUPER::new($user_cache, $leftmenu_cache, $apache_cache, $internal_proxy_cache);
+     my $medarbejderoversigt_cache = WebObvius::Cache::ExternalMedarbejderoversigtCache->new($obvius);;
+   
+     return $class->SUPER::new($user_cache, 
+                               $leftmenu_cache, 
+                               $apache_cache, 
+                               $internal_proxy_cache,
+                               $medarbejderoversigt_cache);
 }
 
 1;

@@ -7,28 +7,36 @@ use Data::Dumper;
 use Cache::FileCache;
 
 sub new {
-     my ($class, $obvius, $namespace) = @_;
-
+     my ($class, $obvius, $namespace, %cache_options) = @_;
+     
      my $cache_dir = $obvius->{OBVIUS_CONFIG}{FILECACHE_DIRECTORY};
-     my $this = {obvius => $obvius, namespace => $namespace, cache_root => $cache_dir};
+     my $this = bless {obvius => $obvius, 
+                 namespace => $namespace, 
+                 cache_root => $cache_dir, 
+                 cache_options => \%cache_options,
+                }, $class;
+     
+     $this->{cache} = Cache::FileCache->new({cache_root => $this->{cache_root},
+                                             namespace => $this->{namespace},
+                                             %{$this->{cache_options}}});
      return bless $this, $class;
 }
 
+sub get_cache {
+     return shift->{cache};
+}
+     
 sub flush {
      my ($this, $dirty) = @_;
      $dirty = [$dirty] if !ref $dirty;
      
-     my $cache = Cache::FileCache->new({cache_root => $this->{cache_root},
-					namespace => $this->{namespace}});
-
+     my $cache = $this->get_cache();
      $cache->remove($_) for (@$dirty);
 }
 
 sub flush_completely {
      my $this = shift;
-     my $cache = Cache::FileCache->new({cache_root => $this->{cache_root},
-					namespace  => $this->{namespace}
-				       });
+     my $cache = $this->get_cache();
      
      $cache->clear();
 }

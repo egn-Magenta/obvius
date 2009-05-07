@@ -29,7 +29,6 @@ sub find_dirty {
 	  next if (!$doc);
 	    
 	  push @dirty, $doc->Parent if ($doc->Parent);
-	  
      }
      
      return \@dirty;

@@ -17,9 +17,9 @@ sub find_and_flush {
      my ($this, $cache_objects) = @_;
      
      my $relevant = $cache_objects->request_values('users');
-     my $flush = grep { $_->{users} } @$relevant;
+     my @flush = grep { $_->{users} } @$relevant;
      
-     if ($flush) {
+     if (@flush) {
 	  my $commands = {all => 1};
 	  $this->flush($commands);
 
