@@ -11,10 +11,12 @@ my $time	= time();
 my $path	= $ARGS{path} || '/';
 my $purpose	= $ARGS{purpose} || 'open_one';
 my $fieldname	= $ARGS{fieldname};
+my $prefix      = $ARGS{prefix};
 
 my $phrase	= md5_hex($passwd . $time);
 my $url		= "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose&path=$path";
 $url 		.= "&fieldname=$fieldname" if (defined($fieldname));
+$url            .= "&prefix=$prefix" if (defined $prefix);  
 
 $m->comp('/shared/redirect', location => $url);
 
