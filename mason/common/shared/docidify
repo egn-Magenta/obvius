@@ -4,11 +4,13 @@ $html
 </%args>
 <%init>
 $out = '';
+$html = Encode::decode('latin-1', $html);
 $p->parse($html);
 $p->eof;
 $m->scomp( '/shared/from_utf8', dataref => \$out);
 </%init>
 <%once>
+use Encode;
 # $out should be reset before parsing.
 my $out='';
 my $hostname_from_req = $r->hostname;
@@ -18,32 +20,29 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 my($this, $tagname, $text, $attr)=@_;
                                                 if($tagname eq 'a' and $attr->{href}) {
 
-                                                    # Make urls relative to / and convert to .docid format if possible:
+                                                     # Make urls relative to / and convert to .docid format if possible:
+                                                     my $uri = $attr->{href};
+                                                     my $org_uri = $uri;
+                                                     
+                                                     $uri =~ s!^http://$hostname_from_req/!/!;
+                                                     $uri =~ s!^/admin/!/!;
+                                                     
+                                                     if($uri =~ m!^/!) {
+                                                          # Remove anchor ref and querystring:
+                                                          $uri =~ s!#.*$!!;
+                                                          $uri =~ s!\?.*$!!;
+                                                          
+                                                          if(my $doc = $obvius->lookup_document($uri)) {
+                                                               # Remove anchor and querystring from original uri:
+                                                               $org_uri =~ s!#.*$!!;
+                                                               $org_uri =~ s!\?.*$!!;
+                                                              
+                                                               $uri = "/" . $doc->Id . ".docid";
+                                                               $text =~ s!\Q$org_uri\E!$uri!;
+                                                          } 
+                                                     }
 
-                                                    my $uri = $attr->{href};
-                                                    my $org_uri = $uri;
-
-                                                    if($uri) {
-                                                        $uri =~ s!^http://$hostname_from_req/!/!;
-                                                        $uri =~ s!^/admin/!/!;
-
-                                                        if($uri =~ m!^/!) {
-                                                            # Remove anchor ref and querystring:
-                                                            $uri =~ s!#.*$!!;
-                                                            $uri =~ s!\?.*$!!;
-
-                                                            if(my $doc = $obvius->lookup_document($uri)) {
-                                                                # Remove anchor and querystring from original uri:
-                                                                $org_uri =~ s!#.*$!!;
-                                                                $org_uri =~ s!\?.*$!!;
-
-                                                                $uri = "/" . $doc->Id . ".docid";
-                                                                $text =~ s!\Q$org_uri\E!$uri!;
-                                                            }
-                                                        }
-                                                    }
-
-                                                    $out.=$text;
+                                                     $out.=$text;
 
                                                 } elsif($tagname eq 'img') {
 
@@ -104,7 +103,7 @@ my $p = HTML::Parser->new(api_version=>3,
                                         $out.=$text;
                                         },
                                         "self, text" ]);
-$p->attr_encoded(1); # Don't decode entities in attributes
+$p->attr_encoded(0);
 </%once>
 <%method url2docid>
 <%args>
