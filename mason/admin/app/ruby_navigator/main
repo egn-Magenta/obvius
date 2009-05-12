@@ -12,11 +12,12 @@ my $path	= $ARGS{path} || '/';
 my $purpose	= $ARGS{purpose} || 'open_one';
 my $fieldname	= $ARGS{fieldname};
 my $prefix      = $ARGS{prefix};
-
+my $doctype     = $ARGS{doctype};
 my $phrase	= md5_hex($passwd . $time);
 my $url		= "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose&path=$path";
-$url 		.= "&fieldname=$fieldname" if (defined($fieldname));
-$url            .= "&prefix=$prefix" if (defined $prefix);  
+$url .= "&fieldname=$fieldname" if (defined($fieldname));
+$url .= "&prefix=$prefix" if (defined $prefix);  
+$url .= "&doctype=$doctype" if (defined $doctype);
 
 $m->comp('/shared/redirect', location => $url);
 
