@@ -2505,20 +2505,21 @@ sub execute_command {
 
 sub execute_transaction {
      my ($this, $sql, @args) = @_;
-
-     my $sth = $this->{DB}->DBHdl->prepare($sql);
      
-     eval { $sth->execute(@args); };
+     eval {
+          $this->{DB}->DBHdl->begin_work;
+          my $sth = $this->{DB}->DBHdl->prepare($sql);
+          $sth->execute(@args); 
+          $sth->finish();
+     };
 
-     $sth->finish();
      
      if ($@) {
-	  $sth = $this->{DB}->DBHdl->prepare('rollback;');
-	  $sth->finish();
-	  return $@;
+	  $this->{DB}->DBHdl->rollback;
+	  die $@;
+     } else {
+          $this->{DB}->DBHdl->commit;
      }
-     
-     return 0;
 }
 
      
