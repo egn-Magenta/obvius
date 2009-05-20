@@ -101,7 +101,7 @@ sub raw_document_data {
                             );
 
         my @headers;
-
+        
         for(@{$xml_data->{fields}->{field} || [] }) {
             my $header = $_->{title} . " (" . $_->{name} . ")";
             $header = $this->unutf8ify($header);
@@ -123,6 +123,7 @@ sub raw_document_data {
         # Data:
         my $data_format=$workbook->addformat();
         $data_format->set_align('top');
+        $data_format->set_locked(0);
         my $i=1;
 
         for(@{ $xml_data->{entries}->{entry} || [] }) {
