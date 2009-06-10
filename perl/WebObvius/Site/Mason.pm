@@ -214,12 +214,6 @@ sub access_handler ($$) {
      }
 
 
-     # The orig_uri case from above does not apply to admin, however, so it's
-     # not needed here.
-     return $this->redirect($req, $req->notes('prefix') . $uri , 'force-external')
-       if (!$this->param('is_admin') and ($uri =~ s{[.]html/$}{.html}i));
-     # ... and we auto-deslash any uri which ends in .html.
-
      my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef);
      return SERVER_ERROR unless ($obvius);
 
