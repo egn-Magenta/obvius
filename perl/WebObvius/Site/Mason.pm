@@ -184,8 +184,6 @@ sub access_handler ($$) {
      my $uri=$req->uri;
      my $remove = $req->dir_config('RemovePrefix');
      $uri =~ s/^\Q$remove\E// if ($remove);
-     # We will allow .html (but don't use it if you don't need it) ...
-     #$uri =~ s/\.html?$//;
      $req->notes(prefix=>($req->dir_config('AddPrefix') || ''));
      $req->notes(uri=>$uri);
      $req->uri($uri) unless ($req->dir_config('AddPrefix')); # I'm unsure about this... but I'm guessing it's okay to put here.
