@@ -191,27 +191,6 @@ sub access_handler ($$) {
      my $orig_uri = $uri;
      my $roothost = $req->subprocess_env('ROOTHOST');
 
-     # XXX Instead of checking for a '.' in the uri here, wouldn't it
-     # be better to only do this whole slash-redirection thing only if
-     # there is no alternate_location for the document?
-     # The problem with that is, that we only know if there is an
-     # alternate location much later (in handler, below), so it takes a
-     # little more work to change it.
-
-     # ... and we auto-slash any uri without .'s in it except on admin where it's
-     # handled in Mason ...
-     if ($orig_uri !~ m!/$! and $orig_uri !~ /[.]/ and !$this->param('is_admin')) {
-          # If on a subsite system (eg. roothost is set) always redirect to the roothost
-          # or we will get a double subsite rewrite. A better way to handle this would be
-          # good since we now wil get 3 redirects if a user ommits the ending /:
-          # http://subsite.somehost/someurl =>
-          # http://roothost.somehost/somesubsite/someurl/ =>
-          # http://subsite.somehost/someurl/
-          my $host_part = $roothost ? ('http://' . $roothost) : '';
-          return $this->redirect($req, $host_part . $req->notes('prefix') . $orig_uri . '/', 'force-external')
-     }
-
-
      my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef);
      return SERVER_ERROR unless ($obvius);
 
