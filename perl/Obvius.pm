@@ -2047,6 +2047,11 @@ sub delete_document {
         die "Document has sub documents\n"
             if ($this->get_docs_by_parent($doc->Id));
 
+        # Sets user so that trigger on document delete nows who deleted the document.
+        my $user = $this->{USER} ? $this->get_userid($this->{USER}) : 1;
+        $this->execute_command("set \@user=?", $user);
+
+
         $this->{LOG}->info("====> Deleting fields ... delete from vfields");
         $this->db_delete_vfields($doc->Id);
         $this->{LOG}->info("====> Deleting versions ... delete from versions");
