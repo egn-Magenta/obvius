@@ -9,6 +9,7 @@ $fieldname => undef
 <% $url %> 
 <%init>
 use Digest::MD5 qw(md5_hex);
+use URI::Escape;
 $obvius->read_user_and_group_info();
 
 my $user = $obvius->{USER};
@@ -20,14 +21,13 @@ $purpose = "open_one" if defined $fieldname;
 my $url = "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 if ($path) {
-	$path =~ s/ /%20/g;
-	$url .= "&path=$path" if ($path);
+   $path = uri_escape($path);
 }
 
 </%init>
 </%method>
 <%method onclick>
-javascript: return window.open('<% $url %>', 'navigator',800, 500);
+javascript: return window.open('<% $url %>', 'navigator',800, 500, 'resize=1');
 <%init>
 my $url = $m->scomp('navigator_link_start:href', %ARGS);
 $url =~ s/\s//g;
