@@ -27,7 +27,7 @@ if ($path) {
 </%init>
 </%method>
 <%method onclick>
-javascript: return window.open('<% $url %>', 'navigator',800, 500, 'resize=1');
+javascript: return window.open('<% $url %>', 'navigator','resizable=1,width=800,height=500')
 <%init>
 my $url = $m->scomp('navigator_link_start:href', %ARGS);
 $url =~ s/\s//g;
