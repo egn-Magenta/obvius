@@ -110,7 +110,7 @@ sub save_request_result_in_cache
      
      open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
      flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
-     print F (ref $s ? $$s : $s);
+     print F (ref $s ? $$s : $s) if $s;
      flock F, LOCK_UN;
      close F;
      
