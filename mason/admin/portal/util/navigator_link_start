@@ -22,6 +22,7 @@ my $url = "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpos
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 if ($path) {
    $path = uri_escape($path);
+   $url .= "&path=$path";
 }
 
 </%init>
