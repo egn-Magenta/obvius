@@ -25,6 +25,8 @@
 <& form_files/show_after_submit, %ARGS, output=>$output &>
 %} elsif($r->param('obvius_form_submitted') and $output->param('submitted_data_ok')) {
 <& form_files/after_submit, %ARGS, output=>$output &>
+%} elsif($closed && !$prefix) {
+<& /shared/htmlize, text => $vdoc->field('close_message') &>  
 %} else {
 <& teaser &>
 	   
@@ -125,14 +127,18 @@ $output
 </%args>
 %
 <%init>
-$obvius->get_version_fields($vdoc, ['formtext']);
+$obvius->get_version_fields($vdoc, ['formtext', 'close_message', 'entries_for_close']);
 my $formdata = $output->param('formdata') || {};
 my $fields = $formdata->{field} || [];
 
 my $invalid = $output->param('invalid') || [];
 my $not_unique = $output->param('not_unique') || [];
 
+my $count = $doctype->count_entries($doc->Id,$obvius);
+my $closed = $count >= $vdoc->field('entries_for_close');
+     
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
+$output->param(OBVIUS_SIDE_EFFECTS => 1);
 </%init>
 <%once>
 use Unicode::String qw(utf8 latin1);
