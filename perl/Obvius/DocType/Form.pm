@@ -402,7 +402,6 @@ sub action {
          $uri = $hostmap->translate_uri($uri, ':whatever:');
          my $from = 'noreply@adm.ku.dk';
          
-         print STDERR "CoUNT: $count, ", $vdoc->field('entries_for_advert'), $vdoc->field('entries_for_close');
          if ($count == $vdoc->field('entries_for_advert')) {
               my $subject = encode_base64("Overvågning af $uri");
               $subject =~ s/\n//g;
@@ -436,7 +435,7 @@ END
                    $obvius->send_mail($mt, $msg, $from);
               }
          }
-              
+         
 	 $output->param('submitted_data_ok' => 1);
 	 $output->param('formdata' => $formdata);
     }
