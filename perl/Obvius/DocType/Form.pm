@@ -37,6 +37,7 @@ use POSIX qw(strftime);
 use Encode;
 use Unicode::String qw(utf8 latin1);
 use Spreadsheet::WriteExcel;
+use MIME::Base64;
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -209,7 +210,9 @@ sub action {
 
 
 
-    $obvius->get_version_fields($vdoc, ['formdata' ]);
+    $obvius->get_version_fields($vdoc, ['formdata', 'mailto',
+                                        'entries_for_advert', 'entries_for_close'
+                                       ]);
     
     my $data = $vdoc->field('formdata');
     $data = Encode::decode('latin1', $data);
@@ -391,7 +394,49 @@ sub action {
 	 }
 	 
 	 $this->insert_xml_entry($doc->{ID}, \%entry, $obvius);
-	 
+	 my $count = $this->count_entries($doc->Id, $obvius);
+         my @mailto = split /;/, $vdoc->field('mailto');
+         
+         my $uri = $obvius->get_doc_uri($doc);
+         my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
+         $uri = $hostmap->translate_uri($uri, ':whatever:');
+         my $from = 'noreply@adm.ku.dk';
+         
+         print STDERR "CoUNT: $count, ", $vdoc->field('entries_for_advert'), $vdoc->field('entries_for_close');
+         if ($count == $vdoc->field('entries_for_advert')) {
+              my $subject = encode_base64("Overvågning af $uri");
+              $subject =~ s/\n//g;
+              $subject = "=?ISO-8859-1?B?" . $subject . "?=";
+              for my $mt (@mailto) {
+                   my $msg =<<END;
+To: <$mt>
+From: <$from>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Subject: $subject
+
+Formularen på $uri har nu fået $count indtastninger
+END
+
+                    $obvius->send_mail($mt, $msg, $from);
+              }
+         }
+         if ($count == $vdoc->field('entries_for_close')) {     
+              for my $mt (@mailto) {
+                   my $msg =<<END;
+To: <$mt>
+From: <$from>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Subject: Formularen $uri er nu lukket for indtastninger
+
+Formularen $uri har nu modtaget $count indtastninger, 
+og er derfor nu lukket for yderligere indtastninger.
+END
+                   $obvius->send_mail($mt, $msg, $from);
+              }
+         }
+              
 	 $output->param('submitted_data_ok' => 1);
 	 $output->param('formdata' => $formdata);
     }
@@ -442,6 +487,13 @@ sub insert_xml_entry {
     }
 }
 
+sub count_entries {
+     my ($this, $id, $obvius) = @_;
+     
+     my $res = $obvius->execute_select("select count(*) c from formdata where docid=?", $id);
+
+     return $res->[0]{c};
+}
 
 sub unutf8ify {
     my ($this, $obj)=@_;
