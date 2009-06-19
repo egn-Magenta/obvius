@@ -25,7 +25,17 @@ sub new {
 sub get_cache {
      return shift->{cache};
 }
-     
+
+sub save {
+     my ($this, $key, $data) = @_;
+     return $this->get_cache()->set($key, $data);
+}
+
+sub get {
+     my ($this, $key) = @_;
+     return $this->get_cache()->get($key);
+}
+
 sub flush {
      my ($this, $dirty) = @_;
      $dirty = [$dirty] if !ref $dirty;
