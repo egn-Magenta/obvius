@@ -1,9 +1,17 @@
 delimiter $$
 
+-- @user must be set ahead of deleting the document to place it in the right bin.
+-- Otherwise default to admin being the deleter.
 drop trigger post_document_delete $$
 create trigger post_document_delete after delete on documents
 for each row
 begin
+        declare p text default NULL;
+        select path from docid_path where docid=old.id into p;  
+        insert into documents_backup (id, parent, name, type, owner,grp, accessrules, 
+                                      path,date_deleted, delete_user) values 
+                                   (old.id, old.parent, old.name, old.type, old.owner, 
+                                    old.grp, old.accessrules, p, now(), ifnull(@user, 1));
 	delete d from docid_path d where d.docid = old.id;
 	call clean_internal_proxies(old.id);
 end $$
@@ -20,7 +28,6 @@ end $$
 drop trigger post_document_insert $$
 create trigger post_document_insert after insert on documents
 for each row call insert_docid_path(new.id) $$
-
 
 drop procedure if exists recursive_subdocs_trigger $$
 create procedure recursive_subdocs_trigger (docid integer unsigned) 
@@ -39,10 +46,10 @@ begin
 		      delete r2 from recursive_subdocs_table2 r2;
 		      insert ignore into recursive_subdocs_table2 (id)
 		      	     select id from recursive_subdocs_trigger_table;
-                      insert ignore into recursive_subdocs_trigger_table (id) select                 
+                      insert ignore into recursive_subdocs_trigger_table (id) select
                              d.id from recursive_subdocs_table2 r2 join 
                              documents d on (r2.id = d.parent); 
-                       select count(*) into new_len from recursive_subdocs_trigger_table;
+                      select count(*) into new_len from recursive_subdocs_trigger_table;
          end while;
 	 drop temporary table recursive_subdocs_table2;
 end $$
