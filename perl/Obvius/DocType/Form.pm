@@ -402,7 +402,7 @@ sub action {
          $uri = $hostmap->translate_uri($uri, ':whatever:');
          my $from = 'noreply@adm.ku.dk';
          
-         if ($count == $vdoc->field('entries_for_advert')) {
+         if ($vdoc->field('entries_for_advert') && $count == $vdoc->field('entries_for_advert')) {
               my $subject = encode_base64("Overvågning af $uri");
               $subject =~ s/\n//g;
               $subject = "=?ISO-8859-1?B?" . $subject . "?=";
@@ -420,7 +420,7 @@ END
                     $obvius->send_mail($mt, $msg, $from);
               }
          }
-         if ($count == $vdoc->field('entries_for_close')) {     
+         if ($vdoc->field('entries_for_close') && $count == $vdoc->field('entries_for_close')) {     
               for my $mt (@mailto) {
                    my $msg =<<END;
 To: <$mt>
