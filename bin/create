@@ -23,7 +23,7 @@ use XML::Simple;
 use MIME::Base64;
 use POSIX qw(strftime);
 use Unicode::String qw(utf8);
-
+use WebObvius::InternalProxy;
 use Getopt::Long;
 
 my (
@@ -199,7 +199,11 @@ my $num = 0;
 
     
 foreach my $document (@{$data->{document}}) { # Must be in parent-before-child order!
-	$num++ if create_document( $document);
+     if (get($document, 'obvius_dump_type_name') eq 'InternalProxy') {
+          $num++ if create_proxy_document ( $document );
+     } else {
+          $num++ if create_document( $document);
+     }
 }
 say "$num documents created\n";
 
@@ -255,12 +259,53 @@ sub get_usermap_id
 	$id;
 }
 
+sub create_proxy_document {
+     my ($document) = @_;
+     my $parent_uri = get( $document, 'parent');
+     $parent_uri = s!^\Q$remove_prefix\E!! if $remove_prefix;
+     $parent_uri = $add_prefix . '/' . $parent_uri;
+     $parent_uri =~ s!/+!/!g;
+     
+     my $parent = $obvius->lookup_document( $parent_uri );
+     if (!$parent) {
+          warn "Parent document $parent_uri does not exist\n";
+          return;
+     }
+     my $new_uri = $parent_uri . '/' . get( $document, 'name' );
+     my $owner = get_usermap_id('user',
+                                $new_uri,
+                                get( $document, 'user'),
+                                \%map_owners,
+                                'get_userid'
+                               );
+     my $grp = get_usermap_id('group',
+                              $new_uri,
+                              get( $document, 'grp'),
+                              \%map_groups,
+                              'get_grpid'
+                             );
+     
+     my $ip = WebObvius::InternalProxy->new($obvius);
+     
+     my ($docid, $version) = $ip->create_internal_proxy_document(parent => $parent->Id,
+                                                                 name => get($document, 'name'),
+                                                                 grpid => $grp,
+                                                                 owner => $owner,
+                                                                 lang => get($document, 'lang'),
+                                                                 fields => get($document, 'fields'));
+     
+     if (get ($document, 'public')) {
+          $obvius->just_publish_fucking_version($docid, $version);
+     }
+     return 1;
+}
+
 sub create_document
 {
 	my ($document) = @_;
 
 	my $new_uri = get( $document, 'obvius_dump_doc_uri');
-
+        
 	$new_uri =~ s!^\Q$remove_prefix\E!! if $remove_prefix;
 	$new_uri = $add_prefix . '/' . $new_uri;
 	$new_uri =~ s[//][/]g;

@@ -38,6 +38,35 @@ sub make_old_obvius_data_from_hash {
      $data->param($_ => $hash->{$_}) for (keys %$hash);
      return $data;
 }
+
+sub get_attrib {
+     my ($this, $vdoc, @attribs) = @_;
+     
+     my $attribs = join ',', (map { "\"$_\"" } grep {/^[\w\d_]+$/} @attribs);
+     
+     my $sel_res = $this->{obvius}->execute_select("select name, text_value, int_value, 
+                                            double_value, date_value from vfields
+                                            where docid = ? and version = ? and name in ($attribs)", 
+                                            $vdoc->Docid, $vdoc->Version);
+     my %res;
+     for my $elem (@$sel_res) {
+          my $name = lc $elem->{name};
+          my $val = $elem->{text_value} || 
+                    $elem->{int_value} ||
+                    $elem->{date_value} ||
+                    $elem->{double_value};
+          if ($res{$name}) {
+               if (ref $res{$name} eq 'ARRAY') {
+                    push @{$res{$name}}, $val;
+               } else {
+                    $res{$name} = [$res{$name}, $val];
+               }
+          } else {
+               $res{$name} = $val;
+          }
+     }
+     return \%res;
+}
      
 sub create_internal_proxy_document {
      my ($this, %options) = @_;
@@ -107,7 +136,10 @@ sub new_internal_proxy_entry {
      my ($this, $docid, $version, $depends_on, $fields) = @_;
      
      my $str = join ",", @$fields;
-     eval {$this->{obvius}->dbprocedures->new_internal_proxy_entry($docid, $version, $depends_on, $str); };
+     eval {
+          $this->{obvius}->dbprocedures->new_internal_proxy_entry($docid, $version, 
+                                                                  $depends_on, $str); 
+     };
      if ($@) {
 	  die "Error creating internal_proxy_entry: $@\n";
      }

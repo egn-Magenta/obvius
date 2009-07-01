@@ -16,7 +16,8 @@ use warnings;
 use Obvius;
 use Obvius::Config;
 use Obvius::Log;
-
+use Data::Dumper;
+use WebObvius::InternalProxy;
 use XML::Simple;
 use MIME::Base64;
 
@@ -116,8 +117,82 @@ dump_doc($_) for @docids;
 print $output "</documentcollection>\n";
 exit;
 
+sub is_proxy_document {
+     my ($doc) = @_;
+     
+     my $vdoc = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc);
+     return 0 if (!$vdoc);
+     return $vdoc->real_doctype($obvius)->Name eq 'InternalProxy';
+}
 
-sub dump_doc
+sub dump_proxy_doc {
+     my ( $doc ) = @_;
+     
+     my $vdoc = $obvius->get_public_version( $doc ) || $obvius->get_latest_version ( $doc );
+
+     return undef if !$vdoc;
+     return undef if $doc->Parent < 1;
+
+     my $parent = $obvius->get_doc_by_id( $doc->Parent);
+     return undef if !$parent;
+     
+     my $user = $obvius->get_user ($doc->Owner);
+     my $group = $obvius->get_group ($doc-> Grp);
+     $user = $user ? $user->{login} : 'admin';
+     $group = $group ? $group->{login} : 'admin';
+
+     my %res = (obvius_dump_type_name => $vdoc->real_doctype($obvius)->Name,
+                name => $doc->Name,
+                parent => $obvius->get_doc_uri( $parent ),
+                lang => $vdoc->Lang,
+                grp => $group,
+                user => $user,
+                public => $vdoc->Public
+               );
+     my @interesting_fields = ('title', 
+                               'short_title', 
+                               'seq', 
+                               'internal_proxy_path', 
+                               'internal_proxy_overload_rightboxes',
+                               'rightboxes'
+                              );
+     
+     my $ip = WebObvius::InternalProxy->new($obvius);
+     my $fields = $ip->get_attrib($vdoc, @interesting_fields);
+     
+     if ($fields->{internal_proxy_overload_rightboxes}) {
+          undef $fields->{rightboxes};
+     }
+     $res{fields} = $fields;
+
+     print $output XMLout(\%res, 
+                          rootname => 'document', 
+                          noattr   => 1
+                         ), "\n";
+}    
+     
+     
+     
+                
+     
+     
+sub dump_doc {
+     my ($doc) = @_;
+     
+     if( is_proxy_document( $doc ) ) {
+          dump_proxy_doc( $doc );
+     } else {
+          dump_normal_doc( $doc );
+     }
+     
+     # Recursively:
+     if ($recursive) {
+          my $subdocs = $obvius-> get_docs_by_parent( $doc->Id);
+          dump_doc($_) for @$subdocs;
+     }
+}
+
+sub dump_normal_doc
 {
 	my $doc = $_[0];
 
@@ -142,7 +217,7 @@ sub dump_doc
 		$obvius-> get_version_fields($_, 255);
 		$_->param( 
 			obvius_dump_type_name => 
-				$obvius->get_version_type($_)->Name
+                                $obvius->get_version_type($_)->Name
 		);
 		$_->param(
 			obvius_dump_user_login => 
@@ -188,11 +263,6 @@ sub dump_doc
 		noattr   => 1
 	), "\n";
 
-	# Recursively:
-	if ($recursive) {
-		my $subdocs = $obvius-> get_docs_by_parent( $doc->Id);
-		dump_doc($_) for @$subdocs;
-	}
 }
 
 sub hashify
