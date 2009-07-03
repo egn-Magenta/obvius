@@ -135,7 +135,7 @@ my $invalid = $output->param('invalid') || [];
 my $not_unique = $output->param('not_unique') || [];
 
 my $count = $doctype->count_entries($doc->Id,$obvius);
-my $closed = $count >= $vdoc->field('entries_for_close');
+my $closed = $vdoc->field('entries_for_close') && $count >= $vdoc->field('entries_for_close');
      
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 $output->param(OBVIUS_SIDE_EFFECTS => 1);
