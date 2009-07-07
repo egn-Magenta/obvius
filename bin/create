@@ -262,7 +262,8 @@ sub get_usermap_id
 sub create_proxy_document {
      my ($document) = @_;
      my $parent_uri = get( $document, 'parent');
-     $parent_uri = s!^\Q$remove_prefix\E!! if $remove_prefix;
+     
+     $parent_uri =~ s!^\Q$remove_prefix\E!! if $remove_prefix;
      $parent_uri = $add_prefix . '/' . $parent_uri;
      $parent_uri =~ s!/+!/!g;
      
@@ -286,13 +287,19 @@ sub create_proxy_document {
                              );
      
      my $ip = WebObvius::InternalProxy->new($obvius);
-     
-     my ($docid, $version) = $ip->create_internal_proxy_document(parent => $parent->Id,
-                                                                 name => get($document, 'name'),
-                                                                 grpid => $grp,
-                                                                 owner => $owner,
-                                                                 lang => get($document, 'lang'),
-                                                                 fields => get($document, 'fields'));
+    my ($docid, $version); 
+     eval {
+	($docid, $version) = $ip->create_internal_proxy_document(parent => $parent->Id,
+       	                                                          name => get($document, 'name'),
+       	                                                          grpid => $grp,
+       	                                                          owner => $owner,
+       	                                                          lang => get($document, 'lang'),
+       	                                                          fields => get($document, 'fields'));
+     };
+     if ($@) {
+	warn $@;
+	return;
+     }
      
      if (get ($document, 'public')) {
           $obvius->just_publish_fucking_version($docid, $version);
@@ -309,7 +316,6 @@ sub create_document
 	$new_uri =~ s!^\Q$remove_prefix\E!! if $remove_prefix;
 	$new_uri = $add_prefix . '/' . $new_uri;
 	$new_uri =~ s[//][/]g;
-
 	say "$document->{obvius_dump_doc_uri} -> $new_uri\n";
 	
 	if ( $obvius-> lookup_document( $new_uri)) {
