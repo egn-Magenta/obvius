@@ -1,7 +1,12 @@
 <%method block>\
 %
+<script type="text/javascript">
+$(function () {
+           $(".htmlContent").resizable();
+});
+</script>
 <& ../util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
-<textarea <% $disabled ? 'disabled="disabled" ' : '' %>cols="<% $cols |h %>" rows="<% $rows |h %>" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>"><% $value->{value} |h %></textarea><br />
+<textarea class="htmlContent" <% $disabled ? 'disabled="disabled" ' : '' %>cols="<% $cols |h %>" rows="<% $rows |h %>" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>"><% $value->{value} |h %></textarea><br />
 <& /shared/msg, text=>'or, upload text-file' &>: <input type="file" name="<% $prefix . $field->{name} . '_upload' |h %>" size="40" />
 <%args>
 $prefix
