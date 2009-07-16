@@ -80,7 +80,7 @@ function add_key_value () {
 % } elsif (defined $show->{type} and $show->{type} eq 'dropdown') {
       <select <% $show->{inactive} ? 'disabled="disabled" ' : '' %>name="<% $show->{name} |h %>">
 %     foreach my $option (@{$show->{choices}}) {
-        <option value="<% $option->{id} |h %>"<% $option->{id} eq $show->{value} ? ' selected="selected"' : '' %>><% $option->{name} |h %></option>
+        <option value="<% $option->{id} |h %>"<% $option->{id} eq $show->{value} ? ' selected="selected"' : '' %>><% $show->{to_show} ? $show->{to_show}->($option) : $option->{name} |h %></option>
 %     }
       </select>
 % } elsif (defined $show->{type} and $show->{type} eq 'checkbox') {
@@ -181,6 +181,7 @@ my @info = (
                 name    => 'owner',
                 type    => 'dropdown',
                 inactive=> 1 - $can_access,
+                to_show => sub { "$_[0]->{name} ($_[0]->{login})"},
                 choices => [
                         sort {
                                 lc($a->{name}) cmp lc($b->{name})
