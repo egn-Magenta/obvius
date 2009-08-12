@@ -543,7 +543,6 @@ sub generate_page {
         print STDERR "GENERATE_PAGE: calling site operation returned $status\n"
             if ($this->{DEBUG});
 
-        print STDERR "Status : $status\n";
         unless ($status == OK) {
             $req->status($status);
             $req->no_cache(1);
