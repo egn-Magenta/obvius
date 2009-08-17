@@ -106,7 +106,7 @@ else {
     my $redirect_to;
     $confirmation =~ s/obvius_editengine_protocol_confirmation://;
     ($confirmation, $redirect_to) = ($confirmation =~ m/([^:]+)(?::(.*))?/);
-
+    
     #use Data::Dumper; print STDERR '<main> $confirmation: ' . Dumper($confirmation);
     my $execute = $confirmation;
     if ($execute) {
@@ -127,6 +127,7 @@ else {
 
         # 2) Retrieve all objects and regroup them by scheme/initializers
         my @editengine_objects = grep {$_ =~ /editengine_object:/} keys %ARGS;
+
         foreach my $object (@editengine_objects) {
             my ($history, $object_id) = $object =~ /^(.*)editengine_object:(.*)$/;
 #            $objects{$history}->{$object_id} = $m->comp('toolbox:unescape_object', object_description=>$object_id);
@@ -174,10 +175,8 @@ else {
         else {
             # Perform type checking etc. for all objects.  Start by clearing previous errors.
             delete $session->{editengine_errors};
-            my %errors;
-            my $accumulated_errors;
-            my @invalid_field_titles=();
-
+            my (%errors, $accumulated_errors, @invalid_field_titles, @invalid_field_messages);
+            
             foreach my $history (keys %objects) {
                 # 1) Lookup the data description in the storage section of the editscheme
                 my $scheme_path = $m->comp('history:extract_path', history=>$history);
@@ -200,18 +199,28 @@ else {
                         # [!] Consider further....
                         # Determine type
                         my ($type) = $data_description->{$data}->{type} =~ /^(\w+)$/ if $data_description->{$data};
-                        my $status;
+                        my ($status, $msg);
                         if (!$type) {
                             #                        warn 'missing $type; template use?';
                             $status = '(internal)';
                         }
                         else {
-                            $status = $m->comp("type/$type", data => $objects{$history}->{$object}, id=>$data, validation=>$data_description->{$data}) if $data_description->{$data};
+                            ($status, $msg) = $m->comp("type/$type", 
+                                                       data => $objects{$history}->{$object}, 
+                                                       id=>$data, 
+                                                       validation=>$data_description->{$data},
+                                                       global_data => WebObvius::Storage::key_to_identifiers(undef, $object)) if $data_description->{$data};
                         }
                         $object_errors{$data} = { value => $objects{$history}->{$object}->{$data}, status => $status };
-                        push @invalid_field_titles, $labels{$data} unless (!defined $status or $status eq 'OK' or $status eq '(internal)');
+                        
+                        if (defined $status and $status ne 'OK' and $status ne '(internal)') {
+                             if (!$msg) {
+                                  push @invalid_field_titles, $labels{$data};
+                             } else {
+                                  push @invalid_field_messages, "$labels{$data}: $msg";
+                             }
+                        }
                         # Further reporting should go here...
-
                         $any_errors_detected++ unless (!defined $status or $status eq 'OK' or $status eq '(internal)');
                     }
 
@@ -242,8 +251,18 @@ else {
 
                 $m->comp('history:get_current_event', history=>$return_history);
                 $m->comp('main', history=>$return_history);
+                
+                my $message = '';
+                if (@invalid_field_titles) {
+                     $message .= 'Invalid data (' . (join ', ', @invalid_field_titles) . 
+                                 '), please correct and try again';
+                }
 
-		my $message = 'Invalid data (' . (join ', ', @invalid_field_titles) . '), please correct and try again';
+                $message .= '<br />' if (@invalid_field_titles && @invalid_field_messages);
+
+                if (@invalid_field_messages) {
+                     $message .= join '<br />', @invalid_field_messages;
+                }
 
 		$m->comp('/shared/set_status_message', message => $message, status => 'Warning');
 
@@ -263,7 +282,7 @@ else {
             # Flow: The vertex has [edit] status here...
 
             #            print STDERR "Inserting from <main>\n";
-
+            
             $m->comp('flow:insert', execute=>$execute, objects=>\%objects, history=>$confirmation_path, session=>$session);
             $m->comp('main:confirmation', redirect_to => $redirect_to, obvius=>$obvius, session=>$session);
         }
