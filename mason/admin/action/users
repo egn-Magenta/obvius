@@ -91,8 +91,8 @@ my $user_storage = {
                                     },
                     data => {
                              id     => { type => 'integer'  },
-                             login  => { type => 'line'     , 
-					 validation_regexp => '^(?:[\w\d_.]|[\w\d_.][\w\d_.]*[\w\d_.])$' }, #'
+                             login  => { type => 'line', 
+                                         validator => 'validators/login'},
                              name   => { type => 'line'     },
                              notes  => { type => 'text'     },
 			     surveillance => { type => 'surveillance' }, 
@@ -103,8 +103,8 @@ my $user_storage = {
                              can_manage_groups  => { type => 'radio'    },
                             },
     	           post_execute_callback => '/action/users:clear_user_cache',
-
-                   };
+                   db_error_msg => 'Brugeren er enten allerede oprettet, 
+                                    eller login er allerede i brug.'};
 
 
 my $input_display = [

@@ -116,7 +116,7 @@ sub read_user_and_group_info {
 	  {name => 'USERS', 
 	   fetch_data => sub {return $this->get_table_data_hash('users', [qw(id login)])}},
 	  {name => 'GROUPS',
-	   fetch_data => sub { return $this->get_table_data_hash('groups', 'id') }},
+	   fetch_data => sub { return $this->get_table_data_hash('groups', [qw(id name)])}},
 	  { name => 'USER_GROUPS', 
 	    fetch_data => sub { return $this->get_table_data_hash_array('grp_user', 'user') }},
 	  { name => 'GROUP_USERS',

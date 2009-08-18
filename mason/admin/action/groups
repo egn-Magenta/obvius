@@ -84,7 +84,7 @@ my $group_storage = {
                                      },
                      data => {
                               id    => { type => 'integer' },
-                              name  => { type => 'line'   , validation_regexp => '^[\w_\d][\w_ \d]+[\w_\d]$'}
+                              name  => { type => 'line', validator => 'validators/group'}
                              },
 	             post_execute_callback => '/action/users:clear_user_cache',	
 

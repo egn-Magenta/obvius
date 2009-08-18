@@ -217,7 +217,8 @@ else {
                              if (!$msg) {
                                   push @invalid_field_titles, $labels{$data};
                              } else {
-                                  push @invalid_field_messages, "$labels{$data}: $msg";
+                                  push @invalid_field_messages, 
+                                    $m->scomp('/shared/msg', text => $labels{$data}). ": $msg";
                              }
                         }
                         # Further reporting should go here...
