@@ -298,8 +298,6 @@ sub get_universal_document
 sub lookup_document {
     my ($this, $path) = @_;
 
-    $this->tracer($path) if ($this->{DEBUG});
-
     if (wantarray) {
         my $path_info;
         if (my @path = $this->get_doc_by_path($path, \$path_info)) {
@@ -390,7 +388,12 @@ sub get_doc_uri {
     my $docid = ref $doc ? $doc->Id : $doc;
     my $paths = $this->execute_select("select path from docid_path where docid=?", $docid);
     
-    return @$paths ? $paths->[0]{path} : undef;
+    if (@$paths) {
+         $doc->{path} = $paths->[0]{path} if ref $doc;
+         return $paths->[0]{path};
+    } else {
+         return undef;
+    }
 }
 
 # is_doc_below_doc - given two document-objects, returns true if the
@@ -482,7 +485,7 @@ sub get_docs_by {
     }
 
     $set->Disconnect;
-    return (@subdocs ? \@subdocs : undef);
+    return (@subdocs ? \@subdocs : undef); 
 }
 
 
@@ -1195,8 +1198,12 @@ sub get_version_fields_by_threshold {
 
 #    print STDERR "entering";
     $this->tracer($version, $threshold||'N/A', $type) if ($this->{DEBUG});
-
+    
+    
     my $doctype = $this->get_version_type($version);
+    if (!$doctype) {
+         print STDERR "Version: ", $version->Version, "Docid: ", $version->Docid;
+    }
     my @fields;
 
     if(ref $threshold) {
@@ -2504,7 +2511,14 @@ sub execute_command {
 
      my $sth = $this->{DB}->DBHdl->prepare($sql);
      
-     $sth->execute(@args);
+     if (ref $args[0] eq 'ARRAY') {
+          @args = @{$args[0]};
+     } else {
+          @args = ( [ @args ] );
+     }
+     for my $arg (@args) {
+          $sth->execute(@$arg);
+     }
      $sth->finish;
 }
 
