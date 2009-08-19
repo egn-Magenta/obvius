@@ -175,23 +175,26 @@ sub access_handler ($$) {
 
      return OK unless ($req->is_main);
 
-     # We havn't created the $obvius yet. Fall back on Obvius::log()
-     #Obvius::log->debug(" Mason::access_handler ($this : " . $req->uri . ")";
-
-     $this->tracer($req) if ($this->{DEBUG});
      my $benchmark = Obvius::Benchmark-> new('mason::access') if $this-> {BENCHMARK};
 
      my $uri=$req->uri;
      my $remove = $req->dir_config('RemovePrefix');
+     
      $uri =~ s/^\Q$remove\E// if ($remove);
+     
      $req->notes(prefix=>($req->dir_config('AddPrefix') || ''));
      $req->notes(uri=>$uri);
-     $req->uri($uri) unless ($req->dir_config('AddPrefix')); # I'm unsure about this... but I'm guessing it's okay to put here.
+     $req->uri($uri) unless ($req->dir_config('AddPrefix'));
 
      my $orig_uri = $uri;
      my $roothost = $req->subprocess_env('ROOTHOST');
 
-     my $obvius   =$this->obvius_connect($req, $req->notes('user'), undef);
+     my $obvius   = $this->obvius_connect($req, undef, undef,
+                                          $this->{SUBSITE}->{DOCTYPES},
+                                          $this->{SUBSITE}->{FIELDTYPES},
+                                          $this->{SUBSITE}->{FIELDSPECS});
+                                          
+                                          
      return SERVER_ERROR unless ($obvius);
 
      # Cache these structures: (they should be dirtied when the db is updated... XXX)
@@ -207,6 +210,31 @@ sub access_handler ($$) {
      return OK;
 }
 
+sub public_authen_handler {
+     my ($this, $req) = @_;
+
+     return OK if !$req->is_main;
+     
+     my $obvius = $this-> obvius_connect($req, undef, undef, 
+                                         $this->{SUBSITE}->{DOCTYPES},
+                                         $this->{SUBSITE}->{FIELDTYPES},
+                                         $this->{SUBSITE}->{FIELDSPECS});
+     
+     return SERVER_ERROR if !$obvius;
+     
+     my $doc = $req->pnotes('document');
+     
+     my $is_locked = $obvius->dbprocedures->is_forbidden_doc($doc->Id);
+
+     if ($is_locked) {
+          $req->notes(nocache =>  1);
+          $req->notes(OBVIUS_SIDE_EFFECTS =>  1 );
+          $req->no_cache(1);          
+          return $this->session_authen_handler($req);
+     } 
+     return OK;
+}
+          
      
 # handler - Handles incoming Apache requests when using Mason as template system.
 sub handler ($$) {
@@ -224,7 +252,6 @@ sub handler ($$) {
      $req->notes(now => strftime('%Y-%m-%d %H:%M:%S', localtime($req->request_time)));
 
      my $doc=$req->pnotes('document');
-
      return NOT_FOUND if (!$obvius->is_public_document($doc) && !$is_admin);
      my $vdoc = $this->obvius_document_version($req, $doc);
      
@@ -252,7 +279,6 @@ sub handler ($$) {
      # by the browser should have a method called "raw_document_data"
      # Please also note that a slash at the end of an uri in admin signifies
      # that we are getting the *raw* resource, not the obvius-wrapper (where that is appropriate)
-
      if (!$is_admin || $req->uri !~ m|/$|) {
 	  my ($mime_type, $data, $filename, $con_disp, $path) = 
 	    $doctype->raw_document_data(
@@ -360,7 +386,10 @@ sub authen_handler ($$) {
      }
 
      # Check password
-     my $obvius = $this->obvius_connect($req, $login, $pw, $this->{SUBSITE}->{DOCTYPES}, $this->{SUBSITE}->{FIELDTYPES}, $this->{SUBSITE}->{FIELDSPECS});
+     my $obvius = $this->obvius_connect($req, $login, $pw, 
+                                        $this->{SUBSITE}->{DOCTYPES}, 
+                                        $this->{SUBSITE}->{FIELDTYPES}, 
+                                        $this->{SUBSITE}->{FIELDSPECS});
      unless ($obvius) {
           $req->note_basic_auth_failure;
           return AUTH_REQUIRED;
@@ -388,8 +417,7 @@ sub already_logged_in {
      return 0 if not $session_id;
 
      my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
-     my $session_result = $obvius->execute_select("SELECT login AS login FROM login_sessions WHERE session_id=?",
-                                                  $session_id);
+     my $session_result = $obvius->execute_select("select login, UNIX_TIMESTAMP() as now, last_access from login_sessions where session_id=?", $session_id);
      my $res = $session_result->[0];
      return 0 if not $res;
      $obvius->{USER} = $res->{login};
@@ -409,13 +437,16 @@ sub already_logged_in {
 sub session_authen_handler ($$) {
     my ($this, $req) = @_;
 
-    return OK if (not $req->is_initial_req);
-    my $obvius = $this->obvius_connect($req, undef, undef, 
+    return OK if not $req->is_initial_req;
+    my $obvius = $this->obvius_connect($req, 
+                                       undef, 
+                                       undef, 
                                        $this->{SUBSITE}->{DOCTYPES}, 
                                        $this->{SUBSITE}->{FIELDTYPES}, 
                                        $this->{SUBSITE}->{FIELDSPECS});
-    $req->pnotes(obvius => $obvius);
+
     return SERVER_ERROR if not $obvius;
+
     return OK if $this->already_logged_in($obvius, $req);
     
     my $r = WebObvius::Apache::apache_module('Request')-> new($req);
@@ -425,7 +456,8 @@ sub session_authen_handler ($$) {
     my $secret = $r->param('obvius_sessionlogin_secret') || '';
 
     goto redirect if 
-      not $r->param('obvius_sessionlogin_submit') or not $password or not $login;
+      !$r->param('obvius_sessionlogin_submit');
+    goto login_failed if !$password || !$login;
 
     my $userdata = $obvius->{USERS}->{$login};
     goto redirect if not $userdata;
@@ -435,7 +467,7 @@ sub session_authen_handler ($$) {
     if ($hash ne $password) {
          $obvius->{USER} = $login;
          $obvius->{PASSWORD} = $password;
-         goto redirect if not $obvius->validate_user;
+         goto login_failed if not $obvius->validate_user;
          $this->register_session($obvius, $r, $login);
          return OK;
     } 
@@ -444,9 +476,10 @@ sub session_authen_handler ($$) {
     
     return OK;
 
-  redirect:
+  login_failed:
     $req->notes(login_failed => 1);
-    return $this->redirect($r,'/system/login');
+  redirect:
+    return $this->redirect($r, '/system/login');
 }
 
 sub register_session {
@@ -475,29 +508,6 @@ sub register_session {
      
      
      
-     
-# public_authen_handler - this method is called by Apache with a
-#                         request object (notice the prototype, which
-#                         is necessary for Apache) during the
-#                         authentification phase of the request on the
-#                         public website (if so defined in
-#                         setup.conf). Connects to obvius and handles
-#                         a public login cookie if the request isn't a
-#                         sub-request. Always returns OK.
-sub public_authen_handler($$) {
-     my ($this, $req) = @_;
-
-     return OK unless ($req->is_initial_req);
-
-     my $obvius = $this->obvius_connect($req);
-
-     # Handle obvius_public_login cookie
-     $this->public_login_cookie($req, $obvius);
-
-     return OK;
-
-}
-
 sub authz_handler ($$) {
      my ($this, $req) = @_;
 
