@@ -8,7 +8,7 @@ create table if not exists documents_backup (
   owner smallint(5) unsigned default '0' not null,
   grp smallint(5) unsigned default '0' not null,
   accessrules text default "",
-  path text not null,
+  path varchar(1024) not null,
   date_deleted datetime not null,
   delete_user integer unsigned not null,
   primary key (id),
@@ -20,8 +20,26 @@ create table if not exists versions_backup like versions $$
 create table if not exists vfields_backup like vfields $$
 create table if not exists formdata_backup like formdata $$
 
+create table if not exists docparams_backup (
+       id int(8) unsigned not null auto_increment,
+       deletion_time datetime not null,
+       docid int(8) unsigned not null,
+       name  varchar(127)  not null,
+       value longtext,
+       type  int(8) unsigned,
+       primary key (id)
+       ) $$
+
+drop trigger post_docparams_delete $$
+create trigger post_docparams_delete after delete on docparms
+for each row
+begin
+        insert into docparams_backup (docid, name, value, type, deletion_time) values
+                                     (old.docid, old.name, old.value, old.type, now());
+end $$
+
 drop trigger post_formdata_delete  $$
-crete trigger post_formdata_delete 
+create trigger post_formdata_delete after delete on formdata
 for each row
 begin 
       insert into formdata_backup (id, docid, entry) values

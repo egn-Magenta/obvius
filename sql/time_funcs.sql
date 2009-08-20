@@ -14,4 +14,5 @@ begin
 
 	return not ((eiv2 < siv1 and eiv2 < eiv1) or (eiv1 < siv2 and eiv1 < eiv2));
 end $$
+
 delimiter ;

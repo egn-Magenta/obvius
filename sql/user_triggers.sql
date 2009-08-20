@@ -1,7 +1,6 @@
 delimiter $$
 
-drop table if exists user_surveillance_docs $$
-create table user_surveillance_docs (
+create table if not exists user_surveillance_docs (
        id integer unsigned auto_increment not null,
        user_id integer unsigned not null,
        docid integer unsigned not null,
@@ -11,8 +10,7 @@ create table user_surveillance_docs (
        unique (user_id, docid)
 ) engine = INNODB $$
 
-drop table if exists user_surveillance_sites $$
-create table user_surveillance_sites (
+create table if not exists user_surveillance_sites (
        id integer unsigned auto_increment not null,
        user_id integer unsigned not null,
        docid integer unsigned not null,
