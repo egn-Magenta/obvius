@@ -1,0 +1,93 @@
+<div class="obvius-editengine obvius-link-decor">
+<h2 style="margin-bottom: 0.5em;">
+  <& /shared/trans, en => "Global tags", da => "Systemiske tags" &>
+</h2>
+<div style="margin-bottom: 1em;" >
+Her kan de forskellige systemiske tags skrives ind. 
+De forskellige tags skal hver være på sin egen linje.
+</div>
+<form method="post" accept-encoding="utf-8">
+<input type="hidden" name="obvius_command_tags" value="1" />
+% for my $tags_info (@langs) {
+<div style="<% $tags_info->{div_style} |h %>"> 
+
+<h3 style="margin-bottom: 0.1em">
+  <& /shared/trans, 
+     da => $tags_info->{title}->{danish},
+    en => $tags_info->{title}->{english} &></h3>
+<textarea name="<% $tags_info->{textarea_name} |h %>" style="width: 200px; height: 400px">
+% for my $tag (@{$tags_info->{tags}}) {
+<% $tag |h %>
+% }
+</textarea>
+</div>
+% }
+<input type="submit" value="<& /shared/trans, en => 'Update', da => 'Opdater' &>" />
+<input type="button" 
+       value="<& /shared/trans, en => 'Cancel', da => 'Afbryd' &>" 
+       onclick="window.location.href = window.location.href.replace(/\?.*/, '')" />
+</form>
+</div>
+<%once>
+use Obvius::Tags;
+</%once>
+<%args>
+$danish_tags => undef
+$english_tags => undef
+</%args>
+<%init>
+my $tags = Obvius::Tags->new($obvius);
+
+my $updated = 0;
+my $handle_tags = sub {
+     my ($text, $lang) = @_;
+     
+     return if !defined $text;
+     $text = Encode::decode('UTF-8', $text);
+     my @tags = sort grep { $tags->validate_tag($_) } split /\r?\n/, $text;
+     my ($last_tag, @out_tags);
+     
+     for my $tag (@tags) {
+          if ($last_tag ne $tag) {
+               push @out_tags, $tag;
+               $last_tag = $tag;
+          }
+     }
+               
+     $tags->update_tags(\@out_tags, $lang);
+     $updated = 1;
+};
+
+eval { 
+     $handle_tags->($danish_tags, 'da');
+     $handle_tags->($english_tags, 'en');  
+};
+if ($@) {
+     $m->comp("/shared/set_status_message",
+              status => 'WARNING',
+              message => 'Kunne ikke sætte alle tags.');
+     warn $@;
+}
+
+if ($updated) {
+     $m->comp("/shared/set_status_message", 
+              status => 'SUCCESS', 
+              message => 'Tags opdateret');
+}
+
+my @langs = ({ 
+              lang => 'danish',
+              title => { danish => 'Danske tags',
+                         english => 'Danish tags' },
+              textarea_name => 'danish_tags',
+              tags => $tags->danish_tags,
+              div_style => 'float: left; margin-right: 2em;'
+             },
+             {
+              lang => 'english',
+              title => { danish => 'Engelske tags', 
+                         english => 'English tags' },
+              textarea_name => 'english_tags',
+              tags => $tags->english_tags
+             });
+</%init>

@@ -1,0 +1,233 @@
+<%method block>
+<script type="text/javascript">
+function add_to_select(select_id, val) {
+    if (typeof val !== 'object') {
+       val = [ val ];
+    }
+    var select = document.getElementById(select_id);
+    for(var i = 0, len = val.length; i < len; i++) {
+       var new_option = document.createElement('option');
+       if(is_permanent_tag(val[i])) {
+          new_option.style.color = "<% $standard_tag_color %>";
+       }
+       new_option.value = val[i];
+       new_option.text = val[i];
+       try {
+          select.add(new_option, null);
+       } catch(ex) {
+          select.add(new_option);
+       }
+    }
+}
+
+function do_to_selected(select_id, f) {
+    var res = [];
+    var sel = document.getElementById(select_id);
+    for (var i = sel.length - 1; i >= 0; i--) {
+         if (sel.options[i].selected) {
+             res.push(f(sel.options[i], i, sel));
+         }
+    }
+    res.reverse();
+    return res;
+}
+
+function retrieve_selected(select_id) {
+   return do_to_selected(select_id, function (opt) { return opt.value });
+}
+
+function delete_selected(select_id) {
+   do_to_selected(select_id, function (opt, idx, sel) { sel.remove(idx) });
+}
+
+function filter_non_permanent(tags) {
+    var ret = [];
+    for (var i = tags.length - 1; i >= 0; i--) {
+      if (is_permanent_tag(tags[i])) {
+        ret.push(tags[i]);
+      }
+    }
+    return ret;
+}
+
+function move_from_to(select_id1, select_id2) {
+   var selected = retrieve_selected(select_id1);
+   delete_selected(select_id1);
+   selected = filter_non_permanent(selected);
+   add_to_select(select_id2, selected);
+}
+
+function add_new_tag_to_send_tags(select_id, text_id) {
+   var text_field = document.getElementById(text_id);
+   var val = text_field.value;
+   var vals = val.split(/\s*,\s*/);
+   for (var i = vals.length - 1; i >= 0; i--) {
+     var v = vals[i].replace(/^\s*|\s*$/g, "");
+     if (v) {
+       add_to_select(select_id, v);
+     }
+   }
+}
+
+function select_all_tags(select_id) {
+    var sel = document.getElementById(select_id);
+    for (var i = sel.length - 1; i >= 0; i--) {
+        sel.options[i].selected=true;
+    }
+}
+
+var permanent_tags;
+eval(unescape(
+    '<% "permanent_tags = { " . 
+       (join ',', 
+        map { s/'/\\'/; my $a = $_; Encode::from_to($a, "UTF-8", "latin-1"); "'$a': 1" } @permanent_tags) .
+      "}"|u %>'));
+
+function is_permanent_tag(tag) {
+    return permanent_tags[tag];
+}
+
+onsubmit_array.push(function () { 
+    add_new_tag_to_send_tags('<% $send_tags_id |h%>', '<% $text_id %>');
+    select_all_tags("<% $send_tags_id |h %>"); 
+    return true; 
+});
+
+</script>
+<div>
+<& util/label, name => $prefix . $field->{name}, label => $field->{label}, field => $field &>
+<div style="float: left">
+  <h3><& /shared/trans, en => 'Global tags', da => 'Systemiske tags' &></h3>
+  <select multiple 
+          style="width: 200px; height: 300px"
+          name="<% $global_tags_id |h %>"
+          id="<% $global_tags_id |h %>">
+% for my $tag (@standard_tags) {
+    <option value="<% $tag |h %>" style="color: <% $standard_tag_color %>">
+     <% $tag |h %>
+    </option>
+% }
+  </select>
+</div>
+<div style="float: left">
+  <div style="margin-top: 10em; margin-left: 1em; margin-right: 1em">
+    <input type="button" value="<-" 
+           onclick="move_from_to('<% $send_tags_id |h %>', '<% $global_tags_id |h %>')" />
+
+  <input type="button" value="->" 
+         onclick="move_from_to('<% $global_tags_id |h %>', '<% $send_tags_id |h %>')" />
+  </div>
+</div>
+<div style="float: left">
+  <h3><& /shared/trans, da => "Valgte tags", en => "Chosen tags" &></h3>
+  <select multiple 
+          style="width: 200px; height: 300px" 
+          name="<% $send_tags_id |h %>"
+          id="<% $send_tags_id |h %>">
+% for my $tag (@global_document_tags) {
+     <option 
+        value="<% $tag |h %>" 
+        <% $permanent_tags{$tag} ? "style='color: $standard_tag_color'":'' %> >
+       <% $tag |h %>
+     </option>
+% }
+   </select>
+</div>
+<div style="clear:both" />
+<br />
+<div>
+  <h3>
+    <& /shared/trans, da => "Egne tags (som en kommasepareret liste)", en => "Auxillary tags" &>
+  </h3>
+  <input
+     style="width: 600px;" 
+     type="text" 
+     value="<% $csv |h %>"
+     id="<% $text_id |h %>" 
+   />
+</div>
+</div>
+</div>
+<%args>
+$prefix
+$field
+$value=>{ value => [] }
+$style
+</%args>
+<%init>
+use Obvius::Tags;
+my $lang;
+
+my $standard_tag_color = "#000000";
+my $global_tags_id = $prefix . $field->{name} . "_globals";
+my $send_tags_id = $prefix . $field->{name};
+my $text_id = $prefix . $field->{name} . "_text_field";
+
+eval {
+  my $session = $r->pnotes('obvius_session');
+  if (defined $session->{obvius_new_language}) {
+     $lang = $session->{obvius_new_language};
+  } else {
+     $lang = $vdoc->Lang;
+  }
+};
+if ($@) {
+     warn $@;
+     $lang = 'da';
+}
+my $tags = Obvius::Tags->new($obvius);
+my @document_tags = @{ $value->{value} || [] };
+my %document_tags = map { $_ => 1 } @document_tags;
+my @global_document_tags;
+
+my @csv;
+my @permanent_tags = @{ $tags->get_tags($lang) };
+my %permanent_tags = map { $_ => 1 } @permanent_tags;
+my %seen;
+
+for my $tag (@document_tags) {
+     next if ($seen{$tag});
+     $seen{$tag} = 1;
+
+     if (exists $permanent_tags{$tag}) {
+          $permanent_tags{$tag} = 0;
+          push @global_document_tags, $tag;
+     } else {
+          push @csv, $tag;
+     }
+}
+
+my $csv = join ',', @csv;
+
+my @standard_tags = sort { lc $a cmp lc $b } grep { $permanent_tags{$_} } keys %permanent_tags;
+@global_document_tags = sort { lc  $a cmp lc $b } @global_document_tags;
+</%init>
+</%method>
+
+<%method inline>
+<% $value->{value} |h %>
+<%args>
+$value
+</%args>
+</%method>
+
+<%args>
+$data
+$id
+$validation
+</%args>
+<%init>
+use Encode;
+my $tags = Obvius::Tags->new('obvius');
+
+my $value = $data->{$id};
+if (! ref $value ) {
+   $value = [ $value ];
+}     
+
+# Workaround for the horrible encoding-handling in obvius.
+@$value = grep { $tags->validate_tag($_) } map { Encode::decode('latin-1', $_ ) }  @$value;
+$data->{$id} = $value;
+return 'OK';
+</%init>
+v

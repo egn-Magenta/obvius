@@ -1,0 +1,11 @@
+<%args>
+$en => undef
+$da => undef
+</%args>
+
+<% $msg %>
+<%init>
+use WebObvius::Site;
+my $lang_prefs = WebObvius::Site::get_language_preferences(undef, $r);
+my $msg = $lang_prefs->{en} > $lang_prefs->{da} ? $en : $da;
+</%init>
