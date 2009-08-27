@@ -3,27 +3,57 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
 <head>
-<title>Obvius Login</title>
+<title>
+  <& translator, 
+     da => "Godkendelse påkrævet", 
+    en => "Authorization required" &>
+</title>
 <style type="text/css">
+body, th, td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+color: #4A4949;
+}
+
+h1 { 
+font-size: 1.4em;  
+margin-left: 272px;
+}
+
 #mainarea {
     width: 770px;
     position: absolute;
     left: 50%;
     margin-left: -385px;
+background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
+border: 1px solid #75736E;
+padding-top: 107px;
 }
+
 #mainarea label {
     float: left;
     font-size: 1.0em;
-    width: 5em;
+    width: 9em;
     padding: 0;
     margin: 0;
 }
 p.warning {
     color: red;
 }
+
+fieldset {
+border: 0;
+margin-right: 190px;
+float: right;
+}
+
+#submit {
+margin-left: 137px;
+}
+
 </style>
 <script type="text/javascript" src="/scripts/md5.js"></script>
-<script type="text/javascript"><!--
+<script type="text/javascript">
 var alphanumchars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 function random_string(l) {
@@ -161,7 +191,7 @@ function secret_login() {
     if(login_elem) login = login_elem.value;
 
 
-    var pw_elem = document.getElementById('obvius_sessionlogin_password');
+    var pw_elem = document.getElementById('obvius_sessionlogin_password_box');
     if(pw_elem) password = pw_elem.value;
 
     if(! login || ! password) {
@@ -185,51 +215,90 @@ function secret_login() {
 
     var message = login + crypted_password + secret;
     var new_pw = hex_md5(message);
-    pw_elem.value = new_pw;
+    document.getElementById('obvius_sessionlogin_password').value = new_pw;
 
     return true;
 }
-// -->
 </script>
 </head>
 <body onload="focus_on_load();">
 <div id="mainarea">
-<h1>Obvius Login at <% $r->hostname %></h1>
-<form action="<% $return_uri %>" method="post" id="loginform" onsubmit="secret_login();">
+<h1><& translator, da => "Godkendelse påkrævet", en => "Authorization required" &></h1>
+<form action="<% $return_uri %>" 
+      method="post" 
+      id="loginform" 
+      onsubmit="secret_login();">
 <fieldset>
-<legend>Login</legend>
+<legend> </legend>
 <p>
-    You have requested a ressource for the Obvius setup at <% $r->hostname %> that requires you to log in.<br />
-    Enter your login in password in the form below.
+  <& translator, 
+     da => "Indtast brugernavn og adgangskode for at logge på Obvius CMS", 
+     en => "Please enter your username and password to log onto Obvius CMS" &>
 </p>
+
 %if($last_login_failed) {
 <p class="warning">
-    Login failed: The username and password you supplied is not valid. Please check your credentials and try again.
+  <& translator, 
+     da => "Fejl i login. Check venligst dine brugeroplysninger og forsøg igen.",
+     en => "Login failed. Please check your credentials and try again." &>
 </p>
 %}
 <div>
-    <label for="obvius_sessionlogin_login">Login:</label>
-    <input type="text" name="obvius_sessionlogin_login" id="obvius_sessionlogin_login" value="<% $r->param('obvius_sessionlogin_login') %>" />
+    <label for="obvius_sessionlogin_login">
+      <& translator, da => 'Brugernavn:', en => 'Username' &>
+    </label>
+    <input type="text" 
+           name="obvius_sessionlogin_login" 
+           id="obvius_sessionlogin_login" 
+           value="<% $r->param('obvius_sessionlogin_login') %>" />
 </div>
 <div>
-    <label for="obvius_sessionlogin_password">Password:</label>
-    <input type="password" name="obvius_sessionlogin_password" id="obvius_sessionlogin_password" value="" />
+    <label for="obvius_sessionlogin_password_box">
+      <& translator, da => 'Adgangskode:', en => 'Password' &>
+    </label>
+    <input type="password" 
+           name="obvius_sessionlogin_password_box" 
+           id="obvius_sessionlogin_password_box" 
+           value="" />
+    <input type="hidden" 
+           name="obvius_sessionlogin_password" 
+           id="obvius_sessionlogin_password" />
 </div>
-    <input type="hidden" name="obvius_sessionlogin_secret" id="obvius_sessionlogin_secret" value="" />
+    <input type="hidden" 
+           name="obvius_sessionlogin_secret" 
+           id="obvius_sessionlogin_secret" 
+           value="" />
 %for(@param_names) {
-    <input type="hidden" name="<% $_ %>" value="<% $last_r->param($_) |h %>" />
+    <input type="hidden" name="<% $_ |h %>" value="<% $last_r->param($_) |h %>" />
 %}
 <br />
-<div>
-<input type="submit" name="obvius_sessionlogin_submit" value="Submit" />
-</div>
+
+<input id="submit" type="submit" 
+       name="obvius_sessionlogin_submit" 
+       value="<& translator, da => 'Log ind', en => 'Log on' &>" />
 </fieldset>
 </form>
+<div style="clear: both; border-bottom:solid; border-width: 1px;"></div>
+<div style="margin: 1em;">
+  <center>
+  <a 
+     href="/system/forgotten_password/?came_from=<% "http://" . $r->hostname .  $r->uri |h %><% "?return_uri=$return_uri" |uh %>">
+    <& translator,
+       da => 'Hjælp, jeg har glemt min adgangskode.',
+       en => 'Help, I have forgotten my password.' &>
+%#'"
+ </a>
+   </center>
+</div>
+
 </div>
 </body>
 </html>
-<%init>
-my $return_uri = $r->param('return') || "/";
+<%args>
+$return_uri => undef
+</%args>
+<%init>#"
+$return_uri ||= $r->param('return') || "/";
 my %extra_form_data;
 my $resubmit_params = 0;
 

@@ -3,25 +3,56 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
 <head>
-<title>Obvius Logout</title>
+<title><& translator, da => "Log ud", en => "Log out" &></title>
 <style type="text/css">
+
+body, th, td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+color: #4A4949;
+}
+
+h1 { 
+font-size: 1.4em;  
+}
+
+
 #mainarea {
     width: 770px;
     position: absolute;
     left: 50%;
     margin-left: -385px;
+background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
+border: 1px solid #75736E;
+padding-top: 107px;
 }
+
+#content {
+margin-left: -40px;
+text-align: center;
+}
+
 </style>
 </head>
 <body>
 <div id="mainarea">
-<h1>Obvius Logout at <% $r->hostname %></h1>
+<div id="content">
 <p>
-    You have logged out of the Obvius system at <% $r->hostname %>.
+   <& translator, 
+      da => "Du er nu logget ud af Obvius CMS.", 
+      en =>  "You have now logged out of Obvius CMS." &>
 </p>
 <p>
-    <a href="/system/login/?return=<% $return_uri |u %>">Click here to log in with a different user</a>.
+    <a href="/system/login/?return=<% $return_uri |u %>">
+      <& translator, 
+         da => "Klik her for at logge på med en anden bruger.",
+         en => "Click here to logon with a different user." &>
+</a>
 </p>
+<p>
+&nbsp;
+</p>
+</div>
 </div>
 </body>
 </html>
