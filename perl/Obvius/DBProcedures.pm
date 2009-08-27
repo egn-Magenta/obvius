@@ -69,6 +69,19 @@ my $commands = [
 	    args =>[ qw( docid ) ],
 	    options =>{ explicit_transactional => 1}
 	   },
+           {
+            command => "is_forbidden_doc",
+            args => [ qw( docid ) ],
+            options => { output => 1,
+                         post_hook => 
+                         sub {
+                              my $res = shift;
+                              if (ref $res eq 'ARRAY' && 1 == @$res) {
+                                   return $res->[0]{is_forbidden};
+                              }
+                              return 0;
+                         }}
+           },
 	   {
 	    command => "is_internal_proxy_document",
 	    args => [ qw( docid ) ],
