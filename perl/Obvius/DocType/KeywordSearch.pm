@@ -15,7 +15,7 @@ our $VERSION="1.0";
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-
+    
     $output->param(input => $input);
 
 
@@ -66,12 +66,19 @@ sub action {
 
     my $basedoc=$doc;
     my $baseid=$doc->Id;
+
     $output->param(Obvius_DEPENCIES => 1);
     if ($basedoc=$obvius->lookup_document($args{base}))
     {
-	$baseid=$basedoc->Id;
+         if ($basedoc->Id == 1) {
+              $baseid = $doc->Id;
+              $basedoc = $doc;
+         } else {
+              $baseid=$basedoc->Id;
+         }
+         $args{base} = $obvius->get_doc_path($doc);
     }
-
+    
     $args{base} = $input->param('base') if (defined $input->param('base'));
     $args{keyword} = $input->param('kw') if (defined $input->param('kw'));
     $args{category} = $input->param('cat') if (defined $input->param('cat'));
