@@ -12,6 +12,7 @@ sub new {
      
      my $ns = "medarbejderoversigtcache";
      my $this = $class->SUPER::new($obvius, $ns, default_expires_in => 86400);
+     return $this;
 }
 
 sub save {
@@ -26,7 +27,7 @@ sub get {
      
      my $uri = $this->{obvius}->get_doc_uri($doc);
 
-     return $this->{cache}->get($uri);
+     return $this->get_cache()->get($uri);
 }
 
 sub find_dirty {
