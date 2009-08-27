@@ -9,7 +9,8 @@ posting the form data twice.
 $output
 </%args>
 <%init>
-$obvius->get_version_fields($vdoc, ['aftersubmittext', 'mailto']);
+$obvius->get_version_fields($vdoc, ['aftersubmittext', 'mailto', 
+                                    'entries_for_advert', 'entries_for_close']);
 my @mailto = split /;/, $vdoc->field('mailto');
 my $server = $obvius->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
@@ -26,7 +27,6 @@ for my $mailto  (@mailto) {
      $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
      $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailtxt]));
      $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
-
 }
 my $redirect_uri = $uri;
 if(my $siterootmap = $m->comp('/shared/get_subsite_siterootmap')) {

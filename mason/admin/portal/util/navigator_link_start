@@ -3,7 +3,7 @@
 <%method href>
 <%args>
 $path => '/'
-$purpose => 'browser'
+$purpose => undef
 $fieldname => undef
 </%args>
 <% $url %> 
@@ -17,7 +17,14 @@ my $passwd = $obvius->{USERS}{$user}{passwd};
 my $time = time();
 
 my $phrase = md5_hex($passwd . $time);
-$purpose = "open_one" if defined $fieldname;
+if (!defined $purpose) {
+ if (defined $fieldname) {
+   $purpose = "open_one";
+ } else {
+   $purpose = "browse";
+ }
+}
+
 my $url = "/navigator/default?user=$user&code=$phrase&time=$time&purpose=$purpose";
 $url .= "&fieldname=$fieldname" if (defined($fieldname));
 if ($path) {
