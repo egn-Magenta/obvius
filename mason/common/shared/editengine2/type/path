@@ -1,8 +1,15 @@
 <%method block>\
 % my $disabled = (defined $style->{disabled} and $style->{disabled}) ? '1' : '0';
 <& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
-<input <% $disabled ? 'disabled="disabled" ' : '' %>type="text" size="50" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" value="<% $display_value |h %>" />
-<input onclick="<& /portal/util/navigator_link_start:onclick, path=>$display_value, fieldname=>$prefix . $field->{name} &>" type="button" value="<& /shared/msg, text=>'Find' &> ..." />
+<input <% $disabled ? 'disabled="disabled" ' : '' %>
+  type="text" 
+  size="50" 
+  name="<% $prefix . $field->{name} |h %>" 
+  id="<% $prefix . $field->{name} |h %>" value="<% $display_value |h %>" />
+<input 
+  onclick="<& /portal/util/navigator_link_start:onclick, path=>$display_value, fieldname=>$prefix . $field->{name} &>" 
+   type="button" 
+   value="<& /shared/msg, text=>'Find' &> ..." />
 %
 <%args>
 $prefix
@@ -13,6 +20,7 @@ $style
 </%args>
 %
 <%init>
+  use Data::Dumper;
 # The path is stored as a docid in the database, but for
 # representation in HTML we use the text-path, so we need to copy in
 # here:
