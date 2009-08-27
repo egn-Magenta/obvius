@@ -2,12 +2,40 @@
 %
 <script type="text/javascript">
 $(function () {
-           $(".htmlContent").resizable();
+           var textarea = $("#<% $textarea_id |h %>");
+           var resizer = $("#<% $resizer_id |h %>");
+           resizer.css('width', (textarea.width() - 1) + "px");
+           resizer.mousedown(function (ev) {
+                   var height = textarea.height();
+                   var mousestart = ev.pageY;
+                   var old_cursor = $('body').css('cursor');
+                   var mousemove = function (ev) {
+                        textarea.css('height', (height + ev.pageY - mousestart) + "px");
+                   };
+                   var mouseup = function (ev) {
+                       $('body').css('cursor', old_cursor == 's-resize' ? '' : old_cursor);
+                       $(document).unbind('mouseup', mouseup).unbind('mousemove', mousemove);
+                   };
+                   $(document).mousemove(mousemove).mouseup(mouseup);
+                   $('body').css('cursor', 's-resize');
+            });
 });
 </script>
 <& ../util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
-<textarea class="htmlContent" <% $disabled ? 'disabled="disabled" ' : '' %>cols="<% $cols |h %>" rows="<% $rows |h %>" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>"><% $value->{value} |h %></textarea><br />
-<& /shared/msg, text=>'or, upload text-file' &>: <input type="file" name="<% $prefix . $field->{name} . '_upload' |h %>" size="40" />
+<textarea class="htmlContent" <% $disabled ? 'disabled="disabled" ' : '' %>
+          cols="<% $cols |h %>" 
+          rows="<% $rows |h %>" 
+          style="border-bottom: none; margin-bottom: 0px; border-left: solid; border-right:solid; border-top: solid; border-width: 1px;"
+          name="<% $prefix . $textarea_id |h %>"
+          id="<% $textarea_id  |h %>"><% $value->{value} |h %>
+</textarea>
+<div id="<% $resizer_id |h %>" 
+     style="height: 20px; width: 100%; background-color: white; cursor: s-resize; margin-bottom: 2em;border-right: solid; border-left: solid; border-bottom: solid; border-width: 1px;" />
+<br />
+<br />
+<& /shared/msg, text=>'or, upload text-file' &>: 
+  <input type="file" name="<% $prefix . $field->{name} . '_upload' |h %>" size="40" />
+</div>
 <%args>
 $prefix
 $field
@@ -17,6 +45,10 @@ $disabled=>0
 $cols
 $rows
 </%args>
+<%init>
+my $resizer_id = $field->{name} . "_resizer";
+my $textarea_id = $field->{name};
+</%init>
 %
 %
 </%method>
