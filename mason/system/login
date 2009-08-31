@@ -190,7 +190,6 @@ function secret_login() {
     var login_elem = document.getElementById('obvius_sessionlogin_login');
     if(login_elem) login = login_elem.value;
 
-
     var pw_elem = document.getElementById('obvius_sessionlogin_password_box');
     if(pw_elem) password = pw_elem.value;
 
@@ -198,11 +197,18 @@ function secret_login() {
         alert('Please enter login and password');
         return false;
     }
-    // Request the password seed to be used:
-    var request =  new XMLHttpRequest();
-    request.open("GET", '/system/password_seed?login=' + login, false);
-    request.send(null);
-    var salt = request.responseText || 'ERROR'
+    
+    var xmlHttp;                                                       
+    if (window.XMLHttpRequest) {
+        xmlHttp = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+        xmlHttp = new ActiveXObject('MSXML2.XMLHTTP.3.0');
+    } else {
+        alert("Din browser understøttes desværre ikke.");
+    }
+    xmlHttp.open("GET", '/system/password_seed?login=' + login, false);
+    xmlHttp.send(null);
+    var salt = xmlHttp.responseText || 'ERROR'
     if(salt == 'ERROR') {
         alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
         return false;
