@@ -207,7 +207,7 @@ function secret_login() {
     }
     xmlHttp.open("GET", '/system/password_seed?login=' + login, false);
     xmlHttp.send(null);
-    var salt = xmlHttp.responseText || 'ERROR'
+    var salt = xmlHttp.responseText || 'ERROR';
 
     if(salt == 'ERROR') {
         alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
@@ -222,7 +222,7 @@ function secret_login() {
     var message = login + crypted_password + secret;
     var new_pw = hex_md5(message);
     document.getElementById('obvius_sessionlogin_password').value = new_pw;
-
+                                                       
     return true;
 }
 </script>
