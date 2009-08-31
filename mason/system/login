@@ -6,7 +6,7 @@
 <title>
   <& translator, 
      da => "Godkendelse påkrævet", 
-    en => "Authorization required" &>
+     en => "Authorization required" &>
 </title>
 <style type="text/css">
 body, th, td {
@@ -194,7 +194,6 @@ function secret_login() {
     if(pw_elem) password = pw_elem.value;
 
     if(! login || ! password) {
-        alert('Please enter login and password');
         return false;
     }
     
@@ -208,7 +207,8 @@ function secret_login() {
     }
     xmlHttp.open("GET", '/system/password_seed?login=' + login, false);
     xmlHttp.send(null);
-    var salt = xmlHttp.responseText || 'ERROR'
+    var salt = xmlHttp.responseText || 'ERROR';
+
     if(salt == 'ERROR') {
         alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
         return false;
@@ -222,7 +222,7 @@ function secret_login() {
     var message = login + crypted_password + secret;
     var new_pw = hex_md5(message);
     document.getElementById('obvius_sessionlogin_password').value = new_pw;
-
+                                                       
     return true;
 }
 </script>
@@ -303,7 +303,16 @@ function secret_login() {
 <%args>
 $return_uri => undef
 </%args>
-<%init>#"
+<%init>
+use Obvius::Hostmap;
+
+my  $get_full_uri = sub {
+     my ($uri) = @_;
+     
+     my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
+     return $hostmap->translate_uri($uri, ':whatever:');
+};
+
 $return_uri ||= $r->param('return') || "/";
 my %extra_form_data;
 my $resubmit_params = 0;
@@ -324,5 +333,9 @@ if($last_r) {
         @param_names = grep { ! /^obvius_sessionlogin_(login|password|submit|secret)$/ } $last_r->param;
     }
     $last_login_failed = $last_r->notes('login_failed');
+}
+
+if ($return_uri !~ m!^/admin(?:/?|.+)!) {
+   $return_uri = $get_full_uri->($return_uri);
 }
 </%init>
