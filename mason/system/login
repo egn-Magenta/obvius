@@ -220,7 +220,6 @@ function secret_login() {
     secret_elem.value = secret;
 
     var message = login + crypted_password + secret;
-    alert(message);
     var new_pw = hex_md5(message);
     document.getElementById('obvius_sessionlogin_password').value = new_pw;
                                                        
