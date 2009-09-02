@@ -213,6 +213,14 @@ sub update_internal_proxies {
      return if (!@$docids);
      eval { $this->{obvius}->dbprocedures->update_internal_proxy_docids(join ',', @$docids )};
      warn $@ if ($@);
+     
+     my $docids_template = join ',', (('?') x @$docids);
+     my $updated = $this->{obvius}->execute_select("select distinct docid from 
+                                                    internal_proxy_documents where 
+                                                    dependent_on in ($docids_template)",
+                                                   @$docids);
+     
+     $this->{obvius}->register_modified(docid => $_) for (map { $_->{docid} } @$updated);
 }
 
 1;

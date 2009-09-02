@@ -417,7 +417,9 @@ sub already_logged_in {
      return 0 if not $session_id;
 
      my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
-     my $session_result = $obvius->execute_select("select login, UNIX_TIMESTAMP() as now, last_access from login_sessions where session_id=?", $session_id);
+     my $session_result = $obvius->execute_select("select login, UNIX_TIMESTAMP() as now, 
+                                                   last_access from login_sessions where 
+                                                   session_id=?", $session_id);
      my $res = $session_result->[0];
      return 0 if not $res;
      $obvius->{USER} = $res->{login};

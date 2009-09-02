@@ -208,7 +208,7 @@ function secret_login() {
     xmlHttp.open("GET", '/system/password_seed?login=' + login, false);
     xmlHttp.send(null);
     var salt = xmlHttp.responseText || 'ERROR';
-
+    console.log(salt);
     if(salt == 'ERROR') {
         alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
         return false;
@@ -229,7 +229,8 @@ function secret_login() {
 </head>
 <body onload="focus_on_load();">
 <div id="mainarea">
-<h1><& translator, da => "Godkendelse påkrævet", en => "Authorization required" &></h1>
+<h1><& translator, da => "Godkendelse påkrævet", en => "Authorization required" &>
+</h1>
 <form action="<% $return_uri %>" 
       method="post" 
       id="loginform" 
@@ -263,7 +264,7 @@ function secret_login() {
       <& translator, da => 'Adgangskode:', en => 'Password' &>
     </label>
     <input type="password" 
-           name="obvius_sessionlogin_password_box" 
+           name="obvius_sessionlogin_password_box"
            id="obvius_sessionlogin_password_box" 
            value="" />
     <input type="hidden" 
@@ -306,10 +307,13 @@ $return_uri => undef
 <%init>
 use Obvius::Hostmap;
 
+my $config = Obvius::Config->new($r->dir_config('site'));
+
 my  $get_full_uri = sub {
      my ($uri) = @_;
      
-     my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
+     my $hostmap = Obvius::Hostmap->new($config->{OBVIUS_CONFIG}{HOSTMAP_FILE},
+                                        $config->{OBVIUS_CONFIG}{ROOTHOST});
      return $hostmap->translate_uri($uri, ':whatever:');
 };
 

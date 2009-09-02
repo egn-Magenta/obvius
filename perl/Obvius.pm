@@ -2536,9 +2536,8 @@ sub execute_transaction {
      if ($@) {
 	  $this->{DB}->DBHdl->rollback;
 	  die $@;
-     } else {
-          $this->{DB}->DBHdl->commit;
-     }
+     } 
+     $this->{DB}->DBHdl->commit;
 }
 
      
