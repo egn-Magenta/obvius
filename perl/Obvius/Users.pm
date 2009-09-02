@@ -95,6 +95,7 @@ sub get_group_users {
 sub validate_user {
     my ($this) = @_;
 
+
     if ( $this->{USER} eq 'nobody') {
         # nobody can never login interactively, but only programmatically
         # with password set to undef
@@ -106,6 +107,7 @@ sub validate_user {
     if (my $crypted=$this->{USERS}->{$this->{USER}}->{passwd}) {
         return ((crypt($this->{PASSWORD}, $crypted) eq $crypted));
     }
+
     return undef;
 }
 
@@ -113,22 +115,22 @@ sub read_user_and_group_info {
     my ($this) = @_;
 
     my @ops = (
-	  {name => 'USERS', 
-	   fetch_data => sub {return $this->get_table_data_hash('users', [qw(id login)])}},
-	  {name => 'GROUPS',
-	   fetch_data => sub { return $this->get_table_data_hash('groups', [qw(id name)])}},
+	  { name => 'USERS', 
+	    fetch_data => sub {return $this->get_table_data_hash('users', [qw(id login)])}},
+	  { name => 'GROUPS',
+	    fetch_data => sub { return $this->get_table_data_hash('groups', [qw(id)])}},
 	  { name => 'USER_GROUPS', 
 	    fetch_data => sub { return $this->get_table_data_hash_array('grp_user', 'user') }},
 	  { name => 'GROUP_USERS',
 	    fetch_data => sub { return $this->get_table_data_hash_array('grp_user', 'grp') }});
-	    
+    
     my $cache = new Cache::FileCache({cache_root => $this->{OBVIUS_CONFIG}{FILECACHE_DIRECTORY},
 				      namespace => 'user_data'});
-    
+     
     for my $op (@ops) {
 	 my $entity = $cache->get($op->{name});
 	 if (!$entity) {
-	      $entity = &{$op->{fetch_data}};
+	      $entity = $op->{fetch_data}->();
 	      $cache->set($op->{name}, $entity);
 	 }
 	 $this->{$op->{name}} = $entity;

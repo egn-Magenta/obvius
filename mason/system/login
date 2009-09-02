@@ -220,6 +220,7 @@ function secret_login() {
     secret_elem.value = secret;
 
     var message = login + crypted_password + secret;
+    
     var new_pw = hex_md5(message);
     document.getElementById('obvius_sessionlogin_password').value = new_pw;
 
@@ -263,7 +264,7 @@ function secret_login() {
       <& translator, da => 'Adgangskode:', en => 'Password' &>
     </label>
     <input type="password" 
-           name="obvius_sessionlogin_password_box" 
+           name="obvius_sessionlogin_password_box"
            id="obvius_sessionlogin_password_box" 
            value="" />
     <input type="hidden" 
@@ -306,10 +307,13 @@ $return_uri => undef
 <%init>
 use Obvius::Hostmap;
 
+my $config = Obvius::Config->new($r->notes('site'));
+
 my  $get_full_uri = sub {
      my ($uri) = @_;
      
-     my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
+     my $hostmap = Obvius::Hostmap->new($config->{OBVIUS_CONFIG}{HOSTMAP_FILE},
+                                        $config->{OBVIUS_CONFIG}{ROOTHOST});
      return $hostmap->translate_uri($uri, ':whatever:');
 };
 
