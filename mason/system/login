@@ -208,7 +208,7 @@ function secret_login() {
     xmlHttp.open("GET", '/system/password_seed?login=' + login, false);
     xmlHttp.send(null);
     var salt = xmlHttp.responseText || 'ERROR';
-    console.log(salt);
+    
     if(salt == 'ERROR') {
         alert("Couldn't login using advanced login - perhaps you entered a wrong username?");
         return false;
