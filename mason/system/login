@@ -231,7 +231,7 @@ function secret_login() {
 <div id="mainarea">
 <h1><& translator, da => "Godkendelse påkrævet", en => "Authorization required" &>
 </h1>
-<form action="<% $return_uri %>" 
+<form action="<% $return_uri |h %>" 
       method="post" 
       id="loginform" 
       onsubmit="secret_login();">
@@ -279,10 +279,12 @@ function secret_login() {
     <input type="hidden" name="<% $_ |h %>" value="<% $last_r->param($_) |h %>" />
 %}
 <br />
-
+<br />
+<div>
 <input id="submit" type="submit" 
        name="obvius_sessionlogin_submit" 
        value="<& translator, da => 'Log ind', en => 'Log on' &>" />
+</div>
 </fieldset>
 </form>
 <div style="clear: both; border-bottom:solid; border-width: 1px;"></div>
@@ -339,7 +341,10 @@ if($last_r) {
     $last_login_failed = $last_r->notes('login_failed');
 }
 
-if ($return_uri !~ m!^/admin(?:/?|.+)!) {
+if ($return_uri !~ m!^/admin(?:/?$|/.+)!) {
    $return_uri = $get_full_uri->($return_uri);
+}
+if ($return_uri !~ /\?/ && $return_uri !~ m!/$!) {
+   $return_uri .= '/';
 }
 </%init>
