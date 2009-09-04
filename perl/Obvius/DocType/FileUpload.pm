@@ -15,9 +15,6 @@ sub raw_document_data {
      my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
      my $data =	$req->hostname . ':' . $req->the_request;
      
-     print STDERR "DATA: $data\n";
-     print STDERR "MD5: " . md5_hex($data) . "\n";
-    
      $obvius->get_version_fields($vdoc, ['mimetype', 'title', 'uploadfile']);
      my $path = $vdoc->field('uploadfile');
      return undef if !$path;
@@ -31,6 +28,7 @@ sub raw_document_data {
      my ($filename) = $path =~ m|/([^/]+)$|;
      $filename ||= $vdoc->field('title');
      
+     $filename =~ s/^\s+|\s+$//g;
      $filename =~ s/\s+/_/g;
 
      local $/;
