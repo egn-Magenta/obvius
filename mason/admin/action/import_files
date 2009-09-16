@@ -135,6 +135,7 @@ $source
 $dest_url
 </%args>
 <%init>
+
 sub upload_image {
     use Image::Size;
     my ($data, $filename, $mime_type, $obvius) = @_;
@@ -251,14 +252,13 @@ if (!defined($mime_type)) {
 for (@mime_array) {
     my $regex = $_->{regex};
     if ($mime_type =~ /$regex/) {
-	$args = &{$_->{function}}($data, $source, $mime_type, $obvius);
+	$args = $_->{function}->($data, $source, $mime_type, $obvius);
 	last;
     }
 }
 
 return 0 if (!$args);
 
-print STDERR "Here: $source\n";
 my ($status, $message)=$obvius->send_order(
 					   docid=>$parent->Id,
 					   user=>$obvius->user,
