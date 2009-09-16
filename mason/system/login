@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
 <head>
@@ -25,9 +25,9 @@ margin-left: 272px;
     position: absolute;
     left: 50%;
     margin-left: -385px;
-background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
-border: 1px solid #75736E;
-padding-top: 107px;
+    background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
+    border: 1px solid #75736E;
+    padding-top: 107px;
 }
 
 #mainarea label {
@@ -42,9 +42,9 @@ p.warning {
 }
 
 fieldset {
-border: 0;
-margin-right: 190px;
-float: right;
+    border: 0;
+    margin-right: 190px;
+    float: right;
 }
 
 #submit {
@@ -253,8 +253,9 @@ function secret_login() {
 <div>
     <label for="obvius_sessionlogin_login">
       <& translator, da => 'Brugernavn:', en => 'Username' &>
-    </label>
-    <input type="text" 
+    </label> 
+    <input style="width: 15em;"
+           type="text" 
            name="obvius_sessionlogin_login" 
            id="obvius_sessionlogin_login" 
            value="<% $r->param('obvius_sessionlogin_login') %>" />
@@ -263,14 +264,15 @@ function secret_login() {
     <label for="obvius_sessionlogin_password_box">
       <& translator, da => 'Adgangskode:', en => 'Password' &>
     </label>
-    <input type="password" 
+    <input style="width: 15em;"
+           type="password" 
            name="obvius_sessionlogin_password_box"
            id="obvius_sessionlogin_password_box" 
            value="" />
+</div>
     <input type="hidden" 
            name="obvius_sessionlogin_password" 
            id="obvius_sessionlogin_password" />
-</div>
     <input type="hidden" 
            name="obvius_sessionlogin_secret" 
            id="obvius_sessionlogin_secret" 
