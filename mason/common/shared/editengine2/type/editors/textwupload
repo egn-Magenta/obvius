@@ -1,10 +1,19 @@
 <%method block>\
 %
 <script type="text/javascript">
+function isie () {
+         var ua = navigator.userAgent;
+         var re = /MSIE/;
+         if (re.exec(ua)) {
+            return true;
+         }
+         return false;
+}
+
 $(function () {
            var textarea = $("#<% $textarea_id |h %>");
            var resizer = $("#<% $resizer_id |h %>");
-           resizer.css('width', (textarea.width() - 1) + "px");
+           resizer.css('width', (textarea.width() + (isie() ? 2 : 0))  + "px");
            resizer.mousedown(function (ev) {
                    var height = textarea.height();
                    var mousestart = ev.pageY;
@@ -22,15 +31,17 @@ $(function () {
 });
 </script>
 <& ../util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
+<div id="textarea_container" style="width: 70em">
 <textarea class="htmlContent" <% $disabled ? 'disabled="disabled" ' : '' %>
           cols="<% $cols |h %>" 
           rows="<% $rows |h %>" 
-          style="border-bottom: none; margin-bottom: 0px; border-left: solid; border-right:solid; border-top: solid; border-width: 1px;"
+          style="border-bottom: none; margin-bottom: 0px; border-left: solid; border-right:solid; border-top: solid; border-width: 1px; width: 100%;"
           name="<% $prefix . $textarea_id |h %>"
           id="<% $textarea_id  |h %>"><% $value->{value} |h %>
 </textarea>
 <div id="<% $resizer_id |h %>" 
      style="height: 20px; width: 100%; background-color: white; cursor: s-resize; margin-bottom: 2em;border-right: solid; border-left: solid; border-bottom: solid; border-width: 1px;" />
+</div>
 <br />
 <br />
 <& /shared/msg, text=>'or, upload text-file' &>: 
