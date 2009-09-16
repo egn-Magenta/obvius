@@ -440,6 +440,9 @@ sub session_authen_handler ($$) {
     my ($this, $req) = @_;
 
     return OK if not $req->is_initial_req;
+    my $benchmark = Obvius::Benchmark-> new('mason::session_authen_handler') 
+      if $this-> {BENCHMARK};
+
     my $obvius = $this->obvius_connect($req, 
                                        undef, 
                                        undef, 
@@ -486,6 +489,7 @@ sub session_authen_handler ($$) {
 
 sub register_session {
      my ($this, $obvius, $req, $login) = @_;
+     my $benchmark = Obvius::Benchmark-> new('mason::register_session') if $this-> {BENCHMARK};
 
      my $try_n_times = 10;
      my $session_id;
