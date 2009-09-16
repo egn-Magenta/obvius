@@ -1,45 +1,13 @@
 <%method block>
-<script type="text/javascript">
-function add_to_select(select_id, val) {
-    if (typeof val !== 'object') {
-       val = [ val ];
-    }
-    var select = document.getElementById(select_id);
-    for(var i = 0, len = val.length; i < len; i++) {
-       var new_option = document.createElement('option');
-       if(is_permanent_tag(val[i])) {
-          new_option.style.color = "<% $standard_tag_color %>";
-       }
-       new_option.value = val[i];
-       new_option.text = val[i];
-       try {
-          select.add(new_option, null);
-       } catch(ex) {
-          select.add(new_option);
-       }
-    }
+<script type="text/javascript"> 
+esc_html = function (txt) {
+   return txt.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/, "&amp;");
 }
-
-function do_to_selected(select_id, f) {
-    var res = [];
-    var sel = document.getElementById(select_id);
-    for (var i = sel.length - 1; i >= 0; i--) {
-         if (sel.options[i].selected) {
-             res.push(f(sel.options[i], i, sel));
-         }
-    }
-    res.reverse();
-    return res;
+                   
+function esc_sel(sel) {
+    return sel.replace(/:/g, "\\:").replace(/\./g, "\\.");
 }
-
-function retrieve_selected(select_id) {
-   return do_to_selected(select_id, function (opt) { return opt.value });
-}
-
-function delete_selected(select_id) {
-   do_to_selected(select_id, function (opt, idx, sel) { sel.remove(idx) });
-}
-
+         
 function filter_non_permanent(tags) {
     var ret = [];
     for (var i = tags.length - 1; i >= 0; i--) {
@@ -48,32 +16,6 @@ function filter_non_permanent(tags) {
       }
     }
     return ret;
-}
-
-function move_from_to(select_id1, select_id2) {
-   var selected = retrieve_selected(select_id1);
-   delete_selected(select_id1);
-   selected = filter_non_permanent(selected);
-   add_to_select(select_id2, selected);
-}
-
-function add_new_tag_to_send_tags(select_id, text_id) {
-   var text_field = document.getElementById(text_id);
-   var val = text_field.value;
-   var vals = val.split(/\s*,\s*/);
-   for (var i = vals.length - 1; i >= 0; i--) {
-     var v = vals[i].replace(/^\s*|\s*$/g, "");
-     if (v) {
-       add_to_select(select_id, v);
-     }
-   }
-}
-
-function select_all_tags(select_id) {
-    var sel = document.getElementById(select_id);
-    for (var i = sel.length - 1; i >= 0; i--) {
-        sel.options[i].selected=true;
-    }
 }
 
 var permanent_tags;
@@ -87,65 +29,113 @@ function is_permanent_tag(tag) {
     return permanent_tags[tag];
 }
 
+function tag_name(el) {
+   return $(el).find(".tag_name").text();
+}
+
 onsubmit_array.push(function () { 
-    add_new_tag_to_send_tags('<% $send_tags_id |h%>', '<% $text_id %>');
-    select_all_tags("<% $send_tags_id |h %>"); 
+    var sel = $("#" + esc_sel("<% $send_tags_id |h %>"));
+    $(".chosen_tag").each(function () {
+           var txt = tag_name(this);
+           sel.append('<option selected="selected" value="' + esc_html(txt) + '">x</option>');
+    });
     return true; 
 });
 
-</script>
-<div>
-<& util/label, name => $prefix . $field->{name}, label => $field->{label}, field => $field &>
-<div style="float: left">
-  <h3><& /shared/trans, en => 'Global tags', da => 'Systemiske tags' &></h3>
-  <select multiple 
-          style="width: 200px; height: 300px"
-          name="<% $global_tags_id |h %>"
-          id="<% $global_tags_id |h %>">
-% for my $tag (@standard_tags) {
-    <option value="<% $tag |h %>" style="color: <% $standard_tag_color %>">
-     <% $tag |h %>
-    </option>
-% }
-  </select>
-</div>
-<div style="float: left">
-  <div style="margin-top: 10em; margin-left: 1em; margin-right: 1em">
-    <input type="button" value="<-" 
-           onclick="move_from_to('<% $send_tags_id |h %>', '<% $global_tags_id |h %>')" />
+function create_chosen(tag) {
+  $(tag).removeClass('global_tag').addClass('chosen_tag');
+  var t = $(tag).find(".tag_clearer");
+  t.before(
+    "<span class='remove_chosen'>X</span>"
+  );
+}  
 
-  <input type="button" value="->" 
-         onclick="move_from_to('<% $global_tags_id |h %>', '<% $send_tags_id |h %>')" />
+function received_chosen(ev, ui) {
+  create_chosen(ui.item);
+}
+
+function received_global(ev, ui) {
+  var txt = tag_name(ui.item);
+  if (!is_permanent_tag(txt)) {
+    $(ui.sender).sortable('cancel');
+    return;
+  }
+  ui.item.removeClass('global_tag').addClass('chosen_tag').find(".remove_chosen").remove()
+}
+
+function add_tag_from_field() {
+  var val = $("#add_tag_field").attr('value');
+  $("#add_tag_field").attr('value', '');
+  $("#chosen_tags").append('<div class="chosen_tag tag"><span class="tag_name">' +esc_html(val) +
+                           '</span><span class="remove_chosen">X</span><div class="tag_clearer">'+
+                           '</div></div>');
+}
+
+$(function () {
+  $('.remove_chosen').live('click', function (ev) {
+    ev.stopPropagation(); 
+    var txt = $(this).siblings(".tag_name").text();
+    $(this).parents(".chosen_tag").remove(); 
+    if (is_permanent_tag(txt)) {
+       $("#global_tags").append("<div class='global_tag tag'><span class='tag_name'>" + esc_html(txt) + "</span><div class='tag_clearer'></div></div>");
+    }
+  });
+  $('#chosen_tags').sortable({receive: received_chosen, 
+                              connectWith: '#global_tags'});
+  $('#global_tags').sortable({ receive: received_global, 
+                               connectWith: '#chosen_tags'});
+  $('#add_tag_field').autocomplete('/system/all_tags');
+});
+
+</script>
+<div class="tags_widget <% $div_class %>" style="clear: both; width: 100%;">
+<select multiple="multiple"
+        id="<% $send_tags_id |h %>" name="<% $send_tags_id |h %>">
+</select>
+
+<& util/label, name => $prefix . $field->{name}, label => $field->{label}, field => $field &>
+<div class="tag_div_container" style="width: 280px;">
+  <h3><& /shared/trans, en => 'Global tags', da => 'Faste tags' &></h3>
+  <div id="global_tags" style="height: 324px; margin-bottom: 0em;"
+       class="tag_container">
+% for my $tag (@standard_tags) {
+    <div class="global_tag tag">
+      <span class="tag_name"><% $tag |h %></span>
+      <div class="tag_clearer"></div>
+    </div>
+% }
+  </div>
+  <div id="add_field_container">
+    <h3>
+      <& /shared/trans, da => "Tilføj tag", en => "Add tag" &>
+    </h3>
+    <center> 
+      <input
+         style="width: 170px;" 
+         type="text"
+         id="add_tag_field" />
+      <input type="button" 
+             value="<& /shared/trans, da => 'Tilføj', en => 'Add' &>" 
+             onclick="add_tag_from_field()" /> 
+     </center>
   </div>
 </div>
-<div style="float: left">
+<div class="tag_div_container" style="width: 280px;">
   <h3><& /shared/trans, da => "Valgte tags", en => "Chosen tags" &></h3>
-  <select multiple 
-          style="width: 200px; height: 300px" 
-          name="<% $send_tags_id |h %>"
-          id="<% $send_tags_id |h %>">
-% for my $tag (@global_document_tags) {
-     <option 
-        value="<% $tag |h %>" 
-        <% $permanent_tags{$tag} ? "style='color: $standard_tag_color'":'' %> >
-       <% $tag |h %>
-     </option>
+  <div id="chosen_tags" class="tag_container">
+% for my $tag (@document_tags) {
+    <div class="chosen_tag tag">
+      <span class="tag_name"><% $tag |h %></span>
+      <span class="remove_chosen">
+        X
+      </span>
+      <div class="tag_clearer"></div>
+    </div>
 % }
-   </select>
+  </div>
 </div>
-<div style="clear:both" />
+<div style="clear:both" ></div>
 <br />
-<div>
-  <h3>
-    <& /shared/trans, da => "Egne tags (som en kommasepareret liste)", en => "Auxillary tags" &>
-  </h3>
-  <input
-     style="width: 600px;" 
-     type="text" 
-     value="<% $csv |h %>"
-     id="<% $text_id |h %>" 
-   />
-</div>
 </div>
 </div>
 <%args>
@@ -162,6 +152,9 @@ my $standard_tag_color = "#000000";
 my $global_tags_id = $prefix . $field->{name} . "_globals";
 my $send_tags_id = $prefix . $field->{name};
 my $text_id = $prefix . $field->{name} . "_text_field";
+
+my $div_class = $field->{name};
+$div_class =~ s![^\w\d]!!g;
 
 eval {
   my $session = $r->pnotes('obvius_session');
@@ -203,7 +196,6 @@ my @standard_tags = sort { lc $a cmp lc $b } grep { $permanent_tags{$_} } keys %
 @global_document_tags = sort { lc  $a cmp lc $b } @global_document_tags;
 </%init>
 </%method>
-
 <%method inline>
 <% $value->{value} |h %>
 <%args>
@@ -229,5 +221,5 @@ if (! ref $value ) {
 @$value = grep { $tags->validate_tag($_) } map { Encode::decode('latin-1', $_ ) }  @$value;
 $data->{$id} = $value;
 return 'OK';
+
 </%init>
-v
