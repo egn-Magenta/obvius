@@ -57,11 +57,9 @@ if(my $categories = $vdoc->field('category')) {
 
 # Opbyg description tag:
 
-# Konverter til plaintext:
-my $description = $m->scomp('/shared/html2text', html=>($vdoc->field('teaser') || ''));
-
-# Htmlunmap
-$description = $m->scomp('/shared/htmlunmap', text=>$description);
+# Fjern html.
+my $description = $vdoc->field('teaser');
+$description =~ s/<[^>]*>//g;
 
 # Fjern liniebreaks til sidst:
 $description =~ s/[\r\n]*$//;
