@@ -2678,7 +2678,7 @@ sub shorten_url {
      my @parts = split /\/+/, $url;
      my @res;
      for my $part (@parts) {
-          next if !$part;
+          next if !defined $part || $part eq "";
           next if $part eq '.';
           if ($part eq '..') {
                pop @res;
