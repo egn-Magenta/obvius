@@ -94,4 +94,12 @@ for each row begin
     end if;
 end $$
 
+drop trigger post_vfield_insert $$
+create trigger post_vfield_insert after insert on vfields 
+for each row begin
+    if new.name = 'tags' then
+       insert ignore into all_tags values (new.text_value);
+    end if;
+end $$
+
 delimiter ;
