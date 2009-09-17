@@ -299,11 +299,11 @@ sub lookup_document {
     my ($this, $path) = @_;
 
     if (wantarray) {
-        my $path_info;
-        if (my @path = $this->get_doc_by_path($path, \$path_info)) {
-            return ($path[-1], $path_info);
-        }
-        return ();
+         warn "Using ancient get_doc_by_path";
+         if (my @path = $this->get_doc_by_path($path)) {
+              return (reverse @path);
+         }
+         return ();
     }
 
     $path = $path . '/';
