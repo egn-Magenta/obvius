@@ -299,7 +299,9 @@ sub lookup_document {
     my ($this, $path) = @_;
 
     if (wantarray) {
-         die "Lookup document needing an array is deprecated.\n";
+	 use Carp;
+	 $CARP::Verbose = 1;
+	 carp "Lookup document needing an array is deprecated";
     }
 
     $path = $path . '/';
