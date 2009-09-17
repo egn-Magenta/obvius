@@ -299,17 +299,14 @@ sub lookup_document {
     my ($this, $path) = @_;
 
     if (wantarray) {
-         warn "Using ancient get_doc_by_path";
-         if (my @path = $this->get_doc_by_path($path)) {
-              return (reverse @path);
-         }
-         return ();
+         die "Lookup document needing an array is deprecated.\n";
     }
 
     $path = $path . '/';
     $path =~ s!/+!/!g;
-    my $paths = $this->execute_select("select d.* from docid_path dp join  documents d on 
-                                      (dp.docid = d.id) where dp.path = ?", $path);
+    my $paths = $this->execute_select("select d.*,dp.path path from docid_path dp join  
+                                       documents d on (dp.docid = d.id) where 
+                                       dp.path = ?", $path);
     return @$paths ? Obvius::Document->new($paths->[0]) : undef;
 }
 
@@ -2662,9 +2659,9 @@ sub find_closest_subsite {
      my $query = "select d.*, dp.path path
                   from docparms dpa join docid_path dp using (docid) join documents d on 
                   (dp.docid = d.id) where  dp.path in ($question_marks) and 
-                  dpa.name = 'is_subsite' and dpa.value = '1' order by dp.path desc limit 1";
-     
+                  dpa.name = 'is_subsite' and dpa.value = '1' order by length(dp.path) desc limit 1";
      my $res = $this->execute_select($query, @uris);
+
      return @$res ? Obvius::Document->new($res->[0]) : undef;
 }
 
