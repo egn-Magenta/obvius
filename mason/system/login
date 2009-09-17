@@ -316,8 +316,8 @@ my $config = Obvius::Config->new($r->dir_config('site'));
 my  $get_full_uri = sub {
      my ($uri) = @_;
      
-     my $hostmap = Obvius::Hostmap->new($config->{OBVIUS_CONFIG}{HOSTMAP_FILE},
-                                        $config->{OBVIUS_CONFIG}{ROOTHOST});
+     my $hostmap = Obvius::Hostmap->new($config->{HOSTMAP_FILE},
+                                        $config->{ROOTHOST});
      return $hostmap->translate_uri($uri, ':whatever:');
 };
 
