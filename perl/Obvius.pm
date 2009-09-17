@@ -318,52 +318,48 @@ sub lookup_document {
 #
 # Bemærk: Giver alle dokumenterne på stien tilbage i et array:
 sub get_doc_by_path {
-    my ($this, $uri, $path_info) = @_;
+     my ($this, $uri, $path_info) = @_;
+     
+     
+     if ($path_info) {
+          die "This interface is deprecated\n";
+     }
 
-    $this->tracer($uri, $path_info||'') if ($this->{DEBUG});
-    
-    if ($uri =~ /^\/(\d+).docid\/?$/) {
-        return ($this->get_doc_by_id($1));
-    }
+     if (my ($id) = $uri =~ /^\/(\d+).docid\/?$/) {
+          return $this->$this->get_doc_by_id($id);
+     }
+     
+     my @uri = split m!/+!, $uri;
+     my @interesting_docs;
+     
+     my $cur_uri = '/';
+     push @interesting_docs, $cur_uri;
+     for my $part (@uri) {
+          next if !defined $part || $part eq '';
+          $cur_uri .= $part . '/';
+          push @interesting_docs, $cur_uri;
+     }
+     
+     my $param = join ",", (("?") x @interesting_docs);
+     
+     my $docs = $this->execute_select(
+                             "select 
+                                     d.id id, d.parent parent, d.type type,d.owner owner,
+                                     d.grp grp, d.accessrules accessrules, dp.path path
+                              from
+                                     docid_path dp join documents d on (d.id = dp.docid) 
+                              where
+                                     dp.path in ($param)
+                              order by length(dp.path) asc", @interesting_docs);
+     
+     if (@$docs != @interesting_docs) {
+          return ();
+     }
 
-    my $id = 1; # XXX DOC ROOT
-    my $root = $this->get_doc_by_id($id);
-    return () unless ($root);
-
-    my @path = ($root);
-    if ($uri eq '/') {
-        $$path_info = undef if (defined $path_info);
-        return @path;
-    }
-
-    my @uri = split('/+', $uri);
-
-    shift(@uri);
-    while (my $name = shift(@uri)) {
-         my $vec;
-         my $parent;
-
-         $this->{LOG}->debug("get_doc_by_path: searching $name parent $id");
-
-         $parent = $this->get_doc_by_name_parent($name, $id);
-         unless ($parent) {
-             return () unless ($path_info);
-
-             $$path_info = join('/', $name, @uri);
-             return @path;
-         }
-
-         $id = $parent->_id;
-         $this->{LOG}->debug("get_doc_by_path: got id $id");
-
-         push(@path, $parent);
-    }
-
-    $this->{LOG}->debug("get_doc_by_path: done");
-
-    $$path_info = undef if (defined $path_info);
-    return @path;
+     my @docs = map { Obvius::Document->new($_) } @$docs;
+     return @docs;
 }
+     
 
 sub get_doc_path {
     my ($this, $doc) = @_;
@@ -2663,7 +2659,7 @@ sub find_closest_subsite {
      }
 
      my $question_marks = join ", ", (("?") x @uris);
-     my $query = "select d.*, dp.path 
+     my $query = "select d.*, dp.path path
                   from docparms dpa join docid_path dp using (docid) join documents d on 
                   (dp.docid = d.id) where  dp.path in ($question_marks) and 
                   dpa.name = 'is_subsite' and dpa.value = '1' order by dp.path desc limit 1";
