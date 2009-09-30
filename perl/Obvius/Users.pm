@@ -51,6 +51,13 @@ sub get_user {
     return $this->{USERS}->{$userid};
 }
 
+sub is_admin {
+     my ($this) = @_;
+     return 0 if (!$this->{USER});
+     my $user = $this->get_user($this->{USER});
+     return $user->{can_manage_users} > 1;
+}
+    
 # get_userid - given a string containing a username, returns the id of
 #              the user.
 sub get_userid {
