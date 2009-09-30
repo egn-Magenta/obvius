@@ -114,15 +114,18 @@ sub get_language_preferences {
     }
 
     # Find out if somebody specified ?lang=XX on the URL, if so, give it even more weight:
-    my %args = map { split /=/ } grep { /=/ } split /&/, $req->args if ($req->args);
-    if ($args{lang}) {
-        my %user_pref = split_language_preferences($args{lang}, 4000); # Override
-        for (keys %user_pref) {
-            $lang{$_} = $user_pref{$_};
-        }
+    if ($req->args) {
+         my ($lang_arg) = $req->args =~ /.*lang=([^&]+)/;
+         
+         if ($lang_arg) {
+              my %user_pref = split_language_preferences($lang_arg, 4000); # Override
+              for (keys %user_pref) {
+                   $lang{$_} = $user_pref{$_};
+              }
+         }
+         
+         return \%lang;
     }
-
-    return \%lang;
 }
 
 
@@ -192,40 +195,9 @@ sub obvius_document {
     
     if ($path) { # Specific path lookup
         my $found_doc=$obvius->lookup_document($path);
-        return $found_doc if (defined $found_doc); # Document found - return it.
-
-        # Otherwise, check if the last document found in the path
-        # can handle the request:
-        my ($doc, $path_info)=$obvius->lookup_document($path);
-
-        return undef unless($doc);
-
-        my $doctype=$obvius->get_document_type($doc); # XXX Should look at the public version?
-
-        # It can:
-        return if (!$doctype->handle_path_info());
-
-	$req->notes('obvius_path_info'=>$path_info);
-	my $handle_uri=$obvius->get_doc_uri($doc);
-	$req->notes(uri=>$handle_uri);
-	$req->uri($handle_uri);
-	return $doc;
-    }
-    else {
-        # Need some comment about when path isn't defined here...
-
-        my $doc = $req->pnotes('document');
-        return $doc if ($doc);
-
-        # Lookup from request with path_info and prefix removal
-        $path = $req->uri;
-        my $remove = $req->dir_config('RemovePrefix');
-        $path =~ s/^\Q$remove\E// if ($remove);
-        $path =~ s/\.html?$//;
-        $req->uri($path);
-
-        return scalar($obvius->lookup_document($path));
-    }
+        return $found_doc;
+   }
+    return undef;
 }
 
 sub obvius_document_version {
