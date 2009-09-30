@@ -90,6 +90,7 @@ use Obvius::Version;
 use Obvius::FieldSpec;
 use Obvius::FieldType;
 use Obvius::Log;
+use Time::HiRes qw( time );
 
 use Obvius::DB;
 use Obvius::Access;
@@ -128,17 +129,20 @@ sub new {
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
                                   LANGUAGES   => {}
                                  );
-
+    
+    $this->{IGNORE_DOCTYPES} = $options{ignore_doctypes};
     croak("No database specified")
         unless ( $this->Obvius_Config->DSN );
     
     $this->connect;
+
     if ($this->{USER} and not $this->validate_user) {
 	 print STDERR "User not valid.\n";
 	 return undef;
     }
     
     $this->{dbprocedures} = Obvius::DBProcedures->new($this->dbh);
+
     return $this;
 }
 
@@ -150,7 +154,7 @@ sub connect {
     my ($this) = @_;
 
     $this->tracer() if ($this->{DEBUG});
-
+    
     return $this->{DB} if (defined($this->{DB}));
 
     $this->{LOG}->debug( ref($this) . ": connecting");
@@ -177,6 +181,7 @@ sub connect {
                                                     ShowErrorStatement => 1,
                                                    },
                                  } );
+    
     croak(ref($this), ": failed to connect to database")
         unless (defined($db));
 
@@ -189,12 +194,13 @@ sub connect {
 
     $this->{DB} = $db;
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
-    unless (scalar(@{$this->{DOCTYPES}}) and 
-	    scalar(@{$this->{FIELDTYPES}}) and 
-	    scalar ($this->{FIELDSPECS}->param)) 
+    if ((!scalar(@{$this->{DOCTYPES}}) ||
+        !scalar(@{$this->{FIELDTYPES}}) ||
+        !scalar($this->{FIELDSPECS}->param)) && !$this->{IGNORE_DOCTYPES}) 
     {
         $this->read_type_info(1)
     }
+
     $this->read_user_and_group_info;
 
     #print STDERR Dumper($db->MetaData('documents'));
@@ -299,17 +305,14 @@ sub lookup_document {
     my ($this, $path) = @_;
 
     if (wantarray) {
-         warn "Using ancient get_doc_by_path";
-         if (my @path = $this->get_doc_by_path($path)) {
-              return (reverse @path);
-         }
-         return ();
+         die "Lookup document needing an array is deprecated.\n";
     }
 
     $path = $path . '/';
     $path =~ s!/+!/!g;
-    my $paths = $this->execute_select("select d.* from docid_path dp join  documents d on 
-                                      (dp.docid = d.id) where dp.path = ?", $path);
+    my $paths = $this->execute_select("select d.*,dp.path path from docid_path dp join  
+                                       documents d on (dp.docid = d.id) where 
+                                       dp.path = ?", $path);
     return @$paths ? Obvius::Document->new($paths->[0]) : undef;
 }
 
@@ -1845,8 +1848,11 @@ sub read_type_info {
     $this->tracer() if ($this->{DEBUG});
     
     $this->read_doctypes_table($make_objects);
+
     $this->read_fieldtypes_table($make_objects);
+
     $this->read_fieldspecs_table($make_objects);
+
     $this->adjust_doctype_hierarchy();
 
     #print STDERR Dumper($this->{DOCTYPES}) if ($this->{DEBUG});
