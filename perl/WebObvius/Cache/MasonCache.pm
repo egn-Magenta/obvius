@@ -30,7 +30,6 @@ sub flush {
      
      my $cache = open_cache(@{$this->{cache_args}});
      
-     print STDERR "Flusing: " . Dumper($docids);
      $docids = [$docids] if (!ref $docids);
 
      $cache->remove($_) for (@$docids);
@@ -39,7 +38,6 @@ sub flush {
 sub find_and_flush {
      my ($this, $docs) = @_;
      
-     print STDERR "Docs: " . Dumper($docs);
      my $dirty = $this->find_dirty($docs);
      $this->flush($dirty) if scalar(@$dirty);
 }
