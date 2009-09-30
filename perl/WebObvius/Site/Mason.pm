@@ -8,10 +8,10 @@ package WebObvius::Site::Mason;
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag <jubk@magenta-aps.dk>
+# Authors: JÃ¸rgen Ulrik B. Krag <jubk@magenta-aps.dk>
 #          Peter Makholm <pma@fi.dk>
-#          René Seindal
-#          Adam Sjøgren <asjo@magenta-aps.dk>
+#          RenÃ© Seindal
+#          Adam SjÃ¸gren <asjo@magenta-aps.dk>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -210,6 +210,73 @@ sub access_handler ($$) {
      return OK;
 }
 
+sub shave_of_tails {
+     my ($uri) = @_;
+     
+     my @parts = split '/', $uri;
+     my $cur = '/';
+     my @uris = ('/');
+     
+     for my $part (@parts) {
+          next if ($part eq "" || ! defined $part);
+          $cur .= $part . '/';
+          push @uris, $cur;
+     }
+     
+     return \@uris;
+}
+
+sub convert_ip_to_number {
+     my ($ip) = @_;
+     my ($p1, $p2, $p3, $p4, $subnet) = $ip =~ m!^\s*(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?:\/(\d{1,2}))?\s*$!;
+     
+     if ($p1) {
+          return ($p1 * (2 << 24) + $p2 * (2 << 16) + $p3 * (2 << 8) + $p4, $subnet);
+     } else {
+          return undef;
+     }
+}
+
+sub check_ip {
+     my ($rules, $r) = @_;
+     
+     my $ip = $r->headers_in->{'X-FORWARDED-FOR'};
+     if (!$ip) {
+          warn "No X-FORWARDED-FOR header";
+          return undef;
+     }
+
+     $ip =~ s!,.*!!;
+     return 0 if !$ip;
+
+     my ($ipn) = convert_ip_to_number($ip);
+     return 0 if (!$ipn);
+
+     for my $rule (@$rules) {
+          my ($num, $significance) = convert_ip_to_number($rule);
+          my $subnet = 0;
+          next if !$num;
+          
+          if (!defined $significance) {
+               $significance = 32;
+               my $bits = 255;
+               while ($bits ) {
+                    last if ($bits & $num);
+                    $bits <<= 8;
+                    $significance -= 8;
+               }
+          }
+
+          for (my $i = 31; $i >= (32 - $significance); $i--) {
+               $subnet += 1 << $i;
+          }
+
+          return 1 if (($ipn & $subnet) == ($num & $subnet));
+     }
+
+     return 0;
+}
+
 sub public_authen_handler {
      my ($this, $req) = @_;
 
@@ -222,19 +289,67 @@ sub public_authen_handler {
      
      return SERVER_ERROR if !$obvius;
      
-     my $doc = $req->pnotes('document');
+     my $uri = $req->notes('uri');
+     $uri = "/" . $uri . "/";
+     $uri =~ s!/+!/!g;
      
-     my $is_locked = $obvius->dbprocedures->is_forbidden_doc($doc->Id);
+     my $uris = shave_of_tails($uri);
 
-     if ($is_locked) {
-          $req->notes(nocache =>  1);
-          $req->notes(OBVIUS_SIDE_EFFECTS =>  1 );
-          $req->no_cache(1);          
-          return $this->session_authen_handler($req);
-     } 
-     return OK;
-}
+     if (!@$uris) {
+          warn "NO URI: $uri\n";
+          return SERVER_ERROR;
+     }
+     my $params = join ',', (('?') x @$uris);
+     
+     my $forbidden = $obvius->execute_select(
+              "select docid from docid_path dp join forbidden_docs using (docid) where
+               dp.path in ($params) order by dp.path desc limit 1", @$uris);
+     return OK if !@$forbidden;
+
+     my $docid = $forbidden->[0]{docid};
+     
+     $req->notes(nocache =>  1);
+     $req->notes(OBVIUS_SIDE_EFFECTS =>  1 );
+     $req->no_cache(1);          
           
+     my $allowed_ips = $obvius->execute_select("select ip from forbidden_docs_ips 
+                                                     where docid=?", $docid);
+     my @ips = grep { $_ } map { $_->{ip} } @$allowed_ips;
+     return OK if check_ip(\@ips, $req);
+
+     my $res = $this->session_authen_handler($req);
+     return $res if ($res ne OK); 
+     
+     return OK if $obvius->is_admin;
+     
+     my $users = $obvius->execute_select("select user from forbidden_docs_users 
+                                          where docid=?", $docid);
+     
+     my $cur_user = $obvius->get_user($obvius->{USER});
+     for my $user (@$users) {
+          return OK if $user->{user} == $cur_user->{id};
+     }
+
+     my $groups = $obvius->execute_select("select grp from forbidden_docs_groups 
+                                                 where docid = ?", $docid);
+
+     # Hash it so we avoid O(n^2)
+     my %user_groups;
+     my $user_groups = $obvius->{USER_GROUPS}{$cur_user->{id}};
+     if ($user_groups) {
+          $user_groups{$_->{grp}} = 1 for (@$user_groups);
+     }
+
+     for my $grp (@$groups) {
+          return OK if $user_groups{$grp->{grp}};
+     }
+
+     # If no specific access-choices have been made, allow everybody that is logged in. 
+     # Call to session_authen_handler above make sure we are logged in at this point.
+     return !@$groups && !@$users && !@$ips ? OK : FORBIDDEN;
+
+     return FORBIDDEN;
+}
      
 # handler - Handles incoming Apache requests when using Mason as template system.
 sub handler ($$) {
@@ -426,6 +541,7 @@ sub already_logged_in {
      $obvius->read_user_and_group_info;
      
      $req->notes(user => $res->{login});
+
      # If more than a minute has passed since last login update the 
      # timestamp in the database as well:
      $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP() 
@@ -630,9 +746,9 @@ sub expand_output {
 
      my $benchmark = Obvius::Benchmark-> new('mason::expand output') if $this-> {BENCHMARK};
 
-     # XXX Hvordan pokker håndteres dette? XXX
-     # Måske kan HTML::Mason::Interp out_method hjælpe?
-     # Måske lidt a la dette:
+     # XXX Hvordan pokker hÃ¥ndteres dette? XXX
+     # MÃ¥ske kan HTML::Mason::Interp out_method hjÃ¦lpe?
+     # MÃ¥ske lidt a la dette:
 
      $req->notes('is_admin'=>$output->param('IS_ADMIN')) if ($output->param('IS_ADMIN'));
      my $filename=$site->param('comp_root')->[0]->[1] . '/switch'; # Grab the docroot from the setup.pl
@@ -779,10 +895,10 @@ Debian woody) and 1.26 (after, Debian sarge).
 
 =head1 AUTHOR
 
-Jørgen Ulrik B. Krag <jubk@magenta-aps.dk>
+JÃ¸rgen Ulrik B. Krag <jubk@magenta-aps.dk>
 Peter Makholm <pma@fi.dk>
-René Seindal
-Adam Sjøgren <asjo@magenta-aps.dk>
+RenÃ© Seindal
+Adam SjÃ¸gren <asjo@magenta-aps.dk>
 
 =head1 SEE ALSO
 
