@@ -18,7 +18,6 @@ sub handler {
      my $obvius_config = $req->dir_config('ObviusConfig');
      my $config = Obvius::Config->new($obvius_config);
 
-     print STDERR "CAME HERE4 $config $obvius_config\n";
      my $obvius = Obvius->new($config);
 
      my $uri = $req->uri();
@@ -42,7 +41,6 @@ sub flush {
      my $args = $ap2_req->param('cache');
      my $data = from_json($args);
 
-     print STDERR "ARgs is " . Dumper($args);
      return 400 if (ref $data ne 'ARRAY');
 
      (ref $_ eq 'HASH' and $obvius->register_modified(%$_)) for @$data;
