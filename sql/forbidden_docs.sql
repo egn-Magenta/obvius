@@ -1,8 +1,31 @@
 delimiter $$
 create table if not exists forbidden_docs (
-       docid integer unsigned not null primary key
-       ) $$
+       docid integer unsigned not null primary key,
+       foreign key (docid) references documents (id) on delete cascade
+) $$    
 
+
+create table if not exists forbidden_docs_users (
+       docid integer unsigned not null,
+       user smallint(5) unsigned not null,
+       foreign key (docid) references forbidden_docs(docid) on delete cascade,
+       foreign key (user) references users(id) on delete cascade
+) $$
+
+create table if not exists forbidden_docs_groups (
+       docid integer unsigned not null,
+       grp smallint(5) unsigned not null,
+       foreign key (docid) references forbidden_docs(docid) on delete cascade,
+       foreign key (grp) references groups(id) on delete cascade
+);
+
+create table if not exists forbidden_docs_ips (
+       docid integer unsigned not null,
+       ip varchar(128) not null,
+       foreign key (docid) references forbidden_docs(docid) on delete cascade
+);
+       
+       
 
 drop procedure if exists is_forbidden_doc $$
 create procedure is_forbidden_doc (docid integer unsigned)
