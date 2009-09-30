@@ -110,7 +110,12 @@ sub save_request_result_in_cache
      
      open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
      flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
-     print F (ref $s ? $$s : $s) if $s;
+     if (ref $s && defined $$s) {
+          print F $$s;
+     } elsif (defined $s) {
+          print F $s;
+     }
+          
      flock F, LOCK_UN;
      close F;
      
@@ -246,7 +251,6 @@ END
           push @res, map { $_->{docid}} @{$this->execute_query($query_sql, $field)};
      }
 
-     print STDERR Dumper(\@res);
      return \@res;
 }
 
@@ -277,7 +281,6 @@ sub is_relevant_for_leftmenu_cache {
      $obvius->get_version_fields($vdoc, \@relevant_fields);
 
      for (@relevant_fields) {
-          print STDERR "Field: ", $vdoc->field($_), ", ", $vdoc->field($_), "\n";
 	  return 1 if ($vdoc->field($_) ne $old_vdoc->field($_));
      }
      
@@ -473,9 +476,6 @@ sub find_dirty {
         @$moved_documents
        );
      
-     print STDERR "Clear recursively: " . Dumper(\@clear_recursively);
-     print STDERR "Related: " . Dumper(\@related);
-     print STDERR "To clear: " . Dumper(\@commands);
      my $unique = uniquify_commands(\@commands);
      return $unique;
 }
