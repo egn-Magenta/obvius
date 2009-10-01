@@ -10,6 +10,3 @@ create table if not exists tags (
 
 create table if not exists all_tags (
        name varchar(256) not null primary key);
-
-
-
