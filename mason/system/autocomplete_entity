@@ -1,0 +1,67 @@
+<% $msg %>
+
+<%args>
+$table => 'user'
+$q => undef
+</%args>
+<%once>
+use Obvius; use Obvius::Config;
+use WebObvius::Site::Mason; #To check if we are logged in. Should ideally be moved away from here.
+use Time::HiRes qw( time );
+use Obvius::Data;
+</%once>
+<%init>
+
+my $site = $r->dir_config('site');
+if (!$site) {
+   die "You must specify a site.";
+}             
+
+#hackish but we speed it up 50%
+my $obvius = Obvius->new(Obvius::Config->new($r->dir_config('site')), undef, undef, 
+                         undef, undef, undef, ignore_doctypes => 1);
+
+my $logged_in = WebObvius::Site::Mason::already_logged_in(undef, $obvius, $r);
+if (!$logged_in) {
+     print "Not logged in";
+     goto end;
+}
+
+if (!$obvius->is_admin) {
+     print "Is not admin";
+     goto end;
+}
+
+my $data;
+my $params = {'user' => {
+                         field => 'login',
+                         table => 'users'
+                        },
+              'group' => {
+                          field => 'name',
+                          table => 'groups'
+                         }
+              };
+
+my $query_params = $params->{$table};
+if (!$query_params) {
+     goto end;
+}
+
+my $query = "select $query_params->{field} f from $query_params->{table}";
+my @params;
+
+if ($q) {
+     $query .= " where $query_params->{field} like ?";
+     push @params, "$q%";
+}
+
+$data = $obvius->execute_select($query, @params);
+
+my $msg = join "\n", map { $_->{f} } @$data;
+
+end:
+if (!defined $msg) {
+  $msg = "Error in query\n";
+}
+</%init>

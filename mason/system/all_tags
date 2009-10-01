@@ -1,0 +1,23 @@
+<% join "\n", @tags %>
+
+<%args>
+$q => undef
+</%args>
+<%init>
+my $obvius = Obvius->new(Obvius::Config->new($r->dir_config('site')));
+
+my $tags;
+if ($q) {
+     $q =~ s/[%_]//g;
+     $tags = $obvius->execute_select("select name from all_tags where name like ? order by name",
+                                     $q . '%');
+} else {
+     $tags = $obvius->execute_select("select name from all_tags order by name");
+}
+
+my @tags = map { $_->{name} } @$tags;
+</%init>
+<%once>
+use Obvius;
+use Obvius::Config;
+</%once>
