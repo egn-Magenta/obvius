@@ -1323,12 +1323,12 @@ div.obvius-ac-editbuttons {
 }
 
 .tags_widget .tag_div_container .tag_container .tag {
-    font-size: 1.1em; 
     border: 1px solid #CCCCCC; 
     margin: 0.1em; 
     font-weight: bolder; 
     padding: 0.2em; 
     padding-left: 0.3em;
+    cursor: move;
 }
 
 .tag_name {

@@ -1,13 +1,20 @@
 <%method block>
-<script type="text/javascript"> 
-esc_html = function (txt) {
-   return txt.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/, "&amp;");
+<!--[if lte IE 7 ]>
+<style type="text/css">
+.tag {
+  width: 220px;
 }
-                   
+<![endif]--> 
+</style>
+<script type="text/javascript">
+var esc_html = function (txt) {
+  return txt.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/, "&amp;").replace('"', "&quot;");
+};
+
 function esc_sel(sel) {
     return sel.replace(/:/g, "\\:").replace(/\./g, "\\.");
 }
-         
+
 function filter_non_permanent(tags) {
     var ret = [];
     for (var i = tags.length - 1; i >= 0; i--) {
@@ -20,8 +27,8 @@ function filter_non_permanent(tags) {
 
 var permanent_tags;
 eval(unescape(
-    '<% "permanent_tags = { " . 
-       (join ',', 
+    '<% "permanent_tags = { " .
+       (join ',',
         map { s/'/\\'/; my $a = $_; Encode::from_to($a, "UTF-8", "latin-1"); "'$a': 1" } @permanent_tags) .
       "}"|u %>'));
 
@@ -33,13 +40,13 @@ function tag_name(el) {
    return $(el).find(".tag_name").text();
 }
 
-onsubmit_array.push(function () { 
+onsubmit_array.push(function () {
     var sel = $("#" + esc_sel("<% $send_tags_id |h %>"));
     $(".chosen_tag").each(function () {
            var txt = tag_name(this);
            sel.append('<option selected="selected" value="' + esc_html(txt) + '">x</option>');
     });
-    return true; 
+    return true;
 });
 
 function create_chosen(tag) {
@@ -48,7 +55,7 @@ function create_chosen(tag) {
   t.before(
     "<span class='remove_chosen'>X</span>"
   );
-}  
+}
 
 function received_chosen(ev, ui) {
   create_chosen(ui.item);
@@ -60,7 +67,7 @@ function received_global(ev, ui) {
     $(ui.sender).sortable('cancel');
     return;
   }
-  ui.item.removeClass('global_tag').addClass('chosen_tag').find(".remove_chosen").remove()
+  ui.item.removeClass('global_tag').addClass('chosen_tag').find(".remove_chosen").remove();
 }
 
 function add_tag_from_field() {
@@ -71,19 +78,23 @@ function add_tag_from_field() {
                            '</div></div>');
 }
 
+
 $(function () {
   $('.remove_chosen').live('click', function (ev) {
-    ev.stopPropagation(); 
+    ev.stopPropagation();
     var txt = $(this).siblings(".tag_name").text();
-    $(this).parents(".chosen_tag").remove(); 
+    $(this).parents(".chosen_tag").remove();
     if (is_permanent_tag(txt)) {
        $("#global_tags").append("<div class='global_tag tag'><span class='tag_name'>" + esc_html(txt) + "</span><div class='tag_clearer'></div></div>");
     }
   });
-  $('#chosen_tags').sortable({receive: received_chosen, 
-                              connectWith: '#global_tags'});
-  $('#global_tags').sortable({ receive: received_global, 
-                               connectWith: '#chosen_tags'});
+  $('#chosen_tags').sortable({receive: received_chosen,
+                              connectWith: '#global_tags',
+                              distance: 5});
+  $('#global_tags').sortable({ receive: received_global,
+                               connectWith: '#chosen_tags',
+                               distance: 5
+});
   $('#add_tag_field').autocomplete('/system/all_tags');
 });
 
@@ -96,8 +107,9 @@ $(function () {
 <& util/label, name => $prefix . $field->{name}, label => $field->{label}, field => $field &>
 <div class="tag_div_container" style="width: 280px;">
   <h3><& /shared/trans, en => 'Global tags', da => 'Faste tags' &></h3>
-  <div id="global_tags" style="height: 324px; margin-bottom: 0em;"
-       class="tag_container">
+  <div id="global_tags"
+       style="height: 324px; margin-bottom: 0em; overflow: auto; cursor: move;"
+       class="tag_container" >
 % for my $tag (@standard_tags) {
     <div class="global_tag tag">
       <span class="tag_name"><% $tag |h %></span>
@@ -107,22 +119,22 @@ $(function () {
   </div>
   <div id="add_field_container">
     <h3>
-      <& /shared/trans, da => "Tilføj tag", en => "Add tag" &>
+      <& /shared/trans, da => "Tilføj frie tags", en => "Add free tag" &>
     </h3>
-    <center> 
+    <center>
       <input
-         style="width: 170px;" 
+         style="width: 170px;"
          type="text"
          id="add_tag_field" />
-      <input type="button" 
-             value="<& /shared/trans, da => 'Tilføj', en => 'Add' &>" 
-             onclick="add_tag_from_field()" /> 
+      <input type="button"
+             value="<& /shared/trans, da => 'Tilføj', en => 'Add' &>"
+             onclick="add_tag_from_field()" />
      </center>
   </div>
 </div>
 <div class="tag_div_container" style="width: 280px;">
   <h3><& /shared/trans, da => "Valgte tags", en => "Chosen tags" &></h3>
-  <div id="chosen_tags" class="tag_container">
+  <div id="chosen_tags" class="tag_container" style="overflow: auto; ">
 % for my $tag (@document_tags) {
     <div class="chosen_tag tag">
       <span class="tag_name"><% $tag |h %></span>
@@ -215,7 +227,7 @@ my $tags = Obvius::Tags->new('obvius');
 my $value = $data->{$id};
 if (! ref $value ) {
    $value = [ $value ];
-}     
+}
 
 # Workaround for the horrible encoding-handling in obvius.
 @$value = grep { $tags->validate_tag($_) } map { Encode::decode('latin-1', $_ ) }  @$value;
