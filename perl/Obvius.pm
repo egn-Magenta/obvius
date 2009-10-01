@@ -2668,9 +2668,9 @@ sub find_closest_subsite {
      my $query = "select d.*, dp.path path
                   from docparms dpa join docid_path dp using (docid) join documents d on 
                   (dp.docid = d.id) where  dp.path in ($question_marks) and 
-                  dpa.name = 'is_subsite' and dpa.value = '1' order by dp.path desc limit 1";
-     
+                  dpa.name = 'is_subsite' and dpa.value = '1' order by length(dp.path) desc limit 1";
      my $res = $this->execute_select($query, @uris);
+
      return @$res ? Obvius::Document->new($res->[0]) : undef;
 }
 
