@@ -108,7 +108,7 @@ $(function () {
 <div class="tag_div_container" style="width: 280px;">
   <h3><& /shared/trans, en => 'Global tags', da => 'Faste tags' &></h3>
   <div id="global_tags"
-       style="height: 324px; margin-bottom: 0em; overflow: auto; cursor: move;"
+       style="height: 324px; margin-bottom: 0em; overflow-y: auto; overflow-x: hidden; cursor: move;"
        class="tag_container" >
 % for my $tag (@standard_tags) {
     <div class="global_tag tag">
@@ -134,7 +134,7 @@ $(function () {
 </div>
 <div class="tag_div_container" style="width: 280px;">
   <h3><& /shared/trans, da => "Valgte tags", en => "Chosen tags" &></h3>
-  <div id="chosen_tags" class="tag_container" style="overflow: auto; ">
+  <div id="chosen_tags" class="tag_container" style="overflow-y: auto; overflow-x: hidden; ">
 % for my $tag (@document_tags) {
     <div class="chosen_tag tag">
       <span class="tag_name"><% $tag |h %></span>
