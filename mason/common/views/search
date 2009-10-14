@@ -1,0 +1,301 @@
+<script type="text/javascript">
+var search_url = "/system/search";
+var teaser_length = 200;
+var results_per_page = 10;
+var browse_pages_to_show = 5;
+var last_search_args = {};
+var doctypes = eval(unescape("(<% to_json(\@doctypes) |u %>)"));
+var paths = eval(unescape("(<% to_json($path) |u %>)"));
+var tag = unescape("<% $tag |u %>");
+
+function get_cookie(name) {
+  var cookie_pos = document.cookie.indexOf(name + "=");
+  if (cookie_pos == -1) return undefined;
+  cookie_pos += name.length + 1;
+  var end = document.cookie.indexOf(";", cookie_pos);
+  if (end == -1) end = document.cookie.length;
+  return unescape(document.cookie.substring(cookie_pos, end));
+}
+
+function set_cookie(name, value, expires) {
+  var cookie = [];
+  cookie.push([name,escape(value)]);
+
+  if (!expires) {
+    var now = new Date();
+    var secs = now.getTime();
+    secs += 86400;
+    now.setTime(secs);
+    expires = now;
+  }
+
+  cookie.push(["expires", expires.toGMTString()]);
+
+  var path = document.location.href.replace(/\?.*$/, "").replace(/http:\/\/[^\/]+/, "");
+  cookie.push(["path", path]);
+
+  for (var i = 0, len = cookie.length;i < len; i++) {
+    cookie[i] = cookie[i].join("=");
+  }
+  cookie = cookie.join(";");
+
+  document.cookie = cookie;
+  return cookie;
+}
+
+function delete_cookie(name) {
+  document.cookie = name + "=yadayada; expires=Thu, 01-Jan-70 00:00:01 GMT";
+}
+
+function get_search_cookie() {
+  var cookie = get_cookie("obvius_search_cookie");
+  if (!cookie) return {};
+
+  var cookie_data = eval("(" + cookie + ")");
+  return cookie_data;
+}
+
+function get_last_search() {
+  var cookie_data = get_search_cookie();
+
+  return cookie_data[document.location.href];
+}
+
+$(function () {
+    $("#query").keypress(function (ev) {
+                           if (ev.which == 13)
+                             do_search();
+                         });
+    $("#start_date, #end_date").datepicker(
+      {dateFormat: "yy-mm-dd"});
+
+    var args = get_last_search();
+    if (args) {
+      if (args.tags && args.tags != tag || args.end_date || args.start_date) {
+        $("#advanced_search").show();
+      }
+      $("#query").attr('value', args.query) || "";
+      $("#tags").attr('value', args.tags) || "";
+      $("#end_date").attr('value', args.end_date) || "";
+      $("#start_date").attr('value', args.start_date) || "";
+
+      last_search_args = args;
+      do_search(last_search_args);
+      return;
+    }
+
+    if (tag) {
+      $("#tags").attr('value', tag);
+    }
+
+    do_search();
+  });
+
+function assemble_search_args() {
+  var args = {};
+  var keys = ["path", "query", "tags", "published_before", "published_after"];
+
+  for (var i = 0, len = keys.length; i < len; i++) {
+    var key = keys[i];
+    var val = $('#' + JSUtils.escape_jquery_selector(key)).attr('value');
+    if (val && !val.match(/^\s*$/)) {
+          args[key] = val;
+    }
+  }
+
+  args.limit = 10;
+  args.offset = 0;
+
+  if (doctypes && doctypes.length) {
+    args.doctype = doctypes;
+  }
+
+  if (paths && paths.length) {
+    args.path = paths;
+  }
+
+  return args;
+}
+
+function do_search(args) {
+  var cookie = get_search_cookie();
+
+  if (!args) args = assemble_search_args();
+  last_search_args = args;
+
+  cookie[document.location.href] = args;
+  set_cookie("obvius_search_cookie", JSUtils.serialize(cookie));
+
+  var b = $.ajax({type: "GET",
+                  url: search_url,
+                  data: args,
+                  success: new_search_result });
+}
+
+function assemble_results(data) {
+  var docs = data.docs;
+  var res = ["div", {}];
+
+  var browser = page_browser(data.numFound, data.start);
+  res.push(browser);
+  for (var i = 0,len = docs.length; i < len; i++) {
+    res.push(search_result(docs[i]));
+  }
+  res.push(browser);
+  return res;
+}
+
+function new_search_result(data) {
+  var res;
+  try {
+    data = eval("(" + data + ")");
+    res = !data.docs || data.docs.length == 0 ?
+      "<& /shared/trans, da => 'Vi kunne ikke finde noget resultat på din søgning', en => 'No results match your query' &>" : JSUtils.generate_html(assemble_results(data));
+  } catch (e) {
+    res = "<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>";
+  }
+
+  $("#search_result").html(res);
+}
+
+
+function isSpace(text) {
+  return text == " " || text == "\n" || text == "\r" || text == "\t" || !text ;
+}
+
+function shorten(text, text_length) {
+  var i, len;
+  text = text.replace(new RegExp("<[^>]*>", "g"), "");
+  for (i = 0, len = text.length; i < len && (i < text_length || !isSpace(text[i])); i++);
+
+  var retstr = text.substring(0, i);
+  if (i != 0 && text.length != i) {
+    retstr = retstr.replace(new RegExp("[ .,:'\"?;\t\n\r]*$"), "..."); //"
+  }
+
+  return retstr;
+}
+
+function search_result(result) {
+  return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
+          ["div", {className: "result_entity_header",
+                   style: "width: 100%; font-size: 1.1em; font-weight: bolder;"},
+           ["span", {style: "float: left; width: 80%"},
+            ["a", {href: result.uri}, result.title]],
+           ["span", {style: "float: right"}, result.score + "%"],
+           ["div", {style: "clear: both"}]],
+          ["div", {className: "result_entity_body", style: "width: 100%"},
+           new JSUtils.UnquotedString(result.teaser ? shorten(result.teaser, teaser_length) : result.content ? shorten(result.content, teaser_length) : ""),
+           ["div", {className: "read_more", style: "margin-top: 0.1em;"},
+            ["a", {href: result.uri},
+             new JSUtils.UnquotedString("<& /shared/trans, da => 'Læs mere...', en => 'Read more...' &>")]]]];
+}
+
+function goto_page(n) {
+  last_search_args.offset = n*results_per_page;
+  do_search(last_search_args);
+}
+
+function browse_page(text, page_to_goto, highlight, extra_style) {
+  return ["span",{style: "cursor: pointer;" +
+                  (highlight ? "color: black; font-weight: bold;" : "color: blue; text-decoration: underline;") +
+                  extra_style || "",
+                  onclick: JSUtils.handler_call('goto_page', page_to_goto)
+                 },
+          new JSUtils.UnquotedString(text)];
+}
+
+function page_browser(nr_results, start) {
+  var cur_page = (start / results_per_page);
+  var nr_pages = Math.floor((nr_results - 1) / results_per_page) + 1;
+  if (nr_pages <= 1) return "";
+  var res = ["div"];
+  if (cur_page > 0) {
+    res.push(
+      browse_page("<& /shared/trans, da => 'Forrige', en => 'Previous' &>", cur_page - 1)
+    );
+  }
+  for (var page = Math.max(0, cur_page - browse_pages_to_show),
+       max = Math.min(cur_page + browse_pages_to_show, nr_pages - 1);
+       page <= max; page++) {
+    res.push(browse_page(page + 1, page, page == cur_page));
+  }
+  if (cur_page < nr_pages - 1) {
+    res.push(
+      browse_page("<& /shared/trans, da => 'Næste', en => 'Next' &>", cur_page + 1,
+                  undefined));
+  }
+
+  return res;
+}
+</script>
+<div class="search_page" style="margin-top: 1em">
+  <div style="width: 37em">
+    <input type="text" id="query" name="query" style="width: 100%; margin-bottom: 0.2em"/>
+
+    <div style="margin-bottom: 1em; width: 100%;">
+      <input type="button"
+             name="<& /shared/trans, da => 'Søg', en => 'Search' &>"
+             onclick="do_search()"
+             value="Søg" />
+
+      <a onclick="$('#advanced_search').slideToggle('fast')"
+         style="cursor: pointer; float: right; font-weight: bold; font-size: 1.1em; margin-top: 0.4em;">
+        <& /shared/trans, da => "Avanceret søgning", en => "Advanced search" &>
+      </a>
+    </div>
+    <div id="advanced_search"
+         style="width: 35em; border: 1px solid;padding: 0em 1em 1em; font-weight: bold; display: none;">
+      <br />
+      <label for="tags">
+        Tagssøgning
+      </label>
+      <input type="text" name="tags" id="tags" style="width: 14.5em; margin-left: 1.2em"/>
+      <div style="clear: both; margin-bottom: 1em" ></div>
+
+      <label for="start_date" style="width: 2em">
+        <& /shared/trans, da => "Publiseret efter", en => "Published after" &>
+      </label>
+      <input type="text" id="start_date" id="published_after" name="start_date" style="width: 6.3em"/>
+      <label for="end_date">
+        <& /shared/trans, da => "før", en => "before" &>
+      </label>
+      <input type="text" id="end_date" name="published_before" id="end_date" style="width: 6.3em" />
+      <br />
+    </div>
+
+    <div id="search_result">
+    </div>
+  </div>
+</div>
+<%args>
+</%args>
+<%once>
+use JSON;
+use Encode qw( decode from_to );
+</%once>
+<%init>
+my %args = $r->args;
+
+my $path = $args{path};
+my $doctypes_in = $args{doctype};
+my $tag = $args{tag};
+from_to($tag, 'UTF-8', 'latin-1');
+$path = [ $path ] if ref $path ne 'ARRAY' && defined $path;
+$path = [] if !$path;
+$doctypes_in = [ $doctypes_in ] if ref $doctypes_in ne 'ARRAY' && $doctypes_in;
+$doctypes_in = [] if !$doctypes_in;
+
+my @doctypes;
+for my $doctype (@$doctypes_in) {
+   next if !$doctype;
+   if ($doctype =~ /^\d+$/) {
+        $doctype = $obvius->get_doctype_by_id($doctype);
+        next if !$doctype;
+        push @doctypes, $doctype->param('name');
+   } else {
+        push @doctypes, $doctype;
+   }
+}
+
+</%init>
