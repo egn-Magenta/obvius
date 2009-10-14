@@ -146,9 +146,8 @@ $(function () {
 % }
   </div>
 </div>
-<div style="clear:both" ></div>
+<div style="clear:both"></div>
 <br />
-</div>
 </div>
 <%args>
 $prefix
