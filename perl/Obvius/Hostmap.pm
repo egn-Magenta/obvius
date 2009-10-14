@@ -33,7 +33,8 @@ our $VERSION="1.0";
 
 sub new_with_obvius {
      my ($class, $obvius) = @_;
-     return $class->create_hostmap($obvius->{OBVIUS_CONFIG}{HOSTMAP_FILE}, $obvius->{OBVIUS_CONFIG}{ROOTHOST});
+     return $class->create_hostmap($obvius->{OBVIUS_CONFIG}{HOSTMAP_FILE}, 
+                                   $obvius->{OBVIUS_CONFIG}{ROOTHOST});
 }
 
 sub create_hostmap {

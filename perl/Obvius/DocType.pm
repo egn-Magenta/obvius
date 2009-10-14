@@ -36,13 +36,8 @@ use warnings;
 
 use Obvius;
 use Obvius::Data;
+use Data::Dumper;
 
-our @ISA = qw( Obvius::Data );
-our $VERSION="1.0";
-
-# new ($class, $rec)
-#   - TODO: Document instantiation...
-#     
 #     The object contains two instances of Obvius::Data. Both contain
 #     fields associated with the object:
 #     FIELDS: Fields which cannot be changed after the object has been 
@@ -51,6 +46,10 @@ our $VERSION="1.0";
 #                     version. These fields are usually associated with a 
 #                     published version of the document and usually 
 #                     dropped once the document is no longer published.
+
+our @ISA = qw( Obvius::Data );
+our $VERSION="1.0";
+
 sub new {
     my ($class, $rec) = @_;
 
@@ -62,6 +61,51 @@ sub new {
     return $this;
 }
 
+sub mode {
+     my ($this, $args) = @_;
+     
+     my %modes = ('search' => 'search');
+     my ($mode) = $args->{obvius_mode} && $modes{$args->{obvius_mode}};
+
+     return $mode;
+}
+
+sub generate_head_html {
+     my ($this, $r, $doc, $vdoc, $obvius) = @_;
+
+     my $mode = $this->mode({$r->args});
+     if ($mode && $mode eq 'search') {
+          my $script = "<script type='text/javascript' src='/scripts/jquery/jquery-1.3.2.min.js'>
+                        </script>
+                        <script type='text/javascript' src='/scripts/jquery/jquery-ui-1.7.2.custom.min.js' >
+                        </script>
+                        <script type=\"text/javascript\" src=\"/scripts/jsutils.js\" ></script>
+                        <link rel=\"stylesheet\" type=\"text/css\" href=\"/style/jquery-ui-1.7.2.custom.css\" />";
+          return $script;
+     }
+     
+     return '';
+}
+
+sub view {
+     my ($this, $args) = @_;
+     
+     my %views = (search => '/views/search');
+     my $view;
+
+     if (my $view_arg = $this->mode($args)) {
+          $view = $views{$view_arg};
+     } 
+
+     if (!defined $view) {
+          ($view) = (ref $this) =~ m!::([^:]+$)!;
+          $view = "/doctypes/$view";
+     }
+     
+     return $view;
+}
+     
+     
 # action - the action method in the document type is called by Obvius
 #          when a document perform its function. Obvius provides data
 #          for the document type to use on the input-object and the
@@ -122,6 +166,7 @@ sub handle_path_info { return undef; }
 #
 #########################################################################
 
+     
 sub doctypemap {
     my ($this, $a, $b, $c, $d, $doctypename, $obvius)=@_;
 
@@ -400,7 +445,6 @@ sub publish_type_map {
     my ($this) = @_;
     return $this->type_map($this->{PUBLISH_FIELDS});
 }
-
 
 ########################################################################
 #
