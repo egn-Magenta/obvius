@@ -1,0 +1,60 @@
+<% $output %>
+<%args>
+</%args>
+<%init>
+use strict; use warnings;
+use Data::Dumper;
+
+my $output = '';
+my $search = Obvius::SolrSearch->new;
+sub csv_splitter {
+     split /\s*,\s*/, shift;
+}
+
+my %good_procs = (path => \&csv_splitter, query => 1, tags => \&csv_splitter,
+                  published_before => 1, published_after => 1, doctype => 1,
+                  offset => 1, limit => 1);
+
+for my $key (keys %ARGS) {
+     my $handler = $good_procs{$key};
+     next if !$handler;
+
+     my $arg = $ARGS{$key};
+     my @args = ref $arg eq 'ARRAY' ? @$arg : ($arg);
+     if (ref $handler) {
+          @args = $handler->(@args);
+     }
+     
+     @args = map { Encode::decode('utf-8', $_) } @args;
+     $search->$key(@args);
+}
+
+my $res = $search->search;
+
+my $max_score = $res->{maxScore};
+
+my $config = Obvius::Config->new($r->dir_config('site'));
+my $hostmap = Obvius::Hostmap->new_with_obvius({OBVIUS_CONFIG => $config});
+
+
+my @docs;
+for my $doc (@{$res->{docs}}) {
+     push @docs,{uri => "http://" . $hostmap->absolute_uri($doc->{path}),
+                 teaser => $doc->{teaser},
+                 title => $doc->{title},
+                 score => int(($doc->{score} / $max_score) * 100)};
+}
+$output = to_json({start => $res->{start},
+                   numFound => $res->{numFound},
+                   docs => \@docs});
+
+end:
+</%init>
+
+<%once>
+use JSON;
+use Encode;
+use Obvius::SolrSearch;
+use Obvius::Hostmap;
+use Obvius::Config;
+</%once>
