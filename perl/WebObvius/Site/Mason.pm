@@ -346,7 +346,7 @@ sub public_authen_handler {
 
      # If no specific access-choices have been made, allow everybody that is logged in. 
      # Call to session_authen_handler above make sure we are logged in at this point.
-     return !@$groups && !@$users && !@$ips ? OK : FORBIDDEN;
+     return !@$groups && !@$users && !@ips ? OK : FORBIDDEN;
 
      return FORBIDDEN;
 }
