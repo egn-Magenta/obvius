@@ -1,4 +1,4 @@
-<% $text %>
+<% $text %>\
 <%init>
 my $default = 'en';
 my $langs = $r->pnotes('site')-> {LANGUAGE_PREFERENCES};
