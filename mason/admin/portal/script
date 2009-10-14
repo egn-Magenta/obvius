@@ -12,3 +12,4 @@
   <script type="text/javascript" src="/scripts/jquery/jquery.bgiframe.min.js"></script>
   <script type="text/javascript" src="/scripts/jquery/jquery.ajaxQueue.js"></script>
   <script type="text/javascript" src="/scripts/jquery/jquery.autocomplete.min.js"></script>
+  <script type="text/javascript" src="/scripts/jsutils.js" ></script>
