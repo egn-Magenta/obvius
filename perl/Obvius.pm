@@ -2656,6 +2656,9 @@ sub send_mail {
 sub find_closest_subsite {
      my ($this, $doc) = @_;
 
+     return $doc->{_cached_closest_subsite} if 
+       (ref $doc && $doc->{_cached_closest_subsite});
+
      my $uri = $this->get_doc_uri($doc);
      my @uris;
      
@@ -2670,8 +2673,12 @@ sub find_closest_subsite {
                   (dp.docid = d.id) where  dp.path in ($question_marks) and 
                   dpa.name = 'is_subsite' and dpa.value = '1' order by length(dp.path) desc limit 1";
      my $res = $this->execute_select($query, @uris);
-
-     return @$res ? Obvius::Document->new($res->[0]) : undef;
+     
+     return undef if !@$res;
+     
+     my $subsite = Obvius::Document->new($res->[0]);
+     $doc->{_cached_closest_subsite} = $subsite if ref $doc;
+     return $subsite;
 }
 
 sub shorten_url {
