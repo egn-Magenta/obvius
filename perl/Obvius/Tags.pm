@@ -3,6 +3,11 @@ package Obvius::Tags;
 use strict;
 use warnings;
 
+use Data::Dumper;
+use LWP::UserAgent;
+use XML::Simple;
+use JSON;
+
 our @langs = qw(danish english);
 
 sub new {
@@ -71,4 +76,75 @@ for my $lang (@langs) {
      use strict "refs";
 }
 
+sub find_tags_on_path {
+     my ($this, $docs, %options) = @_;
+     
+     $docs = [$docs] if ref $docs ne 'ARRAY';
+     my @paths = grep { $_ } map { $this->ob->get_doc_uri($_) } @$docs;
+
+     my (@vars, @where, @pathexp);
+     
+     
+     for my $path (@paths) {
+          push @pathexp, "dp.path like ?";
+          push @vars, "${path}%";
+     }
+     
+     die "Document $doc's path couldn't be found" if (!@pathexp);
+
+     push @where, '(' . (join " or ", @pathexp) . ')';
+     
+     if (my $doctypes = $options{doctypes}) {
+          $doctypes = [$doctypes] if ref $doctypes ne 'ARRAY';
+          my @doctypes;
+          
+          for my $doctype (@$doctypes) {
+               if ($doctype =~ /^\d+$/) {
+                    push @doctypes, $doctype;
+               } else {
+                    $doctype = $this->ob->get_doctype_by_name($doctype);
+                    next if !$doctype;
+                    push @doctypes, $doctype->Id;
+               }
+          }
+
+          if (@doctypes) {
+               my $params = join ",", (("?") x @doctypes);
+               push @where, "v.type in ($params)";
+               push @vars, @doctypes;
+          }
+     }
+
+     if ($options{tag_filter}) {
+          for my $key ('include', 'exclude') {
+               my $data = $options{tag_filter}->{$key};
+               next if !$data;
+               if (!@$data) {
+                    push @where, "0" if $key eq 'include';
+                    next;
+               }
+               my $param = join ",", (("?") x @$data);
+               push @where, "vf.text_value " . ($key eq 'exclude' ? ' not ' : '') . " in ($param)";
+               push @vars, @$data;
+          }
+
+     }
+     
+     push @where, "v.public = 1";
+     push @where, "vf.name = 'tags'";
+     
+     push @where, "vf.text_value is not null";
+
+     my $where = @where ? " where " . (join ' and ', @where) : "";
+
+     my $query = "select vf.text_value tag, count(*) tagcount from 
+                     vfields vf join versions v on (v.docid = vf.docid and vf.version = v.version)
+                     join docid_path dp on (v.docid = dp.docid) $where\n
+                     group by vf.text_value order by lower(vf.text_value)";
+     
+     my $tags = $this->ob->execute_select($query, @vars);
+     @$tags = grep { $_->{tag} && $_->{tag} !~ /^\s*$/ } @$tags;
+
+     return $tags,
+}
 1;
