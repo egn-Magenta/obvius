@@ -150,7 +150,7 @@ sub make_solr_filter_query {
      if ($published_before || $published_after) {
           $published_before = $published_before ? $published_before . "T00:00:00Z" : '*';
           $published_after = $published_after ? $published_after . "T00:00:00Z" : '*';
-          push @query, "published:[$published_after TO $published_before]";
+          push @query, "docdate:[$published_after TO $published_before]";
      }
      
 
@@ -196,7 +196,7 @@ sub search {
                     {
                      fq => Encode::encode('UTF-8', $filter_query),
                      q => Encode::encode('UTF-8', $query),
-                     fl => "title,id,score,teaser,path,content,tags,published", 
+                     fl => "title,id,score,teaser,path,content,tags,docdate", 
                      sort => $sort,
                      wt => "json",
                      rows => $rows,
@@ -218,7 +218,7 @@ sub search {
           };
 
           my $content = from_json($res->content)->{response};
-
+          
           return $content if !$content->{docs};
           
           for my $doc (@{$content->{docs}}) {

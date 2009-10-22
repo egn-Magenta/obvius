@@ -188,9 +188,9 @@ function search_result(result) {
   teaser = teaser || "";
 
   var date;
-  if (result.published) {
-    var match = result.published.match(/^(\d+)-(\d+)-(\d+).*$/);
-    date = match ? new Date(match[1], match[2], match[3]) : undefined;
+  if (result.docdate) {
+    var match = result.docdate.match(/^(\d+)-(\d+)-(\d+).*$/);
+    date = match ? new Date(match[1], match[2] - 1, match[3]) : undefined;
   }
 
   return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
