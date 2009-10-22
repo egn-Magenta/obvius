@@ -155,7 +155,6 @@ function new_search_result(data) {
       "<& /shared/trans, da => 'Vi kunne ikke finde noget resultat på din søgning', en => 'No results match your query' &>"
       : JSUtils.generate_html(assemble_results(data));
   } catch (e) {
-    alert(e);
     res = "<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>";
   }
 
