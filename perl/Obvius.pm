@@ -43,7 +43,8 @@ use Cache::FileCache;
 
 use WebObvius::Cache::CacheObjects; 
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
-use WebObvius::Cache::ApacheCache qw(is_relevant_for_leftmenu_cache);
+use WebObvius::Cache::ApacheCache qw(is_relevant_for_leftmenu_cache is_relevant_for_tags
+                                     is_relevant_for_tags_on_unpublish );
 
 use Obvius::DBProcedures;
 
@@ -2214,11 +2215,12 @@ sub publish_version {
         delete $vdoc->{PUBLISH_FIELDS}->{PUBLISHED};
     }
 
-    # Procedure:
-    # validate, update version, insert pfields, end.
-    #For the leftmenu cache, check if any
-    
     my $related = is_relevant_for_leftmenu_cache($this, $vdoc->Docid, $vdoc);
+    my $tags_related = is_relevant_for_tags($this, $vdoc->Docid, $vdoc);
+    
+    my $doctype = $this->get_doctype_by_id($vdoc->Type);
+    $tags_related ||= $doctype && $doctype->Name eq 'TagCloud';
+    
 
     $this->db_begin;
     eval {
@@ -2269,6 +2271,8 @@ sub publish_version {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done"); 
     $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => $related);
+    $this->register_modified(clear_tags => 1) if $tags_related;
+
     if ($related) {
 	 my $doc = $this->get_doc_by_id($vdoc->Docid);
 	 $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
@@ -2354,6 +2358,7 @@ sub unpublish_version {
     $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => 1);
     my $doc = $this->get_doc_by_id($vdoc->Docid);
     $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
+    $this->register_modified(clear_tags => 1) if is_relevant_for_tags_on_unpublish($vdoc);
     return 1;
 }
 

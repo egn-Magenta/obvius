@@ -29,17 +29,25 @@ for my $key (keys %ARGS) {
      $search->$key(@args);
 }
 
-my $res = $search->search;
+if (!$ARGS{query} || $ARGS{query} =~ /^\s*$/) {
+     $search->sort_by('published desc');
+}
+my $config = Obvius::Config->new($r->dir_config('site'));
+
+
+my $res = $search->search($config->{SOLR_URL});
+
 
 my $max_score = $res->{maxScore};
 
-my $config = Obvius::Config->new($r->dir_config('site'));
 my $hostmap = Obvius::Hostmap->new_with_obvius({OBVIUS_CONFIG => $config});
 
 
 my @docs;
 for my $doc (@{$res->{docs}}) {
      push @docs,{uri => "http://" . $hostmap->absolute_uri($doc->{path}),
+                 published => $doc->{published},
+                 content => $doc->{content},
                  teaser => $doc->{teaser},
                  title => $doc->{title},
                  score => int(($doc->{score} / $max_score) * 100)};

@@ -13,7 +13,8 @@ use Exporter;
 
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw(is_relevant_for_leftmenu_cache);
+our @EXPORT_OK = qw(is_relevant_for_leftmenu_cache is_relevant_for_tags 
+                    is_relevant_for_tags_on_unpublish);
 
 our %known_options = (
     cache_index => 1,
@@ -265,6 +266,46 @@ sub find_referrers {
 }
 
      
+sub is_relevant_for_tags {
+     my ($obvius, $docid, $vdoc) = @_;
+     
+     my $doc = $obvius->get_doc_by_id($docid);
+     return 0 if !$doc;
+     
+     my $old_vdoc = $obvius->get_public_version($doc);
+     return 1 if !$old_vdoc;
+     
+     $obvius->get_version_fields($old_vdoc, ['tags']);
+     $obvius->get_version_fields($vdoc, ['tags']);
+     
+     my $old_tags = $old_vdoc->field('tags');
+     my $tags = $vdoc->field('tags');
+     
+     return 1 if ((!$old_tags && $tags) || (!$tags && $old_tags));
+     return 0 if (!$old_tags && !$old_tags);
+
+     my %tags_hash = map { $_ => 1} @$old_tags;
+     for my $tag (@$tags) {
+          return 1 if (!$tags_hash{$tag});
+     }
+     
+     %tags_hash = map { $_ => 1 } @$tags;
+     
+     for my $tag (@$old_tags) {
+          return 1 if !$tags_hash{$tag};
+     }
+
+     return 0;
+}
+
+sub is_relevant_for_tags_on_unpublish {
+     my ($obvius, $vdoc) = @_;
+     
+     $obvius->get_version_fields($vdoc, ['tags']);
+     my $tags = $vdoc->field('tags');
+     return $tags && @$tags;
+}
+
 sub is_relevant_for_leftmenu_cache {
      my ($this, $docid, $vdoc) = @_; 
      my @relevant_fields = qw(title short_title seq);
@@ -324,6 +365,8 @@ END
 sub perform_command_sophisticated_rightbox_clear {
      my ($this, @doctypes) = @_;
      
+     return [] if !@doctypes;
+
      my @doctypes_sql = ('?') x @doctypes;
      my $doctypes_sql = '(' . (join ',', @doctypes_sql) . ')';
 
@@ -431,12 +474,20 @@ sub clear_moved {
      
      my @to_clear;
      for my $docid (@docids) {
-          push @to_clear, @{$this->check_vfields_for_docids([{docid => $docid}], ['content', 'teaser', 'html_content', 'introduction', 'introduktion'])};
+          push @to_clear, @{$this->check_vfields_for_docids([{docid => $docid}], 
+                                                            ['content', 'teaser', 
+                                                             'html_content', 'introduction', 
+                                                             'introduktion'])};
      }
      
      return $this->make_clear_uris(\@to_clear);
 }
      
+sub clear_tags {
+     my ($this) = @_;
+     
+     return $this->perform_command_sophisticated_rightbox_clear("TagCloud");
+}
      
           
 sub find_dirty {
@@ -466,14 +517,20 @@ sub find_dirty {
 
      my @docids		= grep { $_ } map { {docid => $_->{docid}, uri => $_->{uri} }} @$vals; 
      my $referrers = $this->find_referrers(\@docids);
-    
+     
+     my @clear_tags = grep { $_ } 
+                 map { $_->{clear_tags} } @{$cache_objects->request_values('clear_tags')};
+     my @clear_tags_command = @{$this->clear_tags} if @clear_tags;
+                   
+     
      my @commands = grep { $_ } 
        (@clear_recursively,
 	@$referrers,
 	@related,
 	@$special_actions,
 	@uris_to_clear,
-        @$moved_documents
+        @$moved_documents,
+        @clear_tags_command
        );
      
      my $unique = uniquify_commands(\@commands);

@@ -60,6 +60,12 @@ for my $method (@methods) {
 }
 use strict "refs";
 
+sub sort_by {
+     my ($this, $order) = @_;
+     $this->{sort_by} = $order;
+     return $this;
+}
+
 sub new {
      my ($class, %options) = @_;
      
@@ -169,7 +175,9 @@ sub make_solr_query {
 }
      
 sub search {
-     my ($this) = @_;
+     my ($this, $url) = @_;
+
+     die "Invalid url: $url" if !$url;
 
      my $filter_query = $this->make_solr_filter_query;
      my $query = $this->make_solr_query;
@@ -181,14 +189,15 @@ sub search {
      my $start = $this->{offset} || 0;
      my $rows = $this->{limit} || 10;
 
+     my $sort = $this->{sort_by} || "score desc";
      my $ua = LWP::UserAgent->new;
      
-     my $res = $ua->post("http://localhost:8983/solr/select/",
+     my $res = $ua->post($url,
                     {
                      fq => Encode::encode('UTF-8', $filter_query),
                      q => Encode::encode('UTF-8', $query),
-                     fl => "title,id,score,teaser,path,content", 
-                     sort => "score desc",
+                     fl => "title,id,score,teaser,path,content,tags,published", 
+                     sort => $sort,
                      wt => "json",
                      rows => $rows,
                      start => $start

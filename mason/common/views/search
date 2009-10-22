@@ -7,6 +7,7 @@ var last_search_args = {};
 var doctypes = eval(unescape("(<% to_json(\@doctypes) |u %>)"));
 var paths = eval(unescape("(<% to_json($path) |u %>)"));
 var tag = unescape("<% $tag |u %>");
+var language = unescape("<% $lang |u %>");
 
 function get_cookie(name) {
   var cookie_pos = document.cookie.indexOf(name + "=");
@@ -62,13 +63,14 @@ function get_last_search() {
 }
 
 $(function () {
-    $("#query").keypress(function (ev) {
+    $("#query, #tags, #published_before, #published_after").keypress(function (ev) {
                            if (ev.which == 13)
                              do_search();
                          });
     $("#start_date, #end_date").datepicker(
       {dateFormat: "yy-mm-dd"});
-
+    $("#tags").autocomplete('/system/all_tags');
+                                          
     var args = get_last_search();
     if (args) {
       if (args.tags && args.tags != tag || args.end_date || args.start_date) {
@@ -150,8 +152,10 @@ function new_search_result(data) {
   try {
     data = eval("(" + data + ")");
     res = !data.docs || data.docs.length == 0 ?
-      "<& /shared/trans, da => 'Vi kunne ikke finde noget resultat på din søgning', en => 'No results match your query' &>" : JSUtils.generate_html(assemble_results(data));
+      "<& /shared/trans, da => 'Vi kunne ikke finde noget resultat på din søgning', en => 'No results match your query' &>"
+      : JSUtils.generate_html(assemble_results(data));
   } catch (e) {
+    alert(e);
     res = "<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>";
   }
 
@@ -165,6 +169,7 @@ function isSpace(text) {
 
 function shorten(text, text_length) {
   var i, len;
+  if (!text) return text;
   text = text.replace(new RegExp("<[^>]*>", "g"), "");
   for (i = 0, len = text.length; i < len && (i < text_length || !isSpace(text[i])); i++);
 
@@ -177,15 +182,33 @@ function shorten(text, text_length) {
 }
 
 function search_result(result) {
+  var teaser = result.teaser && shorten(result.teaser, teaser_length);
+  if (!teaser || teaser.match(/^(&\w{2,4};|\s)*$/)) {
+    teaser = shorten(result.content, teaser_length);
+  }
+  teaser = teaser || "";
+
+  var date;
+  if (result.published) {
+    var match = result.published.match(/^(\d+)-(\d+)-(\d+).*$/);
+    date = match ? new Date(match[1], match[2], match[3]) : undefined;
+  }
+
   return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
           ["div", {className: "result_entity_header",
                    style: "width: 100%; font-size: 1.1em; font-weight: bolder;"},
            ["span", {style: "float: left; width: 80%"},
-            ["a", {href: result.uri}, result.title]],
+            ["a", {href: result.uri,
+                   style: "margin-right: 1em;"},
+             result.title]],
+
            ["span", {style: "float: right"}, result.score + "%"],
-           ["div", {style: "clear: both"}]],
+           ["div", {style: "clear: both"}],
+
+           ["span", {style: "font-weight: 100; font-size: 80%; color: #707070;"},
+            date ? JSUtils.print_date(date, language) : ""]],
           ["div", {className: "result_entity_body", style: "width: 100%"},
-           new JSUtils.UnquotedString(result.teaser ? shorten(result.teaser, teaser_length) : result.content ? shorten(result.content, teaser_length) : ""),
+           new JSUtils.UnquotedString(teaser),
            ["div", {className: "read_more", style: "margin-top: 0.1em;"},
             ["a", {href: result.uri},
              new JSUtils.UnquotedString("<& /shared/trans, da => 'Læs mere...', en => 'Read more...' &>")]]]];
@@ -209,6 +232,7 @@ function page_browser(nr_results, start) {
   var cur_page = (start / results_per_page);
   var nr_pages = Math.floor((nr_results - 1) / results_per_page) + 1;
   if (nr_pages <= 1) return "";
+
   var res = ["div"];
   if (cur_page > 0) {
     res.push(
@@ -256,11 +280,11 @@ function page_browser(nr_results, start) {
       <label for="start_date" style="width: 2em">
         <& /shared/trans, da => "Publiseret efter", en => "Published after" &>
       </label>
-      <input type="text" id="start_date" id="published_after" name="start_date" style="width: 6.3em"/>
+      <input type="text" id="published_after" name="start_date" style="width: 6.3em"/>
       <label for="end_date">
         <& /shared/trans, da => "før", en => "before" &>
       </label>
-      <input type="text" id="end_date" name="published_before" id="end_date" style="width: 6.3em" />
+      <input type="text" name="published_before" id="end_date" style="width: 6.3em" />
       <br />
     </div>
 
@@ -280,6 +304,7 @@ my %args = $r->args;
 my $path = $args{path};
 my $doctypes_in = $args{doctype};
 my $tag = $args{tag};
+my $lang = $vdoc->Lang;
 from_to($tag, 'UTF-8', 'latin-1');
 $path = [ $path ] if ref $path ne 'ARRAY' && defined $path;
 $path = [] if !$path;

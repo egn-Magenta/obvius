@@ -70,18 +70,29 @@ sub mode {
      return $mode;
 }
 
+sub add_js {
+     return map {"<script type=\"text/javascript\" src=\"$_\"></script>" } @_;
+}
+
+sub add_link {
+     return map {"<link rel=\"stylesheet\" type=\"text/css\" href=\"$_\"></link>" } @_;
+}
+     
 sub generate_head_html {
      my ($this, $r, $doc, $vdoc, $obvius) = @_;
 
      my $mode = $this->mode({$r->args});
      if ($mode && $mode eq 'search') {
-          my $script = "<script type='text/javascript' src='/scripts/jquery/jquery-1.3.2.min.js'>
-                        </script>
-                        <script type='text/javascript' src='/scripts/jquery/jquery-ui-1.7.2.custom.min.js' >
-                        </script>
-                        <script type=\"text/javascript\" src=\"/scripts/jsutils.js\" ></script>
-                        <link rel=\"stylesheet\" type=\"text/css\" href=\"/style/jquery-ui-1.7.2.custom.css\" />";
-          return $script;
+          my @header;
+          push @header, add_js('/scripts/jquery/jquery-1.3.2.min.js',
+                               '/scripts/jquery/jquery-ui-1.7.2.custom.min.js',
+                               '/scripts/jsutils.js',
+                               '/scripts/jquery/jquery.bgiframe.min.js',
+                               '/scripts/jquery/jquery.ajaxQueue.js',
+                               '/scripts/jquery/jquery.autocomplete.min.js');
+          push @header, add_link('/style/jquery-ui-1.7.2.custom.css');
+          
+          return join "\n", @header;
      }
      
      return '';

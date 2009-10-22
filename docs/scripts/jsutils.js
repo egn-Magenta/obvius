@@ -140,5 +140,17 @@ var JSUtils = new (
       var call = func_name + "(" + arglist.join(",") + ")";
       return call;
     };
+
+    var month_lang = {
+      da: ['Januar', 'Februar', 'Marts', 'April', 'Maj', 'Juni',
+           'Juli', 'August', 'September', 'Oktober', 'November', 'December'],
+      en: ['January', 'February', 'March', 'April', 'May', 'June',
+           'July', 'August', 'September', 'October', 'November', 'December']
+    };
+
+    this.print_date = function (date, lang) {
+      var months = month_lang[lang];
+      return [(date.getDay() + 1) + ".", months[date.getMonth()], date.getFullYear()].join(" ");
+    };
   })();
 
