@@ -7,9 +7,8 @@
 <%init>
 my $output=$r->pnotes('OBVIUS_OUTPUT');
 
-my $doctypename='Standard';
-if ( (ref $doctype) =~ /::([^:]+)$/ ) {
-    $doctypename = $1;
+if ($doctype) {
+   $doctypename = $doctype->view($input);
 }
 
 $obvius->get_version_fields($vdoc, [qw(title show_subdocs)]);
@@ -21,7 +20,7 @@ $content=$m->scomp("/doctypes/$doctypename", output=>$output) if ($m->comp_exist
 unless (defined $content) {
     $m->comp('/shared/set_status_message',
              status=>'WARNING',
-             message=>[ 'Component not found for document type', ' "', $doctypename, '"' ]);
+             message=>['Component not found for document type', ' "', $doctypename, '"' ]);
     $content=''
 }
 
