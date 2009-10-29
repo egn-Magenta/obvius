@@ -142,18 +142,6 @@ function do_search(args) {
                   data: args,
                   success: new_search_result });
 
-  var elems = $(".result_entries_old");
-   elems.parent().remove();
-return;
-  var f = function () {
-    if (elems.filter(":hidden").length) {
-      elems.parent().remove();
-    } else if(elems.length) {
-      setTimeout(f, 10);
-    }};
-  setTimeout(f, 10);
-//  elems.hide("slide", {direction: "right"}, 500);
-
 }
 
 function old_assemble_results(data) {
@@ -243,10 +231,9 @@ function search_result(result) {
              result.title]],
 
            ["span", {style: "float: right; display: block; width: 5%"}, result.score + "%"],
-           ["div", {style: "clear: both"}],
-
-           ["span", {style: "font-weight: 100; font-size: 80%; color: #707070;"},
-            date ? JSUtils.print_date(date, language) : ""]],
+           ["div", {style: "clear: both; width: 100%; height: 0px;"}],
+           date ? ["div", {style: "font-weight: 100; font-size: 80%; color: #707070;"},
+                   JSUtils.print_date(date, language)] : ""],
           ["div", {className: "result_entity_body", style: "width: 100%"},
            new JSUtils.UnquotedString(teaser),
            ["div", {className: "read_more", style: "margin-top: 0.1em;"},
