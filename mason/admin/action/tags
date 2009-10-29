@@ -1,9 +1,9 @@
 <div class="obvius-editengine obvius-link-decor">
 <h2 style="margin-bottom: 0.5em;">
-  <& /shared/trans, en => "Global tags", da => "Systemiske tags" &>
+  <& /shared/trans, en => "Global tags", da => "Faste tags" &>
 </h2>
 <div style="margin-bottom: 1em;" >
-Her kan de forskellige systemiske tags skrives ind. 
+Her kan de forskellige faste tags skrives ind. 
 De forskellige tags skal hver være på sin egen linje.
 </div>
 <form method="post" accept-encoding="utf-8">

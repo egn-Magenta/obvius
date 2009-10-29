@@ -197,7 +197,6 @@ function new_search_result(data) {
     data = eval("(" + data + ")");
     res = assemble_results(data);
   } catch (e) {
-    alert(e);
     res = new JSUtils.UnquotedString("<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>");
   }
   $("#search_result").html(JSUtils.generate_html(res));
@@ -230,8 +229,8 @@ function search_result(result) {
   teaser = teaser || "";
 
   var date;
-  if (result.published) {
-    var match = result.published.match(/^(\d+)-(\d+)-(\d+).*$/);
+  if (result.docdate) {
+    var match = result.docdate.match(/^(\d+)-(\d+)-(\d+).*$/);
     date = match ? new Date(match[1] - 1, match[2], match[3]) : undefined;
   }
 
