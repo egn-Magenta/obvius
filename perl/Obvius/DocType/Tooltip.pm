@@ -32,6 +32,7 @@ use warnings;
 
 use Obvius;
 use Obvius::DocType;
+use Encode;
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -51,8 +52,7 @@ sub raw_document_data {
 
     my $text;
 
-    $obvius->get_version_field($vdoc, 'content');
-    $obvius->get_version_field($vdoc, 'parent');
+    $obvius->get_version_fields($vdoc, ['content', 'parent']);
 
     # If text is not set, use the parent-text.
     if ($vdoc->field('content') =~ /^\s*$/ && !($vdoc->field('parent') eq '')) {
@@ -67,7 +67,8 @@ sub raw_document_data {
         $text .= $vdoc->field('content');
     }
 
-    return ( 'text/html', $text );
+    
+    return ( 'text/html', Encode::encode('ascii', $text, Encode::FB_HTMLCREF) );
 }
 
 
