@@ -1530,6 +1530,10 @@ sub get_docparam_value_recursive {
 sub get_docparams_recursive {
     my ($this, $doc) = @_;
 
+    if (ref $doc && (my $v = $doc->{_cached_docparams_recursive})) {
+         return $v;
+    }
+    
     my @paramslist;
 
     do {
@@ -1547,6 +1551,7 @@ sub get_docparams_recursive {
         }
     }
 
+    $doc->{_cached_docparams_recursive} = $result if ref $doc;
     return $result;
 }
 
