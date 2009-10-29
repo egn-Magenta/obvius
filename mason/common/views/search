@@ -6,7 +6,8 @@ var browse_pages_to_show = 5;
 var last_search_args = {};
 var doctypes = eval(unescape("(<% to_json(\@doctypes) |u %>)"));
 var paths = eval(unescape("(<% to_json($path) |u %>)"));
-var tag = unescape("<% $tag |u %>");
+var tag = eval(unescape("(<% to_json($tag) |u %>)"));
+var prefix = unescape("<% $prefix |u %>");
 var language = unescape("<% $lang |u %>");
 
 function get_cookie(name) {
@@ -70,7 +71,7 @@ $(function () {
     $("#start_date, #end_date").datepicker(
       {dateFormat: "yy-mm-dd"});
     $("#tags").autocomplete('/system/all_tags');
-                                          
+
     var args = get_last_search();
     if (args) {
       if (args.tags && args.tags != tag || args.end_date || args.start_date) {
@@ -82,20 +83,24 @@ $(function () {
       $("#start_date").attr('value', args.start_date) || "";
 
       last_search_args = args;
-      do_search(last_search_args);
+      if($("#tags").attr('value') || $("#query").attr('value')) {
+        do_search(last_search_args);
+      }
       return;
     }
 
     if (tag) {
-      $("#tags").attr('value', tag);
+      $("#tags").attr('value', tag.join(','));
+    }
+    if($("#tags").attr('value') || $("#query").attr('value')) {
+      do_search();
     }
 
-    do_search();
   });
 
 function assemble_search_args() {
   var args = {};
-  var keys = ["path", "query", "tags", "published_before", "published_after"];
+  var keys = ["query", "tags", "published_before", "published_after"];
 
   for (var i = 0, len = keys.length; i < len; i++) {
     var key = keys[i];
@@ -107,6 +112,10 @@ function assemble_search_args() {
 
   args.limit = 10;
   args.offset = 0;
+
+  if (prefix) {
+    args.prefix = prefix;
+  }
 
   if (doctypes && doctypes.length) {
     args.doctype = doctypes;
@@ -132,18 +141,53 @@ function do_search(args) {
                   url: search_url,
                   data: args,
                   success: new_search_result });
+
+  var elems = $(".result_entries_old");
+   elems.parent().remove();
+return;
+  var f = function () {
+    if (elems.filter(":hidden").length) {
+      elems.parent().remove();
+    } else if(elems.length) {
+      setTimeout(f, 10);
+    }};
+  setTimeout(f, 10);
+//  elems.hide("slide", {direction: "right"}, 500);
+
+}
+
+function old_assemble_results(data) {
+  var docs = data.docs;
+  var res = ["div", {}];
+
+  var browser = page_browser(data.numFound, data.start);
+  res.push(browser);
+  var search_results = ["div", {id: "result_entries"}];
+  res.push(search_results);
+  for (var i = 0,len = docs.length; i < len; i++) {
+    search_results.push(search_result(docs[i]));
+  }
+  res.push(browser);
+  return res;
 }
 
 function assemble_results(data) {
   var docs = data.docs;
   var res = ["div", {}];
 
-  var browser = page_browser(data.numFound, data.start);
-  res.push(browser);
-  for (var i = 0,len = docs.length; i < len; i++) {
-    res.push(search_result(docs[i]));
+  if (!docs || !docs.length) {
+    res.push(new JSUtils.UnquotedString("<& /shared/trans, da => 'Vi kunne ikke finde noget resultat på din søgning', en => 'No results match your query' &>"));
+  } else {
+    var browser = page_browser(data.numFound, data.start);
+    res.push(browser);
+    var search_results = ["div", {id: "result_entries"}];
+    res.push(search_results);
+    for (var i = 0,len = docs.length; i < len; i++) {
+      search_results.push(search_result(docs[i]));
+    }
+    res.push(browser);
   }
-  res.push(browser);
+
   return res;
 }
 
@@ -151,15 +195,12 @@ function new_search_result(data) {
   var res;
   try {
     data = eval("(" + data + ")");
-    res = !data.docs || data.docs.length == 0 ?
-      "<& /shared/trans, da => 'Vi kunne ikke finde noget resultat på din søgning', en => 'No results match your query' &>"
-      : JSUtils.generate_html(assemble_results(data));
+    res = assemble_results(data);
   } catch (e) {
     alert(e);
-    res = "<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>";
+    res = new JSUtils.UnquotedString("<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>");
   }
-
-  $("#search_result").html(res);
+  $("#search_result").html(JSUtils.generate_html(res));
 }
 
 
@@ -191,18 +232,18 @@ function search_result(result) {
   var date;
   if (result.published) {
     var match = result.published.match(/^(\d+)-(\d+)-(\d+).*$/);
-    date = match ? new Date(match[1], match[2], match[3]) : undefined;
+    date = match ? new Date(match[1] - 1, match[2], match[3]) : undefined;
   }
 
   return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
           ["div", {className: "result_entity_header",
                    style: "width: 100%; font-size: 1.1em; font-weight: bolder;"},
-           ["span", {style: "float: left; width: 80%"},
+           ["span", {style: "float: left; width: 80%; display: block;"},
             ["a", {href: result.uri,
                    style: "margin-right: 1em;"},
              result.title]],
 
-           ["span", {style: "float: right"}, result.score + "%"],
+           ["span", {style: "float: right; display: block; width: 5%"}, result.score + "%"],
            ["div", {style: "clear: both"}],
 
            ["span", {style: "font-weight: 100; font-size: 80%; color: #707070;"},
@@ -254,22 +295,30 @@ function page_browser(nr_results, start) {
 }
 </script>
 <div class="search_page" style="margin-top: 1em">
+  <h1><% $title |h %></h1>
+% if ($introduction) {
+  <p><& /shared/htmlize, text=>$introduction &></p>
+% }
   <div style="width: 37em">
-    <input type="text" id="query" name="query" style="width: 100%; margin-bottom: 0.2em"/>
+    <input type="text"
+           id="query"
+           name="query"
+           value="<% $query |h %>"
+           style="width: 100%; margin-bottom: 0.2em"/>
 
-    <div style="margin-bottom: 1em; width: 100%;">
+    <div style="width: 100%;">
       <input type="button"
              name="<& /shared/trans, da => 'Søg', en => 'Search' &>"
              onclick="do_search()"
-             value="Søg" />
+             value="<& /shared/trans, da => 'Søg', en => 'Search' &>" />
 
-      <a onclick="$('#advanced_search').slideToggle('fast')"
+      <a onclick="$('#advanced_search').toggle('slide', {direction: 'up'}, 200);"
          style="cursor: pointer; float: right; font-weight: bold; font-size: 1.1em; margin-top: 0.4em;">
         <& /shared/trans, da => "Avanceret søgning", en => "Advanced search" &>
       </a>
     </div>
     <div id="advanced_search"
-         style="width: 35em; border: 1px solid;padding: 0em 1em 1em; font-weight: bold; display: none;">
+         style="width: 35em; margin-top: 1em; border: 1px inset;padding: 0em 1em 1em; font-weight: bold; display: none;">
       <br />
       <label for="tags">
         Tagssøgning
@@ -301,15 +350,34 @@ use Encode qw( decode from_to );
 <%init>
 my %args = $r->args;
 
-my $path = $args{path};
-my $doctypes_in = $args{doctype};
-my $tag = $args{tag};
+my $type = $obvius->get_doctype_by_id($vdoc->Type);
+my ($path, $doctypes_in, $tag, $title, $introduction);
+
+if ($type && $type->UNIVERSAL::can('search_args')) {
+     my $res = $type->search_args($obvius, $doc, $vdoc);
+     ($path, $doctypes_in, $tag, $title, $introduction) =
+       @{$res}{qw( path doctypes tag title introduction )};
+} else {
+     $path = $args{path} if $args{path};
+     $doctypes_in = $args{doctype} if $args{doctype};
+     $title = $args{title} if $args{title};
+     $introduction = $args{introduction} if $args{introduction};
+}
+
+$tag = $args{tag} if $args{tag};
+my $query = "";
+$query = $args{query} if $args{query};
+
 my $lang = $vdoc->Lang;
-from_to($tag, 'UTF-8', 'latin-1');
-$path = [ $path ] if ref $path ne 'ARRAY' && defined $path;
-$path = [] if !$path;
-$doctypes_in = [ $doctypes_in ] if ref $doctypes_in ne 'ARRAY' && $doctypes_in;
-$doctypes_in = [] if !$doctypes_in;
+my $fixup_array = sub { defined $_[0] ? ref $_[0] eq 'ARRAY' ? $_[0] : [ $_[0] ] : [] };
+
+$tag = $fixup_array->($tag);
+for (my $i = 0; $i < @$tag; $i++) {
+    from_to($tag->[$i], 'UTF-8', 'latin-1');
+}
+
+$path = $fixup_array->($path);
+$doctypes_in = $fixup_array->($doctypes_in);
 
 my @doctypes;
 for my $doctype (@$doctypes_in) {

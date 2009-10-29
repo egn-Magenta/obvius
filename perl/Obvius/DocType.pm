@@ -90,7 +90,8 @@ sub generate_head_html {
                                '/scripts/jquery/jquery.bgiframe.min.js',
                                '/scripts/jquery/jquery.ajaxQueue.js',
                                '/scripts/jquery/jquery.autocomplete.min.js');
-          push @header, add_link('/style/jquery-ui-1.7.2.custom.css');
+          push @header, add_link('/style/jquery-ui-1.7.2.custom.css',
+                                 '/style/jquery.autocomplete.css');
           
           return join "\n", @header;
      }

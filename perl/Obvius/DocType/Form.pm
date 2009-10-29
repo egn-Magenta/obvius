@@ -58,9 +58,10 @@ sub raw_document_data {
     unless($input->param('get_file')) {
         return (undef, undef, undef);
     }
-
+    
     return undef unless($input->pnotes('site') && $input->pnotes('site')->param('is_admin'));
-
+    
+    my $headers_out = {"cache-control" => "no-cache"};
     $obvius->get_version_fields($vdoc, ['title', 'formdata']);
 
     my $xmldata = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' . "\n";
@@ -94,7 +95,7 @@ sub raw_document_data {
     $xmldata = Encode::encode('utf8', $xmldata);
 
     if($format eq 'excel') {
-
+         
         my $xml_data = XMLin(   $xmldata,
                                 keyattr=>[],
                                 forcearray => [ 'field', 'option', 'validaterule', 'entry' ],
@@ -128,22 +129,24 @@ sub raw_document_data {
         my $i=1;
 
         for(@{ $xml_data->{entries}->{entry} || [] }) {
-            my @row;
-            my $fields = $_->{fields}->{field} || [];
-            for(@$fields) {
-                my $val = $_->{fieldvalue};
+             my @row;
+             next if !$_ || !ref $_->{fields};
+             my $fields = $_->{fields}->{field} || [];
+             
+             for(@$fields) {
+                  my $val = $_->{fieldvalue};
+                  
+                  if(ref $val eq 'ARRAY') {
+                       $val = join(", ", map { Encode::decode('utf8', $_) } @$val);
+                  } else {
+                       $val = Encode::decode('utf8', $val);
+                  }
 
-                if(ref $val eq 'ARRAY') {
-                     $val = join(", ", map { Encode::decode('utf8', $_) } @$val);
-                } else {
-                     $val = Encode::decode('utf8', $val);
-                }
-
-                push(@row, $val);
-            }
-
-            $worksheet->write_row($i, 0, \@row, $data_format);
-            $i++;
+                  push(@row, $val);
+             }
+             
+             $worksheet->write_row($i, 0, \@row, $data_format);
+             $i++;
         }
 
         # Close $tempfile, read it and delete it:
@@ -155,10 +158,11 @@ sub raw_document_data {
         close $fh;
         unlink $tempfile;
 
-        return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
+        return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment", undef, 
+                $headers_out);
     }
     
-    return ("text/xml", $xmldata, $name . ".xml", "attachment");
+    return ("text/xml", $xmldata, $name . ".xml", "attachment", undef, $headers_out);
 }
 
 sub flush_xml {
@@ -209,7 +213,6 @@ sub action {
     }
 
 
-
     $obvius->get_version_fields($vdoc, ['formdata', 'mailto',
                                         'entries_for_advert', 'entries_for_close'
                                        ]);
@@ -222,6 +225,7 @@ sub action {
                             suppressempty => ''
                         );
     
+    $formdata ||= {};
     $formdata = $this->unutf8ify($formdata);
     unless($input->param('obvius_form_submitted')) {
         # Form not submitted yet, just output the form:
@@ -232,7 +236,7 @@ sub action {
     my %fields_by_name;
 
     my @emails;
-    for my $field (@{$formdata->{field}}) {
+    for my $field (@{$formdata->{field} || []}) {
         my $value = $input->param($field->{name});
 
 	if ($field->{type} eq 'email') {

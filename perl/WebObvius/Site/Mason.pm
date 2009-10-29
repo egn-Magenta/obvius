@@ -347,8 +347,6 @@ sub public_authen_handler {
      # If no specific access-choices have been made, allow everybody that is logged in. 
      # Call to session_authen_handler above make sure we are logged in at this point.
      return !@$groups && !@$users && !@ips ? OK : FORBIDDEN;
-
-     return FORBIDDEN;
 }
      
 # handler - Handles incoming Apache requests when using Mason as template system.
@@ -395,7 +393,7 @@ sub handler ($$) {
      # Please also note that a slash at the end of an uri in admin signifies
      # that we are getting the *raw* resource, not the obvius-wrapper (where that is appropriate)
      if (!$is_admin || $req->uri !~ m|/$|) {
-	  my ($mime_type, $data, $filename, $con_disp, $path) = 
+	  my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) = 
 	    $doctype->raw_document_data(
 					$doc, $vdoc, $obvius,
 					WebObvius::Apache::apache_module('Request')-> new($req),
@@ -407,7 +405,10 @@ sub handler ($$) {
 			   output_filename => $filename, 
 			   con_disp => $con_disp,
 			   path => $path);
-	       
+               print STDERR Dumper($extra_headers);
+               if ($extra_headers){
+                    $req->header_out($_ => $extra_headers->{$_}) for keys %$extra_headers;
+               }
 	       my $status = defined $data ? 
 		 $this->output_data($req, %args) : 
 		 $this->output_file($req, %args);
@@ -431,7 +432,8 @@ sub handler ($$) {
      
      my $status=$this->execute_mason($req);
      my $html;
-     if (defined $this->{'SITE_SCALAR_REF'}) { # This, out_method, is not used in admin; only for public.
+     if (defined $this->{'SITE_SCALAR_REF'}) {
+          # This, out_method, is not used in admin; only for public.
           $html = ${$this->{'SITE_SCALAR_REF'}} if ($status == OK);
           ${$this->{'SITE_SCALAR_REF'}}='';
 
@@ -599,6 +601,7 @@ sub session_authen_handler ($$) {
 
   login_failed:
     $req->notes(login_failed => 1);
+
   redirect:
     return $this->redirect($r, '/system/login');
 }
