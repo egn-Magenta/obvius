@@ -150,7 +150,7 @@ var JSUtils = new (
 
     this.print_date = function (date, lang) {
       var months = month_lang[lang];
-      return [(date.getDay() + 1) + ".", months[date.getMonth()], date.getFullYear()].join(" ");
+      return [date.getDate() + ".", months[date.getMonth()], date.getFullYear()].join(" ");
     };
   })();
 
