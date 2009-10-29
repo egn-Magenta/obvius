@@ -219,7 +219,7 @@ function search_result(result) {
   var date;
   if (result.docdate) {
     var match = result.docdate.match(/^(\d+)-(\d+)-(\d+).*$/);
-    date = match ? new Date(match[1] - 1, match[2], match[3]) : undefined;
+    date = match ? new Date(match[1], match[2], parseInt(match[3], 10) + 1) : undefined;
   }
 
   return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
