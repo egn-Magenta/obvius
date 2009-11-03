@@ -8,7 +8,12 @@ use Data::Dumper;
 my $output = '';
 my $search = Obvius::SolrSearch->new;
 sub csv_splitter {
-     split /\s*,\s*/, shift;
+    my @arg = @_;
+    my @res;
+    for my $arg (@arg) {
+        push @res, split /\s*,\s*/, $arg;
+    }
+    return @res;
 }
 
 my %good_procs = (path => \&csv_splitter, query => 1, tags => \&csv_splitter,
@@ -20,6 +25,7 @@ for my $key (keys %ARGS) {
      next if !$handler;
 
      my $arg = $ARGS{$key};
+     
      my @args = ref $arg eq 'ARRAY' ? @$arg : ($arg);
      if (ref $handler) {
           @args = $handler->(@args);
@@ -36,7 +42,6 @@ my $config = Obvius::Config->new($r->dir_config('site'));
 my $prefix = $ARGS{prefix};
 
 my $res = $search->search($config->{SOLR_URL});
-
 
 my $max_score = $res->{maxScore};
 
