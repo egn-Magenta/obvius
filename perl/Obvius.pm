@@ -2363,7 +2363,7 @@ sub unpublish_version {
     $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => 1);
     my $doc = $this->get_doc_by_id($vdoc->Docid);
     $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
-    $this->register_modified(clear_tags => 1) if is_relevant_for_tags_on_unpublish($vdoc);
+    $this->register_modified(clear_tags => 1) if is_relevant_for_tags_on_unpublish($this, $vdoc);
     return 1;
 }
 
