@@ -8,7 +8,12 @@ use Data::Dumper;
 my $output = '';
 my $search = Obvius::SolrSearch->new;
 sub csv_splitter {
-     split /\s*,\s*/, shift;
+    my @arg = @_;
+    my @res;
+    for my $arg (@arg) {
+        push @res, split /\s*,\s*/, $arg;
+    }
+    return @res;
 }
 
 my %good_procs = (path => \&csv_splitter, query => 1, tags => \&csv_splitter,
@@ -20,6 +25,7 @@ for my $key (keys %ARGS) {
      next if !$handler;
 
      my $arg = $ARGS{$key};
+     
      my @args = ref $arg eq 'ARRAY' ? @$arg : ($arg);
      if (ref $handler) {
           @args = $handler->(@args);
@@ -37,20 +43,29 @@ my $prefix = $ARGS{prefix};
 
 my $res = $search->search($config->{SOLR_URL});
 
-
 my $max_score = $res->{maxScore};
 
 my $hostmap = Obvius::Hostmap->new_with_obvius({OBVIUS_CONFIG => $config});
 
 my @docs;
+
+my  $decode_correctly  = sub {
+     my $content = Encode::decode('UTF-8', $_[0]);
+     $content = Encode::encode('iso-8859-1', $content);
+     $content = Encode::decode('UTF-8', $content);
+     
+     $content =~ s/\x{FFFD}\x{3F}/Å/g;
+     return $content;
+};
+
 for my $doc (@{$res->{docs}}) {
      push @docs,{uri => $prefix ? $prefix . $doc->{path} : 
                         "http://" . $hostmap->absolute_uri($doc->{path}),
                  docdate => $doc->{docdate},
-                 content => $doc->{content},
-                 teaser => $doc->{teaser},
-                 title => $doc->{title},
-                 score => int(($doc->{score} / $max_score) * 100)};
+                 content => $decode_correctly->($doc->{content}),
+                 teaser  => $decode_correctly->($doc->{teaser}),
+                 title   => $decode_correctly->($doc->{title}),
+                 score   => int(($doc->{score} / $max_score) * 100)};
 }
 $output = to_json({start => $res->{start},
                    numFound => $res->{numFound},

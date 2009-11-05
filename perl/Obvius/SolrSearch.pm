@@ -221,11 +221,11 @@ sub search {
           
           return $content if !$content->{docs};
           
-          for my $doc (@{$content->{docs}}) {
-               for my $key (keys %$doc) {
-                    $doc->{$key} = Encode::encode('latin-1', $decode->($doc->{$key}));
-               }
-          }
+          # for my $doc (@{$content->{docs}}) {
+          #      for my $key (keys %$doc) {
+          #           $doc->{$key} = Encode::encode('latin-1', $decode->($doc->{$key}));
+          #      }
+          # }
           
           return $content;
      } else {

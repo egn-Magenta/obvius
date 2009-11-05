@@ -219,7 +219,7 @@ function search_result(result) {
   var date;
   if (result.docdate) {
     var match = result.docdate.match(/^(\d+)-(\d+)-(\d+).*$/);
-    date = match ? new Date(match[1] - 1, match[2], match[3]) : undefined;
+    date = match ? new Date(match[1], match[2], parseInt(match[3], 10) + 1) : undefined;
   }
 
   return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
@@ -335,7 +335,6 @@ use JSON;
 use Encode qw( decode from_to );
 </%once>
 <%init>
-my %args = $r->args;
 
 my $type = $obvius->get_doctype_by_id($vdoc->Type);
 my ($path, $doctypes_in, $tag, $title, $introduction);
@@ -345,15 +344,15 @@ if ($type && $type->UNIVERSAL::can('search_args')) {
      ($path, $doctypes_in, $tag, $title, $introduction) =
        @{$res}{qw( path doctypes tag title introduction )};
 } else {
-     $path = $args{path} if $args{path};
-     $doctypes_in = $args{doctype} if $args{doctype};
-     $title = $args{title} if $args{title};
-     $introduction = $args{introduction} if $args{introduction};
+     $path = [ $r->param('path') ];
+     $doctypes_in = [ $r->param('doctype') ];
+     $title = $r->param('title');
+     $introduction = $r->param('introduction');
 }
 
-$tag = $args{tag} if $args{tag};
+$tag = [$r->param('tag') ];
 my $query = "";
-$query = $args{query} if $args{query};
+$query = $r->param('query');
 
 my $lang = $vdoc->Lang;
 my $fixup_array = sub { defined $_[0] ? ref $_[0] eq 'ARRAY' ? $_[0] : [ $_[0] ] : [] };
