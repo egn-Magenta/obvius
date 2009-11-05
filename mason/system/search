@@ -49,7 +49,7 @@ my @docs;
 my $decode_correctly  = sub {
      my $content = Encode::decode('UTF-8', $_[0]);
      $content = Encode::encode('cp-1252', $content);
-     $content = Encode::decode('UTF-8', $content);
+     eval  { $content = Encode::decode('UTF-8', $content, Encode::FB_CROAK) };
      
      return $content;
 };

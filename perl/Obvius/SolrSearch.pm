@@ -189,7 +189,7 @@ sub search {
      my $start = $this->{offset} || 0;
      my $rows = $this->{limit} || 10;
 
-     my $sort = $this->{sort_by} || "score desc";
+     my $sort = $this->{sort_by} || "score desc, docdate desc";
      my $ua = LWP::UserAgent->new;
      
      my $res = $ua->post($url,
@@ -205,27 +205,9 @@ sub search {
      
      if ($res->is_success) {
           #Horror of horrors, but we are in a hurry.
-          my $decode = sub {
-               my ($content) = @_;
-               my $temp;
-               do {
-                    $temp = $content;
-                    $content = eval { Encode::decode('utf-8', $content, Encode::FB_CROAK) };
-                    
-                    $content = $temp if $@;
-               } while (!$@ && $temp ne $content);
-               return $content;
-          };
-
           my $content = from_json($res->content)->{response};
           
           return $content if !$content->{docs};
-          
-          # for my $doc (@{$content->{docs}}) {
-          #      for my $key (keys %$doc) {
-          #           $doc->{$key} = Encode::encode('latin-1', $decode->($doc->{$key}));
-          #      }
-          # }
           
           return $content;
      } else {

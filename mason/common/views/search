@@ -141,6 +141,15 @@ function do_search(args) {
                   url: search_url,
                   data: args,
                   success: new_search_result });
+  var q = $(".search_page #query");
+  var h = q.height(), w = q.width(), offset = q.offset(), wrapper_offset = $("#wrapper").offset();
+  var img = $("#loading_ajax");
+  var left = offset.left - wrapper_offset.left, top = offset.top - wrapper_offset.top;
+
+  var imgh = img.height(), imgw = img.width();
+
+  img.css('position', 'absolute').css('left', (left + w - imgw - 5) + "px").css(
+    'top', (top + h - imgh - 1) + "px").show();
 
 }
 
@@ -188,6 +197,7 @@ function new_search_result(data) {
     res = new JSUtils.UnquotedString("<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>");
   }
   $("#search_result").html(JSUtils.generate_html(res));
+  $("#loading_ajax").hide();
 }
 
 
@@ -280,6 +290,10 @@ function page_browser(nr_results, start) {
   return res;
 }
 </script>
+<img src="/pics/icons/ajax-loader.gif" alt="loading ..."
+     style="float:left;padding: 3px 0 0 0.5em; display:none;"
+     id="loading_ajax"
+     />
 <div class="search_page" style="margin-top: 1em">
   <h1><% $title |h %></h1>
 % if ($introduction) {
@@ -297,7 +311,6 @@ function page_browser(nr_results, start) {
              onclick="do_search()"
              value="<& /shared/trans, da => 'Søg', en => 'Search' &>"
              style="float:left;" />
-      <img src="/pics/icons/ajax-loader.gif" alt="loading ..." style="float:left;padding: 3px 0 0 0.5em;" />
       <a onclick="$('#advanced_search').toggle('slide', {direction: 'up'}, 200);"
          style="cursor: pointer; float: right; font-weight: bold; font-size: 1.1em; margin-top: 3px;">
         <& /shared/trans, da => "Avanceret søgning", en => "Advanced search" &>
@@ -308,15 +321,15 @@ function page_browser(nr_results, start) {
          style="width: auto; margin: 0.25em 0 0; border: solid 1px #ccc;padding: 0 1em 1em; height: auto; font-weight: bold; display: none;">
       <br />
       <label for="tags" style="width: 110px; float: left;padding-top:3px;">
-        Tagssøgning
+        <& /shared/trans, da => 'Søg i tags', en => 'Search in tags' &>
       </label>
       <input type="text" name="tags" id="tags" style="width: 220px;float:left;"/>
       <div style="clear: both; padding: 0 0 0.5em;margin:0;height:1px;" ></div>
 
       <label for="start_date" style="width: 110px; float:left;padding-top:3px;">
-        <& /shared/trans, da => "Publiseret efter", en => "Published after" &>
+        <& /shared/trans, da => "Publiceret efter", en => "Published after" &>
       </label>
-      <input type="text" id="published_after" name="start_date" style="width: 87px;float:left;"/>
+      <input type="text" name="published_after" id="start_date" style="width: 87px;float:left;"/>
       <label for="end_date" style="width:40px;text-align: center;float:left;padding-top:3px">
         <& /shared/trans, da => "før", en => "before" &>
       </label>
