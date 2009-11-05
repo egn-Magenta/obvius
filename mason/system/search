@@ -49,12 +49,11 @@ my $hostmap = Obvius::Hostmap->new_with_obvius({OBVIUS_CONFIG => $config});
 
 my @docs;
 
-my  $decode_correctly  = sub {
+my $decode_correctly  = sub {
      my $content = Encode::decode('UTF-8', $_[0]);
-     $content = Encode::encode('iso-8859-1', $content);
+     $content = Encode::encode('cp-1252', $content);
      $content = Encode::decode('UTF-8', $content);
      
-     $content =~ s/\x{FFFD}\x{3F}/Å/g;
      return $content;
 };
 
