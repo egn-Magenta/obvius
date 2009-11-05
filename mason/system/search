@@ -35,9 +35,6 @@ for my $key (keys %ARGS) {
      $search->$key(@args);
 }
 
-if (!$ARGS{query} || $ARGS{query} =~ /^\s*$/) {
-     $search->sort_by('docdate desc');
-}
 my $config = Obvius::Config->new($r->dir_config('site'));
 my $prefix = $ARGS{prefix};
 
