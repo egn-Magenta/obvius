@@ -184,7 +184,7 @@ function new_search_result(data) {
   try {
     data = eval("(" + data + ")");
     res = assemble_results(data);
-  } catch (e) {
+  } catch (e) {alert(e);
     res = new JSUtils.UnquotedString("<& /shared/trans, da => 'Der var en fejl ved din søgning', en => 'There was an error performing your query.' &>");
   }
   $("#search_result").html(JSUtils.generate_html(res));
@@ -225,18 +225,18 @@ function search_result(result) {
   return ["div", {className: "result_entity", style: "margin: 1em 0em;"},
           ["div", {className: "result_entity_header",
                    style: "width: 100%; font-size: 1.1em; font-weight: bolder;"},
-           ["span", {style: "float: left; width: 80%; display: block;"},
+           ["span", {style: "font-size: 145%;"},
             ["a", {href: result.uri,
                    style: "margin-right: 1em;"},
              result.title]],
 
-           ["span", {style: "float: right; display: block; width: 5%"}, result.score + "%"],
+           ["span", {style: "font-size:80%; color:#707070;"}, result.score + "%"],
            ["div", {style: "clear: both; width: 100%; height: 0px;"}],
-           date ? ["div", {style: "font-weight: 100; font-size: 80%; color: #707070;"},
+           date ? ["div", {style: "font-weight: 100; font-size: 80%; color: #707070; padding-bottom:0.5em;"},
                    JSUtils.print_date(date, language)] : ""],
           ["div", {className: "result_entity_body", style: "width: 100%"},
            new JSUtils.UnquotedString(teaser),
-           ["div", {className: "read_more", style: "margin-top: 0.1em;"},
+           ["div", {className: "read_more", style: "margin-top: 0.1em;padding-bottom: 1em"},
             ["a", {href: result.uri},
              new JSUtils.UnquotedString("<& /shared/trans, da => 'Læs mere...', en => 'Read more...' &>")]]]];
 }
@@ -285,45 +285,46 @@ function page_browser(nr_results, start) {
 % if ($introduction) {
   <p><& /shared/htmlize, text=>$introduction &></p>
 % }
-  <div style="width: 37em">
+  <div style="width:100%;">
     <input type="text"
            id="query"
            name="query"
            value="<% $query |h %>"
-           style="width: 100%; margin-bottom: 0.2em"/>
-
+           style="width: 500px; margin-bottom: 0.2em;" />
     <div style="width: 100%;">
       <input type="button"
              name="<& /shared/trans, da => 'Søg', en => 'Search' &>"
              onclick="do_search()"
-             value="<& /shared/trans, da => 'Søg', en => 'Search' &>" />
-
+             value="<& /shared/trans, da => 'Søg', en => 'Search' &>"
+             style="float:left;" />
+      <img src="/pics/icons/ajax-loader.gif" alt="loading ..." style="float:left;padding: 3px 0 0 0.5em;" />
       <a onclick="$('#advanced_search').toggle('slide', {direction: 'up'}, 200);"
-         style="cursor: pointer; float: right; font-weight: bold; font-size: 1.1em; margin-top: 0.4em;">
+         style="cursor: pointer; float: right; font-weight: bold; font-size: 1.1em; margin-top: 3px;">
         <& /shared/trans, da => "Avanceret søgning", en => "Advanced search" &>
       </a>
+      <div style="clear: both; padding:0;margin:0;height:1px;" ></div>
     </div>
     <div id="advanced_search"
-         style="width: 35em; margin-top: 1em; border: 1px inset;padding: 0em 1em 1em; font-weight: bold; display: none;">
+         style="width: auto; margin: 0.25em 0 0; border: solid 1px #ccc;padding: 0 1em 1em; height: auto; font-weight: bold; display: none;">
       <br />
-      <label for="tags">
+      <label for="tags" style="width: 110px; float: left;padding-top:3px;">
         Tagssøgning
       </label>
-      <input type="text" name="tags" id="tags" style="width: 14.5em; margin-left: 1.2em"/>
-      <div style="clear: both; margin-bottom: 1em" ></div>
+      <input type="text" name="tags" id="tags" style="width: 220px;float:left;"/>
+      <div style="clear: both; padding: 0 0 0.5em;margin:0;height:1px;" ></div>
 
-      <label for="start_date" style="width: 2em">
+      <label for="start_date" style="width: 110px; float:left;padding-top:3px;">
         <& /shared/trans, da => "Publiseret efter", en => "Published after" &>
       </label>
-      <input type="text" id="published_after" name="start_date" style="width: 6.3em"/>
-      <label for="end_date">
+      <input type="text" id="published_after" name="start_date" style="width: 87px;float:left;"/>
+      <label for="end_date" style="width:40px;text-align: center;float:left;padding-top:3px">
         <& /shared/trans, da => "før", en => "before" &>
       </label>
-      <input type="text" name="published_before" id="end_date" style="width: 6.3em" />
-      <br />
+      <input type="text" name="published_before" id="end_date" style="width: 87px;float:left" />
+      <div style="clear: both; padding: 0;margin:0;height:1px;" ></div>
     </div>
 
-    <div id="search_result">
+    <div id="search_result" style="padding-top: 1em;">
     </div>
   </div>
 </div>
