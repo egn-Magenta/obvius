@@ -68,7 +68,7 @@ $(function () {
                            if (ev.which == 13)
                              do_search();
                          });
-    $("#start_date, #end_date").datepicker(
+    $("#published_before, #published_after").datepicker(
       {dateFormat: "yy-mm-dd"});
     $("#tags").autocomplete('/system/all_tags');
 
@@ -329,11 +329,11 @@ function page_browser(nr_results, start) {
       <label for="start_date" style="width: 110px; float:left;padding-top:3px;">
         <& /shared/trans, da => "Publiceret efter", en => "Published after" &>
       </label>
-      <input type="text" name="published_after" id="start_date" style="width: 87px;float:left;"/>
+      <input type="text" id="published_after" style="width: 87px;float:left;"/>
       <label for="end_date" style="width:40px;text-align: center;float:left;padding-top:3px">
         <& /shared/trans, da => "før", en => "before" &>
       </label>
-      <input type="text" name="published_before" id="end_date" style="width: 87px;float:left" />
+      <input type="text" id="published_before"  style="width: 87px;float:left" />
       <div style="clear: both; padding: 0;margin:0;height:1px;" ></div>
     </div>
 
