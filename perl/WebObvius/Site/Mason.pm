@@ -406,7 +406,6 @@ sub handler ($$) {
 			   output_filename => $filename, 
 			   con_disp => $con_disp,
 			   path => $path);
-               print STDERR Dumper($extra_headers);
                if ($extra_headers){
                     $req->header_out($_ => $extra_headers->{$_}) for keys %$extra_headers;
                }
@@ -802,9 +801,9 @@ sub output_data {
      my $new_data = $options{data};
      
      my $data_ref = ref $new_data ? $new_data : \$new_data;
-     my $data = $$data_ref;
-
-     Encode::_utf8_off($data);
+     if ( Encode::is_utf8($$data_ref)) {
+        Encode::_utf8_off($$data_ref);
+     }
      $this->set_mime_type_and_content_disposition($req, %options);
      # The spec. says that it is not necessary to advertise this:
      # $req->header_out('Accept-Ranges'=>'bytes');
@@ -812,13 +811,13 @@ sub output_data {
      # Handle Range: N-M
      my $range=$req->headers_in->{Range};
      
-     my $len = length($data);
+     my $len = length($$data_ref);
 
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
           my ($start, $stop)=($1 || 0, $2 || $len);
           
           # Sanity check range:
-          if ($start>length($data) or $stop>$len or $start>$stop) {
+          if ($start>length($$data_ref) or $stop>$len or $start>$stop) {
                $req->header_out('Content-Range'=>'0-0/' . $len);
                $req->status(416); # "Requested range not satisfiable"
                $req->send_http_header;
@@ -829,11 +828,11 @@ sub output_data {
           $req->set_content_length($stop-$start);
           $req->status(206); # "Partial content"
           $req->send_http_header;
-          $req->print(substr($data, $start, $stop-$start));
+          $req->print(substr($$data_ref, $start, $stop-$start));
      } else {
           $req->set_content_length($len);
           $req->send_http_header;
-          $req->print($data) unless ($req->header_only);
+          $req->print($$data_ref) unless ($req->header_only);
      }
 
      return OK;
