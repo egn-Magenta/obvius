@@ -13,9 +13,9 @@ Formularen "<% $vdoc->field('title') %>" er blevet udfyldt med følgende data:
 %next if($_->{type} =~ m!^fieldset!);
 <% $_->{title} %> (<% $_->{name} %>):
 %if(ref($_->{_submitted_value})) {
-<% join(", ", @{ $_->{_submitted_value} }) %>
+<% utf8(join(", ", @{ $_->{_submitted_value} }))->latin1 %>
 %} else {
-<% $_->{_submitted_value} %>
+<% utf8($_->{_submitted_value})->latin1 %>
 %}
 
 %}
@@ -38,7 +38,7 @@ $mailto
 <%init>
 my $formdata = $output->param('formdata');
 
-my $fields = $formdata->{field} || [];
+my $fields = $formdata || [];
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 
 
@@ -68,7 +68,8 @@ for(@$fields) {
     # ~ for linebreaks.
     $val =~ s!\r?\n!~!g;
     $val =~ s|;||g;
-
+    
+    $val = utf8($val)->latin1;
     push(@csv_values, $val);
 }
 
@@ -76,6 +77,7 @@ my $url_sitename = $obvius->config->param('test_sitename') || $obvius->config->p
 </%init>
 <%once>
 use Unicode::String qw(utf8 latin1);
+use Encode;
 </%once>
 <%filter>
 # Cleanup utf characters

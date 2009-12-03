@@ -71,27 +71,29 @@ sub mode {
 }
 
 sub add_js {
+     shift;
      return map {"<script type=\"text/javascript\" src=\"$_\"></script>" } @_;
 }
 
 sub add_link {
+     shift;
      return map {"<link rel=\"stylesheet\" type=\"text/css\" href=\"$_\"></link>" } @_;
 }
      
 sub generate_head_html {
      my ($this, $r, $doc, $vdoc, $obvius) = @_;
 
-     my $mode = $this->mode({$r->args});
+     my $mode = $this->mode({map { $_ => $r->param($_) || 1 } grep {$r->param($_)} $r->param });
      if ($mode && $mode eq 'search') {
           my @header;
-          push @header, add_js('/scripts/jquery/jquery-1.3.2.min.js',
-                               '/scripts/jquery/jquery-ui-1.7.2.custom.min.js',
-                               '/scripts/jsutils.js',
-                               '/scripts/jquery/jquery.bgiframe.min.js',
-                               '/scripts/jquery/jquery.ajaxQueue.js',
-                               '/scripts/jquery/jquery.autocomplete.min.js');
-          push @header, add_link('/style/jquery-ui-1.7.2.custom.css',
-                                 '/style/jquery.autocomplete.css');
+          push @header, $this->add_js('/scripts/jquery/jquery-1.3.2.min.js',
+                                      '/scripts/jquery/jquery-ui-1.7.2.custom.min.js',
+                                      '/scripts/jsutils.js',
+                                      '/scripts/jquery/jquery.bgiframe.min.js',
+                                      '/scripts/jquery/jquery.ajaxQueue.js',
+                                      '/scripts/jquery/jquery.autocomplete.min.js');
+          push @header, $this->add_link('/style/jquery-ui-1.7.2.custom.css',
+                                        '/style/jquery.autocomplete.css');
           
           return join "\n", @header;
      }

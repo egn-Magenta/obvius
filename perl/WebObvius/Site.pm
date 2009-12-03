@@ -360,6 +360,7 @@ sub create_input_object {
         my $session=$this->get_session($obvius_session_id);
         $input->param(SESSION=>$session);
     }
+    
     my @uploads = $req->upload;
     for(@uploads) {
         if($_->filename ne '' and $_->size!=0 and my $fh=$_->fh) {
@@ -368,7 +369,7 @@ sub create_input_object {
             my $value = <$fh>;
             $data->param(filename => $_->filename);
             $data->param(data => $value);
-            $data->param(mimetype => $_->mimetype);
+            $data->param(mimetype => $_->type);
             $data->param(size => $_->size);
             if($_->type =~ /^image\//) {
                 my ($w, $h)=imgsize(\$value);

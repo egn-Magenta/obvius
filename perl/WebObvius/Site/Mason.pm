@@ -188,7 +188,6 @@ sub access_handler ($$) {
      $req->uri($uri) unless ($req->dir_config('AddPrefix'));
 
      my $orig_uri = $uri;
-     my $roothost = $req->subprocess_env('ROOTHOST');
 
      my $obvius   = $this->obvius_connect($req, undef, undef,
                                           $this->{SUBSITE}->{DOCTYPES},
@@ -334,7 +333,6 @@ sub public_authen_handler {
      my $groups = $obvius->execute_select("select grp from forbidden_docs_groups 
                                                  where docid = ?", $docid);
 
-     # Hash it so we avoid O(n^2)
      my %user_groups;
      my $user_groups = $obvius->{USER_GROUPS}{$cur_user->{id}};
      if ($user_groups) {
@@ -395,8 +393,7 @@ sub handler ($$) {
      # that we are getting the *raw* resource, not the obvius-wrapper (where that is appropriate)
      if (!$is_admin || $req->uri !~ m|/$|) {
 	  my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) = 
-	    $doctype->raw_document_data(
-					$doc, $vdoc, $obvius,
+	    $doctype->raw_document_data($doc, $vdoc, $obvius,
 					WebObvius::Apache::apache_module('Request')-> new($req),
 					$output
 				       );
@@ -406,7 +403,6 @@ sub handler ($$) {
 			   output_filename => $filename, 
 			   con_disp => $con_disp,
 			   path => $path);
-               print STDERR Dumper($extra_headers);
                if ($extra_headers){
                     $req->header_out($_ => $extra_headers->{$_}) for keys %$extra_headers;
                }
@@ -695,8 +691,8 @@ sub rulebased_authen_handler ($$)
      }
 
      # finally, turn server cache off for the protected documents
-     $req-> notes('nocache', 1) unless $have_user == OK;
-     $req-> notes( "OBVIUS_SIDE_EFFECTS", 1 );
+     $req-> notes(nocache => 1);
+     $req-> notes(OBVIUS_SIDE_EFFECTS => 1 );
      $req->no_cache(1);
 
      return OK;
@@ -818,7 +814,7 @@ sub output_data {
           my ($start, $stop)=($1 || 0, $2 || $len);
           
           # Sanity check range:
-          if ($start>length($data) or $stop>$len or $start>$stop) {
+          if ($start>$len or $stop>$len or $start>$stop) {
                $req->header_out('Content-Range'=>'0-0/' . $len);
                $req->status(416); # "Requested range not satisfiable"
                $req->send_http_header;

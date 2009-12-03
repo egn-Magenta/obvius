@@ -1,4 +1,21 @@
 <!-- Form doctype: -->
+<iframe id="form_receiver" name="form_receiver" style="display: none;"></iframe>
+<script type="text/javascript">
+$(function () {
+   if (window.parent.document.getElementById('content')) {
+       window.parent.document.getElementById('content').innerHTML = window.document.getElementById('content').innerHTML;
+   }
+});
+
+function onsubmit_formhandler() {
+           var submit = $("#submit_div");
+           submit.replaceWith("<div><& /shared/trans, 
+                                      da => "Vent venligst, mens formular sendes...&nbsp;",
+                                      en => "Please wait, while the form is sent...&nbsp;" 
+                                     &><img src='/pics/icons/ajax-loader.gif' /></div>");
+}
+</script>
+
 %if (scalar(@$invalid)) {
     <div class="error" style="border: 1px solid rgb(144, 26, 30); margin: 0pt 0pt 1em; padding: 6px; background-color: rgb(243, 243, 243); font-size: 14px; color: rgb(144, 26, 30); text-align: center;">
       <span><& /shared/msg, text => 'Obs, fejl i udfyldningen af formularen' &> </span>
@@ -12,10 +29,50 @@
 %   my $uri2 = $uri;
 %   $uri2 =~ s!/$!!;
 <div class="obviusformdownload">
-    <div><a href="<% $prefix . $uri2 %>?get_file=1"><& /shared/msg, text=>"Click here to download collected form data in XML format" &></a>.</div>
-    <div><a href="<% $prefix . $uri2 %>?get_file=1&format=excel"><& /shared/msg, text=>"Click here to download collected form data in Excel format" &></a>.</div>
+    <div>
+      <a href="<% $prefix . $uri2 %>?get_file=1&format=excel">
+        <& /shared/msg, text=>"Click here to download collected form data in Excel format" &>.
+      </a>
+    </div>
     <br />
-    <div><a href="<% $prefix . $uri %>?flush_xml=1"><& /shared/msg, text=>"Flush XML file" &></a></div>
+%if ($doctype->count_deleted($doc->Id, $obvius) > 0) {
+    <div>
+      <a href="#" onclick="$('#regret').slideToggle(); return false;">
+        <& /shared/trans, 
+           da => "Genopret slettede data fra formularen",
+           en => "Restore deleted data from the form" &>
+      </a>
+      <div id="regret" style="display: none">
+        <h2 style="margin-top: 0.2em;" >
+          <& /shared/trans, 
+             da => 'Er du sikker på at du vil genoprette alle slettede formulardata?',
+             en => 'Are you sure you want to restore all delete formdata?' &>
+        </h2>
+        <input type="button" 
+               onclick="document.location.href='<% $prefix . $uri %>?obvius_regret_deletion=1'" 
+               value="<& /shared/trans, da => 'Ja', en => 'Yes' &>" />
+        <input type="button" onclick="$('#regret').slideToggle()" 
+               value="<& /shared/trans, da => 'Nej', en => 'No' &>" />
+      </div>
+    </div>
+%}
+
+    <div style="margin-bottom: 1em">
+      <a href="#" onclick="$('#flush').slideToggle(); return false;"><& /shared/msg, text=>"Flush XML file" &></a>
+      <div id="flush" style="display: none">
+        <h2 style="margin-top: 0.2em;" >
+          <& /shared/trans, 
+             da => 'Er du sikker på at du vil slette alle formulardata?',
+             en => 'Are you sure you want to delete all entries?' &>
+        </h2>
+        <input type="button" 
+               onclick="document.location.href='<% $prefix . $uri %>?flush_xml=1'" 
+               value="<& /shared/trans, da => 'Ja', en => 'Yes' &>" />
+        <input type="button" 
+               onclick="$('#flush').slideToggle()" 
+               value="<& /shared/trans, da => 'Nej', en => 'No' &>" />
+      </div>
+    </div>
 </div>
 %}
 
@@ -26,10 +83,10 @@
 %} elsif($r->param('obvius_form_submitted') and $output->param('submitted_data_ok')) {
 <& form_files/after_submit, %ARGS, output=>$output &>
 %} elsif($closed && !$prefix) {
-<& /shared/htmlize, text => $vdoc->field('close_message') &>  
+<& /shared/htmlize, text => $vdoc->field('close_message') &>
 %} else {
 <& teaser &>
-	   
+
 <& /shared/htmlize, text=>$vdoc->field('formtext') || '' &>
 
 <div class="obviusform">
@@ -58,16 +115,16 @@
 <br />
 %}
 
-%$r->notes('fieldsets' => 0);
-%unless($prefix) {
-<form name="pageform" action="<% $uri %>" method="post">
-%}
+% $r->notes('fieldsets' => 0);
+<form enctype="multipart/form-data" name="pageform"  onsubmit="onsubmit_formhandler(); return true;"
+      action="<% $prefix . $uri %>" method="post" target="form_receiver">
 <input type="hidden" name="obvius_form_submitted" value="1" />
+
 %for(@$fields) {
 %if($_->{type} =~ m!^fieldset!) {
 <& 'form_files/fieldtypes/' . $_->{type}, fielddata=>$_ &>
 %} else {
-<div class="formfield">
+<div class="formfield"><!-- #"-->
 <a name="<% $_->{name} %>"></a>
 <label for="<% $_->{name} %>">
 <% $_->{title} %><% ($_->{mandatory}) eq '1' ? ' <span class="mandatory">*</span>' : '' %>
@@ -104,17 +161,30 @@
 %if($r->notes('fieldsets')) {
 </fieldset>
 %}
-
+% if ($vdoc->field('captcha')) {
+% if ($output->param('captcha_success') eq '0') {
+<& /shared/trans, da => "Kodefeltet blev desværre ikke udfyldt korrekt",
+                   en => "There was an error in your captcha" &>
+% }
 <br />
-<div>
-<input type="submit" value="<& /shared/msg, text=>"Submit" &>" />
+<img src="/captcha/image.php" />
+<br />
+<& /shared/trans, 
+   da => "Skriv ovenstående kode i feltet. Derved sorterer vi mellem seriøse indlæg og spam",
+   en  => "Please write the above code in the field and help us avoid spam" &>
+<br />
+<input type="text" name="captcha_field" />
+<br />
+<br />
+%}
+<div id="submit_div">
+<input type="submit" id="submit_button"
+       value="<& /shared/msg, text=>"Submit" &>" /> #
 <& /shared/msg, text=>"Fields marked with" &>
 <span class="mandatory">*</span>
 <& /shared/msg, text=>"are required" &>.
 </div>
-%unless($prefix) {
 </form>
-%}
 </div>
 %
 %}
@@ -127,16 +197,16 @@ $output
 </%args>
 %
 <%init>
-$obvius->get_version_fields($vdoc, ['formtext', 'close_message', 'entries_for_close']);
+$obvius->get_version_fields($vdoc, ['formtext', 'close_message', 'entries_for_close', 'captcha']);
 my $formdata = $output->param('formdata') || {};
-my $fields = $formdata->{field} || [];
+my $fields = $formdata || [];
 
 my $invalid = $output->param('invalid') || [];
 my $not_unique = $output->param('not_unique') || [];
 
 my $count = $doctype->count_entries($doc->Id,$obvius);
-my $closed = $vdoc->field('entries_for_close') && $count >= $vdoc->field('entries_for_close');
-     
+my $closed = !$output->param('submitted_data_ok') && ($output->param('obvius_full_form') || ($vdoc->field('entries_for_close') && $count >= $vdoc->field('entries_for_close')));
+
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 $output->param(OBVIUS_SIDE_EFFECTS => 1);
 </%init>

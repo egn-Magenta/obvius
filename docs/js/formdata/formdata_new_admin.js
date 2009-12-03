@@ -285,9 +285,22 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         document.getElementById('unique').style.display = 'none';
     }
 
+    if(type == 'upload') {
+      document.getElementById('options').style.display = 'none';
+      document.getElementById('validaterules').style.display = 'none';
+      document.getElementById('image').style.display = 'none';
+      document.getElementById('unique').style.display = 'none';
+    }
+
+    if (type == 'name' ) {
+      document.getElementById('options').style.display = 'none';
+      document.getElementById('maxlength').style.display = '';
+      document.getElementById('size').style.display = '';
+    }
+
     if(type == 'text' || type == 'password') {
-        document.getElementById('maxlength').style.display = '';
-        document.getElementById('size').style.display = '';
+      document.getElementById('maxlength').style.display = '';
+      document.getElementById('size').style.display = '';
     }
 
     if(type == 'textarea') {
