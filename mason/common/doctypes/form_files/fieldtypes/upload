@@ -1,0 +1,13 @@
+<input type="file" name="<% $fielddata->{name} |h %>" 
+       value="<& /shared/trans, da => "Gennemse...", en => "Browse..." &>" />
+<br />
+<span style="margin-top: 2px;">
+ <& /shared/trans, 
+   da => "NB! Filen sendes over en ukrypteret forbindelse og må derfor ikke indeholde 
+          personfølsomme oplysninger.",
+   en => "NB! The file is sent over an unencrypted connection and should therefore not 
+          contain sensitive personal information." &>
+</span>
+<%args>
+$fielddata => {}
+</%args>
