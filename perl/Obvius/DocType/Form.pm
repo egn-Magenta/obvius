@@ -119,7 +119,7 @@ sub validate_by_rule {
      } elsif ($type eq 'max_length') {
           return (defined $value && $value ne "" && length($value) < $arg, $error_msg);
      } elsif ($type eq 'email') {
-          return ($value =~ /.+@.+\..+/, 'Ugyldig emailadresse');
+          return ($value !~ /.+@.+\..+/, 'Ugyldig emailadresse');
      }
      
      return 0;
@@ -432,7 +432,7 @@ sub insert_entry {
           $entry_nr = $res->[0]{en};
 
           $obvius->execute_command("insert into formdata_entry (docid, entry_nr, time) values
-                                    (?, ?, now())", $docid, $entry_nr + 1);
+                                    (?, ?, now())", $docid, ++$entry_nr);
           
           $res = $obvius->execute_select("select last_insert_id() as id");
 
