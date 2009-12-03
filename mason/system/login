@@ -31,6 +31,7 @@ margin-left: 272px;
 }
 
 #mainarea label {
+    font-weight: bolder;
     float: left;
     font-size: 1.0em;
     width: 9em;
@@ -237,11 +238,11 @@ function secret_login() {
       onsubmit="secret_login();">
 <fieldset>
 <legend> </legend>
-<p>
+<h4>
   <& translator, 
      da => "Indtast brugernavn og adgangskode for at logge på Obvius CMS", 
      en => "Please enter your username and password to log onto Obvius CMS" &>
-</p>
+</h4>
 
 %if($last_login_failed) {
 <p class="warning">
@@ -250,25 +251,34 @@ function secret_login() {
      en => "Login failed. Please check your credentials and try again." &>
 </p>
 %}
-<div>
+<div style="margin-bottom: 0.5em">
     <label for="obvius_sessionlogin_login">
       <& translator, da => 'Brugernavn:', en => 'Username' &>
     </label> 
     <input style="width: 15em;"
            type="text" 
-           name="obvius_sessionlogin_login" 
-           id="obvius_sessionlogin_login" 
+           name="obvius_sessionlogin_login"
+           id="obvius_sessionlogin_login"
            value="<% $r->param('obvius_sessionlogin_login') %>" />
 </div>
-<div>
+<div style="margin-bottom: 0.5em">
     <label for="obvius_sessionlogin_password_box">
-      <& translator, da => 'Adgangskode:', en => 'Password' &>
+      <& translator, da => 'Adgangskode:', en => 'Password: ' &>
     </label>
     <input style="width: 15em;"
            type="password" 
            name="obvius_sessionlogin_password_box"
            id="obvius_sessionlogin_password_box" 
            value="" />
+</div>
+<div>
+    <label for="obvius_sessionlogin_remember_me">
+      <& translator, da => "Husk mig: ", en => "Remember me: " &>
+    </label>
+    <input 
+       type="checkbox" 
+       name="obvius_sessionlogin_remember_me"
+       id="obvius_sessionlogin_remember_me" />
 </div>
     <input type="hidden" 
            name="obvius_sessionlogin_password" 
@@ -277,10 +287,9 @@ function secret_login() {
            name="obvius_sessionlogin_secret" 
            id="obvius_sessionlogin_secret" 
            value="" />
-%for(@param_names) {
-    <input type="hidden" name="<% $_ |h %>" value="<% $last_r->param($_) |h %>" />
+%for my $param (@param_names) {
+    <input type="hidden" name="<% $param |h %>" value="<% $last_r->param($param) |h %>" />
 %}
-<br />
 <br />
 <div>
 <input id="submit" type="submit" 

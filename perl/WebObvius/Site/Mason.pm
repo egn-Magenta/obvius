@@ -606,7 +606,8 @@ sub session_authen_handler ($$) {
 sub register_session {
      my ($this, $obvius, $req, $login) = @_;
      my $benchmark = Obvius::Benchmark-> new('mason::register_session') if $this-> {BENCHMARK};
-
+     
+     my $remember_me = !!$req->param('obvius_sessionlogin_remember_me');
      my $try_n_times = 10;
      my $session_id;
      do {
@@ -614,14 +615,18 @@ sub register_session {
 	  
 	  eval {
                $obvius->execute_command("insert into login_sessions
-                                           (login, session_id, last_access) values
-                                           (?, ?, UNIX_TIMESTAMP())", $login, $session_id);
+                                           (login, session_id, last_access, permanent) values
+                                           (?, ?, UNIX_TIMESTAMP(), ?)", 
+                                           $login, $session_id, $remember_me
+                                       );
                };
      } while ($try_n_times-- and $@);
  
      die "Can't create session, maybe because of: $@" if $@;
      
-     $req->headers_out->add("Set-Cookie", "obvius_login_session=$session_id; path=/; HttpOnly");
+     my $expires = $remember_me ? "Expires=Fri, 21-Nov-2036 06:00:00 GMT" : '';
+     $req->headers_out->add("Set-Cookie", 
+                            "obvius_login_session=$session_id; path=/;${expires};  HttpOnly");
      $req->notes(user => $login);
      $obvius->{USER} = $login;
 
