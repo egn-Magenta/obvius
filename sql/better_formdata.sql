@@ -3,6 +3,7 @@ create table if not exists formdata_entry (
        docid integer unsigned not null,
        entry_nr integer unsigned not null,
        time datetime not null,
+       deleted boolean not null default false,
        foreign key(docid) references documents(id),
        unique (docid, entry_nr)) 
            character set utf8 
