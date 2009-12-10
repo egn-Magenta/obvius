@@ -251,7 +251,7 @@ sub get_formdata {
                                           'validaterule'],
                            suppressempty => '' );
      
-     die "No formdata" if !ref $formdata;
+     return [] if !ref $formdata;
 
      return $formdata->{field};
 }
