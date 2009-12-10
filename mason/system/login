@@ -16,22 +16,23 @@ color: #4A4949;
 }
 
 h1 { 
-font-size: 1.4em;  
-margin-left: 272px;
+    font-size: 1.4em;  
+}
+h4 {
+    font-size: 1em;
+    font-weight: normal;
 }
 
 #mainarea {
     width: 770px;
-    position: absolute;
-    left: 50%;
-    margin-left: -385px;
+    margin: 0 auto;
     background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
     border: 1px solid #75736E;
     padding-top: 107px;
+    text-align: center;
 }
 
 #mainarea label {
-    font-weight: bolder;
     float: left;
     font-size: 1.0em;
     width: 9em;
@@ -41,18 +42,32 @@ margin-left: 272px;
 p.warning {
     color: red;
 }
-
+form { 
+    width: 430px;
+    text-align: left;
+    margin: 3em auto 2em;
+}
 fieldset {
     border: 0;
-    margin-right: 190px;
-    float: right;
 }
-
+fieldset {
+    margin-left: 3em;
+}
 #submit {
-margin-left: 137px;
+    margin: 0 auto;
+    display: block;
+}
+fieldset #submitDiv {
+    margin-left: -3em;
+    text-align: center;
 }
 
 </style>
+<!--[if IE 8]>
+    <style typx="text/css">
+        fieldset #submit {margin-left:180px;}
+    </style>
+<![endif]-->
 <script type="text/javascript" src="/scripts/md5.js"></script>
 <script type="text/javascript">
 var alphanumchars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -237,7 +252,6 @@ function secret_login() {
       id="loginform" 
       onsubmit="secret_login();">
 <fieldset>
-<legend> </legend>
 <h4>
   <& translator, 
      da => "Indtast brugernavn og adgangskode for at logge på Obvius CMS", 
@@ -291,7 +305,7 @@ function secret_login() {
     <input type="hidden" name="<% $param |h %>" value="<% $last_r->param($param) |h %>" />
 %}
 <br />
-<div>
+<div id="submitDiv">
 <input id="submit" type="submit" 
        name="obvius_sessionlogin_submit" 
        value="<& translator, da => 'Log ind', en => 'Log on' &>" />

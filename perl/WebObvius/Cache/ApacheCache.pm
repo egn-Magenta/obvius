@@ -3,7 +3,8 @@ package WebObvius::Cache::ApacheCache;
 use strict;
 use warnings;
 
-use Fcntl ':flock';
+use Fcntl qw ( LOCK_EX LOCK_UN O_RDWR O_CREAT );
+use SDBM_File;
 use Digest::MD5 qw (md5_hex);
 
 use Data::Dumper;
@@ -22,6 +23,32 @@ our %known_options = (
 );
 
 
+sub with_db {
+     my ($this, $method) = @_;
+     my $res;
+     open my $fh, ">", $this->{cache_db_lock} or die "Couldn't open cache lock";
+     
+     eval {
+          flock $fh, LOCK_EX or die "Couldn't get lock";
+          my %h;
+          tie (%h, 'SDBM_File', $this->{cache_db}, O_RDWR|O_CREAT, 0666) or 
+            die "Failed to tie hash db";
+          eval {
+               $res = $method->(\%h);
+          };
+          untie %h;
+          if ($@) {
+               die $@;
+          }
+     };
+     close $fh;
+     if ($@) {
+          die $@;
+     }
+
+     return $res;
+}
+     
 sub new {
     my ($class, $obvius, %options) = @_;
 
@@ -33,17 +60,16 @@ sub new {
 
     my $var_dir = '/var/www/' . $obvius->{OBVIUS_CONFIG}{SITENAME} . '/var/';
     $new->{cache_dir} ||= $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY} || ($var_dir . 'document_cache/');
-    $new->{cache_index} ||= $obvius->{OBVIUS_CONFIG}{CACHE_INDEX}   || ($var_dir . 'document_cache.txt');
+    $new->{cache_db} ||= $obvius->{OBVIUS_CONFIG}{CACHE_DB}   
+      || ($var_dir . 'cache_db/cache.dbm');
+    $new->{cache_db_lock} ||= 
+      $obvius->{OBVIUS_CONFIG}{CACHE_DB_LOCK} || ($var_dir . 'cache_db/.lock');
     $new->{cache_dir} .= '/' if ($new->{cache_dir} !~ m|/$|);
 
     die "ApacheCache: " . $new->{cache_dir} . " is not a directory\n" if 
 	(! -d $new->{cache_dir});
     die "ApacheCache: " . $new->{cache_dir} . " is not writable by me\n" if 
 	(! -w $new->{cache_dir});
-    die "ApacheCache: " . $new->{cache_index} . " is not a file\n" if
-	(! -f $new->{cache_index});
-    die "ApacheCache: " . $new->{cache_index} . " is not writable by me\n" if
-	(! -w $new->{cache_index});
 
     return bless $new, $class;
 }
@@ -126,14 +152,8 @@ sub save_request_result_in_cache
      
      my $path = $req->uri();
      
-     open F, ">>", $this->{cache_index} || (warn "Failed to open " . $this->{cache_index}, return);
-     flock F, LOCK_EX || (warn "couldn't get lock", goto close);
-     print F $path, $args, "\t", '/cache/' . $local_dir, "\n";
-     flock F, LOCK_UN;
-     
-   close:
-     close F;
-     
+     $this->with_db(sub {$_[0]->{$path . $args} = "/cache/$local_dir";});
+
      return;
 }
 
@@ -169,20 +189,15 @@ sub flush {
 sub flush_by_pattern {
     my ($this, $pred) = @_;
 
-    open F, '+<', $this->{cache_index} || return;
-    flock F, LOCK_EX or goto close;
-    my @lines;
-    while(my $line = <F>) {
-        my ($local_uri) = ($line =~ m/^(\S+)/);
-	push @lines, $line if ($local_uri && !$pred->($local_uri));
-    }
-    seek F, 0, 0;
-    truncate F, 0;
-    print F $_ for (@lines);
-    
-    flock F, LOCK_UN;
-  close:
-    close F;
+    $this->with_db( 
+                   sub {
+                        my ($h) = @_;
+                        for my $k (keys %$h) {
+                             if ($pred->($k)) {
+                                  delete $h->{$k};
+                             }
+                        }
+                   });
 }
     
 sub execute_query {
