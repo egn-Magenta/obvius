@@ -12,6 +12,7 @@ CREATE TABLE login_sessions (
   login varchar(31)  NOT NULL,
   session_id char(32)  NOT NULL,
   last_access int(12)  NOT NULL,
+  permanent boolean not null,
   PRIMARY KEY (session_id),
   index (login)
 ) type=InnoDB;

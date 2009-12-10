@@ -305,9 +305,8 @@ sub get_universal_document
 sub lookup_document {
     my ($this, $path) = @_;
 
-    if (wantarray) {
-         die "Lookup document needing an array is deprecated.\n";
-    }
+    my ($docid) = $path =~ m!/(?:\d*:)?(\d+)\.docid$!;
+    return $this->get_doc_by_id($docid) if ($docid);
 
     $path = $path . '/';
     $path =~ s!/+!/!g;

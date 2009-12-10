@@ -83,7 +83,11 @@ sub add_link {
 sub generate_head_html {
      my ($this, $r, $doc, $vdoc, $obvius) = @_;
 
-     my $mode = $this->mode({map { $_ => $r->param($_) || 1 } grep {$r->param($_)} $r->param });
+     my $mode = $this->mode({
+                             map { $_ => $r->param($_) || undef } 
+                             grep {$r->param($_)} $r->param 
+                            });
+
      if ($mode && $mode eq 'search') {
           my @header;
           push @header, $this->add_js('/scripts/jquery/jquery-1.3.2.min.js',

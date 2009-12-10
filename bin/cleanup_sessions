@@ -10,5 +10,5 @@ my $timeout = 60*60;
 my $conf = Obvius::Config->new('ku');
 my $obvius = Obvius->new($conf);
 
-$obvius->execute_command("delete from login_sessions where last_access + ? < UNIX_TIMESTAMP()", $timeout);
+$obvius->execute_command("delete from login_sessions where last_access + ? < UNIX_TIMESTAMP() and not permanent", $timeout);
 
