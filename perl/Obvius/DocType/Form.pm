@@ -104,6 +104,9 @@ sub validate_by_rule {
      my $arg = $valrule->{validationargument};
      my $error_msg = $valrule->{errormessage};
      
+     print STDERR Dumper($valrule);
+     print STDERR Dumper($value);
+     
      if ($type eq 'regexp') {
           my $res = 1;
           eval  { $res = $value =~ /$arg/ };
@@ -142,7 +145,7 @@ sub is_included_in {
 sub validate_entry {
      my ($fieldspec, $field, $fields, $docid, $obvius) = @_;
      
-     my $valrules = ($fieldspec->{validaterules} || {})->{validaterule} || [];
+     my $valrules = ($fieldspec->{valrules} || {})->{validaterule} || [];
      push @$valrules, {validationtype => 'email'} if $field->{type} eq 'email';
      for my $vr (@$valrules) {
           my ($error, $msg) = validate_by_rule($field->{value}, $vr);
@@ -232,7 +235,7 @@ sub get_formdata {
      my ($vdoc, $obvius) = @_;
      $obvius->get_version_fields($vdoc, ['formdata']);
      my $data = $vdoc->field('formdata');
-     die "No formdata" if !$data;
+     return [] if !$data;
      
      eval {
           $data = Encode::decode('UTF-8', $data, Encode::FB_CROAK);
@@ -279,11 +282,11 @@ sub convert_formspec {
            type => $_->{type},
            mandatory => $_->{mandatory},
            unique => $_->{unique},
-           valrules => $_->{validaterule},
+           valrules => $_->{validaterules},
            options => $prepare_options->($_->{options}),
            order => $_->{order}
           }} @$formdata;
-     print STDERR "Formspec", Dumper(\%formspec);     
+
      return \%formspec;
 }
 
@@ -739,7 +742,10 @@ sub show_field {
                return "";
           }
           return $val->{filename};
+     } elsif (ref $field->{value} eq 'ARRAY') {
+          return join ", ", @{$field->{value}};
      }
+
      return $field->{value};
 }
 
@@ -753,7 +759,7 @@ sub generate_result_view {
      
      push @entries, ("", [translate('id', $vdoc), $entry_nr]);
 
-     return join "\n",map { ref $_ ? $_->[0] . ": " . $_->[1] : $_} @entries;
+     return join "\n", map { ref $_ ? $_->[0] . ": " . $_->[1] : $_} @entries;
        
 }
 
