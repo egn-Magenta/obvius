@@ -179,7 +179,7 @@ function onsubmit_formhandler() {
 %}
 <div id="submit_div">
 <input type="submit" id="submit_button"
-       value="<& /shared/msg, text=>"Submit" &>" /> #
+       value="<& /shared/msg, text=>"Submit" &>" />
 <& /shared/msg, text=>"Fields marked with" &>
 <span class="mandatory">*</span>
 <& /shared/msg, text=>"are required" &>.
