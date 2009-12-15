@@ -122,7 +122,7 @@ sub validate_by_rule {
      } elsif ($type eq 'max_length') {
           return (defined $value && $value ne "" && length($value) < $arg, $error_msg);
      } elsif ($type eq 'email') {
-          return ($value !~ /.+@.+\..+/, 'Ugyldig emailadresse');
+          return ($value =~ /.+@.+\..+/, 'Ugyldig emailadresse');
      }
      
      return 0;
