@@ -110,7 +110,7 @@ sub validate_by_rule {
      if ($type eq 'regexp') {
           my $res = 1;
           eval  { $res = $value =~ /$arg/ };
-          return ($res, $error_msg);
+          return (!$res, $error_msg);
      } elsif ($type eq 'min_checked') {
           return (ref $value eq 'ARRAY' && @$value < $arg, $error_msg);
      } elsif ($type eq 'max_checked') {
@@ -122,7 +122,7 @@ sub validate_by_rule {
      } elsif ($type eq 'max_length') {
           return (defined $value && $value ne "" && length($value) < $arg, $error_msg);
      } elsif ($type eq 'email') {
-          return ($value =~ /.+@.+\..+/, 'Ugyldig emailadresse');
+          return ($value !~ /.+@.+\..+/, 'Ugyldig emailadresse');
      }
      
      return 0;
