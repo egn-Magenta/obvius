@@ -142,13 +142,16 @@ sub validate_entry {
      my ($fieldspec, $field, $fields, $docid, $obvius) = @_;
      
      my $valrules = ($fieldspec->{valrules} || {})->{validaterule} || [];
-     push @$valrules, {validationtype => 'email'} if $field->{type} eq 'email';
-     for my $vr (@$valrules) {
-          my ($error, $msg) = validate_by_rule($field->{value}, $vr);
-          if ($error) {
-               $field->{invalid} = $msg;
-               last;
-          }
+     push @$valrules, { validationtype => 'email' } if $field->{type} eq 'email';
+
+     if ($field->{has_value}) {
+	 for my $vr (@$valrules) {
+	     my ($error, $msg) = validate_by_rule($field->{value}, $vr);
+	     if ($error) {
+		 $field->{invalid} = $msg;
+		 last;
+	     }
+	 }
      }
           
      $field->{mandatory_failed} = !validate_mandatory($fieldspec->{mandatory} || 0, 
