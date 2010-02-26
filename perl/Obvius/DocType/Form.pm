@@ -88,10 +88,9 @@ sub validate_mandatory {
      if ($mandatory eq '1') {
           return $has_value;
      } elsif ($mandatory =~ s/^!//) {
-          return !$fields->{$mandatory} || 
-            (!$fields->{$mandatory}{has_value} && $has_value);
-     } elsif ($mandatory) {
           return $fields->{$mandatory}{has_value} && !$has_value;
+     } elsif ($mandatory) {
+          return $fields->{$mandatory}{has_value} && $has_value;
      }
 
      return 1;
@@ -103,9 +102,6 @@ sub validate_by_rule {
      my $type = $valrule->{validationtype} || '';
      my $arg = $valrule->{validationargument};
      my $error_msg = $valrule->{errormessage};
-     
-     print STDERR Dumper($valrule);
-     print STDERR Dumper($value);
      
      if ($type eq 'regexp') {
           my $res = 1;
@@ -586,8 +582,8 @@ sub raw_document_data {
     return undef if !$input->pnotes('site') || !$input->pnotes('site')->param('is_admin');
     return undef if !$obvius->can_view_document($doc);
     
-    return generate_excel(@_) if $input->param('get_file');
-    return get_upload_file(@_) if $input->param('get_upload_file');
+    return generate_excel(@_) if ($input->param('get_file'));
+    return get_upload_file(@_) if $input->param('get_upload_file'); 
 }
 
 sub get_upload_file {
@@ -679,8 +675,8 @@ sub generate_excel {
          my @row = map { $show_fields->($_, $entry->{fields}{$_}, $entry_nr) } @keys;
          unshift @row, $entry->{time};
          unshift @row, $entry_nr;
-
-         $worksheet->write_row($i++, 0, \@row, $data_format);
+         
+         $worksheet->write_row($i++, 0, [ map { /^\s*=/ ? '"' . $_ . '"' : $_ } @row], $data_format);
     }
     $workbook->close();
     
@@ -699,7 +695,7 @@ sub generate_excel {
 sub delete_entries {
     my ($this, $doc, $obvius) = @_;
     return OBVIUS_OK if 
-      !$obvius->can_delete_document($doc);
+      !$obvius->can_delete_single_version($doc);
     $obvius->execute_command("update formdata_entry set deleted = true where docid=?", $doc->Id);
     return OBVIUS_OK;
 }
