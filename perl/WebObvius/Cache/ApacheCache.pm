@@ -411,9 +411,9 @@ sub perform_command_sophisticated_rightbox_clear {
 sub perform_command_rightbox_clear {
     my ($this, $table) = @_;
     
-    my $sql = "select distinct docid from $table";
+    my $docids = $this->execute_query("select distinct docid from $table");
     
-    return $this->make_clear_urls([map { $_->{docid} }]);
+    return $this->make_clear_uris([map { $_->{docid} } @$docids]);
 }
 
 sub uniquify_docs {
@@ -449,7 +449,6 @@ sub special_actions {
 						 command => 'clear_doctype', 
 						 args => ['NyNyhedsliste'] 
 						}],
-
 				   CalendarEvent => [
 						{
 						 command => 'clear_doctype', 
@@ -556,9 +555,8 @@ sub find_dirty {
         @$moved_documents,
         @clear_tags_command
        );
-     
-     my $unique = uniquify_commands(\@commands);
-     return $unique;
+
+     return \@commands;
 }
 
 sub uniquify_commands {
