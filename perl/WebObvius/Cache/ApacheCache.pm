@@ -384,7 +384,8 @@ sub perform_command_sophisticated_rightbox_clear {
 
      my @doctypes_sql = ('?') x @doctypes;
      my $doctypes_sql = '(' . (join ',', @doctypes_sql) . ')';
-
+     
+     
      my $query = "select distinct docid from versions v join doctypes dt on (dt.id = v.type)
                   where v.public = 1 and dt.name in $doctypes_sql";
      my @docids = map { $_->{docid} } @{$this->execute_query($query, @doctypes)};
@@ -405,6 +406,14 @@ sub perform_command_sophisticated_rightbox_clear {
      }
 
      return $this->make_clear_uris(\@res_docids);
+}
+
+sub perform_command_rightbox_clear {
+    my ($this, $table) = @_;
+    
+    my $sql = "select distinct docid from $table";
+    
+    return $this->make_clear_urls([map { $_->{docid} }]);
 }
 
 sub uniquify_docs {
@@ -433,8 +442,8 @@ sub special_actions {
 						 args => ['Nyhedsliste'] 
 						}, 
 						{
-						 command => 'sophisticated_rightbox_clear', 
-						 args => ['Nyhedsliste', 'NyNyhedsliste'] 
+						 command => 'rightbox_clear', 
+						 args => ['newslists']
 						},
 						{
 						 command => 'clear_doctype', 
@@ -447,8 +456,8 @@ sub special_actions {
 						 args => ['Arrangementsliste']
 						}, 
 						{
-						 command => 'sophisticated_rightbox_clear', 
-						 args => ['Arrangementsliste', 'NyArrangementsliste']
+						 command => 'rightbox_clear', 
+						 args => ['calendars']
 						},
 						{
 						 command => 'clear_doctype', 
@@ -471,7 +480,7 @@ sub special_actions {
 	       push @commands, @$cmds;
 	  }
      }
-
+ 
      return \@commands;
 }
 

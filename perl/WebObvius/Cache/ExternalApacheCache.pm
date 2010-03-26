@@ -24,7 +24,10 @@ sub find_and_flush {
      if (scalar @$commands) {
 	  $this->flush($commands);
 	  my $command = {cache => 'WebObvius::Cache::ApacheCache', commands => $commands}; 
-	  WebObvius::Cache::SOAPHelper::send_command($this, $command);
+	  eval {
+	      WebObvius::Cache::SOAPHelper::send_command($this, $command);
+	  };
+	  warn $@ if ($@);
      }
 }
 
