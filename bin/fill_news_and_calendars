@@ -1,0 +1,52 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Data::Dumper;
+use Obvius::Config;
+use Obvius;
+
+my $obvius = Obvius->new(Obvius::Config->new('ku'));
+my @fields = ("rightboxes", "boxes1", "boxes2", "boxes3");
+my @entities = ({ name => "Calendar",
+		  table => "calendars",
+		  types => ["Arrangementsliste", "NyArrangementsliste"]},
+		{ name => "Newslist",
+		  table => "newslists",
+		  types => ["Nyhedsliste", "NyNyhedsliste"]});
+
+sub fetch_docids {
+  my ($types) = @_;
+
+  my $in_arg = join ',',(("?") x @$types);
+
+  my $docids = $obvius->execute_select("select v.docid as docid from versions v join doctypes dt on (v.type = dt.id) 
+                                        where dt.name in ($in_arg) and v.public = 1", @$types);
+
+  my @docids = map { $_->{docid} } @$docids;
+
+  return \@docids;
+}
+
+sub insert {
+  my ($endtable, $field, $regexp) = @_;
+
+  $obvius->execute_command("insert ignore into $endtable select docid from vfields vf 
+                                       natural join versions v where v.public = 1 AND vf.name = ? 
+                                       and vf.text_value regexp ?", $field, $regexp);
+}
+
+for my $entity (@entities) {
+  $entity->{docids} = fetch_docids($entity->{types});
+  $entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\\\.docid';
+
+  for my $field (@fields) {
+    insert($entity->{table}, $field, $entity->{regexp});
+  }
+}
+
+
+
+
+
