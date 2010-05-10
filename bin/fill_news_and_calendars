@@ -40,13 +40,7 @@ sub insert {
 for my $entity (@entities) {
   $entity->{docids} = fetch_docids($entity->{types});
   $entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
-  
   for my $field (@fields) {
     insert($entity->{table}, $field, $entity->{regexp});
   }
 }
-
-
-
-
-
