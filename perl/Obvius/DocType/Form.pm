@@ -296,7 +296,7 @@ sub retrieve_file {
      die "Form upload dir was not defined" if (!$upload_location);
      
      die "Form:toobig"
-       if ($upload->param('size') > 10_000_000);
+       if ($upload->param('size') > 50_000_000);
      
      die "Form:exefile" if $upload->param('filename') =~ /\.exe$/i; #"
      
