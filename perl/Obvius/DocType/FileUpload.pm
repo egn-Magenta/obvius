@@ -8,6 +8,7 @@ use Obvius::DocType;
 use Digest::MD5 qw( md5_hex );
 
 use WebObvius::Cache::Cache;
+use Obvius::Hostmap;
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -47,7 +48,9 @@ sub raw_document_data {
      $req->content_type($mime_type || "application/octet-stream");
      
      $cache->save_request_result_in_cache($req, \$data, $filename);
-     $output->param(redirect => $req->uri);
+     my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
+     
+     $output->param(redirect => "http://" . $hostmap->absolute_uri($req->uri));
      return OBVIUS_OK;
 }
 
