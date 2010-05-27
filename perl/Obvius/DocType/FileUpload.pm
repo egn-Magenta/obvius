@@ -6,12 +6,15 @@ use warnings;
 use Obvius;
 use Obvius::DocType;
 use Digest::MD5 qw( md5_hex );
+
+use WebObvius::Cache::Cache;
+
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
 
+
 sub raw_document_data {
      my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
-     my $data =	$req->hostname . ':' . $req->the_request;
      
      $obvius->get_version_fields($vdoc, ['mimetype', 'title', 'uploadfile']);
      my $path = $vdoc->field('uploadfile');
@@ -29,12 +32,23 @@ sub raw_document_data {
      $filename =~ s/^\s+|\s+$//g;
      $filename =~ s/\s+/_/g;
 
-     local $/;
-     my $fh;
-     open $fh, $path or die "File not found: $path";
-     $data = <$fh>;
-     close $fh;
-     return ($mime_type, \$data, $filename);
+     my $data;
+     do {
+	 local $/;
+	 my $fh;
+	 open $fh, $path or die "File not found: $path";
+	 $data = <$fh>;
+	 close $fh;
+     };
+     if ($req->notes('is_admin')) {
+	 return ($mime_type, \$data, $filename);
+     }
+     my $cache = WebObvius::Cache::Cache->new($obvius);
+     $req->content_type($mime_type || "application/octet-stream");
+     
+     $cache->save_request_result_in_cache($req, \$data, $filename);
+     $output->param(redirect => $req->uri);
+     return OBVIUS_OK;
 }
 
 1;

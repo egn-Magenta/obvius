@@ -344,7 +344,6 @@ sub public_authen_handler {
      }
 
      # If no specific access-choices have been made, allow everybody that is logged in. 
-     # Call to session_authen_handler above make sure we are logged in at this point.
      return !@$groups && !@$users && !@ips ? OK : FORBIDDEN;
 }
      
@@ -355,8 +354,7 @@ sub handler ($$) {
      my $obvius = $this->obvius_connect($req);
      
      my $is_admin = $this->param('is_admin');
-
-     Obvius::log->debug(" Mason::handler ($this : " . $req->uri . ")");
+     $req->notes(is_admin => $is_admin);
      
      $this->tracer($req) if ($this->{DEBUG});
      my $benchmark = Obvius::Benchmark-> new('mason::handler') if $this-> {BENCHMARK};
@@ -415,6 +413,10 @@ sub handler ($$) {
                
 	       return $status;
 	  }
+     }
+     
+     if ($output->param("redirect")) {
+	 return $this->redirect($req, $output->param("redirect"), 'force-external');
      }
      
      $req->content_type('text/html') unless $req->content_type;
@@ -814,7 +816,7 @@ sub output_data {
      my $range=$req->headers_in->{Range};
      
      my $len = length($$data_ref);
-
+     
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
           my ($start, $stop)=($1 || 0, $2 || $len);
           
@@ -831,10 +833,12 @@ sub output_data {
           $req->status(206); # "Partial content"
           $req->send_http_header;
           $req->print(substr($$data_ref, $start, $stop-$start));
+	  $req->rflush;
      } else {
           $req->set_content_length($len);
           $req->send_http_header;
-          $req->print($$data_ref) unless ($req->header_only);
+          my $p = $req->print($$data_ref) unless ($req->header_only);
+	  $req->rflush;
      }
 
      return OK;
