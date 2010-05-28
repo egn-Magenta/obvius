@@ -7,7 +7,7 @@ use Obvius;
 use Obvius::DocType;
 use Digest::MD5 qw( md5_hex );
 
-use WebObvius::Cache::Cache;
+use WebObvius::Cache::ApacheCache;
 use Obvius::Hostmap;
 
 our @ISA = qw( Obvius::DocType );
@@ -41,15 +41,24 @@ sub raw_document_data {
 	 $data = <$fh>;
 	 close $fh;
      };
-     if ($req->notes('is_admin')) {
+
+     my $cache = WebObvius::Cache::ApacheCache->new($obvius);
+     
+     # Redirect to url without arguments so to cache
+     # it instead.
+     if ($req->args && $req->args !~ /^\s*$/) { 
+	 goto redirect;
+     }
+     
+     if (!$cache->can_request_use_cache_p($req) || $req->notes('is_admin')) {
 	 return ($mime_type, \$data, $filename);
      }
-     my $cache = WebObvius::Cache::Cache->new($obvius);
+
      $req->content_type($mime_type || "application/octet-stream");
-     
      $cache->save_request_result_in_cache($req, \$data, $filename);
+
+   redirect:
      my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
-     
      $output->param(redirect => "http://" . $hostmap->absolute_uri($req->uri));
      return OBVIUS_OK;
 }
