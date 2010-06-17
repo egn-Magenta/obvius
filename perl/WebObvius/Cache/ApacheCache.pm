@@ -209,8 +209,7 @@ sub execute_query {
 sub check_rightboxes {
      my ($this, $docs) = @_;
      
-     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3'],
-                                            anchored_regexp => 1);
+     return $this->check_vfields_for_docids($docs, [ 'rightboxes', 'boxes1', 'boxes2', 'boxes3']);
 }
 
 sub uniquify_simple {
@@ -235,7 +234,7 @@ sub bring_forth_sql_for_docsearch {
      my $docids = uniquify_simple(\@docids);
      
      my @docid_query;
-     if ($options{anchored_regexp}) {
+     if ($options{anchored_regexp} || @$docids > 5) {
           my $docids = join '|', @$docids;
           push @docid_query, "$str regexp '^[0-9]+:/($docids)\\\\.docid'";
      } else {
@@ -394,8 +393,7 @@ sub perform_command_sophisticated_rightbox_clear {
      while (my @cur_docids = splice @docids, 0, 5000) {
           push @docids_to_clear, 
                @{$this->check_rightboxes(\@cur_docids, 
-                                         ['rightboxes', 'boxes1', 'boxes2', 'boxes3'],
-                                         anchored_regexp => 1)};
+                                         ['rightboxes', 'boxes1', 'boxes2', 'boxes3'])};
      }
      
      
