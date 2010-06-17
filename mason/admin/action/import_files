@@ -142,14 +142,17 @@ sub upload_image {
 
     local $/ = undef;
     my ($title) = ($filename =~ m|/([^/]+)$|);
-    open (FH, $filename) or return 0;
+    my $fh;
+    open ($fh, $filename) or return 0;
 
-    my $raw = <FH>;
-
-    $data->param (data => \$raw);
-
+    my $filename = $m->scomp('/shared/place_file_in_upload',
+                             fh => $fh,
+			     type => $mime_type,
+			     filename => $filename);
+       		   	     
     my ( $w, $h ) = imgsize( \$raw );
 
+    $data->param( uploadfile => $filename );
     $data->param( width => $w );
     $data->param( height => $h );
     $data->param( size => -s $filename );

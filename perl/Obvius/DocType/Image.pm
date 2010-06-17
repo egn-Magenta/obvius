@@ -43,6 +43,30 @@ use File::Path;
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
 
+sub get_data {
+    my ($this,$vdoc,$obvius) = @_;
+    $obvius->get_version_fields($vdoc, ['data', 'uploadfile']);
+    my $data;
+    if (my $path = $vdoc->field('uploadfile')) {
+	$path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . '/' . $path;
+	$path =~ s!/+!/!g;
+	my $fh;
+	open $fh, $path || die "File not found: $path";
+	eval {
+	    local $/ = undef;
+	    $data = <$fh>;
+	};
+	close $fh;
+	if ($@) {
+	    die $@;
+	}
+    } else {
+	$data = $vdoc->field('data');
+    }
+    return $data;
+}
+	
+    
 sub raw_document_data {
     my ($this, $doc, $vdoc, $obvius, $input) = @_;
 
@@ -61,8 +85,8 @@ sub raw_document_data {
         }
     }
 
-    my $fields = $obvius->get_version_fields($vdoc, ['mimetype', 'data']);
-    return ($fields->param('mimetype'), $fields->param('data'));
+    my $fields = $obvius->get_version_fields($vdoc, ['mimetype']);
+    return ($fields->param('mimetype'), $this->get_data($vdoc, $obvius));
 }
 
 sub get_resized_data {
@@ -92,7 +116,7 @@ sub get_resized_data {
 
         return($mimetype, $data);
     } else {
-        my $org_data = $obvius->get_version_field($vdoc, 'data');
+        my $org_data = $this->get_data($vdoc, $obvius);
 
         my $image = Image::Magick->new;
         $image->BlobToImage($org_data);
@@ -207,10 +231,10 @@ sub create_new_version_handler {
 }
 
 our %magick_map = (
-                    'gif' => 'GIF',
-                    'jpeg' => 'JPEG',
-                    'png' => 'PNG'
-                );
+    'gif' => 'GIF',
+    'jpeg' => 'JPEG',
+    'png' => 'PNG'
+    );
 
 sub transform_image_at_upload() {
     my ($this, $fhref, $width, $height, $format, $quality) = @_;
