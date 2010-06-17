@@ -204,11 +204,7 @@ sub search {
                     });
      
      if ($res->is_success) {
-          #Horror of horrors, but we are in a hurry.
           my $content = from_json($res->content)->{response};
-          
-          return $content if !$content->{docs};
-          
           return $content;
      } else {
           die $res->content;
