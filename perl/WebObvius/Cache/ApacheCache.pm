@@ -238,7 +238,11 @@ sub bring_forth_sql_for_docsearch {
           my $docids = join '|', @$docids;
           push @docid_query, "$str regexp '^[0-9]+:/($docids)\\\\.docid'";
      } else {
-          @docid_query = map { "$str like '%/$_.docid%'" } @$docids;
+	 my @elems;
+	 for my $docid (@$docids) {
+	     push @elems, map { "'$_:/$docid.docid'" } (0..6);
+	 }
+	 @docid_query = map { "$str in (" . (join ',', @elems) . ")" } @$docids;
      }
 
      my $sql = join " or ", @docid_query;
