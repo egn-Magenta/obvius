@@ -242,7 +242,7 @@ sub bring_forth_sql_for_docsearch {
 	 for my $docid (@$docids) {
 	     push @elems, map { "'$_:/$docid.docid'" } (0..6);
 	 }
-	 @docid_query = map { "$str in (" . (join ',', @elems) . ")" } @$docids;
+	 @docid_query = "$str in (" . (join ',', @elems) . ")";
      }
 
      my $sql = join " or ", @docid_query;
@@ -252,23 +252,20 @@ sub bring_forth_sql_for_docsearch {
 sub check_vfields_for_docids {
      my ($this, $docs, $fields, %options) = @_;
      my $obvius = $this->{obvius};
-
+     my @res;
+     
      $fields = [ $fields ] if !ref $fields;
      $docs = [ $docs ] if !ref $docs;
-
+     my $fields_query = join ",", (("?") x @$fields);
+     
      my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
      return [] if !$docsearch_sql;
-
-     my $sql = <<END;
-select distinct docid from versions v natural join vfields vf where
-     vf.name = ? and v.public=1
-END
      
-     my @res;
-     for my $field (@$fields) {
-          my $query_sql = $sql . " and $docsearch_sql";
-          push @res, map { $_->{docid}} @{$this->execute_query($query_sql, $field)};
-     }
+     my $sql = "select distinct docid from versions v natural join vfields vf where
+	        vf.name in ($fields_query) and v.public=1";
+     
+     my $query_sql = $sql . " and $docsearch_sql";
+     push @res, map { $_->{docid}} @{$this->execute_query($query_sql, @$fields)};
 
      return \@res;
 }
