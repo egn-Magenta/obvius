@@ -370,13 +370,6 @@ sub handler ($$) {
      return FORBIDDEN if (!$is_admin && ($vdoc->Expires lt $req->notes('now')));
      return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
      
-     # For collecting newsletter statistics:
-     my $collect_newsletter_stats = ($obvius->config->param('newsletter_collect_stats') || 0);
-     if ($collect_newsletter_stats) {
-        use KU::Newsletter::Stats;
-	KU::Newsletter::Stats::click(WebObvius::Apache::apache_module('Request')-> new($req));
-     }
-
      my $doctype = $obvius->get_version_type($vdoc);
      
      my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
