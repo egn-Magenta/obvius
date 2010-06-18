@@ -262,10 +262,12 @@ sub check_vfields_for_docids {
      return [] if !$docsearch_sql;
      
      my $sql = "select distinct docid from versions v natural join vfields vf where
-	        vf.name in ($fields_query) and v.public=1";
+	        vf.name = ? and v.public=1";
      
      my $query_sql = $sql . " and $docsearch_sql";
-     push @res, map { $_->{docid}} @{$this->execute_query($query_sql, @$fields)};
+     for my $field (@$fields) {
+	 push @res, map { $_->{docid}} @{$this->execute_query($query_sql, $field)};
+     }
 
      return \@res;
 }
