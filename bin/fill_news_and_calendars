@@ -29,19 +29,37 @@ sub fetch_docids {
   return \@docids;
 }
 
-sub insert {
-  my ($endtable, $field, $regexp) = @_;
+sub get_docids {
+    my ($field, $regexp) = @_;
+    
+    my $docids = $obvius->execute_select("select v.docid docid from versions v join vfields vf on (v.docid = vf.docid and v.version = vf.version)  where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
+    return $docids;
+}
 
-  $obvius->execute_command("insert ignore into $endtable select v.docid from versions v join vfields vf on (v.docid = vf.docid and v.version = vf.version)
-                                       where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
+sub insert {
+  my ($table, $docids) = @_;
+  
+  $obvius->db_begin;
+  eval { 
+      $obvius->execute_command("delete from $table");
+      $obvius->execute_command("insert into $table (docid) values (?)", [ map { $_->{docid} } @$docids ]);
+  };
+  if ($@) {
+      $obvius->db_rollback;
+      die $@;
+  } else {
+      $obvius->db_commit;
+  }
 }
 
 eval { 
     for my $entity (@entities) {
 	$entity->{docids} = fetch_docids($entity->{types});
 	$entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
+	my $docids = [];
 	for my $field (@fields) {
-	    insert($entity->{table}, $field, $entity->{regexp});
+	    push @$docids, @{get_docids($field, $entity->{regexp})};
 	}
+	insert($entity->{table}, $entity->{regexp});
     }
 };
