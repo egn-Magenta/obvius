@@ -42,24 +42,23 @@ sub insert {
   $obvius->db_begin;
   eval { 
       $obvius->execute_command("delete from $table");
-      $obvius->execute_command("insert into $table (docid) values (?)", [ map { $_->{docid} } @$docids ]);
+      $obvius->execute_command("insert ignore into $table (docid) values (?)", [ map { [$_->{docid}] } @$docids ]);
   };
   if ($@) {
       $obvius->db_rollback;
+   
       die $@;
   } else {
       $obvius->db_commit;
   }
 }
 
-eval { 
-    for my $entity (@entities) {
+for my $entity (@entities) {
 	$entity->{docids} = fetch_docids($entity->{types});
 	$entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
 	my $docids = [];
 	for my $field (@fields) {
 	    push @$docids, @{get_docids($field, $entity->{regexp})};
 	}
-	insert($entity->{table}, $entity->{regexp});
-    }
-};
+	insert($entity->{table}, $docids);
+}
