@@ -32,7 +32,7 @@ sub fetch_docids {
 sub get_docids {
     my ($field, $regexp) = @_;
     
-    my $docids = $obvius->execute_select("select v.docid docid from versions v join vfields vf on (v.docid = vf.docid and v.version = vf.version)  where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
+    my $docids = $obvius->execute_select("select v.docid docid from versions v straight_join vfields vf on (v.docid = vf.docid and v.version = vf.version)  where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
     return $docids;
 }
 
