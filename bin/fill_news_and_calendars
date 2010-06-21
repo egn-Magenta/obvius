@@ -36,10 +36,8 @@ sub insert {
                                        where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
 }
 
-$obvius->db_begin;
 eval { 
     for my $entity (@entities) {
-	$obvius->execute_command("delete from $entity->{table}");
 	$entity->{docids} = fetch_docids($entity->{types});
 	$entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
 	for my $field (@fields) {
@@ -47,9 +45,3 @@ eval {
 	}
     }
 };
-if ($@) {
-    $obvius->db_rollback;
-    die $@;
-} else {
-    $obvius->db_commit;
-}
