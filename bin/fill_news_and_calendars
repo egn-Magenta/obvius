@@ -32,15 +32,24 @@ sub fetch_docids {
 sub insert {
   my ($endtable, $field, $regexp) = @_;
 
-  $obvius->execute_command("insert ignore into $endtable select docid from vfields vf 
-                                       natural join versions v where v.public = 1 AND vf.name = ? 
-                                       and vf.text_value regexp ?", $field, $regexp);
+  $obvius->execute_command("insert ignore into $endtable select v.docid from versions v straight_join vfields vf on (v.docid = vf.docid and v.version = vf.version)
+                                       where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
 }
 
-for my $entity (@entities) {
-  $entity->{docids} = fetch_docids($entity->{types});
-  $entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
-  for my $field (@fields) {
-    insert($entity->{table}, $field, $entity->{regexp});
-  }
+$obvius->db_begin;
+eval { 
+    for my $entity (@entities) {
+	$obvius->execute_command("delete from $entity->{table}");
+	$entity->{docids} = fetch_docids($entity->{types});
+	$entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
+	for my $field (@fields) {
+	    insert($entity->{table}, $field, $entity->{regexp});
+	}
+    }
+};
+if ($@) {
+    $obvius->db_rollback;
+    die $@;
+} else {
+    $obvius->db_commit;
 }
