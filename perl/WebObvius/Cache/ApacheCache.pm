@@ -373,7 +373,7 @@ select distinct(docid) from
 where
     v.public = 1 AND v.type = ?;
 END
-     my $docids = $this->execute_query($query, $doctype->Id, $doctype->Id);
+     my $docids = $this->execute_query($query, $doctype->Id);
 
      my @docids = map { $_->{docid} } @$docids;
      return $this->make_clear_uris(\@docids);
