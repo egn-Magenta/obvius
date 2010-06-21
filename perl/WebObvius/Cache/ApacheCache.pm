@@ -371,7 +371,7 @@ sub perform_command_clear_doctype {
 select distinct(docid) from 
     documents d inner join versions v on (v.docid = d.id)
 where
-    v.public = 1 AND (d.type = ? OR v.type = ?);
+    v.public = 1 AND v.type = ?;
 END
      my $docids = $this->execute_query($query, $doctype->Id, $doctype->Id);
 
