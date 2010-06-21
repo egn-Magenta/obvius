@@ -32,7 +32,7 @@ sub fetch_docids {
 sub insert {
   my ($endtable, $field, $regexp) = @_;
 
-  $obvius->execute_command("insert ignore into $endtable select v.docid from versions v straight_join vfields vf on (v.docid = vf.docid and v.version = vf.version)
+  $obvius->execute_command("insert ignore into $endtable select v.docid from versions v join vfields vf on (v.docid = vf.docid and v.version = vf.version)
                                        where v.public = 1 AND vf.name = ? and vf.text_value regexp ?", $field, $regexp);
 }
 
