@@ -225,51 +225,30 @@ sub uniquify_simple {
      return \@res;
 }
 
-sub bring_forth_sql_for_docsearch {
-     my ($this, $docs, $str, %options) = @_;
-     
-     my @docids = grep { $_ && /^\d+$/ } map { ref $_ ? $_->{docid} : $_ } @$docs;
-     return if !@docids;
-
-     my $docids = uniquify_simple(\@docids);
-     
-     my @docid_query;
-     if ($options{anchored_regexp} || @$docids > 5) {
-          my $docids = join '|', @$docids;
-          push @docid_query, "$str regexp '^[0-9]+:/($docids)\\\\.docid'";
-     } else {
-	 my @elems;
-	 for my $docid (@$docids) {
-	     push @elems, map { "'$_:/$docid.docid'" } (0..6);
-	 }
-	 @docid_query = "$str in (" . (join ',', @elems) . ")";
-     }
-
-     my $sql = join " or ", @docid_query;
-     return $sql;
-}
-     
 sub check_vfields_for_docids {
      my ($this, $docs, $fields, %options) = @_;
      my $obvius = $this->{obvius};
-     my @res;
      
      $fields = [ $fields ] if !ref $fields;
      $docs = [ $docs ] if !ref $docs;
-     my $fields_query = join ",", (("?") x @$fields);
-     
-     my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
-     return [] if !$docsearch_sql;
-     
-     my $sql = "select distinct docid from versions v natural join vfields vf where
-	        vf.name = ? and v.public=1";
-     
-     my $query_sql = $sql . " and $docsearch_sql";
-     for my $field (@$fields) {
-	 push @res, map { $_->{docid}} @{$this->execute_query($query_sql, $field)};
-     }
 
-     return \@res;
+     my @query_docs;
+     for my $d (@$docs) { 
+	 push @query_docs, map { "$_:/$d.docid" } (0..9);
+     }
+     
+     my @res;
+     while (my @cur_docs = splice @query_docs, 0, 1000) {
+	 my $docs_question = join ",", (("?") x @cur_docs);
+	 
+	 my $sql = "select distinct docid from versions v natural join vfields vf where
+	        vf.name = ? and v.public=1 and vf.text_value in ($docs_question)";
+	 for my $field (@$fields) {
+	     push @res, map { $_->{docid}} @{ $this->execute_query($sql, $field, @cur_docs) };
+	 }
+     }
+     
+     return uniquify_simple(\@res);
 }
 
      
@@ -376,6 +355,7 @@ END
      my $docids = $this->execute_query($query, $doctype->Id);
 
      my @docids = map { $_->{docid} } @$docids;
+
      return $this->make_clear_uris(\@docids);
 }
 	 
