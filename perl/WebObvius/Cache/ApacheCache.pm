@@ -256,8 +256,8 @@ sub find_referrers {
      my ($this, $docs) = @_;
 
      my $docids = $this->check_rightboxes($docs);
-
      my $res = $this->make_clear_uris($docids);
+
      return $res;
 }
 
@@ -519,14 +519,13 @@ sub find_dirty {
        grep { $_->{docid}} @$vals;
      my $special_actions = $this->special_actions(\@docids_doctypes);
 
-     my @docids		= grep { $_ } map { {docid => $_->{docid}, uri => $_->{uri} }} @$vals; 
+     my @docids		= grep { $_ } map {  $_->{docid} } @$vals; 
      my $referrers = $this->find_referrers(\@docids);
      
      my @clear_tags = grep { $_ } 
                  map { $_->{clear_tags} } @{$cache_objects->request_values('clear_tags')};
      my @clear_tags_command = @{$this->clear_tags} if @clear_tags;
                    
-     
      my @commands = grep { $_ } 
        (@clear_recursively,
 	@$referrers,
@@ -536,7 +535,7 @@ sub find_dirty {
         @$moved_documents,
         @clear_tags_command
        );
-
+     
      return \@commands;
 }
 
