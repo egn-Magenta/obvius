@@ -29,18 +29,46 @@ sub fetch_docids {
   return \@docids;
 }
 
-sub insert {
-  my ($endtable, $field, $regexp) = @_;
+sub get_docids {
+    my ($field, $docids_in) = @_;
+    
+    my @exprs;
+    for my $d (@$docids_in) {
+	push @exprs, map { "$_:/$d.docid" } (0..8);
+    }
+    
+    my @result;
+    while (my @docs = splice @exprs, 0, 1000) { 
+	my $question = (join ",", (("?") x @docs));
+	my $docids = $obvius->execute_select("select v.docid docid from versions v join vfields vf on (v.docid = vf.docid and v.version = vf.version)  where v.public = 1 AND vf.name = ? and vf.text_value in ($question)", $field, @docs);
+	push @result, map { $_->{docid} } @$docids;
+    }
+    
+    return \@result;
+}
 
-  $obvius->execute_command("insert ignore into $endtable select docid from vfields vf 
-                                       natural join versions v where v.public = 1 AND vf.name = ? 
-                                       and vf.text_value regexp ?", $field, $regexp);
+sub insert {
+  my ($table, $docids) = @_;
+  
+  $obvius->db_begin;
+  eval { 
+      $obvius->execute_command("delete from $table");
+      $obvius->execute_command("insert ignore into $table (docid) values (?)", [ map { [ $_ ] } @$docids ] );
+  };
+  if ($@) {
+      $obvius->db_rollback;
+   
+      die $@;
+  } else {
+      $obvius->db_commit;
+  }
 }
 
 for my $entity (@entities) {
-  $entity->{docids} = fetch_docids($entity->{types});
-  $entity->{regexp} = '^[0-9]+:/(' . (join '|', @{$entity->{docids}}) . ')\\.docid$';
-  for my $field (@fields) {
-    insert($entity->{table}, $field, $entity->{regexp});
-  }
+	$entity->{docids} = fetch_docids($entity->{types});
+	my $docids = [];
+	for my $field (@fields) {
+	    push @$docids, @{get_docids($field, $entity->{docids})};
+	}
+	insert($entity->{table}, $docids);
 }

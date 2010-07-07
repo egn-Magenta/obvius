@@ -225,48 +225,30 @@ sub uniquify_simple {
      return \@res;
 }
 
-sub bring_forth_sql_for_docsearch {
-     my ($this, $docs, $str, %options) = @_;
-     
-     my @docids = grep { $_ && /^\d+$/ } map { ref $_ ? $_->{docid} : $_ } @$docs;
-     return if !@docids;
-
-     my $docids = uniquify_simple(\@docids);
-     
-     my @docid_query;
-     if ($options{anchored_regexp} || @$docids > 5) {
-          my $docids = join '|', @$docids;
-          push @docid_query, "$str regexp '^[0-9]+:/($docids)\\\\.docid'";
-     } else {
-          @docid_query = map { "$str like '%/$_.docid%'" } @$docids;
-     }
-
-     my $sql = join " or ", @docid_query;
-     return $sql;
-}
-     
 sub check_vfields_for_docids {
      my ($this, $docs, $fields, %options) = @_;
      my $obvius = $this->{obvius};
-
+     
      $fields = [ $fields ] if !ref $fields;
      $docs = [ $docs ] if !ref $docs;
 
-     my $docsearch_sql = $this->bring_forth_sql_for_docsearch($docs, "text_value", %options);
-     return [] if !$docsearch_sql;
-
-     my $sql = <<END;
-select distinct docid from versions v natural join vfields vf where
-     vf.name = ? and v.public=1
-END
+     my @query_docs;
+     for my $d (@$docs) { 
+	 push @query_docs, map { "$_:/$d.docid" } (0..9);
+     }
      
      my @res;
-     for my $field (@$fields) {
-          my $query_sql = $sql . " and $docsearch_sql";
-          push @res, map { $_->{docid}} @{$this->execute_query($query_sql, $field)};
+     while (my @cur_docs = splice @query_docs, 0, 1000) {
+	 my $docs_question = join ",", (("?") x @cur_docs);
+	 
+	 my $sql = "select distinct docid from versions v natural join vfields vf where
+	        vf.name = ? and v.public=1 and vf.text_value in ($docs_question)";
+	 for my $field (@$fields) {
+	     push @res, map { $_->{docid}} @{ $this->execute_query($sql, $field, @cur_docs) };
+	 }
      }
-
-     return \@res;
+     
+     return uniquify_simple(\@res);
 }
 
      
@@ -274,8 +256,8 @@ sub find_referrers {
      my ($this, $docs) = @_;
 
      my $docids = $this->check_rightboxes($docs);
-
      my $res = $this->make_clear_uris($docids);
+
      return $res;
 }
 
@@ -368,11 +350,12 @@ sub perform_command_clear_doctype {
 select distinct(docid) from 
     documents d inner join versions v on (v.docid = d.id)
 where
-    v.public = 1 AND (d.type = ? OR v.type = ?);
+    v.public = 1 AND v.type = ?;
 END
-     my $docids = $this->execute_query($query, $doctype->Id, $doctype->Id);
+     my $docids = $this->execute_query($query, $doctype->Id);
 
      my @docids = map { $_->{docid} } @$docids;
+
      return $this->make_clear_uris(\@docids);
 }
 	 
@@ -536,14 +519,13 @@ sub find_dirty {
        grep { $_->{docid}} @$vals;
      my $special_actions = $this->special_actions(\@docids_doctypes);
 
-     my @docids		= grep { $_ } map { {docid => $_->{docid}, uri => $_->{uri} }} @$vals; 
+     my @docids		= grep { $_ } map {  $_->{docid} } @$vals; 
      my $referrers = $this->find_referrers(\@docids);
      
      my @clear_tags = grep { $_ } 
                  map { $_->{clear_tags} } @{$cache_objects->request_values('clear_tags')};
      my @clear_tags_command = @{$this->clear_tags} if @clear_tags;
                    
-     
      my @commands = grep { $_ } 
        (@clear_recursively,
 	@$referrers,
@@ -553,7 +535,7 @@ sub find_dirty {
         @$moved_documents,
         @clear_tags_command
        );
-
+     
      return \@commands;
 }
 
