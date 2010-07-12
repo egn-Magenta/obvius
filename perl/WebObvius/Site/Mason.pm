@@ -43,7 +43,7 @@ our $VERSION="1.0";
 use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;
 
-use WebObvius::Cache::Flushing;
+#use WebObvius::Cache::Flushing;
 use WebObvius::Cache::Cache;
 use Encode;
 
