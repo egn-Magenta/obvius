@@ -2,6 +2,7 @@ package Obvius::DocType::Form;
 
 use strict; use warnings;
 
+use utf8;
 use Digest::MD5 qw(md5_hex);
 use Obvius;
 use Obvius::DocType;
@@ -618,8 +619,21 @@ sub get_upload_file {
           $data = <$fh>;
           close $fh;
      };
+     my $extra_headers;
 
-     return ($field_data->{type}, \$data, $field_data->{filename});
+#     $extra_headers->{'Content-Description'} = 'File Transfer';
+#     $extra_headers->{'Content-Transfer-Encoding'} = 'binary';
+#     $extra_headers->{'Expires'} = '0';
+#     $extra_headers->{'Cache-Control'} = 'must-revalidate, post-check=0, pre-check=0';
+#     $extra_headers->{''} = '';
+#     $extra_headers->{''} = '';
+
+
+
+#           ($mime_type, $data, $filename, $con_disp, $path, $extra_headers)
+#     return ($field_data->{type}, \$data, $field_data->{filename}, $con_disp, undef, $extra_headers);
+
+     return ('application/octet-stream', \$data, $field_data->{filename}, 'attachment', undef, $extra_headers);
 }
      
 sub generate_excel {
