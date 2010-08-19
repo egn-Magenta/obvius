@@ -464,7 +464,7 @@ sub send_advert_mail {
      my ($vdoc, $count, $obvius) = @_;
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
-     my $subject = "Overvaagning af $uri";
+     my $subject = "Overvågning af $uri";
      my $msg = "Formularen på $uri har fået $count indtastninger.";
      
      mail_helper($vdoc, $subject, $msg, $obvius);
@@ -475,7 +475,7 @@ sub send_close_mail {
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
 
-     my $subject = "Formularen $uri er nu lukket for indtastninger";     
+     my $subject = "Formularen $uri er nu lukket for indtastninger";
      my $msg = "Formularen $uri har nu modtaget $count indtastninger,
 		og er nu lukket for yderligere indtastninger.";
 
@@ -720,11 +720,11 @@ sub delete_entries {
 our $translation_table = 
 { Dear => {
            en => 'Dear',
-           da => 'K�re'
+           da => 'Kære'
           },
   id => { 
          en => 'ID',
-         da => 'L�benr'
+         da => 'Løbenr'
         },
   tastede => {
               da => "Indtastede oplysninger",

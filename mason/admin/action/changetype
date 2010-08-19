@@ -53,6 +53,7 @@ foreach my $type (@{$obvius->{DOCTYPES}}) {
     if ($obvius->get_editpages($type)) {
         next if (defined $limit and !($type->{NAME} =~ /$limit/));
 	next unless $type->{ID};
+	next if ( $type->{ID} == 58 );
 
 	my $doctype = {
 		id              => $type-> {ID},
