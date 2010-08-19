@@ -464,8 +464,8 @@ sub send_advert_mail {
      my ($vdoc, $count, $obvius) = @_;
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
-     my $subject = "Overvågning af $uri";
-     my $msg = "Formularen på $uri har fået $count indtastninger.";
+     my $subject = "Overvaagning af $uri";
+     my $msg = "Formularen pÃ¥ $uri har fÃ¥et $count indtastninger.";
      
      mail_helper($vdoc, $subject, $msg, $obvius);
 }
@@ -474,11 +474,11 @@ sub send_close_mail {
      my ($vdoc, $count, $obvius) = @_;
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
-     my $subject = "Formularen på $uri er nu lukket for indtastninger";
 
+     my $subject = "Formularen $uri er nu lukket for indtastninger";     
      my $msg = "Formularen $uri har nu modtaget $count indtastninger,
-                og er nu lukket for yderligere indtastninger.";
-     
+		og er nu lukket for yderligere indtastninger.";
+
      mail_helper($vdoc, $subject, $msg, $obvius);
 }
 
