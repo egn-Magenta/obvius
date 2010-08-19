@@ -43,7 +43,7 @@ our $VERSION="1.0";
 use WebObvius::Template::MCMS;
 use WebObvius::Template::Provider;
 
-use WebObvius::Cache::Flushing;
+#use WebObvius::Cache::Flushing;
 use WebObvius::Cache::Cache;
 use Encode;
 
@@ -383,7 +383,18 @@ sub handler ($$) {
           return NOT_FOUND if (Apache->define('NOREDIR'));
           return $this->redirect($req, $alternate, 'force-external');
      }
-
+     # For collecting newsletter statistics:
+     my $collect_newsletter_stats = ($obvius->config->param('newsletter_collect_stats') || 0);
+     if ($collect_newsletter_stats) {
+	 eval { 
+	     require KU::Newsletter::Stats;
+	     KU::Newsletter::Stats::click(WebObvius::Apache::apache_module('Request')-> new($req));
+	 };
+	 if ($@) {
+	     warn $@;
+	 }
+     }
+     
      # Documents returning data which shouldnt be handled by the portal 
      # (eg. a download document), but directly
      # by the browser should have a method called "raw_document_data"
@@ -787,7 +798,7 @@ sub set_mime_type_and_content_disposition {
      push @con_disps,  "filename=$options{output_filename}" if $options{output_filename};
      
      if (@con_disps) {
-          my $con_disp_header = join ';', @con_disps;
+          my $con_disp_header = join '; ', @con_disps;
           $req->header_out('Content-Disposition', $con_disp_header);
      }
 
@@ -809,6 +820,9 @@ sub output_data {
         Encode::_utf8_off($$data_ref);
      }
      $this->set_mime_type_and_content_disposition($req, %options);
+
+     $req->no_cache(0);
+
      # The spec. says that it is not necessary to advertise this:
      # $req->header_out('Accept-Ranges'=>'bytes');
      

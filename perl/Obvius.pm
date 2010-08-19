@@ -1683,6 +1683,7 @@ sub read_doctypes_table {
         }
         # If neither the doctype itself nor the XTRA_TYPES could be found, try the parent:
         # For this to work, we need to handle parents before children:
+	no strict 'refs';
         unless (defined $$tester) {
             my $parentdoctype=$this->get_doctype_by_id($rec->{parent}) || $rec;
             my $doctypename="Obvius::DocType::$rec->{name}";
@@ -1700,7 +1701,7 @@ sub read_doctypes_table {
                 $this->log->warn(" FALLBACK FAILED: $ev_error");
             }
         }
-
+        use strict 'refs';
         if (defined $doctype) {
             if ($make_objects) {
                 #$this->log->debug("INSTANTIATING $doctype");
@@ -2758,6 +2759,7 @@ sub alternative_langs {
      my ($this, $doc) = @_;
      
      my $subsite_doc = $this->find_closest_subsite($doc);
+     return [] if !$subsite_doc;
      my $docparams = $this->get_docparams($subsite_doc);
      my @langs;
 
