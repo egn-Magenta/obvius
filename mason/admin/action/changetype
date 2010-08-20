@@ -46,6 +46,7 @@ if(my $dt_value = $docparams->param('admin_doctypes_available')) {
 
 my %labels=();
 my @choices=();
+use Data::Dumper;
 
 my ( @doctypes, @doctypes2);
 foreach my $type (@{$obvius->{DOCTYPES}}) {
