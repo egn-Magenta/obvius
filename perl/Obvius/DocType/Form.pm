@@ -65,6 +65,9 @@ sub preprocess_fields {
           }
           $of->{name} = $field->{name};
           $of->{value} = ensure_decoded($value);
+	  if (!ref($of->{value})) { 
+	      $of->{value} =~ s/(?:^\s+|\s+$)//g;
+	  }
           $of->{type} = $field->{type};
      }
 
@@ -115,9 +118,9 @@ sub validate_by_rule {
      } elsif ($type eq 'x_checked') {
           return (ref $value eq 'ARRAY' && @$value != $arg, $error_msg);
      } elsif ($type eq 'min_length') {
-          return (defined $value && $value ne "" && length($value) > $arg, $error_msg);
-     } elsif ($type eq 'max_length') {
           return (defined $value && $value ne "" && length($value) < $arg, $error_msg);
+     } elsif ($type eq 'max_length') {
+          return (defined $value && $value ne "" && length($value) > $arg, $error_msg);
      } elsif ($type eq 'email') {
           return ($value !~ /.+@.+\..+/, 'Ugyldig emailadresse');
      }
@@ -181,7 +184,7 @@ sub handle_submitted {
 
      $obvius->get_version_fields($vdoc, ['entries_for_advert', 'entries_for_close', 'captcha']);
      my $captcha_code = $vdoc->field('captcha');
-     my $captcha_success = $captcha_code ? check_captcha_from_input($input) : 1;
+     my $captcha_success = !$captcha_code || check_captcha_from_input($input);
      $output->param(captcha_success => $captcha_success);
      
      return OBVIUS_OK if !$captcha_success;
@@ -464,8 +467,8 @@ sub send_advert_mail {
      my ($vdoc, $count, $obvius) = @_;
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
-     my $subject = "Overvågning af $uri";
-     my $msg = "Formularen på $uri har fået $count indtastninger.";
+     my $subject = "OvervÃ¥gning af $uri";
+     my $msg = "Formularen pÃ¥ $uri har fÃ¥et $count indtastninger.";
      
      mail_helper($vdoc, $subject, $msg, $obvius);
 }
@@ -474,7 +477,7 @@ sub send_close_mail {
      my ($vdoc, $count, $obvius) = @_;
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
-     my $subject = "Formularen på $uri er nu lukket for indtastninger";
+     my $subject = "Formularen pÃ¥ $uri er nu lukket for indtastninger";
 
      my $msg = "Formularen $uri har nu modtaget $count indtastninger,
                 og er nu lukket for yderligere indtastninger.";
@@ -720,11 +723,11 @@ sub delete_entries {
 our $translation_table = 
 { Dear => {
            en => 'Dear',
-           da => 'Kære'
+           da => 'KÃ¦re'
           },
   id => { 
          en => 'ID',
-         da => 'Løbenr'
+         da => 'LÃ¸benr'
         },
   tastede => {
               da => "Indtastede oplysninger",
