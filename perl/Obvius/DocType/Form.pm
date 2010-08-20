@@ -478,10 +478,9 @@ sub send_close_mail {
      
      my $uri = get_full_uri($vdoc->Docid, $obvius);
      my $subject = "Formularen på $uri er nu lukket for indtastninger";
-
      my $msg = "Formularen $uri har nu modtaget $count indtastninger,
-                og er nu lukket for yderligere indtastninger.";
-     
+		og er nu lukket for yderligere indtastninger.";
+
      mail_helper($vdoc, $subject, $msg, $obvius);
 }
 
@@ -624,19 +623,7 @@ sub get_upload_file {
      };
      my $extra_headers;
 
-#     $extra_headers->{'Content-Description'} = 'File Transfer';
-#     $extra_headers->{'Content-Transfer-Encoding'} = 'binary';
-#     $extra_headers->{'Expires'} = '0';
-#     $extra_headers->{'Cache-Control'} = 'must-revalidate, post-check=0, pre-check=0';
-#     $extra_headers->{''} = '';
-#     $extra_headers->{''} = '';
-
-
-
-#           ($mime_type, $data, $filename, $con_disp, $path, $extra_headers)
-#     return ($field_data->{type}, \$data, $field_data->{filename}, $con_disp, undef, $extra_headers);
-
-     return ('application/octet-stream', \$data, $field_data->{filename}, 'attachment', undef, $extra_headers);
+     return ($field_data->{type}, \$data, $field_data->{filename}, 'attachment', undef, $extra_headers);
 }
      
 sub generate_excel {
