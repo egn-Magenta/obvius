@@ -181,7 +181,7 @@ sub handle_submitted {
 
      $obvius->get_version_fields($vdoc, ['entries_for_advert', 'entries_for_close', 'captcha']);
      my $captcha_code = $vdoc->field('captcha');
-     my $captcha_success = $captcha_code ? check_captcha_from_input($input) : 1;
+     my $captcha_success = $captcha_code ? WebObvius::Captcha::check_captcha_from_input($input) : 1;
      $output->param(captcha_success => $captcha_success);
      
      return OBVIUS_OK if !$captcha_success;
