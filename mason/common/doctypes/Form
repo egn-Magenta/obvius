@@ -20,7 +20,15 @@ function onsubmit_formhandler() {
     <div class="error" style="border: 1px solid rgb(144, 26, 30); margin: 0pt 0pt 1em; padding: 6px; background-color: rgb(243, 243, 243); font-size: 14px; color: rgb(144, 26, 30); text-align: center;">
       <span><& /shared/msg, text => 'Obs, fejl i udfyldningen af formularen' &> </span>
     </div>
+
 % }
+% if ($vdoc->field('captcha') && $output->param('captcha_success') eq '0') {
+    <div class="error" style="border: 1px solid rgb(144, 26, 30); margin: 0pt 0pt 1em; padding: 6px; background-color: rgb(243, 243, 243); font-size: 14px; color: rgb(144, 26, 30); text-align: center;">
+          <span><& /shared/trans, da => "Kodefeltet blev desværre ikke udfyldt korrekt",
+                       en => "There was an error in your captcha" &></span>    
+    </div>
+% }
+
 %if($output->param('flush_xml')) {
 <& form_files/flush_xml, %ARGS &>
 %} else {
@@ -95,6 +103,7 @@ function onsubmit_formhandler() {
 <div class="error">
 <& /shared/msg, text=>"You will need to correct the entries in the following fields" &>.
 <& /shared/msg, text=>"Please click the field name to correct the entry in the form below" &>.
+
 <ul>
 %for(@$invalid) {
     <li><a href="#<% $_ %>"><% $fields_by_name{$_}->{title} %></a></li>

@@ -65,7 +65,7 @@ sub preprocess_fields {
           }
           $of->{name} = $field->{name};
           $of->{value} = ensure_decoded($value);
-	  if (!ref($of->{value})) { 
+	  if (!ref ($of->{value})) { 
 	      $of->{value} =~ s/(?:^\s+|\s+$)//g;
 	  }
           $of->{type} = $field->{type};
@@ -83,6 +83,7 @@ sub is_unique {
                                         where docid=? and name=? and value=? and 
                                         not fe.deleted",
                                         $docid, $name, $value);
+     
      return !@$res;
 }
 
@@ -150,7 +151,7 @@ sub validate_entry {
 
      if ($field->{has_value}) {
 	 for my $vr (@$valrules) {
-	     my ($error, $msg) = validate_by_rule($field->{value}, $vr);
+	   my ($error, $msg) = validate_by_rule($field->{value}, $vr);
 	     if ($error) {
 		 $field->{invalid} = $msg;
 		 last;
@@ -184,7 +185,7 @@ sub handle_submitted {
 
      $obvius->get_version_fields($vdoc, ['entries_for_advert', 'entries_for_close', 'captcha']);
      my $captcha_code = $vdoc->field('captcha');
-     my $captcha_success = !$captcha_code || check_captcha_from_input($input);
+     my $captcha_success = !$captcha_code || WebObvius::Captcha::check_captcha_from_input($input);
      $output->param(captcha_success => $captcha_success);
      
      return OBVIUS_OK if !$captcha_success;
@@ -504,13 +505,13 @@ sub mail_helper {
      
      $subject = encode_base64($subject);
      $subject =~ s/\n//g;
-     $subject = "=?UTF-8?B?" . $subject . "?=";
+     $subject = "=?LATIN-1?B?" . $subject . "?=";
      
      for my $mt (@mailto) {
           $msg =<<END;
 To: <$mt>
 From: <$from>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=latin-1
 Content-Transfer-Encoding: 8bit
 Subject: $subject
 

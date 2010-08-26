@@ -42,7 +42,7 @@ my $fields = $formdata || [];
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 
 
-my $from = $mailto;
+my $from = 'noreply@adm.ku.dk';
 
 # Try to make the mail originate from whoever filled the
 # form. Magic fieldnames used are "email" and "name".
