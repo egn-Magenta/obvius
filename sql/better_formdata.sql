@@ -4,7 +4,6 @@ create table if not exists formdata_entry (
        entry_nr integer unsigned not null,
        time datetime not null,
        deleted boolean not null default false,
-       foreign key(docid) references documents(id),
        unique (docid, entry_nr)) 
            character set utf8 
            collate utf8_danish_ci;
@@ -19,3 +18,4 @@ create table if not exists formdata_entry_data (
           character set utf8
           collate utf8_danish_ci;
        
+alter table formdata_entry drop foreign key formdata_entry_ibfk_1
