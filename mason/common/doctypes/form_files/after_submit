@@ -29,7 +29,9 @@ for my $mailto  (@mailto) {
      $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailtxt]));
      $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
      if ( $mail_error ) {
-        print STDERR "\nafter_submit mail error: $mail_error\n";
+        use POSIX qw(strftime);
+        my $today = strftime( "%Y-%m-%d %H:%M:%S", localtime );
+        print STDERR "\n$today: after_submit mail error: $mail_error\n";
      }
 }
 my $redirect_uri = $uri;

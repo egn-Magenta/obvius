@@ -2659,7 +2659,9 @@ sub send_mail {
      
      my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => 1) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
      if ( $mail_error ) {
-         print STDERR "\nObvius-send_mail: $mail_error\n";
+         use POSIX qw(strftime);
+         my $today = strftime( "%Y-%m-%d %H:%M:%S", localtime );
+         print STDERR "\n$today: Obvius send_mail: $mail_error\n";
          return;
      }
  
