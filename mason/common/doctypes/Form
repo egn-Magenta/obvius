@@ -2,9 +2,9 @@
 <iframe id="form_receiver" name="form_receiver" style="display: none;"></iframe>
 <script type="text/javascript">
 $(function () {
-   if (window.parent.document.getElementById('content')) {
-       window.parent.document.getElementById('content').innerHTML = window.document.getElementById('content').innerHTML;
-   }
+//   if (window.parent.document.getElementById('content')) {
+//       window.parent.document.getElementById('content').innerHTML = window.document.getElementById('content').innerHTML;
+//   }
 });
 
 function onsubmit_formhandler() {
@@ -126,7 +126,7 @@ function onsubmit_formhandler() {
 
 % $r->notes('fieldsets' => 0);
 <form enctype="multipart/form-data" name="pageform"  onsubmit="onsubmit_formhandler(); return true;"
-      action="<% $prefix . $uri %>" method="post" target="form_receiver">
+      action="<% $prefix . $uri %>" method="post">
 <input type="hidden" name="obvius_form_submitted" value="1" />
 
 %for(@$fields) {
