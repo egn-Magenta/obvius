@@ -501,7 +501,7 @@ sub mail_helper {
      $obvius->get_version_fields($vdoc, ['mailto']);
      my @mailto = split /;/, $vdoc->field('mailto');
      
-     my $from = 'noreply@adm.ku.dk';
+     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
      
      $subject = encode_base64($subject);
      $subject =~ s/\n//g;
@@ -788,7 +788,7 @@ sub send_mail {
      my $uri = get_full_uri($vdoc->Docid, $obvius);
      my $form = translate("formular", $vdoc);
      
-     my $from = 'noreply@adm.ku.dk';
+     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
      my $mailmsg = <<END;
 To:      $to
 From:    $from
