@@ -62,33 +62,4 @@ sub raw_document_data {
     }
 }
 
-
 1;
-__END__
-
-=head1 NAME
-
-Obvius::DocType::Upload - document type for file uploads.
-
-=head1 SYNOPSIS
-
-  used automatically by Obvius.
-
-=head1 DESCRIPTION
-
-This document type is special in that it can be used to store files of
-all kinds. The raw data is returned when the document is retrieved.
-
-Magically a Content-Disposition is set if the name has a '.' in it(!)
-
-=head1 AUTHOR
-
-Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
-René Seindahl,
-Adam Sjøgren (asjo@magenta-aps.dk)
-
-=head1 SEE ALSO
-
-L<Obvius::DocType>.
-
-=cut
