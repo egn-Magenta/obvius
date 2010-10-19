@@ -76,20 +76,20 @@ if($new_document) {
     # Make a fake doc:
 
     my $fake_doc = new Obvius::Document({
-                                            id => 0,
-                                            parent => $doc->Id,
-                                            owner => $doc->Owner,
-                                            group => $doc->Group,
-                                            name => 'dummy'
+                                         id => 0,
+                                         parent => $doc->Id,
+                                         owner => $doc->Owner,
+                                         group => $doc->Group,
+                                         name => 'dummy'
                                         });
 
     # Make a fake vdoc...
     my $fake_vdoc = new Obvius::Version({
-                                            title => $m->scomp('/shared/msg', text=>"This document"),
-                                            seq => $value,
-                                            docid => 0,
-                                            type => 0,
-                                            lang => 'en'
+                                         title => $m->scomp('/shared/msg', text=>"This document"),
+                                         seq => $value,
+                                         docid => 0, 
+                                         type => 0,  
+                                         lang => 'en'                
                                         });
     $fake_vdoc->field('title' => $fake_vdoc->Title);
     $fake_vdoc->field('seq' => $fake_vdoc->Seq);
@@ -158,7 +158,7 @@ if ($current) {
 
 # Find prev_value/next_value:
 my $prev_seq;
-my ($current_seq)=grep { $_->{seq}==$current->{value} } @seqs;
+my ($current_seq)=grep { $_->{seq} == $current->{value} } @seqs;
 my $next_seq;
 foreach (@seqs) {
     $prev_seq=$_ if ($_->{seq}<$current_seq->{seq});
