@@ -117,8 +117,12 @@ sub db_error { return shift->{DB_Error}; };
 
 sub db_begin {
     my $this = shift;
+    $this->{DB}->DBHdl->{AutoCommit} = 0;
+    if($this->{DB}->DBHdl->{AutoCommit}) {
+	die "Couldn't switch to transactional.";
+    }
     $this->{LOG}->info("**** DB TRANSACTION BEGIN");
-    $this->{DB}->DBHdl->begin_work or die "Horror....\n" . $this->{DB}->DBHdl->errstr;
+    #$this->{DB}->DBHdl->begin_work; # or die "Horror....\n" . $this->{DB}->DBHdl->errstr;
     return 1;
 }
 
@@ -126,12 +130,14 @@ sub db_commit {
     my $this = shift;
     $this->{LOG}->info("**** DB TRANSACTION COMMIT");
     $this->{DB}->DBHdl->commit;
+    $this->{DB}->DBHdl->{AutoCommit} = 1;
  }
 
 sub db_rollback	{
      my $this = shift;
      $this->{LOG}->info("**** DB TRANSACTION ROLLBACK");
      $this->{DB}->DBHdl->rollback;
+    $this->{DB}->DBHdl->{AutoCommit} = 1;
 }
 
 # db_number_of_rows_in_table - returns the number of rows in the table
