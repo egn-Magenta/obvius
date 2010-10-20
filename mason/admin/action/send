@@ -37,6 +37,7 @@
 use Apache::File;
 use Text::Format;
 use Obvius::Hostmap;
+use Encode;
 </%once>
 %
 <%init>
@@ -78,7 +79,7 @@ $obvius->get_version_field($vdoc, qw(title));
 my $data=$m->comp('/default/generate_subsite');
 
 my ($tmpnam, $tmpfh)=Apache::File->tmpfile;
-print $tmpfh <<EOT;
+my $html_data=<<EOT;
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -92,10 +93,25 @@ $data
 </body>
 </html>
 EOT
+
+print $tmpfh $html_data;
+
 my $datatext=`/usr/bin/w3m -T text/html -dump '$tmpnam'`;
-$tmpfh->close();
-my $absolute_uri = $hostmap->absolute_uri($uri);
-my ($host, $uri_part) = $absolute_uri =~ m|^([^/]+)/(.*)|;
+
+my $host = $r->hostname;
+my $roothost = $obvius->config->param('roothost') || $host;
+my $uri_part = $uri;
+
+if(my $hostmap = $obvius->config->param('hostmap')) {
+    my $resolved_link = $hostmap->translate_uri($uri, '--bogus-no-sub-subsite') || '';
+    if($resolved_link =~ m!^https?://([^/]+)(.+)!) {
+      $host = $1;
+      $uri_part = $2;
+    }
+    
+    
+}
+
 
 # Format email
 my $email_text='';
@@ -105,13 +121,14 @@ $email_text.=join "\n",
     map { my $t=(length($_)>72 ? $formatter->format($_) : $_ . "\n"); $t }
     split "\r?\n\r?\n", $obvius_text;
 $email_text.="\n\n";
-$email_text.=" * http://$host/$uri_part\n" if ($obvius_show_url eq 'public');
-$email_text.=" * http://$host/admin/$uri_part?obvius_version=" . $m->scomp('/shared/escape_u', text=>$vdoc->Version) . "\n" if ($obvius_show_url eq 'admin');
+$email_text.=" * http://$host$uri_part\n" if ($obvius_show_url eq 'public');
+$email_text.=" * http://$roothost/admin${uri}?obvius_version=" . $m->scomp('/shared/escape_u', text=>$vdoc->Version) . "\n" if ($obvius_show_url eq 'admin');
 $email_text.="\n== == ==\n\n";
 $email_text.=$datatext;
 
 # Send
-$m->comp('/shared/send_email', to=>$obvius_to, from=>$obvius_from, subject=>$obvius_subject, text=>$email_text, debug=>1, encoding=>'utf-8');
+$m->comp('/shared/send_email', to=>$obvius_to, from=>$obvius_from, 
+         subject=>$obvius_subject, text=>$email_text, debug=>1, encoding=>'utf-8');
 
 $m->comp('/shared/set_status_message', status=>'OK', message=>['Email sent to', ' ', $obvius_to, '.']);
 
