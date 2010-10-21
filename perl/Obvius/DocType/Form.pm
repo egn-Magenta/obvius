@@ -511,8 +511,6 @@ sub mail_helper {
           $msg =<<END;
 To: <$mt>
 From: <$from>
-Content-Type: text/plain; charset=latin-1
-Content-Transfer-Encoding: 8bit
 Subject: $subject
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -795,6 +793,8 @@ sub send_mail {
 To:      $to
 From:    $from
 Subject: $subject
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 
 $prepend
 
