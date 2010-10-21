@@ -21,7 +21,7 @@ create table if not exists user_surveillance_sites (
 ) engine = INNODB $$
 
        
-drop trigger post_user_delete $$
+drop trigger if exists post_user_delete $$
 create trigger post_user_delete after delete on users
 for each row
 begin
@@ -32,7 +32,7 @@ begin
 	delete from grp_user where user=old.id;
 end $$
 
-drop trigger post_groups_delete $$
+drop trigger if exists post_groups_delete $$
 create trigger post_groups_delete after delete on groups
 for each row
 begin
@@ -47,7 +47,7 @@ begin
         delete from user_surveillance_sites where user_surveillance_sites.user_id = user_id;
 end $$
 
-drop trigger post_user_insert $$
+drop trigger if exists post_user_insert $$
 create trigger post_user_insert after insert on users 
 for each row
 begin 
@@ -57,7 +57,7 @@ begin
       end if;	  
 end $$
 
-drop trigger post_user_update $$
+drop trigger if exists post_user_update $$
 create trigger post_user_update after update on users 
 for each row
 begin 

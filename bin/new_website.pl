@@ -96,6 +96,13 @@ my @dirs=(
 	{ dir=>'docs', },
 	{ dir=>'docs/style', },
 	{ dir=>'docs/pics', },
+	{ dir=>'docs/grafik', },
+	{ dir=>'docs/grafik/pager', },
+	{ dir=>'docs/grafik/news', },
+	{ dir=>'docs/grafik/menu', },
+	{ dir=>'docs/grafik/obvius', },
+	{ dir=>'docs/css', },
+
 	{ dir=>'htdig', },
 	{ dir=>'htdig/db', group=>$options{httpd_group}, },
 	{ dir=>'htdig/common', group=>$options{httpd_group}, },
@@ -113,6 +120,7 @@ my @dirs=(
 	{ dir=>'var/edit_sessions/LOCKS', group=>$options{httpd_group}, },
 	{ dir=>'var/user_sessions', group=>$options{httpd_group}, },
 	{ dir=>'var/user_sessions/LOCKS', group=>$options{httpd_group}, },
+
 );
 
 push @dirs, (

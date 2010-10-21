@@ -253,7 +253,7 @@ CREATE_TABLE( comments,
   date         DATETIME NOT NULL,
   name         varchar(127) NOT NULL,
   email        varchar(63) NOT NULL,
-  show_email   BOOL NOT NULL DEFAULT 'F',
+  show_email   BOOL NOT NULL DEFAULT false,
   text text    NOT NULL,
   PRIMARY KEY  (docid,date)
 );

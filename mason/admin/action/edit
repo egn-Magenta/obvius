@@ -209,6 +209,7 @@ delete $session->{action}; # Return to nothing (i.e. view)
 
 my $internal_proxy = WebObvius::InternalProxy->new($obvius);
 my $internal_proxy_doctype = $obvius->get_doctype_by_name('InternalProxy');
+my $new_document = defined $session->{obvius_new_document_name};
 
 my $edit_doctype;
 $edit_doctype=$obvius->get_doctype_by_id($session->{obvius_new_doctypeid})
@@ -233,14 +234,17 @@ $obvius->log->info("Excess fields not stored: @{$status{excess}}") if ($status{e
 $obvius->log->debug("Valid fields: @{$status{valid}}") if ($status{valid});
 
 my ($status, $message);
+
+my $command = '';
+my %args;
+
 if ($status{invalid}) {
     # a) not ok, return to interface
     $m->comp('/shared/set_status_message', status=>'WARNING', message=>'Invalid data entered, please correct.');
 
     # XXX Do the values entered stay when we do this? NO! Fix it!
     return 'edit';
-} elsif ($edit_doctype->Id == $internal_proxy_doctype->Id) {
-    my $new_document = define $session->{obvius_new_document_name};
+} elsif ($internal_proxy_doctype && $edit_doctype->Id == $internal_proxy_doctype->Id) {
     my ($docid, $version);
     
     if ($new_document) {
@@ -250,7 +254,7 @@ if ($status{invalid}) {
 								owner => $obvius->user,
 								parent => $doc->Id,
 								name => $session->{obvius_new_document_name},
-								grpid => $session->{obvius_new_grpid};
+								grpid => $session->{obvius_new_grpid},
 								lang => $session->{obvius_new_language} || $vdoc->Lang,
 								fields => $values);
 	 };
@@ -259,7 +263,7 @@ if ($status{invalid}) {
 	      $version = 
 		$internal_proxy->create_internal_proxy_version(docid => $doc->Id,
 							       lang => $session->{obvius_new_language} || $vdoc->Lang,
-							       owner = $obvius->user,
+							       owner => $obvius->user,
 							       fields => $values);
 	 };
     }
@@ -274,8 +278,6 @@ if ($status{invalid}) {
     }
 } else {
 #   b) ok, send order
-    my $command;
-    my %args;
     if (defined $session->{obvius_new_document_name}) { # It's a whole new document:
         $command='new_document';
         %args=(
@@ -323,7 +325,7 @@ if ($status{invalid}) {
 	      # XXX This depends on the message set in Obvius::Queue::perform_new_version!
 	 }
     }
-    
+
     return '';
 </%init>
 %

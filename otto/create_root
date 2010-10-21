@@ -13,6 +13,7 @@ use POSIX qw(strftime);
 
 use Obvius;
 use Obvius::Config;
+use Obvius::DocType::Base;
 
 use Data::Dumper;
 

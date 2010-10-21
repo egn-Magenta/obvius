@@ -1,6 +1,6 @@
 To: <% $mailto %>
 From: <% $from %>
-Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://cms.ku.dk/admin<% $r->uri %>)
+Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $obvius->config->param('roothost') %>/admin<% $r->uri %>)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
@@ -42,7 +42,7 @@ my $fields = $formdata || [];
 my %fields_by_name = map { $_->{name} => $_ } @$fields;
 
 
-my $from = 'noreply@adm.ku.dk';
+my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
 
 # Try to make the mail originate from whoever filled the
 # form. Magic fieldnames used are "email" and "name".

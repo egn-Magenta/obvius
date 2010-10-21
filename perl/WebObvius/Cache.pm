@@ -46,11 +46,7 @@ sub handler {
     my $filename = $r->filename;
 
     $filename =~ s/^$prefix//;
-    $filename =~ m|([^/]*)/([^/]*/[^/]*)|;
-    # This fails sometimes (seemingly at random):
-    #   $r->content_type($2);
-    # But this seems to work all the time:
-    my $mimetype=$2;
+    my ($mimetype) = $filename =~ m|^([^/]+/[^/]+)|;
     $r->content_type($mimetype);
 
     # Most browsers doesn't understand get filenames ending in a slash.

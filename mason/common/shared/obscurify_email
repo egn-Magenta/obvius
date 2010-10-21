@@ -1,0 +1,123 @@
+<%method javascript>\
+<script type="text/javascript"><!--
+function decode_email(elem) {
+    var qstring = elem.href.substring(elem.href.indexOf("?") + 1);
+    var args = qstring.split("&");
+    var data = '';
+    for(var i=0;i<args.length;i++) {
+        var a = args[i].split("=");
+        if(a[0] == 'mailto_redirect') {
+            data = a[1];
+            break;
+        }
+    }
+    
+    if(data) {
+        data = unescape(data);
+        var result = "";
+        for(var i=0;i<data.length;i++) {
+            result += String.fromCharCode(data.charCodeAt(i) ^ 137);
+        }
+        elem.href = 'mailto:' + result;
+    }
+
+    return true;
+}
+// -->
+</script>\
+<%init>
+return '' if($r->notes('obscurify_email_js_ok'));
+$r->notes('obscurify_email_js_ok' => 1);
+# Check if we need to do an email redirect:
+$m->comp('/shared/obscurify_email:redirect');
+</%init>
+</%method>
+%
+%
+%
+<%method html>\
+<%doc>
+Returns an obscurified version of the email that uses HTML entities and comments
+to make it impossible to read the email from the plaintext source of the HTML
+page.
+</%doc>
+<%args>
+$email
+</%args>
+<% $result %>\
+<%init>
+my @chars = split("", $email);
+my $result = shift(@chars);
+my $count = 0;
+for(@chars) {
+    $count++;
+    # Escape every second character and always escape @
+    if($count % 2 == 1 || $_ eq '@') {
+        $result .= '&#' . ord($_) . ";";
+    } else {
+        $result .= $_;
+    }
+    
+    # add a HTML comment every 3 chars
+    if($count % 3 == 1) {
+        $result .= "<!--<" . join("", map { chr(int(rand(75)) + 48) } (1..int(2 + rand(5))) ) . "/>-->"
+    }
+}
+</%init>
+</%method>
+%
+%
+%
+<%method encode>\
+<%args>
+$email
+</%args>
+<% $encoded |u %>\
+<%init>
+my $encoded = $email;
+$encoded =~ s!(.)!chr(ord($1) ^ 137)!ge;
+</%init>
+</%method>
+%
+%
+%
+<%method decode>\
+<%args>
+$data
+</%args>
+<% $decoded %>\
+<%init>
+my $decoded = $data;
+$decoded =~ s!(.)!chr(ord($1) ^ 137)!ge;
+</%init>
+</%method>
+%
+%
+%
+<%method redirect>
+<%init>
+if(my $data = $r->param('mailto_redirect')) {
+    my $decoded = $m->scomp('obscurify_email:decode', data => $data);
+    $m->comp('/shared/redirect', location => "mailto:$decoded");
+}
+return '';
+</%init>
+</%method>
+%
+%
+%
+<%method email_link>\
+<%args>
+$email
+$class=>""
+</%args>\
+%unless($r->param('obscurify_email_js_ok')) {
+<& obscurify_email:javascript &>\
+%}
+<a<% $class %> href="<% $prefix . $uri %>?mailto_redirect=<% $encoded %>" onclick="decode_email(this)"><% $html %></a>\
+<%init>
+my $encoded = $m->scomp('/shared/obscurify_email:encode', email => $email);
+my $html = $m->scomp('/shared/obscurify_email:html', email => $email);
+$class = qq! class="$class"! if($class);
+</%init>
+</%method>

@@ -58,7 +58,9 @@ if ($upload) {
         $data->{mimetype}= $upload->type;
         $data->{size}= $upload->size;
 
-        $value = $m->scomp('/shared/place_file_in_upload', fh => $fh, type => $upload->type, filename => $upload->filename);
+        $value = $m->scomp('/shared/place_file_in_upload', 
+                           fh => $fh, type => $upload->type, 
+                           filename => $upload->filename);
         $new_upload = 1;
     }
 }

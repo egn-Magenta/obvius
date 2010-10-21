@@ -2,7 +2,7 @@ delimiter $$
 
 -- @user must be set ahead of deleting the document to place it in the right bin.
 -- Otherwise default to admin being the deleter.
-drop trigger post_document_delete $$
+drop trigger if exists post_document_delete $$
 create trigger post_document_delete after delete on documents
 for each row
 begin
@@ -25,7 +25,7 @@ begin
         insert into docid_path (docid, path) values (did, path);
 end $$
 
-drop trigger post_document_insert $$
+drop trigger if exists post_document_insert $$
 create trigger post_document_insert after insert on documents
 for each row call insert_docid_path(new.id) $$
 
@@ -86,7 +86,7 @@ begin
 	drop temporary table recursive_subdocs_trigger_table;
 end $$      
 
-drop   trigger post_document_update $$
+drop trigger if exists post_document_update $$
 create trigger post_document_update after update on documents
 for each row begin
     if (new.parent != old.parent) or (new.name != old.name) then
@@ -94,7 +94,7 @@ for each row begin
     end if;
 end $$
 
-drop trigger post_vfield_insert $$
+drop trigger if exists post_vfield_insert $$
 create trigger post_vfield_insert after insert on vfields 
 for each row begin
     if new.name = 'tags' then

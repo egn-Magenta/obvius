@@ -352,6 +352,7 @@ sub handler ($$) {
      my ($this, $req) = @_;
 
      my $obvius = $this->obvius_connect($req);
+     $req->no_cache(1) if $obvius->{OBVIUS_CONFIG}{CACHE_OFF};     
      
      my $is_admin = $this->param('is_admin');
      $req->notes(is_admin => $is_admin);
@@ -406,6 +407,7 @@ sub handler ($$) {
 					WebObvius::Apache::apache_module('Request')-> new($req),
 					$output
 				       );
+
 	  if ($data || $path) {
 	       my %args = (mime_type => $mime_type, 
 			   data => $data, 

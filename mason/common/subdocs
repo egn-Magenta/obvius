@@ -31,20 +31,18 @@ my $subvdocs=$obvius->get_document_subdocs($doc,
                                             public=>($r->pnotes('site')->param('is_admin') ? 0 : 1),
                                             notexpired => ($r->pnotes('site')->param('is_admin') ? 0 : 1),
                                             sortvdoc=>$vdoc);
+
 $obvius->get_version_fields($vdoc, [qw(show_subdoc_teaser show_subdoc_date show_subdocs pagesize)]);
 
 my $pagesize = $vdoc->field('pagesize');
-
 if($pagesize) {
     my $page = $r->param('p') || 1;
-    $doctype->export_paged_doclist($vdoc->Pagesize, $subvdocs, $output, $obvius,
-                                                                                name=>'kwdocs',
-                                                                                page=>$page,
-                                                                                prefix => $prefix,
-                                                                                include_images=>1,
-                                                                                return_vdoclist => 1,
-                                            );
-    $subvdocs = $output->param('kwdocs') || [];
+    $subvdocs = $doctype->export_paged_doclist($vdoc->Pagesize, $subvdocs, $output, $obvius,
+                                               name=>'kwdocs',
+                                               page=>$page,
+                                               prefix => $prefix,
+                                               include_images=>1,
+                                               return_vdoclist => 1) || [];
 }
 
 
@@ -53,12 +51,13 @@ my $show_subdoc_teaser=$vdoc->field('show_subdoc_teaser') || 0;
 my $show_subdoc_date=$vdoc->field('show_subdoc_date') || 0;
 my $show_subdocs=$vdoc->field('show_subdocs');
 
-my @subdocs=[];
+my @subdocs;
 
 if (not defined($show_subdocs) or $show_subdocs == 1) {
 my @get_fields = qw(title short_title);
 push(@get_fields, 'teaser') if ($show_subdoc_teaser == 1);
 push(@get_fields, 'docdate') if ($show_subdoc_date == 1);
+
 @subdocs=map {
     my $subdoc=$obvius->get_doc_by_id($_->Docid);
     $obvius->get_version_fields($_, \@get_fields);
