@@ -2674,7 +2674,6 @@ sub send_mail {
  
      $smtp->mail($from) or return;
      $smtp->to($to) or return;
-     $smtp->datasend("Content-Type: text/plain; charset=ISO-8859-1\n");
      $smtp->data([$msg]) or return;
      $smtp->quit or return;
 }
