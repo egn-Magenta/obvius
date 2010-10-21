@@ -3,9 +3,9 @@
 <br />
 <span style="margin-top: 2px;">
  <& /shared/trans, 
-   da => "NB! Max 30 MB. Filen sendes over en ukrypteret forbindelse og må derfor ikke indeholde 
+   da => "NB! Max 50 MB. Filen sendes over en ukrypteret forbindelse og må derfor ikke indeholde 
           personfølsomme oplysninger.",
-   en => "NB! Max 30 MB. The file is sent over an unencrypted connection and should therefore not 
+   en => "NB! Max 50 MB. The file is sent over an unencrypted connection and should therefore not 
           contain sensitive personal information." &>
 </span>
 <%args>
