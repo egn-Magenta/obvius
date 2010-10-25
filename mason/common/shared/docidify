@@ -5,6 +5,7 @@ $html
 <%init>
 $out = '';
 $html = Encode::decode('latin-1', $html);
+$hostname_from_req = $r->hostname;
 $p->parse($html);
 $p->eof;
 $m->scomp( '/shared/from_utf8', dataref => \$out);
@@ -20,56 +21,27 @@ my $p = HTML::Parser->new(api_version=>3,
                                                 my($this, $tagname, $text, $attr)=@_;
                                                 if($tagname eq 'a' and $attr->{href}) {
 
-                                                     # Make urls relative to / and convert to .docid format if possible:
-                                                     my $uri = $attr->{href};
-                                                     my $org_uri = $uri;
-                                                     
-                                                     $uri =~ s!^http://$hostname_from_req/!/!;
-                                                     $uri =~ s!^/admin/!/!;
-                                                     
-                                                     if($uri =~ m!^/!) {
-                                                          # Remove anchor ref and querystring:
-                                                          $uri =~ s!#.*$!!;
-                                                          $uri =~ s!\?.*$!!;
-                                                          
-                                                          if(my $doc = $obvius->lookup_document($uri)) {
-                                                               # Remove anchor and querystring from original uri:
-                                                               $org_uri =~ s!#.*$!!;
-                                                               $org_uri =~ s!\?.*$!!;
-                                                              
-                                                               $uri = "/" . $doc->Id . ".docid";
-                                                               $text =~ s!\Q$org_uri\E!$uri!;
-                                                          } 
-                                                     }
+                                                    # Make urls relative to / and convert to .docid format if possible:
+                                                    my $org_path = $attr->{href};
+                                                    my ($docid_url, $replace) = $m->comp('docidify:url2docid', url=>$org_path);
+                                                    if($docid_url) {
+                                                        $text =~ s!\Q$replace\E!$docid_url!;
+                                                    }
 
-                                                     $out.=$text;
+                                                    $out.=$text;
 
                                                 } elsif($tagname eq 'img') {
 
                                                     # Make images relative to / and convert to .docid format if possible:
 
-                                                    my $org_src = $attr->{src};
-
-                                                    if($org_src) {
-                                                        # Remove achor and querystring:
-                                                        $org_src =~ s!#.*$!!;
-                                                        $org_src =~ s!\?.*$!!;
-
-                                                        my $src = $org_src;
-
-                                                        # Remove hostname:
-                                                        $src =~ s!^http://$hostname_from_req/!/!;
-                                                        $src =~ s!^/admin/!/!;
-
-
-                                                        if($src =~ m!^/!) {
-                                                            if(my $imgdoc = $obvius->lookup_document($src)) {
-                                                                $src = "/" . $imgdoc->Id . ".docid";
-                                                            }
-                                                        }
-
-                                                        $text =~ s!\Q$org_src\E!$src!;
+                                                    my $org_path = $attr->{src};
+                                                    my ($docid_url, $replace) = $m->comp('docidify:url2docid', url=>$org_path);
+                                                    if($docid_url) {
+                                                        $text =~ s!\Q$replace\E!$docid_url!;
                                                     }
+
+                                                    $out.=$text;
+
 
                                                     $out .= $text;
                                                 } elsif($tagname eq 'object' and $attr->{type} and $attr->{type} eq 'application/x-shockwave-flash') {
@@ -117,10 +89,13 @@ $url =~ s!\?.*$!!;
 # This is the part of the URL we want to replace with /<docid>.docid. Save it.
 my $replace_part = $url;
 
-# Remove hostname:
-$url =~ s!^http://$hostname_from_req/!/!;
-# and /admin/:
-$url =~ s!^/admin/!/!;
+# If we're on any admin host, remove hostname and admin part
+unless($url =~ s!^https?://[^/]+/admin/!/!) {
+    # Else just try to remove current hostname:
+    $url =~ s!^http://$hostname_from_req/!/!;
+    # and /admin/:
+    $url =~ s!^/admin/!/!;
+}
 
 
 if($url =~ m!^/!) {
