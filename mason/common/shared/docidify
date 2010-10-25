@@ -41,9 +41,6 @@ my $p = HTML::Parser->new(api_version=>3,
                                                     }
 
                                                     $out.=$text;
-
-
-                                                    $out .= $text;
                                                 } elsif($tagname eq 'object' and $attr->{type} and $attr->{type} eq 'application/x-shockwave-flash') {
                                                     my $org_path = $attr->{data};
                                                     if($org_path) {
