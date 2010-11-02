@@ -103,6 +103,7 @@ sub action {
                             'public' => 1,
                             'valid' => 1,
                             'lang' => 1,
+                            'path' => 1, # Not exactly a version field, but it is available for searches in newer versions of Obvius
                         );
     my %parentfields = (
                             'id' => 1,
