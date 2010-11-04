@@ -785,10 +785,10 @@ sub send_mail {
      
      my $result_view = generate_result_view($formspec,$fields, $entry_nr, $vdoc);
      
-     from_to($subject, $charset, 'UTF-8');
+     $subject = ensure_correct_encoding($subject, $charset);
      $subject = encode_base64($subject);
      $subject =~ s/\n//g;
-     $subject = "=?UTF-8?B?" . $subject . "?=";
+     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
 
      my $text = $vdoc->field('email_text');
      
