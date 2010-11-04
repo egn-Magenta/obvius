@@ -11,7 +11,7 @@ Formularen "<% $vdoc->field('title') %>" er blevet udfyldt med følgende data:
 
 %for(@$fields) {
 %next if($_->{type} =~ m!^fieldset!);
-<% $_->{title} %> (<% $_->{name} %>):
+<% $_->{title} %>:
 %if(ref($_->{_submitted_value})) {
 <% join(", ", @{ $_->{_submitted_value} }) %>
 %} else {
