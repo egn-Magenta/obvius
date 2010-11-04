@@ -29,24 +29,26 @@ sub generate_head_html {
 }
 
 sub ensure_decoded {
-     my ($val) = @_;
+     my ($val, $charset) = @_;
+     
+     $charset ||= 'iso-8859-1';
      
      if (ref $val eq 'ARRAY') {
-          return [map {ensure_decoded($_)} @$val];
+          return [map {ensure_decoded($_, $charset)} @$val];
      } elsif (ref $val eq 'HASH') {
-          return { map {ensure_decoded($_)} %$val};
+          return { map {ensure_decoded($_, $charset)} %$val};
      } elsif (ref $val eq 'SCALAR') {
-          my $scal = ensure_decoded($$val);
+          my $scal = ensure_decoded($$val, $charset);
           return \$scal;
      } elsif (ref $val) {
           die "Unknown type: " . ref $val;
      } else {
-          return is_utf8($val) ? $val : decode('UTF-8', $val);
+          return is_utf8($val) ? $val : decode($charset, $val);
      }
 }
 
 sub preprocess_fields {
-     my ($formspec, $input) = @_;
+     my ($formspec, $input, $charset) = @_;
      my %outfields;
      
      for my $fn (keys %$formspec) {
@@ -64,7 +66,7 @@ sub preprocess_fields {
                $value = "";
           }
           $of->{name} = $field->{name};
-          $of->{value} = ensure_decoded($value);
+          $of->{value} = ensure_decoded($value, $charset);
 	  if (!ref ($of->{value})) { 
 	      $of->{value} =~ s/(?:^\s+|\s+$)//g;
 	  }
@@ -397,7 +399,7 @@ sub validate_full_entry {
           $input{$val->{name}} = $value;
      }
           
-     my $outfields = preprocess_fields($formspec, \%input);
+     my $outfields = preprocess_fields($formspec, \%input, $obvius->config->param('charset'));
      
      for my $fn (keys %$formspec) {
           validate_entry($formspec->{$fn}, $outfields->{$fn}, $outfields, $docid, $obvius);
@@ -826,16 +828,14 @@ sub ensure_correct_encoding {
      Encode::_utf8_off($input);
 
      while($input) {
-          # Decode as much of the input string as we can, storing the result in
-          # $n. $n is now guaranteed to be in perls own format. The next
-          # character in $input is somehow broken.
-          my $n = decode($charset, $input, Encode::FB_QUIET);
+          # Decode as much correct utf-8 as we can from the current input
+          # passing on anything we doesn't know one character at a time,
+          # assuming it is in perl's own string format. Re-encode everything to
+          # octects of the sites' charset afterwards.
+          my $n = decode('utf-8', $input, Encode::FB_QUIET);
           
-          # Try to just add the next character as-is - this will work for
-          # double encodings.
           if (length ($input)) {
                my $c = substr ($input, 0, 1);
-               print STDERR "Passing through character '$c'\n";
                $n .= $c;
                $input = substr($input,1);
           }
