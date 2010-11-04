@@ -2,7 +2,7 @@ To: <% $mailto %>
 From: <% $from %>
 Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $obvius->config->param('roothost') %>/admin<% $r->uri %>)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=<% $charset %>
 Content-Transfer-Encoding: 8bit
 Content-Disposition: inline
 Precedence: bulk
@@ -13,9 +13,9 @@ Formularen "<% $vdoc->field('title') %>" er blevet udfyldt med følgende data:
 %next if($_->{type} =~ m!^fieldset!);
 <% $_->{title} %> (<% $_->{name} %>):
 %if(ref($_->{_submitted_value})) {
-<% utf8(join(", ", @{ $_->{_submitted_value} }))->latin1 %>
+<% join(", ", @{ $_->{_submitted_value} }) %>
 %} else {
-<% utf8($_->{_submitted_value})->latin1 %>
+<% $_->{_submitted_value} %>
 %}
 
 %}
@@ -69,19 +69,52 @@ for(@$fields) {
     $val =~ s!\r?\n!~!g;
     $val =~ s|;||g;
     
-    $val = utf8($val)->latin1;
     push(@csv_values, $val);
 }
 
 my $url_sitename = $obvius->config->param('test_sitename') || $obvius->config->param('sitename');
+my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
 </%init>
 <%once>
-use Unicode::String qw(utf8 latin1);
 use Encode;
 </%once>
 <%filter>
-# Cleanup utf characters
-$_ =~ s/(Ã.)/utf8($1)->latin1/ge;
+# OK, here's the rundown: We get a string in perl's own format, however this
+# string will contain the encoded values for anything utf8 instead of the
+# actual wide chars. To work around this we first encode our string as latin1,
+# so we have a valid encoding for characters originating from strings in the
+# mason component. After that use _utf8_off to allow is to decode the string
+# as utf-8 data. Using Encode::FB_QUIET we can get the encoding to halt every
+# time it reaches a non-utf-8 character, eg. the special latin1 characters
+# left over from the initial encoding into latin1.
+# By doing this we can decode anything that is not already latin1 and then
+# encode it back to latin1. By concatenating the converted non-latin1 segments
+# and the latin1 segments we get a string that is purely latin1 encoded. We
+# can then use this string to convert to the encoding of our own choice.
+#
+my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+my $string = '';
+my $str = $_;
+$str = encode('iso-8859-1', $str);
+Encode::_utf8_off($str);
+
+while($str) {
+    # Apparently decode, does magic with $str.
+    my $n = decode('utf-8', $str, Encode::FB_QUIET);
+    $n = encode('iso-8859-1', $n);
+    if (length ($str)) {
+        my $c = substr ($str, 0, 1);
+        $str = substr($str,1);
+        $n .= $c;
+    }
+    $string .= $n;
+}
+
+# Convert everything to our current charset:
+if(lc($charset) ne 'iso-8859-1') {
+  Encode::from_to($string, 'iso-8859-1', $charset);
+}
+$_ = $string;
 </%filter>
 %
 %

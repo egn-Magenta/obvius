@@ -503,9 +503,11 @@ sub mail_helper {
      
      my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
      
-     $subject = encode_base64($subject);
+     my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+     
+     $subject = encode_base64(encode($charset, $subject));
      $subject =~ s/\n//g;
-     $subject = "=?LATIN-1?B?" . $subject . "?=";
+     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
      
      for my $mt (@mailto) {
           $msg =<<END;
@@ -513,11 +515,12 @@ To: <$mt>
 From: <$from>
 Subject: $subject
 MIME-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=$charset
 Content-Transfer-Encoding: 8bit
 
 $msg
 END
+          $msg = ensure_correct_encoding($msg, $charset);
           $obvius->send_mail($mt, $msg, $from);
      }
 }
@@ -763,7 +766,7 @@ sub generate_result_view {
      }
      
      push @entries, ("", [translate('id', $vdoc), $entry_nr]);
-
+     
      return join "\n", map { ref $_ ? $_->[0] . ": " . $_->[1] : $_} @entries;
        
 }
@@ -771,13 +774,16 @@ sub generate_result_view {
 sub send_mail {
      my ($to, $obvius, $vdoc, $formspec, $fields, $entry_nr) = @_;
      $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
-     
+
+     my $charset = $obvius->config->param('charset') || 'ISO-8859-1';     
+
      my $subject = $vdoc->field('email_subject');
      my ($namefield) = grep { $_->{type} eq 'name' } values %$fields;
      my $prepend = $namefield ? translate('Dear', $vdoc) . " " . $namefield->{value}: '';
      
      my $result_view = generate_result_view($formspec,$fields, $entry_nr, $vdoc);
-     from_to($subject, 'ISO-8859-1', 'UTF-8');
+     
+     from_to($subject, $charset, 'UTF-8');
      $subject = encode_base64($subject);
      $subject =~ s/\n//g;
      $subject = "=?UTF-8?B?" . $subject . "?=";
@@ -795,7 +801,7 @@ To:      $to
 From:    $from
 Subject: $subject
 MIME-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=$charset
 
 $prepend
 
@@ -809,7 +815,35 @@ $result_view
 $form: $uri
 END
      
+     $mailmsg = ensure_correct_encoding($mailmsg, $charset);
+     
      $obvius->send_mail($to, $mailmsg, $from);
+}
+     
+sub ensure_correct_encoding {
+     my ($input, $charset) = @_;
+     my $output = '';
+     Encode::_utf8_off($input);
+
+     while($input) {
+          # Decode as much of the input string as we can, storing the result in
+          # $n. $n is now guaranteed to be in perls own format. The next
+          # character in $input is somehow broken.
+          my $n = decode($charset, $input, Encode::FB_QUIET);
+          
+          # Try to just add the next character as-is - this will work for
+          # double encodings.
+          if (length ($input)) {
+               my $c = substr ($input, 0, 1);
+               print STDERR "Passing through character '$c'\n";
+               $n .= $c;
+               $input = substr($input,1);
+          }
+          $n = encode($charset, $n);
+          $output .= $n;
+     }
+     
+     return $output;
 }
        
 sub count_entries {
