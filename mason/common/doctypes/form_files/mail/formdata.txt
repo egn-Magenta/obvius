@@ -1,6 +1,6 @@
 To: <% $mailto %>
 From: <% $from %>
-Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $obvius->config->param('roothost') %>/admin<% $r->uri %>)
+Subject: Udfyldt formular: <% $vdoc->field('title') %> (http://<% $hostname %>/admin<% $r->uri %>)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=<% $charset %>
 Content-Transfer-Encoding: 8bit
@@ -36,6 +36,7 @@ $mailto
 %
 %
 <%init>
+my $hostname = $obvius->config->param('roothost') || $r->hostname;
 my $formdata = $output->param('formdata');
 
 my $fields = $formdata || [];
