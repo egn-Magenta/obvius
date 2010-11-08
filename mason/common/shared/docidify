@@ -73,6 +73,7 @@ my $p = HTML::Parser->new(api_version=>3,
                                         },
                                         "self, text" ]);
 $p->attr_encoded(0);
+my $hostmap = $m->comp('/shared/get_subsite_siterootmap');
 </%once>
 <%method url2docid>
 <%args>
@@ -94,6 +95,10 @@ unless($url =~ s!^https?://[^/]+/admin/!/!) {
     $url =~ s!^/admin/!/!;
 }
 
+# Translate full URLs pointing to other subsites:
+if(my $translated = $hostmap->url_to_uri($url)) {
+    $url = $translated;
+}
 
 if($url =~ m!^/!) {
     if(my $doc = $obvius->lookup_document($url)) {
