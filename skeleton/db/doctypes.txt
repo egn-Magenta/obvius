@@ -64,16 +64,17 @@ DocType: HTML parent=Base basis searchable
  html_content  textwupload                  searchable sortable threshold=128
  bare          bool                         default_value=0
 
-DocType: Upload parent=Base basis
+
+DocType: FileUpload parent=Base basis
  author        line                         searchable sortable threshold=64
- teaser        text                         searchable threshold=64
+ teaser        text                         searchable threshold=64 dont_escape_me
  url           line                         searchable sortable threshold=64
  docref        line                         searchable sortable threshold=64
  contributors  line                         searchable sortable threshold=64
  source        line                         searchable sortable threshold=64
- uploaddata    appdata						threshold=192
- size	       int>=0						threshold=192
- contentdisposition condisp                 searchable sortable default_value=attachment
+ uploadfile    fileupload2                  threshold=192
+ size          int>=0                       threshold=192
+ seq           sequence                    sortable threshold=0 default_value=-10.00
 
 DocType: Quiz parent=Standard basis searchable
  mailto            email

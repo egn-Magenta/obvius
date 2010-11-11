@@ -120,7 +120,8 @@ my @dirs=(
 	{ dir=>'var/edit_sessions/LOCKS', group=>$options{httpd_group}, },
 	{ dir=>'var/user_sessions', group=>$options{httpd_group}, },
 	{ dir=>'var/user_sessions/LOCKS', group=>$options{httpd_group}, },
-
+	{ dir=>'var/user_sessions/LOCKS', group=>$options{httpd_group}, },
+	{ dir=>'var/cache_db', group=>$options{httpd_group}, },
 );
 
 push @dirs, (
@@ -158,6 +159,7 @@ my %heavy_interpolate_needed = map { $_ => 1 } qw(
 	db/structure.sql
 	db/cycle_doctypes.sql
 	db/cycle_doctypes_etc.sh
+	db/.cycle_local.conf
 	db/perms.sql
 	conf/site.conf
 );
@@ -372,6 +374,8 @@ design=3columns
 
 english_frontpage=frontpage_en
 
+roothost=$options{website}
+
 EOT
 	}
 }
@@ -404,10 +408,16 @@ sub make_db
 	run_system_command( "cat $options{wwwroot}/$options{website}/db/perms.sql | $dbrun");
 	# Put doctypes, editpages, fieldspecs and fieldtypes in the database:
 	run_system_command( "(cd $options{wwwroot}/$options{website}/db; sh ./cycle_doctypes_etc.sh)");
+	# Initiate triggers and procedures
+	my $cwd = `pwd`; chomp($cwd);
+	run_system_command( "cd $options{prefix}/sql/; cat $options{prefix}/sql/read_in.sql | $dbrun");
+	#run_system_command( "cd $cwd" );
 	# Make root document, and publish it:
 	run_system_command( "$options{prefix}/otto/create_root ${dbname} Forside --publish");
         # Import initial documents (XXX httpd_user here:):
-        run_system_command( "$options{prefix}/bin/create --site ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml");
+        run_system_command( "$options{prefix}/bin/create ${dbname} $options{wwwroot}/$options{website}/db/initial_documents.xml");
+	# Make sure docid_path tables are up to date
+	run_system_command( "echo 'call update_move(1)' | $dbrun");
 }
 
 sub read_conf {

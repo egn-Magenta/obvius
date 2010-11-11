@@ -102,6 +102,7 @@ if (!scalar(@confirmations)) {
   }
 }
 else {
+    my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
     my $confirmation = pop @confirmations;
     my $redirect_to;
     $confirmation =~ s/obvius_editengine_protocol_confirmation://;
@@ -142,12 +143,12 @@ else {
             # The input from forms must be utf-8 encoded. This is commonly done by adding:
             # accept-charset="UTF-8" as a form attribute.
             if (! ref $ARGS{$value}) {
-                $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode('UTF-8', $ARGS{$value}), Encode::FB_HTMLCREF);
+                $objects{$history}->{$object_id}->{$value_id} = Encode::encode('ISO-8859-1', Encode::decode($charset, $ARGS{$value}), Encode::FB_HTMLCREF);
             } elsif (ref $ARGS{$value} eq 'ARRAY') {
                  $objects{$history}->{$object_id}->{$value_id} = 
                    [ map {
                         Encode::encode('ISO-8859-1', 
-                                       Encode::decode('UTF-8', $_), Encode::FB_HTMLCREF);
+                                       Encode::decode($charset, $_), Encode::FB_HTMLCREF);
                    } @{$ARGS{$value}}];
             } else {
                 $objects{$history}->{$object_id}->{$value_id} = $ARGS{$value};
