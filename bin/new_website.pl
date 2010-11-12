@@ -376,6 +376,8 @@ english_frontpage=frontpage_en
 
 roothost=$options{website}
 
+use_old_navigator=1
+
 EOT
 	}
 }
