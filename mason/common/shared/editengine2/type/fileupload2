@@ -36,6 +36,13 @@ $id
 $validation
 </%args>
 %
+<%once>
+my %check_extension_types = map { $_ => 1 } qw(
+    application/octet-stream
+    application/x-zip-compressed
+    application/zip
+);
+</%once>
 <%init>
 my @uploads=$r->upload;
 
@@ -55,12 +62,27 @@ for(($r->upload)) {
 if ($upload) {
     if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
 
-        $data->{mimetype}= $upload->type;
+        my $mimetype = $data->{mimetype}= $upload->type;
+	if($check_extension_types{$mimetype} and (-r "/etc/mime.types")) {
+	    my ($extension) = ($upload->filename =~ m!\.([^.]+)$!);
+	    if($extension) {
+		open(FH, "/etc/mime.types") or die "Couldn't open /etc/mime.types";
+		while(<FH>) {
+		    my($type, $rest) = m!^(\S+)\s+(.*)$!;
+		    my @exts = split(/\s+/, $rest);
+		    if(grep { $_ eq $extension } @exts) {
+			$mimetype = $data->{mimetype} = $type;
+			last;
+		    }
+		}
+		close(FH);
+	    }
+	}
         $data->{size}= $upload->size;
 
         $value = $m->scomp('/shared/place_file_in_upload', 
-                           fh => $fh, type => $upload->type, 
-                           filename => $upload->filename);
+			    fh => $fh, type => $mimetype, 
+			    filename => $upload->filename);
         $new_upload = 1;
     }
 }
