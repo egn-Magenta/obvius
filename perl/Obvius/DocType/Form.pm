@@ -151,7 +151,7 @@ sub validate_entry {
      my $valrules = ($fieldspec->{valrules} || {})->{validaterule} || [];
      push @$valrules, { validationtype => 'email' } if $field->{type} eq 'email';
 
-     if ($field->{has_value}) {
+     if ($field->{has_value} || $field->{type} eq 'checkbox' || $field->{type} eq 'selectmultiple') {
 	 for my $vr (@$valrules) {
 	   my ($error, $msg) = validate_by_rule($field->{value}, $vr);
 	     if ($error) {
