@@ -377,6 +377,19 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 }
 
 function formdata_populate_validaterules(fieldNode) {
+    var fieldType = '';
+    var fieldTypeNode = fieldNode.getElementsByTagName('type').item(0);
+    if(fieldTypeNode) {
+        fieldType = formdata_get_node_text(fieldTypeNode);
+    }
+
+    // No validation rules for radiobuttons and non-multiple selects
+    if(fieldType == 'radio' || fieldType == 'select') {
+        document.getElementById('validaterules').style.display = 'none';
+        return;
+    }
+    
+    
     // First get the table element and empty it:
     var table =  document.getElementById('validaterules_table');
 
@@ -997,7 +1010,6 @@ function formdata_init_valrule_edit(ruleNr) {
                                         'dummy':        0
                                     },
                             'select': {
-                                        'min_checked':  1,
                                         'dummy':        0
                                     },
                             'fieldset': {},
