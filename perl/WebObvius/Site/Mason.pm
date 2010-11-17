@@ -228,10 +228,10 @@ sub shave_of_tails {
 
 sub convert_ip_to_number {
      my ($ip) = @_;
-     my ($p1, $p2, $p3, $p4, $subnet) = $ip =~ m!^\s*(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?:\/(\d{1,2}))?\s*$!;
+     my ($p1, $p2, $p3, $p4, $subnet) = ($ip =~ m!^\s*(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?:\/(\d{1,2}))?\s*$!);
      
      if ($p1) {
-          return ($p1 * (2 << 24) + $p2 * (2 << 16) + $p3 * (2 << 8) + $p4, $subnet);
+          return ($p1 * (1 << 24) + $p2 * (1 << 16) + $p3 * (1 << 8) + $p4, $subnet);
      } else {
           return undef;
      }
