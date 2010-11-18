@@ -95,9 +95,9 @@ sub validate_mandatory {
      if ($mandatory eq '1') {
           return $has_value;
      } elsif ($mandatory =~ s/^!//) {
-          return $fields->{$mandatory}{has_value} && !$has_value;
+          return $has_value if(! $fields->{$mandatory}{has_value});
      } elsif ($mandatory) {
-          return $fields->{$mandatory}{has_value} && $has_value;
+          return $has_value if($fields->{$mandatory}{has_value});
      }
 
      return 1;
