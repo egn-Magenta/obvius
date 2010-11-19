@@ -127,7 +127,10 @@ sort $inherited_docparams->param();
 
 # split rules in three parts: universal, inherited, and document's
 my $universal_access = $obvius-> get_universal_document();
-$universal_access = join("\n", split "[\n\r]+", ( $universal_access ? $universal_access-> AccessRules : ''));
+# Notice that we have to get all capabilities from the universal access document
+# including inherited rules since it now has to have a valid parent because of
+# the docid_path system.
+$universal_access = join("\n", ( $universal_access ? $obvius->_get_capability_rules($universal_access) : ()));
 my $local_access  = join("\n", split "[\n\r]+", ( $doc-> Accessrules || ''));
 my $inherited_access = join("\n", $obvius->get_capability_rules($doc));
 $inherited_access =~ s/^\Q$universal_access\E//s;
