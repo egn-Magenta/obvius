@@ -93,7 +93,9 @@ use Cache::FileCache;
 
 my $cache = Cache::FileCache->new({cache_root => $obvius->{OBVIUS_CONFIG}{FILECACHE_DIRECTORY},
    	    			   namespace => 'subdocs'});
-my $result = $cache->get( $base_doc->Id );
+				   
+my $cache_key = $obvius->config->param('use_old_admin_subdocs_sort') ? ($base_doc->Id . "_" . $base_vdoc->Version) : $base_doc->Id;
+my $result = $cache->get( $cache_key );
 return $result if $result;
 
 my $subvdocs=$obvius->get_document_subdocs($base_doc, sortvdoc=>$base_vdoc, public=>0); 
@@ -109,11 +111,13 @@ my @subs=map {
     }
 } @$subvdocs;
 
-@subs = sort { ($a->{seq} >= 0 && $b->{seq} >= 0) || ($a->{seq} < 0 && $b->{seq} < 0) ?  
-            	$a->{seq} <=> $b->{seq} : $a->{seq} > $b->{seq} ?
-		-1 : 1} @subs;
+unless($obvius->config->param('use_old_admin_subdocs_sort')) {
+     @subs = sort { ($a->{seq} >= 0 && $b->{seq} >= 0) || ($a->{seq} < 0 && $b->{seq} < 0) ?  
+		     $a->{seq} <=> $b->{seq} : $a->{seq} > $b->{seq} ?
+		     -1 : 1} @subs;
+}
 
-$cache->set ( $base_doc->Id, \@subs);
+$cache->set( $cache_key, \@subs );
 return \@subs;
 </%init>
 %

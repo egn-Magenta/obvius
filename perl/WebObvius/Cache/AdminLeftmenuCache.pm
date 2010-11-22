@@ -28,8 +28,36 @@ sub find_dirty {
      return \@docids;
 }
 
+sub flush {
+     my ($this, $dirty) = @_;
+     $dirty = [$dirty] if !ref $dirty;
+     
+     my $cache = $this->get_cache();
+     my $obvius = $this->{obvius};
+     
+     if($obvius->config->param('use_old_admin_subdocs_sort')) {
+          my @clear_keys;
+          for my $docid (@$dirty) {
+               my $d = $obvius->get_doc_by_id($docid);
+               next unless($d);
+               my $versions = $obvius->get_versions($d);
+               next unless($versions);
+               for my $v (@$versions) {
+                    push(@clear_keys, $v->Docid . "_" . $v->Version);
+               }
+          }
+          $cache->remove($_) for (@clear_keys);
+     } else {
+          $cache->remove($_) for (@$dirty);
+     }
+}
+
+
 sub cache_new_version_p {
      my ($obvius, $docid, $lang) = @_;
+     
+     # If we use the old leftmenu sorting, always clear after creating a new version:
+     return 1 if($obvius->config->param('use_old_admin_subdocs_sort'));
      
      my $query = <<END;
      select distinct docid d from 
