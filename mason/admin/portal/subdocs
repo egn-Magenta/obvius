@@ -26,7 +26,7 @@
 %         last if ($i>$max);
 %     }
 % if ($i>$max) {
-             <li class="obvius-<% $i+1%2 ? 'b' : 'a' %>" title="Navigator"><p><& util/navigator_link_start &>... <& /shared/msg, text=>'show all' &> (<% scalar(@$subs) %>)</a></p></li>
+             <li class="obvius-<% $i+1%2 ? 'b' : 'a' %>" title="Navigator"><p><& util/navigator_link_start, path => $obvius->get_doc_uri($doc) &>... <& /shared/msg, text=>'show all' &> (<% scalar(@$subs) %>)</a></p></li>
 % }
            </ul>
 % }
