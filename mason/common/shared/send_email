@@ -5,7 +5,7 @@ $bcc=>undef
 $from
 $subject
 $text
-$smtpserver=>'localhost'
+$smtpserver=>undef
 $timeout=>30
 $debug=>0
 </%args>
@@ -15,6 +15,7 @@ use Net::SMTP;
 </%once>
 %
 <%init>
+$smtpserver ||= $obvius->config->param('smtp') || 'localhost';
 my $smtp = Net::SMTP->new($smtpserver, Timeout=>$timeout, Debug=>$debug);
 $smtp->mail($from);
 map { $smtp->to($_) } split /\s*,\s*/, $to;
