@@ -552,9 +552,14 @@ table.obvius-editengine-list {
   border-collapse: collapse;
 }
 
-table.obvius-editengine-list tr.obvius-editengine-pagelist td {
+div.obvius-editengine-pagelist span {
   color: #aaa;
   text-align: center;
+  font-size: small;
+}
+
+.obvius-editengine-pagelist {
+  margin: 0.5em 0 1em;
 }
 
 table.obvius-editengine-list th {
