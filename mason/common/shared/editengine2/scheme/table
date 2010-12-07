@@ -2,6 +2,12 @@
 <h2><& /shared/msg, text=>$editscheme->{label} &></h2>
 %   }
 
+% if ($style->{context} eq 'block') {
+    <& '.display_pagelist', page=>$page, max=>$obvius_max, total=>$total, history=>$history, numberofcolumns=>scalar(@columns) &>
+% }
+
+ <table class='obvius-editengine-list'>
+%
 %   if ( $do_filters) {
 <form class="obvius-handling" method="post" action="?<% 
 	$m-> scomp( '../toolbox:get_scheme_parameters',
@@ -12,12 +18,6 @@
 	) 
 %>">
 %   }
-
- <table class='obvius-editengine-list'>
-% if ($style->{context} eq 'block') {
-    <& '.display_pagelist', page=>$page, max=>$obvius_max, total=>$total, history=>$history, numberofcolumns=>scalar(@columns) &>
-% }
-%
     <tr>
 %   foreach my $column (@columns) {
       <th>
@@ -31,7 +31,7 @@
 %   }
 %   if ( $do_filters) {
 <th>
-<input name="obvius_editengine_filter" type="text" size="10" value="<% $filter %>" />
+<input name="obvius_editengine_filter" type="input" size=10" value="<% $filter %>" />
 <input type="submit" value="Filter"/>
 % 		if ( length $filter) {
 		<div class="obvius-editengine-anonymous-functions">
@@ -46,6 +46,7 @@
 		</div>
 % 		}
 </th>
+</form>
 %   }
     </tr>
 %
@@ -73,9 +74,6 @@
 % }
 %
  </table>
-%   if( $do_filters) {
-</form>
-%   }
 %
   <& '../select:clear' &>
 %# If an object was passed, return to this for partial object creation
@@ -252,19 +250,19 @@ my $label = $m->scomp('/shared/msg', text=>$column->{label});
  $history
  $numberofcolumns
 </%args>
-    <tr class='obvius-editengine-pagelist'>
-      <td colspan='<% $numberofcolumns |h %>'>
+    <div class='obvius-editengine-pagelist'>
+      <span colspan='<% $numberofcolumns |h %>'>
 % if ($page ne '1') {
-<& '../toolbox:transfer_scheme_parameters', options=>{page=>1}, label=>'«', history=>$history &>\
-<& '../toolbox:transfer_scheme_parameters', options=>{page=>$page-1}, label=>'&lt;', history=>$history &>\
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>1}, label=>'&laquo;', history=>$history &>\
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$page-1}, label=>'&lsaquo;', history=>$history &>\
 % }
 % else {
-« &lt;
+« &lsaquo;
 % }
 
 % for(my $i=1; $i<=$pages; $i++) {
 %   if ($i eq $page) {
-<% $i %>
+<span style="font-weight: bold; color: #222;"><% $i %></span>
 %   }
 %   else {
 <& '../toolbox:transfer_scheme_parameters', options=>{page=>$i}, label=>$i, history=>$history &>\
@@ -272,14 +270,14 @@ my $label = $m->scomp('/shared/msg', text=>$column->{label});
 % }
 
 % if ($page ne $pages) {
-<& '../toolbox:transfer_scheme_parameters', options=>{page=>$page+1}, label=>'&gt;', history=>$history &>\
-<& '../toolbox:transfer_scheme_parameters', options=>{page=>$pages}, label=>'»', history=>$history &>\
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$page+1}, label=>'&rsaquo;', history=>$history &>\
+<& '../toolbox:transfer_scheme_parameters', options=>{page=>$pages}, label=>'&raquo;', history=>$history &>\
 % }
 % else {
-&gt; »
+&rsaquo; &raquo;
 % }
-      </td>
-    </tr>
+      </span>
+    </div>
 <%init>
 return unless (defined $max);
 return unless (defined $total);
