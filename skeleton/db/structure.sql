@@ -25,7 +25,7 @@ my ( $table, $content) = ( $_[0], join(",\n",@_[1..$#_]));
 DROP TABLE IF EXISTS $table;
 CREATE TABLE $table (
 $content
-) type=MyISAM
+) type=InnoDB
 CT
 CREATE_TABLE
 
@@ -192,6 +192,7 @@ CREATE_TABLE( users,
   admin        TINYINT(1) DEFAULT '0' NOT NULL,
   can_manage_users   TINYINT(1) DEFAULT '0' NOT NULL,
   can_manage_groups  TINYINT(1) DEFAULT '0' NOT NULL,
+  surveillance text,
   PRIMARY KEY  (id)
 ); 
 CREATE UNIQUE INDEX users_login_idx ON users (login);
@@ -253,7 +254,7 @@ CREATE_TABLE( comments,
   date         DATETIME NOT NULL,
   name         varchar(127) NOT NULL,
   email        varchar(63) NOT NULL,
-  show_email   BOOL NOT NULL DEFAULT 'F',
+  show_email   BOOL NOT NULL DEFAULT false,
   text text    NOT NULL,
   PRIMARY KEY  (docid,date)
 );
@@ -306,6 +307,14 @@ CREATE_TABLE( news,
 CREATE INDEX news_start_idx ON news (start);
 CREATE INDEX news_end_idx   ON news (FIELD(end));
 
+CREATE_TABLE ( formdata,
+  id 		COUNTER,
+  docid		UNSIGNED,
+  entry		LONGTEXT,
+  PRIMARY KEY (id)
+);
+CREATE INDEX formdata_docid_idx ON formdata (docid);
+
 # Default data:
 
 #  Users:
@@ -317,8 +326,8 @@ CREATE INDEX news_end_idx   ON news (FIELD(end));
 
 #perldef CRYPT($passwd) "'" . crypt($passwd, '$1$safdasdf$') . "'"
 
-INSERT INTO users VALUES ( '1',  'admin', CRYPT(admin),  'Admin', QUOTE(webmaster@DOMAIN), '', '1','2','1');
-INSERT INTO users VALUES ( '2', 'nobody', '', 'Nobody', '', '', '0','0','0');
+INSERT INTO users VALUES ( '1',  'admin', CRYPT(admin),  'Admin', QUOTE(webmaster@DOMAIN), '', '1','2','1', NULL);
+INSERT INTO users VALUES ( '2', 'nobody', '', 'Nobody', '', '', '0','0','0', NULL);
 
 # Groups:
 

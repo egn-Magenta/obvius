@@ -1,3 +1,4 @@
+drop table if exists shortcuts;
 create table shortcuts (
        id int(8) unsigned not null auto_increment not null primary key,
        user_id int(8) unsigned not null,

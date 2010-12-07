@@ -30,7 +30,7 @@ create table if not exists docparams_backup (
        primary key (id)
        ) $$
 
-drop trigger post_docparams_delete $$
+drop trigger if exists post_docparams_delete $$
 create trigger post_docparams_delete after delete on docparms
 for each row
 begin
@@ -38,7 +38,7 @@ begin
                                      (old.docid, old.name, old.value, old.type, now());
 end $$
 
-drop trigger post_formdata_delete  $$
+drop trigger if exists post_formdata_delete  $$
 create trigger post_formdata_delete after delete on formdata
 for each row
 begin 
@@ -46,7 +46,7 @@ begin
                                   (old.id, old.docid, old.entry);
 end $$
 
-drop trigger post_version_delete $$
+drop trigger if exists post_version_delete $$
 create trigger post_version_delete after delete on versions 
 for each row
 begin
@@ -56,7 +56,7 @@ begin
                                    old.valid, old.lang, old.user);
 end $$
 
-drop trigger post_vfield_delete $$
+drop trigger if exists post_vfield_delete $$
 create trigger post_vfield_delete after delete on vfields
 for each row
 begin 

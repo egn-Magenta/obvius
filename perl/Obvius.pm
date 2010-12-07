@@ -194,6 +194,10 @@ sub connect {
     $db->TableAttr('fieldtypes', '!Serial' => 'id');
 
     $this->{DB} = $db;
+    if ($config->{UTF8}) {
+         $this->execute_command("set names utf8");
+    }
+
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
     if ((!scalar(@{$this->{DOCTYPES}}) ||
         !scalar(@{$this->{FIELDTYPES}}) ||
@@ -204,8 +208,6 @@ sub connect {
 
     $this->read_user_and_group_info;
 
-    #print STDERR Dumper($db->MetaData('documents'));
-    
     return $db;
 }
 
@@ -987,6 +989,10 @@ sub search {
         $i++;
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
+   
+    push @table, "docid_path dp";
+    push @join, "(dp.docid = versions.docid)";
+    push @fields, "dp.path as path";
 
     # XXX This is still problematic, if someone searches for
     #     %fieldnamewhatever%, 'fieldnamewhatever' or
@@ -1002,7 +1008,7 @@ sub search {
                                         });
 
     $having = ($having ? " HAVING $having" : '');
-
+    
     my $query = {
                     '$where'    => join(' AND ', @where, "($where)"),
                     '$group'    => "versions.docid, versions.version, versions.lang $having",
@@ -1021,15 +1027,18 @@ sub search {
 
     my @subdocs;
     while (my $rec = $set->Next) {
-        if ($options{public}) {
-            # If we've got a parent (from the search), check from the parent up:
-            my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
-
-            # If there is no parent, we pass the hint that the document being checked _is_
-            # public itself (options{public} ensures that):
-            next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
-        }
-        push(@subdocs, new Obvius::Version($rec));
+         # Quick workaround to exclude previews.
+         next if !$options{include_preview} && $rec->{path} =~ m!/admin/previews/!;
+         if ($options{public}) {
+              # If we've got a parent (from the search), check from the parent up:
+              
+              my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
+              
+              # If there is no parent, we pass the hint that the document being checked _is_
+              # public itself (options{public} ensures that):
+              next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
+         }
+         push(@subdocs, new Obvius::Version($rec));
     }
     $set->Disconnect;
 
@@ -1282,8 +1291,6 @@ sub get_version_fields {
         }
     }
     $set->Disconnect;
-
-#    print STDERR Dumper($fields);
 
     for (@$needed) {
 #        print STDERR "VFIELD STORE $_\n";
@@ -1665,7 +1672,7 @@ sub read_doctypes_table {
                 #$this->log->debug("LOADING $_");
 
                 eval "use $_";
-                $ev_error=$@;
+#                $ev_error=$@;
 
                 if ( $@) {
                         # test if this is because a module cannot be found, or something more serious
@@ -2655,7 +2662,15 @@ sub send_mail {
      my $server = $this->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
      use Net::SMTP;
-     my $smtp = Net::SMTP->new($server, Timeout => 30, Debug => 1);
+     my $mail_error;
+     
+     my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => 1) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
+     if ( $mail_error ) {
+         use POSIX qw(strftime);
+         my $today = strftime( "%Y-%m-%d %H:%M:%S", localtime );
+         print STDERR "\n$today: Obvius send_mail: $mail_error\n";
+         return;
+     }
  
      $smtp->mail($from) or return;
      $smtp->to($to) or return;

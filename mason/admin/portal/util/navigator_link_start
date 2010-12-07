@@ -1,5 +1,8 @@
+%if($obvius->config->param('use_old_navigator')) {
+<a onclick="javascript:return obvius_open_window(this.href, 'obvius_navigator', 'width=800', 'height=432', 'status=yes');" href="<% $prefix . $uri %>?obvius_app_navigator=1">
+%} else {
 <a onclick="<& navigator_link_start:onclick, %ARGS &>" href="#">
-
+%}
 <%method href>
 <%args>
 $path => '/'
@@ -34,12 +37,11 @@ if ($path) {
 
 </%init>
 </%method>
-<%method onclick>
-javascript: return window.open('<% $url %>', 'navigator','resizable=1,width=800,height=500')
+<%method onclick>\
+javascript: return window.open('<% $url %>', 'navigator','resizable=1,width=800,height=500')\
 <%init>
 my $url = $m->scomp('navigator_link_start:href', %ARGS);
 $url =~ s/\s//g;
+$url =~ s!&!&amp;!g;
 </%init>
 </%method>
-
-

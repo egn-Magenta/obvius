@@ -16,6 +16,26 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 <script type="text/javascript" src="/scripts/admin_validator.js"></script>
 
 <script type="text/javascript">
+%if($obvius->config->param('use_old_navigator')) {
+obvius_tinymce_navigator_callback_p = function (field_name, url, type, arg, options, win) {
+    var start_url = tinyMCE.getParam('document_base_url');
+    start_url = start_url.replace(/^https?:\/\/[^\/]+/, "");
+    if(url && url.charAt(0) == '/') {
+        start_url = url.replace(/\?.*$/, "");
+        if(! url.match(/\/$/))
+            start_url += "/";
+    }
+    var doctype_extra = '';
+    if(type == 'image')
+        doctype_extra = "&doctype=Image";
+    if (!win)
+      win=window;
+    var obvius_navigator_argument = arg + doctype_extra + '&fieldname=' + field_name;
+    win = win.open('/admin/?' + obvius_navigator_argument +  '&path=' + start_url, '', options);
+    return false;
+}
+%}
+
     tinyMCE.init({
 %     # For configuration see below in the init block
 %     for(@config_keys) {

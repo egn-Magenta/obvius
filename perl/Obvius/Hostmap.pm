@@ -48,6 +48,7 @@ sub create_hostmap {
                 roothost => $roothost,
                 last_change => 0,
                 hostmap => {},
+                forwardmap => {},
                 regexp => '',
                 %options
             );
@@ -71,6 +72,7 @@ sub get_hostmap {
     if($file_timestamp > $this->{last_change}) {
         print STDERR "Reloading hostmap $path\n" if($this->{debug});
         my $siteroot_map = $this->{hostmap} = {};
+        $this->{forwardmap} = {};
 
         open(FH, $path) || die "Couldn't open siteroot file $path";
         my @lines;
@@ -97,6 +99,7 @@ sub get_hostmap {
         for(@lines) {
             if(/^(\S+)\s+(\S+)/) {
                 $siteroot_map->{lc($2)} = $1;
+                $this->{forwardmap}->{lc($1)} = $2;
             }
         }
 
@@ -188,6 +191,29 @@ sub find_host_prefix {
      my ($best_prefix) = $uri =~ /$this->{regexp}/i;
      
      return $best_prefix;
+}
+
+sub host_to_uri {
+     my ($this, $host) = @_;
+     
+     return $this->{forwardmap}->{lc($host)};
+}
+
+
+# This translates a full URL (with hostname) into a local URI, semilar to how
+# the rewriting in apache works. Will return undef if translation is not
+# possible.
+sub url_to_uri {
+     my ($this, $url) = @_;
+     
+     if($url =~ m!https?://([^/]+)(.*)!) {
+          my $host = $1;
+          my $rest = $2;
+          if(my $host_uri = $this->host_to_uri($host)) {
+               return $host_uri . $rest;
+          }
+     }
+     return undef;
 }
 
 1;

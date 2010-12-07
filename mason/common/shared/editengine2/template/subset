@@ -45,6 +45,8 @@
 % }
 %
 % if ($style->{context} eq 'inline') {
+%  my $printit = grep { $subset_lookup{$_} } map { my $element = $_; join '.', map {$element->{$_}->{value}} @correspondances; } @$set;
+%  if($printit) {
    <ul>
 %   foreach my $element (@$set) {
 %     my $element_key = join '·', map {$element->{$_}->{value}} @correspondances;
@@ -59,6 +61,7 @@
 %     }
 %   }
    </ul>
+%  }
 % }
 <%args>
 # Mandatory arguments

@@ -20,13 +20,19 @@ for my $mailto  (@mailto) {
 
      $mail_error = "Kunne ikke generere mail besked" unless($mailtxt);
 
-     my $smtp = Net::SMTP->new($server, Timeout=>30, Debug => 1);
+     my $smtp = Net::SMTP->new($server, Timeout=>5, Debug => 1) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
+
      my $from = $r->notes('formdata_mail_from') || $mailto;
 
      $mail_error = "Failed to specify a sender [$from]\n"        unless ($mail_error or $smtp->mail($from));
      $mail_error = "Failed to specify a recipient [$mailto]\n"   unless ($mail_error or $smtp->to($mailto));
      $mail_error = "Failed to send a message\n"                  unless ($mail_error or $smtp->data([$mailtxt]));
      $mail_error = "Failed to quit\n"                            unless ($mail_error or $smtp->quit);
+     if ( $mail_error ) {
+        use POSIX qw(strftime);
+        my $today = strftime( "%Y-%m-%d %H:%M:%S", localtime );
+        print STDERR "\n$today: after_submit mail error: $mail_error\n";
+     }
 }
 my $redirect_uri = $uri;
 if(my $siterootmap = $m->comp('/shared/get_subsite_siterootmap')) {

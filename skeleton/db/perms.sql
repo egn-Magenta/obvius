@@ -11,10 +11,7 @@
 #define USER QUOTE(DBUSERNAME##_normal)@QUOTE(HOSTNAME)
 
 use mysql;
-# grant select on DBNAME.* to USER identified by 'default_normal';
-grant select,insert,update,delete on DBNAME.* to USER identified by QUOTE(DBPASSWORD);
-# grant insert,update on DBNAME.subscribers to USER;
-# grant insert,update,delete on DBNAME.subscriptions to USER;
+grant select,insert,update,delete,execute,trigger on DBNAME.* to USER identified by QUOTE(DBPASSWORD);
 
 #elif "DBTYPE" eq "pgsql"
 

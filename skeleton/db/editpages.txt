@@ -209,7 +209,7 @@ DocType: Sitemap
   Desc: Publish now?
  End
 
-DocType: Upload
+DocType: FileUpload
  Page: 1
   Title: Upload
   Desc: The Upload-document if for all types of binary files besides
@@ -218,9 +218,8 @@ DocType: Upload
   Fields: short_title Short title
   Fields: teaser Teaser;rows=4
   Fields: mimetype MIME-type;distinct=1
-  Fields: uploaddata Upload data
-  Fields: contentdisposition How should the uploaded data be downloaded;label_attachment=Download to disk,label_inline=Show inline in browser
-  Fields: author Author;distinct=1
+  Fields: uploadfile Upload data
+  Fields: author Sidens kontaktperson;distinct=1
   Fields: seq Order of succession
   Fields: docdate Date (YYYY-MM-DD)
   Fields: expires Expiring
@@ -237,8 +236,7 @@ DocType: Upload
   Fields: source Source
  End
  Page: P
-  Title: Publish document
-  Fields: in_subscription Include in subscription;label_0=No, label_1=Yes, reverse_options=1
+  Copy: Standard (P)
  End
 
 DocType: Search
@@ -548,9 +546,6 @@ DocType: ErrorDocument
  End
  Page: 3
   Copy: HTML(3)
- End
- Page: 4
-  Copy: HTML(4)
  End
  Page: P
   Copy: HTML(P)

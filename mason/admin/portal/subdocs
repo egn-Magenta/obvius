@@ -7,7 +7,7 @@
 % else {
  <a href="../"><img width="16" height="11" src="/pics/icons/up.png" alt="<& /shared/msg, text=>'Up' &>" /></a>\
 % }
- <& util/navigator_link_start &><img width="16" height="11" src="/pics/icons/navigator<% $r->notes('inactive_subdocs') ? '-inactive' : '' %>.png" alt="<& /shared/msg, text=>'Navigator' &>" /></a></h3>
+ <& util/navigator_link_start, path => $obvius->get_doc_uri($doc) &><img width="16" height="11" src="/pics/icons/navigator<% $r->notes('inactive_subdocs') ? '-inactive' : '' %>.png" alt="<& /shared/msg, text=>'Navigator' &>" /></a></h3>
 
        <ul>
 % # Current:
@@ -16,7 +16,7 @@
 <& subdocs:display_icons, doc=>$doc, vdoc=>$vdoc &></a>\
 % $obvius->get_version_fields($vdoc, [qw(short_title title)]);
 <a class="obvius-current<% $r->notes('inactive_subdocs') ? ' obvius-inactive' : '' %>" href="./">\
-<& /shared/shorten, text=>$vdoc->field('short_title') || $vdoc->field('title'), len=>23, escape=>'h' &></a>
+<& /shared/shorten, text=>$vdoc->field('short_title') || $vdoc->field('title'), len=>500, escape=>'h' &></a>
 % # Subdocs:
 % if (scalar(@$subs)) {
            <ul>
@@ -26,7 +26,7 @@
 %         last if ($i>$max);
 %     }
 % if ($i>$max) {
-             <li class="obvius-<% $i+1%2 ? 'b' : 'a' %>" title="Navigator"><& util/navigator_link_start &>... <& /shared/msg, text=>'show all' &> (<% scalar(@$subs) %>)</a></li>
+             <li class="obvius-<% $i+1%2 ? 'b' : 'a' %>" title="Navigator"><p><& util/navigator_link_start, path => $obvius->get_doc_uri($doc) &>... <& /shared/msg, text=>'show all' &> (<% scalar(@$subs) %>)</a></p></li>
 % }
            </ul>
 % }
@@ -46,7 +46,7 @@ $args=>''
 $pre=>''
 $post=>''
 $hide_icons=>0
-$len=>23
+$len=>500
 </%args>
 %
 % my $title=$m->scomp('/shared/shorten', text=>$sub->{title}, len=>$len);
@@ -58,7 +58,7 @@ $len=>23
 % unless ($hide_icons) {
 <a href="<% $prefix . $url %><% $args %>"<% $tooltip %>><& subdocs:display_icons, doc=>$sub->{doc}, vdoc=>$sub->{vdoc} &></a>\
 % }
-<a href="<% $prefix . $url %><% $args %>"<% $tooltip %>><% $title |h %></a><% $post %></li>\
+<a href="<% $prefix . $url %><% $args %>"<% $tooltip %>><% $title |h %></a><% $post %></p></li>\
 %
 </%method>
 %
@@ -88,15 +88,17 @@ $base_vdoc
 </%args>
 %
 <%init>
-# XXX Should also account for language here, right?
-my $cache_key=$base_doc->Id . '|' . $base_vdoc->Version;
-if(my $cached_value=$m->cache(action=>'retrieve', key=>$cache_key, busy_lock=>'30sec')) {
-    #print STDERR $base_doc->Id . '|' . $base_vdoc->Version . " USING CACHED SUBS\n";
-    return $cached_value;
-}
-print STDERR $base_doc->Id . '|' . $base_vdoc->Version . " CACHING SUBS\n";
 
-my $subvdocs=$obvius->get_document_subdocs($base_doc, sortvdoc=>$base_vdoc, public=>0);
+use Cache::FileCache;
+
+my $cache = Cache::FileCache->new({cache_root => $obvius->{OBVIUS_CONFIG}{FILECACHE_DIRECTORY},
+   	    			   namespace => 'subdocs'});
+				   
+my $cache_key = $obvius->config->param('use_old_admin_subdocs_sort') ? ($base_doc->Id . "_" . $base_vdoc->Version) : $base_doc->Id;
+my $result = $cache->get( $cache_key );
+return $result if $result;
+
+my $subvdocs=$obvius->get_document_subdocs($base_doc, sortvdoc=>$base_vdoc, public=>0); 
 my @subs=map {
     $obvius->get_version_fields($_, [qw(short_title title seq)]);
     my $subdoc=$obvius->get_doc_by_id($_->Docid);
@@ -105,10 +107,17 @@ my @subs=map {
         name=>$subdoc->Name,
         vdoc=>$_,
         doc=>$subdoc,
+	seq => $_->field('seq')
     }
 } @$subvdocs;
 
-$m->cache(action=>'store', key=>$cache_key, value=>\@subs);
+unless($obvius->config->param('use_old_admin_subdocs_sort')) {
+     @subs = sort { ($a->{seq} >= 0 && $b->{seq} >= 0) || ($a->{seq} < 0 && $b->{seq} < 0) ?  
+		     $a->{seq} <=> $b->{seq} : $a->{seq} > $b->{seq} ?
+		     -1 : 1} @subs;
+}
+
+$cache->set( $cache_key, \@subs );
 return \@subs;
 </%init>
 %

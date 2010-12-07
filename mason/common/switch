@@ -1,27 +1,35 @@
 <div class="content">
 <% $content %>
-    </div>
+</div>
 % if ($show_subdocs) {
 <& subdocs, output=>$output &>\
 % }
 <%init>
 my $output=$r->pnotes('OBVIUS_OUTPUT');
 
-if ($doctype) {
-   $doctypename = $doctype->view($input);
-}
-
 $obvius->get_version_fields($vdoc, [qw(title show_subdocs)]);
 my $title = $vdoc->Title;
 
-my $content=undef;
-$content=$m->scomp("/doctypes/$doctypename", output=>$output) if ($m->comp_exists("/doctypes/$doctypename"));
 
-unless (defined $content) {
+my $content = '';
+
+my $doctype = $obvius->get_doctype_by_id($vdoc->Type);
+my $view = $doctype->view(\%ARGS);
+
+if (!$view) {
+     warn "No view for doctype " . $doctype->Name;
     $m->comp('/shared/set_status_message',
              status=>'WARNING',
-             message=>['Component not found for document type', ' "', $doctypename, '"' ]);
-    $content=''
+             message=>['No view found for doctype "', $doctype->Name, '", using Standard instead.' ]);
+
+     $view = '/doctypes/Standard'; # Default to standard.
+}
+if($m->comp_exists($view)) {
+    $content = $m->scomp($view, output=>$output);
+} else {
+    $m->comp('/shared/set_status_message',
+             status=>'WARNING',
+             message=>['Component "', $view, '" does not exist - no content generated.' ]);
 }
 
 my $show_subdocs=$vdoc->field('show_subdocs') || 0;

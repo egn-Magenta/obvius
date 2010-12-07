@@ -62,14 +62,16 @@ flock F, LOCK_EX;
 my $lock_now = localtime();
 print F $lock_now;
 
+# Eval ensures that we will always unlock even if the script crashes for some reason.
 eval {
-     if ($automatic) {
-	  send_automatic(); 
-     } elsif ($manual) {
-	  send_manual($docid);
-     } 
-     print STDERR "No subscriptions sent\n";
-     
+    if ($automatic) {
+        send_automatic();
+    } elsif ($manual) {
+        send_manual($docid);
+    } else {
+        print STDERR "No subscriptions sent\n";
+    }
+
 };
 flock F, LOCK_UN; 
 close F;

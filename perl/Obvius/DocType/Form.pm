@@ -29,24 +29,26 @@ sub generate_head_html {
 }
 
 sub ensure_decoded {
-     my ($val) = @_;
+     my ($val, $charset) = @_;
+     
+     $charset ||= 'iso-8859-1';
      
      if (ref $val eq 'ARRAY') {
-          return [map {ensure_decoded($_)} @$val];
+          return [map {ensure_decoded($_, $charset)} @$val];
      } elsif (ref $val eq 'HASH') {
-          return { map {ensure_decoded($_)} %$val};
+          return { map {ensure_decoded($_, $charset)} %$val};
      } elsif (ref $val eq 'SCALAR') {
-          my $scal = ensure_decoded($$val);
+          my $scal = ensure_decoded($$val, $charset);
           return \$scal;
      } elsif (ref $val) {
           die "Unknown type: " . ref $val;
      } else {
-          return is_utf8($val) ? $val : decode('UTF-8', $val);
+          return is_utf8($val) ? $val : decode($charset, $val);
      }
 }
 
 sub preprocess_fields {
-     my ($formspec, $input) = @_;
+     my ($formspec, $input, $charset) = @_;
      my %outfields;
      
      for my $fn (keys %$formspec) {
@@ -64,7 +66,7 @@ sub preprocess_fields {
                $value = "";
           }
           $of->{name} = $field->{name};
-          $of->{value} = ensure_decoded($value);
+          $of->{value} = ensure_decoded($value, $charset);
 	  if (!ref ($of->{value})) { 
 	      $of->{value} =~ s/(?:^\s+|\s+$)//g;
 	  }
@@ -93,9 +95,9 @@ sub validate_mandatory {
      if ($mandatory eq '1') {
           return $has_value;
      } elsif ($mandatory =~ s/^!//) {
-          return $fields->{$mandatory}{has_value} && !$has_value;
+          return $has_value if(! $fields->{$mandatory}{has_value});
      } elsif ($mandatory) {
-          return $fields->{$mandatory}{has_value} && $has_value;
+          return $has_value if($fields->{$mandatory}{has_value});
      }
 
      return 1;
@@ -149,7 +151,7 @@ sub validate_entry {
      my $valrules = ($fieldspec->{valrules} || {})->{validaterule} || [];
      push @$valrules, { validationtype => 'email' } if $field->{type} eq 'email';
 
-     if ($field->{has_value}) {
+     if ($field->{has_value} || $field->{type} eq 'checkbox' || $field->{type} eq 'selectmultiple') {
 	 for my $vr (@$valrules) {
 	   my ($error, $msg) = validate_by_rule($field->{value}, $vr);
 	     if ($error) {
@@ -397,7 +399,7 @@ sub validate_full_entry {
           $input{$val->{name}} = $value;
      }
           
-     my $outfields = preprocess_fields($formspec, \%input);
+     my $outfields = preprocess_fields($formspec, \%input, $obvius->config->param('charset'));
      
      for my $fn (keys %$formspec) {
           validate_entry($formspec->{$fn}, $outfields->{$fn}, $outfields, $docid, $obvius);
@@ -501,22 +503,26 @@ sub mail_helper {
      $obvius->get_version_fields($vdoc, ['mailto']);
      my @mailto = split /;/, $vdoc->field('mailto');
      
-     my $from = 'noreply@adm.ku.dk';
+     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
      
-     $subject = encode_base64($subject);
+     my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+     
+     $subject = encode_base64(encode($charset, $subject));
      $subject =~ s/\n//g;
-     $subject = "=?LATIN-1?B?" . $subject . "?=";
+     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
      
      for my $mt (@mailto) {
           $msg =<<END;
 To: <$mt>
 From: <$from>
-Content-Type: text/plain; charset=latin-1
-Content-Transfer-Encoding: 8bit
 Subject: $subject
+MIME-Version: 1.0
+Content-Type: text/plain; charset=$charset
+Content-Transfer-Encoding: 8bit
 
 $msg
 END
+          $msg = ensure_correct_encoding($msg, $charset);
           $obvius->send_mail($mt, $msg, $from);
      }
 }
@@ -762,7 +768,7 @@ sub generate_result_view {
      }
      
      push @entries, ("", [translate('id', $vdoc), $entry_nr]);
-
+     
      return join "\n", map { ref $_ ? $_->[0] . ": " . $_->[1] : $_} @entries;
        
 }
@@ -770,16 +776,19 @@ sub generate_result_view {
 sub send_mail {
      my ($to, $obvius, $vdoc, $formspec, $fields, $entry_nr) = @_;
      $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
-     
+
+     my $charset = $obvius->config->param('charset') || 'ISO-8859-1';     
+
      my $subject = $vdoc->field('email_subject');
      my ($namefield) = grep { $_->{type} eq 'name' } values %$fields;
      my $prepend = $namefield ? translate('Dear', $vdoc) . " " . $namefield->{value}: '';
      
      my $result_view = generate_result_view($formspec,$fields, $entry_nr, $vdoc);
-     from_to($subject, 'ISO-8859-1', 'UTF-8');
+     
+     $subject = ensure_correct_encoding($subject, $charset);
      $subject = encode_base64($subject);
      $subject =~ s/\n//g;
-     $subject = "=?UTF-8?B?" . $subject . "?=";
+     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
 
      my $text = $vdoc->field('email_text');
      
@@ -788,11 +797,13 @@ sub send_mail {
      my $uri = get_full_uri($vdoc->Docid, $obvius);
      my $form = translate("formular", $vdoc);
      
-     my $from = 'noreply@adm.ku.dk';
+     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
      my $mailmsg = <<END;
 To:      $to
 From:    $from
 Subject: $subject
+MIME-Version: 1.0
+Content-Type: text/plain; charset=$charset
 
 $prepend
 
@@ -806,7 +817,33 @@ $result_view
 $form: $uri
 END
      
+     $mailmsg = ensure_correct_encoding($mailmsg, $charset);
+     
      $obvius->send_mail($to, $mailmsg, $from);
+}
+     
+sub ensure_correct_encoding {
+     my ($input, $charset) = @_;
+     my $output = '';
+     Encode::_utf8_off($input);
+
+     while($input) {
+          # Decode as much correct utf-8 as we can from the current input
+          # passing on anything we doesn't know one character at a time,
+          # assuming it is in perl's own string format. Re-encode everything to
+          # octects of the sites' charset afterwards.
+          my $n = decode('utf-8', $input, Encode::FB_QUIET);
+          
+          if (length ($input)) {
+               my $c = substr ($input, 0, 1);
+               $n .= $c;
+               $input = substr($input,1);
+          }
+          $n = encode($charset, $n);
+          $output .= $n;
+     }
+     
+     return $output;
 }
        
 sub count_entries {

@@ -228,10 +228,10 @@ sub shave_of_tails {
 
 sub convert_ip_to_number {
      my ($ip) = @_;
-     my ($p1, $p2, $p3, $p4, $subnet) = $ip =~ m!^\s*(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?:\/(\d{1,2}))?\s*$!;
+     my ($p1, $p2, $p3, $p4, $subnet) = ($ip =~ m!^\s*(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?:\/(\d{1,2}))?\s*$!);
      
      if ($p1) {
-          return ($p1 * (2 << 24) + $p2 * (2 << 16) + $p3 * (2 << 8) + $p4, $subnet);
+          return ($p1 * (1 << 24) + $p2 * (1 << 16) + $p3 * (1 << 8) + $p4, $subnet);
      } else {
           return undef;
      }
@@ -352,6 +352,7 @@ sub handler ($$) {
      my ($this, $req) = @_;
 
      my $obvius = $this->obvius_connect($req);
+     $req->no_cache(1) if $obvius->{OBVIUS_CONFIG}{CACHE_OFF};     
      
      my $is_admin = $this->param('is_admin');
      $req->notes(is_admin => $is_admin);
@@ -406,6 +407,7 @@ sub handler ($$) {
 					WebObvius::Apache::apache_module('Request')-> new($req),
 					$output
 				       );
+
 	  if ($data || $path) {
 	       my %args = (mime_type => $mime_type, 
 			   data => $data, 
