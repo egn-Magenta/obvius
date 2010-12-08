@@ -12,7 +12,6 @@ use Encode qw( is_utf8 encode decode from_to );
 use WebObvius::Captcha;
 use Spreadsheet::WriteExcel;
 use MIME::Base64;
-use Data::Dumper;
 use File::Path qw( mkpath );
 use Fcntl qw( :flock );
 use JSON qw( to_json from_json );
@@ -632,78 +631,98 @@ sub get_upload_file {
 
      return ($field_data->{type}, \$data, $field_data->{filename}, 'attachment', undef, $extra_headers);
 }
-     
+
 sub generate_excel {
-    my ($this, $doc, $vdoc, $obvius, $input) = @_;
+     my ($this, $doc, $vdoc, $obvius, $input) = @_;
+      
+     $obvius->get_version_fields($vdoc, ['title', 'formdata']);
      
-    $obvius->get_version_fields($vdoc, ['title', 'formdata']);
-    
-    my $formdata = get_formdata($vdoc, $obvius);
-    my $formspec = convert_formspec($formdata);
-    
-    my @keys = sort { $formspec->{$a}{order} <=> $formspec->{$b}{order} } keys %$formspec;
-    my @headers = @keys;
-    unshift @headers, "Dato";
-    unshift @headers, "Id";
-    
-    my $name = $doc->Name;
-    my $tempfile="/tmp/" . $name . ".xls";
-    my $workbook=Spreadsheet::WriteExcel->new($tempfile);
-    my $worksheet=$workbook->addworksheet();
-    
-    # Headers:
-    my $header_format=$workbook->addformat();
-    $header_format->set_bold();
-    $worksheet->write_row(0, 0, \@headers, $header_format);
+     my $formdata = get_formdata($vdoc, $obvius);
+     my $formspec = convert_formspec($formdata);
+     
+     my @keys = sort { $formspec->{$a}{order} <=> $formspec->{$b}{order} } keys %$formspec;
+     
+     if($input->param('get_all_versions')) {
+          my %seen_fields = map { $_ => 1 } @keys;
 
-    # Data:
-    my $data_format=$workbook->addformat();
-    $data_format->set_align('top');
-    $data_format->set_locked(0);
-    
-    my $entered_data = retrieve_data($obvius, $vdoc->Docid);
+          my $versions = $obvius->get_versions($doc) || [];
+          @$versions = sort { $b->Version cmp $a->Version } grep { $_->Version ne $vdoc->Version } @$versions;
 
-    my $uri = $obvius->get_doc_uri($doc);
-    
-    $uri = "http://" . $obvius->config->{ROOTHOST} . $input->notes('prefix') . $uri;
-    $uri =~ s!/+$!!;
-    $uri .= "?get_upload_file=1&";
-    
-    my $show_fields = sub {
-         my ($fieldname, $entry, $entry_nr) = @_;
-         
-         return "" if !defined $entry;
-         
-         if ($formspec->{$fieldname}{type} eq 'upload') {
-              my $field = eval { from_json($entry); };
-              return "" if !$field;
-              return $uri ."entry_nr=" . uri_escape($entry_nr) . "&fieldname=" . $fieldname;
-         }
-         from_to($entry, 'UTF-8', 'latin-1');
-         return $entry;
-    };
-
-    my $i=1;
-    for my $entry_nr (sort { $a <=> $b } keys %$entered_data) {
-         my $entry = $entered_data->{$entry_nr};
-         my @row = map { $show_fields->($_, $entry->{fields}{$_}, $entry_nr) } @keys;
-         unshift @row, $entry->{time};
-         unshift @row, $entry_nr;
-         
-         $worksheet->write_row($i++, 0, [ map { /^\s*=/ ? '"' . $_ . '"' : $_ } @row], $data_format);
-    }
-    $workbook->close();
-    
-    my ($data, $fh);
-    eval {
-         open $fh, $tempfile or die "Couldn't open $tempfile, stopping";
-         do { local $/; $data = <$fh> };
-         close $fh;
-    };
-    unlink $tempfile;
-    
-    die $@ if $@;
-    return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
+          for my $v (@$versions) {
+               my $formdata = get_formdata($v, $obvius);
+               my $fs = convert_formspec($formdata);
+               my @new_keys = sort { $fs->{$a}{order} <=> $fs->{$b}{order} } grep {!$seen_fields{$_}} keys %$fs;
+               for(@new_keys) {
+                    push(@keys, $_);
+                    $seen_fields{$_} = 1;
+                    $formspec->{$_} = $fs->{$_};
+                    
+               }
+          }
+     }
+     
+     my @headers = @keys;
+     unshift @headers, "Dato";
+     unshift @headers, "Id";
+     
+     my $name = $doc->Name;
+     my $tempfile="/tmp/" . $name . ".xls";
+     my $workbook=Spreadsheet::WriteExcel->new($tempfile);
+     my $worksheet=$workbook->addworksheet();
+     
+     # Headers:
+     my $header_format=$workbook->addformat();
+     $header_format->set_bold();
+     $worksheet->write_row(0, 0, \@headers, $header_format);
+ 
+     # Data:
+     my $data_format=$workbook->addformat();
+     $data_format->set_align('top');
+     $data_format->set_locked(0);
+     
+     my $entered_data = retrieve_data($obvius, $vdoc->Docid);
+ 
+     my $uri = $obvius->get_doc_uri($doc);
+     
+     $uri = "http://" . $obvius->config->{ROOTHOST} . $input->notes('prefix') . $uri;
+     $uri =~ s!/+$!!;
+     $uri .= "?get_upload_file=1&";
+     
+     my $show_fields = sub {
+          my ($fieldname, $entry, $entry_nr) = @_;
+          
+          return "" if !defined $entry;
+          
+          if ($formspec->{$fieldname}{type} eq 'upload') {
+               my $field = eval { from_json($entry); };
+               return "" if !$field;
+               return $uri ."entry_nr=" . uri_escape($entry_nr) . "&fieldname=" . $fieldname;
+          }
+          from_to($entry, 'UTF-8', 'latin-1');
+          return $entry;
+     };
+ 
+     my $i=1;
+     for my $entry_nr (sort { $a <=> $b } keys %$entered_data) {
+          my $entry = $entered_data->{$entry_nr};
+          my @row = map { $show_fields->($_, $entry->{fields}{$_}, $entry_nr) } @keys;
+          unshift @row, $entry->{time};
+          unshift @row, $entry_nr;
+          
+          $worksheet->write_row($i++, 0, [ map { /^\s*=/ ? '"' . $_ . '"' : $_ } @row], $data_format);
+     }
+     $workbook->close();
+     
+     my ($data, $fh);
+     eval {
+          open $fh, $tempfile or die "Couldn't open $tempfile, stopping";
+          do { local $/; $data = <$fh> };
+          close $fh;
+     };
+     unlink $tempfile;
+     
+     die $@ if $@;
+     return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
 }
 
 sub delete_entries {

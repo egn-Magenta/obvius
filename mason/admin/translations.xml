@@ -1635,5 +1635,229 @@
     <translation lang="en">Copy document parameters</translation>
     <translation lang="da">Kopier dokumentparametre</translation>
   </text>
-    
+  
+  <!-- Form doctype start -->
+  <text key="Fieldset">
+    <translation lang="en">Fieldset</translation>
+    <translation lang="da">Feltområde</translation>
+  </text>
+  <text key="Textarea">
+    <translation lang="en">Textarea</translation>
+    <translation lang="da">Tekstområde</translation>
+  </text>
+  <text key="Radiobuttons">
+    <translation lang="en">Radiobuttons</translation>
+    <translation lang="da">Radioknapper</translation>
+  </text>
+  <text key="Checkboxes">
+    <translation lang="en">Checkboxes</translation>
+    <translation lang="da">Afkrydsningsknapper</translation>
+  </text>
+  <text key="Select multiple">
+    <translation lang="en">Select multiple</translation>
+    <translation lang="da">Vælg flere</translation>
+  </text>
+  <text key="Add new field:">
+    <translation lang="en">Add new field:</translation>
+    <translation lang="da">Tilføj nyt felt</translation>
+  </text>
+  <text key="Description/explanation">
+    <translation lang="en">Description/explanation</translation>
+    <translation lang="da">Beskrivelse/forklaring</translation>
+  </text>
+  <text key="Fieldname">
+    <translation lang="en">Fieldname</translation>
+    <translation lang="da">Feltnavn</translation>
+  </text>
+  <text key="formdata_type">
+    <translation lang="en">formdata_type</translation>
+    <translation lang="da">Felt type</translation>
+  </text>
+  <text key="formdata_type:">
+    <translation lang="en">formdata_type:</translation>
+    <translation lang="da">Felt type:</translation>
+  </text>
+  <text key="If..">
+    <translation lang="en">If..</translation>
+    <translation lang="da">Hvis..</translation>
+  </text>
+  <text key="The field:">
+    <translation lang="en">The field:</translation>
+    <translation lang="da">Feltet:</translation>
+  </text>
+  <text key="Has been filled">
+    <translation lang="en">Has been filled</translation>
+    <translation lang="da">Er udfyldt</translation>
+  </text>
+  <text key="Has not been filled">
+    <translation lang="en">Has not been filled</translation>
+    <translation lang="da">Ikke er udfyldt</translation>
+  </text>
+
+  <text key="Dimensions">
+
+    <translation lang="Dimensions"/>
+
+    <translation lang="Dimensioner"/>
+
+  </text>
+
+  <text key="Options">
+
+    <translation lang="Options"/>
+
+    <translation lang="Muligheder"/>
+
+  </text>
+
+  <text key="Unique">
+    <translation lang="en">Unique</translation>
+    <translation lang="da">Unik</translation>
+  </text>
+  <text key="Unique:">
+    <translation lang="en">Unique:</translation>
+    <translation lang="da">Unik:</translation>
+  </text>
+  <text key="Options:">
+    <translation lang="en">Options:</translation>
+    <translation lang="da">Muligheder:</translation>
+  </text>
+  <text key="Add new">
+    <translation lang="en">Add new</translation>
+    <translation lang="da">Tilføj ny</translation>
+  </text>
+  <text key="Value">
+    <translation lang="en">Value</translation>
+    <translation lang="da">Værdi</translation>
+  </text>
+  <text key="Validaterules">
+    <translation lang="en">Validaterules</translation>
+    <translation lang="da">Valideringsregler</translation>
+  </text>
+  <text key="Error message">
+    <translation lang="en">Error message</translation>
+    <translation lang="da">Fejlmeddelelse</translation>
+  </text>
+  <text key="Edit option">
+    <translation lang="en">Edit option</translation>
+    <translation lang="da">Redigér muligheder</translation>
+  </text>
+  <text key="Edit validaterule">
+    <translation lang="en">Edit validaterule</translation>
+    <translation lang="da">Redigér valideringsregel</translation>
+  </text>
+  <text key="validate_type_min_checked">
+    <translation lang="en">validate_type_min_checked</translation>
+    <translation lang="da">Min. antal valgte værdier</translation>
+  </text>
+  <text key="validate_type_max_checked">
+    <translation lang="en">validate_type_max_checked</translation>
+    <translation lang="da">Max. antal valgte værdier</translation>
+  </text>
+  <text key="validate_type_x_checked">
+    <translation lang="en">validate_type_x_checked</translation>
+    <translation lang="da">Præcis x valgte værdier</translation>
+  </text>
+  <text key="Predefined validations">
+    <translation lang="en">Predefined validations</translation>
+    <translation lang="da">Prædefinerede valderinger</translation>
+  </text>
+  <text key="Valid phone number">
+    <translation lang="en">Valid phone number</translation>
+    <translation lang="da">Gyldigt telefonnummer</translation>
+  </text>
+  <text key="Valid e-mail address">
+    <translation lang="en">Valid e-mail address</translation>
+    <translation lang="da">Gyldig email adresse</translation>
+  </text>
+  <text key="Valid postal code">
+    <translation lang="en">Valid postal code</translation>
+    <translation lang="da">Gyldigt postnummer</translation>
+  </text>
+  <text key="Numbers only">
+    <translation lang="en">Numbers only</translation>
+    <translation lang="da">Kun tal</translation>
+  </text>
+  <text key="validate_type_regexp">
+    <translation lang="en">validate_type_regexp</translation>
+    <translation lang="da">regulært udtryk</translation>
+  </text>
+  <text key="validate_type_max_length">
+    <translation lang="en">validate_type_max_length</translation>
+    <translation lang="da">max. antal tegn</translation>
+  </text>
+  <text key="validate_type_min_length">
+    <translation lang="en">validate_type_min_length</translation>
+    <translation lang="da">min. antal tegn</translation>
+  </text>
+  <text key="Edit validaterule">
+    <translation lang="en">Edit validaterule</translation>
+    <translation lang="da">Redigér valideringsregel</translation>
+  </text>
+  <text key="Mandatory">
+    <translation lang="en">Mandatory</translation>
+    <translation lang="da">Skal udfyldes</translation>
+  </text>
+  <text key="Mandatory:">
+    <translation lang="en">Mandatory:</translation>
+    <translation lang="da">Skal udfyldes:</translation>
+  </text>
+  <text key="Click here to download collected form data in XML format">
+    <translation lang="en">Click here to download collected form data in XML format</translation>
+    <translation lang="da">Hent data fra formularen i XML-format</translation>
+  </text>
+  <text key="Click here to download collected form data in Excel format">
+    <translation lang="en">Click here to download collected form data in Excel format</translation>
+    <translation lang="da">Hent data fra formularen i Excel-format</translation>
+  </text>
+  <text key="all fields from all versions included">
+    <translation lang="en">all fields from all versions included</translation>
+    <translation lang="da">inklusiv alle felter fra alle versioner</translation>
+  </text>
+  <text key="Flush XML file">
+    <translation lang="en">Delete all data from the form</translation>
+    <translation lang="da">Slet alle data fra formularen</translation>
+  </text>
+  <text key="Submit">
+    <translation lang="en">Submit</translation>
+    <translation lang="da">Send</translation>
+  </text>
+  <text key="Tekst over formular">
+    <translation lang="en">Text above form</translation>
+    <translation lang="da">Indledende tekst, der vises oven over formularen</translation>
+  </text>
+  <text key="Tekst der vises efter udfyldning af formularen">
+    <translation lang="en">Text shown after submitting the form</translation>
+    <translation lang="da">Tekst, der vises, når formularens indhold er modtaget og valideret</translation>
+  </text>
+  <text key="Emailadresse data skal sendes til ved udfyldning (optional)">
+    <translation lang="en">Email-address data should be mailed to (optional)</translation>
+    <translation lang="da">Data skal sendes til følgende e-mail-adresse (valgfri)</translation>
+  </text>
+  <text key="Maximum length">
+    <translation lang="en">Maximum length</translation>
+    <translation lang="da">Maks. antal tegn</translation>
+  </text>
+  <text key="Cols">
+    <translation lang="en">Cols</translation>
+    <translation lang="da">Kolonner</translation>
+  </text>
+  <text key="Rows">
+    <translation lang="en">Rows</translation>
+    <translation lang="da">Rækker</translation>
+  </text>
+  <text key="Field width">
+    <translation lang="en">Field width</translation>
+    <translation lang="da">Feltbredde</translation>
+  </text>
+  <text key="Fieldset End">
+    <translation lang="en">Fieldset End</translation>
+    <translation lang="da">Afslutning af feltområde</translation>
+  </text>
+  <text key="Form">
+    <translation lang="en">Form</translation>
+    <translation lang="da">Formular</translation>
+  </text>
+  <!-- Form doctype end -->
+
 </messages>

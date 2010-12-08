@@ -39,8 +39,15 @@ function onsubmit_formhandler() {
 <div class="obviusformdownload">
     <div>
       <a href="<% $prefix . $uri2 %>?get_file=1&format=excel">
-        <& /shared/msg, text=>"Click here to download collected form data in Excel format" &>.
-      </a>
+        <& /shared/msg, text=>"Click here to download collected form data in Excel format" &>
+      </a>.
+    </div>
+    <br />
+    <div>
+      <a href="<% $prefix . $uri2 %>?get_file=1&format=excel&get_all_versions=1">
+        <& /shared/msg, text=>"Click here to download collected form data in Excel format" &>
+        (<& /shared/msg, text=>"all fields from all versions included" &>)
+      </a>.
     </div>
     <br />
 %if ($doctype->count_deleted($doc->Id, $obvius) > 0) {
