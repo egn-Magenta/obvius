@@ -11,9 +11,32 @@
      <hr />
     </td>
   </tr>
-% foreach my $seq (@seqs) {
+% if(scalar(@hidden_seqs)) {
   <tr>
-    <td class="seq">
+    <th></th>
+    <th style="text-align: left;"><& /shared/trans, en=>"Hidden documents", da=>"Skjulte dokumenter" &></th>
+  </tr>
+% }
+% foreach my $seq (@hidden_seqs) {
+    <& SELF:display_seq, seq=>$seq, inactive=>$inactive, next=>$next, prev=>$prev, new_document=>$new_document, fieldname=>$fieldname &>
+% }
+% if(scalar(@shown_seqs)) {
+  <tr>
+    <th></th>
+    <th style="text-align: left;"><& /shared/trans, en=>"Shown documents", da=>"Viste dokumenter" &></th>
+  </tr>
+% }
+% foreach my $seq (@shown_seqs) {
+    <& SELF:display_seq, seq=>$seq, inactive=>$inactive, next=>$next, prev=>$prev, new_document=>$new_document, fieldname=>$fieldname &>
+% }
+</table>
+
+<& ../bottom &>
+%
+%
+<%method display_seq>
+  <tr>
+    <td class="seq" style="vertical-align: top;">
       <% $seq->{seq} |h %>
     </td>
     <td>
@@ -40,10 +63,15 @@
       </ul>
     </td>
   </tr>
-% }
-</table>
-
-<& ../bottom &>
+<%args>
+$seq
+$inactive
+$next
+$prev
+$new_document
+$fieldname
+</%args>
+</%method>
 %
 <%args>
 $fieldname
@@ -131,11 +159,20 @@ if ($sibs) {
     }
 }
 
+my (@shown_seqs, @hidden_seqs);
+for(@seqs) {
+  if($_->{seq} >= 0) {
+    push(@shown_seqs, $_);
+  } else {
+    push(@hidden_seqs, $_);
+  }
+}
+
 if ($current) {
     # Put in in place.
     # XXX Note that this "insertion in place" does not take
     #     the original/real sort into account.
-    my ($current_seq)=grep { $_->{seq}==$current->{value} } @seqs;
+    my ($current_seq)=grep { $_->{seq}==$current->{value} } (@hidden_seqs, @shown_seqs);
     if ($current_seq) {
         # Find out where to put it:
         my $before=0;
@@ -148,21 +185,39 @@ if ($current) {
     else {
         $current_seq={ seq=>$current->{value}, sibs=>[ $current ] };
 
-        my $before=0;
-        for(my $i=0; $i<scalar(@seqs); $i++) {
-            $before=$i+1 if ($current_seq->{seq}>$seqs[$i]->{seq});
+        if($current_seq->{seq} >= 0){
+          stuff_in(\@shown_seqs, $current_seq)
+        } else {
+          stuff_in(\@hidden_seqs, $current_seq)
         }
-        splice @seqs, $before, 0, ($current_seq);
+
     }
+}
+
+sub stuff_in {
+  my($array, $item) = @_;
+  
+  my $value = $item->{seq};
+  
+  my $before=0;
+  for(my $i=0; $i<scalar(@$array); $i++) {
+    my $seq = $array->[$i]->{seq};
+    if ($value>$seq) {
+      $before=$i+1;
+    }
+  }
+  splice @$array, $before, 0, ($item);
 }
 
 # Find prev_value/next_value:
 my $prev_seq;
-my ($current_seq)=grep { $_->{seq} == $current->{value} } @seqs;
+my ($current_seq)=grep { $_->{seq} == $current->{value} } (@hidden_seqs, @shown_seqs);
 my $next_seq;
-foreach (@seqs) {
-    $prev_seq=$_ if ($_->{seq}<$current_seq->{seq});
-    $next_seq=$_ if (!defined $next_seq and $_->{seq}>$current_seq->{seq});
+my $last_seq;
+foreach ((@hidden_seqs, @shown_seqs)) {
+    $prev_seq=$last_seq if($_->{seq} == $value);
+    $next_seq=$_ if ($last_seq and $last_seq->{seq} == $value);
+    $last_seq = $_;
 }
 
 my $prev=$current_seq->{seq}-10;
