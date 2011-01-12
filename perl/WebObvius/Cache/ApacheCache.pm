@@ -157,6 +157,49 @@ sub save_request_result_in_cache
      return;
 }
 
+# copy_file_to_cache -   Copies a file to the cache instead of printing it from
+#                        a blob.
+sub copy_file_to_cache {
+    my ($this, $req, $source_path, $filename) = @_;
+
+    return if !$this->can_request_use_cache_p($req);
+    
+    my ($fp, $fn) = $this->find_cache_filename($req, $filename);
+    my $local_dir = $fp . $fn;
+    return if (!$fn);
+    
+    my $dir = $this->{cache_dir} . $fp;
+    make_sure_exist($dir) or return;
+    
+    my $dest_path = $dir . $fn;
+    my $lockfile = $dest_path . ".LOCK";
+    
+    open LOCK, '>', $lockfile  || (warn "Couldn't open lockfile\n", return);
+    flock LOCK, LOCK_EX || (warn  "Couldn't get lock\n", close LOCK, return);
+    
+    my $copy = 1;
+    if(-f $dest_path) {
+        my @s = stat $source_path;
+        my @d = stat $dest_path;
+        # Don't copy unless size doesn't match or source file has been modified.
+        $copy = 0 unless($s[7] != $d[7] or $s[9] >= $d[9]);
+    }
+    
+    system('cp', $source_path, $dest_path) if($copy);
+    
+    flock LOCK, LOCK_UN;
+    close LOCK;
+
+    my ($args) = ($req->args =~ /^(size=\d+(?:x\d+|\%))$/) if ($req->args);
+    $args ||= "";
+    
+    my $path = $req->uri();
+    
+    $this->with_db(sub {$_[0]->{$path . $args} = "/cache/$local_dir";});
+
+    return;
+}
+
 sub flush {
     my ($this, $commands) = @_;
 
