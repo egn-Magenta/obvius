@@ -28,6 +28,8 @@ use Obvius::Hostmap;
 use Getopt::Long;
 
 $ENV{MOD_PERL} = "mod_perl/2"; # make sure everyone thinks mod_perl is 2.
+$ENV{MOD_PERL_API_VERSION} = "2"; # Ditto
+$ENV{ROSE_DB_NO_CHILD_INIT_HANDLER} = 1; # Tell Rose::DB to not mess around with apache
 # Try to set effective user id to www-data:
 die "Please just don't run as root ok.\n" if (! $>);
 # If it wasn't possible, die:
