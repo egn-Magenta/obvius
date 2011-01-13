@@ -37,6 +37,8 @@ use HTML::Parser;
 use URI;
 use URI::Escape;
 
+use Encode;
+
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
 
@@ -84,7 +86,24 @@ sub action {
 
     # Filter content if it is a type we feel know:
     if ($response->headers->header('content-type')=~m!^text/(html|xml|xhtml|plain)!) {
-        $output->param(proxy_content=>filter_content($response->content, $fetch_url, $base_url, $prefixes));
+        my $content = $response->content;
+
+        # First, figure out which encoding it is in:
+        my ($encoding) = ($response->headers->header('content-type') =~ m!charset\s*=\s*([\w\d-]+)!);
+        ($encoding) = ($response->content =~ m!charset\s*=\s*([\w\d-]+)!) unless($encoding);
+        $encoding = 'iso-8859-1' unless($encoding and Encode::find_encoding($encoding));
+        
+        # Now decode into perl's format and convert anything that is not supported to HTML entities
+        $content = Encode::decode($encoding, $content, Encode::FB_HTMLCREF);
+
+        # Convert to ascii with HTML entities for all wide characters
+        $content = Encode::encode("ascii", $content, Encode::FB_HTMLCREF);
+
+        # Filter content
+        $content = filter_content($content, $fetch_url, $base_url, $prefixes);
+
+        # Output should still be ascii with entities
+        $output->param(proxy_content=>$content);
     }
     elsif ($response->is_success) {
         # Success, but we don't know how to filter the page, so
@@ -138,10 +157,9 @@ sub filter_content {
                                  api_version=>3,
                                  start_h=>[ \&start_element, 'self, tagname, attr, attrseq' ],
                                  end_h=>[ \&end_element, 'self, tagname' ],
-                                 default_h=>[ \&catch_all, 'self, dtext' ],
+                                 default_h=>[ \&catch_all, 'self, text' ],
                                  unbroken_text=>1,
                                 );
-
 
     $parser->{OBVIUS_OUTPUT}='';
     $parser->{OBVIUS_IN_BODY}=0;
