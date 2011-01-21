@@ -16,6 +16,8 @@ our $VERSION="1.0";
 sub internal_redirect {
     my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
 
+    return undef if ($req->uri =~ m!^/admin! );
+
     # Can't handle requests with args, so skip them and let raw_document_data
     # redirect them.
     return undef if($req->args and $req->args !~ m!^\s*$!);
