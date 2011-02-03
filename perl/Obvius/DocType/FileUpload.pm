@@ -16,8 +16,6 @@ our $VERSION="1.0";
 sub internal_redirect {
     my ($this, $doc, $vdoc, $obvius, $req, $output) = @_;
 
-    return undef if ($req->uri =~ m!^/admin! );
-
     # Can't handle requests with args, so skip them and let raw_document_data
     # redirect them.
     return undef if($req->args and $req->args !~ m!^\s*$!);
@@ -33,7 +31,10 @@ sub internal_redirect {
         my $filename = path_to_filename($path, $vdoc);
         $cache->copy_file_to_cache($req, $path, $filename);
 
-        return $vdoc->field('uploadfile');
+        my $uri = $vdoc->field('uploadfile');
+        $uri =~ s!^\s+!!;
+        $uri =~ s!\s+!!;
+        return $uri;
     } else {
         # Serve admin files this way?
         return undef;
@@ -84,6 +85,8 @@ sub raw_document_data {
 sub get_full_path {
     my ($path, $obvius) = @_;
     return undef unless($path);
+    $path =~ s!^\s+!!;
+    $path =~ s!\s+$!!;    
 
     $path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . $path;
     $path =~ s|/+|/|g;
