@@ -401,12 +401,22 @@ sub handler ($$) {
      # by the browser should have a method called "raw_document_data"
      # Please also note that a slash at the end of an uri in admin signifies
      # that we are getting the *raw* resource, not the obvius-wrapper (where that is appropriate)
+     #
+     # Now extended to also include the "internal_redirect" method which makes
+     # it possible to serve a static file already present beneath the document
+     # root.
      if (!$is_admin || $req->uri !~ m|/$|) {
+          my $upgraded_req = WebObvius::Apache::apache_module('Request')-> new($req);
+          
+          # Check if we should just serve data using an internal redirect:
+          my $other_path = $doctype->internal_redirect($doc, $vdoc, $obvius, $upgraded_req, $output);
+          if($other_path) {
+               $upgraded_req->internal_redirect($other_path);
+               return OK;
+          }
+          
 	  my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) = 
-	    $doctype->raw_document_data($doc, $vdoc, $obvius,
-					WebObvius::Apache::apache_module('Request')-> new($req),
-					$output
-				       );
+	    $doctype->raw_document_data($doc, $vdoc, $obvius, $upgraded_req, $output);
 
 	  if ($data || $path) {
 	       my %args = (mime_type => $mime_type, 

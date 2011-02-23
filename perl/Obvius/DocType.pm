@@ -147,6 +147,15 @@ sub is_cacheable { return 1; }
 #                      string. Return undef to avoid redirection.
 sub alternate_location { return undef; }
 
+# internal_redirect - 	if the document should serve the contents of a local
+#			static file residing inside the document root this
+#			method should return the uri of that file. Will be
+#			called after alternate_location and before
+#			raw_document_data. Arguments are:
+#			$doc, $vdoc, $obvius, $req, $output
+sub internal_redirect { return undef; }
+
+
 # raw_document_data - if this document returns binary data, this
 #                     method must return a list with the mimetype, the
 #                     raw data (as a string) an optionally a
