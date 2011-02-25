@@ -33,7 +33,7 @@ sub internal_redirect {
 
         my $uri = $vdoc->field('uploadfile');
         $uri =~ s!^\s+!!;
-        $uri =~ s!\s+!!;
+        $uri =~ s!\s+$!!;
         return $uri;
     } else {
         # Serve admin files this way?
