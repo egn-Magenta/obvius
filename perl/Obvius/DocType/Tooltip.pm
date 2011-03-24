@@ -68,9 +68,25 @@ sub raw_document_data {
     }
 
     
-    return ( 'text/html', Encode::encode('ascii', $text, Encode::FB_HTMLCREF) );
+    return ( 'text/html', decode_db_output($text) );
 }
 
+sub decode_db_output {
+    my $text = shift;
+    my $result = "";
+    Encode::_utf8_off($text);
+    my $str = Encode::encode('latin-1', $text);
+    my $res = "";
+    while($str) {
+        $res .= Encode::decode('utf-8', $str, Encode::FB_QUIET);
+        if($str) {
+            $res .= Encode::decode('latin-1', substr($str, 0, 1));
+            $str = substr($str, 1);
+        }
+    }
+    $text = $res;
+    return Encode::encode('ascii', $text, Encode::FB_HTMLCREF);
+}
 
 
 1;
