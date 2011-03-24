@@ -181,6 +181,15 @@ for ( @columns) {
 		$f =~ s[(')][$1']g;
 		$f =~ s[\\][\\\\]g;
 		$options->{where} = "$_->{name} like '%$f%'";
+	} elsif ($_-> {filter} =~ m!^sql:(.*)!s) {
+	    my $sql = $1;
+	    my $quoted = $filter;
+	    $quoted =~ s!\\!\\\\!g;
+	    $quoted =~ s!'!\'!g;
+	    $sql =~ s!#FILTER_VALUE#!$quoted!gs;
+	    my $fieldref = $storage->param('source') . "." . $_->{name};
+	    $sql =~ s!#FIELD_VALUE#!$fieldref!gs;
+	    $options->{where} = $sql;
 	} else {
 		die "bad filter $_->{filter}";
 	}
