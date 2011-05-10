@@ -124,9 +124,6 @@ sub hostmap {
 sub rewrite {
     my ($this, %args) = @_;
     
-    use Data::Dumper;
-    print STDERR Dumper(\%args);
-    
     return undef unless($args{is_front_server});
     
     my $roothost = $this->{roothost};
