@@ -8,10 +8,11 @@ our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 sub setup {
     my ($this, $rewriter) = @_;
 
-    my $docs_dir = $rewriter->{config}->param('docs_dir');
-    die "No docs_dir specified in the config file" unless($docs_dir);
+    my $site_base = $rewriter->{config}->param('sitebase');
+    die "No sitebase specified in the config file" unless($site_base);
+    $site_base =~ s!/$!!;
+    my $docs_dir = $site_base . "/docs";
 
-    $docs_dir =~ s!/$!!;
     $this->{docs_dir} = $docs_dir;
 }
 
@@ -123,9 +124,6 @@ sub hostmap {
 
 sub rewrite {
     my ($this, %args) = @_;
-    
-    use Data::Dumper;
-    print STDERR Dumper(\%args);
     
     return undef unless($args{is_front_server});
     
