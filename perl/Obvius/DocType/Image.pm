@@ -43,6 +43,18 @@ use File::Path;
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
 
+sub action {
+    my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
+    
+    unless($input->param('is_admin')) {
+	my $uri = $obvius->get_doc_uri($doc);
+	$obvius->log("Not serving HTML-page for image on public website: $uri");
+	return OBVIUS_ERROR;
+    }
+    
+    return OBVIUS_OK;
+}
+
 sub get_data {
     my ($this,$vdoc,$obvius) = @_;
     $obvius->get_version_fields($vdoc, ['data', 'uploadfile']);
