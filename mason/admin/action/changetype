@@ -74,7 +74,7 @@ foreach my $type (@{$obvius->{DOCTYPES}}) {
 @doctypes  = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
 @doctypes2 = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes2;
 
-@choices=map { $labels{$_->{id}}=$_->{translated_name}; $_->{id} } @doctypes, @doctypes2;
+@choices=map { $labels{$_->{id}}=$_->{name}; $_->{id} } @doctypes, @doctypes2;
 
 $r->notes(inactive_handlingarea=>1);
 $r->notes(inactive_path=>1);
