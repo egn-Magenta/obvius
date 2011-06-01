@@ -1,7 +1,7 @@
 % if (scalar(@$choices)) {
 <select id="<% $name |h %>" name="<% $name |h %>"<% $multiple ? ' multiple="multiple"' : '' %><% $multiple ? ' size="' . $size . '"' : '' %>>
 % foreach my $choice (@$choices) {
-%     my $text=$m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice));
+%     my $text=$translated_labels->{$choice} || $m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice));
   <option value="<% $choice |h %>"<% $values{$choice} ? ' selected="selected"' : '' %>><% $text |h %></option>
 % }
 </select>
@@ -11,6 +11,7 @@
 $name
 $choices
 $labels=>undef
+$translated_labels=>undef
 $value=>undef
 $multiple=>0
 $size=>8
@@ -18,6 +19,7 @@ $size=>8
 %
 <%init>
 $labels={} if (!defined $labels);
+$translated_labels={} if (!defined $translated_labels);
 
 my %values=();
 if (defined $value) {
