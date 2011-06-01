@@ -17,7 +17,7 @@
 %
 <%method doctype_dropdown>
 %
-<& /shared/editengine2/type/util/dropdown, name=>'obvius_new_doctypeid', choices=>\@choices, labels=>\%labels, value=>$value || $doctype->Id &>
+<& /shared/editengine2/type/util/dropdown, name=>'obvius_new_doctypeid', choices=>\@choices, labels=>\%labels, translated_labels=>\%translated_labels, value=>$value || $doctype->Id &>
 <p>
 %if($restricted and $user_is_admin) {
 <& /shared/msg, text=>'Doctypes marked with (*) are normally resticted in this area, but are visible to users with admin-rights.' &>
@@ -45,6 +45,7 @@ if(my $dt_value = $docparams->param('admin_doctypes_available')) {
 
 
 my %labels=();
+my %translated_labels=();
 my @choices=();
 use Data::Dumper;
 
@@ -74,7 +75,11 @@ foreach my $type (@{$obvius->{DOCTYPES}}) {
 @doctypes  = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes;
 @doctypes2 = sort {$a->{translated_name} cmp $b->{translated_name}} @doctypes2;
 
-@choices=map { $labels{$_->{id}}=$_->{name}; $_->{id} } @doctypes, @doctypes2;
+@choices=map {
+  $labels{$_->{id}}=$_->{name};
+  $translated_labels{$_->{id}} = $_->{translated_name};
+  $_->{id}
+} @doctypes, @doctypes2;
 
 $r->notes(inactive_handlingarea=>1);
 $r->notes(inactive_path=>1);
