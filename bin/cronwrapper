@@ -1,0 +1,93 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $output_on = "nothing";
+my $skip_stdout = 0;
+
+usage() unless(@ARGV);
+
+my $check_args = 1;
+while(@ARGV) {
+    last unless($ARGV[0]);
+
+    if($ARGV[0] eq '--output-on-exit-status') {
+        $output_on = "exit_status";
+        shift(@ARGV);
+    } elsif($ARGV[0] eq '--output-on-stderr') {
+        $output_on = "stderr";
+        shift(@ARGV);
+    } elsif($ARGV[0] eq '--skip-stdout' or $ARGV[0] eq '--no-stdout') {
+        $skip_stdout = 1;
+        shift(@ARGV);
+    } elsif($ARGV[0] eq '--help' or $ARGV[0] eq '-h') {
+        usage();
+    } elsif($ARGV[0] eq '--') {
+        shift(@ARGV);
+        last;
+    } else {
+        last;
+    }
+}
+
+usage() unless(@ARGV);
+
+my $stdout_file = "/tmp/cronwrapper-$$-stdout.txt";
+my $stderr_file = "/tmp/cronwrapper-$$-stderr.txt";
+
+my ($stdout_fh, $stderr_fh);
+open($stdout_fh, '>&', STDOUT);
+open($stderr_fh, '>&', STDERR);
+
+open(STDOUT, ">$stdout_file");
+open(STDERR, ">$stderr_file");
+
+my $exit_status = system(@ARGV);
+
+open(STDOUT, '>&', $stdout_fh);
+open(STDERR, '>&', $stderr_fh);
+
+exit 0 if($output_on eq 'nothing');
+
+if($output_on eq 'exit_status' and $exit_status != 0) {
+    print STDERR "Process ", join(" ", map { /\s/ ? "'$_'" : $_ } @ARGV), " exited with status ", ($? >> 8), ":\n\n";
+    print_output();
+} elsif($output_on eq 'stderr' and -s $stderr_file) {
+    print STDERR "Process ", join(" ", map { /\s/ ? "'$_'" : $_ } @ARGV), " produced error output:\n\n";
+    print_output();
+}
+unlink($stdout_file, $stderr_file);
+
+sub print_output {
+    local $/ = undef;
+    print STDERR "------ STDERR output start ------\n";
+    open(FH, $stderr_file);
+    my $txt = <FH> || '<No output>';
+    print STDERR "$txt\n";
+    close(FH);
+    print STDERR "------ STDERR output end ------\n";
+    unless($skip_stdout) {
+        print "\n";
+        print STDERR "------ STDOUT output start ------\n";
+        open(FH, $stdout_file);
+        my $txt = <FH> || '<No output>';
+        print STDERR "$txt\n";
+        close(FH);
+        print STDERR "------ STDOUT output end ------\n";
+    }
+}
+
+sub usage {
+    print <<EOT;
+This script is a wrapper for cronjobs used to redirect their output so only important information is sent in emails from cron.
+
+Usage:
+    $0 --output-on-exit-status [--no-stdout] -- /some/script [script args]
+    or
+    $0 --output-on-stderr [--no-stdout] -- /some/script [script args]
+    or
+    $0 --help
+EOT
+exit 1;
+}
