@@ -8,6 +8,7 @@ our @ISA = qw(Exporter);
 
 use constant REWRITE => 'rewrite';
 use constant REDIRECT => 'redirect';
+use constant REDIRECT_PERMANENT => 'redirect_301';
 use constant PASSTHROUGH => 'passthrough';
 use constant FORBIDDEN => 'forbidden';
 use constant LAST => 'last';
@@ -16,6 +17,7 @@ use constant PROXY => 'proxy';
 our @EXPORT_OK = qw(
     REWRITE
     REDIRECT
+    REDIRECT_PERMANENT
     PASSTHROUGH
     FORBIDDEN
     LAST
