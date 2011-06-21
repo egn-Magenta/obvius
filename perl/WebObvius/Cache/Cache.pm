@@ -5,6 +5,7 @@ use warnings;
 
 use WebObvius::Cache::ExternalUserCache;
 use WebObvius::Cache::ExternalApacheCache;
+use WebObvius::Cache::MysqlApacheCache;
 use WebObvius::Cache::Collection;
 use WebObvius::Cache::AdminLeftmenuCache;
 use WebObvius::Cache::InternalProxyCache;
@@ -18,7 +19,13 @@ sub new {
      my $user_cache     = WebObvius::Cache::ExternalUserCache->new($obvius);
      my $leftmenu_cache = WebObvius::Cache::AdminLeftmenuCache->new($obvius);
 
-     my $apache_cache = WebObvius::Cache::ExternalApacheCache->new($obvius);
+     my $apache_cache;
+     if($obvius->config->param('mysql_apachecache_table')) {
+          $apache_cache = WebObvius::Cache::MysqlApacheCache->new($obvius);
+     } else {
+          $apache_cache = WebObvius::Cache::ExternalApacheCache->new($obvius);
+     }
+
      my $internal_proxy_cache = WebObvius::Cache::InternalProxyCache->new($obvius);
      
      my $medarbejderoversigt_cache = WebObvius::Cache::ExternalMedarbejderoversigtCache->new($obvius);;
