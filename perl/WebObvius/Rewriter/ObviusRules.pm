@@ -34,6 +34,12 @@ package WebObvius::Rewriter::ObviusRules::LowerCaser;
 use WebObvius::Rewriter::RewriteRule qw(REWRITE);
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
+sub setup {
+    my ($this, $rewriter) = @_;
+
+    $this->{is_admin_rewriter} = 1;
+}
+
 sub rewrite {
     my ($this, %args) = @_;
 
@@ -108,6 +114,8 @@ our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 sub setup {
     my ($this, $rewriter) = @_;
     
+    $this->{is_admin_rewriter} = 1;
+
     my $config = $rewriter->{config};
     
     $this->{roothost} = $config->param('roothost');
@@ -205,7 +213,6 @@ sub rewrite {
     my ($this, %args) = @_;
     $args{query_string} ||= '';
     
-    return undef if($args{uri} =~ m!^/admin!);
     return undef unless($args{method} =~ m!^(GET|HEAD)$!);
     print STDERR "$args{method} method OK\n" if($this->{debug});
     return undef unless($args{query_string} =~ m!^(size=[0123456789]+x[0123456789]+|)$!);

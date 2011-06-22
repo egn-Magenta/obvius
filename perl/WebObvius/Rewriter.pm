@@ -14,16 +14,11 @@ sub new {
     my %data = (
         %args,
         rewriters => [],
+        admin_rewriters => [],
         config => $config,
     );
     
     return bless \%data, $class;
-}
-
-sub rewriters {
-    my ($this) = @_;
-    
-    return @{$this->{rewriters}};
 }
 
 sub add_rewriter {
@@ -32,6 +27,7 @@ sub add_rewriter {
     if(blessed($rewriter) && $rewriter->isa("WebObvius::Rewriter::RewriteRule") ) {
         $rewriter->setup($this);
         push(@{$this->{rewriters}}, $rewriter);
+        push(@{$this->{admin_rewriters}}, $rewriter) if($rewriter->{is_admin_rewriter});
     } else {
         warn "Rewriter object with ref '" . (ref($rewriter) || '') . "' is not a RewriteRule, skipping it";
     }
@@ -53,8 +49,12 @@ sub rewrite {
     my ($this, $input) = @_;
     my %args = split(/[?]/, $input);
     
+    my $is_admin = $args{uri} =~ m!^/admin/!;
+    
+    my $rewriters = $is_admin ? $this->{admin_rewriters} : $this->{rewriters};
+    
     my $rewritten = 0;
-    for my $rw ($this->rewriters) {
+    for my $rw (@$rewriters) {
         my ($action, $url) = $rw->rewrite(%args);
         if($this->{debug}) {
             my $a = $action || 'no action';
