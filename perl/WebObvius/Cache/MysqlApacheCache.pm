@@ -5,6 +5,7 @@ use warnings;
 
 use Fcntl qw ( LOCK_EX LOCK_UN O_RDWR O_CREAT );
 use WebObvius::Cache::ApacheCache;
+use WebObvius::Cache::MysqlApacheCache::QueryStringMapper;
 
 use Data::Dumper;
 use Obvius::Hostmap;
@@ -32,38 +33,99 @@ sub new {
     $new->{cache_dir} ||= $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY} || ($var_dir . 'document_cache/');
     die "ApacheCache: " . $new->{cache_dir} . " is not a directory\n" if 
 	(! -d $new->{cache_dir});
+        
+    $new->{qstring_mapper} = $config->param('mysqlcache_querystring_mapper')
+        || new WebObvius::Cache::MysqlApacheCache::QueryStringMapper();
 
     return bless $new, $class;
 }
 
 sub insert_or_update {
-    my ($this, $uri, $cache_path) = @_;
+    my ($this, $uri, $querystring, $cache_path) = @_;
     
     my $table = $this->{local_table};
     my $sth = $this->{obvius}->dbh->prepare(qq|
         INSERT INTO ${table}
-            (uri, cache_uri)
+            (uri, querystring, cache_uri)
         VALUES
-            (?, ?)
+            (?, ?, ?)
         ON DUPLICATE KEY UPDATE
             cache_uri = VALUES(cache_uri)
     |);
-    $sth->execute($uri, $cache_path);
+    $sth->execute($uri, $querystring, $cache_path);
+}
+
+sub can_request_use_cache_p {
+    my ($this, $req) = @_;
+
+    my $output = $req->pnotes('OBVIUS_OUTPUT');
+    
+    my $result = !(
+        ($output && $output->param('OBVIUS_SIDE_EFFECTS'))  ||
+        $req->no_cache                                      ||
+        $req->method_number != 0                            || # 0 er M_GET, mod_perl bug.
+        $req->notes('nocache')                              ||
+        $req->uri =~ m|^/preview/|
+    );
+
+    my $new_qstring;
+    if($result) {
+        my ($doctypeid, $doctypename) = $this->get_doctype_id_and_name($req->uri);
+        if($doctypeid) {
+            my $args = $req->args || '';
+            ($result, $new_qstring) = $this->{qstring_mapper}->map_querystring_for_cache($doctypeid, $doctypename, $args);
+        } else {
+            $result = 0;
+        }
+    }
+    
+    if(wantarray) {
+        return ($result, $new_qstring);
+    } else {
+        return $result;
+    }
+}
+
+
+sub get_doctype_id_and_name {
+    my ($this, $uri) = @_;
+
+    my $dtype = $this->{obvius}->dbh->prepare(qq|
+        SELECT
+            doctypes.id AS doctypeid,
+            doctypes.name AS doctypename
+        FROM
+            docid_path,
+            versions,
+            doctypes
+        WHERE
+            docid_path.docid = versions.docid
+            AND
+            versions.public = 1
+            AND
+            versions.type=doctypes.id
+            AND
+            docid_path.path = ?;
+    |);
+    $dtype->execute($uri);
+
+    return ($dtype->fetchrow_array);
 }
 
 sub save_request_result_in_cache
 {
     my ($this, $req, $s, $filename) = @_;
     
-    return if !$this->can_request_use_cache_p($req);
-     
+    my ($can_cache, $qstring) = $this->can_request_use_cache_p($req);
+    return if !$can_cache;
+
     my ($fp, $fn) = $this->find_cache_filename($req, $filename);
     my $local_dir = $fp . $fn;
     return if (!$fn);
-     
+
     my $dir = $this->{cache_dir} . $fp;
     WebObvius::Cache::ApacheCache::make_sure_exist($dir) or return;
-     
+
     open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
     flock F, LOCK_EX || (warn  "Couldn't get lock\n", goto close);
     if (ref $s && defined $$s) {
@@ -75,13 +137,9 @@ sub save_request_result_in_cache
     flock F, LOCK_UN;
     close F;
 
-    #Save image info.
-    my ($args) = ($req->args =~ /^(size=\d+(?:x\d+|\%))$/) if ($req->args);
-    $args ||= "";
-
     my $path = $req->uri();
 
-    $this->insert_or_update($path . $args, "/cache/$local_dir");
+    $this->insert_or_update($path, $qstring, "/cache/$local_dir");
 
     return;
 }
@@ -91,7 +149,8 @@ sub save_request_result_in_cache
 sub copy_file_to_cache {
     my ($this, $req, $source_path, $filename) = @_;
 
-    return if !$this->can_request_use_cache_p($req);
+    my ($can_cache, $qstring) = $this->can_request_use_cache_p($req);
+    return if !$can_cache;
     
     my ($fp, $fn) = $this->find_cache_filename($req, $filename);
     my $local_dir = $fp . $fn;
@@ -119,12 +178,9 @@ sub copy_file_to_cache {
     flock LOCK, LOCK_UN;
     close LOCK;
 
-    my ($args) = ($req->args =~ /^(size=\d+(?:x\d+|\%))$/) if ($req->args);
-    $args ||= "";
-    
     my $path = $req->uri();
     
-    $this->insert_or_update($path . $args, "/cache/$local_dir");
+    $this->insert_or_update($path, $qstring, "/cache/$local_dir");
 
     return;
 }
@@ -151,18 +207,14 @@ sub flush_in_table {
 
     my @simple_uris = keys %flush_simple;
     
-    while(my @cur_uris = splice @simple_uris, 0, 100) {
+    while(my @cur_uris = splice @simple_uris, 0, 200) {
         my $qmarks = join(",", map{'?'} @cur_uris);
-        my @img_uris = map { $_ . 'size=%' } grep { m!/$! } @cur_uris;
-        my $img_matches = "(" . join(") OR (", map { "uri LIKE ?" } @img_uris) . ")";
         my $flusher = $this->{obvius}->dbh->prepare(qq|
             DELETE FROM ${table}
                 WHERE
                     uri IN ($qmarks)
-                OR
-                    ($img_matches)
         |);
-        $flusher->execute(@cur_uris, @img_uris);
+        $flusher->execute(@cur_uris);
     }
 
     my @flush_regexps = map { $_->{regexp} } 

@@ -101,6 +101,7 @@ package WebObvius::Rewriter::ObviusRules::SubSites;
 
 use Obvius::Hostmap;
 use WebObvius::Rewriter::RewriteRule qw(REDIRECT REWRITE);
+use WebObvius::Cache::MysqlApacheCache::QueryStringMapper;
 
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
@@ -214,6 +215,77 @@ sub rewrite {
     tie (%cache, 'SDBM_File', $this->{cache_file}, O_RDONLY|O_CREAT, 0666);
     my $cached = $cache{$args{uri} . $args{query_string}};
     untie %cache;
+
+    if($cached) {
+        print STDERR "Found cached URI: $cached\n" if($this->{debug});
+        return (REWRITE, $cached);
+    }
+
+    return undef;    
+}
+
+1;
+
+package WebObvius::Rewriter::ObviusRules::MysqlCache;
+
+use WebObvius::Rewriter::RewriteRule qw(REWRITE);
+
+our @ISA = qw(WebObvius::Rewriter::RewriteRule);
+
+sub setup {
+    my ($this, $rewriter) = @_;
+    
+    my $config = $rewriter->{config};
+    
+    my $dsn = $config->param('dsn');
+    my $username = $config->param('normal_db_login');
+    my $passwd = $config->param('normal_db_passwd');
+    $this->{dbh} = DBI->connect($dsn, $username, $passwd) or die "Could not connect to database";
+
+    $this->{qstring_mapper} = $config->param('mysqlcache_querystring_mapper') ||
+        new WebObvius::Cache::MysqlApacheCache::QueryStringMapper();
+    
+    my $table = $this->{table} = $config->param('mysql_apachecache_table');
+    die "No table specified for mysql-based cache" unless($table);
+    $this->{lookup} = $this->{dbh}->prepare("SELECT cache_uri FROM $table WHERE uri = ? and querystring = ?");
+    
+    $this->{doctype_lookup} = $this->{dbh}->prepare(q|
+        SELECT
+            doctypes.id AS doctypeid,
+            doctypes.name AS doctypename
+        FROM
+            docid_path,
+            versions,
+            doctypes
+        WHERE
+            docid_path.docid = versions.docid
+            AND
+            versions.public = 1
+            AND
+            versions.type=doctypes.id
+            AND
+            docid_path.path = ?;
+    |);
+
+    $this->{debug} = $rewriter->{debug};
+}
+
+sub rewrite {
+    my ($this, %args) = @_;
+    $args{query_string} ||= '';
+    
+    return undef if($args{uri} =~ m!^/admin!);
+    return undef unless($args{method} =~ m!^(GET|HEAD)$!);
+    print STDERR "$args{method} method OK\n" if($this->{debug});
+
+    $this->{doctype_lookup}->execute($args{uri});
+    my ($doctypeid, $doctypename) = ($this->{doctype_lookup}->fetchrow_array);
+    my ($can_cache, $qstring) = $this->{qstring_mapper}->map_querystring_for_cache($doctypeid, $doctypename, $args{query_string});
+    return undef unless($can_cache);
+    print STDERR "Querystring '$args{query_string}' OK, mapped to '$qstring'\n" if($this->{debug});
+
+    $this->{lookup}->execute($args{uri}, $qstring);
+    my ($cached) = ($this->{lookup}->fetchrow_array);
 
     if($cached) {
         print STDERR "Found cached URI: $cached\n" if($this->{debug});
