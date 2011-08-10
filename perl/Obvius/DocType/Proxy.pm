@@ -252,7 +252,7 @@ sub filter_attribute {
         # No filtering
     }
 
-    return $value;
+    return Encode::encode("ascii", $value, Encode::FB_HTMLCREF);
 }
 
 # absolutify - given a (full, absolute, relative) url and the url of
