@@ -454,8 +454,15 @@ sub db_update_version_mark_public {
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
 					     '!Table'      => 'versions',
 					    });
-    # Clear other public version for same language
-    $set->Update({ public => 0}, { $vdoc->params('docid', 'lang') });
+
+    unless($this->config->param('allow_multiple_public_languages')) {
+	# Clear all other public versions for this document	
+	$set->Update({public => 0}, { $vdoc->params('docid') });
+    } else {
+	# Clear other public version for same language
+	$set->Update({ public => 0}, { $vdoc->params('docid', 'lang') });
+    }
+
     # Set this version public
     $set->Update({ public => 1}, { $vdoc->params('docid', 'version') }) if ($public);
     $set->Disconnect;
