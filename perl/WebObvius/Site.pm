@@ -123,9 +123,9 @@ sub get_language_preferences {
                    $lang{$_} = $user_pref{$_};
               }
          }
-         
-         return \%lang;
     }
+
+    return \%lang;
 }
 
 
