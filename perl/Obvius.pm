@@ -350,7 +350,8 @@ sub get_doc_by_path {
      my $docs = $this->execute_select(
                              "select 
                                      d.id id, d.parent parent, d.type type,d.owner owner,
-                                     d.grp grp, d.accessrules accessrules, dp.path path
+                                     d.grp grp, d.accessrules accessrules, dp.path path,
+                                     d.name name
                               from
                                      docid_path dp join documents d on (d.id = dp.docid) 
                               where
