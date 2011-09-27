@@ -36,6 +36,10 @@ $danish_tags => undef
 $english_tags => undef
 </%args>
 <%init>
+unless($obvius->is_admin_user) {
+    $m->comp('/default/access_denied');
+    return;
+}
 my $tags = Obvius::Tags->new($obvius);
 
 my $updated = 0;

@@ -289,6 +289,10 @@ my $edges = {
 </%once>
 %
 <%init>
+unless($obvius->is_admin_user) {
+    $m->comp('/default/access_denied');
+    return;
+}
 $r->pnotes('obvius_session')->{action}='editengine';
 
 $r->notes(inactive_handlingarea=>1);
