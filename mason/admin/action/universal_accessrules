@@ -23,10 +23,7 @@
 </div>
 
 <%init>
-unless($obvius->is_admin_user) {
-    $m->comp('/default/access_denied');
-    return;
-}
+$m->comp('/default/check_access', can=>'is_admin_user');
 my $universal_rules = $obvius-> get_universal_document();
 if ( !$universal_rules) {
         # not supported
