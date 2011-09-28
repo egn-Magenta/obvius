@@ -135,10 +135,7 @@ my $queue={
 </%once>
 %
 <%init>
-unless($obvius->is_admin_user) {
-    $m->comp('/default/access_denied');
-    return;
-}
+$m->comp('/default/check_access', can=>'is_admin_user');
 $r->pnotes('obvius_session')->{action}='editengine';
 
 $r->notes(inactive_handlingarea=>1);
