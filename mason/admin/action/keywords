@@ -53,6 +53,7 @@ my $keywords={
 </%once>     
 %
 <%init>
+$m->comp('/default/check_access', can=>'is_admin_user');
 # XXX:
 # $m->comp('/default/check_access', can=>'can_?');
 
