@@ -1,0 +1,5 @@
+<div class="obvius-command">
+<p>
+<& /shared/trans, en => "Access denied.", da => "Adgang nægtet" &>
+</p>
+</div>

@@ -513,6 +513,27 @@ sub generate_page {
             $this->redirect($req, $redir, 1);
         }
 
+	# Transfer notes and pnotes to the req object
+	if(my $notes = $output->param('OBVIUS_NOTES')) {
+	    if(ref($notes) eq 'ARRAY') {
+		map { $req->notes($_ => 1) } @$notes;
+	    } elsif(ref($notes) eq 'HASH') {
+		map { $req->notes( $_ => $notes->{$_} ) } keys %$notes;
+	    } else {
+		$req->notes($notes => 1);
+	    }
+	}
+
+	if(my $pnotes = $output->param('OBVIUS_PNOTES')) {
+	    if(ref($pnotes) eq 'ARRAY') {
+		map { $req->pnotes($_ => 1) } @$pnotes;
+	    } elsif(ref($pnotes) eq 'HASH') {
+		map { $req->pnotes( $_ => $pnotes->{$_} ) } keys %$pnotes;
+	    } else {
+		$req->pnotes($pnotes => 1);
+	    }
+	}
+
         print STDERR "GENERATE_PAGE: calling site operation returned $status\n"
             if ($this->{DEBUG});
 
