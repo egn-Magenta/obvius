@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Scalar::Util qw (blessed);
+use URI::Escape;
 use WebObvius::Rewriter::RewriteRule qw(REWRITE);
 
 sub new {
@@ -52,6 +53,8 @@ sub add_rewriters {
 sub rewrite {
     my ($this, $input) = @_;
     my %args = split(/[?]/, $input);
+    $args{querystring} = uri_unescape($args{querystring}) if($args{querystring});
+    $args{uri} = uri_unescape($args{uri});
     
     my $rewritten = 0;
     for my $rw ($this->rewriters) {
