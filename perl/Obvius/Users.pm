@@ -51,6 +51,12 @@ sub get_user {
     return $this->{USERS}->{$userid};
 }
 
+# is_admin - depricated. Kept for backwards compatibility, but should use
+#	     is_admin_user instead.
+sub is_admin {
+    return shift->is_admin_user;
+}
+
 sub is_admin_user {
     my ($this) = @_;
 
