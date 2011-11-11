@@ -260,3 +260,20 @@ function OpenWin(url, w, h) {
 		  +'width='+w+',height='+h);
   window.open (url + '', '', features);
 }
+
+function start_ror_navigator(url, path, fallback_uri, field_name) {
+    var elem = document.getElementById(field_name);
+    if (elem) {
+        if (elem.value) {
+            path = elem.value;
+        } else {
+            path = fallback_uri;
+        }
+    }
+    
+    if (path) {
+        path = escape(path);
+        url += "&path=" + path;
+    }
+    return window.open(url, 'navigator','resizable=1,width=800,height=500');
+}
