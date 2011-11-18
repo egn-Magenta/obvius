@@ -6,8 +6,6 @@
     <& '.display_pagelist', page=>$page, max=>$obvius_max, total=>$total, history=>$history, numberofcolumns=>scalar(@columns) &>
 % }
 
- <table class='obvius-editengine-list'>
-%
 %   if ( $do_filters) {
 <form class="obvius-handling" method="post" action="?<% 
 	$m-> scomp( '../toolbox:get_scheme_parameters',
@@ -18,6 +16,8 @@
 	) 
 %>">
 %   }
+ <table class='obvius-editengine-list'>
+%
     <tr>
 %   foreach my $column (@columns) {
       <th>
@@ -46,7 +46,6 @@
 		</div>
 % 		}
 </th>
-</form>
 %   }
     </tr>
 %
@@ -74,6 +73,7 @@
 % }
 %
  </table>
+</form>
 %
   <& '../select:clear' &>
 %# If an object was passed, return to this for partial object creation
