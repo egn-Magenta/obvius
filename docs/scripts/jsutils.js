@@ -27,7 +27,10 @@ var JSUtils = new (
 
 
     this.escape_html = string_escaper(html_escape_data);
-    this.escape_jquery_selector = string_escaper(jquery_escape_selector_data);
+    this.escape_jquery_selector = function(str) {
+      str = str.replace(/([\]\[\#\;\&\,\.\+\*\~\'\:\"\!\^\$\(\)\=\>\|\/])/g, '\\$1');
+      return str;
+    };
     this.escape_single_quote = string_escaper(single_quote_escape_data);
 
     this.isArray = function (obj) {
