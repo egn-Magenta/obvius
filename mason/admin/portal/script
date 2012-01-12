@@ -13,3 +13,6 @@
   <script type="text/javascript" src="/scripts/jquery/jquery.ajaxQueue.js"></script>
   <script type="text/javascript" src="/scripts/jquery/jquery.autocomplete.min.js"></script>
   <script type="text/javascript" src="/scripts/jsutils.js" ></script>
+<%init>
+$r->notes('jquery_loaded' => 1);
+</%init>
