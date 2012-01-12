@@ -136,9 +136,6 @@ function formdata_populate_fieldtable(name) {
             updown_td.appendChild(down_a);
             tr.appendChild(updown_td);
 
-
-
-
             var tbodies = table.getElementsByTagName('tbody');
             if(tbodies[0]) {
                 tbodies[0].appendChild(tr);
@@ -147,7 +144,39 @@ function formdata_populate_fieldtable(name) {
             }
         }
     }
+    formdata_populate_sortorder_field(name, rootDoc);
 }
+
+function formdata_populate_sortorder_field(name, rootDoc) {
+    if(!$)
+        return false;
+    var select = $.grep($(document.pageform).find("select").get(), function(elem) {
+        return elem.name.match(/infored_sortorder$/);
+    })[0];
+
+    if(select) {
+        if(!rootDoc)
+            rootDoc = formdata_get_rootDoc_by_name(name);
+    
+        if(!rootDoc)
+            return false;
+
+        var sj = $(select);
+        var chosen = sj.val();
+        while(select.options.length > 1)
+            select.options[select.options.length - 1] = null;
+
+        var fields = rootDoc.getElementsByTagName('field');
+        for(var i=0;i < fields.getLength();i++) {
+            var item = fields.item(i);
+            var obj = formdata_objectify_node(item);
+            sj.append($('<option>').val(obj.name).text(obj.title));
+            sj.append($('<option>').val(obj.name + "_reverse").text(obj.title + " (Omvendt)"));
+        }
+        sj.val(chosen);
+    }
+}
+
 
 function formdata_delete_field(formfield_name, fieldname) {
     if(! confirm(formdata_translations['really_delete'] + " '" + fieldname + "'?")) {
