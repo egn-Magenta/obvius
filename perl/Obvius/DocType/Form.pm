@@ -1,6 +1,6 @@
 package Obvius::DocType::Form;
 
-use strict; use warnings;
+use strict; use warnings; use utf8;
 
 use utf8;
 use Digest::MD5 qw(md5_hex);
@@ -16,6 +16,7 @@ use File::Path qw( mkpath );
 use Fcntl qw( :flock );
 use JSON qw( to_json from_json );
 use URI::Escape;
+use Obvius::CharsetTools qw(:all);
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -809,7 +810,7 @@ sub send_mail {
      $subject =~ s/\n//g;
      $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
 
-     my $text = $vdoc->field('email_text');
+     my $text = mixed2perl($vdoc->field('email_text'));
      
      my $result_prefix = translate("tastede", $vdoc);
      
@@ -840,31 +841,13 @@ END
      
      $obvius->send_mail($to, $mailmsg, $from);
 }
-     
-sub ensure_correct_encoding {
-     my ($input, $charset) = @_;
-     my $output = '';
-     Encode::_utf8_off($input);
 
-     while($input) {
-          # Decode as much correct utf-8 as we can from the current input
-          # passing on anything we doesn't know one character at a time,
-          # assuming it is in perl's own string format. Re-encode everything to
-          # octects of the sites' charset afterwards.
-          my $n = decode('utf-8', $input, Encode::FB_QUIET);
-          
-          if (length ($input)) {
-               my $c = substr ($input, 0, 1);
-               $n .= $c;
-               $input = substr($input,1);
-          }
-          $n = encode($charset, $n);
-          $output .= $n;
-     }
-     
-     return $output;
+sub ensure_correct_encoding {
+    my ($input, $charset) = @_;
+
+    return mixed2charset($input, $charset);
 }
-       
+
 sub count_entries {
      my ($this, $id, $obvius) = @_;
      

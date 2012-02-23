@@ -32,7 +32,7 @@ use Exporter;
 use Encode;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(mixed2utf8 mixed2perl debugstr);
+our @EXPORT_OK = qw(mixed2utf8 mixed2perl mixed2charset debugstr);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK);
 
 our $VERSION="1.0";
@@ -40,7 +40,7 @@ our $VERSION="1.0";
 sub mixed2utf8 {
     my ($txt) = shift;
 
-    return $text unless($txt);
+    return $txt unless($txt);
 
     Encode::_utf8_off($txt);
     my $out = "";
@@ -98,6 +98,15 @@ sub mixed2perl {
     my ($txt) = shift;
 
     return Encode::decode("utf8", mixed2utf8($txt));
+}
+
+sub mixed2charset {
+    my ($txt, $charset) = @_;
+    if($charset =~ m!utf[-]?8!i) {
+        return mixed2utf8($txt);
+    } else {
+        return Encode::from_to(mixed2utf8($txt), 'utf8', $charset);
+    }
 }
 
 sub debugstr {
