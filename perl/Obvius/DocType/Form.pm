@@ -66,7 +66,7 @@ sub preprocess_fields {
                $value = "";
           }
           $of->{name} = $field->{name};
-          $of->{value} = ensure_decoded($value, $charset);
+          $of->{value} = mixed2perl($value);
 	  if (!ref ($of->{value})) { 
 	      $of->{value} =~ s/(?:^\s+|\s+$)//g;
 	  }
@@ -178,7 +178,7 @@ sub add_submitted_values  {
      my ($formdata, $input) = @_;
      
      for my $elem (@$formdata){
-          $elem->{_submitted_value} = $input->param($elem->{name});
+          $elem->{_submitted_value} = mixed2perl($input->param($elem->{name}));
      }
 }
 
@@ -386,7 +386,7 @@ sub validate_full_entry {
      
      my @invalid_upload_fields;
      my %input = ref $input ne 'HASH' && $input->UNIVERSAL::can('param') ? 
-                 map { $_ => $input->param($_) } keys %$formspec : %$input;  
+                 map { $_ => mixed2perl($input->param($_)) } keys %$formspec : %$input;  
 
      for my $val (grep { $_->{type} eq 'upload' } values %$formspec) {
           my $value = eval { handle_upload_file($docid, $input, $val, $obvius) } || undef;
