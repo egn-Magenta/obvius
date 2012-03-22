@@ -66,7 +66,7 @@ sub preprocess_fields {
                $value = "";
           }
           $of->{name} = $field->{name};
-          $of->{value} = mixed2perl($value);
+          $of->{value} = ref $value ? $value : mixed2perl($value);
 	  if (!ref ($of->{value})) { 
 	      $of->{value} =~ s/(?:^\s+|\s+$)//g;
 	  }
