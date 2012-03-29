@@ -42,31 +42,31 @@ sub mixed2utf8 {
 
     return $txt unless($txt);
 
-    #Encode::_utf8_off($txt);
     my $out = "";
 
     # Get the 4 first chars
     my $length = length($txt);
-    my @chars = unpack("C*", substr($txt, 0, 4));
+    my @chars = unpack("W*", substr($txt, 0, 4));
     my $index = 4;
 
     while(@chars) {
         # If highest bit is 0 => ascii
-        if(($chars[0] & 0b10000000) == 0) {
+        if(defined($chars[0]) && $chars[0] < 128) {
             $out .= pack("C", shift(@chars));
         }
         # Two-byte unicode char (0b110xxxxx,0b10xxxxxx)
         elsif(
+            defined($chars[0]) && $chars[0] < 256 &&
+            defined($chars[1]) && $chars[1] < 256 &&
             ($chars[0] & 0b11100000) == 0b11000000 &&
-            defined($chars[1]) &&
             ($chars[1] & 0b11000000) == 0b10000000
         ) {
             $out .= pack("C*", splice(@chars, 0, 2));
         }
         # Three-byte unicode char (0b1110xxxx,0b10xxxxxx,0b10xxxxxx)
         elsif(
+            defined($chars[2]) && $chars[2] < 256 &&
             ($chars[0] & 0b11110000) == 0b11100000 &&
-            defined($chars[2]) &&
             ($chars[1] & 0b11000000) == 0b10000000 &&
             ($chars[2] & 0b11000000) == 0b10000000
         ) {
@@ -74,20 +74,21 @@ sub mixed2utf8 {
         }
         # Four-byte unicode char (0b11110xxx,0b10xxxxxx,0b10xxxxxx)
         elsif(
+            defined($chars[3]) && $chars[3] < 256 &&
             ($chars[0] & 0b11111000) == 0b11100000 &&
-            defined($chars[3]) &&
             ($chars[1] & 0b11000000) == 0b10000000 &&
             ($chars[2] & 0b11000000) == 0b10000000 &&
             ($chars[3] & 0b11000000) == 0b10000000
         ) {
             $out .= pack("C*", splice(@chars, 0, 4));
         } else {
-            $out .= Encode::encode("utf8", Encode::decode("latin-1", pack("C", shift(@chars))))
+            # Single wide char that needs to be utf8 encoded
+            $out .= Encode::encode("utf8", chr(shift(@chars)));
         }
 
         # Get as many new chars as was removed
         my $taken = 4 - @chars;
-        push(@chars, unpack("C*", substr($txt, $index, $taken))) if($index < $length);
+        push(@chars, unpack("W*", substr($txt, $index, $taken))) if($index < $length);
         $index += $taken;
     }
 
@@ -113,8 +114,7 @@ sub debugstr {
     my ($txt) = shift;
 
     return join("", map {
-        my $n = ord($_);
-        $n < 128 ? $_ : sprintf('\\x{%x}', $n)
-    } split(//, $txt));
+        $_ < 128 ? chr($_) : sprintf('\\x{%x}', $_);
+    } unpack("W*", $txt));
 }
 1;
