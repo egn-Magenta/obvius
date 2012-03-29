@@ -42,7 +42,7 @@ sub mixed2utf8 {
 
     return $txt unless($txt);
 
-    Encode::_utf8_off($txt);
+    #Encode::_utf8_off($txt);
     my $out = "";
 
     # Get the 4 first chars
