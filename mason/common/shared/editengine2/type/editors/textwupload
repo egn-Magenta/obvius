@@ -70,11 +70,10 @@ my $overridden_width = $obvius->config->param($field->{name} . '_width');
 my $overridden_height = $obvius->config->param($field->{name} . '_height');
 
 if ( $overridden_width ) {
-    $width_html = 'width: 505px;';
+    $width_html = 'width: ' . $overridden_width . 'px;';
 }
 if ( $overridden_height ) {
-    #$height_html = 'height: ' . $overridden_height . 'px;';
-    $height_html = 'height: 280px;';
+    $height_html = 'height: ' . $overridden_height . 'px;';
 }
 
 </%init>
