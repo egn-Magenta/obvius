@@ -107,6 +107,16 @@ my $height=($rows+6)*16; # XXX?!
 
 my $name=$prefix . $field->{name};
 
+my $overridden_width = $obvius->config->param($field->{name} . '_width');
+my $overridden_height = $obvius->config->param($field->{name} . '_height');
+
+if ( $overridden_width ) {
+    $width = $overridden_width;
+}
+if ( $overridden_height ) {
+    $height = $overridden_height;
+}
+
 # If changing these remember to add quotes to strings etc:
 my %config_values = (
     theme => '"advanced"',
