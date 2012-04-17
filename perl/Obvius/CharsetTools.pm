@@ -46,7 +46,7 @@ sub mixed2utf8 {
 
     # Get the 4 first chars
     my $length = length($txt);
-    my @chars = unpack("W*", substr($txt, 0, 4));
+    my @chars = unpack("U*", substr($txt, 0, 4));
     my $index = 4;
 
     while(@chars) {
@@ -88,7 +88,7 @@ sub mixed2utf8 {
 
         # Get as many new chars as was removed
         my $taken = 4 - @chars;
-        push(@chars, unpack("W*", substr($txt, $index, $taken))) if($index < $length);
+        push(@chars, unpack("U*", substr($txt, $index, $taken))) if($index < $length);
         $index += $taken;
     }
 
@@ -115,6 +115,6 @@ sub debugstr {
 
     return join("", map {
         $_ < 128 ? chr($_) : sprintf('\\x{%x}', $_);
-    } unpack("W*", $txt));
+    } unpack("U*", $txt));
 }
 1;
