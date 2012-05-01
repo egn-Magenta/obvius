@@ -792,7 +792,6 @@ sub generate_result_view {
 }
 
 sub send_mail {
-<<<<<<< HEAD
     my ($to, $obvius, $vdoc, $formspec, $fields, $entry_nr) = @_;
     $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
 
