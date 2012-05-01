@@ -1,11 +1,14 @@
 package WebObvius::Captcha;
 
-use strict; use warnings;
+use strict;
+use warnings;
+
 
 use Exporter;
 use Digest::MD5 qw( md5_hex );
+use Captcha::reCAPTCHA;
 
-our @EXPORT = qw( check_captcha check_captcha_from_input );
+our @EXPORT = qw( check_captcha check_captcha_from_input check_recaptcha_from_input );
 
 sub check_captcha_from_input {
      my ($input) = @_;
@@ -21,6 +24,22 @@ sub check_captcha {
      
      my $md5 = md5_hex($captcha_entered);
      return int($captcha_cookie && $md5 && $md5 eq $captcha_cookie);
+}
+
+sub check_recaptcha_from_input {
+    my ($input) = @_;
+
+    my $challenge = $input->param('recaptcha_challenge_field');
+    my $response =  $input->param('recaptcha_response_field');
+
+    my $captcha = Captcha::reCAPTCHA->new;
+    my $result = $captcha->check_answer("6Lc2Dc4SAAAAACLl_BaGlOxPMYnYezxkObdGoRJO",
+        $ENV{'REMOTE_ADDR'},
+        $challenge,
+        $response
+    );
+
+   return $result->{is_valid}; 
 }
 
 1;
