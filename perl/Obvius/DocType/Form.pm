@@ -242,13 +242,8 @@ sub get_formdata {
      $obvius->get_version_fields($vdoc, ['formdata']);
      my $data = $vdoc->field('formdata');
      return [] if !$data;
-     
-     eval {
-          $data = Encode::decode('UTF-8', $data, Encode::FB_CROAK);
-     };
-     if ($@) {
-          $data = Encode::decode('LATIN-1', $data);
-     }
+
+    $data = mixed2utf8($data);
 
      my $formdata = XMLin( $data,
                            keyattr=>[],
