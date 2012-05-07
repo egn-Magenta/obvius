@@ -123,7 +123,20 @@ if ( $MOD_PERL == 2) {
 	
 	# not present in compat::
 	require Apache2::Cookie;
-	*Apache::Cookie::fetch = \&Apache2::Cookie::fetch;
+	*Apache::Cookie::fetch = sub {
+	    # Workaround for Apache2::Cookie crash when encountering malformed
+	    # cookies.
+	    my $jar = eval { Apache2::Cookie::fetch(@_); };
+
+	    if($@) {
+		$jar = $@->jar;
+		$jar->cookie_class('Apache2::Cookie');
+	    }
+
+	    my $class = shift;
+	    return $jar->get(shift) if @_;
+	    return wantarray ? %$jar : $jar;
+	};
 	*Apache::Cookie::new = sub { Apache2::Cookie-> new(@_[1..$#_]) };
 
 	# present in compat:: in Apache2:: namespace, but we need Apache::
