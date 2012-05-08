@@ -134,8 +134,15 @@ if ( $MOD_PERL == 2) {
 	    }
 
 	    my $class = shift;
-	    return $jar->get(shift) if @_;
-	    return wantarray ? %$jar : $jar;
+
+            # Hand
+            if($jar) {
+                return $jar->get(shift) if @_;
+            } else {
+                $jar = {};
+                return undef if @_;
+            }
+            return wantarray ? %$jar : $jar;
 	};
 	*Apache::Cookie::new = sub { Apache2::Cookie-> new(@_[1..$#_]) };
 
