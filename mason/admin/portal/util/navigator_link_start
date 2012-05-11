@@ -38,10 +38,14 @@ if ($path) {
 </%init>
 </%method>
 <%method onclick>\
-javascript: return window.open('<% $url %>', 'navigator','resizable=1,width=800,height=500')\
+javascript: return start_ror_navigator("<% $url %>", "<% $ARGS{path} %>",\
+                                       "<% $uri %>", "<% $ARGS{fieldname} %>");\
 <%init>
 my $url = $m->scomp('navigator_link_start:href', %ARGS);
 $url =~ s/\s//g;
-$url =~ s!&!&amp;!g;
+$url =~ s!&path=[^&]*!!;
 </%init>
+<%filter>
+$_ = HTML::Entities::encode($_);
+</%filter>
 </%method>

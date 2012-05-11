@@ -51,11 +51,24 @@ sub get_user {
     return $this->{USERS}->{$userid};
 }
 
+# is_admin - depricated. Kept for backwards compatibility, but should use
+#	     is_admin_user instead.
 sub is_admin {
-     my ($this) = @_;
-     return 0 if (!$this->{USER});
-     my $user = $this->get_user($this->{USER});
-     return $user->{can_manage_users} > 1;
+    return shift->is_admin_user;
+}
+
+sub is_admin_user {
+    my ($this) = @_;
+
+    return 0 if (!$this->{USER});
+    my $user = $this->get_user($this->{USER});
+
+    my $mode = $this->config->param('is_admin_user_mode') || 'member_of_admin_group';
+    if($mode eq 'can_manage_users') {
+	return $user->{can_manage_users} > 1;
+    } else {
+	return grep { $_ == 1 } @{$this->get_user_groups($user->{id})};
+    }
 }
     
 # get_userid - given a string containing a username, returns the id of

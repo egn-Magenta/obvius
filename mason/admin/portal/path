@@ -12,12 +12,26 @@ $append_args=>''
 </%args>\
 % if ($uri ne $crumb->{url}) {
 %     my $title=$m->scomp('/shared/shorten', text=>$crumb->{title}, len=>21);
-%     my $tooltip=($title eq $crumb->{title} ? '' : ' title="' . $crumb->{title} . '"');
-<a href="<% $prefix %><% $crumb->{url} %><% $append_args %>"<% $tooltip %>><% $title |h %></a>\
+<a href="<% $prefix %><% $crumb->{url} %><% $append_args %>"<& .crumb_tooltip, title=>$crumb->{title}, short_title=>$title &>><% $title |h %></a>\
 % }
 % else {
 <% $crumb->{title} |h %>\
 % }
+</%def>
+%
+%
+<%def .crumb_tooltip>\
+%if($result) {
+ title="<% $result |h %>"\
+%}
+<%args>
+$title
+$short_title
+</%args>\
+<%init>
+my $result = "";
+$result = $title if($title ne $short_title);
+</%init>\
 </%def>
 %
 %

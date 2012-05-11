@@ -147,14 +147,16 @@ sub rewrite {
     
     # Stage one: Redirect admin requests on any host to the proper URI on
     # the roothost:    
-    if($args{uri} =~ m!^/admin/(.*)!) {
+    if($args{uri} =~ m!^/admin(/(.*)|$)!) {
         # If already on the root we don't need any more subsite rewriting
         return undef if($hostname eq $roothost);
-        
+
+        my $rest = $1 || '/';
         if($subsite_uri) {
-            return (REDIRECT, "$protocol://$roothost/admin$subsite_uri$1");
+            $subsite_uri =~ s!/$!!;
+            return (REDIRECT, "$protocol://$roothost/admin$subsite_uri$rest");
         } else {
-            return (REDIRECT, "$protocol://$roothost/admin$1");
+            return (REDIRECT, "$protocol://$roothost/admin$rest");
         }
     }
 

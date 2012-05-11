@@ -107,7 +107,15 @@ my $user_storage = {
                                     eller login er allerede i brug.'};
 
 
-my $input_display = [
+my $can_manage_users_item = {
+				name=>'can_manage_users',  content=>'data',   label=>'Can manage users', tooltip => '/users/',
+				# label_2 will be set/unset in the init block
+				options=>{ label_2 => 'Yes', label_1 => 'In own group only', label_0 => 'No' }, edit_args=>'2|1|0'
+			    };
+my $label_2_value = $can_manage_users_item->{options}->{label_2};
+
+
+my @input_display = (
                      { name=>'name',   content=>'data',   label=>'Name' , tooltip => '/users/'    },
                      { name=>'login',  content=>'data',   label=>'Login', tooltip => '/users/'    },
                      { name=>'email',  content=>'data',   label=>'E-mail', tooltip => '/users/'   },
@@ -117,11 +125,12 @@ my $input_display = [
 		       content => 'data', label => 'Udvalgte websider', tooltip => '/users/' },
                      { name=>'admin',  content=>'data',   label=>'Can login to admin interface', tooltip => '/users/', 
 		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
-                     { name=>'can_manage_users',  content=>'data',   label=>'Can manage users', tooltip => '/users/',
-		     	options=>{ label_2 => 'Yes', label_1 => 'In own group only', label_0 => 'No' }, edit_args=>'2|1|0'  },
+                     $can_manage_users_item,
                      { name=>'can_manage_groups',  content=>'data',   label=>'Can manage groups', tooltip => '/users/',
 		     	options=>{ label_1 => 'Yes', label_0 => 'No' }, edit_args=>'1|0'  },
-                    ];
+);
+
+my $input_display = [ @input_display ];
 
 
 my $create_user = {
@@ -314,23 +323,22 @@ $m->comp('/default/check_access', can=>'can_create_new_user');
 
 if ( $obvius-> can_create_new_user > 1) {
 	$groups->{storage}->{organization}->{where} = undef;
+	# Restore option to give full user management acces
+	$can_manage_users_item->{edit_args} = "2|1|0";
 } else {
 	my @groups = @{$obvius-> get_user_groups( $obvius-> get_userid( $obvius->{USER} ))};
 	$groups->{storage}->{organization}->{where} = 
 		( @groups) ? 
 			'id IN (' . join(',', @groups) . ')' :
 			'NOT TRUE'; # no groups
-	for ( @$input_display) {
-		next unless $_-> {name} eq 'can_manage_users';
-		delete $_-> {options}-> {label_2};
-		$_-> {edit_args} = '1|0';
-		last;
-	}
+
+	# Remove option to give full user management acces
+	$can_manage_users_item->{edit_args} = "1|0";
 }
 
-unless ( $obvius-> can_create_new_group) {
-	@$input_display = grep { $_-> {name} ne 'can_manage_groups' } @$input_display;
-}
+# Don't give access to setting can_manage_groups unless the user has the correct capabilities
+my $group_ok = $obvius-> can_create_new_group;
+@$input_display = grep { $group_ok || $_-> {name} ne 'can_manage_groups' } @input_display;
 
 $r->pnotes('obvius_session')->{action}='editengine';
 
