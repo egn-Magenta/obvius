@@ -161,8 +161,12 @@ sub get_resized_data {
             # requesting huge pictures. The 300px limit can be
             # overruled in the config file with max_image_width and
             # max_image_height.
-            $new_width = 300 if($new_width > ($obvius->config->param('max_image_width') || 300));
-            $new_height = 300 if($new_height > ($obvius->config->param('max_image_height') || 300));
+            #
+            my ($maxw, $maxh) = (
+                $obvius->config->param('max_image_width')  || 300,
+                $obvius->config->param('max_image_height') || 300);
+            $new_width = $maxw if($new_width > $maxw);
+            $new_height = $maxh if($new_height > $maxh);
 
             # Scale the image
             $image->Scale(geometry => $new_width . "x" . $new_height);

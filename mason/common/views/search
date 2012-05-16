@@ -299,6 +299,11 @@ function page_browser(nr_results, start) {
 % if ($introduction) {
   <p><& /shared/htmlize, text=>$introduction &></p>
 % }
+  <form
+    name="solrsearchform" id="solrsearchform"
+    method="get" action="<% $prefix . $uri %>"
+    onsubmit="do_search(); return false;"
+  >
   <div style="width:100%;">
     <input type="text"
            id="query"
@@ -340,6 +345,7 @@ function page_browser(nr_results, start) {
     <div id="search_result" style="padding-top: 1em;">
     </div>
   </div>
+  </form>
 </div>
 <%args>
 </%args>
