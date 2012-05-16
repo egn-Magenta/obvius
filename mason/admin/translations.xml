@@ -1628,8 +1628,8 @@
     <translation lang="da">Kopier fra:</translation>
   </text>
   <text key="copy_docparams_warning">
-    <translation lang="en"> IMPORTANT! This procedure will overwrite any existing document parameters on this document.</translation>
-    <translation lang="da">  VIGTIGT! Du overskriver alle dette dokuments eksisterende dokumentparametre med det valgte dokuments dokumentparametre.</translation>
+    <translation lang="en"> IMPORTANT! If the same document parameters are present on both documents the parameters on the current document will be overwritten with the values from the document you are copying from.</translation>
+    <translation lang="da"> VIGTIGT! Hvis de samme dokumentparametre optræder i begge dokumenter, vil parametrene på dette dokument blive overskrevet med værdierne fra det dokument, du kopierer fra.</translation>
   </text>
   <text key="Kopier dokumentparametre">
     <translation lang="en">Copy document parameters</translation>
