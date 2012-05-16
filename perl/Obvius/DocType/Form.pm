@@ -40,11 +40,11 @@ sub ensure_decoded {
     } elsif (ref $val eq 'SCALAR') {
         my $scal = ensure_decoded($$val, $charset);
         return \$scal;
-} elsif (ref $val) {
-    die "Unknown type: " . ref $val;
-} else {
-    return is_utf8($val) ? $val : decode($charset, $val);
-}
+     } elsif (ref $val) {
+         die "Unknown type: " . ref $val;
+     } else {
+         return is_utf8($val) ? $val : decode($charset, $val);
+     }
 }
 
 sub preprocess_fields {
@@ -814,7 +814,7 @@ sub send_mail {
     
     my $uri = get_full_uri($vdoc->Docid, $obvius);
     my $form = translate("formular", $vdoc);
-    
+
     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
     my $mailmsg = <<END;
 To:      $to
@@ -822,6 +822,7 @@ From:    $from
 Subject: $subject
 MIME-Version: 1.0
 Content-Type: text/plain; charset=$charset
+Content-Transfer-Encoding: 8bit
 
 $prepend
 
