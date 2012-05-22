@@ -12,6 +12,7 @@ use Encode qw( is_utf8 encode decode from_to );
 use WebObvius::Captcha;
 use Spreadsheet::WriteExcel;
 use MIME::Base64;
+use MIME::QuotedPrint;
 use File::Path qw( mkpath );
 use Fcntl qw( :flock );
 use JSON qw( to_json from_json );
@@ -510,18 +511,18 @@ sub mail_helper {
     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
 
     for my $mt (@mailto) {
+        $msg = encode_qp(ensure_correct_encoding($msg, $charset));
         $msg =<<END;
 To: <$mt>
 From: <$from>
 Subject: $subject
 MIME-Version: 1.0
-Content-Type: text/plain; charset=$charset
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="$charset"
+Content-Transfer-Encoding: quoted-printable
 
 $msg
 END
-$msg = ensure_correct_encoding($msg, $charset);
-$obvius->send_mail($mt, $msg, $from);
+        $obvius->send_mail($mt, $msg, $from);
     }
  }
 
@@ -816,14 +817,8 @@ sub send_mail {
     my $form = translate("formular", $vdoc);
 
     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
-    my $mailmsg = <<END;
-To:      $to
-From:    $from
-Subject: $subject
-MIME-Version: 1.0
-Content-Type: text/plain; charset=$charset
-Content-Transfer-Encoding: 8bit
 
+    my $inner = encode_qp(ensure_correct_encoding(<<END, $charset));
 $prepend
 
 $text
@@ -836,8 +831,17 @@ $result_view
 $form: $uri
 END
 
-    $mailmsg = ensure_correct_encoding($mailmsg, $charset);
-    
+    my $mailmsg = <<END;
+To:      $to
+From:    $from
+Subject: $subject
+MIME-Version: 1.0
+Content-Type: text/plain; charset="$charset"
+Content-Transfer-Encoding: quoted-printable
+
+$inner
+END
+
     $obvius->send_mail($to, $mailmsg, $from);
 }
 
