@@ -122,29 +122,10 @@ if ( $MOD_PERL == 2) {
 	use warnings;
 	
 	# not present in compat::
-	require Apache2::Cookie;
-	*Apache::Cookie::fetch = sub {
-	    # Workaround for Apache2::Cookie crash when encountering malformed
-	    # cookies.
-	    my $jar = eval { Apache2::Cookie::fetch(@_); };
-
-	    if($@) {
-		$jar = $@->jar;
-		$jar->cookie_class('Apache2::Cookie');
-	    }
-
-	    my $class = shift;
-
-            # Hand
-            if($jar) {
-                return $jar->get(shift) if @_;
-            } else {
-                $jar = {};
-                return undef if @_;
-            }
-            return wantarray ? %$jar : $jar;
-	};
-	*Apache::Cookie::new = sub { Apache2::Cookie-> new(@_[1..$#_]) };
+	require Apache2::Cookie; # Loaded for backwards compatibility.
+	require CGI::Cookie; # The cookie module that's actually used
+	*Apache::Cookie::fetch = sub { CGI::Cookie->fetch (@_[1..$#_]) };
+	*Apache::Cookie::new = sub { CGI::Cookie-> new(@_[1..$#_]) };
 
 	# present in compat:: in Apache2:: namespace, but we need Apache::
 	require Apache2::Util;
