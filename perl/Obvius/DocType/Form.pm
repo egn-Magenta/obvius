@@ -661,7 +661,7 @@ sub generate_excel {
         }
     }
 
-    my @headers = @keys;
+    my @headers = map { mixed2perl($_) } @keys;
     unshift @headers, "Dato";
     unshift @headers, "Id";
 
@@ -698,8 +698,8 @@ sub generate_excel {
             return "" if !$field;
             return $uri ."entry_nr=" . uri_escape($entry_nr) . "&fieldname=" . $fieldname;
         }
-        from_to($entry, 'UTF-8', 'latin-1');
-        return $entry;
+        
+        return mixed2perl($entry);
     };
     
     my $i=1;

@@ -106,7 +106,7 @@ sub mixed2charset {
     if($charset =~ m!utf[-]?8!i) {
         return mixed2utf8($txt);
     } else {
-        return Encode::from_to(mixed2utf8($txt), 'utf8', $charset);
+        return Encode::encode($charset, mixed2perl($txt));
     }
 }
 
