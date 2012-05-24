@@ -125,7 +125,17 @@ if ( $MOD_PERL == 2) {
 	require Apache2::Cookie; # Loaded for backwards compatibility.
 	require CGI::Cookie; # The cookie module that's actually used
 	*Apache::Cookie::fetch = sub { CGI::Cookie->fetch (@_[1..$#_]) };
-	*Apache::Cookie::new = sub { CGI::Cookie-> new(@_[1..$#_]) };
+	*Apache::Cookie::new = sub {
+		my $class = shift;
+		shift if(ref($_[0])); # Get rid of $r argument
+		my $c = CGI::Cookie-> new(@_);
+		return $c;
+	};
+	*CGI::Cookie::bake = sub {
+		my ($c, $r) = @_;
+		$r ||= eval { Apache2::RequestUtil->request() };
+		$r->err_headers_out->add("Set-Cookie", $c->as_string);
+	};
 
 	# present in compat:: in Apache2:: namespace, but we need Apache::
 	require Apache2::Util;
