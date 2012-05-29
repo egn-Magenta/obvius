@@ -239,14 +239,8 @@ sub convert_ip_to_number {
 
 sub check_ip {
      my ($rules, $r) = @_;
-     
-     my $ip = $r->headers_in->{'X-FORWARDED-FOR'};
-     if (!$ip) {
-          warn "No X-FORWARDED-FOR header";
-          return undef;
-     }
 
-     $ip =~ s!,.*!!;
+     my $ip = WebObvius::Site::get_origin_ip($r);
      return 0 if !$ip;
 
      my ($ipn) = convert_ip_to_number($ip);
@@ -279,6 +273,8 @@ sub check_ip {
 
 sub public_authen_handler {
      my ($this, $req) = @_;
+     
+     print STDERR "Muuuuuuuuuuuuuuuuuuuuuuh\n";
 
      return OK if !$req->is_main;
      

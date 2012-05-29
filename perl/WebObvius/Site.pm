@@ -345,6 +345,7 @@ sub create_input_object {
     $input->param(NOW=>$req->notes('now'));
     $input->param(THE_REQUEST=>$req->the_request);
     $input->param(REMOTE_IP=>$req->connection->remote_ip);
+    $input->param('OBVIUS_ORIGIN_IP' => get_origin_ip($req));
     $input->param(IS_ADMIN => (defined $options{is_admin} ? $options{is_admin} : 0));
     if (my $cookies=Apache::Cookie->fetch) {
         $cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
@@ -739,6 +740,22 @@ sub set_public_login_cookie {
 
     #Update the DB with the new cookie value:
     $obvius->update_public_users({cookie => $cookie_value}, {id=>$user->{id}});
+}
+
+# get_origin_ip($req) -
+# Method for extracting the client's origin IP from the request object, taking
+# proxies into consideration.
+sub get_origin_ip {
+    my ($req) = @_;
+
+    # Get the first IP in the X-FORWARDED-FOR header
+    if(my $ip = $req->headers_in->{"X-FORWARDED-FOR"}) {
+	$ip =~ s!,.*!!;
+	return $ip;
+    }
+
+    # Default to the remote ip of the connection
+    return $req->connection->remote_ip;
 }
 
 # expire_public_login_cookie($req, $obvius)
