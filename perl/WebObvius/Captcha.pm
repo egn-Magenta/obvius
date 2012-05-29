@@ -7,7 +7,7 @@ use warnings;
 use Exporter;
 use Digest::MD5 qw( md5_hex );
 use Captcha::reCAPTCHA;
-use WebObvius::Site;
+use WebObvius::RequestTools;
 
 our @EXPORT = qw( check_captcha check_captcha_from_input check_recaptcha_from_input );
 
@@ -49,7 +49,7 @@ sub check_recaptcha_from_request {
     my $challenge = $req->param('recaptcha_challenge_field');
     my $response =  $req->param('recaptcha_response_field');
 
-    my $ip = WebObvius::Site::get_origin_ip($req);
+    my $ip = get_origin_ip_from_request($req);
 
     my $captcha = Captcha::reCAPTCHA->new;
     my $result = $captcha->check_answer("6Lc2Dc4SAAAAACLl_BaGlOxPMYnYezxkObdGoRJO",

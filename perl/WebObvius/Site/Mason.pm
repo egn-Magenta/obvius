@@ -45,6 +45,7 @@ use WebObvius::Template::Provider;
 
 #use WebObvius::Cache::Flushing;
 use WebObvius::Cache::Cache;
+use WebObvius::RequestTools;
 use Encode;
 
 use WebObvius::Apache
@@ -240,7 +241,7 @@ sub convert_ip_to_number {
 sub check_ip {
      my ($rules, $r) = @_;
 
-     my $ip = WebObvius::Site::get_origin_ip($r);
+     my $ip = get_origin_ip_from_request($r);
      return 0 if !$ip;
 
      my ($ipn) = convert_ip_to_number($ip);
