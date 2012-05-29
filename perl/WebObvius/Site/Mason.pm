@@ -274,8 +274,6 @@ sub check_ip {
 sub public_authen_handler {
      my ($this, $req) = @_;
      
-     print STDERR "Muuuuuuuuuuuuuuuuuuuuuuh\n";
-
      return OK if !$req->is_main;
      
      my $obvius = $this-> obvius_connect($req, undef, undef, 
