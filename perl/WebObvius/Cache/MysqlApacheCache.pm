@@ -70,6 +70,7 @@ sub can_request_use_cache_p {
 
     my $new_qstring;
     if($result) {
+	$req->uri($req->uri() . "/") unless($req->uri() =~ m!/$!);
         my ($doctypeid, $doctypename) = $this->get_doctype_id_and_name($req->uri);
         if($doctypeid) {
             my $args = $req->args || '';

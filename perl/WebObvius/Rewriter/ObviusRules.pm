@@ -37,6 +37,7 @@ our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 sub setup {
     my ($this, $rewriter) = @_;
 
+    # Both admin and public need to lowercase URLs
     $this->{is_admin_rewriter} = 1;
 }
 
@@ -113,7 +114,8 @@ our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
 sub setup {
     my ($this, $rewriter) = @_;
-    
+
+    # Need to rewrite in both admin and public
     $this->{is_admin_rewriter} = 1;
 
     my $config = $rewriter->{config};
@@ -246,16 +248,31 @@ sub setup {
     
     my $config = $rewriter->{config};
     
-    my $dsn = $config->param('dsn');
-    my $username = $config->param('normal_db_login');
-    my $passwd = $config->param('normal_db_passwd');
-    $this->{dbh} = DBI->connect($dsn, $username, $passwd) or die "Could not connect to database";
+    $this->{dsn} = $config->param('dsn');
+    $this->{username} = $config->param('normal_db_login');
+    $this->{passwd} = $config->param('normal_db_passwd');
 
     $this->{qstring_mapper} = $config->param('mysqlcache_querystring_mapper') ||
         new WebObvius::Cache::MysqlApacheCache::QueryStringMapper();
     
-    my $table = $this->{table} = $config->param('mysql_apachecache_table');
-    die "No table specified for mysql-based cache" unless($table);
+    $this->{table} = $config->param('mysql_apachecache_table');
+    die "No table specified for mysql-based cache" unless($this->{table});
+
+    $this->{debug} = $rewriter->{debug};
+
+    $this->connect_dbh;
+}
+
+sub connect_dbh {
+    my ($this) = @_;
+
+    $this->{dbh} = DBI->connect(
+        $this->{dsn},
+        $this->{username},
+        $this->{passwd}
+    ) or die "Could not connect to database";
+
+    my $table = $this->{table};
     $this->{lookup} = $this->{dbh}->prepare("SELECT cache_uri FROM $table WHERE uri = ? and querystring = ?");
     
     $this->{doctype_lookup} = $this->{dbh}->prepare(q|
@@ -275,20 +292,23 @@ sub setup {
             AND
             docid_path.path = ?;
     |);
-
-    $this->{debug} = $rewriter->{debug};
 }
 
 sub rewrite {
     my ($this, %args) = @_;
     $args{query_string} ||= '';
+    $args{uri} .= "/" unless($args{uri} =~ m!/$!);
     
     return undef if($args{uri} =~ m!^/admin!);
     return undef unless($args{method} =~ m!^(GET|HEAD)$!);
     print STDERR "$args{method} method OK\n" if($this->{debug});
 
+    $this->connect_dbh unless($this->{dbh}->ping());
+
     $this->{doctype_lookup}->execute($args{uri});
     my ($doctypeid, $doctypename) = ($this->{doctype_lookup}->fetchrow_array);
+    return undef unless(defined($doctypeid));
+    print STDERR "Uri '$args{uri}?$args{query_string}' mapped to doctype $doctypename, $doctypeid\n" if($this->{debug});
     my ($can_cache, $qstring) = $this->{qstring_mapper}->map_querystring_for_cache($doctypeid, $doctypename, $args{query_string});
     return undef unless($can_cache);
     print STDERR "Querystring '$args{query_string}' OK, mapped to '$qstring'\n" if($this->{debug});
