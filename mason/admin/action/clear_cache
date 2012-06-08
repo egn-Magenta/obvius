@@ -6,6 +6,7 @@
 my @args = (docid => $doc->Id);
 push @args, (clear_recursively => 1) if ($recursively);
 $obvius->register_modified(@args);
+$obvius->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
 
 return 'document_information';
 </%init>

@@ -7,7 +7,7 @@ use Obvius;
 use Obvius::DocType;
 use Digest::MD5 qw( md5_hex );
 
-use WebObvius::Cache::ApacheCache;
+use WebObvius::Cache::Cache;
 use Obvius::Hostmap;
 
 our @ISA = qw( Obvius::DocType );
@@ -24,7 +24,7 @@ sub internal_redirect {
     my $path = get_full_path($vdoc->field('uploadfile'), $obvius);
     return undef unless ($path && -r $path);
 
-    my $cache = WebObvius::Cache::ApacheCache->new($obvius);
+    my $cache = WebObvius::Cache::Cache->new($obvius);
 
     if ($cache->can_request_use_cache_p($req)) {
         $req->content_type($vdoc->field('mimetype') || "application/octet-stream");
@@ -67,7 +67,7 @@ sub raw_document_data {
         close $fh;
     };
 
-    my $cache = WebObvius::Cache::ApacheCache->new($obvius);
+    my $cache = WebObvius::Cache::Cache->new($obvius);
 
     if (!$cache->can_request_use_cache_p($req) || $req->notes('is_admin')) {
         return ($mime_type, \$data, $filename);
