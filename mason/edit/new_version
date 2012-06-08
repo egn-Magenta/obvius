@@ -22,7 +22,7 @@ else {
     my $new_doctype=$obvius->get_version_type($vdoc);
 
     my $sessionid=$r->pnotes('site')->prepare_edit($r, $doc, $vdoc, $new_doctype, $obvius);
-    my $session=$r->pnotes('site')->get_session($sessionid);
+    my $session=$r->pnotes('site')->get_session($sessionid, $obvius);
     $r->pnotes(session=>$session);
     $r->notes(obvius_session=>$sessionid);
     $m->comp('/edit/page', obvius_session=>$sessionid, obvius_page=>1, session=>$session);

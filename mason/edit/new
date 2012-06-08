@@ -73,7 +73,7 @@ $fields->param(docdate=>substr($r->notes('now'), 0, 10));
 $new_vdoc->{FIELDS}=$fields;
 
 my $sessionid=$r->pnotes('site')->prepare_edit($r, $new_doc, $new_vdoc, $new_doctype, $obvius);
-my $session=$r->pnotes('site')->get_session($sessionid);
+my $session=$r->pnotes('site')->get_session($sessionid, $obvius);
 $r->pnotes(session=>$session);
 $r->notes(obvius_session=>$sessionid);
 $session->{done_comp}='/edit/validate/document';

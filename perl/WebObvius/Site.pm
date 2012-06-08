@@ -357,7 +357,7 @@ sub create_input_object {
         # this not happening is a browser that keeps spinning, the
         # webserver not returning anything.
         warn "The session $obvius_session_id has not been released by admin/public-Mason; WebObvius::Site->create_input_object hangs now!" if ($req->pnotes('obvius_session'));
-        my $session=$this->get_session($obvius_session_id);
+        my $session=$this->get_session($obvius_session_id, $options{obvius_object});
         $input->param(SESSION=>$session);
     }
     
@@ -463,7 +463,7 @@ sub generate_page {
 
         $benchmark-> lap( "operation " . $doctype->Name) if $benchmark;
 
-        my $input=$this->create_input_object($req, %options);
+        my $input=$this->create_input_object($req, obvius_object => $obvius, %options);
         my $status = $site->handle_operation($input, $output, $doc, $vdoc, $doctype, $obvius);
 
         my $outgoing_cookies=$output->param('OBVIUS_COOKIES') || {};
@@ -500,7 +500,7 @@ sub generate_page {
         # for making links etc.: See
         #  <http://cvs.magenta-aps.dk/cgi-bin/viewcvs.cgi/mcms/perl/WebMCMS/Site/Site.pm?rev=1.2.2.20&content-type=text/vnd.viewcvs-markup>
         if (my $session_data=$output->param('SESSION')) {
-            my $session=$this->get_session();
+            my $session=$this->get_session(undef, $obvius);
             foreach (keys %$session_data) {
                 $session->{$_}=$session_data->{$_};
             }
@@ -647,18 +647,27 @@ sub handler ($$) {
 ########################################################################
 
 sub get_session {
-    my ($this, $id) = @_;
+    my ($this, $id, $obvius) = @_;
+
+    my %args = ( TableName => "apache_edit_sessions" );
+
+    if($obvius) {
+        $args{Handle} = $obvius->dbh;
+        $args{LockHandle} = $obvius->dbh;
+    } else {
+        # If an obvius object was not provided, create new connections
+        my $conf = $this->param('obvius_config');
+        $args{DataSource} = $args{LockDataSource} = $conf->param('dsn');
+        $args{UserName} = $args{LockUserName} = $conf->param('normal_db_login');
+        $args{Password} = $args{LockPassword} = $conf->param('normal_db_passwd');
+    }
 
     my %session;
     eval {
-        tie %session, 'Apache::Session::File',
-            $id, { Directory => $this->{EDIT_SESSIONS},
-                   LockDirectory => $this->{EDIT_SESSIONS} . '/LOCKS',
-                 };
+        tie %session, 'Apache::Session::MySQL', $id, \%args;
     };
-    my $error=$@;
-    if ($error) {
-        warn "Can't get session data $id: $error\n\t";
+    if ($@) {
+        warn "Can't get session data $id: $@\n\t";
         return undef;
     }
 
