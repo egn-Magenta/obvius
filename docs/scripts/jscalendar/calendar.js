@@ -738,7 +738,7 @@ Calendar.prototype.create = function (_par) {
 
 	var div = Calendar.createElement("div");
 	this.element = div;
-        div.className = "calendar";
+        div.className = window.jscalendar_classname || "calendar";
         div.style.zIndex = "50";
 
 	if (this.isPopup) {
