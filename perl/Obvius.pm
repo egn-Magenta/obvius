@@ -1594,6 +1594,10 @@ sub set_docparams {
     $this->register_modified('docid' => $doc->Id, clear_recursively => 1);
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Setting docparams ... done");
+
+    # Delete any cached docparams on the $doc.
+    delete $doc->{DOCPARAMS};
+
     return 1;
 
 }
