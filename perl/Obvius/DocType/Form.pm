@@ -496,6 +496,19 @@ sub get_full_uri {
 }
 
 
+my %charset_mail_translation = (
+    "utf8" => "UTF-8",
+    "utf-8" => "UTF-8",
+    "latin1" => "iso-8859-1",
+    "iso-8859-1" => "iso-8859-1",
+);
+
+sub translate_charset {
+    my ($charset) = shift;
+    $charset ||= '';
+    return $charset_mail_translation{$charset} || $charset;
+}
+
 sub mail_helper {
     my ($vdoc, $subject, $msg, $obvius) = @_;
 
@@ -505,6 +518,7 @@ sub mail_helper {
     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
 
     my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+    $charset = translate_charset($charset);
 
     $subject = encode_base64(encode($charset, $subject));
     $subject =~ s/\n//g;
@@ -517,7 +531,7 @@ To: <$mt>
 From: <$from>
 Subject: $subject
 MIME-Version: 1.0
-Content-Type: text/plain; charset="$charset"
+Content-Type: text/plain; charset=$charset
 Content-Transfer-Encoding: quoted-printable
 
 $msg
@@ -796,7 +810,8 @@ sub send_mail {
     my ($to, $obvius, $vdoc, $formspec, $fields, $entry_nr) = @_;
     $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
 
-    my $charset = $obvius->config->param('charset') || 'ISO-8859-1';     
+    my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+    $charset = translate_charset($charset);
 
     my $subject = $vdoc->field('email_subject');
     my ($namefield) = grep { $_->{type} eq 'name' } values %$fields;
@@ -836,7 +851,7 @@ To:      $to
 From:    $from
 Subject: $subject
 MIME-Version: 1.0
-Content-Type: text/plain; charset="$charset"
+Content-Type: text/plain; charset=$charset
 Content-Transfer-Encoding: quoted-printable
 
 $inner
