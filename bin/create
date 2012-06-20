@@ -25,6 +25,9 @@ use POSIX qw(strftime);
 use Unicode::String qw(utf8);
 use WebObvius::InternalProxy;
 use Getopt::Long;
+use Digest::MD5 qw(md5_hex);
+use File::Path;
+use Data::Dumper;
 
 my (
 	$site, $remove_prefix, $help, $verbose, $remove_parent,
@@ -153,6 +156,28 @@ my $rfields = $obvius-> get_table_data(
 ) || [];
 $is_repeatable{$_->{name}} = 1 for @$rfields;
 my @repeatable_fields = keys %is_repeatable;
+
+# Make a list of doctypes that has fileupload2 fields
+my %fileupload2_doctypes;
+my $fh2 = $obvius->dbh->prepare(q|
+    select
+	doctypes.name as doctypename,
+	fieldspecs.name as fieldname
+    from
+	fieldspecs
+	join
+	fieldtypes on
+	    (fieldspecs.type = fieldtypes.id)
+	join
+	doctypes on
+	    (fieldspecs.doctypeid = doctypes.id)
+    where
+	fieldtypes.name = 'fileupload2';
+|);
+$fh2->execute;
+while(my $rec = $fh2->fetchrow_hashref) {
+    $fileupload2_doctypes{$rec->{doctypename}} = $rec->{fieldname}
+}
 
 # Figure out which fields are binary and should be decoded:
 my %binary_names;
@@ -323,11 +348,25 @@ sub create_document
 		return;
 	}
 
+
+
 	my $versions = get( $document, 'version');
 	$versions= [ $versions ] unless ref $versions eq 'ARRAY';
 
 	my $succeeded = 0;
 	foreach my $version (@$versions) {
+
+		my $doctype_name = get( $version, 'obvius_dump_type_name');
+		if(my $upload_fieldname = $fileupload2_doctypes{$doctype_name}) {
+		    if(my $upload_data = get( $version, 'obvius_dump_bin_uploadfile')) {
+			my $filename = $new_uri;
+			$filename =~ s!/$!!; $filename =~ s!.*/([^/]+)$!$1!;
+			$upload_data = decode_base64($upload_data);
+			my $value = place_file_in_upload(\$upload_data, $filename, "image/jpeg");
+			$version->{fields}->{$upload_fieldname} = $value;
+		    }
+		}
+
 		my $fields = get( $version, 'fields');
 		for ( keys %$fields) {
 			$fields->{$_} = decode_base64( $fields->{$_}) 
@@ -654,4 +693,48 @@ sub fixup_links
 			name    => $fieldname,
 		);
 	}
+}
+
+sub place_file_in_upload {
+    my ($dataref, $filename, $type) = @_;
+
+    my $id = md5_hex($$dataref);
+
+    my $content_type = $type;
+    $content_type = 'unknown/unknown' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
+    
+    my $docs_dir = $obvius->{OBVIUS_CONFIG}{DOCS_DIR};
+    
+    my $upload_dir = $docs_dir . "/upload/$content_type/";
+    $upload_dir =~ s!/+!/!g;
+    
+    sub make_dir {
+	my $id = shift;
+	return substr($id, 0, 2) . "/" . substr($id, 2, 2) . "/" . substr($id, 0, 8);
+    }
+
+    $filename =~ s!^.*[/\\]([^/\\]+)$!$1!;
+    my $final_dir = make_dir($id);
+    while ( -f $upload_dir . $final_dir . "/$filename") {
+	$final_dir = make_dir(md5_hex(rand() . rand()));
+    }
+    
+    $upload_dir .= $final_dir;
+    unless(-d $upload_dir) {
+	mkpath($upload_dir, 0, 0775) or die "Couldn't create dir: $upload_dir";
+    }
+    
+    unless(-f "$upload_dir/$filename") {
+	local $/ = undef;
+	open(FILE, '>', "$upload_dir/$filename");
+	print FILE $$dataref;
+	close(FILE);
+    }
+    my $value = "$upload_dir/$filename";
+
+    # Make sure we don't remove the first / in /upload
+    $docs_dir =~ s!/$!!;
+    $value =~ s!^$docs_dir!!;
+
+    return $value;
 }
