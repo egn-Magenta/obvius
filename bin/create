@@ -28,10 +28,12 @@ use Getopt::Long;
 use Digest::MD5 qw(md5_hex);
 use File::Path;
 use Data::Dumper;
+use WebObvius::Cache::Cache;
 
 my (
 	$site, $remove_prefix, $help, $verbose, $remove_parent,
-	$force_owner, $force_group, %map_owners, %map_groups
+	$force_owner, $force_group, %map_owners, %map_groups,
+	$auto_create_paths, $interactive
 );
 my $add_prefix = '/';
 my $usermap    = "o:unknown=admin,g:unknown=Admin";
@@ -45,6 +47,8 @@ GetOptions(
 	'group=s'          => \$force_group,
 	'usermap=s'        => \$usermap,
 	'verbose'          => \$verbose,
+	'auto_create_paths' => \$auto_create_paths,
+	'interactive'	   => \$interactive,
 	'help'             => \$help,
 ) or usage();
 
@@ -90,12 +94,16 @@ EOT
 	print <<EOT;
 Usage: create [OPTIONS] site filename
 
-  --path           where to create the new documents (defaults to /)
-  --remove_prefix  remove this prefix from all uris
-  --owner          force owner name
-  --group          force group name
-  --verbose        print more information
-  --usermap        replace user and group names ( run with '--help usermap' for more)
+  --path           	where to create the new documents (defaults to /)
+  --remove_prefix  	remove this prefix from all uris
+  --owner          	force owner name
+  --group          	force group name
+  --verbose        	print more information
+  --usermap        	replace user and group names ( run with '--help usermap'
+			for more)
+  --interactive		run in interactive mode allowing the script to request
+                        input from the user
+  --auto-create-paths	Automatically create missing path segments for documents
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -110,6 +118,12 @@ sub say { print @_ if $verbose }
 
 my $conf = Obvius::Config-> new( $site);
 die "Could not get config for $site" unless defined $conf;
+
+my $cache_db = $conf->param('cache_db') || '/var/www/' . $conf->param('sitename') . '/var/cache_db/cache.dbm';
+my $cache_db1 = $cache_db . ".dir";
+my $cache_db2 = $cache_db . ".pag";
+die "This script requires write access to the cache db in $cache_db. Please ensure you have write permissions or run the script as root."
+    unless(-w $cache_db1 and -w $cache_db2);
 
 my $log = Obvius::Log-> new('notice');
 die "Could not get logging" unless defined $log;
@@ -250,6 +264,12 @@ if ( scalar keys %unresolved_links) {
 	
 }
 
+# Clear caches
+my $cache = WebObvius::Cache::Cache->new($obvius);
+my $modified = $obvius->modified;
+$obvius->clear_modified;
+$cache->find_and_flush($modified);
+
 exit 0;
 
 sub get
@@ -348,8 +368,6 @@ sub create_document
 		return;
 	}
 
-
-
 	my $versions = get( $document, 'version');
 	$versions= [ $versions ] unless ref $versions eq 'ARRAY';
 
@@ -358,7 +376,7 @@ sub create_document
 
 		my $doctype_name = get( $version, 'obvius_dump_type_name');
 		if(my $upload_fieldname = $fileupload2_doctypes{$doctype_name}) {
-		    if(my $upload_data = get( $version, 'obvius_dump_bin_uploadfile')) {
+		    if(my $upload_data = $version->{'obvius_dump_bin_uploadfile'}) {
 			my $filename = $new_uri;
 			$filename =~ s!/$!!; $filename =~ s!.*/([^/]+)$!$1!;
 			$upload_data = decode_base64($upload_data);
@@ -505,7 +523,8 @@ sub create_obvius_document
 		my $parent	= $obvius-> lookup_document($parent_uri);
 
 		if (!$parent) {
-		    die "Error finding: $parent_uri\n";
+		    create_missing_paths($parent_uri);
+		    $parent = $obvius->lookup_document($parent_uri);
 		}
 
 		my $owner = get_usermap_id(
@@ -737,4 +756,63 @@ sub place_file_in_upload {
     $value =~ s!^$docs_dir!!;
 
     return $value;
+}
+
+sub create_missing_paths {
+    my ($uri) = @_;
+    
+    die "Missing path parts for uri $uri" unless($interactive);
+
+    my @parts = grep {$_} split(m!/!, $uri);
+    my $sofar = "/";
+    while(@parts) {
+	$sofar .= shift(@parts) . "/";
+	unless($obvius->lookup_document($sofar)) {
+	    my $ans = "default";
+	    if($auto_create_paths) {
+		$ans = "y";
+	    } else {
+		while($ans !~ m!^(y(es)?|no?|)$!) {
+		    print "Auto-create path $sofar (Y/n)? >";
+		    $ans = lc(<STDIN>);
+		    chomp($ans);
+		    $ans =~ s!^(.).*!$1!;
+		}
+	    }
+	    if($ans eq 'n') {
+		print STDERR "Aborted by user";
+		exit 1;
+	    } else {
+		create_path_part($sofar);
+	    }
+	}
+    }
+}
+
+sub create_path_part {
+    my ($uri) = @_;
+
+    $uri =~ s!/$!!;
+    my $title = $uri;
+    $title =~ s!.*/([^/]+)$!$1!;
+
+    my $doc = {
+	'obvius_dump_doc_uri' => $uri,
+	'obvius_dump_type_name' => 'Standard',
+	'version' => {
+	    'obvius_dump_type_name' => 'Standard',
+	    'lang' => 'da',
+	    'fields' => {
+			    'title' => $title,
+			    'short_title' => $title,
+			    'seq' => '-10',
+			},
+	    'public' => '1',
+	},
+	'obvius_dump_owner_login' => $force_owner || 'admin',
+	'obvius_dump_grp_name' => $force_group || 'Admin',
+    };
+
+    my $errors = "";
+    create_obvius_document($uri, $doc, $doc->{version}, \$errors);
 }
