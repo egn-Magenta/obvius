@@ -469,21 +469,27 @@ sub create_obvius_document
 
 		if ( $fieldtype) {
 			if (ref $value) {
-				@$value = map { 
-					$fieldtype-> copy_in(
-						$obvius, $fieldspec, $_
-					) 
+                            if (ref $value eq 'ARRAY') {
+                                @$value = map { 
+                                    $fieldtype-> copy_in(
+                                        $obvius, $fieldspec, $_
+                                    ) 
 				} @$value;
-			} else {
-				$value = $fieldtype-> copy_in(
-					$obvius, $fieldspec, $value
-				);
-			}
-		}
+                        } else {
+                            my $ref_type = ref $value;
+                            say "Not ARRAY reference in value: $ref_type";
+                            print Dumper($value);
+                        }
+                    } else {
+                        $value = $fieldtype-> copy_in(
+                            $obvius, $fieldspec, $value
+                        );
+                    }
+                }
 
 		# Un-urlify:
 		if ( $value) {
-			if ( ref $value) {
+			if ( ref $value and ref $value eq 'ARRAY' )  {
 				for ( @$value) {
 					my %unresolved;
 					s!([^\'\"]+)\.docid!unurlify($1,$new_uri,0,\%unresolved)!ge;
