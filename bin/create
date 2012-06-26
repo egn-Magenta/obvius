@@ -381,6 +381,9 @@ sub create_document
 			$filename =~ s!/$!!; $filename =~ s!.*/([^/]+)$!$1!;
 			$upload_data = decode_base64($upload_data);
 			my $value = place_file_in_upload(\$upload_data, $filename, "image/jpeg");
+                    print "Dokument: ";
+                    print "$document->{obvius_dump_doc_uri} - $document->{obvius_dump_type_name}";
+                    print "\n";
 			$version->{fields}->{$upload_fieldname} = $value;
 		    }
 		}
@@ -476,9 +479,10 @@ sub create_obvius_document
                                     ) 
 				} @$value;
                         } else {
-                            my $ref_type = ref $value;
-                            say "Not ARRAY reference in value: $ref_type";
-                            print Dumper($value);
+                            $value = $value->{link}->{url};
+                            $value = $fieldtype-> copy_in(
+                                $obvius, $fieldspec, $value
+                            );
                         }
                     } else {
                         $value = $fieldtype-> copy_in(
