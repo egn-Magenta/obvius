@@ -124,7 +124,8 @@ sub save_request_result_in_cache
     my $local_dir = $fp . $fn;
     return if (!$fn);
 
-    my $dir = $this->{cache_dir} . $fp;
+    my $dir = $this->{cache_dir} . "/" . $fp;
+    $dir =~ s!/+!/!g;
     WebObvius::Cache::ApacheCache::make_sure_exist($dir) or return;
 
     open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
