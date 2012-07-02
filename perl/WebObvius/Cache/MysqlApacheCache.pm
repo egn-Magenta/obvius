@@ -33,6 +33,7 @@ sub new {
     $new->{cache_dir} ||= $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY} || ($var_dir . 'document_cache/');
     die "ApacheCache: " . $new->{cache_dir} . " is not a directory\n" if 
 	(! -d $new->{cache_dir});
+    $new->{cache_dir} .= "/" unless($new->{cache_dir} =~ m!/$!);
         
     $new->{qstring_mapper} = $config->param('mysqlcache_querystring_mapper')
         || new WebObvius::Cache::MysqlApacheCache::QueryStringMapper();
@@ -124,8 +125,7 @@ sub save_request_result_in_cache
     my $local_dir = $fp . $fn;
     return if (!$fn);
 
-    my $dir = $this->{cache_dir} . "/" . $fp;
-    $dir =~ s!/+!/!g;
+    my $dir = $this->{cache_dir} . $fp;
     WebObvius::Cache::ApacheCache::make_sure_exist($dir) or return;
 
     open F, '>', $dir . $fn || (warn "Couldn't write cache\n", return);
