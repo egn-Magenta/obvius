@@ -8,6 +8,7 @@ use WebObvius::Cache::ExternalApacheCache;
 use WebObvius::Cache::MysqlApacheCache;
 use WebObvius::Cache::Collection;
 use WebObvius::Cache::AdminLeftmenuCache;
+use WebObvius::Cache::MysqlAdminLeftmenuCache;
 use WebObvius::Cache::InternalProxyCache;
 use WebObvius::Cache::ExternalMedarbejderoversigtCache;
 
@@ -17,7 +18,12 @@ sub new {
      my ($class, $obvius) = @_;
      
      my $user_cache     = WebObvius::Cache::ExternalUserCache->new($obvius);
-     my $leftmenu_cache = WebObvius::Cache::AdminLeftmenuCache->new($obvius);
+     my $leftmenu_cache;
+     if($obvius->config->param('use_old_admin_leftmenu_cache')) {
+          $leftmenu_cache = WebObvius::Cache::AdminLeftmenuCache->new($obvius);
+     } else {
+          $leftmenu_cache = WebObvius::Cache::MysqlAdminLeftmenuCache->new($obvius);
+     }
 
      my $apache_cache;
      if($obvius->config->param('mysql_apachecache_table')) {
