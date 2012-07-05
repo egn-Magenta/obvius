@@ -1,6 +1,6 @@
 package Obvius::DocType::Form;
 
-use strict; use warnings;
+use strict; use warnings; use utf8;
 
 use utf8;
 use Digest::MD5 qw(md5_hex);
@@ -12,10 +12,12 @@ use Encode qw( is_utf8 encode decode from_to );
 use WebObvius::Captcha;
 use Spreadsheet::WriteExcel;
 use MIME::Base64;
+use MIME::QuotedPrint;
 use File::Path qw( mkpath );
 use Fcntl qw( :flock );
 use JSON qw( to_json from_json );
 use URI::Escape;
+use Obvius::CharsetTools qw(:all);
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -39,33 +41,33 @@ sub ensure_decoded {
     } elsif (ref $val eq 'SCALAR') {
         my $scal = ensure_decoded($$val, $charset);
         return \$scal;
-} elsif (ref $val) {
-    die "Unknown type: " . ref $val;
-} else {
-    return is_utf8($val) ? $val : decode($charset, $val);
-}
+     } elsif (ref $val) {
+         die "Unknown type: " . ref $val;
+     } else {
+         return is_utf8($val) ? $val : decode($charset, $val);
+     }
 }
 
 sub preprocess_fields {
     my ($formspec, $input, $charset) = @_;
     my %outfields;
-
+     
     for my $fn (keys %$formspec) {
         my $field = $formspec->{$fn};
         my $value = $input->{$fn};
         my $of = $outfields{$fn} = {};
-
+        
         if ($field->{type} eq 'checkbox' || $field->{type} eq 'selectmultiple') {
-            $value = !defined $value ? [] : ref $value ? $value : [ $value ];
-            $of->{has_value} = scalar(@$value);
+             $value = !defined $value ? [] : ref $value ? $value : [ $value ];
+             $of->{has_value} = scalar(@$value);
         } elsif (defined $value && $value ne "") {
-            $of->{has_value} = 1;
+             $of->{has_value} = 1;
         } else {
-            $of->{has_value} = 0;
-            $value = "";
+             $of->{has_value} = 0;
+             $value = "";
         }
         $of->{name} = $field->{name};
-        $of->{value} = ensure_decoded($value, $charset);
+        $of->{value} = ref $value ? $value : mixed2perl($value);
         if (!ref ($of->{value})) { 
             $of->{value} =~ s/(?:^\s+|\s+$)//g;
         }
@@ -175,9 +177,9 @@ sub validate_entry {
 
 sub add_submitted_values  {     
     my ($formdata, $input) = @_;
-
+    
     for my $elem (@$formdata){
-        $elem->{_submitted_value} = $input->param($elem->{name});
+        $elem->{_submitted_value} = mixed2perl($input->param($elem->{name}));
     }
 }
 
@@ -245,12 +247,7 @@ sub get_formdata {
     my $data = $vdoc->field('formdata');
     return [] if !$data;
 
-    eval {
-        $data = Encode::decode('UTF-8', $data, Encode::FB_CROAK);
-    };
-    if ($@) {
-        $data = Encode::decode('LATIN-1', $data);
-    }
+    $data = mixed2utf8($data);
 
     my $formdata = XMLin( $data,
         keyattr=>[],
@@ -385,10 +382,10 @@ return (1, $entry_id, $entry_nr, \%fields, $count);
 
 sub validate_full_entry {
     my ($input, $formspec, $docid, $obvius) = @_;
-
+    
     my @invalid_upload_fields;
     my %input = ref $input ne 'HASH' && $input->UNIVERSAL::can('param') ? 
-    map { $_ => $input->param($_) } keys %$formspec : %$input;  
+                map { $_ => mixed2perl($input->param($_)) } keys %$formspec : %$input;  
 
     for my $val (grep { $_->{type} eq 'upload' } values %$formspec) {
         my $value = eval { handle_upload_file($docid, $input, $val, $obvius) } || undef;
@@ -402,27 +399,27 @@ sub validate_full_entry {
     }
 
     my $outfields = preprocess_fields($formspec, \%input, $obvius->config->param('charset'));
+    
+    for my $fn (keys %$formspec) {
+        validate_entry($formspec->{$fn}, $outfields->{$fn}, $outfields, $docid, $obvius);
+    }
 
-for my $fn (keys %$formspec) {
-    validate_entry($formspec->{$fn}, $outfields->{$fn}, $outfields, $docid, $obvius);
-}
-
-$outfields->{$_->{name}}{invalid}  = $_->{error} for @invalid_upload_fields;
-my @invalid_fields = grep { $_->{invalid} 
-|| $_->{mandatory_failed} 
-|| $_->{options_failed}} values %$outfields;
-
-my @non_unique_fields = grep { $_->{unique_failed}} values %$outfields;
-
-if (@invalid_fields || @non_unique_fields) {
-    return (undef, {invalid => [ map { $_->{name} } @invalid_fields ],
-            non_unique => [ map { $_->{name} } @non_unique_fields ],
-            outfields => $outfields
-        },
-    );
-}
-
-return (1,$outfields);
+    $outfields->{$_->{name}}{invalid}  = $_->{error} for @invalid_upload_fields;
+    my @invalid_fields = grep { $_->{invalid} 
+    || $_->{mandatory_failed} 
+    || $_->{options_failed}} values %$outfields;
+    
+    my @non_unique_fields = grep { $_->{unique_failed}} values %$outfields;
+    
+    if (@invalid_fields || @non_unique_fields) {
+        return (undef, {invalid => [ map { $_->{name} } @invalid_fields ],
+                non_unique => [ map { $_->{name} } @non_unique_fields ],
+                outfields => $outfields
+            },
+        );
+    }
+    
+    return (1,$outfields);
 }
 
 sub insert_entry {
@@ -454,17 +451,17 @@ sub insert_entry {
         $entry_id]} values %$data;
         $obvius->execute_command("insert into formdata_entry_data (name, value, entry_id)
             values (?, ?, ?)", \@data);
-    if (!$nontransactional) { $obvius->db_commit;}
-};
+        if (!$nontransactional) { $obvius->db_commit;}
+    };
 
-$obvius->execute_command("unlock tables");
-
-if ($@) {
-    if (!$nontransactional) { $obvius->db_rollback;}
-    die $@;
-};
-
-return ($entry_nr, $entry_id, $count + 1);
+    $obvius->execute_command("unlock tables");
+    
+    if ($@) {
+        if (!$nontransactional) { $obvius->db_rollback;}
+        die $@;
+    };
+    
+    return ($entry_nr, $entry_id, $count + 1);
 }
 
 
@@ -499,6 +496,19 @@ sub get_full_uri {
 }
 
 
+my %charset_mail_translation = (
+    "utf8" => "UTF-8",
+    "utf-8" => "UTF-8",
+    "latin1" => "iso-8859-1",
+    "iso-8859-1" => "iso-8859-1",
+);
+
+sub translate_charset {
+    my ($charset) = shift;
+    $charset ||= '';
+    return $charset_mail_translation{$charset} || $charset;
+}
+
 sub mail_helper {
     my ($vdoc, $subject, $msg, $obvius) = @_;
 
@@ -508,86 +518,87 @@ sub mail_helper {
     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
 
     my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+    $charset = translate_charset($charset);
 
     $subject = encode_base64(encode($charset, $subject));
     $subject =~ s/\n//g;
     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
 
     for my $mt (@mailto) {
+        $msg = encode_qp(ensure_correct_encoding($msg, $charset));
         $msg =<<END;
 To: <$mt>
 From: <$from>
 Subject: $subject
 MIME-Version: 1.0
 Content-Type: text/plain; charset=$charset
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 
 $msg
 END
-$msg = ensure_correct_encoding($msg, $charset);
-$obvius->send_mail($mt, $msg, $from);
-     }
+        $obvius->send_mail($mt, $msg, $from);
+    }
  }
 
 
- sub regret_deletion {
-     my ($doc, $obvius) = @_;
+sub regret_deletion {
+    my ($doc, $obvius) = @_;
 
-     $obvius->execute_command("update formdata_entry set deleted = false where docid=?", $doc->Id);
-     return OBVIUS_OK;
- }
-
-
- sub action {
-     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
-
-     my $formdata = get_formdata($vdoc, $obvius);
-     add_submitted_values($formdata, $input) if $input->param('obvius_form_submitted');
-     $output->param(formdata => $formdata);
-
-     return regret_deletion($doc, $obvius) if $input->param('obvius_regret_deletion');
-
-     return $this->delete_entries($doc, $obvius) 
-     if $input->param('flush_xml') && $input->param('is_admin');
-
-     return $this->handle_submitted($input, $output, $vdoc, $obvius) 
-     if $input->param('obvius_form_submitted');
-
-     return OBVIUS_OK;
- }
+    $obvius->execute_command("update formdata_entry set deleted = false where docid=?", $doc->Id);
+    return OBVIUS_OK;
+}
 
 
- sub retrieve_data {
-     my ($obvius, $docid, $entry_nr, $fieldname) = @_;
+sub action {
+    my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
 
-     my (@vars, @where);
-     if ($entry_nr) {
-         push @where, "fe.entry_nr = ?";
-         push @vars, $entry_nr;
-     }
+    my $formdata = get_formdata($vdoc, $obvius);
+    add_submitted_values($formdata, $input) if $input->param('obvius_form_submitted');
+    $output->param(formdata => $formdata);
 
-     if ($fieldname) {
-         push @where, "fd.name = ?";
-         push @vars, $fieldname;
-     }
+    return regret_deletion($doc, $obvius) if $input->param('obvius_regret_deletion');
 
-     my $where = join ' and ', @where;
-     $where .= ' and ' if $where;
+    return $this->delete_entries($doc, $obvius) 
+    if $input->param('flush_xml') && $input->param('is_admin');
 
-     my $res = $obvius->execute_select("select fe.time time, fe.entry_nr id, 
-         fd.name name, fd.value value from
-         formdata_entry fe join formdata_entry_data fd using (entry_id) where
-         fe.docid = ? and $where not fe.deleted order by fe.entry_nr", $docid, @vars);
+    return $this->handle_submitted($input, $output, $vdoc, $obvius) 
+    if $input->param('obvius_form_submitted');
 
-     my %output;
-     for my $entry (@$res) {
-         $output{$entry->{id}} ||= { time => $entry->{time},
-             id => $entry->{id},
-             fields => {}};
-         $output{$entry->{id}}{fields}{$entry->{name}} = $entry->{value};
-     }
+    return OBVIUS_OK;
+}
 
-     return \%output;
+
+sub retrieve_data {
+    my ($obvius, $docid, $entry_nr, $fieldname) = @_;
+
+    my (@vars, @where);
+    if ($entry_nr) {
+        push @where, "fe.entry_nr = ?";
+        push @vars, $entry_nr;
+    }
+
+    if ($fieldname) {
+        push @where, "fd.name = ?";
+        push @vars, $fieldname;
+    }
+
+    my $where = join ' and ', @where;
+    $where .= ' and ' if $where;
+
+    my $res = $obvius->execute_select("select fe.time time, fe.entry_nr id, 
+        fd.name name, fd.value value from
+        formdata_entry fe join formdata_entry_data fd using (entry_id) where
+        fe.docid = ? and $where not fe.deleted order by fe.entry_nr", $docid, @vars);
+
+    my %output;
+    for my $entry (@$res) {
+        $output{$entry->{id}} ||= { time => $entry->{time},
+            id => $entry->{id},
+            fields => {}};
+        $output{$entry->{id}}{fields}{$entry->{name}} = $entry->{value};
+    }
+
+    return \%output;
 }
 
 sub raw_document_data {
@@ -664,7 +675,7 @@ sub generate_excel {
         }
     }
 
-    my @headers = @keys;
+    my @headers = map { mixed2perl($_) } @keys;
     unshift @headers, "Dato";
     unshift @headers, "Id";
 
@@ -678,54 +689,54 @@ sub generate_excel {
     $header_format->set_bold();
     $worksheet->write_row(0, 0, \@headers, $header_format);
 
-# Data:
-my $data_format=$workbook->addformat();
-$data_format->set_align('top');
-$data_format->set_locked(0);
-
-my $entered_data = retrieve_data($obvius, $vdoc->Docid);
-
-my $uri = $obvius->get_doc_uri($doc);
-
-$uri = "http://" . $obvius->config->{ROOTHOST} . $input->notes('prefix') . $uri;
-$uri =~ s!/+$!!;
-$uri .= "?get_upload_file=1&";
-
-my $show_fields = sub {
-    my ($fieldname, $entry, $entry_nr) = @_;
-
-    return "" if !defined $entry;
-
-    if ($formspec->{$fieldname}{type} eq 'upload') {
-        my $field = eval { from_json($entry); };
-        return "" if !$field;
-        return $uri ."entry_nr=" . uri_escape($entry_nr) . "&fieldname=" . $fieldname;
+    # Data:
+    my $data_format=$workbook->addformat();
+    $data_format->set_align('top');
+    $data_format->set_locked(0);
+    
+    my $entered_data = retrieve_data($obvius, $vdoc->Docid);
+    
+    my $uri = $obvius->get_doc_uri($doc);
+    
+    $uri = "http://" . $obvius->config->{ROOTHOST} . $input->notes('prefix') . $uri;
+    $uri =~ s!/+$!!;
+    $uri .= "?get_upload_file=1&";
+    
+    my $show_fields = sub {
+        my ($fieldname, $entry, $entry_nr) = @_;
+    
+        return "" if !defined $entry;
+    
+        if ($formspec->{$fieldname}{type} eq 'upload') {
+            my $field = eval { from_json($entry); };
+            return "" if !$field;
+            return $uri ."entry_nr=" . uri_escape($entry_nr) . "&fieldname=" . $fieldname;
+        }
+        
+        return mixed2perl($entry);
+    };
+    
+    my $i=1;
+    for my $entry_nr (sort { $a <=> $b } keys %$entered_data) {
+        my $entry = $entered_data->{$entry_nr};
+        my @row = map { $show_fields->($_, $entry->{fields}{$_}, $entry_nr) } @keys;
+        unshift @row, $entry->{time};
+        unshift @row, $entry_nr;
+    
+        $worksheet->write_row($i++, 0, [ map { /^\s*=/ ? '"' . $_ . '"' : $_ } @row], $data_format);
     }
-    from_to($entry, 'UTF-8', 'latin-1');
-    return $entry;
-};
-
-my $i=1;
-for my $entry_nr (sort { $a <=> $b } keys %$entered_data) {
-    my $entry = $entered_data->{$entry_nr};
-    my @row = map { $show_fields->($_, $entry->{fields}{$_}, $entry_nr) } @keys;
-    unshift @row, $entry->{time};
-    unshift @row, $entry_nr;
-
-    $worksheet->write_row($i++, 0, [ map { /^\s*=/ ? '"' . $_ . '"' : $_ } @row], $data_format);
-}
-$workbook->close();
-
-my ($data, $fh);
-eval {
-    open $fh, $tempfile or die "Couldn't open $tempfile, stopping";
-    do { local $/; $data = <$fh> };
-    close $fh;
-};
-unlink $tempfile;
-
-die $@ if $@;
-return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
+    $workbook->close();
+    
+    my ($data, $fh);
+    eval {
+        open $fh, $tempfile or die "Couldn't open $tempfile, stopping";
+        do { local $/; $data = <$fh> };
+        close $fh;
+    };
+    unlink $tempfile;
+    
+    die $@ if $@;
+    return ("application/vnd.ms-excel", $data, $name . ".xls", "attachment");
 }
 
 sub delete_entries {
@@ -799,34 +810,30 @@ sub send_mail {
     my ($to, $obvius, $vdoc, $formspec, $fields, $entry_nr) = @_;
     $obvius->get_version_fields($vdoc, [qw (email_subject email_text) ]);
 
-    my $charset = $obvius->config->param('charset') || 'ISO-8859-1';     
+    my $charset = $obvius->config->param('charset') || 'ISO-8859-1';
+    $charset = translate_charset($charset);
 
     my $subject = $vdoc->field('email_subject');
     my ($namefield) = grep { $_->{type} eq 'name' } values %$fields;
     my $prepend = $namefield ? translate('Dear', $vdoc) . " " . $namefield->{value}: '';
-
+    
     my $result_view = generate_result_view($formspec,$fields, $entry_nr, $vdoc);
-
+    
     $subject = ensure_correct_encoding($subject, $charset);
     $subject = encode_base64($subject);
     $subject =~ s/\n//g;
     $subject = "=?" . uc($charset) . "?B?" . $subject . "?=";
 
-    my $text = $vdoc->field('email_text');
-
+    my $text = mixed2perl($vdoc->field('email_text'));
+    
     my $result_prefix = translate("tastede", $vdoc);
-
+    
     my $uri = get_full_uri($vdoc->Docid, $obvius);
     my $form = translate("formular", $vdoc);
 
     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
-    my $mailmsg = <<END;
-To:      $to
-From:    $from
-Subject: $subject
-MIME-Version: 1.0
-Content-Type: text/plain; charset=$charset
 
+    my $inner = encode_qp(ensure_correct_encoding(<<END, $charset));
 $prepend
 
 $text
@@ -839,33 +846,24 @@ $result_view
 $form: $uri
 END
 
-$mailmsg = ensure_correct_encoding($mailmsg, $charset);
+    my $mailmsg = <<END;
+To:      $to
+From:    $from
+Subject: $subject
+MIME-Version: 1.0
+Content-Type: text/plain; charset=$charset
+Content-Transfer-Encoding: quoted-printable
 
-$obvius->send_mail($to, $mailmsg, $from);
+$inner
+END
+
+    $obvius->send_mail($to, $mailmsg, $from);
 }
 
 sub ensure_correct_encoding {
     my ($input, $charset) = @_;
-    my $output = '';
-    Encode::_utf8_off($input);
 
-    while($input) {
-        # Decode as much correct utf-8 as we can from the current input
-        # passing on anything we doesn't know one character at a time,
-        # assuming it is in perl's own string format. Re-encode everything to
-        # octects of the sites' charset afterwards.
-        my $n = decode('utf-8', $input, Encode::FB_QUIET);
-
-        if (length ($input)) {
-            my $c = substr ($input, 0, 1);
-            $n .= $c;
-            $input = substr($input,1);
-        }
-        $n = encode($charset, $n);
-        $output .= $n;
-    }
-
-    return $output;
+    return mixed2charset($input, $charset);
 }
 
 sub count_entries {
