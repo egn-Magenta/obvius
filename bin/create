@@ -319,35 +319,6 @@ sub get_html_fields_for_doctype
     return $ref;
 }
 
-sub xxx_process_html_field
-{
-    my $html_field = shift;
-    
-    # NOTE: This implementation is currently AgTraIn and Sitecore specific.
-    # This should of course NOT be the case.
-    my ($evil_wrong_prefix, $SITE_ROOT, $MEDIA_ROOT);
-
-    
-    
-    # FIX INTERNAL LINKS
-    $evil_wrong_prefix = '/sitecore/content';
-    $SITE_ROOT = '/subsite/agtrain';
-    $html_field =~ s/$evil_wrong_prefix/$SITE_ROOT/g;
-
-    # FIX IMAGES
-    $evil_wrong_prefix = "~/media";
-    $MEDIA_ROOT = "/subsite/media_library";
-    $html_field =~ s/$evil_wrong_prefix/$MEDIA_ROOT/g;
-
-    # REMOVE EVIL SITECORE .ASP[a-z] SUFFIX
-    $html_field =~ s/\.as[ph]\S//g;
-
-    # REPLACE TABLE STYLE
-    $html_field =~ s/usertable1/standard_table/g;
-
-    return $html_field;
-
-}
 # maps user or group name based as requested in --usermap and/or --owner and --group
 sub get_usermap_id
 {
