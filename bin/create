@@ -28,7 +28,6 @@ use Getopt::Long;
 use Digest::MD5 qw(md5_hex);
 use File::Path;
 use Data::Dumper;
-use Module::Load;
 use WebObvius::Cache::Cache;
 
 my (
