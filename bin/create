@@ -28,12 +28,13 @@ use Getopt::Long;
 use Digest::MD5 qw(md5_hex);
 use File::Path;
 use Data::Dumper;
+use Module::Load;
 use WebObvius::Cache::Cache;
 
 my (
 	$site, $remove_prefix, $help, $verbose, $remove_parent,
 	$force_owner, $force_group, %map_owners, %map_groups,
-	$auto_create_paths, $interactive
+	$auto_create_paths, $interactive, $html_processor
 );
 my $add_prefix = '/';
 my $usermap    = "o:unknown=admin,g:unknown=Admin";
@@ -49,12 +50,17 @@ GetOptions(
 	'verbose'          => \$verbose,
 	'auto_create_paths' => \$auto_create_paths,
 	'interactive'	   => \$interactive,
+        'html_processor=s'   => \$html_processor,
 	'help'             => \$help,
 ) or usage();
 
 usage(@ARGV) if $help or not @ARGV;
 $site = shift @ARGV;
 
+# Load HTML processing plugin, if specified
+if ($html_processor) {
+    require $html_processor;
+}
 die "--path must begin with /\n" unless $add_prefix =~ /^\//;
 $add_prefix =~ s/\/$//;
 if ( $remove_prefix) {
@@ -103,7 +109,8 @@ Usage: create [OPTIONS] site filename
 			for more)
   --interactive		run in interactive mode allowing the script to request
                         input from the user
-  --auto-create-paths	Automatically create missing path segments for documents
+  --auto_create_paths	Automatically create missing path segments for documents
+  --html_processor      Perl module to process HTML fields to fix links etc.
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -173,6 +180,7 @@ my @repeatable_fields = keys %is_repeatable;
 
 # Make a list of doctypes that has fileupload2 fields
 my %fileupload2_doctypes;
+
 my $fh2 = $obvius->dbh->prepare(q|
     select
 	doctypes.name as doctypename,
@@ -281,6 +289,66 @@ sub get
 	$object->{$field};
 }
 
+sub get_html_fields_for_doctype
+{
+    # Get list of fields with HTML content for the doctype given as 
+    # parameter. 
+    
+    my $doctype = shift;
+    my @fields= ();
+
+    my $sql_stmt =  q|
+        select
+            fieldspecs.name as fieldname
+        from
+            fieldspecs
+        join fieldtypes on (fieldspecs.type = fieldtypes.id)
+        join doctypes on (fieldspecs.doctypeid = doctypes.id)
+        where
+            fieldtypes.name in ('text', 'textwupload')
+                and 
+            doctypes.name = '| . "$doctype" . "';";
+    my $fh = $obvius->dbh->prepare($sql_stmt);
+    $fh->execute;
+
+    while (my $rec = $fh->fetchrow_hashref) {
+        push(@fields, $rec->{fieldname});
+    }
+    my $ref = \@fields;
+    my $count = @fields;
+    
+    return $ref;
+}
+
+sub xxx_process_html_field
+{
+    my $html_field = shift;
+    
+    # NOTE: This implementation is currently AgTraIn and Sitecore specific.
+    # This should of course NOT be the case.
+    my ($evil_wrong_prefix, $SITE_ROOT, $MEDIA_ROOT);
+
+    
+    
+    # FIX INTERNAL LINKS
+    $evil_wrong_prefix = '/sitecore/content';
+    $SITE_ROOT = '/subsite/agtrain';
+    $html_field =~ s/$evil_wrong_prefix/$SITE_ROOT/g;
+
+    # FIX IMAGES
+    $evil_wrong_prefix = "~/media";
+    $MEDIA_ROOT = "/subsite/media_library";
+    $html_field =~ s/$evil_wrong_prefix/$MEDIA_ROOT/g;
+
+    # REMOVE EVIL SITECORE .ASP[a-z] SUFFIX
+    $html_field =~ s/\.as[ph]\S//g;
+
+    # REPLACE TABLE STYLE
+    $html_field =~ s/usertable1/standard_table/g;
+
+    return $html_field;
+
+}
 # maps user or group name based as requested in --usermap and/or --owner and --group
 sub get_usermap_id
 {
@@ -381,18 +449,32 @@ sub create_document
 			$filename =~ s!/$!!; $filename =~ s!.*/([^/]+)$!$1!;
 			$upload_data = decode_base64($upload_data);
 			my $value = place_file_in_upload(\$upload_data, $filename, "image/jpeg");
-                    print "Dokument: ";
-                    print "$document->{obvius_dump_doc_uri} - $document->{obvius_dump_type_name}";
-                    print "\n";
+                    #print "Dokument: ";
+                    #print "$document->{obvius_dump_doc_uri} - $document->{obvius_dump_type_name}";
+                    #print "\n";
 			$version->{fields}->{$upload_fieldname} = $value;
 		    }
 		}
-
 		my $fields = get( $version, 'fields');
 		for ( keys %$fields) {
 			$fields->{$_} = decode_base64( $fields->{$_}) 
 				if $binary_names{$_};
 		}
+                if ($html_processor) {
+                    # Process internal URIs and image paths to make all aspects
+                    # of the import work, and any other HTML field processing.
+                    my $html_fields_ref = get_html_fields_for_doctype($doctype_name);
+
+                    for my $field (@$html_fields_ref) {
+                        if (exists $fields->{$field}) {
+
+                            my $html_content = $$fields{$field};
+                            $html_content = process_html_field($html_content);
+                            $$fields{$field} = $html_content;
+
+                        }
+                    }
+                }
 		my $error = '';
 		my ($new_docid, $new_version) = create_obvius_document(
 			$new_uri, $document, $version, \$error
