@@ -1,6 +1,11 @@
   <script type="text/javascript" src="/scripts/admin.js"></script>
   <script type="text/javascript" src="/scripts/admin_newsboxes.js"></script>
   <script type="text/javascript" src="/scripts/admin_categories.js"></script>
+% if(my $jscalendar_classname = $obvius->config->param('jscalendar_classname')) {
+  <script type="text/javascript">//<!--
+    window.jscalendar_classname = '<% $jscalendar_classname %>';
+  //--></script>
+% }
   <script type="text/javascript" src="/scripts/jscalendar/calendar.js"></script>
   <script type="text/javascript" src="/scripts/jscalendar/lang/calendar-<% $vdoc->Lang %>.js"></script>
   <script type="text/javascript" src="/scripts/jscalendar/calendar-setup.js"></script>

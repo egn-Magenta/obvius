@@ -194,8 +194,9 @@ sub connect {
     $db->TableAttr('fieldtypes', '!Serial' => 'id');
 
     $this->{DB} = $db;
-    if ($config->{UTF8}) {
+    if ($config->{UTF8} || $config->param('utf8_db')) {
          $this->execute_command("set names utf8");
+	 #$this->{DB}->{'*DBHdl'}->{mysql_enable_utf8} = 1;
     }
 
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
@@ -1594,6 +1595,10 @@ sub set_docparams {
     $this->register_modified('docid' => $doc->Id, clear_recursively => 1);
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Setting docparams ... done");
+
+    # Delete any cached docparams on the $doc.
+    delete $doc->{DOCPARAMS};
+
     return 1;
 
 }

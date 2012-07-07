@@ -173,7 +173,11 @@ sub obvius_connect {
 				}
 				warn "Error: updated $i times\n" if ($i >= 5);
 				$obvius->{DB} = undef;
-				
+
+                                if($obvius->config->param('apache2_sizelimit_process_size')) {
+                                    Apache2::SizeLimit::exit_if_too_big($req);
+                                }
+
 				return 1;
 			   });
     $req->pnotes(obvius => $obvius);
