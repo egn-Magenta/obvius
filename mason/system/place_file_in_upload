@@ -1,0 +1,92 @@
+<%
+    encode_json({
+        status => ($error ? 'ERROR' : 'OK'),
+        uri => $result,
+        error => $error,
+        filename => $filename,
+        path => $path
+    })
+%>
+<%once>
+use Obvius;
+use Obvius::Config;
+use JSON;
+use Digest::MD5 qw( md5_hex );
+
+# Same login implementation as in the RoR navigator
+sub check_login {
+    my ($obvius, $user, $time, $code) = @_;
+
+    my $userid = $obvius->get_userid($user);
+    return undef unless($userid);
+
+    my $passwd = $obvius->get_user($userid)->{passwd};
+    return undef unless($passwd);
+
+    my $now = time;
+
+    return undef if($now - 1800 > $time or $now + 1800 < $time);
+    
+    my $phrase = md5_hex($passwd . $time);
+    return $phrase eq $code;
+}
+</%once>
+<%init>
+my ($result, $error, $site, $config, $obvius, $doctype, $upload,
+    $filename, $path);
+
+my $user = $r->param('user');
+my $time = $r->param('time');
+my $code = $r->param('code');
+
+$error = "You must specify user, time and code parameters"
+    unless($user and $time and $code);
+
+unless($error) {
+    ($upload) = $r->upload;
+    $error = "You must upload a file using multipart/form-data"
+        unless($upload);
+}
+
+unless($error) {
+    $error = "No site config defined"
+        unless($site = $r->dir_config('site'));
+}
+
+unless($error) {
+    $error = "Couldn't load config for $site"
+        unless($config = new Obvius::Config('ku'));
+}
+
+unless($error) {
+    $error = "Couldn't load Obvius"
+        unless($obvius = new Obvius($config));
+}
+
+unless($error) {
+    $error = "Authentication failure"
+        unless(check_login($obvius, $user, $time, $code));
+}
+
+unless($error) {
+    $error = "No FileUpload doctype found"
+        unless($doctype = $obvius->get_doctype_by_name('FileUpload'));
+}
+
+unless($error) {
+    my $fh = $upload->fh;
+    my $type = $upload->type;
+    $filename = $upload->filename;
+
+    $result = $doctype->place_file_in_upload(
+        $obvius,
+        $fh,
+        $type,
+        $filename
+    );
+    $path = $result;
+    $path =~ s!\Q$filename\E$!!;
+}
+
+$r->content_type('application/json');
+</%init>

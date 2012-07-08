@@ -9,6 +9,7 @@ use Digest::MD5 qw( md5_hex );
 
 use WebObvius::Cache::Cache;
 use Obvius::Hostmap;
+use File::Path;
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -104,6 +105,51 @@ sub path_to_filename {
     $filename =~ s/\s+/_/g;
 
     return $filename;
+}
+
+sub place_file_in_upload {
+    my ($this, $obvius, $fh, $type, $filename) = @_;
+
+    my $id = md5_hex($filename);
+    my $content_type = $type;
+    $content_type =~ s!"!!g; $content_type =~ s!'!!g;
+    $content_type = 'unknown/unknown' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
+    
+    my $docs_dir = $obvius->config->param('docs_dir');
+    $docs_dir =~ s!/$!!;
+    
+    my $upload_dir = $docs_dir . "/upload/$content_type";
+    $upload_dir =~ s!/+!/!g;
+    
+    sub make_dir {
+        my $id = shift;
+        return substr($id, 0, 2) . "/" . substr($id, 2, 2) . "/" . substr($id, 0, 8);
+    }
+    
+    $filename =~ s!^.*[/\\]([^/\\]+)$!$1!;
+    my $final_dir = make_dir($id);
+    while ( -f "$upload_dir/$final_dir/$filename") {
+        $final_dir = make_dir(md5_hex(rand() . rand()));
+    }
+    
+    $upload_dir = "$upload_dir/$final_dir";
+    unless(-d $upload_dir) {
+        mkpath($upload_dir, 0, 0775) or die "Couldn't create dir: $upload_dir";
+    }
+    
+    my $full_file_path = "$upload_dir/$filename";
+
+    {
+        local $/ = undef;
+        open(FILE, '>', $full_file_path);
+        print FILE <$fh>;
+        close(FILE);
+    }
+
+    # Make sure we don't remove the first / in /upload
+    $full_file_path =~ s!^$docs_dir!!;
+
+    return $full_file_path;
 }
 
 1;
