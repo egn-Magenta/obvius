@@ -50,6 +50,12 @@ for my $confname (@ARGV) {
                 date >= ?
                 AND
                 date <= NOW()
+                AND
+                (
+                    status IS NULL
+                    or
+                    status = ""
+                )
         |);
         $sth->execute($time);
 
