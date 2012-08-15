@@ -249,6 +249,16 @@ sub flush_in_table {
             @flush_not_regexps = ();
         }
     }
+
+    # Check if we have to clear by no subsite
+    if(grep { $_->{command} eq 'clear_by_no_subsite' } @$commands) {
+	my $hostmap = Obvius::Hostmap->new_with_obvius($this->{obvius});
+
+	$this->flush_by_pattern(sub {
+	    my $uri = shift;
+	    return !$hostmap->find_host_prefix($uri);
+	});
+    }
     
     # If the above fails due to perl-only regexps, fall back to flushing by pattern
     if(@flush_not_regexps or @flush_regexps) {
@@ -286,5 +296,28 @@ sub flush_by_pattern_in_table {
         }
     }
 }
+
+sub quick_flush {} # No quick flush
+
+# Mysql isn't fast at regexps, so avoid using it when finding pages that does
+# not have a subsite. Flushing those will be handled by a flush_by_pattern
+# call later.
+
+sub find_related {
+    my ($this, $uri) = @_;
     
+    my $obvius = $this->{obvius};
+
+    my $hostmap = Obvius::Hostmap->new_with_obvius($obvius);
+
+    my $host_prefix = $hostmap->find_host_prefix($uri);
+
+    if ($host_prefix) {
+	 return { command => 'clear_by_regexp', regexp => "^$host_prefix" } 
+    } else {
+	 return { command => 'clear_by_no_subsite' };
+    }
+}
+
+
 1;
