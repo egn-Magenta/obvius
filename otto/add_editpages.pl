@@ -32,6 +32,8 @@ $db{password} = $dbpasswd;
 
 die "Usage: add_editpages.pl <db name> <editpages file>\n" unless ($db{db} and $db{file});
 
+my $e_count = 1;
+
 ##
 
 my $new_editpage = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db{db}",
@@ -134,6 +136,7 @@ sub copy_editpage {
 
         print " $doctype ($rec->{page}) - Copy of $source_doctype ($source_page)\n";
 
+	$new_editpage->{id} = $e_count++;
         $new_editpage->Insert($rec);
     } else {
         die "Couldn't find the page you wanted to copy: $copypage\n";
@@ -152,6 +155,7 @@ sub add_editpage {
 	}
     } keys %namemap;
 
+    $new_editpage->{id} = $e_count++;
     $new_editpage->Insert($editpage);
 }
 
