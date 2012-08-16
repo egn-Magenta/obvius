@@ -60,7 +60,7 @@ sub flush {
 	 $cache->quick_flush($obvius->modified);
 	 $cache->find_and_flush($obvius->modified);
     }
-
+    $req->content_type("text/plain");
     return (Apache2::Const::OK, "OK\n");
 }
 
