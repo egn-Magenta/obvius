@@ -13,9 +13,14 @@
 </table>
 
 <p>
-<img width="<% $vdoc->Width %>" height="<% $vdoc->Height %>" src="<% $linkuri %>"
- alt="Picture: <% $vdoc->field('short_title') %>" /><br />
+% if (!$vdoc->Width || !$vdoc->Height) {
+  <img src="<% $linkuri %>" alt="Picture: <% $vdoc->field('short_title') %>" /><br />
+%} else {
+  <img width="<% $vdoc->Width %>" height="<% $vdoc->Height %>" src="<% $linkuri %>"
+       alt="Picture: <% $vdoc->field('short_title') %>" /><br />
+%}
 </p>
+
 %
 % #####################
 %

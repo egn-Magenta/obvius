@@ -59,7 +59,9 @@ $site = shift @ARGV;
 # Load HTML processing plugin, if specified
 if ($html_processor) {
     require $html_processor;
+    set_roots($add_prefix, "$add_prefix/media_library") if ($add_prefix);
 }
+
 die "--path must begin with /\n" unless $add_prefix =~ /^\//;
 $add_prefix =~ s/\/$//;
 if ( $remove_prefix) {
@@ -268,7 +270,6 @@ if ( scalar keys %unresolved_links) {
 	}
 
 	$dbset-> Disconnect;
-	
 }
 
 # Clear caches
@@ -690,10 +691,10 @@ sub unurlify
 
 	unless ( $final) {
 		$path =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
-		$path = $add_prefix . '/' . $path;
+		$path = $add_prefix . '/' . $path if ( $path !~ /^\Q$add_prefix\E/ );
 		$path =~ s|/+|/|g;
 	} else {
-		return "/$path.docid" if $path =~ /^\/?\d+$/; # avoid double lookup
+		return "/$1.docid" if $path =~ /^\/?(\d+)$/; # avoid double lookup
 	}
 
 	if ( my $d = $obvius->lookup_document($path)) {
@@ -823,7 +824,7 @@ sub place_file_in_upload {
 sub create_missing_paths {
     my ($uri) = @_;
     
-    die "Missing path parts for uri $uri" unless($interactive);
+    die "Missing path parts for uri $uri" unless($auto_create_paths || $interactive);
 
     my @parts = grep {$_} split(m!/!, $uri);
     my $sofar = "/";
