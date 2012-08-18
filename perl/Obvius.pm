@@ -891,16 +891,18 @@ sub search {
     } else {
         # If we're not searching for public documents, we want to get either
         # the public version if it exists or the latest version if it doesn't.
-        # To do this we join the versions table to the query and used MAX
-        # and SUM functions in a having clause to figure out which versions we
-        # want:
-
-        push(@table, "versions as otherversions");
-        push(@join, "versions.docid = otherversions.docid");
-        push(@fields, "SUM(otherversions.public) as has_public_version");
-        push(@fields, "MAX(otherversions.version) as latest_version");
-
-        $having .= "(versions.public=1 OR (has_public_version = 0 and latest_version = versions.version))";
+	push(@where, "versions.version=(
+	    SELECT
+		v.version
+	    FROM
+		versions v
+	    WHERE
+		v.docid=versions.docid
+	    ORDER BY
+		v.public DESC,
+		v.version DESC
+	    LIMIT 1
+	)");
     }
 
     # Sorting:
