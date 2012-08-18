@@ -39,6 +39,7 @@ use Obvius::Data;
 
 use WebObvius;
 use WebObvius::Cache::Cache;
+use WebObvius::RequestTools;
 
 use Image::Size;
 use Data::Dumper;
@@ -349,6 +350,7 @@ sub create_input_object {
     $input->param(NOW=>$req->notes('now'));
     $input->param(THE_REQUEST=>$req->the_request);
     $input->param(REMOTE_IP=>$req->connection->remote_ip);
+    $input->param('OBVIUS_ORIGIN_IP' => get_origin_ip_from_request($req));
     $input->param(IS_ADMIN => (defined $options{is_admin} ? $options{is_admin} : 0));
     if (my $cookies=Apache::Cookie->fetch) {
         $cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
