@@ -18,7 +18,7 @@ begin
     if (a < 1) then
         CREATE TABLE apache_user_sessions (
             id CHAR(32) NOT NULL PRIMARY KEY,
-            a_session BLOB,
+            a_session MEDIUMBLOB,
             `timestamp` TIMESTAMP
         ) ENGINE=InnoDB;
     end if;
@@ -34,7 +34,7 @@ begin
     if (a < 1) then
         CREATE TABLE apache_edit_sessions (
             id CHAR(32) NOT NULL PRIMARY KEY,
-            a_session BLOB,
+            a_session MEDIUMBLOB,
             `timestamp` TIMESTAMP
         ) ENGINE=InnoDB;
     end if;
