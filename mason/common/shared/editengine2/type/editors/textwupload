@@ -35,7 +35,9 @@ $(function () {
 <textarea class="htmlContent" <% $disabled ? 'disabled="disabled" ' : '' %>
           cols="<% $cols |h %>" 
           rows="<% $rows |h %>" 
-          style="border-bottom: none; margin-bottom: 0px; border-left: solid; border-right:solid; border-top: solid; border-width: 1px; width: 100%;"
+          please="<% $field->{name} %>"
+          style="border-bottom: none; margin-bottom: 0px; border-left: solid;
+          border-right:solid; border-top: solid; border-width: 1px; <% $width_html %> <% $height_html %>"
           name="<% $prefix . $textarea_id |h %>"
           id="<% $textarea_id  |h %>"><% $value->{value} |h %>
 </textarea>
@@ -59,6 +61,21 @@ $rows
 <%init>
 my $resizer_id = $field->{name} . "_resizer";
 my $textarea_id = $field->{name};
+
+my $width_html = 'width: 100%;';
+my $height_html = '';
+
+
+my $overridden_width = $obvius->config->param($field->{name} . '_width');
+my $overridden_height = $obvius->config->param($field->{name} . '_height');
+
+if ( $overridden_width ) {
+    $width_html = 'width: ' . $overridden_width . 'px;';
+}
+if ( $overridden_height ) {
+    $height_html = 'height: ' . $overridden_height . 'px;';
+}
+
 </%init>
 %
 %
