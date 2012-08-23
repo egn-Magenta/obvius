@@ -1905,11 +1905,12 @@ sub quick_create_new_document {
     my($parent, $child, $errMsg, $doctype_obj);
 
     ###Check call-params
-    if ($uri_as_string =~ /^(\/[A-Za-z0-9\-\_\.]+)+$/) {
-	$child = $1;
-	my $parent_uri = $uri_as_string;
-	$parent_uri =~ s/$child$//;
-	$child =~ s/\///;
+    if ($uri_as_string =~ m!^[A-Za-z0-9\-\_\./]+$!) {
+        $uri_as_string =~ s!//!/!g;
+        $uri_as_string .= "/" unless($uri_as_string) =~ m!/$!;
+        my $parent_uri;
+        ($parent_uri, $child) = ($uri_as_string =~ m!^(.*/)([^/]+)/$!);
+        print STDERR Dumper([$parent_uri, $child]);
 	$parent = $this->lookup_document($parent_uri);
 	$errMsg .= "Could not find parent-document '$parent_uri'\n" if (! $parent);
     }
@@ -1961,8 +1962,12 @@ sub quick_create_new_document {
 	    my($usr_id) = $this->get_userid($this->user());
 	    my($grp_id) = defined($options{'group-id'}) ? $options{'group-id'} : 
 		$this->get_user_groups($usr_id)->[0];
+            use Data::Dumper;
+            print STDERR Dumper([$parent, $child, $doctype_obj->param('ID'), 'da', $docfields, $usr_id, $grp_id]);
 	    ($docid, $version) = $this->create_new_document($parent, $child, $doctype_obj->param('ID'), 
 						  'da', $docfields, $usr_id, $grp_id);
+
+            die "Document creation failed" unless($docid);
 
 	    if ($options{publish}) {
 		###Publish it
@@ -1973,7 +1978,7 @@ sub quick_create_new_document {
 	    }
 	};
 	if ( $@ ) {
-	  die "Error in quicke_create_new_document (when calling create_new_document)\n" . 
+	  die "Error in quick_create_new_document (when calling create_new_document)\n" . 
 	      "$@";  
 	} else {
 	    return ($docid, $version);
