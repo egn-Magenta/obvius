@@ -2766,7 +2766,7 @@ sub get_editpages {
 }
 
 sub send_mail {
-     my ($this, $to, $msg, $from) = @_;
+     my ($this, $to, $msg, $from, $subject) = @_;
      
      $from ||= 'noreply@adm.ku.dk';
 
@@ -2785,7 +2785,7 @@ sub send_mail {
  
      $smtp->mail($from) or return;
      $smtp->to($to) or return;
-     $smtp->data([$msg]) or return;
+     $smtp->data([$subject ? "Subject: $subject\n" : '', $msg]) or return;
      $smtp->quit or return;
 }
 
