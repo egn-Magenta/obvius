@@ -7,8 +7,10 @@ use Data::Dumper;
 use Obvius::Config;
 use Obvius;
 
+my $conf = Obvius::Config->new('ku');
+$conf->param('use_batch_db' => 1);
 my $obvius = Obvius->new(
-    Obvius::Config->new('ku'), # config
+    $conf, # config
     undef, #user
     undef, #password
     undef, #doctypes
