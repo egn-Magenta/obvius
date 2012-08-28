@@ -8,6 +8,7 @@ use JSON;
 use LWP::UserAgent;
 use Data::Dumper;
 use Encode;
+use Obvius::CharsetTools;
 
 our @methods = 
   ('path', 
@@ -194,8 +195,8 @@ sub search {
      
      my $res = $ua->post($url,
                     {
-                     fq => Encode::encode('UTF-8', $filter_query),
-                     q => Encode::encode('UTF-8', $query),
+                     fq => Obvius::CharsetTools::mixed2perl($filter_query),
+                     q => Obvius::CharsetTools::mixed2perl($query),
                      fl => "title,id,score,teaser,path,content,tags,docdate", 
                      sort => $sort,
                      wt => "json",
