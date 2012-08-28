@@ -171,7 +171,16 @@ sub connect {
     }
 
     my $config = $this->{OBVIUS_CONFIG};
-    my $db = new DBIx::Database( {'!DataSource' => $config->param('DSN'),
+    my $dsn = $config->param('DSN');
+
+    # Check for use of an alternative database server for batch jobs
+    if($config->param('use_batch_db')) {
+        if(my $batch_dsn = $config->param('batch_dsn')) {
+            $dsn = $batch_dsn;
+        }
+    }
+
+    my $db = new DBIx::Database( {'!DataSource' => $dsn,
                                   '!Username'   => $config->param('normal_db_login'),
                                   '!Password'   => $config->param('normal_db_passwd'),
                                   '!KeepOpen'   => 1,
