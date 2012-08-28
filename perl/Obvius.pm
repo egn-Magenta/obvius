@@ -2447,7 +2447,6 @@ sub publish_version {
 sub unpublish_version {
     my ($this, $vdoc) = @_;
 
-    print STDERR "Unpublishing version\n";
     croak "vdoc not an Obvius::Version\n"
         unless (ref $vdoc and $vdoc->UNIVERSAL::isa('Obvius::Version'));
 
