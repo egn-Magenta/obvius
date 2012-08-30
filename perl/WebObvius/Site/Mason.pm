@@ -47,6 +47,7 @@ use WebObvius::Template::Provider;
 use WebObvius::Cache::Cache;
 use WebObvius::RequestTools;
 use Encode;
+use Time::HiRes;
 
 use WebObvius::Apache
   Constants       => qw(:common :methods :response),
@@ -348,7 +349,10 @@ sub handler ($$) {
 
      my $obvius = $this->obvius_connect($req);
      $req->no_cache(1) if $obvius->{OBVIUS_CONFIG}{CACHE_OFF};     
-     
+
+     $req->pnotes('req_start_timestamp' => [Time::HiRes::gettimeofday])
+        if($obvius->config->param('time_debug_threshold'));
+
      my $is_admin = $this->param('is_admin');
      $req->notes(is_admin => $is_admin);
      
@@ -486,7 +490,18 @@ sub handler ($$) {
 
 sub execute_cache {     
      my ($obvius, $req, $data, $filename ) = @_;
-     
+
+     # Check if we have to do time debugging.
+     if(my $threshold = $obvius->config->param('time_debug_threshold')) {
+        if(my $start_time = $req->pnotes('req_start_timestamp')) {
+            my $end_time = [Time::HiRes::gettimeofday];
+            my $elapsed = Time::HiRes::tv_interval($start_time, $end_time);
+            if($elapsed * 1000 > $threshold) {
+                $obvius->log->warn("Slow request: " . $req->hostname . " " . $req->uri . " " . $elapsed);
+            }
+        }
+     }
+
      my $cache = WebObvius::Cache::Cache->new($obvius);
      if ($data) {
           my $new_data = ref $data ? $data : \$data;
