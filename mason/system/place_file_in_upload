@@ -1,10 +1,12 @@
 <%
-    encode_json({
+    to_json({
         status => ($error ? 'ERROR' : 'OK'),
-        uri => $result,
-        error => $error,
+        uri => mixed2perl($result),
+        error => mixed2perl($error),
         filename => $filename,
-        path => $path
+        path => mixed2perl($path)
+    }, {
+        ascii => 1
     })
 %>
 <%once>
@@ -12,6 +14,7 @@ use Obvius;
 use Obvius::Config;
 use JSON;
 use Digest::MD5 qw( md5_hex );
+use Obvius::CharsetTools qw(mixed2perl mixed2utf8 debugstr);
 
 # Same login implementation as in the RoR navigator
 sub check_login {
@@ -76,7 +79,7 @@ unless($error) {
 unless($error) {
     my $fh = $upload->fh;
     my $type = $upload->type;
-    $filename = $upload->filename;
+    $filename = mixed2perl($upload->filename);
 
     $result = $doctype->place_file_in_upload(
         $obvius,
@@ -88,5 +91,5 @@ unless($error) {
     $path =~ s!\Q$filename\E$!!;
 }
 
-$r->content_type('application/json');
+$r->content_type('application/json; charset=utf-8');
 </%init>
