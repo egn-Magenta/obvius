@@ -3,7 +3,7 @@
         status => ($error ? 'ERROR' : 'OK'),
         uri => mixed2perl($result),
         error => mixed2perl($error),
-        filename => $filename,
+        filename => mixed2perl($filename),
         path => mixed2perl($path)
     }, {
         ascii => 1
@@ -79,7 +79,7 @@ unless($error) {
 unless($error) {
     my $fh = $upload->fh;
     my $type = $upload->type;
-    $filename = mixed2perl($upload->filename);
+    $filename = mixed2utf8($upload->filename);
 
     $result = $doctype->place_file_in_upload(
         $obvius,
