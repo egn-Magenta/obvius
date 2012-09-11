@@ -31,6 +31,10 @@ $db{user} = $dbuser;
 $db{password} = $dbpasswd;
 
 die "Usage: add_doctypes.pl <db name> <doctype file>\n" unless ($db{db} and $db{file});
+my $dcount = 1;
+my $fscount = 1;
+
+
 
 ##
 
@@ -141,6 +145,8 @@ sub add_doctype {
 	$doctype->{parent}=0; # If no parent is given, use 0
     }
 
+    $doctype->{id} = $dcount++;
+
     $new_doctype->Insert($doctype);
 }
 
@@ -168,5 +174,8 @@ sub add_fieldspec {
 	    print STDERR " !!! Yikes, conflicting types for \"$fieldspec->{name}\" in doctypes no. $rec->{doctypeid} and $fieldspec->{doctypeid} - fix it!\n";
 	}
     }
+
+    $new_fieldspec->{id} = $fscount++;
+
     $new_fieldspec->Insert($fieldspec);
 }

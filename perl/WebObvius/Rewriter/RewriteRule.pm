@@ -33,6 +33,7 @@ our %EXPORT_TAGS = (
 sub new {
     my ($class, %args) = @_;;
     my %ref = (
+        is_admin_rewriter => 0,
         %args,
     );
     return bless(\%ref, $class);

@@ -11,7 +11,7 @@ print STDERR ">>> /new/comment\n";
 
 my $session;
 
-$session=$r->pnotes('site')->get_session();
+$session=$r->pnotes('site')->get_session(undef, $obvius);
 die "No session available - fatally wounded.\n" unless ($session);
 
 my %page=(

@@ -78,7 +78,7 @@ sub action {
     }
 
     # Do request:
-    my $response=make_request($fetch_url, $via, $input, $output);
+    my $response=make_request($fetch_url, $via, $input, $output, $obvius);
     unless ($response) {
         $output->param(error=>'Can not handle request');
         return OBVIUS_OK;
@@ -362,7 +362,7 @@ my %incoming_variables_prune=(
 #                response-object if successful, otherwise returns
 #                undef.
 sub make_request {
-    my ($url, $via, $input, $output)=@_;
+    my ($url, $via, $input, $output, $obvius)=@_;
 
     # Read headers from the hashref $input->param('OBVIUS_HEADERS_IN');
     my %headers_to_external_server=();
@@ -383,6 +383,18 @@ sub make_request {
                               );
 
     my %headers=map { $_=>$headers_to_external_server{$_} } keys %headers_to_external_server;
+
+    # Should we use a proxy?
+    if($obvius && $obvius->config->param('use_proxy')) {
+        if(my $no_proxy = $obvius->config->param('no_proxy')) {
+            $ua->no_proxy(split(/\s*,\s*/, $no_proxy));
+        }
+        for my $p qw(ftp http https) {
+            if(my $val = $obvius->config->param($p . '_proxy')) {
+                $ua->proxy($p, $val);
+            }
+        }
+    }
 
     # XXX Check ua->is_protocol_supported
 
