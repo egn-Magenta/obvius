@@ -1,38 +1,15 @@
-<%once>
-use File::Path;
-use Digest::MD5 qw(md5_hex);
-</%once>
+<% $value %>\
 <%args>
 $fh
 $type
 $filename
-</%args>
+</%args>\
 <%init>
-my $value;
-
-
-my $id = md5_hex($r->the_request);
-my $content_type = $type;
-$content_type = 'unknown/unknown' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
-
-my $docs_dir = $obvius->{OBVIUS_CONFIG}{DOCS_DIR};
-
-my $upload_dir = $docs_dir . "/upload/$content_type/";
-my $final_dir = substr($id, 0, 8);
-while ( -d $upload_dir . $final_dir) {
-     $final_dir = md5_hex(rand() . rand());
-};
-
-$upload_dir .= $final_dir;
-mkpath($upload_dir, 0, 0775) or die "Couldn't create dir: $upload_dir";
-$filename =~ s!^.*[/\\]([^/\\]+)$!$1!;
-
-local $/ = undef;
-open(FILE, '>', "$upload_dir/$filename");
-print FILE <$fh>;
-close(FILE);
-$value = "$upload_dir/$filename";
-$value =~ s!^$docs_dir!!;
-
+my $fileupload_doctype = $obvius->get_doctype_by_name('FileUpload');
+my $value = $fileupload_doctype->place_file_in_upload(
+     $obvius,
+     $fh,
+     $type,
+     $filename,
+);
 </%init>
-<% $value %>

@@ -38,7 +38,7 @@ our @ISA = qw( WebObvius );
 our $VERSION="1.0";
 
 use Apache::Session;
-use Apache::Session::File;
+use Apache::Session::MySQL;
 
 
 ########################################################################
@@ -50,7 +50,7 @@ use Apache::Session::File;
 sub prepare_edit {
     my ($this, $req, $doc, $vdoc, $doctype, $obvius) = @_;
 
-    my $session=$this->get_session();
+    my $session=$this->get_session(undef, $obvius);
     die "No session available - fatally wounded.\n" unless ($session);
 
     my $editpages=$obvius->get_editpages($doctype);
@@ -100,15 +100,27 @@ sub prepare_edit {
 #               new session is created and returned. Returns a
 #               hash-ref to the session on success and undef on
 #               failure.
+#		The $obvius argument is optional. If it is not provided
+#		a new database connection will be made.
 sub get_session {
-    my ($this, $id) = @_;
+    my ($this, $id, $obvius) = @_;
 
+    my %args = ( TableName => "apache_edit_sessions" );
+
+    if($obvius) {
+	$args{Handle} = $obvius->dbh;
+	$args{LockHandle} = $obvius->dbh;
+    } else {
+	# If an obvius object was not provided, create new connections
+	my $conf = $this->param('obvius_config');
+	$args{DataSource} = $args{LockDataSource} = $conf->param('dsn');
+	$args{UserName} = $args{LockUserName} = $conf->param('normal_db_login');
+	$args{Password} = $args{LockPassword} = $conf->param('normal_db_passwd');
+    }
+    
     my %session;
     eval {
-	tie %session, 'Apache::Session::File',
-	    $id, { Directory => $this->{EDIT_SESSIONS},
-		   LockDirectory => $this->{EDIT_SESSIONS} . '/LOCKS',
-		 };
+	tie %session, 'Apache::Session::MySQL', $id, \%args;
     };
     if ($@) {
 	warn "Can't get session data $id: $@\n\t";

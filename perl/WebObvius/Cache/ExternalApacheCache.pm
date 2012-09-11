@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use WebObvius::Cache::ApacheCache;
 use WebObvius::Cache::SOAPHelper;
 our @ISA = qw( WebObvius::Cache::ApacheCache );
 

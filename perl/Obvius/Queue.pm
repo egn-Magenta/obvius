@@ -121,9 +121,11 @@ sub store_order {
         my $date_part=$1;
         my $time_part=$2;
         $ENV{PATH}='';
-        system "/bin/echo '".
-            $obvius->config->param('obvius_dir') . "/bin/perform_order --site " .
-            $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
+        unless($obvius->config->param('use_cron_for_queue')) {
+            system "/bin/echo '".
+                $obvius->config->param('obvius_dir') . "/bin/perform_order --site " .
+                $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
+        }
 
         # Notice that we are returning this as a warning, because that
         # will have the side-effect that the command-component won't

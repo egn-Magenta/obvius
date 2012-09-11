@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Obvius::Config;
+use Obvius;
+my $timeout = 60*60;
+
+my $conf = Obvius::Config->new('ku');
+my $obvius = Obvius->new($conf);
+
+$obvius->execute_command("delete from login_sessions where last_access + ? < UNIX_TIMESTAMP() and not permanent", $timeout);
+
+my $sth1 = $obvius->dbh->prepare('delete from apache_edit_sessions where timestamp < DATE_SUB(NOW(), INTERVAL 2 HOUR)');
+$sth1->execute;
+
+my $sth2 = $obvius->dbh->prepare('delete from apache_user_sessions where timestamp < DATE_SUB(NOW(), INTERVAL 30 DAY)');
+$sth2->execute;

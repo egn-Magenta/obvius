@@ -3,6 +3,6 @@ $obvius_session_id=>undef
 </%args>
 %
 <%init>
-$r->pnotes('obvius_session'=>$r->pnotes('site')->get_session($obvius_session_id)) if (!$r->pnotes('obvius_session'));
+$r->pnotes('obvius_session'=>$r->pnotes('site')->get_session($obvius_session_id, $obvius)) if (!$r->pnotes('obvius_session'));
 return $r->pnotes('obvius_session')->{_session_id};
 </%init>

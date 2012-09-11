@@ -36,6 +36,9 @@
 %
 %
 %
+<%once>
+use WebObvius::Cache::MysqlAdminLeftmenuCache;
+</%once>
 <%method display_sub>\
 %
 <%args>
@@ -88,12 +91,7 @@ $base_vdoc
 </%args>
 %
 <%init>
-
-use Cache::FileCache;
-
-my $cache = Cache::FileCache->new({cache_root => $obvius->{OBVIUS_CONFIG}{FILECACHE_DIRECTORY},
-   	    			   namespace => 'subdocs'});
-				   
+my $cache = WebObvius::Cache::MysqlAdminLeftmenuCache->new($obvius);
 my $cache_key = $obvius->config->param('use_old_admin_subdocs_sort') ? ($base_doc->Id . "_" . $base_vdoc->Version) : $base_doc->Id;
 my $result = $cache->get( $cache_key );
 return $result if $result;
@@ -117,7 +115,7 @@ unless($obvius->config->param('use_old_admin_subdocs_sort')) {
 		     -1 : 1} @subs;
 }
 
-$cache->set( $cache_key, \@subs );
+$cache->save( $cache_key, \@subs );
 return \@subs;
 </%init>
 %

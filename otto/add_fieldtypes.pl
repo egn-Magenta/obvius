@@ -33,6 +33,8 @@ $db{password} = $dbpasswd;
 
 die "Usage: add_fieldtypes.pl <db name> <fieldtype file>\n" unless ($db{db} and $db{file});
 
+my $count = 1;
+
 ##
 
 my $new_fieldtype = DBIx::Recordset -> SetupObject ({'!DataSource' => "dbi:$db{db}",
@@ -94,6 +96,7 @@ sub add_fieldtype {
     my($new_fieldtype, $fieldtype)=@_;
 
     print " $fieldtype->{name}\n";
+    $fieldtype->{id} = $count++;
 
     $new_fieldtype->Insert($fieldtype);
 }
