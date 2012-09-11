@@ -1676,31 +1676,31 @@ sub read_doctypes_table {
         my $doctype;
         my $tester;
         my $ev_error='';
-        for (@types) {
-            #$this->log->debug("TESTING $_");
+        for my $t (@types) {
+            #$this->log->debug("TESTING $t");
 
             no strict 'refs';
-            $tester = "${_}::VERSION";
+            $tester = "${t}::VERSION";
             if (defined $$tester) {
-                #$this->log->debug("FOUND $_ SUCCESS");
-                $doctype = $_;
+                #$this->log->debug("FOUND $t SUCCESS");
+                $doctype = $t;
                 last;
             } else {
-                #$this->log->debug("LOADING $_");
+                #$this->log->debug("LOADING $t");
 
-                eval "use $_";
+                eval "use $t";
 #                $ev_error=$@;
 
                 if ( $@) {
                         # test if this is because a module cannot be found, or something more serious
-                        my $fn = $_;
+                        my $fn = $t;
                         $fn =~ s/::/\//g;
-                        croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/; #'
+                        croak "$t:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/; #'
                 }
 
                 if (defined $$tester) {
-                    #$this->log->debug("LOADING $_ SUCCESS");
-                    $doctype = $_;
+                    #$this->log->debug("LOADING $t SUCCESS");
+                    $doctype = $t;
                     last;
                 }
             }
