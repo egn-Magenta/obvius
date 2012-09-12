@@ -274,7 +274,7 @@ begin
 	fetch c2 into a;
 	
 	while not done do
-	   delete from internal_proxy_fields  where i.relation_id = a;
+	   delete i from internal_proxy_fields i where i.relation_id = a;
 	   delete i from internal_proxy_documents i where i.id = a;
 	   fetch c2 into a;
 	end while;
