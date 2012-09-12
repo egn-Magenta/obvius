@@ -384,18 +384,6 @@ sub make_request {
 
     my %headers=map { $_=>$headers_to_external_server{$_} } keys %headers_to_external_server;
 
-    # Should we use a proxy?
-    if($obvius && $obvius->config->param('use_proxy')) {
-        if(my $no_proxy = $obvius->config->param('no_proxy')) {
-            $ua->no_proxy(split(/\s*,\s*/, $no_proxy));
-        }
-        for my $p qw(ftp http https) {
-            if(my $val = $obvius->config->param($p . '_proxy')) {
-                $ua->proxy($p, $val);
-            }
-        }
-    }
-
     # XXX Check ua->is_protocol_supported
 
     my $response;
