@@ -2776,7 +2776,7 @@ sub get_editpages {
 }
 
 sub send_mail {
-     my ($this, $to, $msg, $from, $subject) = @_;
+     my ($this, $to, $msg, $from, $subject, %options) = @_;
      
      $from ||= 'noreply@adm.ku.dk';
 
@@ -2784,8 +2784,12 @@ sub send_mail {
 
      use Net::SMTP;
      my $mail_error;
+     my $mail_debug_level = 1;
+     $mail_debug_level = $options{mail_debug_level}
+	if(defined($options{mail_debug_level}));
      
-     my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => 1) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
+     my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => $mail_debug_level)
+	or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
      if ( $mail_error ) {
          use POSIX qw(strftime);
          my $today = strftime( "%Y-%m-%d %H:%M:%S", localtime );
