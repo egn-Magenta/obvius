@@ -1002,7 +1002,13 @@ sub search {
         $i++;
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
-   
+    
+    ### Eskild: Introduced option 'dont_replace_docid' to stop Obvius->search(...) from
+    ### converting 'docid' substrings in the SQL to 'versions.docid'.
+    ### This way you can for instance search for RIGHTBOXES in ('0:/11111.docid')
+    ### without getting the 'docid' substring screwed up.
+    delete $map{'docid'} if ( $options{'dont_replace_docid'} );
+
     push @table, "docid_path dp";
     push @join, "(dp.docid = versions.docid)";
     push @fields, "dp.path as path";
