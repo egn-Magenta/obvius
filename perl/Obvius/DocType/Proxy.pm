@@ -28,6 +28,7 @@ package Obvius::DocType::Proxy;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 use Obvius;
 use Obvius::DocType;
@@ -92,7 +93,7 @@ sub action {
         my ($encoding) = ($response->headers->header('content-type') =~ m!charset\s*=\s*([\w\d-]+)!);
         ($encoding) = ($response->content =~ m!charset\s*=\s*([\w\d-]+)!) unless($encoding);
         $encoding = 'iso-8859-1' unless($encoding and Encode::find_encoding($encoding));
-        
+
         # Now decode into perl's format and convert anything that is not supported to HTML entities
         $content = Encode::decode($encoding, $content, Encode::FB_HTMLCREF);
 
@@ -100,7 +101,7 @@ sub action {
         $content = Encode::encode("ascii", $content, Encode::FB_HTMLCREF);
 
         # Filter content
-        $content = filter_content($content, $fetch_url, $base_url, $prefixes);
+        $content = filter_content($content, $fetch_url, $base_url, $prefixes, $encoding);
 
         # Output should still be ascii with entities
         $output->param(proxy_content=>$content);
@@ -151,7 +152,7 @@ sub check_via_ok {
 #                  parser-object, also that is where state is kept
 #                  (whether inside body or not).
 sub filter_content {
-    my ($content, $fetch_url, $base_url, $prefixes)=@_;
+    my ($content, $fetch_url, $base_url, $prefixes, $encoding)=@_;
 
     my $parser=HTML::Parser->new(
                                  api_version=>3,
@@ -166,7 +167,7 @@ sub filter_content {
     $parser->{OBVIUS_FETCH_URL}=$fetch_url;
     $parser->{OBVIUS_BASE_URL}=$base_url;
     $parser->{OBVIUS_PREFIXES}=$prefixes;
-
+    $parser->{OBVIUS_URL_ENCODING}=$encoding;
     my $ret=$parser->parse($content);
     $parser->eof;
 
@@ -196,6 +197,21 @@ sub start_element {
     }
 
     return unless $self->{OBVIUS_IN_BODY};
+
+    if ( lc($tagname) eq 'form' ) {
+	if ( lc($self->{OBVIUS_URL_ENCODING}) eq 'iso-8859-1' ) {
+	    #### Setup ISO-8859-1 character set on appropriate form attributes
+	    push(@$attrseq, 'accept-charset') if (! exists($attr->{'accept-charset'}) );
+	    $attr->{'accept-charset'} = 'ISO-8859-1';
+	    if ( ! exists($attr->{'onsubmit'}) ) {
+		push(@$attrseq, 'onsubmit');
+		$attr->{'onsubmit'} = "document.charset = 'ISO-8859-1'";
+	    } else {
+		my $curJS = $attr->{'onsubmit'};
+		$attr->{'onsubmit'} = "var rEtUrNvAl = (function() {$curJS})(); document.charset = 'ISO-8859-1'; return rEtUrNvAl;";
+	    }
+	}
+    }
 
     $self->{OBVIUS_OUTPUT}.='<' . $tagname;
 
