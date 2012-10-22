@@ -10,7 +10,7 @@ my $timeout = 60*60;
 my $conf = Obvius::Config->new('ku');
 my $obvius = Obvius->new($conf);
 
-$obvius->execute_command("delete from login_sessions where last_access + ? < UNIX_TIMESTAMP() and not permanent", $timeout);
+#$obvius->execute_command("delete from login_sessions where last_access + ? < UNIX_TIMESTAMP() and not permanent", $timeout);
 
 my $sth1 = $obvius->dbh->prepare('delete from apache_edit_sessions where timestamp < DATE_SUB(NOW(), INTERVAL 2 HOUR)');
 $sth1->execute;
