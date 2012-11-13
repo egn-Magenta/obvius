@@ -10,6 +10,7 @@ use Digest::MD5 qw( md5_hex );
 use WebObvius::Cache::Cache;
 use Obvius::Hostmap;
 use File::Path;
+use Obvius::CharsetTools qw(mixed2utf8);
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -109,6 +110,9 @@ sub path_to_filename {
 
 sub place_file_in_upload {
     my ($this, $obvius, $fh, $type, $filename) = @_;
+
+    # Make sure that we always save utf8 file names
+    $filename = mixed2utf8($filename);
 
     my $id = md5_hex($filename);
     my $content_type = $type;
