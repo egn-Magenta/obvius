@@ -204,8 +204,9 @@ sub connect {
 
     $this->{DB} = $db;
     if ($config->{UTF8} || $config->param('utf8_db')) {
-         $this->execute_command("set names utf8");
-	 #$this->{DB}->{'*DBHdl'}->{mysql_enable_utf8} = 1;
+        $this->execute_command("set names utf8");
+        $this->{DB}->{'*DBHdl'}->{mysql_enable_utf8} = 1
+            if($config->param('perl_strings_from_mysql'));
     }
 
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
