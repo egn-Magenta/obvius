@@ -1,0 +1,30 @@
+<%doc>
+This component runs a background process that will update the SOLR index for
+a given number of docids.
+</%doc>
+<%args>
+$no_redirect=>undef
+$docids=>[]
+</%args>
+<%init>
+if($obvius->config->param('solr_servers')) {
+    my $confname = $obvius->config->param('name');
+    my $obvius_dir = $obvius->config->param('obvius_dir');
+    $docids = [ $doc->Id ] unless(@$docids);
+    my $docid_arg = join(" ", @$docids);
+    if($confname && $obvius_dir && $docid_arg) {
+        system("perl ${obvius_dir}/bin/update_solr_index.pl $confname $docid_arg >/dev/null &");
+        my $message = $m->scomp(
+            '/shared/trans',
+            da => "SOLR indeksering startet",
+            en => "SOLR indexing started"
+        );
+        unless($no_redirect) {
+            $m->comp('/shared/set_status_message', message=>$message);
+            my $session = $r->pnotes('obvius_session');
+            $m->comp('/shared/redirect/', location=>"./?obvius_session_id=" . $session->{_session_id});
+        }
+    }
+}
+return '';
+</%init>

@@ -195,6 +195,7 @@ else {
                                                args=>{ version=>$obvius_version, publish_fields=>$publish_fields_values },
                                                date=>$obvius_later_date,
                                               );
+    $m->comp('/action/update_solr_index', no_redirect=>1, docids=>[$doc->Id]);
     $m->comp('/shared/set_status_message', status=>$status, message=>$message);
     return ''; # Don't go anywhere else.
 }
