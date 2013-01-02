@@ -2393,6 +2393,9 @@ sub publish_version {
         }
 
         $this->{LOG}->info("====> Publishing version ... publish fields");
+        for my $n (@fields) {
+            $this->db_delete_vfield($vdoc->DocId, $vdoc->Version, $n);
+        }
         $this->db_insert_vfields($vdoc->DocId, $vdoc->Version, $vdoc->publish_fields, \@fields);
 
         $this->{LOG}->info("====> Publishing version ... COMMIT");
