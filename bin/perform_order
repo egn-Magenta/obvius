@@ -104,7 +104,7 @@ $obvius->{USER}=$user->{login};
 my ($status, $message)=$obvius->perform_order(%do_order);
 
 # Set status and message:
-#report_status_message($order, $status, $message);
+report_status_message($order, $status, $message);
 
 # Handle modified docs (cache):
 #$adminsite->handle_modified_docs_cache($obvius);
