@@ -3,7 +3,7 @@
 	$recursively=>0
 </%args>
 <%init>
-my @args = (docid => $doc->Id);
+my @args = (docid => $doc->Id, clear_cache_request => 1);
 push @args, (clear_recursively => 1) if ($recursively);
 $obvius->register_modified(@args);
 $obvius->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
