@@ -153,6 +153,10 @@ sub copy_file_to_cache {
 
     my ($can_cache, $qstring) = $this->can_request_use_cache_p($req);
     return if !$can_cache;
+
+    # Make cache filename unique by source path instead of version, so
+    # we don't copy the same file to two cache-locations.
+    $req->notes('obvius_cache_extra' => $source_path);
     
     my ($fp, $fn) = $this->find_cache_filename($req, $filename);
     my $local_dir = $fp . $fn;
