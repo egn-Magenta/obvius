@@ -5,6 +5,9 @@
 <input type="hidden" name="obvius_upload_<% $field->{name} %>_old_value" value="<% $value->{value} |h %>" />
 <input type="checkbox" name="obvius_upload_<% $field->{name} %>_delete" /> <& /shared/msg, text=>'Delete' &>
 %}
+%if($field->{options} && $field->{options}->{get_image_dimensions_from_upload}) {
+<input type="hidden" name="obvius_upload_<% $field->{name} %>_get_image_dimensions" value="1" />
+%}
 <br />
 <input type="file" size="60" name="<% $prefix . $field->{name} |h %>" id="<% $prefix . $field->{name} |h %>" tabindex="10" />
 <%args>
@@ -37,6 +40,7 @@ $validation
 </%args>
 %
 <%once>
+use Image::Magick;
 my %check_extension_types = map { $_ => 1 } qw(
     application/octet-stream
     application/x-zip-compressed
@@ -84,6 +88,23 @@ if ($upload) {
 			    fh => $fh, type => $mimetype, 
 			    filename => $upload->filename);
         $new_upload = 1;
+	if($r->param('obvius_upload_' . $id . '_get_image_dimensions')) {
+	    eval {
+		my $full_path =
+		    $obvius->config->param('docs_dir') . '/' . $value;
+		$full_path =~ s!/+!/!g;
+		my $img = new Image::Magick();
+		$img->Read($full_path);
+		if(my $width = $img->Get('width')) {
+		    $data->{width} = $width;
+		}
+		if(my $height = $img->Get('height')) {
+		    $data->{height} = $height;
+		}
+		undef($img);
+	    };
+	    warn "ImageMagick problem: $@" if($@);
+	}
     }
 }
 if(! $new_upload) {
