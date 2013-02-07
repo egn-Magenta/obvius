@@ -221,6 +221,8 @@ sub handle_submitted {
     }
 
     my ($entry_nr, $entry_id, $fields, $count) = @data;
+    ### #6601: Saving $entry_nr for use in mason components
+    $output->param('form_entry_nr', $entry_nr);
 
     for my $field (values %$formspec) {
         my $val = $fields->{$field->{name}};
@@ -382,7 +384,7 @@ return (1, $entry_id, $entry_nr, \%fields, $count);
 
 sub validate_full_entry {
     my ($input, $formspec, $docid, $obvius) = @_;
-    
+
     my @invalid_upload_fields;
     my %input = ref $input ne 'HASH' && $input->UNIVERSAL::can('param') ? 
                 map { $_ => mixed2perl($input->param($_)) } keys %$formspec : %$input;  
