@@ -75,13 +75,40 @@ sub send_order {
 sub perform_order {
     my ($obvius, %info)=@_;
 
-    my $order_method='perform_command_' . $info{command};
-
-    if ($obvius->can($order_method)) {
-        return $obvius->$order_method(%info);
-    }
+    if ( $info{command} =~ /^SPECIAL:\s+([a-zA-Z][a-zA-Z0-9_]*(::[a-zA-Z][a-zA-Z0-9_]*)*)$/ ) {
+	##### Specific module - instantiate and call method from args on it
+	my $module = $1;
+	my $file = $module . '.pm';
+	$file =~ s|::|/|g;
+	
+	eval {
+	    require "$file";
+	};
+	if ( $@ ) {
+	    return ('ERROR', [ 'Unknown cmd-module', ' "', "$module", '" system-err (', $!, ')' ]);
+	}
+	else {
+	    my $method = $info{args}->{method};
+	    my $cmdobj = new $module();
+	    
+	    if ( $cmdobj->can($method) ) {
+		return $cmdobj->$method($obvius, $info{docid}, \%info);
+	    } 
+	    else {
+		return ('ERROR', [ 'Unknown command', ' "', "$module->$method", '"' ]);
+	    }
+	}
+    } 
     else {
-        return ('ERROR', [ 'Unknown command', ' "', $info{command}, '"' ]);
+        ##### Old fashion command - do as always
+	my $order_method='perform_command_' . $info{command};
+	
+	if ($obvius->can($order_method)) {
+	    return $obvius->$order_method(%info);
+	}
+	else {
+	    return ('ERROR', [ 'Unknown command', ' "', $info{command}, '"' ]);
+	}
     }
 }
 
