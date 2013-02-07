@@ -369,7 +369,10 @@ sub handler ($$) {
      
      return FORBIDDEN if (!$is_admin && ($vdoc->Expires lt $req->notes('now')));
      return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
-     
+
+     # Make the cache system generate filenames from the version by default
+     $req->notes('obvius_cache_extra' => $vdoc->param('Version'));
+
      my $doctype = $obvius->get_version_type($vdoc);
      
      my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
