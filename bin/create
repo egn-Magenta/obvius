@@ -221,12 +221,18 @@ if(scalar(@$bin_fieldtypes)) {
 }
 
 say "reading...\n";
-my $data = XMLin( 
+my $data = '';
+eval {
+    $data = XMLin( 
 	$ARGV[0], 
 	keyattr		=> [], 
 	suppressempty	=> '', 
-	forcearray	=> \@repeatable_fields
-);
+	forcearray	=> \@repeatable_fields);
+};
+if ( $@ ) {
+    print "XML Parser ERROR: $@";
+    exit 1;
+}
 
 
 say "converting from utf8...\n";
@@ -694,7 +700,9 @@ sub unurlify
 		$path = $add_prefix . '/' . $path if ( $path !~ /^\Q$add_prefix\E/ );
 		$path =~ s|/+|/|g;
 	} else {
-		return "/$1.docid" if $path =~ /^\/?(\d+)$/; # avoid double lookup
+		if($path =~ /^\/?(\d+)$/) { # avoid double lookup
+		    return "/$1.docid"
+		}
 	}
 
 	if ( my $d = $obvius->lookup_document($path)) {
