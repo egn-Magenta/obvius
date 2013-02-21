@@ -180,12 +180,14 @@ for ( @columns) {
 		my $f = $filter;
 		$f =~ s[(')][$1']g;
 		$f =~ s[\\][\\\\]g;
+                $f = db_charset($f);
 		$options->{where} = "$_->{name} like '%$f%'";
 	} elsif ($_-> {filter} =~ m!^sql:(.*)!s) {
 	    my $sql = $1;
 	    my $quoted = $filter;
 	    $quoted =~ s!\\!\\\\!g;
 	    $quoted =~ s!'!\'!g;
+            $quoted = db_charset($quoted);
 	    $sql =~ s!#FILTER_VALUE#!$quoted!gs;
 	    my $fieldref = $storage->param('source') . "." . $_->{name};
 	    $sql =~ s!#FIELD_VALUE#!$fieldref!gs;
@@ -319,4 +321,16 @@ return unless (scalar(keys %parameters));
 </%doc>
 <%once>
 use POSIX qw(ceil);
+use Obvius::CharsetTools qw(mixed2perl mixed2utf8);
+sub db_charset {
+    if(
+        $obvius->config->param('utf8')
+        and not
+        $obvius->dbh->{mysql_enable_utf8}
+    ) {
+        return mixed2utf8(shift);
+    } else {
+        return mixed2perl(shift);
+    }
+}
 </%once>
