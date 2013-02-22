@@ -18,9 +18,6 @@ GetOptions("doctypes=s" => \$doctypes_file,
 	   "password=s" => \$passwd
     );
 
-$login = 'admin';
-$passwd = 'OCms4KU!test';
-
 (scalar @ARGV) == 1 or usage();
 
 my $site = $ARGV[0];
