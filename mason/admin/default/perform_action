@@ -37,8 +37,16 @@ if ($obvius_perform_do) {
     else {
 	$m->comp('perform_action_local', %ARGS);
 	my $redirect_to = $r->notes('obvius_redirect_to');
-	my $joiner=($redirect_to=~/[?]/ ? '&' : '?');
-	$m->comp('/shared/redirect', location=>$redirect_to . $joiner . 'obvius_session_id=' . $session->{_session_id});
+        if($r->notes('suppress_session_on_redirect')) {
+            $m->comp('/shared/redirect',location => $redirect_to);
+        } else {
+            my $joiner=($redirect_to=~/[?]/ ? '&' : '?');
+            $m->comp(
+                '/shared/redirect',
+                location => $redirect_to . $joiner .
+                    'obvius_session_id=' . $session->{_session_id}
+            );
+        }
     }
 }
 
