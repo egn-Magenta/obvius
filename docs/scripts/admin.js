@@ -275,5 +275,5 @@ function start_ror_navigator(url, path, fallback_uri, field_name) {
         path = escape(path);
         url += "&path=" + path;
     }
-    return window.open(url, 'navigator','resizable=1,width=800,height=500');
+    return window.open(url, 'navigator','resizable=1,width=1150,height=500');
 }
