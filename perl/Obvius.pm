@@ -2361,7 +2361,10 @@ sub publish_version {
     
     my $doctype = $this->get_doctype_by_id($vdoc->Type);
     $tags_related ||= $doctype && $doctype->Name eq 'TagCloud';
-    
+
+    my $previous_public = $this->get_public_version(
+	$this->get_doc_by_id($vdoc->Docid)
+    );
 
     $this->db_begin;
     eval {
@@ -2414,7 +2417,11 @@ sub publish_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done"); 
-    $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => $related);
+    $this->register_modified(
+	docid=>$vdoc->Docid,
+	clear_leftmenu => $related,
+	clear_recursively => $previous_public ? 0 : 1
+    );
     $this->register_modified(clear_tags => 1) if $tags_related;
 
     if ($related) {
@@ -2498,7 +2505,11 @@ sub unpublish_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Unpublishing version ... done");
-    $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => 1);
+    $this->register_modified(
+	docid=>$vdoc->Docid,
+	clear_leftmenu => 1,
+	clear_recursively => 1 # Hiding a document affects all subdocuments
+    );
     my $doc = $this->get_doc_by_id($vdoc->Docid);
     $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
     $this->register_modified(clear_tags => 1) if is_relevant_for_tags_on_unpublish($this, $vdoc);

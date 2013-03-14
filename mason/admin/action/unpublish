@@ -45,6 +45,13 @@ my ($status, $message)=$obvius->send_order(
                                            args=>{ version=>$obvius_version },
                                            date=>$obvius_later_date,
                                           );
+
+if($status eq 'OK') {
+    if($m->comp_exists('/events/unpublish')) {
+        $m->comp('/events/unpublish', %ARGS);
+    }
+}
+
 $m->comp('/shared/set_status_message', status=>$status, message=>$message);
 
 return ''; # Don't go anywhere special.
