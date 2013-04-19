@@ -2827,29 +2827,52 @@ sub send_mail {
 sub find_closest_subsite {
      my ($this, $doc) = @_;
 
+     my %subsite_data;
+
      return $doc->{_cached_closest_subsite} if 
        (ref $doc && $doc->{_cached_closest_subsite});
 
      my $uri = $this->get_doc_uri($doc);
-     my @uris;
-     
-     while ($uri) {
-          push @uris, $uri;
-          $uri =~ s/[^\/]*\/$//; 
-     }
+     my $subsite_doc;
 
-     my $question_marks = join ", ", (("?") x @uris);
-     my $query = "select d.*, dp.path path
+     if ( $this->config->param('new_subsite_interface') ) {
+	 my $query = "SELECT * FROM subsites WHERE INSTR(?, path) = 1 " .
+	     "ORDER BY path DESC LIMIT 1";
+	 my $res = $this->execute_select($query, $uri);
+	 if ( ref($res) && $#$res > -1 ) {
+	     %subsite_data = %{$res->[0]};
+	     $subsite_doc = $this->lookup_document($subsite_data{path});
+	 }
+     } else {
+	 my @uris;
+	 
+	 while ($uri) {
+	     push @uris, $uri;
+	     $uri =~ s/[^\/]*\/$//; 
+	 }
+	 
+	 my $question_marks = join ", ", (("?") x @uris);
+	 my $query = "select d.*, dp.path path
                   from docparms dpa join docid_path dp using (docid) join documents d on 
                   (dp.docid = d.id) where  dp.path in ($question_marks) and 
-                  dpa.name = 'is_subsite' and dpa.value = '1' order by length(dp.path) desc limit 1";
-     my $res = $this->execute_select($query, @uris);
+                  dpa.name = 'is_subsite' and dpa.value = '1' 
+                  order by length(dp.path) desc limit 1";
+	 my $res = $this->execute_select($query, @uris);
      
-     return undef if !@$res;
-     
-     my $subsite = Obvius::Document->new($res->[0]);
-     $doc->{_cached_closest_subsite} = $subsite if ref $doc;
-     return $subsite;
+	 $subsite_doc = Obvius::Document->new($res->[0]) if ( ref($res) && $#$res > -1) ;
+     }
+
+     if ( $subsite_doc ) {
+	 my $docparams = $this->get_docparams($subsite_doc );
+	 foreach my $key ( $docparams->param() ) {
+	     my $val = $docparams->param($key);
+	     $val = $val->Value() if ($val);
+	     $subsite_data{lc($key)} = $val;
+	 }
+	 $subsite_doc->param('subsite_info' => \%subsite_data);
+     }
+     $doc->{_cached_closest_subsite} = $subsite_doc if ref $doc;
+     return $subsite_doc;
 }
 
 sub shorten_url {
@@ -2874,13 +2897,13 @@ sub get_lang_base {
      my ($this, $lang, $doc) = @_;
 
      my $subsite_doc = $this->find_closest_subsite($doc);
-     my $docparams = $this->get_docparams($subsite_doc);
+     return undef unless ($subsite_doc);
 
-     my $key = uc "${lang}_base";
+     my $docparams = $subsite_doc->param('subsite_info') || {};
+
+     my $key = lc "${lang}_base";
      my $base =  $docparams->{$key};
      return undef if !$base;
-
-     $base = $base->Value;
 
      my $subsite_path = $this->get_doc_uri($subsite_doc);
 
@@ -2897,6 +2920,8 @@ sub get_lang_uri {
      my ($this, $lang, $doc) = @_;
      
      my $subsite_doc = $this->find_closest_subsite($doc);
+     return undef unless ($subsite_doc);
+
      my $path = $this->get_doc_uri($doc);
 
      my $subsite_path = $this->get_doc_uri($subsite_doc);
@@ -2921,7 +2946,7 @@ sub alternative_langs {
      
      my $subsite_doc = $this->find_closest_subsite($doc);
      return [] if !$subsite_doc;
-     my $docparams = $this->get_docparams($subsite_doc);
+     my $docparams = $subsite_doc->param('subsite_info') || {};
      my @langs;
 
      for my $param (keys %$docparams) {
