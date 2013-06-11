@@ -180,12 +180,14 @@ for ( @columns) {
 		my $f = $filter;
 		$f =~ s[(')][$1']g;
 		$f =~ s[\\][\\\\]g;
+                $f = $obvius->to_db_charset($f);
 		$options->{where} = "$_->{name} like '%$f%'";
 	} elsif ($_-> {filter} =~ m!^sql:(.*)!s) {
 	    my $sql = $1;
 	    my $quoted = $filter;
 	    $quoted =~ s!\\!\\\\!g;
 	    $quoted =~ s!'!\'!g;
+            $quoted = $obvius->to_db_charset($quoted);
 	    $sql =~ s!#FILTER_VALUE#!$quoted!gs;
 	    my $fieldref = $storage->param('source') . "." . $_->{name};
 	    $sql =~ s!#FIELD_VALUE#!$fieldref!gs;
