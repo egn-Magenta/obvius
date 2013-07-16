@@ -31,6 +31,7 @@ package Obvius::Version;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 use Obvius::Data;
 use WebObvius::InternalProxy;
@@ -78,6 +79,42 @@ sub real_doctype {
      } else {
 	  return $obvius->get_doctype_by_id($this->Type);
      }
+}
+
+####################################################
+######## Export to SOLR
+####################################################
+sub export_to_solr {
+    my($self, $obvius, $doc) =  @_;
+
+    #### Get version fields, document and doctype
+    $obvius->get_version_fields($self, 256);
+    $doc = ($doc && ref($doc) eq 'Obvius::Document' ? $doc : 
+	    $obvius->get_doc_by_id($self->DocId));
+    my $doctype = $obvius->get_document_type($doc);
+
+    #### Build specification hash
+    my $fieldsmap = $doctype->get_solr_fields($obvius);
+    my $specs = {};
+    foreach my $key ( keys(%$fieldsmap) ) {
+	my $entry = $fieldsmap->{$key};
+	$key =~ s/^\*+|\*+$//g;
+	my $conv = $entry->[2];
+	my $value;
+	if ( $entry->[0] eq 'd' ) {
+	    $value = $doc->$key;
+	} elsif ( $entry->[0] eq 'v' ) {
+	    $value = $self->$key;
+	} elsif ( $entry->[0] eq 'f' ) {
+	    $value = $self->field($key);
+	}
+	if ( (!ref($value) && $value) || (ref($value) eq 'ARRAY' && $#$value > -1) ) {
+	    $specs->{$entry->[1]} = $conv ? $conv->($value) : $value;
+	}
+    }
+
+    #### Do SOLR index update/create
+    print STDERR Dumper($specs);
 }
      
 

@@ -123,7 +123,58 @@ sub view {
      return $view;
 }
      
+########################################################################
+### Methods regarding SOLR usage
+########################################################################
+
+########################################################################
+# get_solr_fields
+# RETURN: A hash-reference where keys are obvius field-names
+#         and values are array refs, where:
+#         Element 1 (required) = 'f' (VFIELDS fieldname) OR 
+#                                'd' (dokument fieldname) OR
+#                                'v' (version fieldname)
+#         Element 2 (required) = SOLR fieldname
+#         Element 3 (optional) = CODE reference to subroutine that transforms fieldvalue
+#                                indicated by key to value to use for SOLR field.
+#                                The subroutine must take one argument (the value) and
+#                                return one value.
+#                                If not specified, then no tranformation is used - i.e
+#                                the field-value is used unmodified
+########################################################################
+sub get_solr_fields  {
+    my($self, $obvius) = @_;
+    ### Standard fields exported to SOLR
+    my $fieldmap = {
+	'Id'             => ['d', 'id'],
+	'published'      => ['f', 'published'],
+	'docdate'        => ['f', 'docdate'],
+	'content'        => ['f', 'content'],
+	'teaser'         => ['f', 'teaser'],
+	'Path'           => ['d', 'path'],
+	'title'          => ['f', 'title'],
+	'tags'           => ['f', 'tags'],
+	'Lang'           => ['v', 'lang'],
+	'Type'           => ['v', 'type', sub { my $doct = $obvius->{DOCTYPES}->[shift @_];
+						return $doct ? $doct->Name(): '' }],
+    };
+    return $fieldmap;
+}
      
+########################################################################
+### Should be used by subclasses to insert entries in solr fields hashref
+########################################################################
+sub set_solr_field {
+    my($self, $fieldhash, $key, $spec) = @_;
+    if ( $fieldhash && $key && $spec ) {
+	if ( exists $fieldhash->{$key} ) {
+	    $fieldhash->{'*' . $key . '*'} = $spec;
+	} else {
+	    $fieldhash->{$key} = $spec;
+	}
+    }
+}
+
 # action - the action method in the document type is called by Obvius
 #          when a document perform its function. Obvius provides data
 #          for the document type to use on the input-object and the
