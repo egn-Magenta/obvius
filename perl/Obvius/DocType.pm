@@ -37,6 +37,7 @@ use warnings;
 use Obvius;
 use Obvius::Data;
 use Data::Dumper;
+use Obvius::SolrConvRoutines;
 
 #     The object contains two instances of Obvius::Data. Both contain
 #     fields associated with the object:
@@ -141,19 +142,23 @@ sub view {
 #                                return one value.
 #                                If not specified, then no tranformation is used - i.e
 #                                the field-value is used unmodified
+#         Element 4 (optional) = Source of alternative value which is used if elem1 and 2 yields an empty value
+#                                'f' (VFIELDS fieldname) OR 
+#                                'd' (dokument fieldname) OR
+#                                'v' (version fieldname)
+#         Element 5 (optional) = Alternative SOLR fieldname
 ########################################################################
 sub get_solr_fields  {
     my($self, $obvius) = @_;
     ### Standard fields exported to SOLR
     my $fieldmap = {
 	'Id'             => ['d', 'id'],
-	'published'      => ['f', 'published'],
-	'docdate'        => ['f', 'docdate'],
-	'content'        => ['f', 'content'],
-	'teaser'         => ['f', 'teaser'],
+	'published'      => ['f', 'published', \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
+	'docdate'        => ['f', 'docdate',   \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
+	'content'        => ['f', 'content', \&Obvius::SolrConvRoutines::toUTF8],
+	'teaser'         => ['f', 'teaser', \&Obvius::SolrConvRoutines::toUTF8],
 	'Path'           => ['d', 'path'],
-	'title'          => ['f', 'title'],
-	'tags'           => ['f', 'tags'],
+	'title'          => ['f', 'title', \&Obvius::SolrConvRoutines::toUTF8],
 	'Lang'           => ['v', 'lang'],
 	'Type'           => ['v', 'type', sub { my $doct = $obvius->{DOCTYPES}->[shift @_];
 						return $doct ? $doct->Name(): '' }],

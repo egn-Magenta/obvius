@@ -111,9 +111,32 @@ sub export_to_solr {
 	if ( (!ref($value) && $value) || (ref($value) eq 'ARRAY' && $#$value > -1) ) {
 	    $specs->{$entry->[1]} = $conv ? $conv->($value) : $value;
 	}
+	else {
+	    #### Check for alternative CMS value and use it if so
+	    if ( $key = $entry->[4] ) {
+		if ( $entry->[3] eq 'd' ) {
+		    $value = $doc->$key;
+		} elsif ( $entry->[3] eq 'v' ) {
+		    $value = $self->$key;
+		} elsif ( $entry->[3] eq 'f' ) {
+		    $value = $self->field($key);
+		}
+		if ( (!ref($value) && $value) || (ref($value) eq 'ARRAY' && $#$value > -1) ) {
+		    $specs->{$entry->[1]} = $conv ? $conv->($value) : $value;
+		}
+	    }
+	}
     }
 
     #### Do SOLR index update/create
+    print STDERR Dumper($specs);
+    return $specs;
+}
+
+sub delete_from_solr {
+    my($self, $obvius, $doc) =  @_;
+
+    my $specs = { 'id' => $self->DocId };
     print STDERR Dumper($specs);
 }
      

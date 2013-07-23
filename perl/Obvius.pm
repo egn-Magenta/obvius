@@ -329,6 +329,16 @@ sub lookup_document {
     return @$paths ? Obvius::Document->new($paths->[0]) : undef;
 }
 
+sub lookup_document_by_id {
+    my ($this, $docid) = @_;
+
+    return undef if ( $docid !~ /^\d+$/ );
+    my $elems = $this->execute_select("select d.*, dp.path path from docid_path dp join  
+                                       documents d on (dp.docid = d.id) where 
+                                       d.id = ?", $docid);
+    return @$elems ? Obvius::Document->new($elems->[0]) : undef;
+}
+
 # Overveje at tilføje stiens id'er til Obvius::Document når de alligevel slås op hér
 # (så er get_doc_path triviel):
 #
