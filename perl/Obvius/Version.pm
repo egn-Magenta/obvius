@@ -128,8 +128,6 @@ sub export_to_solr {
 	}
     }
 
-    #### Do SOLR index update/create
-    print STDERR Dumper($specs);
     return $specs;
 }
 

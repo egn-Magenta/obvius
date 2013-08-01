@@ -7,6 +7,7 @@ use Obvius::CharsetTools qw(mixed2utf8);
 use DateTime;
 use DateTime::TimeZone;
 my $local_tz = new DateTime::TimeZone(name => 'local');
+my $utc_tz = new DateTime::TimeZone(name => 'UTC');
 
 ###############################################################################
 ###### This module contains routines, which can be used when mapping CMS field
@@ -33,6 +34,23 @@ sub toUTCDateTime {
 	return $dt->iso8601 . "Z";
     } else {
 	return $cmsval;
+    }
+}
+
+sub fromUTCDateTime {
+    my($utcval) = @_;
+
+
+    if ( my($Y, $M, $D, $h, $m, $s) = $utcval =~ /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/ ) {
+	my $dt = new DateTime(year => $Y, month => $M, day => $D, hour => $h,
+			      minute => $m, second => $s, time_zone => $utc_tz);
+	# Make it local
+	$dt->set_time_zone('local');
+	my $cmsval = $dt;
+	$cmsval =~ s/[TZ]/ /g;
+	return $cmsval;
+    } else {
+	return $utcval;
     }
 }
 
