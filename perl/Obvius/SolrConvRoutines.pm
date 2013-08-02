@@ -61,6 +61,17 @@ sub toUTF8 {
     return $cmsval;
 }
 
+sub multipath2Id {
+    my($cmsval) = @_;
+    return [ map { 
+	if (/^\d+\.\/(\d+)\.docid$/) {
+	    $1;
+	} elsif (/^(\d+)$/) {
+	    $1;
+	}
+	     } @$cmsval ];
+}
+
 #####
 # Std. return value
 #####
