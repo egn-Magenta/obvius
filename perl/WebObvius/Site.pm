@@ -71,8 +71,56 @@ sub new
 	
         $self-> {LANGUAGE_PREFERENCES} = [];
         $self-> load_translation_fileset();
-	
+
+        $self->setup_special_handlers();
+
         return $self;
+}
+
+sub setup_special_handlers {
+    my $self = shift;
+    my $conf = $self->param('obvius_config');
+    return unless($conf);
+
+    my $specials = $conf->param('special_handler_map') || '';
+
+    return unless($specials and $specials =~ m!=!);
+
+    my %map;
+    for my $setup (split(/\s*,\s*/, $specials)) {
+        $setup =~ s!^\s+!!; $setup =~ s!\s+$!!;
+        if(my @parts = split(/\s*=>\s*/, $setup)) {
+            my ($key, $value) = @parts;
+            $map{$key} = $value;
+        }
+    }
+    
+    return unless(%map);
+
+    my $urlmatch = join("|", sort { length($b) <=> length($a) } keys %map);
+
+    $self->{_special_handler_match} = qr/^($urlmatch)/;
+    $self->{_special_handler_map} = \%map;
+}
+
+sub get_special_handler {
+    my ($this, $req) = @_;
+
+    my $special_handler = $req->pnotes('special_handler');
+    return $special_handler if(defined($special_handler));
+
+    my $special_regexp = $this->{_special_handler_match};
+    my $uri = $req->notes('uri') || $req->uri;
+
+    if($special_regexp && $uri =~ m!$special_regexp!) {
+        $special_handler = $this->{_special_handler_map}->{$1}->new();
+    } else {
+        $special_handler = 0;
+    }
+
+    $req->pnotes('special_handler' => $special_handler);
+
+    return $special_handler;
 }
 
 
@@ -353,7 +401,10 @@ sub create_input_object {
     $input->param('OBVIUS_ORIGIN_IP' => get_origin_ip_from_request($req));
     $input->param(IS_ADMIN => (defined $options{is_admin} ? $options{is_admin} : 0));
     if (my $cookies=Apache::Cookie->fetch) {
-        $cookies={ map { $_=>$cookies->{$_}->value } keys %{Apache::Cookie->fetch} };
+        $cookies={ map {
+            my $v = $cookies->{$_}->value || undef;
+            $_ => $v;
+        } keys %{Apache::Cookie->fetch} };
         $input->param('OBVIUS_COOKIES'=>$cookies);
     }
     $input->param('OBVIUS_HEADERS_IN'=> scalar( $req->headers_in() ));
@@ -470,7 +521,17 @@ sub generate_page {
         $benchmark-> lap( "operation " . $doctype->Name) if $benchmark;
 
         my $input=$this->create_input_object($req, obvius_object => $obvius, %options);
+
+        my $special_handler = $this->get_special_handler($req);
+        if($special_handler) {
+            $special_handler->before_handle_operation($input, $output);
+        }
+
         my $status = $site->handle_operation($input, $output, $doc, $vdoc, $doctype, $obvius);
+
+        if($special_handler) {
+            $special_handler->after_handle_operation();
+        }
 
         my $outgoing_cookies=$output->param('OBVIUS_COOKIES') || {};
         foreach my $k (keys %$outgoing_cookies) {
@@ -606,6 +667,12 @@ sub handler ($$) {
     return FORBIDDEN unless ($vdoc);
 
     my $doctype = $obvius->get_version_type($vdoc);
+
+    my $special_handler = $this->get_special_handler($req);
+    if($special_handler) {
+        my $res = $special_handler->apache_handler($req, $obvius, $doc, $vdoc);
+        return $res if(defined($res));
+    }
 
     if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius)) {
         return NOT_FOUND if (Apache->define('NOREDIR'));
