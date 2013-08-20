@@ -1860,4 +1860,25 @@
   </text>
   <!-- Form doctype end -->
 
+  <!-- Copy function addendums in realtion to ticket 7511_2 -->
+  <text key="Failed to copy document to destination, document may only contain alpanumeric characters, dot(.), dash(-), and underscore(_).">
+    <translation lang="en">Failed to copy document to destination, document may only contain alpanumeric characters, dot(.), dash(-), and underscore(_).</translation>
+    <translation lang="da">Kopieringen af dokumentet fejlede: Dokument-stien må kun indeholde tal (0-9), bogstaver (a-z), punktum (.), bindestreg (-) og understreg (_)</translation>
+  </text>
+  
+  <text key="The page">
+    <translation lang="en">The page</translation>
+    <translation lang="da">Siden</translation>
+  </text>
+
+  <text key="has been copied successfully to">
+    <translation lang="en">has been copied successfully to</translation>
+    <translation lang="da">er kopieret til placeringen</translation>
+  </text>
+
+  <text key="(and all its subdocuments) has been copied successfully to">
+    <translation lang="en">(and all its subdocuments) has been copied successfully to</translation>
+    <translation lang="da">(og alle dens undersider) er kopieret til placeringen</translation>
+  </text>
+  
 </messages>

@@ -295,13 +295,11 @@ sub _copy_documents_recursive {
     }
     my $dest_uri=$obvius->get_doc_uri($new_dest_doc);
     #                                                                           XXX Prefix?
-    if ( $follow_copy ) {
-	return ('OK', [$count, ' documents copied to ', $dest_uri, ' from ', 
-		       '<a href="' . $obvius->get_doc_uri($source_doc) . '">' . 
-		       $obvius->get_doc_uri($source_doc) . '</a>'], $count);
-    } else {
-	return ('OK', [$count, ' ', 'documents copied from', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', " <a href=\"/admin$dest_uri\">$dest_uri</a>"], $count);
-    }
+    my $source_vdoc=$obvius->get_public_version($source_doc) || $obvius->get_latest_version($source_doc);
+    $obvius->get_version_fields($source_vdoc, ['title']);
+    return('OK', ['The page', ' "' . $source_vdoc->field('title') . '" ', 
+		  '(and all its subdocuments) has been copied successfully to', 
+		  " <a href=\"/admin$dest_uri\">$dest_uri</a> "], $count);
 }
 
 sub _copy_single_document {
@@ -323,14 +321,16 @@ sub _copy_single_document {
         my $new_doc=$obvius->get_doc_by_id($new_docid);
         my $dest_uri=$obvius->get_doc_uri($new_doc);
         #                                                                           XXX Prefix?
-	if ( $follow_copy ) {
-	    return('OK', [$dest_uri, ' copied successfully from ', '<a href="' . $obvius->get_doc_uri($source_doc) . '">' . $obvius->get_doc_uri($source_doc) . '</a>'], $new_doc);
-	} else {
-	    return('OK', ['Copy of ', $obvius->get_doc_uri($source_doc), ' to ', " <a href=\"/admin$dest_uri\">$dest_uri</a> ", ' succeeded'], $new_doc);
-	}
+        return('OK', ['The page', ' "' . $source_vdoc->field('title') . '" ', 
+		      'has been copied successfully to', 
+		      " <a href=\"/admin$dest_uri\">$dest_uri</a> "], $new_doc);
     }
     else {
-        return('ERROR', ['Copy of', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', ' ', $obvius->get_doc_uri($dest_doc) . $new_doc_name . '/', ' ', 'failed.']);
+        return('ERROR', ['Copy of', 
+			 ' ' . $obvius->get_doc_uri($source_doc) . ' ', 
+			 'to', 
+			 ' ' . $obvius->get_doc_uri($dest_doc) . $new_doc_name . '/ ', 
+			 'failed']);
      }
 }
 
