@@ -16,18 +16,22 @@
 <b>Advarsel</b><br />
 F&oslash;lgende filer fra zipfilen blev ikke uploadet:<br />
 
+<table>
 %   foreach ( keys %files )
 %   {
+      <tr>
 %     my $file = $files{$_};
-%     if ( defined( $file->{error} ) ) {                                                                                                                                                            
-<% $_ %><br />
-
-
-%     }                                                                                                                                                            
+%     if ( defined( $file->{error} ) ) {                                                                    
+%       my $txt = $file->{text} || undef;
+        <td><% $_ %></td><td><% $txt ? "($txt)" : "" %></td>
+%     }
+      </tr>
 %   }
+</table>
 <br /><br />Det kan skyldes at:<br />
 - Filen har et ugyldigt filnavn<br />
 - Zipfilen indeholder flere mapper, og filnavnet allerede findes<br />
+- At filerne har et ukendt ZIP komprimerings-format<br/>
 </p>
 % }           
 
@@ -95,14 +99,20 @@ if ( $r->param( "import_files_do" ) )
 		    
 		    if ( ! defined( $files{$file} ))
 		    {
-		      $zipFile->extractMemberWithoutPaths( $member->fileName, "$zip_path/$file" );
-		      if ( ! $m->comp('import_files:do', source=>"$zip_path/$file", dest_url=>$dest_url) )
-		      {
-		        $info{error} = 1;
-			$error = 1;
+		      if ( $zipFile->extractMemberWithoutPaths( $member->fileName, 
+								"$zip_path/$file") != AZ_OK )  {
+			  $info{error} = 1;
+			  $info{text} = 'Error returned from Archive::Zip->extractMemberWithoutPaths (see log file)';
+			  $error = 1;
+		      }
+		      else {
+			  if ( ! $m->comp('import_files:do', source=>"$zip_path/$file", dest_url=>$dest_url) )
+			  {
+			      $info{error} = 1;
+			      $error = 1;
+			  }
 		      }
 		      $files{$file} = \%info;
-
 		    }
 		    else
 		    {
@@ -115,10 +125,7 @@ if ( $r->param( "import_files_do" ) )
 
 	    }
 	}
-
-}
-
-
+    }
 }
 
 </%init>
