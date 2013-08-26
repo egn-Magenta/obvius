@@ -1,0 +1,15 @@
+%unless($r->notes('jquery_ui_css_loaded')) {
+<script type="text/javascript"><!--
+$(function() {
+    var url = 'http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css';
+    var loaded = false;
+    $("head link").each(function() {
+        if($(this).attr("href") == url)
+            loaded = true;
+    })
+    if(!loaded)
+        $("head").append('<link href="' + url + '" rel="stylesheet" type="text/css" media="screen" />');
+});
+--></script>
+%   $r->notes('jquery_ui_css_loaded' => 1)
+%}

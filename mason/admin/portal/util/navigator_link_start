@@ -38,14 +38,21 @@ if ($path) {
 </%init>
 </%method>
 <%method onclick>\
-javascript: return start_ror_navigator("<% $url %>", "<% $ARGS{path} %>",\
+javascript: return start_ror_navigator("<% $url %>", "<% $usepath %>",\
                                        "<% $uri %>", "<% $ARGS{fieldname} %>");\
 <%init>
 my $url = $m->scomp('navigator_link_start:href', %ARGS);
 $url =~ s/\s//g;
 $url =~ s!&path=[^&]*!!;
+
+my $usepath = $ARGS{path};
+$usepath = $doc->Path if ( !defined($usepath) ||  $usepath eq '');
 </%init>
 <%filter>
 $_ = HTML::Entities::encode($_);
 </%filter>
 </%method>
+
+<%once>
+use Data::Dumper;
+</%once>

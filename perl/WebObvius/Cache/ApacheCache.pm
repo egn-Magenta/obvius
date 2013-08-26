@@ -100,7 +100,8 @@ sub find_cache_filename {
     $ct =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|;
     my $lang_array = $req->content_languages();
     my $lang = scalar @$lang_array ? $lang_array->[0] : 'da';
-    my $code = md5_hex($req->hostname . ':' . $req->the_request);
+    my $extra = $req->notes('obvius_cache_extra') || '';
+    my $code = md5_hex($req->hostname . ':' . $req->the_request . $extra);
     $code .= "_$filename"  if $filename;
     return ((join '/', ($ct, $lang)) . '/', $code);
 }
@@ -163,6 +164,10 @@ sub copy_file_to_cache {
     my ($this, $req, $source_path, $filename) = @_;
 
     return if !$this->can_request_use_cache_p($req);
+
+    # Make cache filename unique by source path instead of version, so
+    # we don't copy the same file to two cache-locations.
+    $req->notes('obvius_cache_extra' => $source_path);
     
     my ($fp, $fn) = $this->find_cache_filename($req, $filename);
     my $local_dir = $fp . $fn;

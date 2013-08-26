@@ -97,8 +97,18 @@ sub mixed2utf8 {
 
 sub mixed2perl {
     my ($txt) = shift;
+    
+    # TODO: Ref. ticket #6000. This function used to work as a destroyer of
+    # references. Any array exposed to the encode/decode mechanism will be 
+    # reduced to a string representation of the reference pointer.
+    # For now, just ignore references, but ideally recurse through them and
+    # convert.
 
-    return Encode::decode("utf8", mixed2utf8($txt));
+    if (ref $txt) {
+        return $txt;
+    } else {
+        return Encode::decode("utf8", mixed2utf8($txt));
+    }
 }
 
 sub mixed2charset {

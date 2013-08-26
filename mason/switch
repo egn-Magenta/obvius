@@ -118,7 +118,7 @@ if (defined $obvius_page and $obvius_page eq 'abort') {
     }
 } elsif ($obvius_session) {
     my $admin=$r->pnotes('site');
-    $session=$admin->get_session($obvius_session);
+    $session=$admin->get_session($obvius_session, $obvius);
 
     my $validate_comp=$session->{validate_comp} || '/edit/validate/page';
     $invalid=$m->comp($validate_comp, %ARGS, session=>$session);

@@ -7,7 +7,17 @@ use Data::Dumper;
 use Obvius::Config;
 use Obvius;
 
-my $obvius = Obvius->new(Obvius::Config->new('ku'));
+my $conf = Obvius::Config->new('ku');
+$conf->param('use_batch_db' => 1);
+my $obvius = Obvius->new(
+    $conf, # config
+    undef, #user
+    undef, #password
+    undef, #doctypes
+    undef, #fieldtypes
+    undef, #fieldspecs
+    log => new Obvius::Log("warn")
+);
 my @fields = ("rightboxes", "boxes1", "boxes2", "boxes3");
 my @entities = ({ name => "Calendar",
 		  table => "calendars",

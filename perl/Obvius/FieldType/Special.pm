@@ -61,6 +61,7 @@ sub copy_out {
     my ($this, $obvius, $fspec, $value) = @_;
 
     if ($this->{VALIDATE_ARGS} eq 'DocumentPathCheck') {
+        return undef if(!defined($value) || $value eq '');
         if (my $doc=$obvius->lookup_document($value)) {
             return $doc->Id;
         } else {

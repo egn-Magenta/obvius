@@ -205,6 +205,21 @@ CREATE TABLE votes (
   PRIMARY KEY  (docid,answer)
 ) TYPE=MyISAM PACK_KEYS=1;
 
+DROP TABLE IF EXISTS `apache_user_sessions`;
+CREATE TABLE `apache_user_sessions` (
+  `id` char(32) NOT NULL,
+  `a_session` blob,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `apache_edit_sessions`;
+CREATE TABLE `apache_edit_sessions` (
+  `id` char(32) NOT NULL,
+  `a_session` blob,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
 
 #
 # Default data:

@@ -171,7 +171,16 @@ sub connect {
     }
 
     my $config = $this->{OBVIUS_CONFIG};
-    my $db = new DBIx::Database( {'!DataSource' => $config->param('DSN'),
+    my $dsn = $config->param('DSN');
+
+    # Check for use of an alternative database server for batch jobs
+    if($config->param('use_batch_db')) {
+        if(my $batch_dsn = $config->param('batch_dsn')) {
+            $dsn = $batch_dsn;
+        }
+    }
+
+    my $db = new DBIx::Database( {'!DataSource' => $dsn,
                                   '!Username'   => $config->param('normal_db_login'),
                                   '!Password'   => $config->param('normal_db_passwd'),
                                   '!KeepOpen'   => 1,
@@ -195,8 +204,9 @@ sub connect {
 
     $this->{DB} = $db;
     if ($config->{UTF8} || $config->param('utf8_db')) {
-         $this->execute_command("set names utf8");
-	 #$this->{DB}->{'*DBHdl'}->{mysql_enable_utf8} = 1;
+        $this->execute_command("set names utf8");
+        $this->{DB}->{'*DBHdl'}->{mysql_enable_utf8} = 1
+            if($config->param('perl_strings_from_mysql'));
     }
 
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
@@ -891,16 +901,18 @@ sub search {
     } else {
         # If we're not searching for public documents, we want to get either
         # the public version if it exists or the latest version if it doesn't.
-        # To do this we join the versions table to the query and used MAX
-        # and SUM functions in a having clause to figure out which versions we
-        # want:
-
-        push(@table, "versions as otherversions");
-        push(@join, "versions.docid = otherversions.docid");
-        push(@fields, "SUM(otherversions.public) as has_public_version");
-        push(@fields, "MAX(otherversions.version) as latest_version");
-
-        $having .= "(versions.public=1 OR (has_public_version = 0 and latest_version = versions.version))";
+	push(@where, "versions.version=(
+	    SELECT
+		v.version
+	    FROM
+		versions v
+	    WHERE
+		v.docid=versions.docid
+	    ORDER BY
+		v.public DESC,
+		v.version DESC
+	    LIMIT 1
+	)");
     }
 
     # Sorting:
@@ -991,7 +1003,13 @@ sub search {
         $i++;
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
-   
+    
+    ### Eskild: Introduced option 'dont_replace_docid' to stop Obvius->search(...) from
+    ### converting 'docid' substrings in the SQL to 'versions.docid'.
+    ### This way you can for instance search for RIGHTBOXES in ('0:/11111.docid')
+    ### without getting the 'docid' substring screwed up.
+    delete $map{'docid'} if ( $options{'dont_replace_docid'} );
+
     push @table, "docid_path dp";
     push @join, "(dp.docid = versions.docid)";
     push @fields, "dp.path as path";
@@ -1665,31 +1683,31 @@ sub read_doctypes_table {
         my $doctype;
         my $tester;
         my $ev_error='';
-        for (@types) {
-            #$this->log->debug("TESTING $_");
+        for my $t (@types) {
+            #$this->log->debug("TESTING $t");
 
             no strict 'refs';
-            $tester = "${_}::VERSION";
+            $tester = "${t}::VERSION";
             if (defined $$tester) {
-                #$this->log->debug("FOUND $_ SUCCESS");
-                $doctype = $_;
+                #$this->log->debug("FOUND $t SUCCESS");
+                $doctype = $t;
                 last;
             } else {
-                #$this->log->debug("LOADING $_");
+                #$this->log->debug("LOADING $t");
 
-                eval "use $_";
+                eval "use $t";
 #                $ev_error=$@;
 
                 if ( $@) {
                         # test if this is because a module cannot be found, or something more serious
-                        my $fn = $_;
+                        my $fn = $t;
                         $fn =~ s/::/\//g;
-                        croak "$_:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/; #'
+                        croak "$t:$@" if $@ !~ /^Can't locate $fn.pm in \@INC/; #'
                 }
 
                 if (defined $$tester) {
-                    #$this->log->debug("LOADING $_ SUCCESS");
-                    $doctype = $_;
+                    #$this->log->debug("LOADING $t SUCCESS");
+                    $doctype = $t;
                     last;
                 }
             }
@@ -1877,6 +1895,111 @@ sub read_type_info {
     #print STDERR Dumper($this->{DOCTYPES}) if ($this->{DEBUG});
 }
 
+
+
+########################################################################
+#
+#       Basic quick-creation of a new document or a new version.
+#       The document is created for the current user and by default for the first
+#       of the groups that this user belongs to.
+#
+# ARG1: $uri_as_string (String-path for new non-existing document)
+# ARG2: $doctype_obj   (an Obvius::DocType object)           |
+#       $doctype_name  (a string containing name of doctype) |
+#       $doctype_id    (the database id of the doctype)
+# ARG3: $fields        (a hash-ref containing fields and their values)
+# ARG4: $publish       (0 | 1 for immediate publishing)
+# ARG4: %options       (options supplied as a hash with marker-keys)
+#       Currently supported is:
+#           'publish'  : [0|1] if set then publish the document after creating
+#           'group-id' : [group-id] Use this as group for the document
+#
+# Returns: The same as sub create_new_document returns - i.e 2-piece array with:
+#          1) Document-id and 2) version-id
+#
+########################################################################
+sub quick_create_new_document {
+    my($this, $uri_as_string, $doctype, $fields, %options) = @_;
+    my($parent, $child, $errMsg, $doctype_obj);
+
+    ###Check call-params
+    if ($uri_as_string =~ m!^[A-Za-z0-9\-\_\./]+$!) {
+        $uri_as_string =~ s!//!/!g;
+        $uri_as_string .= "/" unless($uri_as_string) =~ m!/$!;
+        my $parent_uri;
+        ($parent_uri, $child) = ($uri_as_string =~ m!^(.*/)([^/]+)/$!);
+	$parent = $this->lookup_document($parent_uri);
+	$errMsg .= "Could not find parent-document '$parent_uri'\n" if (! $parent);
+    }
+    else {
+	$errMsg .= "Illegal 'uri_as_string' argument (val = '$uri_as_string')\n";
+    }
+
+    if ( $this->lookup_document($uri_as_string) ) {
+	$errMsg .= "Document '$uri_as_string' already exists\n";
+    }
+
+    if ( ref($doctype) eq 'Obvius::DocType') {
+	$doctype_obj = $doctype;
+    }
+    elsif ( $doctype =~ /^\d+$/ && $doctype > 0 ) {
+	$doctype_obj = $this->get_doctype_by_id($doctype);
+	$errMsg .= "Could not find doctype-by-id '$doctype'\n" if (! $doctype_obj);
+    }
+    elsif ( $doctype ) {
+	$doctype_obj = $this->get_doctype_by_name($doctype);
+	$errMsg .= "Could not find doctype-by-name '$doctype'\n" if (! $doctype_obj);
+    }
+    else {
+        $errMsg .= "Illegal 'doctype' argument (val = '$doctype')\n";
+    }
+
+    if ( $errMsg ) {
+	die "Error in quick_create_new_document\n" . $errMsg;
+    }
+    else {
+	my ($docid, $version);
+	my $docfields = Obvius::Data->new();
+
+	 # Default values
+	for(keys %{$doctype_obj->{FIELDS}}) {
+	    my $default_value = $doctype_obj->{FIELDS}->{$_}->{DEFAULT_VALUE};
+	    $docfields->param($_ => $default_value)  if(defined($default_value));
+	}
+
+	# Passed on fields
+	for(keys %$fields) {
+	    $docfields->param($_, $fields->{$_});
+	}
+
+	# Software defaults
+	$docfields->param('docdate', strftime('%Y-%m-%d 00:00:00', localtime));
+
+	eval {
+	    my($usr_id) = $this->get_userid($this->user());
+	    my($grp_id) = defined($options{'group-id'}) ? $options{'group-id'} : 
+		$this->get_user_groups($usr_id)->[0];
+	    ($docid, $version) = $this->create_new_document($parent, $child, $doctype_obj->param('ID'), 
+						  'da', $docfields, $usr_id, $grp_id);
+
+            die "Document creation failed" unless($docid);
+
+	    if ($options{publish}) {
+		###Publish it
+		my($vdoc) = $this->get_version($this->get_doc_by_id($docid), $version);
+		$this->get_version_fields($vdoc, 255, 'PUBLISH_FIELDS');
+		$vdoc->publish_fields()->param(PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
+		$this->publish_version($vdoc, sub {die "Could not publish the document";});
+	    }
+	};
+	if ( $@ ) {
+	  die "Error in quick_create_new_document (when calling create_new_document)\n" . 
+	      "$@";  
+	} else {
+	    return ($docid, $version);
+	}
+    }
+}
 
 
 ########################################################################
@@ -2238,7 +2361,10 @@ sub publish_version {
     
     my $doctype = $this->get_doctype_by_id($vdoc->Type);
     $tags_related ||= $doctype && $doctype->Name eq 'TagCloud';
-    
+
+    my $previous_public = $this->get_public_version(
+	$this->get_doc_by_id($vdoc->Docid)
+    );
 
     $this->db_begin;
     eval {
@@ -2270,6 +2396,9 @@ sub publish_version {
         }
 
         $this->{LOG}->info("====> Publishing version ... publish fields");
+        for my $n (@fields) {
+            $this->db_delete_vfield($vdoc->DocId, $vdoc->Version, $n);
+        }
         $this->db_insert_vfields($vdoc->DocId, $vdoc->Version, $vdoc->publish_fields, \@fields);
 
         $this->{LOG}->info("====> Publishing version ... COMMIT");
@@ -2288,7 +2417,11 @@ sub publish_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Publishing version ... done"); 
-    $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => $related);
+    $this->register_modified(
+	docid=>$vdoc->Docid,
+	clear_leftmenu => $related,
+	clear_recursively => $previous_public ? 0 : 1
+    );
     $this->register_modified(clear_tags => 1) if $tags_related;
 
     if ($related) {
@@ -2331,7 +2464,6 @@ sub publish_version {
 sub unpublish_version {
     my ($this, $vdoc) = @_;
 
-    print STDERR "Unpublishing version\n";
     croak "vdoc not an Obvius::Version\n"
         unless (ref $vdoc and $vdoc->UNIVERSAL::isa('Obvius::Version'));
 
@@ -2373,7 +2505,11 @@ sub unpublish_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Unpublishing version ... done");
-    $this->register_modified(docid=>$vdoc->Docid, clear_leftmenu => 1);
+    $this->register_modified(
+	docid=>$vdoc->Docid,
+	clear_leftmenu => 1,
+	clear_recursively => 1 # Hiding a document affects all subdocuments
+    );
     my $doc = $this->get_doc_by_id($vdoc->Docid);
     $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent]);
     $this->register_modified(clear_tags => 1) if is_relevant_for_tags_on_unpublish($this, $vdoc);
@@ -2661,7 +2797,7 @@ sub get_editpages {
 }
 
 sub send_mail {
-     my ($this, $to, $msg, $from) = @_;
+     my ($this, $to, $msg, $from, $subject, %options) = @_;
      
      $from ||= 'noreply@adm.ku.dk';
 
@@ -2669,8 +2805,12 @@ sub send_mail {
 
      use Net::SMTP;
      my $mail_error;
+     my $mail_debug_level = 1;
+     $mail_debug_level = $options{mail_debug_level}
+	if(defined($options{mail_debug_level}));
      
-     my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => 1) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
+     my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => $mail_debug_level)
+	or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
      if ( $mail_error ) {
          use POSIX qw(strftime);
          my $today = strftime( "%Y-%m-%d %H:%M:%S", localtime );
@@ -2680,7 +2820,7 @@ sub send_mail {
  
      $smtp->mail($from) or return;
      $smtp->to($to) or return;
-     $smtp->data([$msg]) or return;
+     $smtp->data([$subject ? "Subject: $subject\n" : '', $msg]) or return;
      $smtp->quit or return;
 }
 

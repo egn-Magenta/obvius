@@ -60,7 +60,7 @@ $r->notes('obvius_newsboxes_updated'=>1);
 # If there is a message, create a session, put it there, and redirect:
 if ($output->param('message') or $output->param('status')) {
     # Create session:
-    my $session=$r->pnotes('site')->get_session();
+    my $session=$r->pnotes('site')->get_session(undef, $obvius);
     $r->pnotes('obvius_session'=>$session);
     $m->comp('/shared/set_status_message',
              status=>$output->param('status') || 'OK',

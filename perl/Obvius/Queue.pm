@@ -75,13 +75,40 @@ sub send_order {
 sub perform_order {
     my ($obvius, %info)=@_;
 
-    my $order_method='perform_command_' . $info{command};
-
-    if ($obvius->can($order_method)) {
-        return $obvius->$order_method(%info);
-    }
+    if ( $info{command} =~ /^SPECIAL:\s+([a-zA-Z][a-zA-Z0-9_]*(::[a-zA-Z][a-zA-Z0-9_]*)*)$/ ) {
+	##### Specific module - instantiate and call method from args on it
+	my $module = $1;
+	my $file = $module . '.pm';
+	$file =~ s|::|/|g;
+	
+	eval {
+	    require "$file";
+	};
+	if ( $@ ) {
+	    return ('ERROR', [ 'Unknown cmd-module', ' "', "$module", '" system-err (', $!, ')' ]);
+	}
+	else {
+	    my $method = $info{args}->{method};
+	    my $cmdobj = new $module();
+	    
+	    if ( $cmdobj->can($method) ) {
+		return $cmdobj->$method($obvius, $info{docid}, \%info);
+	    } 
+	    else {
+		return ('ERROR', [ 'Unknown command', ' "', "$module->$method", '"' ]);
+	    }
+	}
+    } 
     else {
-        return ('ERROR', [ 'Unknown command', ' "', $info{command}, '"' ]);
+        ##### Old fashion command - do as always
+	my $order_method='perform_command_' . $info{command};
+	
+	if ($obvius->can($order_method)) {
+	    return $obvius->$order_method(%info);
+	}
+	else {
+	    return ('ERROR', [ 'Unknown command', ' "', $info{command}, '"' ]);
+	}
     }
 }
 
@@ -121,9 +148,11 @@ sub store_order {
         my $date_part=$1;
         my $time_part=$2;
         $ENV{PATH}='';
-        system "/bin/echo '".
-            $obvius->config->param('obvius_dir') . "/bin/perform_order --site " .
-            $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
+        unless($obvius->config->param('use_cron_for_queue')) {
+            system "/bin/echo '".
+                $obvius->config->param('obvius_dir') . "/bin/perform_order --site " .
+                $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
+        }
 
         # Notice that we are returning this as a warning, because that
         # will have the side-effect that the command-component won't
@@ -249,16 +278,16 @@ sub perform_command_delete {
 }
 
 sub _copy_documents_recursive {
-    my ($obvius, $source_doc, $dest_doc, $new_doc_name)=@_;
+    my ($obvius, $source_doc, $dest_doc, $new_doc_name, $follow_copy)=@_;
 
     my $count=0;
-    my ($result, $message, $new_dest_doc)=_copy_single_document($obvius, $source_doc, $dest_doc, $new_doc_name);
+    my ($result, $message, $new_dest_doc)=_copy_single_document($obvius, $source_doc, $dest_doc, $new_doc_name, $follow_copy);
     return ($result, $message, $count) if ($result ne 'OK');
     $count++;
 
     my $subdocs=$obvius->get_docs_by_parent($source_doc->Id) || [];
     foreach my $subdoc (@$subdocs) {
-        my ($result, $message, $subcount)=_copy_documents_recursive($obvius, $subdoc, $new_dest_doc);
+        my ($result, $message, $subcount)=_copy_documents_recursive($obvius, $subdoc, $new_dest_doc, $subdoc->Name, $follow_copy);
         $count+=$subcount;
         if ($result ne 'OK') {
             return ($result, $message, $count);
@@ -266,11 +295,17 @@ sub _copy_documents_recursive {
     }
     my $dest_uri=$obvius->get_doc_uri($new_dest_doc);
     #                                                                           XXX Prefix?
-    return ('OK', [$count, ' ', 'documents copied from', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', " <a href=\"/admin$dest_uri\">$dest_uri</a>"], $count);
+    if ( $follow_copy ) {
+	return ('OK', [$count, ' documents copied to ', $dest_uri, ' from ', 
+		       '<a href="' . $obvius->get_doc_uri($source_doc) . '">' . 
+		       $obvius->get_doc_uri($source_doc) . '</a>'], $count);
+    } else {
+	return ('OK', [$count, ' ', 'documents copied from', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', " <a href=\"/admin$dest_uri\">$dest_uri</a>"], $count);
+    }
 }
 
 sub _copy_single_document {
-    my ($obvius, $source_doc, $dest_doc, $new_doc_name) = @_;
+    my ($obvius, $source_doc, $dest_doc, $new_doc_name, $follow_copy) = @_;
     $new_doc_name ||= $source_doc->Name;
 
     my $source_vdoc=$obvius->get_public_version($source_doc) ||
@@ -288,7 +323,11 @@ sub _copy_single_document {
         my $new_doc=$obvius->get_doc_by_id($new_docid);
         my $dest_uri=$obvius->get_doc_uri($new_doc);
         #                                                                           XXX Prefix?
-        return('OK', ['Copy of', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', " <a href=\"/admin$dest_uri\">$dest_uri</a> ", 'succeeded'], $new_doc);
+	if ( $follow_copy ) {
+	    return('OK', [$dest_uri, ' copied successfully from ', '<a href="' . $obvius->get_doc_uri($source_doc) . '">' . $obvius->get_doc_uri($source_doc) . '</a>'], $new_doc);
+	} else {
+	    return('OK', ['Copy of ', $obvius->get_doc_uri($source_doc), ' to ', " <a href=\"/admin$dest_uri\">$dest_uri</a> ", ' succeeded'], $new_doc);
+	}
     }
     else {
         return('ERROR', ['Copy of', ' ', $obvius->get_doc_uri($source_doc), ' ', 'to', ' ', $obvius->get_doc_uri($dest_doc) . $new_doc_name . '/', ' ', 'failed.']);
@@ -311,11 +350,12 @@ sub perform_command_copy {
     if ($info{args}->{recursive}) {
         return ('ERROR', ['Can not recursively copy a document underneath itself']) if ($obvius->is_doc_below_doc($destdoc, $doc) or $destdoc->Id eq $doc->Id);
 
-        my ($status, $message)=_copy_documents_recursive($obvius, $doc, $destdoc, $dest_name);
+        my ($status, $message)=_copy_documents_recursive($obvius, $doc, $destdoc, $dest_name, $info{args}->{follow_copy});
         return ($status, $message);
     }
     else {
-        my @result = _copy_single_document($obvius, $doc, $destdoc, $dest_name);
+        my @result = _copy_single_document($obvius, $doc, $destdoc, $dest_name, 
+					   $info{args}->{follow_copy});
 	return @result;
 	
     }

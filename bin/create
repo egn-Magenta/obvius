@@ -25,10 +25,15 @@ use POSIX qw(strftime);
 use Unicode::String qw(utf8);
 use WebObvius::InternalProxy;
 use Getopt::Long;
+use Digest::MD5 qw(md5_hex);
+use File::Path;
+use Data::Dumper;
+use WebObvius::Cache::Cache;
 
 my (
 	$site, $remove_prefix, $help, $verbose, $remove_parent,
-	$force_owner, $force_group, %map_owners, %map_groups
+	$force_owner, $force_group, %map_owners, %map_groups,
+	$auto_create_paths, $interactive, $html_processor
 );
 my $add_prefix = '/';
 my $usermap    = "o:unknown=admin,g:unknown=Admin";
@@ -42,11 +47,20 @@ GetOptions(
 	'group=s'          => \$force_group,
 	'usermap=s'        => \$usermap,
 	'verbose'          => \$verbose,
+	'auto_create_paths' => \$auto_create_paths,
+	'interactive'	   => \$interactive,
+        'html_processor=s'   => \$html_processor,
 	'help'             => \$help,
 ) or usage();
 
 usage(@ARGV) if $help or not @ARGV;
 $site = shift @ARGV;
+
+# Load HTML processing plugin, if specified
+if ($html_processor) {
+    require $html_processor;
+    set_roots($add_prefix, "$add_prefix/media_library") if ($add_prefix);
+}
 
 die "--path must begin with /\n" unless $add_prefix =~ /^\//;
 $add_prefix =~ s/\/$//;
@@ -87,12 +101,17 @@ EOT
 	print <<EOT;
 Usage: create [OPTIONS] site filename
 
-  --path           where to create the new documents (defaults to /)
-  --remove_prefix  remove this prefix from all uris
-  --owner          force owner name
-  --group          force group name
-  --verbose        print more information
-  --usermap        replace user and group names ( run with '--help usermap' for more)
+  --path           	where to create the new documents (defaults to /)
+  --remove_prefix  	remove this prefix from all uris
+  --owner          	force owner name
+  --group          	force group name
+  --verbose        	print more information
+  --usermap        	replace user and group names ( run with '--help usermap'
+			for more)
+  --interactive		run in interactive mode allowing the script to request
+                        input from the user
+  --auto_create_paths	Automatically create missing path segments for documents
+  --html_processor      Perl module to process HTML fields to fix links etc.
 
 NOTE: Does not handle binary data well, only fields called DATA are
       decoded.
@@ -107,6 +126,12 @@ sub say { print @_ if $verbose }
 
 my $conf = Obvius::Config-> new( $site);
 die "Could not get config for $site" unless defined $conf;
+
+my $cache_db = $conf->param('cache_db') || '/var/www/' . $conf->param('sitename') . '/var/cache_db/cache.dbm';
+my $cache_db1 = $cache_db . ".dir";
+my $cache_db2 = $cache_db . ".pag";
+die "This script requires write access to the cache db in $cache_db. Please ensure you have write permissions or run the script as root."
+    unless(-w $cache_db1 and -w $cache_db2);
 
 my $log = Obvius::Log-> new('notice');
 die "Could not get logging" unless defined $log;
@@ -154,6 +179,29 @@ my $rfields = $obvius-> get_table_data(
 $is_repeatable{$_->{name}} = 1 for @$rfields;
 my @repeatable_fields = keys %is_repeatable;
 
+# Make a list of doctypes that has fileupload2 fields
+my %fileupload2_doctypes;
+
+my $fh2 = $obvius->dbh->prepare(q|
+    select
+	doctypes.name as doctypename,
+	fieldspecs.name as fieldname
+    from
+	fieldspecs
+	join
+	fieldtypes on
+	    (fieldspecs.type = fieldtypes.id)
+	join
+	doctypes on
+	    (fieldspecs.doctypeid = doctypes.id)
+    where
+	fieldtypes.name = 'fileupload2';
+|);
+$fh2->execute;
+while(my $rec = $fh2->fetchrow_hashref) {
+    $fileupload2_doctypes{$rec->{doctypename}} = $rec->{fieldname}
+}
+
 # Figure out which fields are binary and should be decoded:
 my %binary_names;
 my $bin_fieldtypes = $obvius->get_table_data(
@@ -173,12 +221,18 @@ if(scalar(@$bin_fieldtypes)) {
 }
 
 say "reading...\n";
-my $data = XMLin( 
+my $data = '';
+eval {
+    $data = XMLin( 
 	$ARGV[0], 
 	keyattr		=> [], 
 	suppressempty	=> '', 
-	forcearray	=> \@repeatable_fields
-);
+	forcearray	=> \@repeatable_fields);
+};
+if ( $@ ) {
+    print "XML Parser ERROR: $@";
+    exit 1;
+}
 
 
 say "converting from utf8...\n";
@@ -222,8 +276,13 @@ if ( scalar keys %unresolved_links) {
 	}
 
 	$dbset-> Disconnect;
-	
 }
+
+# Clear caches
+my $cache = WebObvius::Cache::Cache->new($obvius);
+my $modified = $obvius->modified;
+$obvius->clear_modified;
+$cache->find_and_flush($modified);
 
 exit 0;
 
@@ -234,6 +293,37 @@ sub get
 	die "Cannot access field '$field'" unless exists $object->{$field};
 
 	$object->{$field};
+}
+
+sub get_html_fields_for_doctype
+{
+    # Get list of fields with HTML content for the doctype given as 
+    # parameter. 
+    
+    my $doctype = shift;
+    my @fields= ();
+
+    my $sql_stmt =  q|
+        select
+            fieldspecs.name as fieldname
+        from
+            fieldspecs
+        join fieldtypes on (fieldspecs.type = fieldtypes.id)
+        join doctypes on (fieldspecs.doctypeid = doctypes.id)
+        where
+            fieldtypes.name in ('text', 'textwupload')
+                and 
+            doctypes.name = '| . "$doctype" . "';";
+    my $fh = $obvius->dbh->prepare($sql_stmt);
+    $fh->execute;
+
+    while (my $rec = $fh->fetchrow_hashref) {
+        push(@fields, $rec->{fieldname});
+    }
+    my $ref = \@fields;
+    my $count = @fields;
+    
+    return $ref;
 }
 
 # maps user or group name based as requested in --usermap and/or --owner and --group
@@ -328,11 +418,40 @@ sub create_document
 
 	my $succeeded = 0;
 	foreach my $version (@$versions) {
+
+		my $doctype_name = get( $version, 'obvius_dump_type_name');
+		if(my $upload_fieldname = $fileupload2_doctypes{$doctype_name}) {
+		    if(my $upload_data = $version->{'obvius_dump_bin_uploadfile'}) {
+			my $filename = $new_uri;
+			$filename =~ s!/$!!; $filename =~ s!.*/([^/]+)$!$1!;
+			$upload_data = decode_base64($upload_data);
+			my $value = place_file_in_upload(\$upload_data, $filename, "image/jpeg");
+                    #print "Dokument: ";
+                    #print "$document->{obvius_dump_doc_uri} - $document->{obvius_dump_type_name}";
+                    #print "\n";
+			$version->{fields}->{$upload_fieldname} = $value;
+		    }
+		}
 		my $fields = get( $version, 'fields');
 		for ( keys %$fields) {
 			$fields->{$_} = decode_base64( $fields->{$_}) 
 				if $binary_names{$_};
 		}
+                if ($html_processor) {
+                    # Process internal URIs and image paths to make all aspects
+                    # of the import work, and any other HTML field processing.
+                    my $html_fields_ref = get_html_fields_for_doctype($doctype_name);
+
+                    for my $field (@$html_fields_ref) {
+                        if (exists $fields->{$field}) {
+
+                            my $html_content = $$fields{$field};
+                            $html_content = process_html_field($html_content);
+                            $$fields{$field} = $html_content;
+
+                        }
+                    }
+                }
 		my $error = '';
 		my ($new_docid, $new_version) = create_obvius_document(
 			$new_uri, $document, $version, \$error
@@ -412,21 +531,28 @@ sub create_obvius_document
 
 		if ( $fieldtype) {
 			if (ref $value) {
-				@$value = map { 
-					$fieldtype-> copy_in(
-						$obvius, $fieldspec, $_
-					) 
+                            if (ref $value eq 'ARRAY') {
+                                @$value = map { 
+                                    $fieldtype-> copy_in(
+                                        $obvius, $fieldspec, $_
+                                    ) 
 				} @$value;
-			} else {
-				$value = $fieldtype-> copy_in(
-					$obvius, $fieldspec, $value
-				);
-			}
-		}
+                        } else {
+                            $value = $value->{link}->{url};
+                            $value = $fieldtype-> copy_in(
+                                $obvius, $fieldspec, $value
+                            );
+                        }
+                    } else {
+                        $value = $fieldtype-> copy_in(
+                            $obvius, $fieldspec, $value
+                        );
+                    }
+                }
 
 		# Un-urlify:
 		if ( $value) {
-			if ( ref $value) {
+			if ( ref $value and ref $value eq 'ARRAY' )  {
 				for ( @$value) {
 					my %unresolved;
 					s!([^\'\"]+)\.docid!unurlify($1,$new_uri,0,\%unresolved)!ge;
@@ -466,7 +592,8 @@ sub create_obvius_document
 		my $parent	= $obvius-> lookup_document($parent_uri);
 
 		if (!$parent) {
-		    die "Error finding: $parent_uri\n";
+		    create_missing_paths($parent_uri);
+		    $parent = $obvius->lookup_document($parent_uri);
 		}
 
 		my $owner = get_usermap_id(
@@ -570,10 +697,12 @@ sub unurlify
 
 	unless ( $final) {
 		$path =~ s!^\Q$remove_prefix\E!!  if $remove_prefix;
-		$path = $add_prefix . '/' . $path;
+		$path = $add_prefix . '/' . $path if ( $path !~ /^\Q$add_prefix\E/ );
 		$path =~ s|/+|/|g;
 	} else {
-		return "/$path.docid" if $path =~ /^\/?\d+$/; # avoid double lookup
+		if($path =~ /^\/?(\d+)$/) { # avoid double lookup
+		    return "/$1.docid"
+		}
 	}
 
 	if ( my $d = $obvius->lookup_document($path)) {
@@ -654,4 +783,107 @@ sub fixup_links
 			name    => $fieldname,
 		);
 	}
+}
+
+sub place_file_in_upload {
+    my ($dataref, $filename, $type) = @_;
+
+    my $id = md5_hex($$dataref);
+
+    my $content_type = $type;
+    $content_type = 'unknown/unknown' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
+    
+    my $docs_dir = $obvius->{OBVIUS_CONFIG}{DOCS_DIR};
+    
+    my $upload_dir = $docs_dir . "/upload/$content_type/";
+    $upload_dir =~ s!/+!/!g;
+    
+    sub make_dir {
+	my $id = shift;
+	return substr($id, 0, 2) . "/" . substr($id, 2, 2) . "/" . substr($id, 0, 8);
+    }
+
+    $filename =~ s!^.*[/\\]([^/\\]+)$!$1!;
+    my $final_dir = make_dir($id);
+    while ( -f $upload_dir . $final_dir . "/$filename") {
+	$final_dir = make_dir(md5_hex(rand() . rand()));
+    }
+    
+    $upload_dir .= $final_dir;
+    unless(-d $upload_dir) {
+	mkpath($upload_dir, 0, 0775) or die "Couldn't create dir: $upload_dir";
+    }
+    
+    unless(-f "$upload_dir/$filename") {
+	local $/ = undef;
+	open(FILE, '>', "$upload_dir/$filename");
+	print FILE $$dataref;
+	close(FILE);
+    }
+    my $value = "$upload_dir/$filename";
+
+    # Make sure we don't remove the first / in /upload
+    $docs_dir =~ s!/$!!;
+    $value =~ s!^$docs_dir!!;
+
+    return $value;
+}
+
+sub create_missing_paths {
+    my ($uri) = @_;
+    
+    die "Missing path parts for uri $uri" unless($auto_create_paths || $interactive);
+
+    my @parts = grep {$_} split(m!/!, $uri);
+    my $sofar = "/";
+    while(@parts) {
+	$sofar .= shift(@parts) . "/";
+	unless($obvius->lookup_document($sofar)) {
+	    my $ans = "default";
+	    if($auto_create_paths) {
+		$ans = "y";
+	    } else {
+		while($ans !~ m!^(y(es)?|no?|)$!) {
+		    print "Auto-create path $sofar (Y/n)? >";
+		    $ans = lc(<STDIN>);
+		    chomp($ans);
+		    $ans =~ s!^(.).*!$1!;
+		}
+	    }
+	    if($ans eq 'n') {
+		print STDERR "Aborted by user";
+		exit 1;
+	    } else {
+		create_path_part($sofar);
+	    }
+	}
+    }
+}
+
+sub create_path_part {
+    my ($uri) = @_;
+
+    $uri =~ s!/$!!;
+    my $title = $uri;
+    $title =~ s!.*/([^/]+)$!$1!;
+
+    my $doc = {
+	'obvius_dump_doc_uri' => $uri,
+	'obvius_dump_type_name' => 'Standard',
+	'version' => {
+	    'obvius_dump_type_name' => 'Standard',
+	    'lang' => 'da',
+	    'fields' => {
+			    'title' => $title,
+			    'short_title' => $title,
+			    'seq' => '-10',
+			},
+	    'public' => '1',
+	},
+	'obvius_dump_owner_login' => $force_owner || 'admin',
+	'obvius_dump_grp_name' => $force_group || 'Admin',
+    };
+
+    my $errors = "";
+    create_obvius_document($uri, $doc, $doc->{version}, \$errors);
 }

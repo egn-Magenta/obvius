@@ -6,7 +6,7 @@ $obvius_page=>1
 print STDERR ">>> /edit/edit (obvius_page: " .
     (defined $obvius_page ? $obvius_page : 'undef') . ")\n";
 my $sessionid=$r->pnotes('site')->prepare_edit($r, $doc, $vdoc, $doctype, $obvius);
-my $session=$r->pnotes('site')->get_session($sessionid);
+my $session=$r->pnotes('site')->get_session($sessionid, $obvius);
 $r->pnotes(session=>$session);
 $r->notes(obvius_session=>$sessionid);
 #print STDERR "session: " . $r->pnotes('session') . "\n";
