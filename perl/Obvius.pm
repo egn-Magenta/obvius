@@ -2034,7 +2034,7 @@ sub quick_create_new_document {
 	}
 
 	# Software defaults
-	$docfields->param('docdate', strftime('%Y-%m-%d 00:00:00', localtime));
+	$docfields->param('docdate', strftime('%Y-%m-%d 00:00:00', localtime)) unless($docfields->param('docdate'));
 
 	eval {
 	    my($usr_id) = $this->get_userid($this->user());
