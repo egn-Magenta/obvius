@@ -373,6 +373,14 @@
     <translation lang="en">Document</translation>
     <translation lang="da">Dokument</translation>
   </text>
+  <text key="The document">
+    <translation lang="en">The document</translation>
+    <translation lang="da">Siden</translation>
+  </text>
+  <text key="has been deleted">
+    <translation lang="en">has been deleted.</translation>
+    <translation lang="da">er blevet slettet.</translation>
+  </text>
   <text key="deleted">
     <translation lang="en">deleted</translation>
     <translation lang="da">slettet</translation>
@@ -390,8 +398,8 @@
     <translation lang="da">Dokumentets navn kan ikke indeholde tegnet &quot;/&quot;, beklager</translation>
   </text>
   <text key="Document renamed">
-    <translation lang="en">Document renamed</translation>
-    <translation lang="da">Dokument omdøbt</translation>
+    <translation lang="en">The document has been renamed.</translation>
+    <translation lang="da">Siden er omdøbt.</translation>
   </text>
   <text key="Move cancelled">
     <translation lang="en">Move cancelled</translation>

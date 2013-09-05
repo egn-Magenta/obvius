@@ -252,7 +252,7 @@ sub _delete_single_document {
     }
 
     if ($ret) {
-        return ('OK', [ 'Document', ' "', $doc->Name, '" ', 'deleted' ]);
+        return ('OK', [ 'The document', ' "', $doc->Name, '" ', 'has been deleted' ]);
     }
 
     return ('ERROR', [ 'Could not delete document ', $doc->Name ]);
@@ -368,7 +368,7 @@ sub perform_command_rename {
     return ('ERROR', [ 'Could not get document', ' (', $info{docid}, ')' ]) unless ($doc);
 
     if ($obvius->rename_document($doc, $info{args}->{new_uri})) {
-        return ('OK', 'Document renamed');
+        return ('OK', ['Document renamed']);
     }
 
     return ('ERROR', 'Could not rename document');
