@@ -2581,8 +2581,8 @@ abonnement på samme email-adresse.</translation>
   </text>
 
   <text key="Document renamed">
-    <translation lang="en">Document renamed</translation>
-    <translation lang="da">Dokument omdøbt/flyttet</translation>
+    <translation lang="en">The document has been renamed.</translation>
+    <translation lang="da">Siden er omdøbt.</translation>
   </text>
 
   <text key="Document deleted">
