@@ -370,7 +370,7 @@ if ($return_uri !~ m!^/admin(?:/?$|/.+)!) {
    $return_uri = $get_full_uri->($return_uri);
 }
 
-if ($return_uri !~ /\?/ && $return_uri !~ m!/$!) {
+if (!@param_names && $return_uri !~ /\?/ && $return_uri !~ m!/$!) {
    $return_uri .= '/';
 }
 </%init>
