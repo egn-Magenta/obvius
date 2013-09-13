@@ -2,6 +2,8 @@ package WebObvius::SpecialHandler;
 
 # Base module used for wrinting Special Obvius handler modules
 
+use CGI::Cookie;
+
 sub new {
     my ($classname, %args) = @_;
 
@@ -19,6 +21,39 @@ sub state { shift->{_state} }
 sub set_state { shift->{_state} = shift }
 sub input { shift->{_input_object} }
 sub output { shift->{_output_object} }
+
+sub cookies {
+    my $self = shift;
+    if(my $cached = $self->req->pnotes('_incoming_cookie_hash')) {
+        return $cached;
+    }
+    my $cookies = CGI::Cookie->fetch;
+    $self->req->pnotes('_incoming_cookie_hash' => $cookies);
+    return $cookies;
+}
+
+sub cookie_value {
+    my $c = shift->cookies->{(shift)};
+    return $c ? $c->value : $c;
+}
+
+sub set_cookie {
+    my ($self, $name, $value, %extra) = @_;
+
+    my %args = (
+        -name => $name,
+        -value => $value
+    );
+
+    for my $k (qw(expires domain path secure)) {
+        $args{$k} = $extra{$k} if(defined($extra{$k}));
+    }
+
+    my $cookie = new CGI::Cookie(%args);
+    $cookie->bake($self->req);
+
+    return $cookie;
+}
 
 # Handlers
 
@@ -87,7 +122,7 @@ sub after_handle_operation {
     if(my $input = $self->input) {
         $input->param('_special_handler' => undef);
     }
-    
+
     delete $self->{_input_object};
 
     return undef;
@@ -141,6 +176,9 @@ sub render_subsite_comp {
         return $self->render_comp($comp, %args);
     }
 
+    # We needs pnotes, so we have to upgrade
+    $self->upgrade_request;
+
     my $r = $self->req;
     $r->pnotes('override_subsite_comp' => $comp);
     $r->pnotes('extra_subsite_comp_args' => \%args);
@@ -158,6 +196,15 @@ sub disable_obvius_cache {
 
 sub disable_browser_cache {
     shift->req->no_cache(1);
+}
+
+sub upgrade_request {
+    my ($self) = @_;
+    my $r = $self->req;
+    unless($r->notes('request_upgraded')) {
+        $r = $self->{_request} = new Apache2::Request($r);
+        $r->notes('request_upgraded' => 1);
+    }
 }
 
 1;
