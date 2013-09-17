@@ -374,7 +374,13 @@ sub handler ($$) {
      $req->notes('obvius_cache_extra' => $vdoc->param('Version'));
 
      my $doctype = $obvius->get_version_type($vdoc);
-     
+
+    my $special_handler = $this->get_special_handler($req);
+    if($special_handler) {
+        my $res = $special_handler->apache_handler($req, $obvius, $doc, $vdoc);
+        return $res if(defined($res));
+    }
+
      my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
      
      # The document can have a "alternate_location" method if the user

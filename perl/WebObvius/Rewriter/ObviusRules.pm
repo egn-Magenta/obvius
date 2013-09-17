@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 
+use DBI;
+
 package WebObvius::Rewriter::ObviusRules::StaticDocs;
 use WebObvius::Rewriter::RewriteRule qw(LAST);
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);

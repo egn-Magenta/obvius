@@ -8,7 +8,10 @@ my $session=$r->pnotes('obvius_session');
 
 if (defined $session) {
     $session->{status}  = $status;
-    $message = join '', @$message if (ref $message eq 'ARRAY');
+    if (ref $message eq 'ARRAY') {
+	### Remember to do potential translation now
+	$message = join "", map { $m->scomp('/shared/msg', text=>$_) } @$message ;
+    }
     $session->{message} = join '', @{$session->{message}} if (ref $session->{message} eq 'ARRAY');
     if ($session->{message}) { 
         $session->{message} .=  "<BR/>$message";
