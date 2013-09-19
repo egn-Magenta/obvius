@@ -186,6 +186,14 @@ sub render_subsite_comp {
     return undef;
 }
 
+# This method should return the path of the component used to render a named
+# customization component called using mason/common/shared/render_special.
+sub get_special_component_path {
+    my ($self, $compname) = @_;
+
+    return undef;
+}
+
 sub disable_obvius_cache {
     my ($self) = @_;
     $self->req->notes('nocache' => 1);
