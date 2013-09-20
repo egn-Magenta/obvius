@@ -7,18 +7,19 @@ use CGI::Cookie;
 sub new {
     my ($classname, %args) = @_;
 
-    $args{'state'} = "new" unless($args{'state'});
+    $args{'state'} ||= "new";
     return bless(\%args, $classname);
 }
 
 # Accessors
 
+sub root_uri { shift->{root_uri} }
 sub req { shift->{_request} }
 sub obvius { shift->{_obvius} }
 sub doc { shift->{_doc} }
 sub vdoc { shift->{_vdoc} }
-sub state { shift->{_state} }
-sub set_state { shift->{_state} = shift }
+sub state { shift->{state} }
+sub set_state { $_[0]->{state} = $_[1] }
 sub input { shift->{_input_object} }
 sub output { shift->{_output_object} }
 
@@ -140,7 +141,8 @@ sub redirect {
         $r->method('GET');
         $r->headers_in->unset('Content-length');
         $r->content_type('text/html');
-        $r->header_out('Location'=>$url);
+        $r->headers_out->add(Location => $url);
+        $r->send_http_header;
         return $http_status;
     } elsif($state eq 'public_mason') {
         die "Can not redirect from public mason - " .
@@ -153,7 +155,7 @@ sub redirect {
         );
         return 1;
     }
-    return 1;
+    return $http_status;
 }
 
 sub render_comp {
