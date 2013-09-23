@@ -13,15 +13,15 @@ sub new {
 
 # Accessors
 
-sub root_uri { shift->{root_uri} }
-sub req { shift->{_request} }
-sub obvius { shift->{_obvius} }
-sub doc { shift->{_doc} }
-sub vdoc { shift->{_vdoc} }
-sub state { shift->{state} }
+sub root_uri { $_[0]->{root_uri} }
+sub req { $_[0]->{_request} }
+sub obvius { $_[0]->{_obvius} }
+sub doc { $_[0]->{_doc} }
+sub vdoc { $_[0]->{_vdoc} }
+sub state { $_[0]->{state} }
 sub set_state { $_[0]->{state} = $_[1] }
-sub input { shift->{_input_object} }
-sub output { shift->{_output_object} }
+sub input { $_[0]->{_input_object} }
+sub output { $_[0]->{_output_object} }
 
 sub cookies {
     my $self = shift;

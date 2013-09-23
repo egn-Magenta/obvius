@@ -68,7 +68,7 @@ use Obvius::PreviewDocument;
 sub new
 {
         my $self = shift-> SUPER::new(@_);
-	
+
         $self-> {LANGUAGE_PREFERENCES} = [];
         $self-> load_translation_fileset();
 
@@ -94,7 +94,7 @@ sub setup_special_handlers {
             $map{$key} = $value;
         }
     }
-    
+
     return unless(%map);
 
     my $urlmatch = join("|", sort { length($b) <=> length($a) } keys %map);
@@ -113,7 +113,9 @@ sub get_special_handler {
     my $uri = $req->notes('uri') || $req->uri;
 
     if($special_regexp && $uri =~ m!$special_regexp!) {
-        $special_handler = $this->{_special_handler_map}->{$1}->new();
+        $special_handler = $this->{_special_handler_map}->{$1}->new(
+            root_uri => $1
+        );
     } else {
         $special_handler = 0;
     }
@@ -165,7 +167,7 @@ sub get_language_preferences {
     # Find out if somebody specified ?lang=XX on the URL, if so, give it even more weight:
     if ($req->args) {
          my ($lang_arg) = $req->args =~ /.*lang=([^&]+)/;
-         
+
          if ($lang_arg) {
               my %user_pref = split_language_preferences($lang_arg, 4000); # Override
               for (keys %user_pref) {
@@ -199,13 +201,13 @@ sub obvius_connect {
 
     my $obvius = $req->pnotes('obvius');
     return $obvius if ($obvius);
-    
+
     $doctypes   = $this->{OBVIUS_ARGS}->{doctypes};
     $fieldtypes = $this->{OBVIUS_ARGS}->{fieldtypes};
     $fieldspecs = $this->{OBVIUS_ARGS}->{fieldspecs};
 
     $this->tracer($req, $user||'-user', $passwd||'-passwd') if ($this->{DEBUG});
-    
+
     $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs, log => $this->{LOG});
     return undef unless ($obvius);
     $obvius->param(LANGUAGES=>$this->get_language_preferences($req));
@@ -244,8 +246,8 @@ sub obvius_document {
     if (my ($docid) = $path =~ m|^/preview/(\d+)/?$|) {
 	 $req->no_cache(1);
 	 return Obvius::PreviewDocument->new($obvius, $docid);
-    } 
-    
+    }
+
     if ($path) { # Specific path lookup
         my $found_doc=$obvius->lookup_document($path);
         return $found_doc;
@@ -254,7 +256,7 @@ sub obvius_document {
 }
 
 sub obvius_document_version {
-    my ($this, $req, $doc) = @_; 
+    my ($this, $req, $doc) = @_;
 
     $this->tracer($req, $doc) if ($this->{DEBUG});
 
@@ -417,7 +419,7 @@ sub create_input_object {
         my $session=$this->get_session($obvius_session_id, $options{obvius_object});
         $input->param(SESSION=>$session);
     }
-    
+
     my @uploads = $req->upload;
     for(@uploads) {
         if($_->filename ne '' and $_->size!=0 and my $fh=$_->fh) {
