@@ -39,6 +39,8 @@ use WebObvius::InternalProxy;
 our @ISA = qw( Obvius::Data );
 our $VERSION="1.0";
 
+our %SOLR_MAPS = ();
+
 use Carp;
 
 
@@ -59,7 +61,6 @@ sub new {
     my $self = $class->SUPER::new($rec);
 
     $self->{FIELDS} = undef;
-
     return $self;
 }
 
@@ -94,7 +95,10 @@ sub export_to_solr {
     my $doctype = $obvius->get_document_type($doc);
 
     #### Build specification hash
-    my $fieldsmap = $doctype->get_solr_fields($obvius);
+    my $fieldsmap = $SOLR_MAPS{$doctype->Id};
+    unless ( $fieldsmap ) {
+	$fieldsmap = $SOLR_MAPS{$doctype->Id} = $doctype->get_solr_fields($obvius);
+    }
     my $specs = {};
     foreach my $key ( keys(%$fieldsmap) ) {
 	my $entry = $fieldsmap->{$key};

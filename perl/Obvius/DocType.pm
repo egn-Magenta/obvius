@@ -154,10 +154,10 @@ sub get_solr_fields  {
 	'Id'             => ['d', 'id'],
 	'published'      => ['f', 'published', \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
 	'docdate'        => ['f', 'docdate',   \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
-	'content'        => ['f', 'content', \&Obvius::SolrConvRoutines::toUTF8],
-	'teaser'         => ['f', 'teaser', \&Obvius::SolrConvRoutines::toUTF8],
+	'content'        => ['f', 'content', \&Obvius::SolrConvRoutines::toPERL],
+	'teaser'         => ['f', 'teaser', \&Obvius::SolrConvRoutines::toPERL],
 	'Path'           => ['d', 'path'],
-	'title'          => ['f', 'title', \&Obvius::SolrConvRoutines::toUTF8],
+	'title'          => ['f', 'title', \&Obvius::SolrConvRoutines::toPERL],
 	'Lang'           => ['v', 'lang'],
 	'Type'           => ['v', 'type', sub { my $doct = $obvius->{DOCTYPES}->[shift @_];
 						return $doct ? $doct->Name(): '' }],

@@ -3,7 +3,7 @@ package Obvius::SolrConvRoutines;
 use strict;
 use warnings;
 
-use Obvius::CharsetTools qw(mixed2utf8);
+use Obvius::CharsetTools qw(mixed2utf8 mixed2perl);
 use DateTime;
 use DateTime::TimeZone;
 my $local_tz = new DateTime::TimeZone(name => 'local');
@@ -58,6 +58,13 @@ sub toUTF8 {
     my($cmsval) = @_;
 
     $cmsval = mixed2utf8($cmsval) if ( $cmsval );
+    return $cmsval;
+}
+
+sub toPERL {
+    my($cmsval) = @_;
+
+    $cmsval = mixed2perl($cmsval) if ( $cmsval );
     return $cmsval;
 }
 
