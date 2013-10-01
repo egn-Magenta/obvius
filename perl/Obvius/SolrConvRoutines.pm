@@ -26,6 +26,7 @@ my $utc_tz = new DateTime::TimeZone(name => 'UTC');
 sub toUTCDateTime {
     my($cmsval) = @_;
 
+    $cmsval = '0000-01-01 00:00:00' if ( $cmsval eq '0000-00-00 00:00:00' );
     if ( my($Y, $M, $D, $h, $m, $s) = $cmsval =~ /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/ ) {
 	my $dt = new DateTime(year => $Y, month => $M, day => $D, hour => $h,
 			      minute => $m, second => $s, time_zone => $local_tz);
