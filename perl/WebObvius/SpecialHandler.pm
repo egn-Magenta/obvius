@@ -28,7 +28,7 @@ sub cookies {
     if(my $cached = $self->req->pnotes('_incoming_cookie_hash')) {
         return $cached;
     }
-    my $cookies = CGI::Cookie->fetch;
+    my $cookies = CGI::Cookie->fetch || {};
     $self->req->pnotes('_incoming_cookie_hash' => $cookies);
     return $cookies;
 }
