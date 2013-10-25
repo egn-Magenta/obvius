@@ -58,14 +58,14 @@ sub fromUTCDateTime {
 sub toUTF8 {
     my($cmsval) = @_;
 
-    $cmsval = mixed2utf8($cmsval) if ( $cmsval );
+    #$cmsval = mixed2utf8($cmsval) if ( $cmsval );
     return $cmsval;
 }
 
 sub toPERL {
     my($cmsval) = @_;
 
-    $cmsval = mixed2perl($cmsval) if ( $cmsval );
+    #$cmsval = mixed2perl($cmsval) if ( $cmsval );
     return $cmsval;
 }
 

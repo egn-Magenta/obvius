@@ -40,6 +40,7 @@ our @ISA = qw( Obvius::Data );
 our $VERSION="1.0";
 
 our %SOLR_MAPS = ();
+our %SOLR_FIELD_LISTS = ();
 
 use Carp;
 
@@ -88,17 +89,31 @@ sub real_doctype {
 sub export_to_solr {
     my($self, $obvius, $doc) =  @_;
 
-    #### Get version fields, document and doctype
-    $obvius->get_version_fields($self, 256);
+    ### Get document if not supplied
     $doc = ($doc && ref($doc) eq 'Obvius::Document' ? $doc : 
 	    $obvius->get_doc_by_id($self->DocId));
     my $doctype = $obvius->get_document_type($doc);
 
-    #### Build specification hash
+    #### Get specs (either from "cache" og by asking doctype object)
     my $fieldsmap = $SOLR_MAPS{$doctype->Id};
+    my $fieldlist = $SOLR_FIELD_LISTS{$doctype->Id};
     unless ( $fieldsmap ) {
+	if ( $doctype->Name =~ /^GeoNat/ ) {
+	    print STDERR "GotOne\n";
+	}
 	$fieldsmap = $SOLR_MAPS{$doctype->Id} = $doctype->get_solr_fields($obvius);
+	$fieldlist = [];
+	foreach my $mkey ( keys(%$fieldsmap) ) {
+	    my $spec = $fieldsmap->{$mkey};
+	    push(@$fieldlist, $spec->[1]) if ( $spec->[0] eq 'f' );
+	    push(@$fieldlist, $spec->[4]) if ( $spec->[3] || '' eq 'f' );
+	}
+	$SOLR_FIELD_LISTS{$doctype->Id} = $fieldlist;
     }
+
+    #### Get version fields
+    $obvius->get_version_fields($self, $fieldlist);
+
     my $specs = {};
     foreach my $key ( keys(%$fieldsmap) ) {
 	my $entry = $fieldsmap->{$key};
