@@ -92,6 +92,9 @@ sub setup_special_handlers {
         if(my @parts = split(/\s*=>\s*/, $setup)) {
             my ($key, $value) = @parts;
             $map{$key} = $value;
+	    ### Make sure that key-path is represented with/without ending slash
+	    $map{$1} = $value if ( $key =~ /^(.*)\/$/ );
+            $map{$key .'/'} = $value if ( $key !~ /\/$/ );
         }
     }
 
