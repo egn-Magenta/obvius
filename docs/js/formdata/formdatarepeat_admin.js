@@ -25,25 +25,35 @@ function formdata_init(elem) {
 
     // Setup data:
     formdata_load_rootDoc_data(elem);
-    formdata_populate_fieldtable(elem.name);
 
+    // Populate fields table and repeatable area
+    formdata_populate_fieldtable(elem.name, true);
 }
 
 function formdata_save(elem) {
     var rootDoc = formdata_get_rootDoc_by_name(elem.name);
 
+    //Delete reppeatables if any leftover
+    if ( rootDoc ) {
+	var repeatselem = rootDoc.getElementsByTagName('repeatables');
+	if ( repeatselem && repeatselem.getLength() > 0 ) {
+            rootDoc.removeChild(repeatselem.item(0)); //Remove it now - inserted again when finished
+	}
+    }
+
     //Insert repeatables in rootDoc
     merge_rootDoc_repeatables(rootDoc);
 
+    //Extract XML text
     var xml = rootDoc.getXML();
-
     xml = xml.replace(/<\/([^>]+)></g, "</$1>\n<");
 
+    //Set form-emlement value to xml-text
     elem.value = xml;
     return true;
 }
 
-function formdata_populate_fieldtable(name) {
+function formdata_populate_fieldtable(name, startup) {
 
     rootDoc = formdata_get_rootDoc_by_name(name);
 
@@ -75,8 +85,10 @@ function formdata_populate_fieldtable(name) {
             var obj = formdata_objectify_node(item);
 
 	    //Update array of fields for repeatables
-	    obvius_rep_field_names.push(obj.name);
-	    obvius_rep_field_displays.push(obj.title);
+	    if ( obj.type != 'fieldset' && obj.type != 'fieldset_end' ) { 
+		obvius_rep_field_names.push(obj.name);
+		obvius_rep_field_displays.push(obj.title);
+	    }
             
 	    // Generate a <tr> for the field:
 
@@ -168,23 +180,20 @@ function formdata_populate_fieldtable(name) {
 	var cur = obvius_rep_field_names[markIdx];
 	obvius_field_name_marker[cur] = obvius_rep_field_displays[markIdx];
     }
-    if ( fields ) {
-	var allareas = document.getElementById('obvius_all_rep_areas');
-	if ( allareas ) {
-	    var allchildren = allareas.children;
-	    if ( allchildren.length == 0 ) {
-		var repeatelem = rootDoc.getElementsByTagName('repeatables');
-		var repeats = repeatelem.getLength() == 1 ? repeatelem.item(0).getElementsByTagName('repeatable') : null;
-		
-		if(repeats) {
-		    for(var i=0;i < repeats.getLength();i++) {
-			var item = repeats.item(i);
-			var obj = formdata_objectify_node(item);
-			insert_repeat_area(obj);
-		    }
-		}
+    if ( startup ) {
+	//Make HTML structure from existing repeatables
+	var repeatselem = rootDoc.getElementsByTagName('repeatables');
+	if( repeatselem && repeatselem.getLength() > 0 ) {
+	    var repeats = repeatselem.item(0).getElementsByTagName('repeatable');
+	    for(var i=0;i < repeats.getLength();i++) {
+		var item = repeats.item(i);
+		var obj = formdata_objectify_repeat_node(item);
+		insert_repeat_area(obj);
 	    }
 	}
+    } else {
+        //Reflect field change on existing repeatables
+	reflectFields_on_repeatables();
     }
 }
 
@@ -237,7 +246,7 @@ function formdata_delete_field(formfield_name, fieldname) {
         }
     }
 
-    formdata_populate_fieldtable(formfield_name);
+    formdata_populate_fieldtable(formfield_name, false);
     document.pageform[formfield_name].value = rootDoc.getXML();
 }
 
@@ -334,7 +343,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 
     var type = fieldObj.type || '';
 
-    if(type == 'text' || type == 'password' || type == 'textarea') {
+    if(type == 'text' || type == 'password' || type == 'textarea' || type == 'protected') {
         // Hide options and validaterules:
         document.getElementById('options').style.display = 'none';
     }
@@ -368,7 +377,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
       document.getElementById('size').style.display = '';
     }
 
-    if(type == 'text' || type == 'password') {
+    if(type == 'text' || type == 'password' || type == 'protected') {
       document.getElementById('maxlength').style.display = '';
       document.getElementById('size').style.display = '';
     }
@@ -561,6 +570,10 @@ function formdata_populate_options(fieldNode) {
         value_td.innerHTML = optObj.optionvalue;
         tr.appendChild(value_td);
 
+	var sel_td = document.createElement('td');
+        sel_td.innerHTML = (optObj.initselect && optObj.initselect != '' ? formdata_translations['Yes'] : formdata_translations['No']);
+        tr.appendChild(sel_td);
+
         var edit_td = document.createElement('td');
         var edit_a = document.createElement('a');
         edit_a.href = document.location.href;
@@ -641,7 +654,7 @@ function formdata_validate_and_save_field(form_fieldname, old_name) {
         return false;
     }
 
-    window.opener.formdata_populate_fieldtable(form_fieldname);
+    window.opener.formdata_populate_fieldtable(form_fieldname, false);
 
     window.close();
 }
@@ -703,7 +716,7 @@ function formdata_validate_and_add_field(form_fieldname, old_name) {
     var fieldsNode = rootDoc.getElementsByTagName('fields').item(0);
     fieldsNode.appendChild(newNode);
 
-    window.opener.formdata_populate_fieldtable(form_fieldname);
+    window.opener.formdata_populate_fieldtable(form_fieldname, false);
 
     window.close();
 }
@@ -921,6 +934,7 @@ function formdata_init_option_edit(ruleNr) {
         tmpXML += " <option>";
         tmpXML += "  <optiontitle></optiontitle>";
         tmpXML += "  <optionvalue></optionvalue>";
+	tmpXML += "  <initselect></initselect>";
         tmpXML += " </option>";
         tmpXML += "</root>";
 
@@ -940,6 +954,13 @@ function formdata_init_option_edit(ruleNr) {
     var valueNode = optionNode.getElementsByTagName('optionvalue').item(0);
     if(valueNode) {
         document.pageform.optionvalue.value = formdata_get_node_text(valueNode);
+    }
+
+    var initSelNode = optionNode.getElementsByTagName('initselect').item(0);
+    if(initSelNode) {
+	var selTxt = formdata_get_node_text(initSelNode);
+	document.pageform.initselect.value = selTxt == '1' ? '1' : '';
+	document.pageform.initselect.checked = selTxt == '1';
     }
 }
 
@@ -971,6 +992,15 @@ function formdata_validate_options_dialog() {
         valueNode.replaceChild(newValue, valueNode.getFirstChild());
     } else {
         valueNode.appendChild(newValue);
+    }
+
+    var selNode = optionNode.getElementsByTagName('initselect').item(0);
+    var checked = document.pageform.initselect.checked;
+    var selValue = optionNode.getOwnerDocument().createTextNode(checked ? '1' : '');
+    if(selNode.getFirstChild()) {
+        selNode.replaceChild(selValue, selNode.getFirstChild());
+    } else {
+        selNode.appendChild(selValue);
     }
 
     return true;
@@ -1302,7 +1332,7 @@ function formdata_move_field(name, nr, direction) {
     secondElem.getParentNode().removeChild(secondElem);
     firstElem.getParentNode().insertBefore(secondClone, firstElem);
 
-    formdata_populate_fieldtable(name);
+    formdata_populate_fieldtable(name, false);
 }
 
 function formdata_move_valrule(nr, direction) {
@@ -1373,6 +1403,26 @@ function formdata_get_node_text(node) {
     return "NOT_TEXT";
 }
 
+function formdata_objectify_repeat_node(node) {
+    var obj = new Object();
+    var children = node.getChildNodes();
+    var titleNode = children.item(0);
+    var title = titleNode.getChildNodes().item(0);
+    obj['title'] = __unescapeString(title.getXML());
+    
+    var fieldMap = {};
+    var fields = children.item(1).getChildNodes();
+    for(var i=0;i < fields.getLength();i++) {
+        var field = fields.item(i);
+	var nameElem = field.getChildNodes().item(0);
+        var titleElem = field.getChildNodes().item(1);
+	var nameContent = nameElem.getChildNodes().item(0);
+        var titleContent = titleElem.getChildNodes().item(0);
+	fieldMap[__unescapeString(nameContent.getXML())] = __unescapeString(titleContent.getXML());
+    }
+    obj['repfields'] = fieldMap;
+    return obj;
+}
 
 function formdata_objectify_node(node) {
     var obj = new Object();
@@ -1437,22 +1487,31 @@ function reflectFields_on_repeatables() {
 	var curindex = curid.replace(patt, '');
 	var select = document.getElementById('obvius_repeated_area_fields_' + curindex);
 	var opts = select.children;
+	var optsMap = {};
 	for (var selidx = 0; selidx < opts.length; selidx++) {
-	    var curnam = opts[selidx].name;
+	    var curnam = opts[selidx].value;
 	    if ( ! obvius_field_name_marker[curnam] ) {
 		select.removeChild(opts[selidx]);
+	    } else {
+		optsMap[curnam] = true;
+	    }
+	}
+	for (var namekey in obvius_field_name_marker) {
+	    if ( optsMap[namekey] ) {
+		; //do nothing
+	    } else {
+		var newsel = document.createElement('option');
+		newsel.setAttribute('value', namekey);
+		newsel.innerHTML = obvius_field_name_marker[namekey];
+		select.appendChild(newsel);
 	    }
 	}
     }
 }
 
 function insert_repeat_area(theobj) {
-    var objfields = theobj ? theobj.fields : [];
-    var fieldsMarker = {};
-    for ( var idx = 0; idx < objfields.length; idx++ ) {
-	var cur = objfields[i];
-	fieldsMarker[cur.name] = cur.title;
-    }
+    var objfields = theobj ? theobj.repfields : {};
+    var fieldsMarker = objfields;
 
     var all = document.getElementById('obvius_all_rep_areas');
     var count = obvius_rep_area_count + 1;
@@ -1508,15 +1567,15 @@ function insert_repeat_area(theobj) {
     var butdiv = document.createElement('div');
     butdiv.setAttribute('className', 'RepAreaButs');
     var but = document.createElement('button');
-    but.onclick = function () { move(-1, 'obvius_repeated_area_' + count); return false };
+    but.onclick = function () { move_repeat_area(-1, 'obvius_repeated_area_' + count); return false };
     but.innerHTML = 'Flyt opad';
     butdiv.appendChild(but);
     but = document.createElement('button');
-    but.onclick = function () { move(1, 'obvius_repeated_area_' + count); return false };
+    but.onclick = function () { move_repeat_area(1, 'obvius_repeated_area_' + count); return false };
     but.innerHTML = 'Flyt nedad';
     butdiv.appendChild(but);
     but = document.createElement('button');
-    but.onclick = function () { remove_area('obvius_repeated_area_' + count); return false };
+    but.onclick = function () { remove_repeat_area('obvius_repeated_area_' + count); return false };
     but.innerHTML = 'Fjern område';
     butdiv.appendChild(but);
     fs.appendChild(butdiv);
@@ -1524,7 +1583,7 @@ function insert_repeat_area(theobj) {
     /* Finish up */
     newArea.appendChild(fs);	   
     all.appendChild(newArea);
-    document.getElementById('obvius_rep_area_count').value = count;
+    obvius_rep_area_count = count;
     newArea.scrollIntoView(true);
 }
 
@@ -1599,13 +1658,13 @@ function merge_rootDoc_repeatables(rootDoc) {
 		    fields.push(opts[fidx].value);
 	    }
 	    if ( title.value && fields.length > 0 ) {
-		tmpxml += '<repeatable><title>' + title.value + '</title>';
-		tmpxml += '<fields>';
+		tmpXML += '<repeatable><title>' + title.value + '</title>';
+		tmpXML += '<repfields>';
 		for (var fidx = 0; fidx < fields.length; fidx++) {
-		    tmpxml += '<field><name>' + fields[fidx] + '</name>';
-		    tmpxml += '<title>' + obvius_field_name_marker[fields[fidx]] + '</title></field>';
+		    tmpXML += '<repfield><name>' + fields[fidx] + '</name>';
+		    tmpXML += '<title>' + obvius_field_name_marker[fields[fidx]] + '</title></repfield>';
 		}
-		tmpxml += '</fields></repeatable>';
+		tmpXML += '</repfields></repeatable>';
 	    }
 	}
     }
