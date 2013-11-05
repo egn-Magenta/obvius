@@ -149,15 +149,17 @@ sub view {
 ########################################################################
 sub get_solr_fields  {
     my($self, $obvius) = @_;
+    ### To PERL string conversion is only necessary on old_db_model
+    my $perlConv = $obvius->can('schema') ? undef : \&Obvius::SolrConvRoutines::toPERL;
     ### Standard fields exported to SOLR
     my $fieldmap = {
 	'Id'             => ['d', 'id'],
 	'published'      => ['f', 'published', \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
 	'docdate'        => ['f', 'docdate',   \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
-	'content'        => ['f', 'content', \&Obvius::SolrConvRoutines::toPERL],
-	'teaser'         => ['f', 'teaser', \&Obvius::SolrConvRoutines::toPERL],
+	'content'        => ['f', 'content', $perlConv],
+	'teaser'         => ['f', 'teaser', $perlConv],
 	'Path'           => ['d', 'path'],
-	'title'          => ['f', 'title', \&Obvius::SolrConvRoutines::toPERL],
+	'title'          => ['f', 'title', $perlConv],
 	'Lang'           => ['v', 'lang'],
 	'Type'           => ['v', 'type', sub { my $doct = $obvius->{DOCTYPES}->[shift @_];
 						return $doct ? $doct->Name(): '' }],
