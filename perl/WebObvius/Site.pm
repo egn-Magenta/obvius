@@ -156,9 +156,14 @@ sub obvius_connect {
     $fieldtypes = $this->{OBVIUS_ARGS}->{fieldtypes};
     $fieldspecs = $this->{OBVIUS_ARGS}->{fieldspecs};
 
+    my $passphrase = $this->{OBVIUS_ARGS}->{'tripleDES_pphr'} || '';
+
     $this->tracer($req, $user||'-user', $passwd||'-passwd') if ($this->{DEBUG});
     
-    $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs, log => $this->{LOG});
+    $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, 
+			 $fieldtypes, $fieldspecs, log => $this->{LOG},
+			 'encryption_pphr' => $passphrase);
+
     return undef unless ($obvius);
     $obvius->param(LANGUAGES=>$this->get_language_preferences($req));
 
