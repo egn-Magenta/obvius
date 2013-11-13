@@ -105,8 +105,8 @@ sub export_to_solr {
 	$fieldlist = [];
 	foreach my $mkey ( keys(%$fieldsmap) ) {
 	    my $spec = $fieldsmap->{$mkey};
-	    push(@$fieldlist, $spec->[1]) if ( $spec->[0] eq 'f' );
-	    push(@$fieldlist, $spec->[4]) if ( $spec->[3] || '' eq 'f' );
+	    push(@$fieldlist, $mkey) if ( $spec->[0] eq 'f' );
+	    push(@$fieldlist, $spec->[4]) if ( ($spec->[3] || '') eq 'f' );
 	}
 	$SOLR_FIELD_LISTS{$doctype->Id} = $fieldlist;
     }
