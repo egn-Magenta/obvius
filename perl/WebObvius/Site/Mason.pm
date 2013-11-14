@@ -90,6 +90,8 @@ sub new
 
      my $basedir = $options{base};
 
+     my $obvius_config = $options{obvius_config} || new Obvius::Data;
+
      unless ( $new_mason) {
           $new->{parser} = new HTML::Mason::Parser(
                                                    in_package    => $class,
@@ -132,12 +134,27 @@ sub new
      # false (we still want headers sent automatically in admin,
      # because less of the handler() is used there (and more is handled
      # in Mason in admin):
+
+     my %error_options = (
+        error_mode => 'fatal',
+        error_format => 'line'
+     );
+
+     my $debug_mason = $obvius_config->param('debug_mason');
+     unless(defined($debug_mason)) {
+        $debug_mason = $obvius_config->param('debug');
+     }
+
+     if($debug_mason) {
+        $error_options{error_mode} = 'output';
+        $error_options{error_format} = 'html';
+     }
+
      my %apachehandler_options = (
                                   apache_status_title   => 'HTML::Mason: ' . $class,
-                                  error_mode            => 'fatal',
-                                  error_format          => 'line',
                                   decline_dirs          => 0,
                                   auto_send_headers     => (scalar ($class) =~ /::(Common|Public)$/) ? 0 : 1,
+                                  %error_options
                                  );
 
      if ($new_mason) {
@@ -161,7 +178,7 @@ sub new
      }
 
      $new->{is_admin} = $options{is_admin};
-        
+
      return bless $new, $class;
 }
 
@@ -182,9 +199,9 @@ sub access_handler ($$) {
 
      my $uri=$req->uri;
      my $remove = $req->dir_config('RemovePrefix');
-     
+
      $uri =~ s/^\Q$remove\E// if ($remove);
-     
+
      $req->notes(prefix=>($req->dir_config('AddPrefix') || ''));
      $req->notes(uri=>$uri);
      $req->uri($uri) unless ($req->dir_config('AddPrefix'));
@@ -195,8 +212,8 @@ sub access_handler ($$) {
                                           $this->{SUBSITE}->{DOCTYPES},
                                           $this->{SUBSITE}->{FIELDTYPES},
                                           $this->{SUBSITE}->{FIELDSPECS});
-                                          
-                                          
+
+
      return SERVER_ERROR unless ($obvius);
 
      # Cache these structures: (they should be dirtied when the db is updated... XXX)
@@ -214,24 +231,24 @@ sub access_handler ($$) {
 
 sub shave_of_tails {
      my ($uri) = @_;
-     
+
      my @parts = split '/', $uri;
      my $cur = '/';
      my @uris = ('/');
-     
+
      for my $part (@parts) {
           next if ($part eq "" || ! defined $part);
           $cur .= $part . '/';
           push @uris, $cur;
      }
-     
+
      return \@uris;
 }
 
 sub convert_ip_to_number {
      my ($ip) = @_;
      my ($p1, $p2, $p3, $p4, $subnet) = ($ip =~ m!^\s*(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?:\/(\d{1,2}))?\s*$!);
-     
+
      if ($p1) {
           return ($p1 * (1 << 24) + $p2 * (1 << 16) + $p3 * (1 << 8) + $p4, $subnet);
      } else {
@@ -252,7 +269,7 @@ sub check_ip {
           my ($num, $significance) = convert_ip_to_number($rule);
           my $subnet = 0;
           next if !$num;
-          
+
           if (!defined $significance) {
                $significance = 32;
                my $bits = 255;
@@ -275,20 +292,20 @@ sub check_ip {
 
 sub public_authen_handler {
      my ($this, $req) = @_;
-     
+
      return OK if !$req->is_main;
-     
-     my $obvius = $this-> obvius_connect($req, undef, undef, 
+
+     my $obvius = $this-> obvius_connect($req, undef, undef,
                                          $this->{SUBSITE}->{DOCTYPES},
                                          $this->{SUBSITE}->{FIELDTYPES},
                                          $this->{SUBSITE}->{FIELDSPECS});
-     
+
      return SERVER_ERROR if !$obvius;
-     
+
      my $uri = $req->notes('uri');
      $uri = "/" . $uri . "/";
      $uri =~ s!/+!/!g;
-     
+
      my $uris = shave_of_tails($uri);
 
      if (!@$uris) {
@@ -296,37 +313,37 @@ sub public_authen_handler {
           return SERVER_ERROR;
      }
      my $params = join ',', (('?') x @$uris);
-     
+
      my $forbidden = $obvius->execute_select(
               "select docid from docid_path dp join forbidden_docs using (docid) where
                dp.path in ($params) order by dp.path desc limit 1", @$uris);
      return OK if !@$forbidden;
 
      my $docid = $forbidden->[0]{docid};
-     
+
      $req->notes(nocache =>  1);
      $req->notes(OBVIUS_SIDE_EFFECTS =>  1 );
-     $req->no_cache(1);          
-          
-     my $allowed_ips = $obvius->execute_select("select ip from forbidden_docs_ips 
+     $req->no_cache(1);
+
+     my $allowed_ips = $obvius->execute_select("select ip from forbidden_docs_ips
                                                      where docid=?", $docid);
      my @ips = grep { $_ } map { $_->{ip} } @$allowed_ips;
      return OK if check_ip(\@ips, $req);
 
      my $res = $this->session_authen_handler($req);
-     return $res if ($res ne OK); 
-     
+     return $res if ($res ne OK);
+
      return OK if $obvius->is_admin;
-     
-     my $users = $obvius->execute_select("select user from forbidden_docs_users 
+
+     my $users = $obvius->execute_select("select user from forbidden_docs_users
                                           where docid=?", $docid);
-     
+
      my $cur_user = $obvius->get_user($obvius->{USER});
      for my $user (@$users) {
           return OK if $user->{user} == $cur_user->{id};
      }
 
-     my $groups = $obvius->execute_select("select grp from forbidden_docs_groups 
+     my $groups = $obvius->execute_select("select grp from forbidden_docs_groups
                                                  where docid = ?", $docid);
 
      my %user_groups;
@@ -339,34 +356,34 @@ sub public_authen_handler {
           return OK if $user_groups{$grp->{grp}};
      }
 
-     # If no specific access-choices have been made, allow everybody that is logged in. 
+     # If no specific access-choices have been made, allow everybody that is logged in.
      return !@$groups && !@$users && !@ips ? OK : FORBIDDEN;
 }
-     
+
 # handler - Handles incoming Apache requests when using Mason as template system.
 sub handler ($$) {
      my ($this, $req) = @_;
 
      my $obvius = $this->obvius_connect($req);
-     $req->no_cache(1) if $obvius->{OBVIUS_CONFIG}{CACHE_OFF};     
+     $req->no_cache(1) if $obvius->{OBVIUS_CONFIG}{CACHE_OFF};
 
      $req->pnotes('req_start_timestamp' => [Time::HiRes::gettimeofday])
         if($obvius->config->param('time_debug_threshold'));
 
      my $is_admin = $this->param('is_admin');
      $req->notes(is_admin => $is_admin);
-     
+
      $this->tracer($req) if ($this->{DEBUG});
      my $benchmark = Obvius::Benchmark-> new('mason::handler') if $this-> {BENCHMARK};
-     
+
      $req->notes(now => strftime('%Y-%m-%d %H:%M:%S', localtime($req->request_time)));
 
      my $doc=$req->pnotes('document');
      return NOT_FOUND if (!$obvius->is_public_document($doc) && !$is_admin);
      my $vdoc = $this->obvius_document_version($req, $doc);
-     
+
      return NOT_FOUND unless ($vdoc);
-     
+
      return FORBIDDEN if (!$is_admin && ($vdoc->Expires lt $req->notes('now')));
      return FORBIDDEN if ($is_admin && !$obvius->can_view_document($doc));
 
@@ -374,9 +391,15 @@ sub handler ($$) {
      $req->notes('obvius_cache_extra' => $vdoc->param('Version'));
 
      my $doctype = $obvius->get_version_type($vdoc);
-     
+
+    my $special_handler = $this->get_special_handler($req);
+    if($special_handler) {
+        my $res = $special_handler->apache_handler($req, $obvius, $doc, $vdoc);
+        return $res if(defined($res));
+    }
+
      my $output = $this->create_output_object($req,$doc,$vdoc,$doctype,$obvius);
-     
+
      # The document can have a "alternate_location" method if the user
      # should be redirected to a different URL.
      # The method should return a path or URL to the new location.
@@ -389,7 +412,7 @@ sub handler ($$) {
      # For collecting newsletter statistics:
      my $collect_newsletter_stats = ($obvius->config->param('newsletter_collect_stats') || 0);
      if ($collect_newsletter_stats) {
-	 eval { 
+	 eval {
 	     require KU::Newsletter::Stats;
 	     KU::Newsletter::Stats::click(WebObvius::Apache::apache_module('Request')-> new($req));
 	 };
@@ -397,8 +420,8 @@ sub handler ($$) {
 	     warn $@;
 	 }
      }
-     
-     # Documents returning data which shouldnt be handled by the portal 
+
+     # Documents returning data which shouldnt be handled by the portal
      # (eg. a download document), but directly
      # by the browser should have a method called "raw_document_data"
      # Please also note that a slash at the end of an uri in admin signifies
@@ -409,51 +432,51 @@ sub handler ($$) {
      # root.
      if (!$is_admin || $req->uri !~ m|/$|) {
           my $upgraded_req = WebObvius::Apache::apache_module('Request')-> new($req);
-          
+
           # Check if we should just serve data using an internal redirect:
           my $other_path = $doctype->internal_redirect($doc, $vdoc, $obvius, $upgraded_req, $output);
           if($other_path) {
                $upgraded_req->internal_redirect($other_path);
                return OK;
           }
-          
-	  my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) = 
+
+	  my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) =
 	    $doctype->raw_document_data($doc, $vdoc, $obvius, $upgraded_req, $output);
 
 	  if ($data || $path) {
-	       my %args = (mime_type => $mime_type, 
-			   data => $data, 
-			   output_filename => $filename, 
+	       my %args = (mime_type => $mime_type,
+			   data => $data,
+			   output_filename => $filename,
 			   con_disp => $con_disp,
 			   path => $path);
                if ($extra_headers){
                     $req->header_out($_ => $extra_headers->{$_}) for keys %$extra_headers;
                }
-	       my $status = defined $data ? 
-		 $this->output_data($req, %args) : 
+	       my $status = defined $data ?
+		 $this->output_data($req, %args) :
 		 $this->output_file($req, %args);
 
 	       $req->no_cache(1) if ($is_admin);
 	       execute_cache($obvius, $req, $data, $filename) if ($status == OK);
-               
+
 	       return $status;
 	  }
      }
-     
+
      if ($output->param("redirect")) {
 	 return $this->redirect($req, $output->param("redirect"), 'force-external');
      }
-     
+
      $req->content_type('text/html') unless $req->content_type;
      $req->content_type('text/html') if $req->content_type =~ /directory$/;
      if ($req->content_type ne 'text/html') {
           execute_cache($obvius, $req);
           return -1;
      }
-     
+
      $obvius->log->debug("  Mason on " . $req->document_root . $req->notes('prefix') . "/dhandler");
      $req->filename($req->document_root . $req->notes('prefix') . "/dhandler"); # default handler
-     
+
      my $status=$this->execute_mason($req);
      my $html;
      if (defined $this->{'SITE_SCALAR_REF'}) {
@@ -491,7 +514,7 @@ sub handler ($$) {
      return $status;
 }
 
-sub execute_cache {     
+sub execute_cache {
      my ($obvius, $req, $data, $filename ) = @_;
 
      # Check if we have to do time debugging.
@@ -511,7 +534,7 @@ sub execute_cache {
           $cache->save_request_result_in_cache($req, $new_data, $filename);
      }
      $cache->quick_flush($obvius->modified) if ($obvius->modified);
-}    
+}
 
 sub execute_mason {
      my ($this, $req)=@_;
@@ -538,9 +561,9 @@ sub authen_handler ($$) {
      }
 
      # Check password
-     my $obvius = $this->obvius_connect($req, $login, $pw, 
-                                        $this->{SUBSITE}->{DOCTYPES}, 
-                                        $this->{SUBSITE}->{FIELDTYPES}, 
+     my $obvius = $this->obvius_connect($req, $login, $pw,
+                                        $this->{SUBSITE}->{DOCTYPES},
+                                        $this->{SUBSITE}->{FIELDTYPES},
                                         $this->{SUBSITE}->{FIELDSPECS});
      unless ($obvius) {
           $req->note_basic_auth_failure;
@@ -561,77 +584,77 @@ sub authen_handler ($$) {
 
 sub already_logged_in {
      my ($this, $obvius, $req) = @_;
-     
+
      my $session_id;
      my %cookies = Apache::Cookie->fetch;
      $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
-     
+
      return 0 if not $session_id;
 
      my $session_timeout = ($obvius->config->param('login_session_timeout') || 30) * 60;
-     my $session_result = $obvius->execute_select("select login, UNIX_TIMESTAMP() as now, 
-                                                   last_access from login_sessions where 
+     my $session_result = $obvius->execute_select("select login, UNIX_TIMESTAMP() as now,
+                                                   last_access from login_sessions where
                                                    session_id=?", $session_id);
      my $res = $session_result->[0];
      return 0 if not $res;
      $obvius->{USER} = $res->{login};
      $obvius->read_user_and_group_info;
-     
+
      $req->notes(user => $res->{login});
 
-     # If more than a minute has passed since last login update the 
+     # If more than a minute has passed since last login update the
      # timestamp in the database as well:
-     $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP() 
-                                   where session_id=?", $session_id) 
+     $obvius->execute_transaction("UPDATE login_sessions SET last_access=UNIX_TIMESTAMP()
+                                   where session_id=?", $session_id)
        if($res->{now} - $res->{last_access} > 60);
-     
+
      return 1;
 }
 
-     
+
 sub session_authen_handler ($$) {
     my ($this, $req) = @_;
 
     return OK if not $req->is_initial_req;
-    my $benchmark = Obvius::Benchmark-> new('mason::session_authen_handler') 
+    my $benchmark = Obvius::Benchmark-> new('mason::session_authen_handler')
       if $this-> {BENCHMARK};
 
-    my $obvius = $this->obvius_connect($req, 
-                                       undef, 
-                                       undef, 
-                                       $this->{SUBSITE}->{DOCTYPES}, 
-                                       $this->{SUBSITE}->{FIELDTYPES}, 
+    my $obvius = $this->obvius_connect($req,
+                                       undef,
+                                       undef,
+                                       $this->{SUBSITE}->{DOCTYPES},
+                                       $this->{SUBSITE}->{FIELDTYPES},
                                        $this->{SUBSITE}->{FIELDSPECS});
 
     return SERVER_ERROR if not $obvius;
 
     return OK if $this->already_logged_in($obvius, $req);
-    
+
     my $r = WebObvius::Apache::apache_module('Request')-> new($req);
 
     my $login = $r->param('obvius_sessionlogin_login');
     my $password = $r->param('obvius_sessionlogin_password');
     my $secret = $r->param('obvius_sessionlogin_secret') || '';
 
-    goto redirect if 
+    goto redirect if
       !$r->param('obvius_sessionlogin_submit');
     goto login_failed if !$password || !$login;
 
     my $userdata = $obvius->{USERS}->{$login};
     goto redirect if not $userdata;
-    
+
     my $hash = md5_hex($login . $userdata->{passwd} . $secret);
-    
+
     if ($hash ne $password) {
          $obvius->{USER} = $login;
          $obvius->{PASSWORD} = $password;
          goto login_failed if not $obvius->validate_user;
          $this->register_session($obvius, $r, $login);
          return OK;
-    } 
-    
+    }
+
     $this->register_session($obvius, $r, $login);
-    
+
     return OK;
 
   login_failed:
@@ -644,35 +667,35 @@ sub session_authen_handler ($$) {
 sub register_session {
      my ($this, $obvius, $req, $login) = @_;
      my $benchmark = Obvius::Benchmark-> new('mason::register_session') if $this-> {BENCHMARK};
-     
+
      my $remember_me = !!$req->param('obvius_sessionlogin_remember_me');
      my $try_n_times = 10;
      my $session_id;
      do {
 	  $session_id = md5_hex(time . rand);
-	  
+
 	  eval {
                $obvius->execute_command("insert into login_sessions
                                            (login, session_id, last_access, permanent) values
-                                           (?, ?, UNIX_TIMESTAMP(), ?)", 
+                                           (?, ?, UNIX_TIMESTAMP(), ?)",
                                            $login, $session_id, $remember_me
                                        );
                };
      } while ($try_n_times-- and $@);
- 
+
      die "Can't create session, maybe because of: $@" if $@;
-     
+
      my $expires = $remember_me ? "Expires=Fri, 21-Nov-2036 06:00:00 GMT" : '';
-     $req->headers_out->add("Set-Cookie", 
+     $req->headers_out->add("Set-Cookie",
                             "obvius_login_session=$session_id; path=/;${expires};  HttpOnly");
      $req->notes(user => $login);
      $obvius->{USER} = $login;
 
      return $session_id;
 }
-     
-     
-     
+
+
+
 sub authz_handler ($$) {
      my ($this, $req) = @_;
 
@@ -697,7 +720,7 @@ sub rulebased_authen_handler ($$)
      # stage 1: try to access the document as nobody
      $obvius = $this-> obvius_connect(
                                       $req,
-                                      $login = 'nobody', 
+                                      $login = 'nobody',
                                       undef,
                                       $this->{SUBSITE}->{DOCTYPES},
                                       $this->{SUBSITE}->{FIELDTYPES},
@@ -797,7 +820,7 @@ sub expand_output {
      my $filename=$site->param('comp_root')->[0]->[1] . '/switch'; # Grab the docroot from the setup.pl
      $req->filename($filename);
      $req->pnotes('OBVIUS_OUTPUT'=>$output);
-    
+
      my $status=$this->execute_mason($req);
 
      my $s='We have an anomaly, the subsite centerpiece was unable to generate.';
@@ -812,16 +835,16 @@ sub expand_output {
 
 sub set_mime_type_and_content_disposition {
      my ($this, $req, %options) = @_;
-     
+
      my $mime_type = $options{mime_type} || 'application/octet-stream';
-     
+
      $req->content_type($mime_type);
      $this->set_expire_header($req, expire_in=>30*24*60*60); # 1 month
-     
+
      my @con_disps;
      push @con_disps, $options{con_disp} if $options{con_disp};
      push @con_disps,  "filename=$options{output_filename}" if $options{output_filename};
-     
+
      if (@con_disps) {
           my $con_disp_header = join '; ', @con_disps;
           $req->header_out('Content-Disposition', $con_disp_header);
@@ -836,10 +859,10 @@ sub set_mime_type_and_content_disposition {
 
 sub output_data {
      my ($this, $req, %options) = @_;
-     
+
      my $con_disp = $options{con_disp};
      my $new_data = $options{data};
-     
+
      my $data_ref = ref $new_data ? $new_data : \$new_data;
      if ( Encode::is_utf8($$data_ref)) {
         Encode::_utf8_off($$data_ref);
@@ -850,15 +873,15 @@ sub output_data {
 
      # The spec. says that it is not necessary to advertise this:
      # $req->header_out('Accept-Ranges'=>'bytes');
-     
+
      # Handle Range: N-M
      my $range=$req->headers_in->{Range};
-     
+
      my $len = length($$data_ref);
-     
+
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
           my ($start, $stop)=($1 || 0, $2 || $len);
-          
+
           # Sanity check range:
           if ($start>$len or $stop>$len or $start>$stop) {
                $req->header_out('Content-Range'=>'0-0/' . $len);
@@ -866,7 +889,7 @@ sub output_data {
                $req->send_http_header;
                return OK;
           }
-          
+
           $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . $len);
           $req->set_content_length($stop-$start);
           $req->status(206); # "Partial content"
@@ -886,9 +909,9 @@ sub output_data {
 sub output_file {
      my ($this, $req, %options) = @_;
      $this->set_mime_type_and_content_disposition($req, %options);
-     
+
      my $path = $options{path};
-     
+
      my @file_stats = stat($path);
      die "Couldn't find file" if not @file_stats;
      my $size = $file_stats[7];
@@ -896,7 +919,7 @@ sub output_file {
      my $range=$req->headers_in->{Range};
      if (defined $range and $range=~/^bytes=(\d*)[-](\d*)$/) {
           my ($start, $stop)=($1 || 0, $2 || $size);
-          
+
           # Sanity check range:
           if ($start >= $stop || $stop > $size ) {
                $req->header_out('Content-Range'=>'0-0/' . $size);
@@ -904,15 +927,15 @@ sub output_file {
                $req->send_http_header;
                return OK;
           }
-               
+
           $req->header_out('Content-Range'=>'bytes ' . $start . '-' . $stop . '/' . $size);
           $req->set_content_length($stop-$start);
           $req->status(206); # "Partial content"
           $req->send_http_header;
           $req->sendfile($path, $start, $stop - $start);
           return OK;
-     } 
-     
+     }
+
      $req->set_content_length($size);
      $req->send_http_header;
      $req->sendfile($path) unless ($req->header_only);

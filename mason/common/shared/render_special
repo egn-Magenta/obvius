@@ -1,0 +1,11 @@
+<& $comp_path, %ARGS &>\
+<%args>
+$comp
+</%args>\
+<%init>
+return '' unless($comp);
+my $special_handler = $r->pnotes('special_handler');
+return '' unless($special_handler);
+my $comp_path = $special_handler->get_special_component_path($comp);
+return '' unless($comp_path);
+</%init>

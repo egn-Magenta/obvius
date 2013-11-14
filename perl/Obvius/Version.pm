@@ -31,12 +31,16 @@ package Obvius::Version;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 use Obvius::Data;
 use WebObvius::InternalProxy;
 
 our @ISA = qw( Obvius::Data );
 our $VERSION="1.0";
+
+our %SOLR_MAPS = ();
+our %SOLR_FIELD_LISTS = ();
 
 use Carp;
 
@@ -58,7 +62,6 @@ sub new {
     my $self = $class->SUPER::new($rec);
 
     $self->{FIELDS} = undef;
-
     return $self;
 }
 
@@ -78,6 +81,80 @@ sub real_doctype {
      } else {
 	  return $obvius->get_doctype_by_id($this->Type);
      }
+}
+
+####################################################
+######## Export to SOLR
+####################################################
+sub export_to_solr {
+    my($self, $obvius, $doc) =  @_;
+
+    ### Get document if not supplied
+    $doc = ($doc && ref($doc) eq 'Obvius::Document' ? $doc : 
+	    $obvius->get_doc_by_id($self->DocId));
+    my $doctype = $obvius->get_document_type($doc);
+
+    #### Get specs (either from "cache" og by asking doctype object)
+    my $fieldsmap = $SOLR_MAPS{$doctype->Id};
+    my $fieldlist = $SOLR_FIELD_LISTS{$doctype->Id};
+    unless ( $fieldsmap ) {
+	if ( $doctype->Name =~ /^GeoNat/ ) {
+	    print STDERR "GotOne\n";
+	}
+	$fieldsmap = $SOLR_MAPS{$doctype->Id} = $doctype->get_solr_fields($obvius);
+	$fieldlist = [];
+	foreach my $mkey ( keys(%$fieldsmap) ) {
+	    my $spec = $fieldsmap->{$mkey};
+	    push(@$fieldlist, $mkey) if ( $spec->[0] eq 'f' );
+	    push(@$fieldlist, $spec->[4]) if ( ($spec->[3] || '') eq 'f' );
+	}
+	$SOLR_FIELD_LISTS{$doctype->Id} = $fieldlist;
+    }
+
+    #### Get version fields
+    $obvius->get_version_fields($self, $fieldlist);
+
+    my $specs = {};
+    foreach my $key ( keys(%$fieldsmap) ) {
+	my $entry = $fieldsmap->{$key};
+	$key =~ s/^\*+|\*+$//g;
+	my $conv = $entry->[2];
+	my $value;
+	if ( $entry->[0] eq 'd' ) {
+	    $value = $doc->$key;
+	} elsif ( $entry->[0] eq 'v' ) {
+	    $value = $self->$key;
+	} elsif ( $entry->[0] eq 'f' ) {
+	    $value = $self->field($key);
+	}
+	if ( (!ref($value) && $value) || (ref($value) eq 'ARRAY' && $#$value > -1) ) {
+	    $specs->{$entry->[1]} = $conv ? $conv->($value) : $value;
+	}
+	else {
+	    #### Check for alternative CMS value and use it if so
+	    if ( $key = $entry->[4] ) {
+		if ( $entry->[3] eq 'd' ) {
+		    $value = $doc->$key;
+		} elsif ( $entry->[3] eq 'v' ) {
+		    $value = $self->$key;
+		} elsif ( $entry->[3] eq 'f' ) {
+		    $value = $self->field($key);
+		}
+		if ( (!ref($value) && $value) || (ref($value) eq 'ARRAY' && $#$value > -1) ) {
+		    $specs->{$entry->[1]} = $conv ? $conv->($value) : $value;
+		}
+	    }
+	}
+    }
+
+    return $specs;
+}
+
+sub delete_from_solr {
+    my($self, $obvius, $doc) =  @_;
+
+    my $specs = { 'id' => $self->DocId };
+    print STDERR Dumper($specs);
 }
      
 
