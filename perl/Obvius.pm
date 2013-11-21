@@ -2881,7 +2881,8 @@ sub send_mail {
  
      $smtp->mail($from) or return;
      $smtp->to($to) or return;
-     $smtp->data([$subject ? "Subject: $subject\n" : '', $msg]) or return;
+     $smtp->data(["From: $from\n", "To: $to\n",
+                  $subject ? "Subject: $subject\n" : '', $msg]) or return;
      $smtp->quit or return;
 }
 
