@@ -2859,8 +2859,8 @@ sub get_editpages {
 
 sub send_mail {
      my ($this, $to, $msg, $from, $subject, %options) = @_;
-     
-     $from ||= 'noreply@adm.ku.dk';
+
+     $from ||= $this->config->param('email_from_address') || 'noreply@adm.ku.dk';
 
      my $server = $this->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
@@ -2869,7 +2869,7 @@ sub send_mail {
      my $mail_debug_level = 1;
      $mail_debug_level = $options{mail_debug_level}
 	if(defined($options{mail_debug_level}));
-     
+
      my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => $mail_debug_level)
 	or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
      if ( $mail_error ) {
@@ -2878,11 +2878,16 @@ sub send_mail {
          print STDERR "\n$today: Obvius send_mail: $mail_error\n";
          return;
      }
- 
+
      $smtp->mail($from) or return;
      $smtp->to($to) or return;
-     $smtp->data(["From: $from\n", "To: $to\n",
-                  $subject ? "Subject: $subject\n" : '', $msg]) or return;
+     my @mailparts = ($msg);
+
+     unshift(@mailparts, "Subject: $subject\n") if($subject);
+     unshift(@mailparts, "To: $to\n") unless($msg =~ m!^To:!m);
+     unshift(@mailparts, "From: $from\n") unless($msg =~ m!^From:!m);
+
+     $smtp->data(\@mailparts) or return;
      $smtp->quit or return;
 }
 
