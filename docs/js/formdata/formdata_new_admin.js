@@ -12,6 +12,12 @@ var formdata_option_dialog_height = 180;
 var formdata_valrule_dialog_width = 400;
 var formdata_valrule_dialog_height = 250;
 
+var scriptmode = false;
+
+function formdata_set_scriptmode() {
+    //Activates field attributes initialvalue and hidden
+    scriptmode = true;
+}
 
 function formdata_init(elem) {
     // Unhide the advanced editing controls:
@@ -100,12 +106,26 @@ function formdata_populate_fieldtable(name) {
 
             tr.appendChild(unique_td);
 
+	    if ( scriptmode ) {
+		var hidden_td = document.createElement('td');
+		var hidden_value = obj.hidden || '';
+		if(hidden_value == 1) {
+                    hidden_td.innerHTML = formdata_translations['Yes'];
+		} else {
+                    hidden_td.innerHTML = formdata_translations['No'];
+		}
+
+		tr.appendChild(hidden_td);
+	    }
+
             var edit_td = document.createElement('td');
             var edit_a = document.createElement('a');
             edit_a.href = document.location.href;
 
             // Hmmm, have to wrap this in eval to avoid problems with global variables
             var edit_url = "/admin/?obvius_app_formdata=1&mode=edit&field=" + obj.name + "&fieldname=" + name;
+            edit_url = edit_url + "&scriptmode=" + ( scriptmode ? '1' : '0' );
+	    edit_url = edit_url + "&edittype=" + obj.type;
             var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height;
             eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit', '" + window_options + "'); return false; }");
             edit_a.innerHTML = formdata_translations['Edit'];
@@ -215,7 +235,7 @@ function formdata_add_new(elem) {
     }
 
 
-    window.open("/admin/?obvius_app_formdata&mode=edit&new=" + type_value + "&fieldname=" + elem.name, "formdata_edit", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height);
+    window.open("/admin/?obvius_app_formdata&mode=edit&new=" + type_value + "&fieldname=" + elem.name + "&scriptmode=" + (scriptmode ? '1' : '0'), "formdata_edit", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height);
 }
 
 
@@ -252,7 +272,11 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         tmpXML += " <field>";
         tmpXML += "     <name></name>";
         tmpXML += "     <title></title>";
+        if ( scriptmode )
+	    tmpXML += "     <initialvalue></initialvalue>";
         tmpXML += "     <type>" + is_new + "</type>";
+        if ( scriptmode )
+            tmpXML += "     <hidden>0</hidden>";
         tmpXML += "     <mandatory>0</mandatory>";
         tmpXML += "     <unique>0</unique>";
         tmpXML += "     <imagepath></imagepath>";
@@ -287,6 +311,8 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
     document.pageform.name.value = fieldObj.name || "";
     document.pageform.description.value = fieldObj.description || "";
     document.pageform.imagepath.value = fieldObj.imagepath || "";
+    if ( scriptmode )
+	document.pageform.initialvalue.value = fieldObj.initialvalue || "";
 
     document.getElementById('type_field').innerHTML = formdata_translations['field_type_' + fieldObj.type] || 'unknown fieldtype';
 
@@ -298,6 +324,18 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         document.getElementById('options').style.display = 'none';
     }
 
+    if (scriptmode && type != 'text' && type != 'cmspath') {
+        // Hide 'hidden' and 'initial-value' controls:
+        document.getElementById('hidden').style.display = 'none';
+        document.getElementById('initial-value').style.display = 'none';
+    }
+
+    if (type == 'cmspath') {
+        document.getElementById('options').style.display = 'none';
+        document.getElementById('validaterules').style.display = 'none';
+        document.getElementById('image').style.display = 'none';
+        document.getElementById('description').style.display = 'none';
+    }
     if (type == 'email' ) {
         document.getElementById('options').style.display = 'none';
         document.getElementById('validaterules').style.display = 'none';
@@ -383,6 +421,16 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
     } else {
         document.getElementById('unique_yes').checked = 0;
         document.getElementById('unique_no').checked = 1;
+    }
+
+    if ( scriptmode ) {
+	if(fieldObj.hidden == 1) {
+            document.getElementById('hidden_yes').checked = 1;
+            document.getElementById('hidden_no').checked = 0;
+	} else {
+            document.getElementById('hidden_yes').checked = 0;
+            document.getElementById('hidden_no').checked = 1;
+	}
     }
 
     // Populate params:
@@ -710,8 +758,25 @@ function formdata_save_field_form_data(fieldNode) {
         mandNode.appendChild(newMand);
     }
 
-    var unique_value = document.getElementById('unique_yes').checked ? 1 : 0;
+    if ( scriptmode ) {
+	var hidden_value = document.getElementById('hidden_yes').checked ? 1 : 0;
+	var hiddenNode = fieldNode.getElementsByTagName('hidden').item(0);
+	
+	// Can't be sure if hidden is there, so if it doesn't exist, create it:
+	if(! hiddenNode) {
+            hiddenNode = fieldNode.getOwnerDocument().createElement('hidden');
+            fieldNode.appendChild(hiddenNode);
+	}
 
+	var hiddenText = fieldNode.getOwnerDocument().createTextNode(hidden_value);
+	if(hiddenNode.getFirstChild()) {
+            hiddenNode.replaceChild(hiddenText, hiddenNode.getFirstChild());
+	} else {
+            hiddenNode.appendChild(hiddenText);
+	}
+    }
+
+    var unique_value = document.getElementById('unique_yes').checked ? 1 : 0;
     var uniqueNode = fieldNode.getElementsByTagName('unique').item(0);
 
     // Can't be sure if unique is there, so if it doesn't exist, create it:
@@ -727,6 +792,22 @@ function formdata_save_field_form_data(fieldNode) {
         uniqueNode.appendChild(uniqueText);
     }
 
+    if ( scriptmode ) {
+	// initialvalue:
+	var ivalNode = fieldNode.getElementsByTagName('initialvalue').item(0);
+        if(! ivalNode) {
+            // Create an intialvalue node if none was present
+            ivalNode = fieldNode.getOwnerDocument().createElement('initialvalue');
+            fieldNode.appendChild(ivalNode);
+	}
+        var ival_value = document.pageform.initialvalue.value || "";
+        var newIval = ivalNode.getOwnerDocument().createTextNode(ival_value);
+        if(ivalNode.getFirstChild()) {
+            ivalNode.replaceChild(newIval, ivalNode.getFirstChild());
+	} else {
+            ivalNode.appendChild(newIval);
+	}
+    }
 
     // Imagepath:
     var imgNode = fieldNode.getElementsByTagName('imagepath').item(0);
