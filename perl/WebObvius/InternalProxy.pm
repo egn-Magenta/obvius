@@ -105,17 +105,17 @@ sub create_internal_proxy_document {
 	  
      my $parent = $obvius->get_doc_by_id($options{parent});
      my $error;
-     
-     my ($docid, $version) = $obvius->create_new_document (
-							    $parent,
-							    $options{name},
-	                				    $doctype_id->Id,
-							    $options{lang},
-							    $compatible_field_values,
-							    $options{owner},
-							    $options{grpid},
-							    \$error
-							  );
+
+    my ($docid, $version) = $obvius->create_new_document (
+        $parent,
+        $options{name},
+        $doctype_id->Id,
+        $options{lang},
+        $compatible_field_values,
+        $obvius->get_userid($options{owner}),
+        $options{grpid},
+        \$error
+    );
      die $error if ($error);
 
      $this->new_internal_proxy_entry($docid, $version, $reference_doc->Id, \@overloaded_fields);
