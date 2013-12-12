@@ -331,6 +331,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
             if(formdata_get_node_text(names.item(i)) == fieldname) {
                 // Need to clone here since we might have to replace it later
                 fieldNode = names.item(i).parentNode.cloneNode(true);
+		break;
             }
         }
     }
@@ -1536,23 +1537,29 @@ function reflectFields_on_repeatables() {
 	var select = document.getElementById('obvius_repeated_area_fields_' + curindex);
 	var opts = select.children;
 	var optsMap = {};
+
+	/* Find currently selected */
 	for (var selidx = 0; selidx < opts.length; selidx++) {
 	    var curnam = opts[selidx].value;
-	    if ( ! obvius_field_name_marker[curnam] ) {
-		select.removeChild(opts[selidx]);
-	    } else {
+	    var cursel = opts[selidx].selected;
+	    if ( curnam && cursel ) {
 		optsMap[curnam] = true;
 	    }
 	}
+
+	/* Delete all options */
+	while (select.firstChild) {
+	    select.removeChild(select.firstChild);
+	}
+
+	/* Insert all "new" field */
 	for (var namekey in obvius_field_name_marker) {
-	    if ( optsMap[namekey] ) {
-		; //do nothing
-	    } else {
-		var newsel = document.createElement('option');
-		newsel.setAttribute('value', namekey);
-		newsel.innerHTML = obvius_field_name_marker[namekey];
-		select.appendChild(newsel);
-	    }
+	    var theopt = document.createElement('option');
+	    theopt.value = namekey;
+	    theopt.innerHTML = obvius_field_name_marker[namekey];
+	    if ( optsMap[namekey] )
+		theopt.selected = true;
+	    select.appendChild(theopt);
 	}
     }
 }
