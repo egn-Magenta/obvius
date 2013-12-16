@@ -4,7 +4,8 @@ use strict;
 use warnings;
 
 use Crypt::TripleDES;
-use MIME::QuotedPrint;
+use APR::Base64;
+use Data::Dumper;
 
 our @ISA = ('Obvius::Data');
 our $VERSION="1.0";
@@ -24,16 +25,17 @@ sub log_access {
     my($self, $obvius, $userinfo, $req, $msg) = @_;
     my $dbh = $obvius->dbh;
 
-    $userinfo = Dumper($obvius->{USER}) unless ($userinfo);
+    $userinfo = Dumper($obvius->get_user($obvius->{USER})) unless ($userinfo);
+    $userinfo ||= 'no-user';
     my $reqInfo = $self->createRequestInfo($req);
     $msg ||= '';
 
     my $stmt = $dbh->prepare("INSERT INTO protected_access_logging " .
-			     "(id, timepoint, userinfo, requestinfo, message) values " .
+			     "(id, timeofentry, userinfo, requestinfo, message) values " .
 			     "(NULL, now(), ?, ?, ?)");
     my $result = $stmt->execute($userinfo, $reqInfo, $msg);
     die __PACKAGE__ . "::log_access -> Failed when inserting values: [" . 
-	join(', ',  ($userinfo, $reqInfo, $msg)) . "]\n";
+	join(', ',  ($userinfo, $reqInfo, $msg)) . "]\n" unless ($result);
 }
 
 sub encrypt_data {
@@ -41,14 +43,14 @@ sub encrypt_data {
     $plaindata =~ s/^\s+|\s+$//g;
     my $ct = new Crypt::TripleDES;
     my $cr = $ct->encrypt3($plaindata, $self->{passphrase});
-    $cr = encode_qp($cr);
+    $cr = APR::Base64::encode($cr);
     undef($ct);
     return $cr;
 }
 
 sub decrypt_data {
     my($self, $cipherdata) = @_;
-    $cipherdata = decode_qp($cipherdata);
+    $cipherdata = APR::Base64::decode($cipherdata);
     my $ct = new Crypt::TripleDES;
     my $dt = $ct->decrypt3($cipherdata, $self->{passphrase});
     $dt =~ s/\s+$//;

@@ -104,6 +104,7 @@ use Obvius::Utils;
 use Obvius::Pubauth;
 use Obvius::Annotations;
 use Obvius::Queue;
+use Obvius::EncryptionModule;
 
 
 ########################################################################
