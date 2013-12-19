@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
+<head>
+<title><& translator, da => "Log ud", en => "Log out" &></title>
+<style type="text/css">
+
+body, th, td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+color: #4A4949;
+}
+
+h1 {
+font-size: 1.4em;
+}
+
+
+#mainarea {
+    width: 770px;
+    position: absolute;
+    left: 50%;
+    margin-left: -385px;
+background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
+border: 1px solid #75736E;
+padding-top: 107px;
+}
+
+#content {
+margin-left: -40px;
+text-align: center;
+}
+
+</style>
+</head>
+<body>
+<div id="mainarea">
+<div id="content">
+<p>
+   <& translator,
+      da => "Du er nu logget ud af Obvius CMS.",
+      en =>  "You have now logged out of Obvius CMS." &>
+</p>
+<p>
+    <a href="/system/sso_login.mason?return=<% $origin |u %>">
+      <& translator,
+         da => "Klik her for at logge på med en anden bruger.",
+         en => "Click here to logon with a different user." &>
+</a>
+</p>
+<p>
+&nbsp;
+</p>
+</div>
+</div>
+</body>
+</html>
+<%init>
+my $return_uri = $r->param('origin') || '/';
+my $cookie=new Apache::Cookie($r,
+                                -name => "obvius_login_session",
+                                -value => "",
+                                -expires => undef, # Undef means expire the cookie now
+                                -path => '/',
+                            );
+$cookie->bake($r);
+$r->no_cache(1);
+</%init>
