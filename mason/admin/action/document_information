@@ -85,7 +85,11 @@ function add_key_value () {
       </select>
 % } elsif (defined $show->{type} and $show->{type} eq 'checkbox') {
 %    for my $opt (@{$show->{choices}}) {
-       <% $opt->{name} %> <input <% !$opt->{active} ? 'disabled="disabled"' :'' %>  type="checkbox" name="Remove" value="<% $opt->{value} %>"><br/>
+% # A quite DIRTY way to squeeze in the full user name and not just the log-in name:
+%       my $user_index = rindex($opt->{name}, ':');
+%       my $user_to_display = substr $opt->{name}, ($user_index+2);
+%       my $info_rest = substr $opt->{name}, 0, ($user_index+2);
+       <% $info_rest %><& /shared/display_user, user_name=>$user_to_display &> <input <% !$opt->{active} ? 'disabled="disabled"' :'' %>  type="checkbox" name="Remove" value="<% $opt->{value} %>"><br/>
 %    }
 % } else {
       <% $show->{value} %>
