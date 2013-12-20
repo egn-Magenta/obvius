@@ -164,7 +164,7 @@ use URI::Escape;
 use Digest::MD5 qw(md5_hex);
 
 sub create_ticket_and_redirect {
-    my ($login, $origin, $permanent, $obvius, $m, $req) = @_;
+    my ($sso_session_id, $origin, $obvius, $m, $req) = @_;
 
     my $ticketcode = md5_hex(time . rand);
     my $ip_match = get_origin_ip_from_request($req);
@@ -172,24 +172,19 @@ sub create_ticket_and_redirect {
 
     my $sth = $obvius->dbh->prepare(q|
         insert into sso_tickets (
-            login,
+            sso_session_id,
             ticketcode,
             origin,
-            ip_match,
-            permanent_request,
             expires
         )
-        values (?,?,?,?,?,DATE_ADD(NOW(), INTERVAL 1 MINUTE))
+        values (?,?,?,DATE_ADD(NOW(), INTERVAL 1 MINUTE))
     |);
 
     $sth->execute(
-        $login,
+        $sso_session_id,
         $ticketcode,
         $origin,
-        $ip_match,
-        $permanent
     );
-
 
     $m->clear_buffer;
     $r->method('GET');
@@ -254,9 +249,8 @@ if(my $sso_cookie = $cookies{obvius_sso_session}) {
         |);
         $updater->execute($id);
         create_ticket_and_redirect(
-            $login,
+            $id,
             $origin,
-            $permanent,
             $obvius,
             $m,
             $r
@@ -289,6 +283,7 @@ if($r->method eq 'POST') {
                 $inserter->execute($session_id, $login, $ip_match, $permanent);
             };
         } while ($try_n_times-- and $@);
+        my $sso_session_id = $inserter->{mysql_insertid};
         die "Can't create session, maybe because of: $@" if $@;
         my $cookie = CGI::Cookie->new(
             -name => "obvius_sso_session",
@@ -296,9 +291,8 @@ if($r->method eq 'POST') {
         );
         $cookie->bake($r);
         create_ticket_and_redirect(
-            $login,
+            $sso_session_id,
             $origin,
-            $permanent,
             $obvius,
             $m,
             $r

@@ -35,22 +35,33 @@ sub minisso_login_handler {
         );
         my $sth = $obvius->dbh->prepare(q|
             select
-                sso_ticket_id,
-                login,
-                permanent_request
+                t.sso_ticket_id,
+                s.login,
+                s.permanent,
+                s.sso_session_id
             from
-                sso_tickets
+                sso_tickets t
+                join
+                sso_sessions s on (
+                    t.sso_session_id = s.sso_session_id
+                )
             where
-                ticketcode = ?
+                t.ticketcode = ?
                 and
-                origin = ?
+                t.origin = ?
                 and
-                ip_match = ?
+                s.ip_match = ?
                 and
-                expires >= NOW()
+                t.expires >= NOW()
         |);
         $sth->execute($ticketcode, $origin_url, $ip_match);
-        if(my ($ticked_id, $login, $permanent) = $sth->fetchrow_array) {
+        my (
+            $ticket_id,
+            $login,
+            $permanent,
+            $sso_session_id
+        ) = $sth->fetchrow_array;
+        if($ticket_id) {
             my $session_id;
             my $inserter = $obvius->dbh->prepare(q|
                 insert into login_sessions (
@@ -58,9 +69,10 @@ sub minisso_login_handler {
                     session_id,
                     last_access,
                     ip_match,
-                    permanent
+                    permanent,
+                    sso_session_id
                 )
-                values (?, ?, UNIX_TIMESTAMP(), ?, ?)
+                values (?, ?, UNIX_TIMESTAMP(), ?, ?, ?)
             |);
             my $try_n_times = 10;
             do {
@@ -70,7 +82,8 @@ sub minisso_login_handler {
                         $login,
                         $session_id,
                         $ip_match,
-                        $permanent
+                        $permanent,
+                        $sso_session_id
                     );
                 };
             } while ($try_n_times-- and $@);
@@ -79,7 +92,7 @@ sub minisso_login_handler {
             # Remove the ticket
             $obvius->dbh->prepare(
                 'delete from sso_tickets where sso_ticket_id = ?'
-            )->execute($ticked_id);
+            )->execute($ticket_id);
 
             my $expires = $permanent ? "Expires=Fri, 21-Nov-2036 06:00:00 GMT" : '';
             $req->headers_out->add(
@@ -107,7 +120,7 @@ sub request_to_origin_url {
 
     my $url;
     my $config = $this->param('obvius_config');
-    if(($ENV{'HTTPS'} || '') eq 'on') {
+    if(($req->subprocess_env('IS_HTTPS') || '') eq 'on') {
         my $https_roothost = $config->param('https_roothost');
         $url = "https://$https_roothost" . $req->uri;
     } else {
@@ -182,6 +195,8 @@ sub already_logged_in {
             )
             and
             ip_match = ?
+            and
+            sso_session_id is not null
     |);
 
     $sth->execute($session_id, $session_timeout, $ip_match);
@@ -211,6 +226,29 @@ sub already_logged_in {
 sub perform_sso_logout {
     my ($this, $req, $obvius) = @_;
 
+    # Delete the sso_session, invalidating all login_sessions that belong
+    # to it
+    my $session_id;
+    my %cookies = CGI::Cookie->fetch;
+    $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
+
+    if($session_id) {
+        my $sth = $obvius->dbh->prepare(q|
+            select
+                sso_session_id
+            from
+                login_sessions
+            where
+                session_id = ?
+        |);
+        $sth->execute($session_id);
+        if(my ($sso_session_id) = $sth->fetchrow_array) {
+            $obvius->dbh->prepare(
+                'delete from sso_sessions where sso_session_id = ?'
+            )->execute($sso_session_id);
+        }
+    }
+
     # Expire the admin-cookie
     my $cookie = CGI::Cookie->new(
         -name => 'obvius_login_session',
@@ -218,13 +256,6 @@ sub perform_sso_logout {
         -expires => '-1M'
     );
     $cookie->bake($req);
-
-    # Delete any sso session for the user
-    if(my $user = $obvius->{USER}) {
-        $obvius->dbh->prepare(
-            'delete from sso_sessions where login = ?'
-        )->execute($user);
-    }
 
     # Make the URL we want to redirect to afterwards
     my $config = $this->param('obvius_config');

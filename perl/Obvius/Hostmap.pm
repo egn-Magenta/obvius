@@ -47,7 +47,6 @@ sub create_hostmap {
     $https_hostmap =~ s!([^/]+)$!https_$1!;
     if(-s $https_hostmap) {
         $options{https_hostmap} = $https_hostmap;
-        print STDERR "Using https hostmap: $https_hostmap\n";
     }
 
     my %new = (
