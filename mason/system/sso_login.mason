@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
+<head>
+<title>
+  <& translator,
+     da => "Godkendelse påkrævet",
+     en => "Authorization required" &>
+</title>
+<style type="text/css">
+body, th, td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+color: #4A4949;
+}
+
+h1 {
+    font-size: 1.4em;
+}
+h4 {
+    font-size: 1em;
+    font-weight: normal;
+}
+
+#mainarea {
+    width: 770px;
+    margin: 0 auto;
+    background: transparent url(/grafik/images/login_top.gif) no-repeat scroll 0 0;
+    border: 1px solid #75736E;
+    padding-top: 107px;
+    text-align: center;
+}
+
+#mainarea label {
+    float: left;
+    font-size: 1.0em;
+    width: 9em;
+    padding: 0;
+    margin: 0;
+}
+p.warning {
+    color: red;
+}
+form {
+    width: 430px;
+    text-align: left;
+    margin: 3em auto 2em;
+}
+fieldset {
+    border: 0;
+}
+fieldset {
+    margin-left: 3em;
+}
+#submit {
+    margin: 0 auto;
+    display: block;
+}
+fieldset #submitDiv {
+    margin-left: -3em;
+    text-align: center;
+}
+
+</style>
+<!--[if IE 8]>
+<style typx="text/css"> fieldset #submit {margin-left:180px;} </style>
+<![endif]-->
+</head>
+<body>
+<div id="mainarea">
+<h1><& translator, da => "Godkendelse påkrævet", en => "Authorization required" &>
+</h1>
+<form action="<% $r->uri %>" method="post" id="loginform">
+<input type="hidden" name="origin" value="<% $origin %>" />
+<fieldset>
+%if($r->param('logged_out')) {
+<p>
+    <& translator,
+        da => "Du er blevet logget ud af Obvius CMS",
+        en => "You have been logged out of Obvius CMS"
+    &>.
+    <& translator,
+        da => "Du kan bruge formularen nedenfor til at logge på igen",
+        en => "You can use the form below to log on again",
+    &>
+</p>
+%}
+
+<h4><& translator,
+     da => "Indtast brugernavn og adgangskode for at logge på Obvius CMS",
+     en => "Please enter your username and password to log onto Obvius CMS"
+&></h4>
+
+%if($login_failed) {
+<p class="warning">
+  <& translator,
+     da => "Fejl i login. Check venligst dine brugeroplysninger og forsøg igen.",
+     en => "Login failed. Please check your credentials and try again." &>
+</p>
+%}
+<div style="margin-bottom: 0.5em">
+    <label for="obvius_sso_login">
+      <& translator, da => 'Brugernavn:', en => 'Username' &>
+    </label>
+    <input style="width: 15em;"
+           type="text"
+           name="obvius_sso_login"
+           id="obvius_sso_login"
+           value="<% $r->param('obvius_sessionlogin_login') %>" />
+</div>
+<div style="margin-bottom: 0.5em">
+    <label for="obvius_sso_password">
+      <& translator, da => 'Adgangskode:', en => 'Password: ' &>
+    </label>
+    <input style="width: 15em;"
+           type="password"
+           name="obvius_sso_password"
+           id="obvius_sso_password"
+           value="" />
+</div>
+<div>
+    <label for="obvius_sso_remember_me">
+      <& translator, da => "Husk mig: ", en => "Remember me: " &>
+    </label>
+    <input
+       type="checkbox"
+       name="obvius_sso_remember_me"
+       id="obvius_sso_remember_me" />
+</div>
+<br />
+<div id="submitDiv">
+<input id="submit" type="submit"
+       name="obvius_sso_submit"
+       value="<& translator, da => 'Log ind', en => 'Log on' &>" />
+</div>
+</fieldset>
+</form>
+<div style="clear: both; border-bottom:solid; border-width: 1px;"></div>
+<div style="margin: 1em;">
+  <center>
+% my $come_from = "http://" . $r->hostname .  $r->uri . "?origin=" . uri_escape($origin);
+  <a
+     href="/system/forgotten_password/?came_from=<% $origin |u %>">
+    <& translator,
+       da => 'Hjælp, jeg har glemt min adgangskode.',
+       en => 'Help, I have forgotten my password.' &>
+  </a>
+</center>
+</div>
+
+</div>
+</body>
+</html>
+<%args>
+$origin => undef
+</%args>
+<%once>
+use WebObvius::RequestTools;
+use Obvius;
+use Obvius::Config;
+use CGI::Cookie;
+use URI::Escape;
+use Digest::MD5 qw(md5_hex);
+
+sub create_ticket_and_redirect {
+    my ($sso_session_id, $origin, $obvius, $m, $req) = @_;
+
+    my $ticketcode = md5_hex(time . rand);
+    my $ip_match = get_origin_ip_from_request($req);
+    $ip_match =~ s!\.\d+$!!;
+
+    my $sth = $obvius->dbh->prepare(q|
+        insert into sso_tickets (
+            sso_session_id,
+            ticketcode,
+            origin,
+            expires
+        )
+        values (?,?,?,DATE_ADD(NOW(), INTERVAL 1 MINUTE))
+    |);
+
+    $sth->execute(
+        $sso_session_id,
+        $ticketcode,
+        $origin,
+    );
+
+    $m->clear_buffer;
+    $r->method('GET');
+    $r->headers_in->unset('Content-length');
+    $r->content_type('text/html');
+
+    my $sep = ($origin =~ /\?/) ? '&' : '?';
+    $r->header_out('Location'=>$origin . $sep . "t=" . $ticketcode);
+
+    $m->abort(302);
+}
+
+sub check_credentials {
+    my ($login, $passwd_in, $obvius) = @_;
+
+    return undef unless($login and $passwd_in);
+
+    my $sth = $obvius->dbh->prepare(q|
+        select passwd from users where login = ?
+    |);
+    $sth->execute($login);
+
+    if(my $passwd = $sth->fetchrow_array) {
+        return (crypt($passwd_in, $passwd) eq $passwd);
+    } else {
+        return 0;
+    }
+}
+</%once>
+<%init>
+my $login_failed;
+
+$origin ||= '/admin/';
+my $ip_match = get_origin_ip_from_request($r);
+$ip_match =~ s!\.\d+$!!;
+
+# First, check for an existing sso session
+my $obvius = Obvius->new(Obvius::Config->new($r->dir_config('site')));
+my %cookies = CGI::Cookie->fetch;
+if(my $sso_cookie = $cookies{obvius_sso_session}) {
+    my $sso_session_id = $sso_cookie->value;
+    my $sth = $obvius->dbh->prepare(q|
+        select
+            sso_session_id,
+            login,
+            permanent
+        from
+            sso_sessions
+        where
+            session_id = ?
+            and
+            ip_match = ?
+            and
+            expires >= NOW()
+    |);
+    $sth->execute($sso_session_id, $ip_match);
+    if(my ($id, $login, $permanent) = $sth->fetchrow_array) {
+        my $updater = $obvius->dbh->prepare(q|
+            update sso_sessions
+            set expires = DATE_ADD(NOW(), INTERVAL 20 HOUR)
+            where sso_session_id = ?
+        |);
+        $updater->execute($id);
+        create_ticket_and_redirect(
+            $id,
+            $origin,
+            $obvius,
+            $m,
+            $r
+        );
+    }
+}
+if($r->method eq 'POST') {
+    my $login = $r->param('obvius_sso_login');
+    my $passwd = $r->param('obvius_sso_password');
+    my $permanent = $r->param('obvius_sso_remember_me') ? 1 : 0;
+
+    # If we don't redirect from here, login has failed
+    $login_failed = 1;
+    if(check_credentials($login, $passwd, $obvius)) {
+        my $inserter = $obvius->dbh->prepare(q|
+            insert into sso_sessions (
+                session_id,
+                login,
+                ip_match,
+                permanent,
+                expires
+            )
+            values (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 20 HOUR))
+        |);
+        my $session_id;
+        my $try_n_times = 10;
+        do {
+            $session_id = md5_hex(time . rand);
+            eval {
+                $inserter->execute($session_id, $login, $ip_match, $permanent);
+            };
+        } while ($try_n_times-- and $@);
+        my $sso_session_id = $inserter->{mysql_insertid};
+        die "Can't create session, maybe because of: $@" if $@;
+        my $cookie = CGI::Cookie->new(
+            -name => "obvius_sso_session",
+            -value => $session_id
+        );
+        $cookie->bake($r);
+        create_ticket_and_redirect(
+            $sso_session_id,
+            $origin,
+            $obvius,
+            $m,
+            $r
+        );
+    }
+}
+</%init>

@@ -1,0 +1,13 @@
+<%init>
+my $siteobj = $r->pnotes('site');
+if($siteobj->can('minisso_login_handler')) {
+    my $dest = $siteobj->perform_sso_logout($r, $obvius);
+    $m->comp('/shared/redirect/', location=>$dest);
+} else {
+    # Just redirect to the old comp
+    $m->comp(
+        '/shared/redirect/',
+        location=>'/system/logout'
+    );
+}
+</%init>
