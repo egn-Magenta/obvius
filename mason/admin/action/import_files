@@ -78,6 +78,24 @@ if ( $r->param( "import_files_do" ) )
 		    print FILE <$fh>;
 		    close(FILE);
 		}
+        
+        # Using unzip instead:
+        @file_details = `unzip -l $zip_path/$filename`; # get a list of the contained files
+        my $begin = 0, $end = 0;
+        my @file_names;
+        foreach my $file ($file_details) {
+            if (rindex($file, '-' && !$begin) {
+                $begin = 1;
+            } elsif (rindex($file, '-' && $begin) {
+                $end = 1;
+            }
+            if ($begin && !$end) {
+                $file_name_index = rindex($file, ' ');
+                $negative_index = $file_name_index * -1;
+                $file_name = substr($file, $negative_index);
+                push(@file_name, $file_name);
+            }
+        }
 		
 		my $zipFile = Archive::Zip->new();
 		unless ( $zipFile->read( "$zip_path/$filename" ) == AZ_OK )
