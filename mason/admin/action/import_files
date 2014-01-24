@@ -79,24 +79,47 @@ if ( $r->param( "import_files_do" ) )
 		    close(FILE);
 		}
         
-        # Using unzip instead:
-        @file_details = `unzip -l $zip_path/$filename`; # get a list of the contained files
-        my $begin = 0, $end = 0;
+        # Using unzip:
+        my $file_details = `unzip -l $zip_path/$filename`; # get a list of the contained files
+        my $begin = 0;
+        my $end = 0;
         my @file_names;
-        foreach my $file ($file_details) {
-            if (rindex($file, '-' && !$begin) {
-                $begin = 1;
-            } elsif (rindex($file, '-' && $begin) {
+        my @detail_lines = split /\n/, $file_details;
+        # We collect the details in an array for use in decompression:
+        foreach (@detail_lines) {
+            if (rindex($_, '---') >= 0 && $begin) { # The info ends with hyphen lines.
                 $end = 1;
             }
             if ($begin && !$end) {
-                $file_name_index = rindex($file, ' ');
-                $negative_index = $file_name_index * -1;
-                $file_name = substr($file, $negative_index);
-                push(@file_name, $file_name);
+                my @raw_details = split ' ', $_;
+                my @details_array;
+                foreach my $detail (@raw_details) {
+                    push (@details_array, $detail);
+                }
+                my @file_components = split '/', $details_array[3];
+                my $file_name = pop(@file_components);
+		        my %info = (
+                    orgFile => $details_array[3],
+                    short => $file_name
+                );
+                my $success = `unzip -j $zip_path/$filename $details_array[3] -d $zip_path/$file_name`;
+                if ($success != 0) {
+			        $info{error} = 1;
+			        $info{text} = 'An error occured while runnig Unzip.';
+			        $error = 1;
+                }
+			    if ( ! $m->comp('import_files:do', source=>"$zip_path/$file_name", dest_url=>$dest_url) ) {
+                    $info{error} = 1;
+                    $error = 1;
+                }
+                $files{$file_name} = \%info;
+            }
+            if (rindex($_, '---') >= 0 && !$begin) { # The info contains 'table headers' before the actual file info.
+                $begin = 1;
             }
         }
-		
+
+=begin comment		
 		my $zipFile = Archive::Zip->new();
 		unless ( $zipFile->read( "$zip_path/$filename" ) == AZ_OK )
 		{
@@ -141,6 +164,8 @@ if ( $r->param( "import_files_do" ) )
 		
 		}
 
+=end comment
+=cut
 	    }
 	}
     }
