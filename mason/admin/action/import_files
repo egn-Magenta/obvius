@@ -118,54 +118,6 @@ if ( $r->param( "import_files_do" ) )
                 $begin = 1;
             }
         }
-
-=begin comment		
-		my $zipFile = Archive::Zip->new();
-		unless ( $zipFile->read( "$zip_path/$filename" ) == AZ_OK )
-		{
-		    print STDERR "Error reading: $zip_path/$filename\n";
-		    die 'read error';
-		}
-		
-		foreach my $member ( $zipFile->members() )
-		{
-		    my @x = split( "/", $member->fileName );
-		    my $file = pop( @x );
-		    my %info = 
-		    (    
-		      orgFile => $member->fileName,
-		      short => $file
-		    );
-		    
-		    
-		    if ( ! defined( $files{$file} ))
-		    {
-		      if ( $zipFile->extractMemberWithoutPaths( $member->fileName, 
-								"$zip_path/$file") != AZ_OK )  {
-			  $info{error} = 1;
-			  $info{text} = 'Error returned from Archive::Zip->extractMemberWithoutPaths (see log file)';
-			  $error = 1;
-		      }
-		      else {
-			  if ( ! $m->comp('import_files:do', source=>"$zip_path/$file", dest_url=>$dest_url) )
-			  {
-			      $info{error} = 1;
-			      $error = 1;
-			  }
-		      }
-		      $files{$file} = \%info;
-		    }
-		    else
-		    {
-		       $info{error} = 1;
-		       $error = 1;
-		       $files{$member->fileName} = \%info; 
-		    }
-		
-		}
-
-=end comment
-=cut
 	    }
 	}
     }
@@ -173,9 +125,7 @@ if ( $r->param( "import_files_do" ) )
 
 </%init>
 <%once>
-use Data::Dumper;
 use POSIX qw(strftime);
-use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 </%once>
 
 
