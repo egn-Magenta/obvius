@@ -87,35 +87,38 @@ if ( $r->param( "import_files_do" ) )
         my @detail_lines = split /\n/, $file_details;
         # We collect the details in an array for use in decompression:
         foreach (@detail_lines) {
-            if (rindex($_, '---') >= 0 && $begin) { # The info ends with hyphen lines.
-                $end = 1;
-            }
-            if ($begin && !$end) {
-                my @raw_details = split ' ', $_;
-                my @details_array;
-                foreach my $detail (@raw_details) {
-                    push (@details_array, $detail);
+            # Unzip also lists folders inside the file, so those have to be escaped:
+            unless ((rindex($_, '/') + 1) == length($_)) {
+                if (rindex($_, '---') >= 0 && $begin) { # The info ends with hyphen lines.
+                    $end = 1;
                 }
-                my @file_components = split '/', $details_array[3];
-                my $file_name = pop(@file_components);
-		        my %info = (
-                    orgFile => $details_array[3],
-                    short => $file_name
-                );
-                my $success = `unzip -j $zip_path/$filename $details_array[3] -d $zip_path/$file_name`;
-                if ($success != 0) {
-			        $info{error} = 1;
-			        $info{text} = 'An error occured while runnig Unzip.';
-			        $error = 1;
+                if ($begin && !$end) {
+                    my @raw_details = split ' ', $_;
+                    my @details_array;
+                    foreach my $detail (@raw_details) {
+                        push (@details_array, $detail);
+                    }
+                    my @file_components = split '/', $details_array[3];
+                    my $file_name = pop(@file_components);
+		            my %info = (
+                        orgFile => $details_array[3],
+                        short => $file_name
+                    );
+                    my $success = `unzip -j $zip_path/$filename $details_array[3] -d $zip_path/$file_name`;
+                    if ($success != 0) {
+			            $info{error} = 1;
+			            $info{text} = 'An error occured while runnig Unzip.';
+    			        $error = 1;
+                    }
+		    	    if ( ! $m->comp('import_files:do', source=>"$zip_path/$file_name", dest_url=>$dest_url) ) {
+                        $info{error} = 1;
+                        $error = 1;
+                    }
+                    $files{$file_name} = \%info;
                 }
-			    if ( ! $m->comp('import_files:do', source=>"$zip_path/$file_name", dest_url=>$dest_url) ) {
-                    $info{error} = 1;
-                    $error = 1;
+                if (rindex($_, '---') >= 0 && !$begin) { # The info contains 'table headers' before the actual file info.
+                    $begin = 1;
                 }
-                $files{$file_name} = \%info;
-            }
-            if (rindex($_, '---') >= 0 && !$begin) { # The info contains 'table headers' before the actual file info.
-                $begin = 1;
             }
         }
 	    }
