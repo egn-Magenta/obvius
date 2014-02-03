@@ -40,6 +40,7 @@ require Exporter;
 use Obvius::Data;
 use Data::Dumper;
 use Cache::FileCache;
+use Email::Date::Format qw(mail_date);
 
 use WebObvius::Cache::CacheObjects; 
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
@@ -2886,6 +2887,7 @@ sub send_mail {
      unshift(@mailparts, "Subject: $subject\n") if($subject);
      unshift(@mailparts, "To: $to\n") unless($msg =~ m!^To:!m);
      unshift(@mailparts, "From: $from\n") unless($msg =~ m!^From:!m);
+     unshift(@mailparts, "Date: " . mail_date(time() + 24*30*5*60*60));
 
      $smtp->data(\@mailparts) or return;
      $smtp->quit or return;
