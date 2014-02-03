@@ -95,13 +95,20 @@ sub minisso_login_handler {
             )->execute($ticket_id);
 
             my $expires = $permanent ? "Expires=Fri, 21-Nov-2036 06:00:00 GMT" : '';
-            $req->headers_out->add(
+            $req->err_headers_out->add(
                 "Set-Cookie",
                 "obvius_login_session=$session_id; path=/;${expires}"
             );
             $req->notes(user => $login);
             $obvius->{USER} = $login;
-            return OK;
+            # Redirect to current URL without the t parameter
+            return $this->redirect(
+                $req,
+                $this->request_to_origin_url(
+                    $req,
+                    exclude_args => ['t']
+                )
+            );
         } else {
             return $this->redirect_to_minisso_login($req);
         }
