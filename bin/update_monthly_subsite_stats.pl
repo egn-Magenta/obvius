@@ -2,14 +2,20 @@ use strict;
 use Obvius;
 use Data::Dumper;
 
-die "Usage: $0 <hostmap>\n" if (scalar (@ARGV) != 3);
+die q|
+Usage: $0 <conf_dir>\n
+       $1 <stat_files_dir>\n
+       $2 <month>\n
+       $3 <year>\n
+| if (scalar (@ARGV) != 4);
 
 my $obvius = Obvius->new(Obvius::Config->new('ku'));
 $obvius->{USER} = 'admin';
 
 my $file = $ARGV[0];
-my $month = $ARGV[1];
-my $year = $ARGV[2];
+my $stat_file_dir = $ARGV[1];
+my $month = $ARGV[2];
+my $year = $ARGV[3];
 
 open(HOSTMAP, "<$file") or die "Couldn't open $file.\n";
 my %subsites = ();
@@ -29,13 +35,14 @@ sub subsite_env {
     return $string;
 }
 
-my @stat_files = glob("../www.ku.dk/awstats${month}${year}.*");
+my @stat_files = glob(File::Spec->catdir($stat_file_dir . "awstats${month}${year}.*"));
 
 my $day_of_month = ((localtime(time)))[3];
 
 # We traverse the awstats files.
 for my $file (@stat_files) {
     open(CURRENT_STATS, "<$file") or die "Couldn't open $file.\n";
+    print STDERR "Analysing file: '$file'\n";
     my $read = 0;
     my %score_hash;
     my %docid_hash;
@@ -55,7 +62,9 @@ for my $file (@stat_files) {
             $URI = $conf2path{$file_parts[(scalar(@file_parts) - 2)]} . $rel_url;
             # We update the URL hassh with the score.
             $score_hash{$URI} = $score_hash{$URI} + $line_parts[3];
-            $docid_hash{$URI} = $obvius->get_doc_by_path($line_parts[0]);
+            if (index ($line_parts[0], 'docid') < 0) {
+                $docid_hash{$URI} = $obvius->get_doc_by_path($line_parts[0]);
+            }
         }
         if ($line =~ /BEGIN_SIDER /) {
             # We rise the READ flag in to start reading the stats.
