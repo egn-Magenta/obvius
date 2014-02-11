@@ -9,6 +9,28 @@
          <& /shared/msg, text=>'Group' &>: <% $group->{name} |h %><br />
        </div>
 
+       <h4><& /shared/msg, text=>'Visits' &>:</h4>
+       <div class="obvius-version-info">
+% my @literals = qw(
+    January
+    February
+    March
+    April
+    May
+    June
+    July
+    August
+    September
+    October
+    November
+    December
+);
+% my $month = (localtime(time))[4];
+% my $year = (localtime(time))[5];
+         <& /shared/msg, text=>'Current month' &> (<& /shared/msg, text=>'$literals[$month]' &>):<& /shared/statistics:current, doc_id=>$vdoc->Id, month=>$month, year=>$year &>
+         <& /shared/msg, text=>'Current year' &> (<% $year %>):<& /shared/statistics:archive, doc_id=>$vdoc->Id, month=>$month, year=>$year &>
+       </div>
+
        <h4><& /shared/msg, text=>'Version' &>:</h4>
        <div class="obvius-version-info">
        <& /shared/msg, text=>'Type' &>: <span title="<% $doctype->Name |h %>"><& /shared/msg, text=>$doctype->Name &></span><br />
