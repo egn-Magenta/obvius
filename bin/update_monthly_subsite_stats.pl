@@ -57,7 +57,7 @@ for my $file (@stat_files) {
             my @file_parts = split(/\./, $file);
             my $rel_url = $line_parts[0];
             $rel_url = lc($rel_url);# Lower case the relative URL
-            $rel_url  =~ s!/+!!g;; # Remove starting slash(es)
+            $rel_url  =~ s!/+!/!g;; # Remove starting slash(es)
             $rel_url  =~ s/\/$//;   # Remove tailing slash
             $URI = $conf2path{$file_parts[(scalar(@file_parts) - 2)]} . $rel_url;
             # We update the URL hassh with the score.
@@ -71,108 +71,123 @@ for my $file (@stat_files) {
             $read = 1;
         }
     }
+    # We create a dump table to store the dat`subsite` int(11) DEFAULT NULL,a temporarily
+    my $create_statement = $obvius->dbh->prepare(q|
+        CREATE TABLE `monthly_path_statisics_tmp` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `subsite` int(11) DEFAULT NULL,
+            `month` tinyint(4) NOT NULL,
+            `uri` varchar(255) NOT NULL,
+            `visit_count` int(11) DEFAULT NULL,
+            PRIMARY KEY (`id`)
+        );
+    |);
+    $create_statement->execute();
     foreach my $key (keys %score_hash) {
-            my $res = $obvius->execute_select(
-                "SELECT id FROM monthly_path_statisics WHERE uri = ?;",
-                $key,
-            );
-            if (scalar(@$res) == 0) {       # If URI is not found, we INSERT...
-                my $insert_statement = $obvius->dbh->prepare(
-                    q|
-                        INSERT INTO monthly_path_statisics (
-                            subsite, 
-                            uri, 
-                            month, 
-                            visit_count
-                        )
-                        VALUES(?, ?, ?, ?);
-                    |
-                );
-                $insert_statement->execute(
-                    $docid_hash{$key},
-                    $key,
-                    $month,
-                    $score_hash{$key}
-                );
-            } else {                        # ...otherwise, we UPDATE.
-                my $update_statement = $obvius->dbh->prepare(
-                    qq|
-                        UPDATE monthly_path_statisics SET 
-                            visit_count = ? 
-                            WHERE 
-                                uri = ? AND
-                                month = ? AND
-                                subsite = ?;
-                    |
-                );
-                $update_statement->execute(
-                    $score_hash{$key},
-                    $key,
-                    $month,
-                    $docid_hash{$key}
-                );
-            }
-            if ($day_of_month == 1) {
-                # Check number of columns
-                # Evt. add count from last month to archive column
-                my $column_count = $obvius->execute_select(
-                    "SELECT COUNT(*) AS count FROM monthly_path_statisics WHERE uri = ?;",
-                    $key
-                );
-                if (@$column_count[0]->{count} == 13) {
-                    my $month_copy;
-                    if ($month > 1) {
-                        $month_copy = 2;#--$month;
-                    } else {
-                        $month_copy = 12;
-                    }
-                    my $count_previous_month = $obvius->execute_select(
-                        "SELECT visit_count, subsite FROM monthly_path_statisics WHERE uri = ? AND month = ?;",
-                        $key,
-                        2
-                    );
-                    my $current_total_count = $obvius->execute_select(
-                        "SELECT visit_count, subsite FROM monthly_path_statisics WHERE uri = ? AND month = ?;",
-                        $key,
-                        13 
-                    );
-                    if (scalar(@$current_total_count) > 0) { # If archive row is present, we UPDATE it...
-                        my $total_count = @$count_previous_month[0]->{visit_count} + @$current_total_count[0]->{visit_count};
-                        my $month_update_statement = $obvius->dbh->prepare(
-                            qq|
-                                UPDATE monthly_path_statisics SET 
-                                    visit_count = ? 
-                                    WHERE uri = ? AND
-                                    month = ? AND
-                                    subsite = ?;
-                            |
-                        );
-                        $month_update_statement->execute(
-                            $total_count,
-                            $key,
-                            13, # We set 13 to be the archive column
-                            @$count_previous_month[0]->{subsitet}
-                        );
-                    } else {                                # otherwise, we INSERT it.
-                        my $month_insert_statement = $obvius->dbh->prepare(
-                            qq|
-                                INSERT INTO monthly_path_statisics (
-                                    month, 
-                                    visit_count, 
-                                    uri,
-                                    subsite
-                                )
-                                VALUES (?, ?, ?, ?);
-                            |
-                        );
-                        $month_insert_statement->execute(
-                            13, # We set 13 to be the archive column
-                            @$count_previous_month[0]->{visit_count},
-                            $key,
-                            @$count_previous_month[0]->{subsitet}
-                        );
-                    }
-                }
-            }
+        # First we store the data in the dump table:
+        my $insert_statement = $obvius->dbh->prepare(q|
+            INSERT INTO monthly_path_statisics_tmp (
+                subsite, 
+                uri, 
+                month, 
+                visit_count
+            )
+            VALUES(?, ?, ?, ?);
+        |);
+        $insert_statement->execute(
+            $docid_hash{$key},
+            $key,
+            $month,
+            $score_hash{$key}
+        );
     }
+    if ($day_of_month == 1) {
+        # We create a temp table to the hold count of columns
+        my $create_count_statement = $obvius->dbh->prepare(q|
+            CREATE TABLE `column_count` (
+                `subsite` int(11) DEFAULT NULL,
+                `uri` varchar (255),
+                `columns_count` int(11)
+            );
+        |)->execute();
+        my $last_copy;
+        if ($month == 1) {
+            $last_copy = 12;
+        } else {
+            $last_copy = $month - 1;
+        }
+        my $tmp_counts_statement = $obvius->dbh->prepare(q|
+            INSERT INTO column_count (
+                subsite,
+                uri,
+                columns_count
+            )
+            SELECT subsite, uri, COUNT(*)
+            FROM monthly_path_statisics
+            GROUP BY uri;
+        |)->execute();
+        my $copy_counts_statement = $obvius->dbh->prepare(q|
+            UPDATE monthly_path_statisics mps, (
+                SELECT mps_t.uri, mps_t.subsite, mps_t.visit_count
+                FROM monthly_path_statisics mps_t
+                INNER JOIN column_count counts
+                ON (
+                    counts.uri = mps_t.uri AND
+                    counts.subsite <=> mps_t.subsite AND
+                    counts.columns_count = 13 AND
+                    mps_t.month = ?
+                )
+            ) mps2
+            SET mps.visit_count = (
+                mps.visit_count + mps2.visit_count
+            )
+            WHERE
+                mps.month = 13 AND
+                mps.uri = mps2.uri AND
+                mps.subsite <=> mps2.subsite;
+        |)->execute($last_copy);
+        my $copy_counts_statement = $obvius->dbh->prepare(q|
+            INSERT INTO monthly_path_statisics (
+                subsite, 
+                uri, 
+                month, 
+                visit_count
+            )
+            SELECT mps.subsite, mps.uri, 13, mps.visit_count
+            FROM monthly_path_statisics mps, (
+                SELECT c.uri, c.subsite
+                FROM column_count c
+                WHERE c.columns_count = 12
+            ) counts
+            WHERE
+                mps.month = ? AND
+                mps.uri = counts.uri and
+                mps.subsite <=> counts.subsite;
+        |)->execute($last_copy);
+        my $drop_query = $obvius->dbh->prepare("drop table column_count_id;")->execute();
+    }
+    my $update_tables_statement = $obvius->dbh->prepare(q|
+        UPDATE monthly_path_statisics mps
+        INNER JOIN monthly_path_statisics_tmp mps_t_m
+        ON mps_t_m.month = mps.month
+        INNER JOIN monthly_path_statisics_tmp mps_t_u
+        ON mps_t_u.uri = mps.uri
+        SET mps.visit_count = mps_t_u.visit_count;
+    |)->execute();
+    my $insert_tables_statement = $obvius->dbh->prepare(q|
+        INSERT INTO monthly_path_statisics (
+            subsite, 
+            uri, 
+            month, 
+            visit_count
+        )
+        SELECT mps_t.subsite, mps_t.uri, mps_t.month, mps_t.visit_count
+        FROM monthly_path_statisics_tmp mps_t
+        LEFT JOIN monthly_path_statisics mps_month
+        ON mps_month.month = mps_t.month
+        WHERE
+            mps_month.month IS NULL;
+    |)->execute();
+    # We drop the dump table
+    my $drop_query = $obvius->dbh->prepare("drop table monthly_path_statisics_tmp;")->execute();
 }
