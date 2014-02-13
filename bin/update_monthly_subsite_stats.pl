@@ -168,11 +168,12 @@ for my $file (@stat_files) {
     }
     my $update_tables_statement = $obvius->dbh->prepare(q|
         UPDATE monthly_path_statisics mps
-        INNER JOIN monthly_path_statisics_tmp mps_t_m
-        ON mps_t_m.month = mps.month
-        INNER JOIN monthly_path_statisics_tmp mps_t_u
-        ON mps_t_u.uri = mps.uri
-        SET mps.visit_count = mps_t_u.visit_count;
+        INNER JOIN monthly_path_statisics_tmp mps_t
+        ON
+            mps_t.month = mps.month AND
+            mps_t.subsite <=> mps.subsite AND
+            mps_t.uri = mps.uri
+        SET mps.visit_count = mps_t.visit_count;
     |)->execute();
     my $insert_tables_statement = $obvius->dbh->prepare(q|
         INSERT INTO monthly_path_statisics (
@@ -183,10 +184,15 @@ for my $file (@stat_files) {
         )
         SELECT mps_t.subsite, mps_t.uri, mps_t.month, mps_t.visit_count
         FROM monthly_path_statisics_tmp mps_t
-        LEFT JOIN monthly_path_statisics mps_month
-        ON mps_month.month = mps_t.month
+        LEFT JOIN monthly_path_statisics mps_j
+        ON 
+            mps_j.month = mps_t.month AND
+            mps_j.subsite <=> mps_t.subsite AND
+            mps_j.uri = mps_t.uri
         WHERE
-            mps_month.month IS NULL;
+            mps_j.uri IS NULL AND
+            mps_j.subsite IS NULL AND
+            mps_j.month IS NULL;
     |)->execute();
     # We drop the dump table
     my $drop_query = $obvius->dbh->prepare("drop table monthly_path_statisics_tmp;")->execute();
