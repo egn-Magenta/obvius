@@ -37,7 +37,7 @@ sub subsite_env {
 
 my @stat_files = glob(File::Spec->catdir($stat_file_dir . "awstats${month}${year}.*"));
 
-my $day_of_month = ((localtime(time)))[3];
+my $current_date = ((localtime(time)))[3] . ((localtime(time)))[4] . ((localtime(time)))[5];
 
 # We traverse the awstats files.
 for my $file (@stat_files) {
@@ -101,7 +101,8 @@ for my $file (@stat_files) {
             $score_hash{$key}
         );
     }
-    if ($day_of_month == 1) {
+    my $previous_cycle = $obvius->execute_select("SELECT cycle_date FROM monthly_path_statisics_last_cycle;");
+    if ($current_date < @$previous_cycle[0]->{cycle_date}) {
         # We create a temp table to the hold count of columns
         my $create_count_statement = $obvius->dbh->prepare(q|
             CREATE TABLE `column_count` (
@@ -164,7 +165,7 @@ for my $file (@stat_files) {
                 mps.uri = counts.uri and
                 mps.subsite <=> counts.subsite;
         |)->execute($last_copy);
-        my $drop_query = $obvius->dbh->prepare("drop table column_count_id;")->execute();
+        my $drop_query = $obvius->dbh->prepare("drop table column_count;")->execute();
     }
     my $update_tables_statement = $obvius->dbh->prepare(q|
         UPDATE monthly_path_statisics mps

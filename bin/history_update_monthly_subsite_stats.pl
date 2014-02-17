@@ -21,11 +21,19 @@ my $cur_year = $ARGV[3];
 my $month_end = $ARGV[4];
 my $year_end = $ARGV[5];
 
-while ($cur_month <= $month_end && $cur_year <= $year_end) {
-    my $month_append = "0" if (length($cur_month) == 1);
+while ($cur_year <= $year_end) {
     my $year_append = "20" if (length($cur_year) == 2);
-    print STDERR "Running command with M=$month_append$cur_month and Y=$cur_year\n";
-    `perl /var/www/obvius/bin/update_monthly_subsite_stats.pl $conf_file_path $stat_file_dir $month_append$cur_month $year_append$cur_year`;
+    if ($cur_year == $year_end) {
+        if ($cur_month <= $month_end) {
+            my $month_append = "0" if (length($cur_month) == 1);
+            print STDERR "Running command with M=$month_append$cur_month and Y=$cur_year\n";
+            `perl /var/www/obvius/bin/update_monthly_subsite_stats.pl $conf_file_path $stat_file_dir $month_append$cur_month $year_append$cur_year`;
+        }
+    } else {
+        my $month_append = "0" if (length($cur_month) == 1);
+        print STDERR "Running command with M=$month_append$cur_month and Y=$cur_year\n";
+        `perl /var/www/obvius/bin/update_monthly_subsite_stats.pl $conf_file_path $stat_file_dir $month_append$cur_month $year_append$cur_year`;
+    }
     if ($cur_month == 12) {
         $cur_year++;
         $cur_month = 1;
