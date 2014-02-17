@@ -1,30 +1,23 @@
-<%method month%>
+<%method month>
 %# A method to show the visits of the specified month, for the specified document.
 <% $count %>
 <%args>
 $doc_id
 # If no value is given, the current system value will be used.
-$month = 0
-$year = 0
+$month => 0
 </%args>
 <%init>
 $month = (localtime(time))[4] if ($month == 0);
-$year = (localtime(time))[5] if ($year == 0);
-my $count = $obvius->get_statistics_for_doc($doc_id, $month, $year, current=>1);
+my $count = $obvius->get_month_statistics_for_doc($doc_id, $month);
 </%init>
 </%method>
-<%method year%>
-%# A method to show the visits of the specified year, for the specified document.
+<%method year_summed>
+%# A method to show an accumulation of the past years statistics, for the specified document.
 <% $count %>
 <%args>
-$doc
-# If no value is given, the current system value will be used.
-$month = 0
-$year = 0
+$doc_id
 </%args>
 <%init>
-$month = (localtime(time))[4] if ($month == 0);
-$year = (localtime(time))[5] if ($year == 0);
-my $count = $obvius->get_statistics_for_doc($doc_id, $month, $year, current=>0);
+my $count = $obvius->get_year_statistics_for_doc($doc_id);
 </%init>
 </%method>

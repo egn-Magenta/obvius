@@ -11,24 +11,11 @@
 
        <h4><& /shared/msg, text=>'Visits' &>:</h4>
        <div class="obvius-version-info">
-% my @literals = qw(
-    January
-    February
-    March
-    April
-    May
-    June
-    July
-    August
-    September
-    October
-    November
-    December
-);
+% my @literals = qw(January February March April May June July August September October November December);
 % my $month = (localtime(time))[4];
-% my $year = (localtime(time))[5];
-         <& /shared/msg, text=>'Current month' &> (<& /shared/msg, text=>'$literals[$month]' &>):<& /shared/statistics:current, doc_id=>$vdoc->Id, month=>$month, year=>$year &>
-         <& /shared/msg, text=>'Current year' &> (<% $year %>):<& /shared/statistics:archive, doc_id=>$vdoc->Id, month=>$month, year=>$year &>
+% my $year = '20' . ((localtime(time))[5] - 100);
+         <& /shared/msg, text=>'Current month' &> (<& /shared/msg, text=>$literals[$month++] &>):<& /shared/statistics:month, doc_id=>$vdoc->DocId, month=>$month &>
+         <& /shared/msg, text=>'Current year' &> (<% $year %>):<& /shared/statistics:year_summed, doc_id=>$vdoc->DocId, month=>$month &>
        </div>
 
        <h4><& /shared/msg, text=>'Version' &>:</h4>
