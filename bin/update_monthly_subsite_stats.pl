@@ -77,7 +77,7 @@ for my $file (@stat_files) {
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `subsite` int(11) DEFAULT NULL,
             `month` tinyint(4) NOT NULL,
-            `uri` varchar(255) NOT NULL,
+            `uri` varchar(512) NOT NULL,
             `visit_count` int(11) DEFAULT NULL,
             PRIMARY KEY (`id`)
         );
@@ -107,7 +107,7 @@ for my $file (@stat_files) {
         my $create_count_statement = $obvius->dbh->prepare(q|
             CREATE TABLE `column_count` (
                 `subsite` int(11) DEFAULT NULL,
-                `uri` varchar (255),
+                `uri` varchar (512),
                 `columns_count` int(11)
             );
         |)->execute();
