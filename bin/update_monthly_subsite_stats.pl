@@ -162,7 +162,7 @@ for my $file (@stat_files) {
             ) counts
             WHERE
                 mps.month = ? AND
-                mps.uri = counts.uri and
+                mps.uri = counts.uri AND
                 mps.subsite <=> counts.subsite;
         |)->execute($last_copy);
         my $drop_query = $obvius->dbh->prepare("drop table column_count;")->execute();
