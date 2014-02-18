@@ -1,4 +1,13 @@
 <%init>
 # Default language 'da':
-$r->pnotes('site')->set_language_preferences($r, 'da');
+my $site = $r->pnotes('site');
+
+$site->set_language_preferences($r, 'da');
+
+my $lang_list = $site->param('LANGUAGE_PREFERENCES') || [];
+my $preferred_language = $lang_list->[0] || 'da';
+
+$r->pnotes('language_preferences' => $lang_list);
+$r->notes('editor_language' => $preferred_language);
+$r->notes('preferred_language' => $preferred_language);
 </%init>

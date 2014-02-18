@@ -28,18 +28,22 @@ sub get_tooltip_path {
     } else {
 	$tooltip_path = $default_path;
     }
-    
-    if (defined ($args{doctype}) && defined ($args{field})) {
-	$path = join '/', ($tooltip_path, $args{doctype}, $args{field});
-    } elsif (defined ($args{doctype})) {
-	$path = join '/', ($tooltip_path, $args{doctype});
-    } else {
-	return undef;
+
+    # If we have no doctype we don't have a tooltip
+    return undef unless(defined ($args{doctype}));
+
+    my $lang = $args{lang} || '';
+
+    my @parts = ( $tooltip_path, $lang, $args{doctype} );
+
+    if(defined($args{field})) {
+        push(@parts, $args{field});
     }
+
+    $path = join("/", @parts);
     
     $path .= '/';
     return fix_slashes($path);
 }
 
 1;
-
