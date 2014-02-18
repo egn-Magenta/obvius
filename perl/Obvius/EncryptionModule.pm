@@ -22,7 +22,7 @@ sub new {
 # 3) $msg - the message supplied by the callee (if none is given then '' is used)
 ######
 sub log_access {
-    my($self, $obvius, $userinfo, $req, $msg) = @_;
+    my($self, $obvius, $userinfo, $req, $msg, %options) = @_;
     my $dbh = $obvius->dbh;
 
     $userinfo = Dumper($obvius->get_user($obvius->{USER})) unless ($userinfo);
@@ -30,12 +30,27 @@ sub log_access {
     my $reqInfo = $self->createRequestInfo($req);
     $msg ||= '';
 
-    my $stmt = $dbh->prepare("INSERT INTO protected_access_logging " .
-			     "(id, timeofentry, userinfo, requestinfo, message) values " .
-			     "(NULL, now(), ?, ?, ?)");
-    my $result = $stmt->execute($userinfo, $reqInfo, $msg);
+    my @fields = qw(id timeofentry userinfo requestinfo message);
+    my @values = ('NULL', 'NOW()', '?',       '?',      '?');
+    my @args = (                   $userinfo, $reqInfo, $msg);
+
+    # If docid is specified, add it
+    if(my $docid = $options{docid}) {
+        push(@fields, 'docid');
+        push(@values, '?');
+        push(@args, $docid);
+    }
+
+    my $sql = "INSERT INTO protected_access_logging (" .
+              join(",", @fields) .
+              ") values (" .
+              join(",", @values) .
+              ")";
+    my $stmt = $dbh->prepare($sql);
+
+    my $result = $stmt->execute(@args);
     die __PACKAGE__ . "::log_access -> Failed when inserting values: [" . 
-	join(', ',  ($userinfo, $reqInfo, $msg)) . "]\n" unless ($result);
+	join(', ',  @args) . "]\n" unless ($result);
 }
 
 sub encrypt_data {
