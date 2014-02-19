@@ -85,7 +85,9 @@ function formdata_populate_fieldtable(name, startup) {
             var obj = formdata_objectify_node(item);
 
 	    //Update array of fields for repeatables
-	    if ( obj.type != 'fieldset' && obj.type != 'fieldset_end' ) { 
+	    if ( obj.type != 'fieldset' && obj.type != 'fieldset_end' && 
+		 obj.type != 'upload' && obj.type != 'password' &&
+		 obj.type != 'selectmultiple' && obj.type != 'checkbox') { 
 		obvius_rep_field_names.push(obj.name);
 		obvius_rep_field_displays.push(obj.title);
 	    }
@@ -307,6 +309,8 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         tmpXML += "     <unique>0</unique>";
         tmpXML += "     <imagepath></imagepath>";
         tmpXML += "     <description></description>";
+        tmpXML += "     <colindex>0</colindex>";
+        tmpXML += "     <listpublic></listpublic>";
         tmpXML += "     <validaterules>";
         tmpXML += "     </validaterules>";
         tmpXML += "     <options>";
@@ -327,6 +331,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
             if(formdata_get_node_text(names.item(i)) == fieldname) {
                 // Need to clone here since we might have to replace it later
                 fieldNode = names.item(i).parentNode.cloneNode(true);
+		break;
             }
         }
     }
@@ -336,12 +341,22 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
     document.pageform.title.value = fieldObj.title || "";
     document.pageform.name.value = fieldObj.name || "";
     document.pageform.description.value = fieldObj.description || "";
+    document.pageform.colindex.value = fieldObj.colindex || "0";
+    document.pageform.listpublic.value = fieldObj.listpublic || "";
     document.pageform.imagepath.value = fieldObj.imagepath || "";
 
     document.getElementById('type_field').innerHTML = formdata_translations['field_type_' + fieldObj.type] || 'unknown fieldtype';
 
 
     var type = fieldObj.type || '';
+
+    //Listpublic is almost certainly not displayed
+    if (type == 'radio') {
+	document.getElementById('listpublic').style.display = '';
+    } else {
+	document.pageform.listpublic.value = "";
+	document.getElementById('listpublic').style.display = 'none';
+    }
 
     if(type == 'text' || type == 'password' || type == 'textarea' || type == 'protected') {
         // Hide options and validaterules:
@@ -362,6 +377,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         document.getElementById('image').style.display = 'none';
         document.getElementById('description').style.display = 'none';
         document.getElementById('unique').style.display = 'none';
+	document.getElementById('colindex').style.display = 'none';
     }
 
     if(type == 'upload') {
@@ -384,6 +400,11 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
 
     if(type == 'textarea') {
         document.getElementById('ta_dimensions').style.display = '';
+    }
+
+    if(type == 'protected') {
+        document.pageform.colindex.value = "0";
+        document.getElementById('colindex').style.display = 'none';
     }
 
     if(fieldObj.mandatory == 0 || ! fieldObj.mandatory) {
@@ -809,6 +830,34 @@ function formdata_save_field_form_data(fieldNode) {
         descNode.replaceChild(newDesc, descNode.getFirstChild());
     } else {
         descNode.appendChild(newDesc);
+    }
+
+    // Col index for public lists
+    var colIndexNode = fieldNode.getElementsByTagName('colindex').item(0);
+    if(! colIndexNode) {
+        colIndexNode = fieldNode.getOwnerDocument().createElement('colindex');
+        fieldNode.appendChild(colIndexNode);
+    }
+    var colidx_value = document.pageform.colindex.value || "0";
+    var newColIdx = colIndexNode.getOwnerDocument().createTextNode(colidx_value);
+    if(colIndexNode.getFirstChild()) {
+        colIndexNode.replaceChild(newColIdx, colIndexNode.getFirstChild());
+    } else {
+        colIndexNode.appendChild(newColIdx);
+    }
+
+    // Determinies public list visibility
+    var listPublicNode = fieldNode.getElementsByTagName('listpublic').item(0);
+    if(! listPublicNode) {
+        listPublicNode = fieldNode.getOwnerDocument().createElement('listpublic');
+        fieldNode.appendChild(listPublicNode);
+    }
+    var listpub_value = document.pageform.listpublic.value || "";
+    var newListPub = listPublicNode.getOwnerDocument().createTextNode(listpub_value);
+    if(listPublicNode.getFirstChild()) {
+        listPublicNode.replaceChild(newListPub, listPublicNode.getFirstChild());
+    } else {
+        listPublicNode.appendChild(newListPub);
     }
 
     // Check for params from the form. Params are defined
@@ -1488,23 +1537,29 @@ function reflectFields_on_repeatables() {
 	var select = document.getElementById('obvius_repeated_area_fields_' + curindex);
 	var opts = select.children;
 	var optsMap = {};
+
+	/* Find currently selected */
 	for (var selidx = 0; selidx < opts.length; selidx++) {
 	    var curnam = opts[selidx].value;
-	    if ( ! obvius_field_name_marker[curnam] ) {
-		select.removeChild(opts[selidx]);
-	    } else {
+	    var cursel = opts[selidx].selected;
+	    if ( curnam && cursel ) {
 		optsMap[curnam] = true;
 	    }
 	}
+
+	/* Delete all options */
+	while (select.firstChild) {
+	    select.removeChild(select.firstChild);
+	}
+
+	/* Insert all "new" field */
 	for (var namekey in obvius_field_name_marker) {
-	    if ( optsMap[namekey] ) {
-		; //do nothing
-	    } else {
-		var newsel = document.createElement('option');
-		newsel.setAttribute('value', namekey);
-		newsel.innerHTML = obvius_field_name_marker[namekey];
-		select.appendChild(newsel);
-	    }
+	    var theopt = document.createElement('option');
+	    theopt.value = namekey;
+	    theopt.innerHTML = obvius_field_name_marker[namekey];
+	    if ( optsMap[namekey] )
+		theopt.selected = true;
+	    select.appendChild(theopt);
 	}
     }
 }
@@ -1524,13 +1579,13 @@ function insert_repeat_area(theobj) {
     /* fieldset */
     var fs = document.createElement('fieldset');
     var leg = document.createElement('legend');
-    leg.innerHTML = 'Gentaget område';
+    leg.innerHTML = formdata_translations['Repeatable area'];
     fs.appendChild(leg);
     
     /* title and options */
     var lab = document.createElement('label');
     lab.setAttribute('for', 'obvius_repeated_area_title_' + count);
-    lab.innerHTML = 'Titel: ';
+    lab.innerHTML = formdata_translations['Title'];
     fs.appendChild(lab);
     
     var inp = document.createElement('input');
@@ -1543,7 +1598,7 @@ function insert_repeat_area(theobj) {
     var para = document.createElement('p');
     lab = document.createElement('label');
     lab.setAttribute('for', 'obvius_repeated_area_fields_' + count);
-    lab.innerHTML = 'Valgte formular felter: ';
+    lab.innerHTML = formdata_translations['Chosen formfields'];
     para.appendChild(lab);
     para.appendChild(document.createElement('br'));
     var sel = document.createElement('select');
@@ -1566,17 +1621,20 @@ function insert_repeat_area(theobj) {
     /* buttons */
     var butdiv = document.createElement('div');
     butdiv.setAttribute('className', 'RepAreaButs');
-    var but = document.createElement('button');
+    
+    /* Below is outcommented for now - only one repeat area */
+    /* var but = document.createElement('button');
     but.onclick = function () { move_repeat_area(-1, 'obvius_repeated_area_' + count); return false };
     but.innerHTML = 'Flyt opad';
     butdiv.appendChild(but);
     but = document.createElement('button');
     but.onclick = function () { move_repeat_area(1, 'obvius_repeated_area_' + count); return false };
     but.innerHTML = 'Flyt nedad';
-    butdiv.appendChild(but);
-    but = document.createElement('button');
+    butdiv.appendChild(but); */
+
+    var but = document.createElement('button');
     but.onclick = function () { remove_repeat_area('obvius_repeated_area_' + count); return false };
-    but.innerHTML = 'Fjern område';
+    but.innerHTML = formdata_translations['Delete'];
     butdiv.appendChild(but);
     fs.appendChild(butdiv);
     
@@ -1585,6 +1643,11 @@ function insert_repeat_area(theobj) {
     all.appendChild(newArea);
     obvius_rep_area_count = count;
     newArea.scrollIntoView(true);
+
+    /* Only one area */
+    var newButArea = document.getElementById('obvius_new_rep_area');
+    if ( newButArea )
+	newButArea.style.display = 'none';
 }
 
 function remove_repeat_area(theid) {
@@ -1592,6 +1655,9 @@ function remove_repeat_area(theid) {
     var cur = document.getElementById(theid);
     if ( cur ) {
 	all.removeChild(cur);
+	var newButArea = document.getElementById('obvius_new_rep_area');
+	if ( newButArea )
+	    newButArea.style.display = '';
     }
 }
 
