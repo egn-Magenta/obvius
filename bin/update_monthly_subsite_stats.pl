@@ -37,7 +37,14 @@ sub subsite_env {
 
 my @stat_files = glob(File::Spec->catdir($stat_file_dir . "awstats${month}${year}.*"));
 
-my $current_date = ((localtime(time)))[3] . ((localtime(time)))[4] . ((localtime(time)))[5];
+my $current_month = (((localtime(time)))[4] + 1);
+$current_month = "0" . $current_month if ($current_month < 10);
+my $current_year = sprintf("%02d", ((localtime(time)))[5] % 100);
+my $current_day = ((localtime(time)))[3];
+$current_day = "0" . $current_day if ($current_day < 10);
+my $current_date = $current_day . $current_month . $current_year;
+
+my $previous_cycle = $obvius->execute_select("SELECT cycle_date FROM monthly_path_statisics_last_cycle;");
 
 # We traverse the awstats files.
 for my $file (@stat_files) {
@@ -101,7 +108,6 @@ for my $file (@stat_files) {
             $score_hash{$key}
         );
     }
-    my $previous_cycle = $obvius->execute_select("SELECT cycle_date FROM monthly_path_statisics_last_cycle;");
     if ($current_date < @$previous_cycle[0]->{cycle_date}) {
         # We create a temp table to the hold count of columns
         my $create_count_statement = $obvius->dbh->prepare(q|
@@ -127,7 +133,7 @@ for my $file (@stat_files) {
             FROM monthly_path_statisics
             GROUP BY uri;
         |)->execute();
-        my $copy_counts_statement = $obvius->dbh->prepare(q|
+        my $copy_counts_update_statement = $obvius->dbh->prepare(q|
             UPDATE monthly_path_statisics mps, (
                 SELECT mps_t.uri, mps_t.subsite, mps_t.visit_count
                 FROM monthly_path_statisics mps_t
@@ -147,24 +153,26 @@ for my $file (@stat_files) {
                 mps.uri = mps2.uri AND
                 mps.subsite <=> mps2.subsite;
         |)->execute($last_copy);
-        my $copy_counts_statement = $obvius->dbh->prepare(q|
-            INSERT INTO monthly_path_statisics (
-                subsite, 
-                uri, 
-                month, 
-                visit_count
-            )
-            SELECT mps.subsite, mps.uri, 13, mps.visit_count
-            FROM monthly_path_statisics mps, (
-                SELECT c.uri, c.subsite
-                FROM column_count c
-                WHERE c.columns_count = 12
-            ) counts
-            WHERE
-                mps.month = ? AND
-                mps.uri = counts.uri AND
-                mps.subsite <=> counts.subsite;
-        |)->execute($last_copy);
+        unless ($copy_counts_update_statement >= 1) {
+            $obvius->dbh->prepare(q|
+                INSERT INTO monthly_path_statisics (
+                    subsite, 
+                    uri, 
+                    month, 
+                    visit_count
+                )
+                SELECT mps.subsite, mps.uri, 13, mps.visit_count
+                FROM monthly_path_statisics mps, (
+                    SELECT c.uri, c.subsite
+                    FROM column_count c
+                    WHERE c.columns_count = 12
+                ) counts
+                WHERE
+                    mps.month = ? AND
+                    mps.uri = counts.uri AND
+                    mps.subsite <=> counts.subsite;
+            |)->execute($last_copy);
+        }
         my $drop_query = $obvius->dbh->prepare("drop table column_count;")->execute();
     }
     my $update_tables_statement = $obvius->dbh->prepare(q|
@@ -176,25 +184,34 @@ for my $file (@stat_files) {
             mps_t.uri = mps.uri
         SET mps.visit_count = mps_t.visit_count;
     |)->execute();
-    my $insert_tables_statement = $obvius->dbh->prepare(q|
-        INSERT INTO monthly_path_statisics (
-            subsite, 
-            uri, 
-            month, 
-            visit_count
-        )
-        SELECT mps_t.subsite, mps_t.uri, mps_t.month, mps_t.visit_count
-        FROM monthly_path_statisics_tmp mps_t
-        LEFT JOIN monthly_path_statisics mps_j
-        ON 
-            mps_j.month = mps_t.month AND
-            mps_j.subsite <=> mps_t.subsite AND
-            mps_j.uri = mps_t.uri
-        WHERE
-            mps_j.uri IS NULL AND
-            mps_j.subsite IS NULL AND
-            mps_j.month IS NULL;
-    |)->execute();
+    unless ($update_tables_statement >= 1) {
+        $obvius->dbh->prepare(q|
+            INSERT INTO monthly_path_statisics (
+                subsite, 
+                uri, 
+                month, 
+                visit_count
+            )
+            SELECT mps_t.subsite, mps_t.uri, mps_t.month, mps_t.visit_count
+            FROM monthly_path_statisics_tmp mps_t
+            LEFT JOIN monthly_path_statisics mps_j
+            ON 
+                mps_j.month = mps_t.month AND
+                mps_j.subsite <=> mps_t.subsite AND
+                mps_j.uri = mps_t.uri
+            WHERE
+                mps_j.uri IS NULL AND
+                mps_j.subsite IS NULL AND
+                mps_j.month IS NULL;
+        |)->execute();
+    }
     # We drop the dump table
     my $drop_query = $obvius->dbh->prepare("drop table monthly_path_statisics_tmp;")->execute();
 }
+# We update the cycle date for next cycle:
+$obvius->dbh->prepare(
+    "UPDATE monthly_path_statisics_last_cycle SET cycle_date = ? WHERE cycle_date = ?;",
+)->execute(
+    $current_date,
+    @$previous_cycle[0]->{cycle_date}
+);
