@@ -2887,7 +2887,7 @@ sub send_mail {
      unshift(@mailparts, "Subject: $subject\n") if($subject);
      unshift(@mailparts, "To: $to\n") unless($msg =~ m!^To:!m);
      unshift(@mailparts, "From: $from\n") unless($msg =~ m!^From:!m);
-     unshift(@mailparts, "Date: " . email_date(time()));
+     unshift(@mailparts, "Date: " . email_date(time()) . "\n");
 
      $smtp->data(\@mailparts) or return;
      $smtp->quit or return;
