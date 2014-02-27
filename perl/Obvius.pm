@@ -3011,7 +3011,7 @@ sub get_month_statistics_for_doc {
 
 sub get_year_statistics_for_doc {
     my ($this, $doc_path) = @_;
-    my $results = $this->execute_select("SELECT visit_count FROM monthly_path_statisics WHERE yearmonth <= ? AND uri = ?", (localtime(time))[5] . (localtime(time))[4], $doc_path);
+    my $results = $this->execute_select("SELECT visit_count FROM monthly_path_statisics WHERE yearmonth > ? AND uri = ?", (localtime(time))[5] . '00', $doc_path);
     my $result = 0;
     for my $res (@$results) {
         $result += $res->{visit_count}; 
