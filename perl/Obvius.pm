@@ -3003,15 +3003,19 @@ sub alternative_langs {
 sub get_month_statistics_for_doc {
     my ($this, $month, $doc_id) = @_;
     $month = (locatime(time))[4] unless defined $month;
-    my $prepare_statement = $this->{DB}->DBHdl->prepare("SELECT visit_count FROM monthly_path_statisics WHERE month = ? AND subsite = ?");
+    my $prepare_statement = $this->{DB}->DBHdl->prepare("SELECT visit_count FROM monthly_path_statisics WHERE yearmonth = ? AND subsite = ?");
     my $result = $prepare_statement->execute($month, $doc_id);
+    $result = 0 if ($result == 0E0);
     return $result;
 }
 
 sub get_year_statistics_for_doc {
     my ($this, $doc_id) = @_;
-    my $prepare_statement = $this->{DB}->DBHdl->prepare("SELECT visit_count FROM monthly_path_statisics WHERE month <= ? AND subsite = ?");
-    my $result = $prepare_statement->execute((localtime(time))[4], $doc_id);
+    my $results = $this->execute_select("SELECT visit_count FROM monthly_path_statisics WHERE yearmonth <= ? AND subsite = ?", (localtime(time))[4], $doc_id);
+    my $result = 0;
+    for my $res (@$results) {
+        $result += $res->{visit_count}; 
+    }
     return $result;
 }
           
