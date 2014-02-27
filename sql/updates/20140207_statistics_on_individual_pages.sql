@@ -6,6 +6,6 @@ CREATE TABLE `monthly_path_statisics` (
         `visit_count` int(11) DEFAULT NULL,
         PRIMARY KEY (`id`),
         KEY `uri` (`uri`),
-        KEY `month` (`month`),
+        KEY `yearmonth` (`month`),
         KEY `subsite` (`subsite`)
 ) DEFAULT CHARSET=utf8;
