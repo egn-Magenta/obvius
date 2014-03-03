@@ -57,7 +57,7 @@ sub rewrite {
 1;
 
 package WebObvius::Rewriter::ObviusRules::Navigator;
-use WebObvius::Rewriter::RewriteRule qw(PROXY);
+use WebObvius::Rewriter::RewriteRule qw(PROXY PASSTHROUGH);
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
 sub setup {
@@ -68,6 +68,11 @@ sub setup {
     $this->{navigator_url} = $config->param('navigator_url');
 
     die ("Trying to use rewriterule for navigator, but no navigator url specified in config") unless($this->{navigator_url});
+
+    if($config->param('use_local_navigator')) {
+        $this->{passthrough} = 1;
+        return;
+    }
 
     $this->{port} = $config->param('navigator_port') || 5000;
     $this->{number_of_servers} = $config->param('navigator_servers') || 3;
@@ -84,6 +89,8 @@ sub rewrite {
     my $nav_url = $this->{navigator_url};
 
     if($args{uri} =~ m!^$nav_url(.*)!) {
+        return (PASSTHROUGH, '-') if($this->{passthrough});
+
         $this->{additional_port} += 1;
         $this->{additional_port} %= $this->{number_of_servers};
         my $real_port = $this->{port} + $this->{additional_port};
