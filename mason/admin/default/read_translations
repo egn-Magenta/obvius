@@ -6,6 +6,7 @@ $site->set_language_preferences($r, 'da');
 
 my $lang_list = $site->param('LANGUAGE_PREFERENCES') || [];
 my $preferred_language = $lang_list->[0] || 'da';
+$preferred_langauge = substr($preferred_langauge, 0, 2);
 
 $r->pnotes('language_preferences' => $lang_list);
 $r->notes('editor_language' => $preferred_language);
