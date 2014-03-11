@@ -3001,22 +3001,39 @@ sub alternative_langs {
 }
 
 sub get_month_statistics_for_doc {
-    my ($this, $month, $doc_path) = @_;
-    $month = (locatime(time))[4] unless defined $month;
-    my $prepare_statement = $this->{DB}->DBHdl->prepare("SELECT visit_count FROM monthly_path_statisics WHERE yearmonth = ? AND uri = ?");
-    my $result = $prepare_statement->execute($month, $doc_path);
-    $result = 0 if ($result == 0E0);
-    return $result;
+    my ($this, $doc_path, $month) = @_;
+    unless($month) {
+	my ($mon,$year) = (localtime(time))[4,5];
+	$month = sprintf('%04d%02d', $year + 1900, $mon +1);
+    }
+    my $sth = $this->dbh->prepare(
+	"SELECT visit_count FROM monthly_path_statisics " .
+	"WHERE yearmonth = ? AND uri = ?"
+    ) or return 0;
+    $sth->execute($month, $doc_path) or return 0;
+    my ($result) = $sth->fetchrow_array;
+    return $result || 0;
 }
 
 sub get_year_statistics_for_doc {
-    my ($this, $doc_path) = @_;
-    my $results = $this->execute_select("SELECT visit_count FROM monthly_path_statisics WHERE yearmonth > ? AND uri = ?", (localtime(time))[5] . '00', $doc_path);
-    my $result = 0;
-    for my $res (@$results) {
-        $result += $res->{visit_count}; 
+    my ($this, $doc_path, $year) = @_;
+
+    unless($year) {
+	my ($y) = (localtime(time))[5];
+	$y += 1900;
+	$year = sprintf('%04d');
     }
-    return $result;
+
+    my $sth = $this->dbh->prepare(
+	"SELECT SUM(visit_count) FROM monthly_path_statisics " .
+	"WHERE yearmonth > ? " .
+	"AND yearmonth < ?" .
+	"AND uri = ?",
+    ) or return 0;
+    $sth->execute($year . '00', $year . '13', $doc_path);
+
+    my ($result) = $sth->fetchrow_array;
+    return $result || 0;
 }
           
 
