@@ -115,6 +115,10 @@ unless($obvius->config->param('use_old_admin_subdocs_sort')) {
 		     -1 : 1} @subs;
 }
 
+# Don't cache the full path
+foreach my $d (@subs) {
+    delete $d->{doc}->{path};
+};
 $cache->save( $cache_key, \@subs );
 return \@subs;
 </%init>
