@@ -926,6 +926,50 @@ sub db_delete_docparams {
     return;
 }
 
+# chlang method for easy changing of language
+sub db_chlang {
+    my ($this, $lang, %options) = @_;
+
+    die "Invalid language: $lang" unless($lang and $lang =~ m!^\w\w$!);
+
+    my @args = ($lang);
+    my $where;
+
+    if(my $docid = $options{docid}) {
+	if($options{recursive}) {
+	    my $d = $this->get_doc_by_id($docid);
+	    return $this->db_chlang(
+		$lang,
+		uri => $this->get_doc_uri($d),
+		recursive => 1
+	    );
+	} else {
+	    $where = "docid = ?";
+	    push(@args, $docid);
+	}
+    } elsif(my $uri = $options{uri}) {
+	if($options{recursive}) {
+	    $where = "docid in (
+		select docid from docid_path where path like ?
+	    )";
+	    push(@args, $uri . '%');
+	} else {
+	    $where = "docid in (select docid from docid_path where path = ?)";
+	    push(@args, $uri);
+	}
+    } else {
+	die "You must specify either an uri or a docid for db_chlang";
+    }
+
+    my $sth = $this->dbh->prepare(qq|
+	update versions
+	set versions.lang = ?
+	where $where
+    |);
+
+    $sth->execute(@args);
+}
+
     
 1;
 __END__
