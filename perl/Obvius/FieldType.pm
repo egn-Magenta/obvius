@@ -16,7 +16,7 @@ use Obvius::FieldType::None;
 use Obvius::FieldType::Xref;
 use Obvius::FieldType::Regexp;
 use Obvius::FieldType::Special;
-
+use Obvius::Log;
 
 # new(%hash) - Constructs an object of class Obvius::FieldType.
 #
@@ -42,7 +42,7 @@ sub new
 			$class .= "::$type";
 			bless $this, $class;	# re-bless into subclass
 		} else {
-			Obvius::log-> warn("No class for fieldtype $type");
+			Obvius::Log-> warn("No class for fieldtype $type");
 		}
 	}
 

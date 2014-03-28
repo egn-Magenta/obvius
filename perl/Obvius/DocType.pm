@@ -37,6 +37,7 @@ use warnings;
 use Obvius;
 use Obvius::Data;
 use Data::Dumper;
+use Obvius::SolrConvRoutines;
 
 #     The object contains two instances of Obvius::Data. Both contain
 #     fields associated with the object:
@@ -90,12 +91,11 @@ sub generate_head_html {
 
      if ($mode && $mode eq 'search') {
           my @header;
-          push @header, $this->add_js('/scripts/jquery/jquery-1.3.2.min.js',
-                                      '/scripts/jquery/jquery-ui-1.7.2.custom.min.js',
+          push @header, $this->add_js('http://code.jquery.com/jquery-1.8.2.min.js',
+                                      'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
                                       '/scripts/jsutils.js',
                                       '/scripts/jquery/jquery.bgiframe.min.js',
-                                      '/scripts/jquery/jquery.ajaxQueue.js',
-                                      '/scripts/jquery/jquery.autocomplete.min.js');
+                                      '/scripts/jquery/jquery.ajaxQueue.js');
           push @header, $this->add_link('/style/jquery-ui-1.7.2.custom.css',
                                         '/style/jquery.autocomplete.css');
           
@@ -123,7 +123,64 @@ sub view {
      return $view;
 }
      
+########################################################################
+### Methods regarding SOLR usage
+########################################################################
+
+########################################################################
+# get_solr_fields
+# RETURN: A hash-reference where keys are obvius field-names
+#         and values are array refs, where:
+#         Element 1 (required) = 'f' (VFIELDS fieldname) OR 
+#                                'd' (dokument fieldname) OR
+#                                'v' (version fieldname)
+#         Element 2 (required) = SOLR fieldname
+#         Element 3 (optional) = CODE reference to subroutine that transforms fieldvalue
+#                                indicated by key to value to use for SOLR field.
+#                                The subroutine must take one argument (the value) and
+#                                return one value.
+#                                If not specified, then no tranformation is used - i.e
+#                                the field-value is used unmodified
+#         Element 4 (optional) = Source of alternative value which is used if elem1 and 2 yields an empty value
+#                                'f' (VFIELDS fieldname) OR 
+#                                'd' (dokument fieldname) OR
+#                                'v' (version fieldname)
+#         Element 5 (optional) = Alternative SOLR fieldname
+########################################################################
+sub get_solr_fields  {
+    my($self, $obvius) = @_;
+    ### To PERL string conversion is only necessary on old_db_model
+    my $perlConv = $obvius->can('schema') ? undef : \&Obvius::SolrConvRoutines::toPERL;
+    ### Standard fields exported to SOLR
+    my $fieldmap = {
+	'Id'             => ['d', 'id'],
+	'published'      => ['f', 'published', \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
+	'docdate'        => ['f', 'docdate',   \&Obvius::SolrConvRoutines::toUTCDateTime, 'v', 'Version'],
+	'content'        => ['f', 'content', $perlConv],
+	'teaser'         => ['f', 'teaser', $perlConv],
+	'Path'           => ['d', 'path'],
+	'title'          => ['f', 'title', $perlConv],
+	'Lang'           => ['v', 'lang'],
+	'Type'           => ['v', 'type', sub { my $doct = $obvius->{DOCTYPES}->[shift @_];
+						return $doct ? $doct->Name(): '' }],
+    };
+    return $fieldmap;
+}
      
+########################################################################
+### Should be used by subclasses to insert entries in solr fields hashref
+########################################################################
+sub set_solr_field {
+    my($self, $fieldhash, $key, $spec) = @_;
+    if ( $fieldhash && $key && $spec ) {
+	if ( exists $fieldhash->{$key} ) {
+	    $fieldhash->{'*' . $key . '*'} = $spec;
+	} else {
+	    $fieldhash->{$key} = $spec;
+	}
+    }
+}
+
 # action - the action method in the document type is called by Obvius
 #          when a document perform its function. Obvius provides data
 #          for the document type to use on the input-object and the

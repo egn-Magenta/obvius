@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 
+use DBI;
+
 package WebObvius::Rewriter::ObviusRules::StaticDocs;
 use WebObvius::Rewriter::RewriteRule qw(LAST);
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
@@ -20,11 +22,11 @@ sub rewrite {
     my ($this, %args) = @_;
 
     return undef if($args{uri} eq '/');
-    
+
     my $full_path = $this->{docs_dir} . $args{uri};
-    
+
     return (LAST, '-') if(-f $full_path or -d $full_path);
-    
+
     return undef;
 }
 
@@ -44,47 +46,59 @@ sub setup {
 sub rewrite {
     my ($this, %args) = @_;
 
-    return (REWRITE, lc($args{uri}));    
+    my $uri = lc($args{uri});
+    if($uri ne $args{uri}) {
+        return (REWRITE, $uri);
+    } else {
+        return undef;
+    }
 }
 
 1;
 
 package WebObvius::Rewriter::ObviusRules::Navigator;
-use WebObvius::Rewriter::RewriteRule qw(PROXY);
+use WebObvius::Rewriter::RewriteRule qw(PROXY PASSTHROUGH);
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
 sub setup {
     my ($this, $rewriter) = @_;
-    
+
     my $config = $rewriter->{config};
-    
+
     $this->{navigator_url} = $config->param('navigator_url');
 
     die ("Trying to use rewriterule for navigator, but no navigator url specified in config") unless($this->{navigator_url});
-    
+
+    if($config->param('use_local_navigator')) {
+        $this->{passthrough} = 1;
+        return;
+    }
+
     $this->{port} = $config->param('navigator_port') || 5000;
     $this->{number_of_servers} = $config->param('navigator_servers') || 3;
     $this->{navigator_server} = $config->param('navigator_server') || 'localhost';
-    
+
     $this->{additional_port} = 0;
 }
 
 sub rewrite {
     my ($this, %args) = @_;
-    
+
     return undef unless($args{is_front_server});
-    
+
     my $nav_url = $this->{navigator_url};
-    
+
     if($args{uri} =~ m!^$nav_url(.*)!) {
+        return (PASSTHROUGH, '-') if($this->{passthrough});
+
         $this->{additional_port} += 1;
         $this->{additional_port} %= $this->{number_of_servers};
         my $real_port = $this->{port} + $this->{additional_port};
         my $url = "http://" . $this->{navigator_server} . ":$real_port/$1";
-        
+
         return (PROXY, $url);
     }
-    
+
     return undef;
 }
 
@@ -94,12 +108,12 @@ sub rewrite {
 #
 #sub rewrite {
 #    my ($this, %args) = @_;
-#    
+#
 #    return undef if($args{uri} =~ m!^/cache/!);
 #    return (PASSTHROUGH, '-') if($args{uri} =~ m!^/(admin|public|soap|rest|system)/!);
 #    return (PASSTHROUGH, "/public/$1") if($args{uri} =~ m!^/(.*)!);
 #
-#    return undef;    
+#    return undef;
 #}
 #
 #1;
@@ -119,14 +133,19 @@ sub setup {
     $this->{is_admin_rewriter} = 1;
 
     my $config = $rewriter->{config};
-    
+
     $this->{roothost} = $config->param('roothost');
     die "Trying to use subsite rewrites on a site with no roothost" unless($this->{roothost});
-    
+
     my $map_file = $config->param('hostmap_file');
     die "No 'hostmap_file' defined in config: Can't rewrite subsites" unless($map_file);
 
-    $this->{hostmap} = Obvius::Hostmap->create_hostmap( $map_file, $this->{roothost}, debug => 1 );
+    $this->{hostmap} = Obvius::Hostmap->create_hostmap(
+        $map_file,
+        $this->{roothost},
+        debug => 1,
+        default_https_roothost => $config->param('https_roothost')
+    );
 }
 
 sub hostmap {
@@ -135,23 +154,48 @@ sub hostmap {
 
 sub rewrite {
     my ($this, %args) = @_;
-    
+
     return undef unless($args{is_front_server});
-    
+
     my $roothost = $this->{roothost};
     my $hostname = lc($args{hostname}) || '';
-    
+    my $hostmap = $this->hostmap;
+
     #Make sure hostmap is correctly loaded:
-    $this->hostmap->get_hostmap;
-    
+    $hostmap->get_hostmap;
+
     my $subsite_uri = $this->hostmap->host_to_uri($args{hostname}) || '';
-    my $protocol = ($args{https} || '') eq 'on' ? 'https' : 'http';
-    
+    my $protocol_in = ($args{https} || '') eq 'on' ? 'https' : 'http';
+
+
+    # Skip system URLs, or redirect to https, if required
+    if($args{uri} =~ m!^/system/!) {
+        if($hostmap->lookup_is_https($args{uri})) {
+            my $host = $hostmap->https_roothost;
+            if($host ne $hostname or $protocol_in ne 'https') {
+                return (REDIRECT, "https://$host$args{uri}");
+            }
+        }
+        return undef;
+    }
+
     # Stage one: Redirect admin requests on any host to the proper URI on
-    # the roothost:    
+    # the roothost:
     if($args{uri} =~ m!^/admin(/(.*)|$)!) {
-        # If already on the root we don't need any more subsite rewriting
-        return undef if($hostname eq $roothost);
+        my $protocol = 'http';
+
+        if($1 and $hostmap->lookup_is_https($1)) {
+            $protocol = 'https';
+            $roothost = $hostmap->https_roothost;
+        }
+
+        # If already on the root and using the correct protocol we don't need
+        # any more subsite rewriting
+        return undef if(
+            $1 and
+            ($protocol_in eq $protocol) and
+            ($hostname eq $roothost)
+        );
 
         my $rest = $1 || '/';
         if($subsite_uri) {
@@ -162,31 +206,29 @@ sub rewrite {
         }
     }
 
-    # Skip system URLs
-    return undef if($args{uri} =~ m!^/system/!);
-    
-    # Store original URI for later use
-    my $orig_uri = $args{uri};
-
     my $rewritten = 0;
-    
-    # Rewrite according to found subsite:
+
+    # Rewrite according to found subsite, making $args{uri} a true Obvius uri.
     if($subsite_uri) {
         $args{uri} =~ s!^/!!;
         $args{uri} = "$subsite_uri$args{uri}";
         $rewritten = 1;
     }
-    
-    # Now, redirect to the correct hostname if we're not already on it:
-    my ($new_uri, $new_host, $subsiteuri) = $this->hostmap->translate_uri($args{uri}, $hostname);
-    
-    # TODO: Handle SSL redirects here? Or maybe in Obvius::Hostmap?
-    return (REDIRECT, $new_uri) if($new_host and $new_host ne $hostname);
+
+    # Now, redirect to the correct protocol/hostname if we're not already on
+    # it:
+    my ($new_uri, $new_host, undef, undef, $protocol)
+        = $this->hostmap->translate_uri($args{uri}, $hostname);
+
+    return (REDIRECT, $new_uri) if(
+        ($protocol ne $protocol_in) or
+        ($new_host and $new_host ne $hostname)
+    );
 
     if($rewritten) {
         return (REWRITE, $args{uri});
     } else {
-        return undef;    
+        return undef;
     }
 }
 
@@ -203,20 +245,20 @@ our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
 sub setup {
     my ($this, $rewriter) = @_;
-    
+
     my $config = $rewriter->{config};
-    
+
     $this->{cache_file} = $config->param('cache_db');
     die "No cache_db specified in the config file" unless($this->{cache_file});
-    
-    
+
+
     $this->{debug} = $rewriter->{debug};
 }
 
 sub rewrite {
     my ($this, %args) = @_;
     $args{query_string} ||= '';
-    
+
     return undef unless($args{method} =~ m!^(GET|HEAD)$!);
     print STDERR "$args{method} method OK\n" if($this->{debug});
     return undef unless($args{query_string} =~ m!^(size=[0123456789]+x[0123456789]+|)$!);
@@ -232,7 +274,7 @@ sub rewrite {
         return (REWRITE, $cached);
     }
 
-    return undef;    
+    return undef;
 }
 
 1;
@@ -245,16 +287,16 @@ our @ISA = qw(WebObvius::Rewriter::RewriteRule);
 
 sub setup {
     my ($this, $rewriter) = @_;
-    
+
     my $config = $rewriter->{config};
-    
+
     $this->{dsn} = $config->param('dsn');
     $this->{username} = $config->param('normal_db_login');
     $this->{passwd} = $config->param('normal_db_passwd');
 
     $this->{qstring_mapper} = $config->param('mysqlcache_querystring_mapper') ||
         new WebObvius::Cache::MysqlApacheCache::QueryStringMapper();
-    
+
     $this->{table} = $config->param('mysql_apachecache_table');
     die "No table specified for mysql-based cache" unless($this->{table});
 
@@ -274,7 +316,7 @@ sub connect_dbh {
 
     my $table = $this->{table};
     $this->{lookup} = $this->{dbh}->prepare("SELECT cache_uri FROM $table WHERE uri = ? and querystring = ?");
-    
+
     $this->{doctype_lookup} = $this->{dbh}->prepare(q|
         SELECT
             doctypes.id AS doctypeid,
@@ -298,12 +340,12 @@ sub rewrite {
     my ($this, %args) = @_;
     $args{query_string} ||= '';
     $args{uri} .= "/" unless($args{uri} =~ m!/$!);
-    
+
     return undef if($args{uri} =~ m!^/admin!);
     return undef unless($args{method} =~ m!^(GET|HEAD)$!);
     print STDERR "$args{method} method OK\n" if($this->{debug});
 
-    $this->connect_dbh unless($this->{dbh}->ping());
+    $this->connect_dbh unless($this->{dbh} && $this->{dbh}->ping());
 
     $this->{doctype_lookup}->execute($args{uri});
     my ($doctypeid, $doctypename) = ($this->{doctype_lookup}->fetchrow_array);
@@ -321,7 +363,7 @@ sub rewrite {
         return (REWRITE, $cached);
     }
 
-    return undef;    
+    return undef;
 }
 
 1;

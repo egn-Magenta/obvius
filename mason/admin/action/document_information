@@ -171,6 +171,18 @@ my $can_docparams = $obvius->can_set_docparams($doc);
 my $user     = $obvius->get_user($doc->Owner);
 my $ownername = $user ? $user->{name} : "---BAD OWNER---";
 
+### Calculate the groups to show
+### Make sure the owner group $doc->Grp is present
+my @grps_to_show = @{$obvius->get_user_groups($obvius->get_userid($obvius->user))};
+my $is_full = 0;
+foreach my $ugrp ( @grps_to_show ) {
+    if ( $ugrp eq $doc->Grp ) {
+	$is_full = 1;
+	last;
+    }
+}
+unshift(@grps_to_show, $doc->Grp) unless ( $is_full);
+
 my @info = (
         {
                 title   => ' Title',
@@ -212,9 +224,7 @@ my @info = (
                                         id      => $group->{id},
                                         name    => $group->{name},
                                 }
-                        } @{
-                                $obvius->get_user_groups($obvius->get_userid($obvius->user))
-                        }
+                        } @grps_to_show
                 ],
         }, {
                 title   => 'Access rules',

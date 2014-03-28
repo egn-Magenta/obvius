@@ -53,7 +53,11 @@ sub preprocess_fields {
     my %outfields;
      
     for my $fn (keys %$formspec) {
-        my $field = $formspec->{$fn};
+	my $field = $formspec->{$fn};
+
+        ### Skip the fieldarea and fieldarea-end field when a form is submitted
+	next if ( $field->{type} eq 'fieldset' or $field->{type} eq 'fieldset_end' );
+        
         my $value = $input->{$fn};
         my $of = $outfields{$fn} = {};
         
@@ -403,7 +407,7 @@ sub validate_full_entry {
     my $outfields = preprocess_fields($formspec, \%input, $obvius->config->param('charset'));
     
     for my $fn (keys %$formspec) {
-        validate_entry($formspec->{$fn}, $outfields->{$fn}, $outfields, $docid, $obvius);
+        validate_entry($formspec->{$fn}, $outfields->{$fn}, $outfields, $docid, $obvius) if ($outfields->{$fn});
     }
 
     $outfields->{$_->{name}}{invalid}  = $_->{error} for @invalid_upload_fields;

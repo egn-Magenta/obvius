@@ -12,12 +12,15 @@ var formdata_option_dialog_height = 180;
 var formdata_valrule_dialog_width = 400;
 var formdata_valrule_dialog_height = 250;
 
-var scriptmode = false;
+/* variables for repeatable use */
+var obvius_rep_field_names = [ ];
+var obvius_rep_field_displays = [ ];
+var obvius_field_name_marker = {};
+var obvius_rep_area_count = 0;
 
-function formdata_set_scriptmode() {
-    //Activates field attributes initialvalue and hidden
-    scriptmode = true;
-}
+var formdata_admin_url = document.location.href.match(/https/) ?
+	                 './' :
+			 '/admin/';
 
 function formdata_init(elem) {
     // Unhide the advanced editing controls:
@@ -26,22 +29,35 @@ function formdata_init(elem) {
 
     // Setup data:
     formdata_load_rootDoc_data(elem);
-    formdata_populate_fieldtable(elem.name);
 
+    // Populate fields table and repeatable area
+    formdata_populate_fieldtable(elem.name, true);
 }
 
 function formdata_save(elem) {
     var rootDoc = formdata_get_rootDoc_by_name(elem.name);
 
-    var xml = rootDoc.getXML();
+    //Delete reppeatables if any leftover
+    if ( rootDoc ) {
+	var repeatselem = rootDoc.getElementsByTagName('repeatables');
+	if ( repeatselem && repeatselem.getLength() > 0 ) {
+            rootDoc.removeChild(repeatselem.item(0)); //Remove it now - inserted again when finished
+	}
+    }
 
+    //Insert repeatables in rootDoc
+    merge_rootDoc_repeatables(rootDoc);
+
+    //Extract XML text
+    var xml = rootDoc.getXML();
     xml = xml.replace(/<\/([^>]+)></g, "</$1>\n<");
 
+    //Set form-emlement value to xml-text
     elem.value = xml;
     return true;
 }
 
-function formdata_populate_fieldtable(name) {
+function formdata_populate_fieldtable(name, startup) {
 
     rootDoc = formdata_get_rootDoc_by_name(name);
 
@@ -62,12 +78,25 @@ function formdata_populate_fieldtable(name) {
 
     var fields = rootDoc.getElementsByTagName('field');
 
+    //Reset repeatables info
+    obvius_rep_field_names = [];
+    obvius_rep_field_displays = [];
+    obvius_field_name_marker = {};
+
     if(fields) {
         for(var i=0;i < fields.getLength();i++) {
             var item = fields.item(i);
             var obj = formdata_objectify_node(item);
 
-            // Generate a <tr> for the field:
+	    //Update array of fields for repeatables
+	    if ( obj.type != 'fieldset' && obj.type != 'fieldset_end' && 
+		 obj.type != 'upload' && obj.type != 'password' &&
+		 obj.type != 'selectmultiple' && obj.type != 'checkbox') { 
+		obvius_rep_field_names.push(obj.name);
+		obvius_rep_field_displays.push(obj.title);
+	    }
+            
+	    // Generate a <tr> for the field:
 
             var tr = document.createElement('tr');
 
@@ -106,26 +135,12 @@ function formdata_populate_fieldtable(name) {
 
             tr.appendChild(unique_td);
 
-	    if ( scriptmode ) {
-		var hidden_td = document.createElement('td');
-		var hidden_value = obj.hidden || '';
-		if(hidden_value == 1) {
-                    hidden_td.innerHTML = formdata_translations['Yes'];
-		} else {
-                    hidden_td.innerHTML = formdata_translations['No'];
-		}
-
-		tr.appendChild(hidden_td);
-	    }
-
             var edit_td = document.createElement('td');
             var edit_a = document.createElement('a');
             edit_a.href = document.location.href;
 
             // Hmmm, have to wrap this in eval to avoid problems with global variables
-            var edit_url = "/admin/?obvius_app_formdata=1&mode=edit&field=" + obj.name + "&fieldname=" + name;
-            edit_url = edit_url + "&scriptmode=" + ( scriptmode ? '1' : '0' );
-	    edit_url = edit_url + "&edittype=" + obj.type;
+            var edit_url = formdata_admin_url + "?obvius_app_formdatarepeat=1&mode=edit&field=" + obj.name + "&fieldname=" + name;
             var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height;
             eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit', '" + window_options + "'); return false; }");
             edit_a.innerHTML = formdata_translations['Edit'];
@@ -165,6 +180,27 @@ function formdata_populate_fieldtable(name) {
         }
     }
     formdata_populate_sortorder_field(name, rootDoc);
+    
+    /* Repetables */
+    for ( var markIdx = 0; markIdx < obvius_rep_field_names.length; markIdx++ ) {
+	var cur = obvius_rep_field_names[markIdx];
+	obvius_field_name_marker[cur] = obvius_rep_field_displays[markIdx];
+    }
+    if ( startup ) {
+	//Make HTML structure from existing repeatables
+	var repeatselem = rootDoc.getElementsByTagName('repeatables');
+	if( repeatselem && repeatselem.getLength() > 0 ) {
+	    var repeats = repeatselem.item(0).getElementsByTagName('repeatable');
+	    for(var i=0;i < repeats.getLength();i++) {
+		var item = repeats.item(i);
+		var obj = formdata_objectify_repeat_node(item);
+		insert_repeat_area(obj);
+	    }
+	}
+    } else {
+        //Reflect field change on existing repeatables
+	reflectFields_on_repeatables();
+    }
 }
 
 function formdata_populate_sortorder_field(name, rootDoc) {
@@ -216,7 +252,7 @@ function formdata_delete_field(formfield_name, fieldname) {
         }
     }
 
-    formdata_populate_fieldtable(formfield_name);
+    formdata_populate_fieldtable(formfield_name, false);
     document.pageform[formfield_name].value = rootDoc.getXML();
 }
 
@@ -234,8 +270,7 @@ function formdata_add_new(elem) {
         return false;
     }
 
-
-    window.open("/admin/?obvius_app_formdata&mode=edit&new=" + type_value + "&fieldname=" + elem.name + "&scriptmode=" + (scriptmode ? '1' : '0'), "formdata_edit", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height);
+    window.open(formdata_admin_url + "?obvius_app_formdatarepeat&mode=edit&new=" + type_value + "&fieldname=" + elem.name, "formdata_edit", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height);
 }
 
 
@@ -272,15 +307,13 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         tmpXML += " <field>";
         tmpXML += "     <name></name>";
         tmpXML += "     <title></title>";
-        if ( scriptmode )
-	    tmpXML += "     <initialvalue></initialvalue>";
         tmpXML += "     <type>" + is_new + "</type>";
-        if ( scriptmode )
-            tmpXML += "     <hidden>0</hidden>";
         tmpXML += "     <mandatory>0</mandatory>";
         tmpXML += "     <unique>0</unique>";
         tmpXML += "     <imagepath></imagepath>";
         tmpXML += "     <description></description>";
+        tmpXML += "     <colindex>0</colindex>";
+        tmpXML += "     <listpublic></listpublic>";
         tmpXML += "     <validaterules>";
         tmpXML += "     </validaterules>";
         tmpXML += "     <options>";
@@ -301,6 +334,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
             if(formdata_get_node_text(names.item(i)) == fieldname) {
                 // Need to clone here since we might have to replace it later
                 fieldNode = names.item(i).parentNode.cloneNode(true);
+		break;
             }
         }
     }
@@ -310,32 +344,28 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
     document.pageform.title.value = fieldObj.title || "";
     document.pageform.name.value = fieldObj.name || "";
     document.pageform.description.value = fieldObj.description || "";
+    document.pageform.colindex.value = fieldObj.colindex || "0";
+    document.pageform.listpublic.value = fieldObj.listpublic || "";
     document.pageform.imagepath.value = fieldObj.imagepath || "";
-    if ( scriptmode )
-	document.pageform.initialvalue.value = fieldObj.initialvalue || "";
 
     document.getElementById('type_field').innerHTML = formdata_translations['field_type_' + fieldObj.type] || 'unknown fieldtype';
 
 
     var type = fieldObj.type || '';
 
-    if(type == 'text' || type == 'password' || type == 'textarea') {
+    //Listpublic is almost certainly not displayed
+    if (type == 'radio') {
+	document.getElementById('listpublic').style.display = '';
+    } else {
+	document.pageform.listpublic.value = "";
+	document.getElementById('listpublic').style.display = 'none';
+    }
+
+    if(type == 'text' || type == 'password' || type == 'textarea' || type == 'protected') {
         // Hide options and validaterules:
         document.getElementById('options').style.display = 'none';
     }
 
-    if (scriptmode && type != 'text' && type != 'cmspath') {
-        // Hide 'hidden' and 'initial-value' controls:
-        document.getElementById('hidden').style.display = 'none';
-        document.getElementById('initial-value').style.display = 'none';
-    }
-
-    if (type == 'cmspath') {
-        document.getElementById('options').style.display = 'none';
-        document.getElementById('validaterules').style.display = 'none';
-        document.getElementById('image').style.display = 'none';
-        document.getElementById('description').style.display = 'none';
-    }
     if (type == 'email' ) {
         document.getElementById('options').style.display = 'none';
         document.getElementById('validaterules').style.display = 'none';
@@ -350,6 +380,7 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
         document.getElementById('image').style.display = 'none';
         document.getElementById('description').style.display = 'none';
         document.getElementById('unique').style.display = 'none';
+	document.getElementById('colindex').style.display = 'none';
     }
 
     if(type == 'upload') {
@@ -365,13 +396,18 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
       document.getElementById('size').style.display = '';
     }
 
-    if(type == 'text' || type == 'password') {
+    if(type == 'text' || type == 'password' || type == 'protected') {
       document.getElementById('maxlength').style.display = '';
       document.getElementById('size').style.display = '';
     }
 
     if(type == 'textarea') {
         document.getElementById('ta_dimensions').style.display = '';
+    }
+
+    if(type == 'protected') {
+        document.pageform.colindex.value = "0";
+        document.getElementById('colindex').style.display = 'none';
     }
 
     if(fieldObj.mandatory == 0 || ! fieldObj.mandatory) {
@@ -421,16 +457,6 @@ function formdata_init_field_edit(form_fieldname, is_new, fieldname) {
     } else {
         document.getElementById('unique_yes').checked = 0;
         document.getElementById('unique_no').checked = 1;
-    }
-
-    if ( scriptmode ) {
-	if(fieldObj.hidden == 1) {
-            document.getElementById('hidden_yes').checked = 1;
-            document.getElementById('hidden_no').checked = 0;
-	} else {
-            document.getElementById('hidden_yes').checked = 0;
-            document.getElementById('hidden_no').checked = 1;
-	}
     }
 
     // Populate params:
@@ -500,7 +526,7 @@ function formdata_populate_validaterules(fieldNode) {
         var edit_a = document.createElement('a');
         edit_a.href = document.location.href;
 
-	var edit_url = "/admin/?obvius_app_formdata&mode=edit_validaterule&rulenr=" + i;
+	var edit_url = formdata_admin_url + "?obvius_app_formdatarepeat&mode=edit_validaterule&rulenr=" + i;
         var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height;
         eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit_valrule', '" + window_options + "'); return false;}");
         edit_a.innerHTML = formdata_translations['Edit'];
@@ -568,11 +594,15 @@ function formdata_populate_options(fieldNode) {
         value_td.innerHTML = optObj.optionvalue;
         tr.appendChild(value_td);
 
+	var sel_td = document.createElement('td');
+        sel_td.innerHTML = (optObj.initselect && optObj.initselect != '' ? formdata_translations['Yes'] : formdata_translations['No']);
+        tr.appendChild(sel_td);
+
         var edit_td = document.createElement('td');
         var edit_a = document.createElement('a');
         edit_a.href = document.location.href;
 
-        var edit_url = "/admin/?obvius_app_formdata&mode=edit_option&rulenr=" + i;
+        var edit_url = formdata_admin_url + "?obvius_app_formdatarepeat&mode=edit_option&rulenr=" + i;
         var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_option_dialog_width + ",height=" + formdata_option_dialog_height;
         eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit_option', '" + window_options + "'); return false;}");
         edit_a.innerHTML = formdata_translations['Edit'];
@@ -648,7 +678,7 @@ function formdata_validate_and_save_field(form_fieldname, old_name) {
         return false;
     }
 
-    window.opener.formdata_populate_fieldtable(form_fieldname);
+    window.opener.formdata_populate_fieldtable(form_fieldname, false);
 
     window.close();
 }
@@ -710,7 +740,7 @@ function formdata_validate_and_add_field(form_fieldname, old_name) {
     var fieldsNode = rootDoc.getElementsByTagName('fields').item(0);
     fieldsNode.appendChild(newNode);
 
-    window.opener.formdata_populate_fieldtable(form_fieldname);
+    window.opener.formdata_populate_fieldtable(form_fieldname, false);
 
     window.close();
 }
@@ -758,25 +788,8 @@ function formdata_save_field_form_data(fieldNode) {
         mandNode.appendChild(newMand);
     }
 
-    if ( scriptmode ) {
-	var hidden_value = document.getElementById('hidden_yes').checked ? 1 : 0;
-	var hiddenNode = fieldNode.getElementsByTagName('hidden').item(0);
-	
-	// Can't be sure if hidden is there, so if it doesn't exist, create it:
-	if(! hiddenNode) {
-            hiddenNode = fieldNode.getOwnerDocument().createElement('hidden');
-            fieldNode.appendChild(hiddenNode);
-	}
-
-	var hiddenText = fieldNode.getOwnerDocument().createTextNode(hidden_value);
-	if(hiddenNode.getFirstChild()) {
-            hiddenNode.replaceChild(hiddenText, hiddenNode.getFirstChild());
-	} else {
-            hiddenNode.appendChild(hiddenText);
-	}
-    }
-
     var unique_value = document.getElementById('unique_yes').checked ? 1 : 0;
+
     var uniqueNode = fieldNode.getElementsByTagName('unique').item(0);
 
     // Can't be sure if unique is there, so if it doesn't exist, create it:
@@ -792,22 +805,6 @@ function formdata_save_field_form_data(fieldNode) {
         uniqueNode.appendChild(uniqueText);
     }
 
-    if ( scriptmode ) {
-	// initialvalue:
-	var ivalNode = fieldNode.getElementsByTagName('initialvalue').item(0);
-        if(! ivalNode) {
-            // Create an intialvalue node if none was present
-            ivalNode = fieldNode.getOwnerDocument().createElement('initialvalue');
-            fieldNode.appendChild(ivalNode);
-	}
-        var ival_value = document.pageform.initialvalue.value || "";
-        var newIval = ivalNode.getOwnerDocument().createTextNode(ival_value);
-        if(ivalNode.getFirstChild()) {
-            ivalNode.replaceChild(newIval, ivalNode.getFirstChild());
-	} else {
-            ivalNode.appendChild(newIval);
-	}
-    }
 
     // Imagepath:
     var imgNode = fieldNode.getElementsByTagName('imagepath').item(0);
@@ -836,6 +833,34 @@ function formdata_save_field_form_data(fieldNode) {
         descNode.replaceChild(newDesc, descNode.getFirstChild());
     } else {
         descNode.appendChild(newDesc);
+    }
+
+    // Col index for public lists
+    var colIndexNode = fieldNode.getElementsByTagName('colindex').item(0);
+    if(! colIndexNode) {
+        colIndexNode = fieldNode.getOwnerDocument().createElement('colindex');
+        fieldNode.appendChild(colIndexNode);
+    }
+    var colidx_value = document.pageform.colindex.value || "0";
+    var newColIdx = colIndexNode.getOwnerDocument().createTextNode(colidx_value);
+    if(colIndexNode.getFirstChild()) {
+        colIndexNode.replaceChild(newColIdx, colIndexNode.getFirstChild());
+    } else {
+        colIndexNode.appendChild(newColIdx);
+    }
+
+    // Determinies public list visibility
+    var listPublicNode = fieldNode.getElementsByTagName('listpublic').item(0);
+    if(! listPublicNode) {
+        listPublicNode = fieldNode.getOwnerDocument().createElement('listpublic');
+        fieldNode.appendChild(listPublicNode);
+    }
+    var listpub_value = document.pageform.listpublic.value || "";
+    var newListPub = listPublicNode.getOwnerDocument().createTextNode(listpub_value);
+    if(listPublicNode.getFirstChild()) {
+        listPublicNode.replaceChild(newListPub, listPublicNode.getFirstChild());
+    } else {
+        listPublicNode.appendChild(newListPub);
     }
 
     // Check for params from the form. Params are defined
@@ -961,6 +986,7 @@ function formdata_init_option_edit(ruleNr) {
         tmpXML += " <option>";
         tmpXML += "  <optiontitle></optiontitle>";
         tmpXML += "  <optionvalue></optionvalue>";
+	tmpXML += "  <initselect></initselect>";
         tmpXML += " </option>";
         tmpXML += "</root>";
 
@@ -980,6 +1006,13 @@ function formdata_init_option_edit(ruleNr) {
     var valueNode = optionNode.getElementsByTagName('optionvalue').item(0);
     if(valueNode) {
         document.pageform.optionvalue.value = formdata_get_node_text(valueNode);
+    }
+
+    var initSelNode = optionNode.getElementsByTagName('initselect').item(0);
+    if(initSelNode) {
+	var selTxt = formdata_get_node_text(initSelNode);
+	document.pageform.initselect.value = selTxt == '1' ? '1' : '';
+	document.pageform.initselect.checked = selTxt == '1';
     }
 }
 
@@ -1011,6 +1044,15 @@ function formdata_validate_options_dialog() {
         valueNode.replaceChild(newValue, valueNode.getFirstChild());
     } else {
         valueNode.appendChild(newValue);
+    }
+
+    var selNode = optionNode.getElementsByTagName('initselect').item(0);
+    var checked = document.pageform.initselect.checked;
+    var selValue = optionNode.getOwnerDocument().createTextNode(checked ? '1' : '');
+    if(selNode.getFirstChild()) {
+        selNode.replaceChild(selValue, selNode.getFirstChild());
+    } else {
+        selNode.appendChild(selValue);
     }
 
     return true;
@@ -1059,7 +1101,7 @@ function formdata_validate_and_add_option() {
 }
 
 function formdata_add_new_option() {
-    window.open("/admin/?obvius_app_formdata&mode=edit_option", "formdata_edit_option", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_option_dialog_width + ",height=" + formdata_option_dialog_height);
+    window.open(formdata_admin_url + "?obvius_app_formdatarepeat&mode=edit_option", "formdata_edit_option", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_option_dialog_width + ",height=" + formdata_option_dialog_height);
     return false;
 }
 
@@ -1312,7 +1354,7 @@ function formdata_validate_and_add_valrule() {
 }
 
 function formdata_add_new_valrule() {
-    window.open("/admin/?obvius_app_formdata&mode=edit_validaterule", "formdata_edit_valrule", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height);
+    window.open(formdata_admin_url + "?obvius_app_formdatarepeat&mode=edit_validaterule", "formdata_edit_valrule", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height);
     return false;
 }
 
@@ -1342,7 +1384,7 @@ function formdata_move_field(name, nr, direction) {
     secondElem.getParentNode().removeChild(secondElem);
     firstElem.getParentNode().insertBefore(secondClone, firstElem);
 
-    formdata_populate_fieldtable(name);
+    formdata_populate_fieldtable(name, false);
 }
 
 function formdata_move_valrule(nr, direction) {
@@ -1413,6 +1455,26 @@ function formdata_get_node_text(node) {
     return "NOT_TEXT";
 }
 
+function formdata_objectify_repeat_node(node) {
+    var obj = new Object();
+    var children = node.getChildNodes();
+    var titleNode = children.item(0);
+    var title = titleNode.getChildNodes().item(0);
+    obj['title'] = __unescapeString(title.getXML());
+    
+    var fieldMap = {};
+    var fields = children.item(1).getChildNodes();
+    for(var i=0;i < fields.getLength();i++) {
+        var field = fields.item(i);
+	var nameElem = field.getChildNodes().item(0);
+        var titleElem = field.getChildNodes().item(1);
+	var nameContent = nameElem.getChildNodes().item(0);
+        var titleContent = titleElem.getChildNodes().item(0);
+	fieldMap[__unescapeString(nameContent.getXML())] = __unescapeString(titleContent.getXML());
+    }
+    obj['repfields'] = fieldMap;
+    return obj;
+}
 
 function formdata_objectify_node(node) {
     var obj = new Object();
@@ -1465,3 +1527,224 @@ function OpenWin(url, w, h) {
                   +'width='+w+',height='+h);
   window.open (url + '', '', features);
 }
+
+/* Funtions for repeatable areas */
+function reflectFields_on_repeatables() {
+    var all = document.getElementById('obvius_all_rep_areas');
+    
+    var areas = all.children;
+    var patt = /^obvius_repeated_area_/;
+    for ( var idx = 0; idx < areas.length; idx++ ) {
+	var curid = areas[idx].id;
+	var curindex = curid.replace(patt, '');
+	var select = document.getElementById('obvius_repeated_area_fields_' + curindex);
+	var opts = select.children;
+	var optsMap = {};
+
+	/* Find currently selected */
+	for (var selidx = 0; selidx < opts.length; selidx++) {
+	    var curnam = opts[selidx].value;
+	    var cursel = opts[selidx].selected;
+	    if ( curnam && cursel ) {
+		optsMap[curnam] = true;
+	    }
+	}
+
+	/* Delete all options */
+	while (select.firstChild) {
+	    select.removeChild(select.firstChild);
+	}
+
+	/* Insert all "new" field */
+	for (var namekey in obvius_field_name_marker) {
+	    var theopt = document.createElement('option');
+	    theopt.value = namekey;
+	    theopt.innerHTML = obvius_field_name_marker[namekey];
+	    if ( optsMap[namekey] )
+		theopt.selected = true;
+	    select.appendChild(theopt);
+	}
+    }
+}
+
+function insert_repeat_area(theobj) {
+    var objfields = theobj ? theobj.repfields : {};
+    var fieldsMarker = objfields;
+
+    var all = document.getElementById('obvius_all_rep_areas');
+    var count = obvius_rep_area_count + 1;
+    
+    /* new area */
+    var newArea = document.createElement('div');
+    newArea.setAttribute('className', 'RepArea');
+    newArea.id = 'obvius_repeated_area_' + count;
+    
+    /* fieldset */
+    var fs = document.createElement('fieldset');
+    var leg = document.createElement('legend');
+    leg.innerHTML = formdata_translations['Repeatable area'];
+    fs.appendChild(leg);
+    
+    /* title and options */
+    var lab = document.createElement('label');
+    lab.setAttribute('for', 'obvius_repeated_area_title_' + count);
+    lab.innerHTML = formdata_translations['Title'];
+    fs.appendChild(lab);
+    
+    var inp = document.createElement('input');
+    inp.setAttribute('type', 'text');
+    inp.setAttribute('id', 'obvius_repeated_area_title_' + count);
+    inp.setAttribute('value', theobj ? theobj.title : '');
+    inp.setAttribute('size', '60');
+    fs.appendChild(inp);
+    
+    var para = document.createElement('p');
+    lab = document.createElement('label');
+    lab.setAttribute('for', 'obvius_repeated_area_fields_' + count);
+    lab.innerHTML = formdata_translations['Chosen formfields'];
+    para.appendChild(lab);
+    para.appendChild(document.createElement('br'));
+    var sel = document.createElement('select');
+    sel.setAttribute('size', 10);
+    sel.setAttribute('multiple', 'multiple');
+    sel.setAttribute('style', 'width:40%');
+    sel.setAttribute('id', 'obvius_repeated_area_fields_' + count);
+    for (var i = 0; i < obvius_rep_field_names.length; i++) {
+	var opt = document.createElement('option');
+	opt.setAttribute('value', obvius_rep_field_names[i]);
+	opt.innerHTML = obvius_rep_field_displays[i];
+	if ( fieldsMarker[obvius_rep_field_names[i]] ) {
+	    opt.setAttribute('selected', true);
+	}
+	sel.appendChild(opt);
+    }
+    para.appendChild(sel);
+    fs.appendChild(para);
+    
+    /* buttons */
+    var butdiv = document.createElement('div');
+    butdiv.setAttribute('className', 'RepAreaButs');
+    
+    /* Below is outcommented for now - only one repeat area */
+    /* var but = document.createElement('button');
+    but.onclick = function () { move_repeat_area(-1, 'obvius_repeated_area_' + count); return false };
+    but.innerHTML = 'Flyt opad';
+    butdiv.appendChild(but);
+    but = document.createElement('button');
+    but.onclick = function () { move_repeat_area(1, 'obvius_repeated_area_' + count); return false };
+    but.innerHTML = 'Flyt nedad';
+    butdiv.appendChild(but); */
+
+    var but = document.createElement('button');
+    but.onclick = function () { remove_repeat_area('obvius_repeated_area_' + count); return false };
+    but.innerHTML = formdata_translations['Delete'];
+    butdiv.appendChild(but);
+    fs.appendChild(butdiv);
+    
+    /* Finish up */
+    newArea.appendChild(fs);	   
+    all.appendChild(newArea);
+    obvius_rep_area_count = count;
+    newArea.scrollIntoView(true);
+
+    /* Only one area */
+    var newButArea = document.getElementById('obvius_new_rep_area');
+    if ( newButArea )
+	newButArea.style.display = 'none';
+}
+
+function remove_repeat_area(theid) {
+    var all = document.getElementById('obvius_all_rep_areas');
+    var cur = document.getElementById(theid);
+    if ( cur ) {
+	all.removeChild(cur);
+	var newButArea = document.getElementById('obvius_new_rep_area');
+	if ( newButArea )
+	    newButArea.style.display = '';
+    }
+}
+
+function move_repeat_area(offset, theid) {
+    var all = document.getElementById('obvius_all_rep_areas');
+    var cur = document.getElementById(theid);
+    var ioff = offset == '-1' ? -1 : 1;
+    var curarea1;
+    var curarea2;
+    var trackarea;
+    
+    if ( cur ) {
+	var areas = all.children;
+	for ( var idx = 0; idx < areas.length; idx++ ) {
+	    if ( areas[idx].id == theid ) {
+                if ( (ioff == -1) && (idx > 0) ) {
+		    curarea1 = areas[idx - 1];
+                    curarea2 = areas[idx];
+                    trackarea = curarea2;
+                } 
+                if ( (ioff == 1) && (idx < (areas.length - 1)) ) {
+                    curarea1 = areas[idx];
+                    curarea2 = areas[idx + 1];
+                    trackarea = curarea1;
+                }
+                break;
+	    }
+	}
+	if ( curarea1 && curarea2 ) {
+	    // create marker element and insert it where obj1 is
+	    var temp = document.createElement("div");
+	    all.insertBefore(temp, curarea1);
+	    
+	    // move obj1 to right before obj2
+	    all.insertBefore(curarea1, curarea2);
+	    
+	    // move obj2 to right before where obj1 used to be
+	    all.insertBefore(curarea2, temp);
+	    
+	    // remove temporary marker node
+	    all.removeChild(temp);
+	    
+	    trackarea.scrollIntoView(true);
+	}
+    }
+}
+
+function merge_rootDoc_repeatables(rootDoc) {
+    var tmpXML = "<root><repeatables>";
+    var all = document.getElementById('obvius_all_rep_areas');
+    var areas = all.children;
+    var result = new Array();
+    var patt = /^obvius_repeated_area_/;
+    for ( var idx = 0; idx < areas.length; idx++ ) {
+	var curid = areas[idx].id;
+	var curindex = curid.replace(patt, '');
+	var title = document.getElementById('obvius_repeated_area_title_' + curindex);
+	var select = document.getElementById('obvius_repeated_area_fields_' + curindex);
+	if ( title && select ) {
+	    var fields = new Array();
+	    var opts = select.children;
+	    for ( var fidx = 0; fidx < opts.length; fidx++ ) {
+		if ( opts[fidx].selected )
+		    fields.push(opts[fidx].value);
+	    }
+	    if ( title.value && fields.length > 0 ) {
+		tmpXML += '<repeatable><title>' + title.value + '</title>';
+		tmpXML += '<repfields>';
+		for (var fidx = 0; fidx < fields.length; fidx++) {
+		    tmpXML += '<repfield><name>' + fields[fidx] + '</name>';
+		    tmpXML += '<title>' + obvius_field_name_marker[fields[fidx]] + '</title></repfield>';
+		}
+		tmpXML += '</repfields></repeatable>';
+	    }
+	}
+    }
+    tmpXML += "</repeatables></root>";
+
+    var parser = new DOMImplementation();
+    var tmpDomDoc = parser.loadXML(tmpXML);
+    var tmpRootDoc = tmpDomDoc.getDocumentElement();
+    var elem = tmpRootDoc.getElementsByTagName('repeatables').item(0);
+    // First import the elem into the rootDoc
+    var elemNode = rootDoc.importNode(elem, true);
+    rootDoc.getElementsByTagName('fields').item(0).appendChild(elemNode);
+}
+

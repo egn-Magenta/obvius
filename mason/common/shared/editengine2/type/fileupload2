@@ -111,7 +111,7 @@ if(! $new_upload) {
     if($r->param('obvius_upload_' . $id . '_delete')) {
         $value = '';
     } else {
-        $value = $r->param('obvius_upload_<% $id %>_old_value');
+        $value = $r->param('obvius_upload_' . $id . '_old_value');
     }
 }
 

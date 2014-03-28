@@ -40,6 +40,7 @@ require Exporter;
 use Obvius::Data;
 use Data::Dumper;
 use Cache::FileCache;
+use Email::Date::Format qw(email_date);
 
 use WebObvius::Cache::CacheObjects; 
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
@@ -104,6 +105,7 @@ use Obvius::Utils;
 use Obvius::Pubauth;
 use Obvius::Annotations;
 use Obvius::Queue;
+use Obvius::EncryptionModule;
 
 
 ########################################################################
@@ -128,7 +130,10 @@ sub new {
                                   DOCTYPES    => (defined $doctypes ? $doctypes : []),
                                   FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
-                                  LANGUAGES   => {}
+                                  LANGUAGES   => {},
+				  ENCRYPTION_HANDLER => (defined $options{'encryption_pphr'} ? 
+							 Obvius::EncryptionModule->new($options{'encryption_pphr'}) : 
+							 undef)
                                  );
     
     $this->{IGNORE_DOCTYPES} = $options{ignore_doctypes};
@@ -290,6 +295,21 @@ sub log {
     return $LOG;
 }
 
+
+########################################################################
+#
+#       Encryption handler
+#
+########################################################################
+sub encryption_handler {
+    my($this) = @_;
+    
+    if ( defined $this && defined $this->{ENCRYPTION_HANDLER} ) { 
+	return $this->{ENCRYPTION_HANDLER};
+    } else {
+	die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER \n";
+    }
+}
 
 
 ########################################################################
@@ -327,6 +347,16 @@ sub lookup_document {
                                        documents d on (dp.docid = d.id) where 
                                        dp.path = ?", $path);
     return @$paths ? Obvius::Document->new($paths->[0]) : undef;
+}
+
+sub lookup_document_by_id {
+    my ($this, $docid) = @_;
+
+    return undef if ( $docid !~ /^\d+$/ );
+    my $elems = $this->execute_select("select d.*, dp.path path from docid_path dp join  
+                                       documents d on (dp.docid = d.id) where 
+                                       d.id = ?", $docid);
+    return @$elems ? Obvius::Document->new($elems->[0]) : undef;
 }
 
 # Overveje at tilføje stiens id'er til Obvius::Document når de alligevel slås op hér
@@ -789,7 +819,6 @@ sub get_nr_of_subdocs {
         $where .= " AND documents.id = versions.docid and versions.public = 1";
     }
 
-
     my $set = DBIx::Recordset->SetupObject(
                                             {
                                                 '!DataSource' => $this->{DB},
@@ -808,6 +837,40 @@ sub get_nr_of_subdocs {
 
 }
 
+sub get_nr_of_docs_in_subtree {
+    my ($this, $doc, %options) = @_;
+
+    return 0 unless($doc);
+    my $path = $this->get_doc_uri($doc);
+    my $tables = 'docid_path p, documents d';
+    my $where = "p.docid = d.id AND p.path like '" . $path . "%'";
+
+    if($options{public}) {
+        $tables .= ", versions v";
+        $where .= " AND d.id = v.docid and v.public = 1";
+    }
+
+    if($options{type} =~ /^\d+$/ ) {
+        $where .= " AND d.type = " . $options{type} ;
+    }
+
+    my $set = DBIx::Recordset->SetupObject(
+                                            {
+                                                '!DataSource' => $this->{DB},
+                                                '!Table'      => $tables,
+                                                '!Fields'     => 'COUNT(d.id) as count'
+                                            }
+                                        );
+    $set->Search($where);
+    my $number = 0;
+    if(my $rec = $set->Next) {
+        $number = $rec->{count};
+    }
+    $set->Disconnect;
+
+    return $number;
+
+}
 
 
 ########################################################################
@@ -866,6 +929,11 @@ sub calc_order_for_query {
     return(\%sort_fields, \@order);
 }
 
+######
+### 1. Normal use - Returns a reference to an array containing version objects satisfying the conditions
+### 2. Count use  - returns a count of the objects in the database satisfying the conditions
+###                 Count use is by setting option count_only.
+######
 sub search {
     my ($this, $fields, $where, %options) = @_;
 
@@ -1020,6 +1088,9 @@ sub search {
     my $regex = '(^|[^\w])(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
     $where =~ s/$regex/$1 . $map{$2}/gie;
 
+    ### Eskild: If option count_only is set then replace the whole @fields arra
+    @fields = ( "count(DISTINCT versions.docid) as count_only" ) if ( $options{'count_only'} );
+
     my $set = DBIx::Recordset->SetupObject({'!DataSource'   => $this->{DB},
                                             '!Table'        => join(', ', (@table, 'versions'))  . " " . join(" ", @left_join_table),
                                             '!TabRelation'  => join(' AND ', @join),
@@ -1031,8 +1102,9 @@ sub search {
     
     my $query = {
                     '$where'    => join(' AND ', @where, "($where)"),
-                    '$group'    => "versions.docid, versions.version, versions.lang $having",
                 };
+    $query->{'$group'} = "versions.docid, versions.version, versions.lang $having" 
+	unless( $options{'count_only'});
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
     $query->{'$order'}=~ s/$regex/$1 . $map{$2}/gie if ($query->{'$order'});
@@ -1045,24 +1117,33 @@ sub search {
     $this->{LOG}->notice(" Search query: " . Dumper($query)) if ($options{'obvius_dump'});
     $set->Search($query);
 
-    my @subdocs;
-    while (my $rec = $set->Next) {
-         # Quick workaround to exclude previews.
-         next if !$options{include_preview} && $rec->{path} =~ m!/admin/previews/!;
-         if ($options{public}) {
-              # If we've got a parent (from the search), check from the parent up:
-              
-              my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
-              
-              # If there is no parent, we pass the hint that the document being checked _is_
-              # public itself (options{public} ensures that):
-              next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
-         }
-         push(@subdocs, new Obvius::Version($rec));
-    }
-    $set->Disconnect;
+    if ( $options{'count_only'} ) {
+	my $count_result = 0;
+	if ( my $rec = $set->Next) {
+	    $count_result = $rec->{count_only};
+	}
+	$set->Disconnect;
+	return $count_result;
+    } else {
+	my @subdocs;
+	while (my $rec = $set->Next) {
+	    # Quick workaround to exclude previews.
+	    next if !$options{include_preview} && $rec->{path} =~ m!/admin/previews/!;
+	    if ($options{public}) {
+		# If we've got a parent (from the search), check from the parent up:
+		
+		my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
+		
+		# If there is no parent, we pass the hint that the document being checked _is_
+		# public itself (options{public} ensures that):
+		next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
+	    }
+	    push(@subdocs, new Obvius::Version($rec));
+	}
+	$set->Disconnect;
 
-    return $this->select_best_language_match_multiple(@subdocs ? \@subdocs : undef);
+	return $this->select_best_language_match_multiple(@subdocs ? \@subdocs : undef);
+    }
 }
 
 # same as search but does WHERE doc.parent IN ( get_documents_subtree ) for
@@ -1973,7 +2054,7 @@ sub quick_create_new_document {
 	}
 
 	# Software defaults
-	$docfields->param('docdate', strftime('%Y-%m-%d 00:00:00', localtime));
+	$docfields->param('docdate', strftime('%Y-%m-%d 00:00:00', localtime)) unless($docfields->param('docdate'));
 
 	eval {
 	    my($usr_id) = $this->get_userid($this->user());
@@ -2798,8 +2879,8 @@ sub get_editpages {
 
 sub send_mail {
      my ($this, $to, $msg, $from, $subject, %options) = @_;
-     
-     $from ||= 'noreply@adm.ku.dk';
+
+     $from ||= $this->config->param('email_from_address') || 'noreply@adm.ku.dk';
 
      my $server = $this->{OBVIUS_CONFIG}{SMTP} || 'localhost';
 
@@ -2808,7 +2889,7 @@ sub send_mail {
      my $mail_debug_level = 1;
      $mail_debug_level = $options{mail_debug_level}
 	if(defined($options{mail_debug_level}));
-     
+
      my $smtp = Net::SMTP->new($server, Timeout => 5, Debug => $mail_debug_level)
 	or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
      if ( $mail_error ) {
@@ -2817,10 +2898,17 @@ sub send_mail {
          print STDERR "\n$today: Obvius send_mail: $mail_error\n";
          return;
      }
- 
+
      $smtp->mail($from) or return;
      $smtp->to($to) or return;
-     $smtp->data([$subject ? "Subject: $subject\n" : '', $msg]) or return;
+     my @mailparts = ($msg);
+
+     unshift(@mailparts, "Subject: $subject\n") if($subject);
+     unshift(@mailparts, "To: $to\n") unless($msg =~ m!^To:!m);
+     unshift(@mailparts, "From: $from\n") unless($msg =~ m!^From:!m);
+     unshift(@mailparts, "Date: " . email_date(time()) . "\n");
+
+     $smtp->data(\@mailparts) or return;
      $smtp->quit or return;
 }
 

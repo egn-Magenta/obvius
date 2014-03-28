@@ -30,11 +30,56 @@ package Obvius::DB;
 #
 ########################################################################
 
+=head1 Name
+
+Obvius::DB - Database functions for L<Obvius>.
+
+=head1 SYNOPSIS
+
+use Obvius;
+use Obvius::Config;
+
+my $config = new Obvius::Config("configname");
+my $obvius = new Obvius($config);
+
+my $err=$obvius->db_error();
+
+my $count=$obvius->db_number_of_rows_in_table('comments');
+
+$obvius->db_insert_comment({
+                            docid=>$doc->Id,
+                            name=>'Søren Hansen',
+                            email=>'sh@example.invalid',
+                            text=>'Jeg synes bare det er helt, ja det er.',
+                           });
+
+$obvius->db_update_table(table=>'synonyms', synonyms=>'Søren Soeren');
+$obvius->db_update_table(table=>'docparms', key=>'docid', name=>'fancy_box', value=>'NO!', type=>0);
+
+$obvius->db_insert_docparams($doc, $paramobj);
+
+$obvius->db_delete_single_version($doc->Docid, $vdoc->Version, $vdoc->Lang); # Do not use.
+$obvius->db_delete_single_version_vfields($doc->Docid, $vdoc->Version);      # Do not use.
+
+my $version=$obvius->db_insert_version($doc->Id, $doctype->Id, $lang);
+
+=head1 DESCRIPTION
+
+This module contains the database functions for the L<Obvius> module.
+It should not be used as a standalone module.
+
+The methods present here are for internal use by Obvius only.
+
+=head1 Methods
+
+=cut
+
 use strict;
 use warnings;
 
 use POSIX qw(strftime);
 use DBIx::Recordset;
+use Obvius::CharsetTools qw(mixed2perl mixed2utf8 mixed2charset);
 
 our $VERSION="1.0";
 
@@ -102,6 +147,23 @@ sub DBIx_Recordset_SQLInsert($$$$)
 	}
 
 	$DBIx{RS_SQLInsert}->( $self, $fields, $vals, $bind_values, $bind_types);
+}
+
+
+=head2 to_db_charset
+
+Converts text string to correct charset for the current database
+
+Example:
+    my $query = $obvius->to_db_charset($text_with_unknown_encoding);
+
+=cut
+sub to_db_charset {
+    my ($this, $text) = @_;
+
+    return mixed2perl($text) if($this->dbh->{mysql_enable_utf8});
+    return mixed2utf8($text) if($this->config->param('utf8'));
+    return mixed2charset($text, "iso-8859-1");
 }
 
 
@@ -867,46 +929,6 @@ sub db_delete_docparams {
     
 1;
 __END__
-
-=head1 NAME
-
-Obvius::DB - Database functions for L<Obvius>.
-
-=head1 SYNOPSIS
-
-  use Obvius;
-  use Obvius::Config;
-
-  my $config = new Obvius::Config("configname");
-  my $obvius = new Obvius($config);
-
-  my $err=$obvius->db_error();
-
-  my $count=$obvius->db_number_of_rows_in_table('comments');
-
-  $obvius->db_insert_comment({
-                              docid=>$doc->Id,
-                              name=>'Søren Hansen',
-                              email=>'sh@example.invalid',
-                              text=>'Jeg synes bare det er helt, ja det er.',
-                             });
-
-  $obvius->db_update_table(table=>'synonyms', synonyms=>'Søren Soeren');
-  $obvius->db_update_table(table=>'docparms', key=>'docid', name=>'fancy_box', value=>'NO!', type=>0);
-
-  $obvius->db_insert_docparams($doc, $paramobj);
-
-  $obvius->db_delete_single_version($doc->Docid, $vdoc->Version, $vdoc->Lang); # Do not use.
-  $obvius->db_delete_single_version_vfields($doc->Docid, $vdoc->Version);      # Do not use.
-
-  my $version=$obvius->db_insert_version($doc->Id, $doctype->Id, $lang);
-
-=head1 DESCRIPTION
-
-This module contains the database functions for the L<Obvius> module.
-It should not be used as a standalone module.
-
-The methods present here are for internal use by Obvius only.
 
 =head1 AUTHORS
 

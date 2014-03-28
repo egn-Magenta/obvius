@@ -44,19 +44,16 @@ sub mixed2utf8 {
 
     my $out = "";
 
-    # Get the 4 first chars
-    my $length = length($txt);
-    my @chars = unpack("U*", substr($txt, 0, 4));
-    my $index = 4;
+    my @chars = unpack("U*", $txt);
 
     while(@chars) {
         # If highest bit is 0 => ascii
-        if(defined($chars[0]) && $chars[0] < 128) {
+        if($chars[0] < 128) {
             $out .= pack("C", shift(@chars));
         }
         # Two-byte unicode char (0b110xxxxx,0b10xxxxxx)
         elsif(
-            defined($chars[0]) && $chars[0] < 256 &&
+            $chars[0] < 256 &&
             defined($chars[1]) && $chars[1] < 256 &&
             ($chars[0] & 0b11100000) == 0b11000000 &&
             ($chars[1] & 0b11000000) == 0b10000000
@@ -85,11 +82,6 @@ sub mixed2utf8 {
             # Single wide char that needs to be utf8 encoded
             $out .= Encode::encode("utf8", chr(shift(@chars)));
         }
-
-        # Get as many new chars as was removed
-        my $taken = 4 - @chars;
-        push(@chars, unpack("U*", substr($txt, $index, $taken))) if($index < $length);
-        $index += $taken;
     }
 
     return $out;
