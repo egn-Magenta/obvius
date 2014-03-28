@@ -2917,7 +2917,7 @@ sub find_closest_subsite {
 
     my %subsite_data;
 
-    return $doc->{_cached_closest_subsite} if 
+    return $doc->{_cached_closest_subsite} if
         (ref $doc && $doc->{_cached_closest_subsite});
 
     my $uri = $this->get_doc_uri($doc);
@@ -2936,14 +2936,14 @@ sub find_closest_subsite {
 
         while ($uri) {
             push @uris, $uri;
-            $uri =~ s/[^\/]*\/$//; 
+            $uri =~ s/[^\/]*\/$//;
         }
 
         my $question_marks = join ", ", (("?") x @uris);
         my $query = "select d.*, dp.path path
-            from docparms dpa join docid_path dp using (docid) join documents d on 
-            (dp.docid = d.id) where  dp.path in ($question_marks) and 
-            dpa.name = 'is_subsite' and dpa.value = '1' 
+            from docparms dpa join docid_path dp using (docid) join documents d on
+            (dp.docid = d.id) where  dp.path in ($question_marks) and
+            dpa.name = 'is_subsite' and dpa.value = '1'
             order by length(dp.path) desc limit 1";
         my $res = $this->execute_select($query, @uris);
 
