@@ -2913,54 +2913,54 @@ sub send_mail {
 }
 
 sub find_closest_subsite {
-     my ($this, $doc) = @_;
+    my ($this, $doc) = @_;
 
-     my %subsite_data;
+    my %subsite_data;
 
-     return $doc->{_cached_closest_subsite} if 
-       (ref $doc && $doc->{_cached_closest_subsite});
+    return $doc->{_cached_closest_subsite} if 
+        (ref $doc && $doc->{_cached_closest_subsite});
 
-     my $uri = $this->get_doc_uri($doc);
-     my $subsite_doc;
+    my $uri = $this->get_doc_uri($doc);
+    my $subsite_doc;
 
-     if ( $this->config->param('new_subsite_interface') ) {
-	 my $query = "SELECT * FROM subsites WHERE INSTR(?, path) = 1 " .
-	     "ORDER BY path DESC LIMIT 1";
-	 my $res = $this->execute_select($query, $uri);
-	 if ( ref($res) && $#$res > -1 ) {
-	     %subsite_data = %{$res->[0]};
-	     $subsite_doc = $this->lookup_document($subsite_data{path});
-	 }
-     } else {
-	 my @uris;
-	 
-	 while ($uri) {
-	     push @uris, $uri;
-	     $uri =~ s/[^\/]*\/$//; 
-	 }
-	 
-	 my $question_marks = join ", ", (("?") x @uris);
-	 my $query = "select d.*, dp.path path
-                  from docparms dpa join docid_path dp using (docid) join documents d on 
-                  (dp.docid = d.id) where  dp.path in ($question_marks) and 
-                  dpa.name = 'is_subsite' and dpa.value = '1' 
-                  order by length(dp.path) desc limit 1";
-	 my $res = $this->execute_select($query, @uris);
-     
-	 $subsite_doc = Obvius::Document->new($res->[0]) if ( ref($res) && $#$res > -1) ;
-     }
+    if ( $this->config->param('new_subsite_interface') ) {
+        my $query = "SELECT * FROM subsites WHERE INSTR(?, path) = 1 " .
+            "ORDER BY path DESC LIMIT 1";
+        my $res = $this->execute_select($query, $uri);
+        if ( ref($res) && $#$res > -1 ) {
+            %subsite_data = %{$res->[0]};
+            $subsite_doc = $this->lookup_document($subsite_data{path});
+        }
+    } else {
+        my @uris;
 
-     if ( $subsite_doc ) {
-	 my $docparams = $this->get_docparams($subsite_doc );
-	 foreach my $key ( $docparams->param() ) {
-	     my $val = $docparams->param($key);
-	     $val = $val->Value() if ($val);
-	     $subsite_data{lc($key)} = $val;
-	 }
-	 $subsite_doc->param('subsite_info' => \%subsite_data);
-     }
-     $doc->{_cached_closest_subsite} = $subsite_doc if ref $doc;
-     return $subsite_doc;
+        while ($uri) {
+            push @uris, $uri;
+            $uri =~ s/[^\/]*\/$//; 
+        }
+
+        my $question_marks = join ", ", (("?") x @uris);
+        my $query = "select d.*, dp.path path
+            from docparms dpa join docid_path dp using (docid) join documents d on 
+            (dp.docid = d.id) where  dp.path in ($question_marks) and 
+            dpa.name = 'is_subsite' and dpa.value = '1' 
+            order by length(dp.path) desc limit 1";
+        my $res = $this->execute_select($query, @uris);
+
+        $subsite_doc = Obvius::Document->new($res->[0]) if ( ref($res) && $#$res > -1) ;
+    }
+
+    if ( $subsite_doc ) {
+        my $docparams = $this->get_docparams($subsite_doc );
+        foreach my $key ( $docparams->param() ) {
+            my $val = $docparams->param($key);
+            $val = $val->Value() if ($val);
+            $subsite_data{lc($key)} = $val;
+        }
+        $subsite_doc->param('subsite_info' => \%subsite_data);
+    }
+    $doc->{_cached_closest_subsite} = $subsite_doc if ref $doc;
+    return $subsite_doc;
 }
 
 sub shorten_url {
