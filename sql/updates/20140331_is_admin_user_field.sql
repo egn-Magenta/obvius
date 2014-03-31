@@ -20,6 +20,7 @@ begin
     if (a < 1) then
         ALTER TABLE users
         ADD COLUMN (is_admin int(1) unsigned default 0);
+        update users set is_admin = 1 where login = 'admin';
     end if;
 end $$
 call __tmp_add_is_admin_field();

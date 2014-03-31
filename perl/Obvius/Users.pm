@@ -89,6 +89,7 @@ sub is_superadmin_user {
     } else {
 	$user = $this->get_user($mixed);
     }
+    return 0 unless($user);
 
     return $user->{is_admin};
 }
