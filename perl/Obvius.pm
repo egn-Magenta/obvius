@@ -2923,22 +2923,28 @@ sub find_closest_subsite {
     my $uri = $this->get_doc_uri($doc);
     my $subsite_doc;
 
+    my @uris;
+
+    while ($uri) {
+	push @uris, $uri;
+	$uri =~ s/[^\/]*\/$//;
+    }
+
+    my $question_marks = join ", ", (("?") x @uris);
+
     if ( $this->config->param('new_subsite_interface') ) {
-        my $query = "SELECT * FROM subsites WHERE INSTR(?, path) = 1 " .
-            "ORDER BY path DESC LIMIT 1";
-        my $res = $this->execute_select($query, $uri);
-        if ( ref($res) && $#$res > -1 ) {
-            %subsite_data = %{$res->[0]};
-            $subsite_doc = $this->lookup_document($subsite_data{path});
-        }
+	my $sth = $this->dbh->prepare(qq|
+	    select * from subsites2
+	    where path in ($question_marks)
+	    order by path desc limit 1
+	|);
+	$sth->execute(@uris);
+	if(my $rec = $sth->fetchrow_hashref()) {
+            use Data::Dumper;
+	    %subsite_data = %$rec;
+	    $subsite_doc = $this->lookup_document($subsite_data{path});
+	}
     } else {
-        my @uris;
-
-        while ($uri) {
-            push @uris, $uri;
-            $uri =~ s/[^\/]*\/$//;
-        }
-
         my $question_marks = join ", ", (("?") x @uris);
         my $query = "select d.*, dp.path path
             from docparms dpa join docid_path dp using (docid) join documents d on
@@ -2948,17 +2954,18 @@ sub find_closest_subsite {
         my $res = $this->execute_select($query, @uris);
 
         $subsite_doc = Obvius::Document->new($res->[0]) if ( ref($res) && $#$res > -1) ;
-    }
-
-    if ( $subsite_doc ) {
-        my $docparams = $this->get_docparams($subsite_doc );
+        my $docparams = $this->get_docparams($subsite_doc);
         foreach my $key ( $docparams->param() ) {
             my $val = $docparams->param($key);
             $val = $val->Value() if ($val);
             $subsite_data{lc($key)} = $val;
         }
+    }
+
+    if ( $subsite_doc ) {
         $subsite_doc->param('subsite_info' => \%subsite_data);
     }
+
     $doc->{_cached_closest_subsite} = $subsite_doc if ref $doc;
     return $subsite_doc;
 }
