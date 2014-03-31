@@ -1,0 +1,36 @@
+<%args>
+$status=>"OK"
+$message
+$location=>'./'
+</%args>
+<%once>
+use URI::Escape;
+</%once>
+<%init>
+$m->comp('/default/setup_session', %ARGS);
+$m->comp('/shared/set_status_message',
+    message => $message,
+    status => $status
+);
+
+my %args;
+if($location =~ s![?]([^#]+)!!) {
+    my $qstring = $1;
+    foreach my $part (split(/&/, $qstring)) {
+        my ($name, $value) = ($part =~ m!^([^=]+)=(.*)$!);
+        $value = uri_unescape($value || '');
+        if(my $existing = $args{$name}) {
+            if(ref($existing)) {
+                push(@$existing, $value);
+            } else {
+                $args{$name} = [ $existing, $value ];
+            }
+        } else {
+            $args{$name} = $value;
+        }
+    }
+}
+$args{obvius_session_id} = $r->pnotes('obvius_session')->{_session_id};
+
+$m->comp('/shared/redirect', location=>$location, args => \%args);
+</%init>

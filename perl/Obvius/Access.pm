@@ -70,7 +70,12 @@ sub get_capability_rules
 #                         Always returns true for 'admin'.
 sub user_has_capabilities {
     my ($this, $doc, @capabilities) = @_;
-    return 1 if ($this->{USER} eq 'admin' and $this->get_userid($this->{USER})==1);
+
+    my $user = $this->get_user($this->{USER});
+    return 0 unless($user);
+
+    return 1 if($user->{is_admin});
+    return 1 if($user->{name} eq 'admin' and $user->{id} == 1);
 
     my $capabilities=$this->user_capabilities($doc);
 
@@ -84,7 +89,12 @@ sub user_has_capabilities {
 #                           has on $doc. Always returns 1 for 'admin'.
 sub user_has_any_capability {
     my ($this, $doc, @capabilities) = @_;
-    return 1 if ($this->{USER} eq 'admin' and $this->get_userid($this->{USER})==1);
+
+    my $user = $this->get_user($this->{USER});
+    return 0 unless($user);
+
+    return 1 if($user->{is_admin});
+    return 1 if($user->{name} eq 'admin' and $user->{id} == 1);
 
     my $capabilities=$this->user_capabilities($doc);
 
