@@ -1,0 +1,46 @@
+<%method reset_notification>
+<%args>
+$email
+$fromaddr
+$roothost
+$user
+$code
+$obvius
+</%args>
+To: <% $email %>
+From: <% ${fromaddr} %>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: Reset of <% ${roothost} %>-password for user <% $user->{login} %>
+
+You are receiving this email because you requested having your password reset on <% ${roothost} %>.
+
+To complete the reset procedure visit the link below:
+
+http://<% ${roothost} %>/system/confirm_reset_password?code=<% ${code} %>
+
+--
+ <% $roothost %>
+</%method>
+%
+%
+%
+<%method password_message>
+<%args>
+$email
+$login
+$from
+$password
+$roothost
+</%args>
+To: <% $email %>
+From: <% $from %>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: New password for user <% $login %> on <% $roothost %>
+
+The new password for the user <% $login %> is: <% $password %>
+
+--
+ <% $roothost %>
+</%method>

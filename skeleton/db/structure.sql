@@ -137,7 +137,7 @@ CREATE_TABLE( fieldspecs,
   searchable   TINYINT(1) NOT NULL DEFAULT 0,
   sortable     TINYINT(1) NOT NULL DEFAULT 0,
   publish      TINYINT(1) NOT NULL DEFAULT 0,
-  threshold    TINYINT(1) DEFAULT 127 NOT NULL,
+  threshold    TINYINT(1) UNSIGNED DEFAULT 128 NOT NULL,
   default_value text,
   extra text,
   PRIMARY KEY  (doctypeid, name)

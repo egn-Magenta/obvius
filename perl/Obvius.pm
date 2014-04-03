@@ -40,6 +40,7 @@ require Exporter;
 use Obvius::Data;
 use Data::Dumper;
 use Cache::FileCache;
+use Email::Date::Format qw(email_date);
 
 use WebObvius::Cache::CacheObjects; 
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
@@ -104,6 +105,7 @@ use Obvius::Utils;
 use Obvius::Pubauth;
 use Obvius::Annotations;
 use Obvius::Queue;
+use Obvius::EncryptionModule;
 
 
 ########################################################################
@@ -128,7 +130,10 @@ sub new {
                                   DOCTYPES    => (defined $doctypes ? $doctypes : []),
                                   FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
-                                  LANGUAGES   => {}
+                                  LANGUAGES   => {},
+				  ENCRYPTION_HANDLER => (defined $options{'encryption_pphr'} ? 
+							 Obvius::EncryptionModule->new($options{'encryption_pphr'}) : 
+							 undef)
                                  );
     
     $this->{IGNORE_DOCTYPES} = $options{ignore_doctypes};
@@ -290,6 +295,21 @@ sub log {
     return $LOG;
 }
 
+
+########################################################################
+#
+#       Encryption handler
+#
+########################################################################
+sub encryption_handler {
+    my($this) = @_;
+    
+    if ( defined $this && defined $this->{ENCRYPTION_HANDLER} ) { 
+	return $this->{ENCRYPTION_HANDLER};
+    } else {
+	die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER \n";
+    }
+}
 
 
 ########################################################################
@@ -2886,6 +2906,7 @@ sub send_mail {
      unshift(@mailparts, "Subject: $subject\n") if($subject);
      unshift(@mailparts, "To: $to\n") unless($msg =~ m!^To:!m);
      unshift(@mailparts, "From: $from\n") unless($msg =~ m!^From:!m);
+     unshift(@mailparts, "Date: " . email_date(time()) . "\n");
 
      $smtp->data(\@mailparts) or return;
      $smtp->quit or return;
