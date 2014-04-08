@@ -147,7 +147,10 @@ sub add_fieldtypes {
 	    my $changed = hash_diff($existing, \%data, \@fields);
 	    if($changed) {
 		print "Updating fieldtype $data{name}: $changed\n";
-		$updater->execute(map { $data{$_} } @fields, $existing->{id});
+		$updater->execute(
+		    (map { $data{$_} } @fields),
+		    $existing->{id}
+		);
 	    }
         } else {
             $inserter->execute(
@@ -258,7 +261,7 @@ sub add_doctypes {
 		
 		if(my $c = hash_diff($existing, \%data, \@dt_fieldnames)) {
 		    print "Updating doctype '$doctype{name}': $c\n";
-		    $updater->execute(@args,$doctype{id});
+		    $updater->execute(@args,$existing->{id});
 		}
 		$doctype{id} = $existing->{id};
 	    } else {
