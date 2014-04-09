@@ -2953,12 +2953,14 @@ sub find_closest_subsite {
             order by length(dp.path) desc limit 1";
         my $res = $this->execute_select($query, @uris);
 
-        $subsite_doc = Obvius::Document->new($res->[0]) if ( ref($res) && $#$res > -1) ;
-        my $docparams = $this->get_docparams($subsite_doc);
-        foreach my $key ( $docparams->param() ) {
-            my $val = $docparams->param($key);
-            $val = $val->Value() if ($val);
-            $subsite_data{lc($key)} = $val;
+        if (ref($res) && $res->[0]) {
+            $subsite_doc = Obvius::Document->new($res->[0])  ;
+            my $docparams = $this->get_docparams($subsite_doc);
+            foreach my $key ( $docparams->param() ) {
+                my $val = $docparams->param($key);
+                $val = $val->Value() if ($val);
+                $subsite_data{lc($key)} = $val;
+            }
         }
     }
 
