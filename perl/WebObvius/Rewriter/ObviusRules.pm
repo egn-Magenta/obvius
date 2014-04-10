@@ -314,6 +314,8 @@ sub connect_dbh {
         $this->{passwd}
     ) or die "Could not connect to database";
 
+    $this->{dbh}->do("set names utf8");
+
     my $table = $this->{table};
     $this->{lookup} = $this->{dbh}->prepare("SELECT cache_uri FROM $table WHERE uri = ? and querystring = ?");
 
