@@ -161,9 +161,12 @@ sub is_https {
 sub lookup_is_https {
     my ($this, $url) = @_;
 
+    # Add last slash in uri if missing
+    $url .= '/' unless($url =~ m!/$!);
+
     if($url =~ m!^https?://(^[/]+)!) {
         return $this->is_https($1);
-    } elsif ($url =~ m!/! and $url =~ m!$this->{regexp}!) {
+    } elsif ($url =~ m!^/! and $url =~ m!$this->{regexp}!) {
         return $this->is_https($1);
     } else {
         return $this->is_https($url);
