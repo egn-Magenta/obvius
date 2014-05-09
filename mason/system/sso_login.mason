@@ -203,12 +203,12 @@ sub check_credentials {
     return undef unless($login and $passwd_in);
 
     my $sth = $obvius->dbh->prepare(q|
-        select passwd from users where login = ?
+        select login, passwd from users where login = ?
     |);
     $sth->execute($login);
 
-    if(my $passwd = $sth->fetchrow_array) {
-        return (crypt($passwd_in, $passwd) eq $passwd);
+    if(my ($login_from_db, $passwd) = $sth->fetchrow_array) {
+        return (crypt($passwd_in, $passwd) eq $passwd) ? $login_from_db : 0;
     } else {
         return 0;
     }
@@ -264,7 +264,7 @@ if($r->method eq 'POST') {
 
     # If we don't redirect from here, login has failed
     $login_failed = 1;
-    if(check_credentials($login, $passwd, $obvius)) {
+    if(my $login_from_db = check_credentials($login, $passwd, $obvius)) {
         my $inserter = $obvius->dbh->prepare(q|
             insert into sso_sessions (
                 session_id,
@@ -280,7 +280,9 @@ if($r->method eq 'POST') {
         do {
             $session_id = md5_hex(time . rand);
             eval {
-                $inserter->execute($session_id, $login, $ip_match, $permanent);
+                $inserter->execute(
+		  $session_id, $login_from_db, $ip_match, $permanent
+		);
             };
         } while ($try_n_times-- and $@);
         my $sso_session_id = $inserter->{mysql_insertid};
