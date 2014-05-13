@@ -91,12 +91,11 @@ sub generate_head_html {
 
      if ($mode && $mode eq 'search') {
           my @header;
-          push @header, $this->add_js('http://code.jquery.com/jquery-1.8.2.min.js',
-                                      'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+          push @header, $this->add_js("//code.jquery.com/ui/1.10.3/jquery-ui.min.js",
                                       '/scripts/jsutils.js',
                                       '/scripts/jquery/jquery.bgiframe.min.js',
                                       '/scripts/jquery/jquery.ajaxQueue.js');
-          push @header, $this->add_link('/style/jquery-ui-1.7.2.custom.css',
+          push @header, $this->add_link("//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css",
                                         '/style/jquery.autocomplete.css');
           
           return join "\n", @header;
