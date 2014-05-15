@@ -571,6 +571,23 @@ sub add_editpages {
 	    %editpage=(doctypeid=>$doctypeid);
 	}
     }
+
+        # Delete unhandled fieldspecs
+    foreach my $key (keys %editpagemap) {
+	my $page = $editpagemap{$key};
+	unless($page->{_seen}) {
+	    my $doctype = $doctypemap->{$page->{doctypeid}} || {};
+	    my $doctypename = $doctype->{name} || $page->{doctypeid};
+	    print "Deleting editpage " .
+		  $doctypename . ":" . $page->{page} . "\n";
+	    $deleter->execute(
+		$page->{doctypeid},
+		$page->{page}
+	    );
+	    delete $editpagemap{$key};
+	}
+    }
+
 }
 
 sub hash_diff {
