@@ -14,7 +14,7 @@
        <& /shared/msg, text=>'Type' &>: <span title="<% $doctype->Name |h %>"><& /shared/msg, text=>$doctype->Name &></span><br />
        <& /shared/msg, text=>'Created by' &>:
 % if ($user) {
-<a href="mailto:<% $user->{email} |h %>" title="Send email"><& /shared/display_user, user_name => $owner->{login} &></a>
+<a href="mailto:<% $user->{email} |h %>" title="Send email"><& /shared/display_user, user_name => $user->{login} &></a>
 % }
 % else {
 <span class="obvius-inactive"><& /shared/msg, text=>'Not registered' &></span>
