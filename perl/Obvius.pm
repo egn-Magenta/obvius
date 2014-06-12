@@ -2913,31 +2913,63 @@ sub send_mail {
 }
 
 sub find_closest_subsite {
-     my ($this, $doc) = @_;
+    my ($this, $doc) = @_;
 
-     return $doc->{_cached_closest_subsite} if 
-       (ref $doc && $doc->{_cached_closest_subsite});
+    my %subsite_data;
 
-     my $uri = $this->get_doc_uri($doc);
-     my @uris;
-     
-     while ($uri) {
-          push @uris, $uri;
-          $uri =~ s/[^\/]*\/$//; 
-     }
+    return $doc->{_cached_closest_subsite} if
+        (ref $doc && $doc->{_cached_closest_subsite});
 
-     my $question_marks = join ", ", (("?") x @uris);
-     my $query = "select d.*, dp.path path
-                  from docparms dpa join docid_path dp using (docid) join documents d on 
-                  (dp.docid = d.id) where  dp.path in ($question_marks) and 
-                  dpa.name = 'is_subsite' and dpa.value = '1' order by length(dp.path) desc limit 1";
-     my $res = $this->execute_select($query, @uris);
-     
-     return undef if !@$res;
-     
-     my $subsite = Obvius::Document->new($res->[0]);
-     $doc->{_cached_closest_subsite} = $subsite if ref $doc;
-     return $subsite;
+    my $uri = $this->get_doc_uri($doc);
+    my $subsite_doc;
+
+    my @uris;
+
+    while ($uri) {
+	push @uris, $uri;
+	$uri =~ s/[^\/]*\/$//;
+    }
+
+    my $question_marks = join ", ", (("?") x @uris);
+
+    if ( $this->config->param('new_subsite_interface') ) {
+	my $sth = $this->dbh->prepare(qq|
+	    select * from subsites2
+	    where path in ($question_marks)
+	    order by path desc limit 1
+	|);
+	$sth->execute(@uris);
+	if(my $rec = $sth->fetchrow_hashref()) {
+            use Data::Dumper;
+	    %subsite_data = %$rec;
+	    $subsite_doc = $this->lookup_document($subsite_data{path});
+	}
+    } else {
+        my $question_marks = join ", ", (("?") x @uris);
+        my $query = "select d.*, dp.path path
+            from docparms dpa join docid_path dp using (docid) join documents d on
+            (dp.docid = d.id) where  dp.path in ($question_marks) and
+            dpa.name = 'is_subsite' and dpa.value = '1'
+            order by length(dp.path) desc limit 1";
+        my $res = $this->execute_select($query, @uris);
+
+        if (ref($res) && $res->[0]) {
+            $subsite_doc = Obvius::Document->new($res->[0])  ;
+            my $docparams = $this->get_docparams($subsite_doc);
+            foreach my $key ( $docparams->param() ) {
+                my $val = $docparams->param($key);
+                $val = $val->Value() if ($val);
+                $subsite_data{lc($key)} = $val;
+            }
+        }
+    }
+
+    if ( $subsite_doc ) {
+        $subsite_doc->param('subsite_info' => \%subsite_data);
+    }
+
+    $doc->{_cached_closest_subsite} = $subsite_doc if ref $doc;
+    return $subsite_doc;
 }
 
 sub shorten_url {
@@ -2962,13 +2994,13 @@ sub get_lang_base {
      my ($this, $lang, $doc) = @_;
 
      my $subsite_doc = $this->find_closest_subsite($doc);
-     my $docparams = $this->get_docparams($subsite_doc);
+     return undef unless ($subsite_doc);
 
-     my $key = uc "${lang}_base";
+     my $docparams = $subsite_doc->param('subsite_info') || {};
+
+     my $key = lc "${lang}_base";
      my $base =  $docparams->{$key};
      return undef if !$base;
-
-     $base = $base->Value;
 
      my $subsite_path = $this->get_doc_uri($subsite_doc);
 
@@ -2985,6 +3017,8 @@ sub get_lang_uri {
      my ($this, $lang, $doc) = @_;
      
      my $subsite_doc = $this->find_closest_subsite($doc);
+     return undef unless ($subsite_doc);
+
      my $path = $this->get_doc_uri($doc);
 
      my $subsite_path = $this->get_doc_uri($subsite_doc);
@@ -3009,7 +3043,7 @@ sub alternative_langs {
      
      my $subsite_doc = $this->find_closest_subsite($doc);
      return [] if !$subsite_doc;
-     my $docparams = $this->get_docparams($subsite_doc);
+     my $docparams = $subsite_doc->param('subsite_info') || {};
      my @langs;
 
      for my $param (keys %$docparams) {
