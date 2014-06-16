@@ -91,8 +91,7 @@ sub generate_head_html {
 
      if ($mode && $mode eq 'search') {
           my @header;
-          push @header, $this->add_js('http://code.jquery.com/jquery-1.8.2.min.js',
-                                      'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+          push @header, $this->add_js('http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
                                       '/scripts/jsutils.js',
                                       '/scripts/jquery/jquery.bgiframe.min.js',
                                       '/scripts/jquery/jquery.ajaxQueue.js');
