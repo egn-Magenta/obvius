@@ -2926,6 +2926,23 @@ sub inherited_subsite_fields {
     return \@fields;
 }
 
+sub explode_path {
+    my ($this, $path) = @_;
+
+    my @result;
+
+    if($path) {
+	my $add_path = '/';
+	push(@result, $add_path);
+	foreach my $pp (grep { $_ } split(/\//, $path)) {
+	    $add_path .= $pp . '/';
+	    push(@result, $add_path);
+	}
+    }
+
+    return @result;
+}
+
 sub find_closest_subsite {
     my ($this, $doc) = @_;
 
@@ -2937,12 +2954,7 @@ sub find_closest_subsite {
     my $uri = $this->get_doc_uri($doc);
     my $subsite_doc;
 
-    my @uris;
-
-    while ($uri) {
-	push @uris, $uri;
-	$uri =~ s/[^\/]*\/$//;
-    }
+    my @uris = $this->explode_path($uri);
 
     my $question_marks = join ", ", (("?") x @uris);
 
@@ -2958,7 +2970,8 @@ sub find_closest_subsite {
 	    # Inherited fields should only be overwritten if a new value
 	    # is specified.
 	    foreach my $ifield (@$inherit_fields) {
-		if(my $v = delete $rec->{$ifield}) {
+		my $v = delete $rec->{$ifield};
+		if($v || $rec->{"dont_inherit_${ifield}"}) {
 		    $subsite_data{$ifield} = $v;
 		}
 	    }
