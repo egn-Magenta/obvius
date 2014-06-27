@@ -2912,6 +2912,37 @@ sub send_mail {
      $smtp->quit or return;
 }
 
+sub inherited_subsite_fields {
+    my ($this) = @_;
+    if(my $cached = $this->{_inherited_subsite_fields}) {
+	return $cached;
+    }
+    my @fields = grep { $_ } split(
+	m{\s*,\s*},
+	$this->config->param('inherited_subsite_fields') ||
+	'local_analytics'
+    );
+    $this->{_inherited_subsite_fields} = \@fields;
+    return \@fields;
+}
+
+sub explode_path {
+    my ($this, $path) = @_;
+
+    my @result;
+
+    if($path) {
+	my $add_path = '/';
+	push(@result, $add_path);
+	foreach my $pp (grep { $_ } split(/\//, $path)) {
+	    $add_path .= $pp . '/';
+	    push(@result, $add_path);
+	}
+    }
+
+    return @result;
+}
+
 sub find_closest_subsite {
     my ($this, $doc) = @_;
 
@@ -2923,25 +2954,32 @@ sub find_closest_subsite {
     my $uri = $this->get_doc_uri($doc);
     my $subsite_doc;
 
-    my @uris;
-
-    while ($uri) {
-	push @uris, $uri;
-	$uri =~ s/[^\/]*\/$//;
-    }
+    my @uris = $this->explode_path($uri);
 
     my $question_marks = join ", ", (("?") x @uris);
 
-    if ( $this->config->param('new_subsite_interface') ) {
+    if ($this->config->param('new_subsite_interface')) {
+	my $inherit_fields = $this->inherited_subsite_fields();
 	my $sth = $this->dbh->prepare(qq|
 	    select * from subsites2
 	    where path in ($question_marks)
-	    order by path desc limit 1
+	    order by path
 	|);
 	$sth->execute(@uris);
-	if(my $rec = $sth->fetchrow_hashref()) {
-            use Data::Dumper;
-	    %subsite_data = %$rec;
+	while(my $rec = $sth->fetchrow_hashref()) {
+	    # Inherited fields should only be overwritten if a new value
+	    # is specified.
+	    foreach my $ifield (@$inherit_fields) {
+		my $v = delete $rec->{$ifield};
+		if($v || $rec->{"dont_inherit_${ifield}"}) {
+		    $subsite_data{$ifield} = $v;
+		}
+	    }
+	    foreach my $k (keys %$rec) {
+		$subsite_data{$k} = $rec->{$k};
+	    }
+	}
+	if($subsite_data{path}) {
 	    $subsite_doc = $this->lookup_document($subsite_data{path});
 	}
     } else {
@@ -2961,7 +2999,7 @@ sub find_closest_subsite {
                 $val = $val->Value() if ($val);
                 $subsite_data{lc($key)} = $val;
             }
-        }
+	}
     }
 
     if ( $subsite_doc ) {
