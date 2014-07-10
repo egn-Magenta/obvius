@@ -70,6 +70,8 @@ sub new
         my $self = shift-> SUPER::new(@_);
 
         $self-> {LANGUAGE_PREFERENCES} = [];
+	my $extra_translation_paths = $self->{EXTRA_TRANSLATION_PATHS} || [];
+	$self-> set_translation_fileset(@$extra_translation_paths);
         $self-> load_translation_fileset();
 
         $self->setup_special_handlers();
@@ -1005,7 +1007,7 @@ sub translate
 {
         my ( $self, $text, $lang) = @_;
 #       print STDERR "$$ $self translates $text\n";
-        for (keys %xml_cache) {
+        for (@{ $self->{TRANSLATION_FILESET} || [] }) {
             next unless exists $xml_cache{$_}->{$text};
             my $k = $xml_cache{$_}->{$text};
 

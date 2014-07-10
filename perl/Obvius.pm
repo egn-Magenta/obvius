@@ -3092,6 +3092,42 @@ sub alternative_langs {
 
      return \@langs;
 }
+
+sub get_month_statistics_for_doc {
+    my ($this, $doc_path, $month) = @_;
+    unless($month) {
+	my ($mon,$year) = (localtime(time))[4,5];
+	$month = sprintf('%04d%02d', $year + 1900, $mon +1);
+    }
+    my $sth = $this->dbh->prepare(
+	"SELECT visit_count FROM monthly_path_statisics " .
+	"WHERE yearmonth = ? AND uri = ?"
+    ) or return 0;
+    $sth->execute($month, $doc_path) or return 0;
+    my ($result) = $sth->fetchrow_array;
+    return $result || 0;
+}
+
+sub get_year_statistics_for_doc {
+    my ($this, $doc_path, $year) = @_;
+
+    unless($year) {
+	my ($y) = (localtime(time))[5];
+	$y += 1900;
+	$year = sprintf('%04d');
+    }
+
+    my $sth = $this->dbh->prepare(
+	"SELECT SUM(visit_count) FROM monthly_path_statisics " .
+	"WHERE yearmonth > ? " .
+	"AND yearmonth < ?" .
+	"AND uri = ?",
+    ) or return 0;
+    $sth->execute($year . '00', $year . '13', $doc_path);
+
+    my ($result) = $sth->fetchrow_array;
+    return $result || 0;
+}
           
 
 package Obvius::Benchmark;
