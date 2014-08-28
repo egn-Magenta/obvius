@@ -2961,7 +2961,10 @@ sub find_closest_subsite {
     if ($this->config->param('new_subsite_interface')) {
 	my $inherit_fields = $this->inherited_subsite_fields();
 	my $sth = $this->dbh->prepare(qq|
-	    select * from subsites2
+            select docid_path.path, subsites2.*
+            from subsites2 join docid_path on (
+                subsites2.root_docid = docid_path.docid
+            )
 	    where path in ($question_marks)
 	    order by path
 	|);
@@ -2975,7 +2978,11 @@ sub find_closest_subsite {
 		    $subsite_data{$ifield} = $v;
 		}
 	    }
-	    foreach my $k (keys %$rec) {
+	    # https subsites should only provide certain fields
+	    my @fields = $rec->{is_https} ? qw(
+		id path title domain user_id backend_faculty comments
+	    ) : (keys %$rec);
+	    foreach my $k (@fields) {
 		$subsite_data{$k} = $rec->{$k};
 	    }
 	}
