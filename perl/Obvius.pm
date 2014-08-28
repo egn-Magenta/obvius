@@ -2978,7 +2978,11 @@ sub find_closest_subsite {
 		    $subsite_data{$ifield} = $v;
 		}
 	    }
-	    foreach my $k (keys %$rec) {
+	    # https subsites should only provide certain fields
+	    my @fields = $rec->{is_https} ? qw(
+		id path title domain user_id backend_faculty comments
+	    ) : (keys %$rec);
+	    foreach my $k (@fields) {
 		$subsite_data{$k} = $rec->{$k};
 	    }
 	}
