@@ -170,7 +170,7 @@ sub mixed2perl_old {
     if (ref $txt) {
         return $txt;
     } else {
-        return Encode::decode("utf8", mixed2utf8($txt));
+        return Encode::decode("utf8", mixed2utf8_old($txt));
     }
 }
 
