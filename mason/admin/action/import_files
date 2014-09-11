@@ -46,18 +46,13 @@ my %files = ();
 
 if ( $r->param( "import_files_do" ) )
 {    
-
-
     $u = $obvius->lookup_document( $dest_url );
     if ( $u )
     {
-
-
         # Make a temp dir for this session
         my $tmp = time();
         mkdir ( $zip_path . $tmp );
         $zip_path .= $tmp;
-
 
 	$dest_url = $r->param( "import_pictures_dest_url" );
 
@@ -74,53 +69,38 @@ if ( $r->param( "import_files_do" ) )
     	    if ( $upload->filename ne '' and $upload->size != 0 and my $fh = $upload->fh ) {
 		my $filename = $tmp . ".zip";
 		local $/ = undef;
-		if(open(FILE, ">$zip_path/" . $filename)) {
+		my $zip_file_name = $zip_path . "/" . $filename;
+		if(open(FILE, ">$zip_file_name")) {
 		    print FILE <$fh>;
 		    close(FILE);
 		}
-        
-        # Using unzip:
-        my $file_details = `unzip -l $zip_path/$filename`; # get a list of the contained files
-        my $begin = 0;
-        my $end = 0;
-        my @file_names;
-        my @detail_lines = split /\n/, $file_details;
-        # We collect the details in an array for use in decompression:
-        foreach (@detail_lines) {
-            # Unzip also lists folders inside the file, so those have to be escaped:
-            unless ((rindex($_, '/') + 1) == length($_)) {
-                if (rindex($_, '---') >= 0 && $begin) { # The info ends with hyphen lines.
-                    $end = 1;
-                }
-                if ($begin && !$end) {
-                    my @raw_details = split ' ', $_;
-                    my @details_array;
-                    foreach my $detail (@raw_details) {
-                        push (@details_array, $detail);
-                    }
-                    my @file_components = split '/', $details_array[3];
-                    my $file_name = pop(@file_components);
-		            my %info = (
-                        orgFile => $details_array[3],
-                        short => $file_name
-                    );
-                    my $success = `unzip -j $zip_path/$filename $details_array[3] -d $zip_path/$file_name`;
-                    if ($success != 0) {
-			            $info{error} = 1;
-			            $info{text} = 'An error occured while runnig Unzip.';
-    			        $error = 1;
-                    }
-		    	    if ( ! $m->comp('import_files:do', source=>"$zip_path/$file_name", dest_url=>$dest_url) ) {
-                        $info{error} = 1;
-                        $error = 1;
-                    }
-                    $files{$file_name} = \%info;
-                }
-                if (rindex($_, '---') >= 0 && !$begin) { # The info contains 'table headers' before the actual file info.
-                    $begin = 1;
-                }
-            }
-        }
+		my $extract_dir = $zip_path . '/output';
+		mkdir($extract_dir);
+
+		if(system('unzip', '-d', $extract_dir, $zip_file_name) == 0) {
+		    File::Find::find(sub {
+			if(-f $File::Find::name) {
+			    my $fname = $_;
+			    my %info = (
+				orgFile => $File::Find::name,
+	                        short => $fname
+	                    );
+			    return if($File::Find::name =~ m!__MACOSX/!);
+			    my $result = $m->comp(
+				'import_files:do',
+				source=>$File::Find::name,
+				dest_url=>$dest_url
+			    );
+			    unless ($result) {
+				$info{error} = 1;
+				$error = 1;
+			    }
+			    $files{$fname} = \%info;
+			}
+		    }, $extract_dir);
+		} else {
+		    $error = 1;
+		}
 	    }
 	}
     }
@@ -129,6 +109,7 @@ if ( $r->param( "import_files_do" ) )
 </%init>
 <%once>
 use POSIX qw(strftime);
+use File::Find;
 </%once>
 
 
@@ -271,14 +252,16 @@ for (@mime_array) {
     }
 }
 
+$args->{name} =~ s/[^a-zA-Z0-9._-]/_/g;
+
 return 0 if (!$args);
 
 my ($status, $message)=$obvius->send_order(
-					   docid=>$parent->Id,
-					   user=>$obvius->user,
-					   command=>'new_document',
-					   args=>$args,
-					   );
+    docid=>$parent->Id,
+    user=>$obvius->user,
+    command=>'new_document',
+    args=>$args,
+);
 
 
 if ( $status eq "OK" )
@@ -287,7 +270,7 @@ if ( $status eq "OK" )
     my %args = ();
       
     # Lookup the new document and get the latest version
-    my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $parent ) . $title );
+    my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $parent ) . $args{name} );
 
     my $new_vdoc = $obvius->get_public_version($new_doc) || $obvius->get_latest_version($new_doc);
     
