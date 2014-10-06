@@ -44,7 +44,7 @@ our $two_byte =   '[\xc0-\xdf][\x80-\xbf]';
 our $three_byte = '[\xe0-\xef][\x80-\xbf][\x80-\xbf]';
 our $four_byte =  '[\xf0-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
 
-our $utf8_bytes_match = qr/(?:$two_byte|$three_byte|$four_byte)+/;
+our $utf8_bytes_match = qr/(?:$two_byte|$three_byte|$four_byte)/;
 
 sub mixed2perl {
     my ($txt) = shift;
@@ -62,7 +62,7 @@ sub mixed2perl {
         }
 
         # Eat any utf8 bytes and convert them to wide characters
-        if($txt =~ s/^($utf8_bytes_match)+//) {
+        while($txt =~ s/^($utf8_bytes_match){1,32000}//) {
             $out .= Encode::decode('utf-8', $1);
         }
 
@@ -90,7 +90,7 @@ sub mixed2utf8 {
         }
 
         # Eat any utf8 chars
-        if($txt =~ s/^($utf8_bytes_match)+//) {
+        while($txt =~ s/^($utf8_bytes_match){1,32000}//) {
             if(Encode::is_utf8($1)) {
                 # Repack octets to remove utf8 flag
                 $out .= pack('c*', unpack('c*', $1));
