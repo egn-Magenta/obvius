@@ -221,7 +221,6 @@ sub insert_table_record {
 
 sub delete_table_record {
     my ($this, $table, $rec, $where) = @_;
-
     return unless (ref $rec eq 'HASH');
     return if (!defined $rec->{id} and !defined $where); # XXX See update_table_record.
 

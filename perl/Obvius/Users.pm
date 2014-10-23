@@ -207,8 +207,9 @@ sub delete_user {
         $set-> Update( { owner => $nobody }, { owner => $userid } );
         $set-> Disconnect;
 
-        $this->db_delete_user($userid);
+	$this->db_delete_user_sessions($userid);
         $this->db_delete_user_grp($userid);
+        $this->db_delete_user($userid);
 
         $this->db_commit;
     };
