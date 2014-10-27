@@ -62,7 +62,7 @@ sub mixed2perl {
         }
 
         # Eat any utf8 bytes and convert them to wide characters
-        while($txt =~ s/^($utf8_bytes_match){1,32000}//) {
+        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
             $out .= Encode::decode('utf-8', $1);
         }
 
@@ -90,7 +90,7 @@ sub mixed2utf8 {
         }
 
         # Eat any utf8 chars
-        while($txt =~ s/^($utf8_bytes_match){1,32000}//) {
+        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
             if(Encode::is_utf8($1)) {
                 # Repack octets to remove utf8 flag
                 $out .= pack('c*', unpack('c*', $1));
