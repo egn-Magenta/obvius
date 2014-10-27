@@ -105,6 +105,7 @@ sub path_to_filename {
     
     $filename =~ s/^\s+|\s+$//g;
     $filename =~ s/\s+/_/g;
+    $filename =~ s/,/_/g;
 
     return $filename;
 }
