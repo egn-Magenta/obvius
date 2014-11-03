@@ -4,7 +4,7 @@
        <h4><a href="./?obvius_command_document_information=1&amp;obvius_version=<% $vdoc->Version |u %>"><& /shared/msg, text=>'Document' &></a></h4>
        <div class="obvius-version-info">
 % my $owner=$obvius->get_user($doc->Owner);
-         <& /shared/msg, text=>'Owner' &>: <span title="login: <% $owner->{login} |h %>, email: <% $owner->{email} |h %>"><% $owner->{name} |h %></span><br />
+         <& /shared/msg, text=>'Owner' &>: <span title="login: <% $owner->{login} |h %>, email: <% $owner->{email} |h %>"><& /shared/display_user, user_name => $owner->{login} &></span><br />
 % my $group=$obvius->get_group($doc->Grp);
          <& /shared/msg, text=>'Group' &>: <% $group->{name} |h %><br />
        </div>
@@ -14,7 +14,7 @@
        <& /shared/msg, text=>'Type' &>: <span title="<% $doctype->Name |h %>"><& /shared/msg, text=>$doctype->Name &></span><br />
        <& /shared/msg, text=>'Created by' &>:
 % if ($user) {
-<a href="mailto:<% $user->{email} |h %>" title="Send email"><% $user->{name} |h %></a>
+<a href="mailto:<% $user->{email} |h %>" title="Send email"><& /shared/display_user, user_name => $user->{login} &></a>
 % }
 % else {
 <span class="obvius-inactive"><& /shared/msg, text=>'Not registered' &></span>

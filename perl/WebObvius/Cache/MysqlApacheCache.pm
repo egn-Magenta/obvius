@@ -223,9 +223,9 @@ sub flush_in_table {
         $flusher->execute(@cur_uris);
     }
 
-    my @flush_regexps = map { $_->{regexp} } 
+    my @flush_regexps = map { lc($_->{regexp}) } 
 	grep {$_->{command} eq 'clear_by_regexp'} @$commands;
-    my @flush_not_regexps = map { $_->{regexp} } 
+    my @flush_not_regexps = map { lc($_->{regexp}) } 
 	grep {$_->{command} eq 'clear_by_not_regexp'} @$commands;
 
     if(@flush_regexps) {
@@ -284,7 +284,7 @@ sub flush_by_pattern {
     my ($this, $pred) = @_;
     
     for my $table ($this->{local_table}, @{$this->{other_tables}}) {
-        $this->flush_by_pattern_in_table($pred, $table);
+	 $this->flush_by_pattern_in_table($pred, $table);
     }
 }
 

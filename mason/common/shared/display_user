@@ -1,0 +1,21 @@
+%#
+%# A module for printing user details in the format:
+%#      <USERS_FULL_NAME> (<USER_NAME>)
+%#
+<% $full_name | h %> (<% $user_name | h %>)
+<%args>
+    # These parameters are optional, though one should be set.
+    $user_name => "NO USER"
+    $user_id => -1
+</%args>
+%
+<%init>
+    my $full_name = "user_name n/a"; # default value if no params
+    if ($user_name ne "NO USER") {
+        $user_id = $obvius->get_userid($user_name);
+    }
+    if ($user_id > -1) {
+        $user_name = $obvius->{USERS}->{$user_id}->{login};
+        $full_name = $obvius->{USERS}->{$user_id}->{name};
+    }
+</%init>

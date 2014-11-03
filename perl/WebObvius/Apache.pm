@@ -124,6 +124,8 @@ if ( $MOD_PERL == 2) {
 	# not present in compat::
 	require Apache2::Cookie; # Loaded for backwards compatibility.
 	require CGI::Cookie; # The cookie module that's actually used
+	{
+	no warnings 'redefine';
 	*Apache::Cookie::fetch = sub { CGI::Cookie->fetch (@_[1..$#_]) };
 	*Apache::Cookie::new = sub {
 		my $class = shift;
@@ -136,6 +138,7 @@ if ( $MOD_PERL == 2) {
 		$r ||= eval { Apache2::RequestUtil->request() };
 		$r->err_headers_out->add("Set-Cookie", $c->as_string);
 	};
+	}
 
 	# present in compat:: in Apache2:: namespace, but we need Apache::
 	require Apache2::Util;

@@ -87,6 +87,7 @@ sub raw_document_data {
 sub get_full_path {
     my ($path, $obvius) = @_;
     return undef unless($path);
+    $path = mixed2utf8($path);
     $path =~ s!^\s+!!;
     $path =~ s!\s+$!!;    
 

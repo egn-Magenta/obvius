@@ -70,6 +70,8 @@ sub new
         my $self = shift-> SUPER::new(@_);
 
         $self-> {LANGUAGE_PREFERENCES} = [];
+	my $extra_translation_paths = $self->{EXTRA_TRANSLATION_PATHS} || [];
+	$self-> set_translation_fileset(@$extra_translation_paths);
         $self-> load_translation_fileset();
 
         $self->setup_special_handlers();
@@ -209,9 +211,14 @@ sub obvius_connect {
     $fieldtypes = $this->{OBVIUS_ARGS}->{fieldtypes};
     $fieldspecs = $this->{OBVIUS_ARGS}->{fieldspecs};
 
-    $this->tracer($req, $user||'-user', $passwd||'-passwd') if ($this->{DEBUG});
+    my $passphrase = $this->{OBVIUS_ARGS}->{'tripleDES_pphr'} || '';
 
-    $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, $fieldtypes, $fieldspecs, log => $this->{LOG});
+    $this->tracer($req, $user||'-user', $passwd||'-passwd') if ($this->{DEBUG});
+    
+    $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, 
+			 $fieldtypes, $fieldspecs, log => $this->{LOG},
+			 'encryption_pphr' => $passphrase);
+
     return undef unless ($obvius);
     $obvius->param(LANGUAGES=>$this->get_language_preferences($req));
 
@@ -1000,7 +1007,7 @@ sub translate
 {
         my ( $self, $text, $lang) = @_;
 #       print STDERR "$$ $self translates $text\n";
-        for (keys %xml_cache) {
+        for (@{ $self->{TRANSLATION_FILESET} || [] }) {
             next unless exists $xml_cache{$_}->{$text};
             my $k = $xml_cache{$_}->{$text};
 

@@ -6,7 +6,7 @@ CREATE TABLE login_secrets (
   secret varchar(32) NOT NULL,
   time int unsigned NOT NULL,
   index (login, secret)
-) type = InnoDB;
+) engine = InnoDB;
      
 CREATE TABLE login_sessions (
   login varchar(31)  NOT NULL,
@@ -15,5 +15,5 @@ CREATE TABLE login_sessions (
   permanent boolean not null,
   PRIMARY KEY (session_id),
   index (login)
-) type=InnoDB;
+) engine = InnoDB;
 
