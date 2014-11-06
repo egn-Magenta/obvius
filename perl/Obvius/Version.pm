@@ -92,7 +92,7 @@ sub export_to_solr {
     ### Get document if not supplied
     $doc = ($doc && ref($doc) eq 'Obvius::Document' ? $doc : 
 	    $obvius->get_doc_by_id($self->DocId));
-    my $doctype = $obvius->get_document_type($doc);
+    my $doctype = $obvius->get_doctype_by_id($self->Type);
 
     #### Get specs (either from "cache" og by asking doctype object)
     my $fieldsmap = $SOLR_MAPS{$doctype->Id};
