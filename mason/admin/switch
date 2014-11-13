@@ -42,7 +42,7 @@ if ($uri!~m!/$! or $uri eq '') {
 
     if ($data) {
 	$mime_type ||= 'application/octet-stream';
-	
+
 	$r->content_type($mime_type);
 	$r->set_content_length(length($data));
 	$r->send_http_header;
@@ -87,3 +87,9 @@ else {
 $m->comp('default/release_session');
 </%perl>
 %
+<%once>
+use Obvius::CharsetTools qw(mixed2utf8);
+</%once>
+<%filter>
+$_ = mixed2utf8($_);
+</%filter>

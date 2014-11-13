@@ -1,0 +1,46 @@
+<%method reset_notification>
+<%args>
+$email
+$fromaddr
+$roothost
+$user
+$code
+$obvius
+</%args>
+To: <% $email %>
+From: <% ${fromaddr} %>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: Nulstilling af <% ${roothost} %>-adgangskode for bruger <% $user->{login} %>
+
+Denne e-mail bliver sendt til dig da du har bedt om at få nulstillet dit password på <% ${roothost} %>.
+
+For at færdiggøre nulstilling af password skal du klikke på nedenstående link:
+
+http://<% ${roothost} %>/system/confirm_reset_password?code=<% $code |u %>
+
+--
+ <% $roothost %>
+</%method>
+%
+%
+%
+<%method password_message>
+<%args>
+$email
+$login
+$from
+$password
+$roothost
+</%args>
+To: <% $email %>
+From: <% $from %>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: Ny adgangskode til <% $roothost %> for bruger <% $login %>
+
+Adgangskode for bruger <% $login %> er nu: <% $password %>
+
+--
+ <% $roothost %>
+</%method>
