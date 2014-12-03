@@ -61,21 +61,28 @@ if (!$tooltip_langs) {
     $r->pnotes('tooltip_languages' => $tooltip_langs);
 }
 
-foreach my $doctype ($docname, "_default_") {
-  foreach my $lang (@$tooltip_langs) {
+
+foreach my $lang (@$tooltip_langs) {
+  foreach my $doctype ($docname, "_default_") {
       $tooltip_url = get_tooltip_path(
           doctype => $doctype,
           field => $field->{name},
           lang => $lang
       );
-      if ($obvius->lookup_document($tooltip_url)) {
+      my $tooltipdoc = $obvius->lookup_document($tooltip_url);
+      if ($tooltipdoc && $obvius->is_public_document($tooltipdoc)) {
           $tooltip_url =~ s!/$!!;
           $tooltip_url = $prefix . $tooltip_url . '?obvius_bare=1';
       } else {
           $tooltip_url = undef;
       }
-      last if(defined($tooltip_url))
+      if (defined($tooltip_url)) {
+        last;
+      }
     }
+  if (defined($tooltip_url)) {
+    last;
+  }
 }
 
 my $subtitle=$field->{options}->{subtitle} if (exists $field->{options});
