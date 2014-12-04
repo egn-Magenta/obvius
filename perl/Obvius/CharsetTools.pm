@@ -30,6 +30,7 @@ use warnings;
 use utf8;
 use Exporter;
 use Encode;
+use Carp;
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mixed2utf8 mixed2perl mixed2charset debugstr);
@@ -37,7 +38,77 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK);
 
 our $VERSION="1.0";
 
+our $ascii =      '[\x00-\x7F]';
+our $not_ascii =  '[^\x00-\x7F]';
+our $two_byte =   '[\xc0-\xdf][\x80-\xbf]';
+our $three_byte = '[\xe0-\xef][\x80-\xbf][\x80-\xbf]';
+our $four_byte =  '[\xf0-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
+
+our $utf8_bytes_match = qr/(?:$two_byte|$three_byte|$four_byte)/;
+
+sub mixed2perl {
+    my ($txt) = shift;
+
+    return $txt unless($txt);
+
+    my $out = '';
+
+    while(length($txt)) {
+        # Eat any ascii chars, removing utf8-flag from matched chars
+        if($txt =~ s!^(${ascii}+)!!) {
+            my $ascii = $1;
+            Encode::_utf8_off($ascii);
+            $out .= $ascii;
+        }
+
+        # Eat any utf8 bytes and convert them to wide characters
+        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
+            $out .= Encode::decode('utf-8', $1);
+        }
+
+        # Output next character, unless it's ascii
+        if($txt =~ s!^(${not_ascii})!!) {
+            $out .= $1;
+        }
+    }
+
+    return $out;
+}
+
 sub mixed2utf8 {
+    my ($txt) = shift;
+
+    return $txt unless($txt);
+
+    my $out = '';
+    while(length($txt)) {
+        # Eat any ascii chars, removing utf8-flag from matched chars
+        if($txt =~ s!^(${ascii}+)!!) {
+            my $ascii = $1;
+            Encode::_utf8_off($ascii);
+            $out .= $ascii;
+        }
+
+        # Eat any utf8 chars
+        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
+            if(Encode::is_utf8($1)) {
+                # Repack octets to remove utf8 flag
+                $out .= pack('c*', unpack('c*', $1));
+            } else {
+                $out .= $1;
+            }
+        }
+
+        # Convert next character to utf8, if present and not asciii
+        if($txt =~ s!^(${not_ascii})!!) {
+            $out .= Encode::encode('utf-8', $1);
+        }
+    }
+
+    return $out;
+}
+
+sub mixed2utf8_old {
     my ($txt) = shift;
 
     return $txt unless($txt);
@@ -87,7 +158,7 @@ sub mixed2utf8 {
     return $out;
 }
 
-sub mixed2perl {
+sub mixed2perl_old {
     my ($txt) = shift;
     
     # TODO: Ref. ticket #6000. This function used to work as a destroyer of
@@ -99,7 +170,7 @@ sub mixed2perl {
     if (ref $txt) {
         return $txt;
     } else {
-        return Encode::decode("utf8", mixed2utf8($txt));
+        return Encode::decode("utf8", mixed2utf8_old($txt));
     }
 }
 
