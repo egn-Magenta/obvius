@@ -32,7 +32,8 @@ $name=>undef
 <%init>
 use WebObvius::Tooltip qw(get_tooltip_path);
 
-my $doctype = $obvius->get_doctype_by_id($vdoc->Type);
+my $session=$r->pnotes('obvius_session');
+my $doctype = $obvius->get_doctype_by_id($session->{obvius_new_doctypeid} || $vdoc->Type);
 my ($docname, $tooltip_url);
 
 if ($field->{tooltip}) {
