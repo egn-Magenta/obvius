@@ -502,7 +502,7 @@ sub add_editpages {
 	    # translate key using fieldnamemap
 	    $key = $fieldnamemap{$key} || $key;
 
-	    die "$doctypename, $editpage{page}: No End-line for page"
+	    die "$doctypename, $editpage{page}: No End-line for page (syntax check editpages.txt)"
 		if $key eq 'page' and defined $editpage{page};
 
 	    if ($key eq 'fields') {
