@@ -1,0 +1,46 @@
+<ul class="show-doctype-data">
+%   foreach my $dt (@doctypes) {
+    <li>
+        <h1><% $dt->{name} %></h1>
+        <ul>
+%       foreach my $ep (@{ $dt->{editpages} }) {
+            <li>
+                <h2><% $ep->{name} %></h2>
+                <ul>
+%               foreach my $field (@{ $ep->{fields} }) {
+                    <li>
+                        <strong><% $field->{name} %></strong>
+                        (<& /shared/msg, text=>$field->{label} &>)
+                    </li>
+%               }
+                </ul>
+            </li>
+%       }
+        </ul>
+    </li>
+%}
+</ul>
+<%init>
+my @doctypes;
+my $doctypes = $obvius->param('doctypes') || [];
+foreach my $dt (grep { $_ } @$doctypes) {
+    my $eps = $obvius->get_editpages($dt);
+    next unless($eps);
+    my @editpages;
+    foreach my $ep_key (sort keys %$eps) {
+        my $ep = $eps->{$ep_key};
+        my $flist = $ep->param('fieldlist') || '';
+        $flist = [ grep { $_ && /\S+/ } split(/\n+/, $flist) ];
+        my @fields;
+        foreach my $fspec (@$flist) {
+            if($fspec =~ m{^(\S+)\s*([^;]*)}) {
+                push(@fields, { name => $1, label => $2 || ''});
+            } else {
+                die "Could not parse fieldspec $fspec";
+            }
+        };
+        push(@editpages, { name => $ep_key, fields => \@fields });
+    }
+    push(@doctypes, { name => $dt->param('name'), editpages => \@editpages });
+}
+</%init>

@@ -10,11 +10,12 @@
 </label>
 
 %if (defined $tooltip_url) {
-<!--    <a href="#" onmouseover="ajax_showTooltip('<% $tooltip_url %>', this)" onmouseout="ajax_hideTooltip()"> -->
-<!--    <a href="#" onclick="ajax_showTooltip('<% $tooltip_url %>', this)">  -->
-
-      <img src="/grafik/spg.gif" alt="?" style="cursor: pointer; cursor: hand" onclick="ajax_showTooltip('<% $tooltip_url %>', document.getElementById('<% $name |h %>_tooltip'))" />
-<!--    </a> -->
+    <img src="/grafik/spg.gif" alt="?" style="cursor: pointer; cursor: hand"
+        onclick="ajax_showTooltip(
+            '<% $tooltip_url %>',
+            document.getElementById('<% $name |h %>_tooltip')
+        )"
+    />
 %}
 <br />\
 % }
@@ -31,7 +32,8 @@ $name=>undef
 <%init>
 use WebObvius::Tooltip qw(get_tooltip_path);
 
-my $doctype = $obvius->get_document_type($doc);
+my $session=$r->pnotes('obvius_session');
+my $doctype = $obvius->get_doctype_by_id($session->{obvius_new_doctypeid} || $vdoc->Type);
 my ($docname, $tooltip_url);
 
 if ($field->{tooltip}) {
@@ -40,12 +42,48 @@ if ($field->{tooltip}) {
     $docname = $doctype->param('name');
 }
 
-$tooltip_url = get_tooltip_path( doctype => $docname, field => $field->{name});
-if ($obvius->lookup_document($tooltip_url)) {
-    $tooltip_url =~ s!/$!!;
-    $tooltip_url = $prefix . $tooltip_url . '?obvius_bare=1';
-} else {
-    $tooltip_url = undef;
+# Get the list of languages we want to try out
+my $tooltip_langs = $r->pnotes('tooltip_languages');
+if (!$tooltip_langs) {
+    my %valid_tooltip_languages = ( '' => 1 );
+    if(my $val_tt_str = $obvius->config->param('valid_tooltip_languages')) {
+        %valid_tooltip_languages = map {
+            $_ => 1
+        } split(/\s*,\s*/, $val_tt_str);
+    }
+    $tooltip_langs = [
+        grep {
+            $valid_tooltip_languages{$_}
+        } (
+            @{ $r->pnotes('language_preferences') },
+            ''
+        )
+    ];
+    $r->pnotes('tooltip_languages' => $tooltip_langs);
+}
+
+
+foreach my $lang (@$tooltip_langs) {
+  foreach my $doctype ($docname, "_default_") {
+      $tooltip_url = get_tooltip_path(
+          doctype => $doctype,
+          field => $field->{name},
+          lang => $lang
+      );
+      my $tooltipdoc = $obvius->lookup_document($tooltip_url);
+      if ($tooltipdoc && $obvius->is_public_document($tooltipdoc)) {
+          $tooltip_url =~ s!/$!!;
+          $tooltip_url = $prefix . $tooltip_url . '?obvius_bare=1';
+      } else {
+          $tooltip_url = undef;
+      }
+      if (defined($tooltip_url)) {
+        last;
+      }
+    }
+  if (defined($tooltip_url)) {
+    last;
+  }
 }
 
 my $subtitle=$field->{options}->{subtitle} if (exists $field->{options});
