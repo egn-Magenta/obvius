@@ -334,7 +334,7 @@ sub connect_dbh {
             AND
             versions.type=doctypes.id
             AND
-            docid_path.path = ?;
+            docid_path.path = binary ?;
     |);
 }
 
