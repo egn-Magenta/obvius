@@ -46,10 +46,23 @@ our $four_byte =  '[\xf0-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
 
 our $utf8_bytes_match = qr/(?:$two_byte|$three_byte|$four_byte)/;
 
+=head2 mixed2perl
+
+  my $perl_wide_string = mixed2perl($mixed_input);
+
+Converts a string with mixed data (wide-characters, latin1 and utf8 encoding
+in the same string) into a string containing only perl wide characters. If the
+input is a reference to a simple data structure a deep copy of the data
+structure will be made, running the mixed2perl method on all elements.
+
+=cut
+
 sub mixed2perl {
     my ($txt) = shift;
 
     return $txt unless($txt);
+
+    return _deep_copy($txt, \&mixed2perl) if(ref($txt));
 
     my $out = '';
 
@@ -75,10 +88,23 @@ sub mixed2perl {
     return $out;
 }
 
+=head2 mixed2utf8
+
+  my $utf8_encoded_string = mixed2utf8($mixed_input);
+
+Converts a string with mixed data (wide-characters, latin1 and utf8 encoding
+in the same string) into a string containing only utf8-octet encoding. If the
+input is a reference to a simple data structure a deep copy of the data
+structure will be made, running the mixed2utf8 method on all elements.
+
+=cut
+
 sub mixed2utf8 {
     my ($txt) = shift;
 
     return $txt unless($txt);
+
+    return _deep_copy($txt, \&mixed2utf8) if(ref($txt));
 
     my $out = '';
     while(length($txt)) {
@@ -99,7 +125,7 @@ sub mixed2utf8 {
             }
         }
 
-        # Convert next character to utf8, if present and not asciii
+        # Convert next character to utf8, if present and not ascii
         if($txt =~ s!^(${not_ascii})!!) {
             $out .= Encode::encode('utf-8', $1);
         }
@@ -190,4 +216,39 @@ sub debugstr {
         $_ < 128 ? chr($_) : sprintf('\\x{%x}', $_);
     } unpack("U*", $txt));
 }
+
+sub _deep_copy {
+    my ($val, $method, $ref_cache) = @_;
+
+    $ref_cache ||= {};
+
+    my $ref = ref($val);
+    my $cache_key = $ref ? scalar($val) : '';
+    if(my $v = $ref_cache->{$cache_key}) {
+        return $v;
+    }
+
+    if (ref $val eq 'ARRAY') {
+        my @v;
+        $ref_cache->{$cache_key} = \@v;
+        @v = map { _deep_copy($_, $method, $ref_cache) } @$val;
+        return \@v;
+    } elsif (ref $val eq 'HASH') {
+        my %v;
+        $ref_cache->{$cache_key} = \%v;
+        %v = map { _deep_copy($_, $method, $ref_cache) } %$val;
+        return \%v;
+    } elsif (ref $val eq 'SCALAR') {
+        my $scal = _deep_copy($$val, $method, $ref_cache);
+        $ref_cache->{$cache_key} = \$scal;
+        return \$scal;
+    } elsif (ref $val) {
+	warn "Can not deep-copy unknown reference type '$ref': " .
+            "Returning orignal reference instead";
+        return $val;
+    } else {
+	return $method->($val);
+    }
+}
+
 1;
