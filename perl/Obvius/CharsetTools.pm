@@ -243,7 +243,9 @@ sub _deep_copy {
         $ref_cache->{$cache_key} = \$scal;
         return \$scal;
     } elsif (ref $val) {
-	die "Unknown type: " . ref $val;
+	warn "Can not deep-copy unknown reference type '$ref': " .
+            "Returning orignal reference instead";
+        return $val;
     } else {
 	return $method->($val);
     }
