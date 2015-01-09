@@ -361,8 +361,14 @@ sub can_set_access_data {
     return $this->user_has_capabilities($doc, qw(modes));
 }
 
-sub can_create_new_user  { $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_users} }
-sub can_create_new_group { $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_groups} }
+sub can_create_new_user  {
+    $_[0]->is_superadmin_user() ||
+    $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_users}
+}
+sub can_create_new_group {
+    $_[0]->is_superadmin_user() ||
+    $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_groups}
+}
 
 sub can_update_comment {
     my ($this, $doc) = @_;
