@@ -87,6 +87,7 @@ sub raw_document_data {
 sub get_full_path {
     my ($path, $obvius) = @_;
     return undef unless($path);
+    $path = mixed2utf8($path);
     $path =~ s!^\s+!!;
     $path =~ s!\s+$!!;    
 
@@ -104,6 +105,7 @@ sub path_to_filename {
     
     $filename =~ s/^\s+|\s+$//g;
     $filename =~ s/\s+/_/g;
+    $filename =~ s/,/_/g;
 
     return $filename;
 }

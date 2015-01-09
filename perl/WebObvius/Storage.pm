@@ -52,9 +52,10 @@ sub _get_object {
     # Retrieve full object description
     my ($object_id) = keys %{$data->{$path_prefix}};
 
-    my $object = $data->{$path_prefix}->{$object_id};
-
-    return $object;
+    if ($object_id) {
+        my $object = $data->{$path_prefix}->{$object_id};
+        return $object;
+    }
 }
 
 

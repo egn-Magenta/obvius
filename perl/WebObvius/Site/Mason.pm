@@ -435,13 +435,16 @@ sub handler ($$) {
 
           # Check if we should just serve data using an internal redirect:
           my $other_path = $doctype->internal_redirect($doc, $vdoc, $obvius, $upgraded_req, $output);
-          if($other_path) {
+          # Certain characters trip apache up, causing a 404 error if we attempt to feed it an invalid path
+          # This is especially true for url markers (?&=#%)
+          if ($other_path && $other_path =~ m/^[^?&=#%]+$/) {
+               # What we do here is non-essential; just letting apache serve the file directly, instead of us proxying it
                $upgraded_req->internal_redirect($other_path);
-               return OK;
           }
 
 	  my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) =
 	    $doctype->raw_document_data($doc, $vdoc, $obvius, $upgraded_req, $output);
+
 
 	  if ($data || $path) {
 	       my %args = (mime_type => $mime_type,
@@ -455,9 +458,12 @@ sub handler ($$) {
 	       my $status = defined $data ?
 		 $this->output_data($req, %args) :
 		 $this->output_file($req, %args);
-
-	       $req->no_cache(1) if ($is_admin);
-	       execute_cache($obvius, $req, $data, $filename) if ($status == OK);
+		if ($is_admin) {
+			$req->no_cache(1);
+		}
+		if ($status == OK) {
+			execute_cache($obvius, $req, $data, $filename);
+		}
 
 	       return $status;
 	  }

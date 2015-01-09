@@ -92,7 +92,7 @@ sub raw_document_data {
 
         my $size = $apr->param('size') || '';
 
-        if($size and $size =~ /^(\d+X\d+|\d+%)$/i) {
+        if($size and $size =~ /^(\d+X\d+|\d+%|\d+x|x\d+)$/i) {
             return $this->get_resized_data($size, $vdoc, $obvius, $apr);
         }
     }
@@ -143,6 +143,12 @@ sub get_resized_data {
         } elsif($size =~ /^(\d+)x(\d+)$/i) {
             $new_width = $1;
             $new_height = $2;
+		} elsif ($size =~ /^(\d+)x$/i) {
+			$new_width = $1;
+			$new_height = $org_height * ($new_width / $org_width);
+		} elsif ($size =~ /^x(\d+)$/i) {
+			$new_height = $1;
+			$new_width = $org_width * ($new_height / $org_height);
         } else {
             $new_width = $org_width;
             $new_height = $org_height;

@@ -278,16 +278,20 @@ sub perform_command_delete {
 }
 
 sub _copy_documents_recursive {
-    my ($obvius, $source_doc, $dest_doc, $new_doc_name, $follow_copy)=@_;
+    my ($obvius, $source_doc, $dest_doc, $new_doc_name, %options)=@_;
 
     my $count=0;
-    my ($result, $message, $new_dest_doc)=_copy_single_document($obvius, $source_doc, $dest_doc, $new_doc_name, $follow_copy);
+    my ($result, $message, $new_dest_doc)=_copy_single_document(
+	$obvius, $source_doc, $dest_doc, $new_doc_name, %options
+    );
     return ($result, $message, $count) if ($result ne 'OK');
     $count++;
 
     my $subdocs=$obvius->get_docs_by_parent($source_doc->Id) || [];
     foreach my $subdoc (@$subdocs) {
-        my ($result, $message, $subcount)=_copy_documents_recursive($obvius, $subdoc, $new_dest_doc, $subdoc->Name, $follow_copy);
+        my ($result, $message, $subcount)=_copy_documents_recursive(
+	    $obvius, $subdoc, $new_dest_doc, $subdoc->Name, %options
+	);
         $count+=$subcount;
         if ($result ne 'OK') {
             return ($result, $message, $count);
@@ -303,8 +307,12 @@ sub _copy_documents_recursive {
 }
 
 sub _copy_single_document {
-    my ($obvius, $source_doc, $dest_doc, $new_doc_name, $follow_copy) = @_;
+    my ($obvius, $source_doc, $dest_doc, $new_doc_name, %options) = @_;
     $new_doc_name ||= $source_doc->Name;
+
+    if(my $new_lang = $options{change_langauge_to}) {
+	die "Invalid language '$new_lang'" unless($new_lang =~ m!^\w\w$!);
+    }
 
     my $source_vdoc=$obvius->get_public_version($source_doc) ||
         $obvius->get_latest_version($source_doc);
@@ -312,10 +320,12 @@ sub _copy_single_document {
     $obvius->get_version_fields($source_vdoc, 255);
     my $error ='';
 
-    my ($new_docid, $new_version)=$obvius->create_new_document($dest_doc, $new_doc_name,
-                                                               $source_vdoc->Type, $source_vdoc->Lang,
-                                                               $source_vdoc->Fields, $source_doc->Owner,
-                                                               $source_doc->Grp, \$error);
+    my ($new_docid, $new_version)=$obvius->create_new_document(
+	$dest_doc, $new_doc_name, $source_vdoc->Type,
+	$options{change_language_to} || $source_vdoc->Lang,
+	$source_vdoc->Fields, $source_doc->Owner,
+	$source_doc->Grp, \$error
+    );
 
     if ($new_docid) {
         my $new_doc=$obvius->get_doc_by_id($new_docid);
@@ -350,12 +360,15 @@ sub perform_command_copy {
     if ($info{args}->{recursive}) {
         return ('ERROR', ['Can not recursively copy a document underneath itself']) if ($obvius->is_doc_below_doc($destdoc, $doc) or $destdoc->Id eq $doc->Id);
 
-        my ($status, $message)=_copy_documents_recursive($obvius, $doc, $destdoc, $dest_name, $info{args}->{follow_copy});
+        my ($status, $message)=_copy_documents_recursive(
+	    $obvius, $doc, $destdoc, $dest_name, %{ $info{args} }
+	);
         return ($status, $message);
     }
     else {
-        my @result = _copy_single_document($obvius, $doc, $destdoc, $dest_name, 
-					   $info{args}->{follow_copy});
+        my @result = _copy_single_document(
+	    $obvius, $doc, $destdoc, $dest_name, %{ $info{args} }
+	);
 	return @result;
 	
     }
@@ -385,6 +398,11 @@ sub perform_command_move {
     my $dest_uri=$info{args}->{new_uri};
     my $prefix='/admin'; # XXX This is a little ugly.
     if ($obvius->rename_document($doc, $dest_uri)) {
+	# Change language for if requested
+	if(my $chlang = $info{args}->{change_language_to}) {
+	    $obvius->db_chlang($chlang, uri => $dest_uri, recursive => 1);
+	}
+
         return ('OK',
                 [
                  'Document moved from',
@@ -394,6 +412,8 @@ sub perform_command_move {
                  '(here)',
                 ]);
     }
+
+
 
     return ('ERROR', 'Could not move document');
 }
