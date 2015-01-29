@@ -1,0 +1,711 @@
+# Danish translations for PACKAGE package
+# Danske oversættelser for pakke PACKAGE.
+# Copyright (C) 2015 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: da\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: /var/www/obvius/mason/admin/portal/versions:44
+msgid "Act."
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/document_information:78
+#: /var/www/obvius/mason/common/doctypes/Newsbox:141
+#: /var/www/obvius/mason/common/shared/editengine2/type/category:19
+msgid "Add"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:138
+msgid "Add item"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/diff:21
+msgid "Added"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/handlingarea:6
+msgid "Administration"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/sequence:8
+msgid "Advanced"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/versions:9
+msgid "All lang."
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:31
+msgid "Also copy subdocuments"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:27
+msgid "Also delete subdocuments"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:24
+msgid "Annotation"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:10
+msgid "Are you sure you want to copy these"
+msgstr ""
+
+#: /var/www/obvius/mason/edit/fieldtypes/formdata:142
+msgid "Are you sure you want to delete the field"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:11
+msgid "Are you sure you want to delete these"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:6
+msgid "Back"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:42
+msgid "Box"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/changetype:2
+msgid "Change document type"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/diff:20
+msgid "Changed"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:42
+#: /var/www/obvius/mason/common/doctypes/Form:48
+msgid "Click here to download collected form data in Excel format"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:38
+msgid "Compare to"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/not_found:39
+msgid "Component missing for type"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:2
+msgid "Copy document"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:15
+msgid "Created by"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/fileupload2:3
+msgid "Current value"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/versions:41
+msgid "Date"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/link:1
+#: /var/www/obvius/mason/admin/portal/link:2
+#: /var/www/obvius/mason/admin/portal/link:3
+#: /var/www/obvius/mason/admin/portal/link:7
+#: /var/www/obvius/mason/admin/portal/link:8
+msgid "Default look"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:125
+#: /var/www/obvius/mason/common/shared/editengine2/type/fileupload2:6
+msgid "Delete"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:2
+msgid "Delete document"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:23
+#: /var/www/obvius/mason/admin/action/move:13
+#: /var/www/obvius/mason/admin/action/rename:14
+msgid "Destination"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/changetype:23
+msgid ""
+"Doctypes marked with (*) are normally resticted in this area, but are "
+"visible to users with admin-rights."
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:4
+msgid "Document"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/document_information:29
+msgid "Document information"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/changetype:6
+#: /var/www/obvius/mason/admin/action/newdocument:11
+msgid "Document type"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/seqlist/main:49
+#: /var/www/obvius/mason/admin/app/seqlist/main:53
+#: /var/www/obvius/mason/common/doctypes/Newsbox:114
+#: /var/www/obvius/mason/common/doctypes/Newsbox:118
+msgid "Down"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:92
+msgid "End"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/diff:15
+msgid "End comparison"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:151
+#: /var/www/obvius/mason/common/doctypes/Form:242
+#: /var/www/obvius/mason/common/doctypes/Form:245
+#: /var/www/obvius/mason/common/doctypes/Form:247
+msgid "Error"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Proxy:10
+msgid "Error: This proxy-document loops (i.e. it fetches itself). Stopped."
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:199
+msgid "Fields marked with"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:24
+#: /var/www/obvius/mason/admin/action/import_files:8
+#: /var/www/obvius/mason/admin/action/import_pictures:13
+#: /var/www/obvius/mason/admin/action/move:14
+#: /var/www/obvius/mason/common/shared/editengine2/type/path:12
+msgid "Find"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editschemetypes/table:66
+msgid "First"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:76
+msgid "Flush XML file"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/flushcache:2
+msgid "Flush cache"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/flushcache:9
+msgid "Flush cache now"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:7
+msgid "Forward"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:19
+#: /var/www/obvius/mason/admin/action/move:9
+#: /var/www/obvius/mason/admin/action/rename:7
+#: /var/www/obvius/mason/admin/action/send:10
+msgid "From"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/newdocument:16
+#: /var/www/obvius/mason/admin/portal/information:9
+msgid "Group"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/handlingarea:9
+msgid "Help"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/unpublish:2
+msgid "Hide"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/unpublish:6
+msgid "Hide this version"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:13
+msgid "Image"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:2
+msgid "Information"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:22
+msgid "Instead of deleting the document, you may want to"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:89
+msgid "Item"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/document_information:61
+msgid "Kopier dokumentparametre"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/versions:43
+msgid "La."
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/newdocument:21
+#: /var/www/obvius/mason/admin/action/newlanguage:6
+msgid "Language"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editschemetypes/table:104
+msgid "Last"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:24
+msgid "Link to admin"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:23
+msgid "Link to public website"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/manual_subscription_notification:2
+msgid "Manual subscription for this document"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/move:2
+msgid "Move"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/newdocument:6
+msgid "Name"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/subdocs:2
+msgid "Navigation"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/subdocs:10
+msgid "Navigator"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:9
+msgid "New"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/newdocument:2
+msgid "New document"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/newlanguage:2
+msgid "New language"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:27
+msgid "New uri"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/newsboxes:31
+msgid "Newsbox documents here"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editschemetypes/table:95
+msgid "Next"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/markup/editend:4
+msgid "Next page"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:34
+#: /var/www/obvius/mason/admin/action/delete:30
+msgid "No"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Proxy:25
+msgid "No content. Perhaps the page uses FRAMES?"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/keyword:7
+msgid "No keywords created yet"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:25
+msgid "No link"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:88
+msgid "No."
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:35
+msgid "None"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/subdocs:80
+#: /var/www/obvius/mason/admin/portal/versions:158
+msgid "Not published"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:20
+msgid "Not registered"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Link:12
+#: /var/www/obvius/mason/common/doctypes/RSSFeed:5
+msgid "Notice"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:21
+msgid "Obs, fejl i udfyldningen af formularen"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Link:13
+msgid "ObviusLinkDocumentExplanation"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/RSSFeed:6
+msgid "ObviusRSSFeedExplanation"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/versionlist/main:10
+msgid "Ok"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:7
+msgid "Owner"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:139
+msgid "Path"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:25
+msgid "Perform"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:112
+msgid "Please click the field name to correct the entry in the form below"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:18
+msgid ""
+"Please remember that if you delete the document, all versions will be "
+"deleted, and it can not be recovered"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editschemetypes/table:75
+msgid "Previous"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/markup/editend:3
+msgid "Previous page"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/versions:45
+msgid "Publ."
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/link:21
+msgid "Public"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/subdocs:77
+#: /var/www/obvius/mason/admin/portal/versions:155
+msgid "Published"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:125
+#: /var/www/obvius/mason/common/shared/editengine2/type/category:19
+msgid "Remove"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/diff:19
+msgid "Removed"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/rename:2
+msgid "Rename"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/seqlist/main:9
+#: /var/www/obvius/mason/admin/portal/newsboxes:26
+#: /var/www/obvius/mason/common/doctypes/Newsbox:28
+msgid "Save"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:144
+msgid "Save changes"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:4
+#: /var/www/obvius/mason/admin/portal/handlingarea:9
+msgid "Search"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/current_document:2
+msgid "Select"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:2
+msgid "Send"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/seqlist/main:7
+msgid "Sequence number"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/versions:20
+msgid "Show complete list"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:22
+msgid "Show document address"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/handlingarea:7
+msgid "Sitemap"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:6
+msgid "Sorry, nothing here."
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:16
+msgid "Sort"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Newsbox:91
+msgid "Start"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:14
+msgid "Subject"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:198
+msgid "Submit"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:18
+msgid "Text"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/editors/tinymce:70
+#: /var/www/obvius/mason/common/shared/editengine2/type/tinymce3:183
+msgid "The XHTML in this field will be validated when you save the document"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Proxy:3
+msgid "The content below was fetched from"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/versions:42
+msgid "Time"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/send:6
+msgid "To"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/newsboxes:31
+msgid "To add newsboxes, create"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:14
+msgid "Type"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/universal_accessrules:5
+msgid "Universal access rules"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:8
+#: /var/www/obvius/mason/admin/app/seqlist/main:50
+#: /var/www/obvius/mason/admin/app/seqlist/main:54
+#: /var/www/obvius/mason/admin/portal/subdocs:8
+#: /var/www/obvius/mason/common/doctypes/Newsbox:115
+#: /var/www/obvius/mason/common/doctypes/Newsbox:119
+msgid "Up"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/navigator/toolbar:14
+msgid "Upload-document"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/flushcache:6
+msgid ""
+"Usually it is not necessary to flush the cache by hand, as the cache is "
+"automatically invalidated at the appropriate times. However, sometimes it is "
+"nice to be able to do so anyhow."
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/editors/tinymce:66
+msgid "Validate field"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:12
+msgid "Version"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/app/versionlist/main:4
+#: /var/www/obvius/mason/admin/portal/versions:2
+msgid "Versions"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/users:10
+msgid "Vælg bruger"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:33
+#: /var/www/obvius/mason/admin/action/delete:29
+msgid "Yes"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:7
+msgid ""
+"You are about to copy this document and all the documents beneath it, in "
+"total"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:8
+msgid ""
+"You are about to delete this document and all the documents beneath it, in "
+"total"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:124
+msgid ""
+"You can only enter unique values in the following fields, and the values you "
+"have entered have already been registered"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:111
+msgid "You will need to correct the entries in the following fields"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:49
+msgid "all fields from all versions included"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:201
+msgid "are required"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:7
+#: /var/www/obvius/mason/admin/action/delete:11
+#: /var/www/obvius/mason/admin/action/delete:8
+msgid "documents"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/copy:10
+msgid "documents to"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:247
+msgid "has been entered"
+msgstr ""
+
+#: /var/www/obvius/mason/common/doctypes/Form:245
+msgid "hasn't been entered"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:6
+msgid "lang_notification:msg1"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:6
+msgid "lang_notification:msg2"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:7
+msgid "lang_notification:msg3"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:9
+msgid "lang_notification:msg4"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:9
+msgid "lang_notification:msg5"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:10
+msgid "lang_notification:msg6"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:15
+msgid "lang_notification:msg7"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/english_language_notification:15
+msgid "lang_notification:msg8"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/action/delete:23
+msgid "merely hide it"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/editors/textwupload:49
+msgid "or, upload text-file"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:43
+msgid "previous"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:51
+msgid "public"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/subdocs:29
+msgid "show all"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/display_dateinterval:14
+msgid "to"
+msgstr ""
+
+#: /var/www/obvius/mason/common/shared/editengine2/type/not_found:39
+msgid "value"
+msgstr ""
+
+#: /var/www/obvius/mason/admin/portal/information:29
+msgid "word(s)"
+msgstr ""
+
+#. ($vdoc)
+#: /var/www/obvius/perl/Obvius/DocType/Form.pm:824
+#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:824
+msgid "Dear"
+msgstr ""
+
+#. ($vdoc)
+#: /var/www/obvius/perl/Obvius/DocType/Form.pm:838
+#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:838
+msgid "formular"
+msgstr ""
+
+#. ($vdoc)
+#: /var/www/obvius/perl/Obvius/DocType/Form.pm:809
+#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:809
+msgid "id"
+msgstr ""
+
+#. ($vdoc)
+#: /var/www/obvius/perl/Obvius/DocType/Form.pm:835
+#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:835
+msgid "tastede"
+msgstr ""
