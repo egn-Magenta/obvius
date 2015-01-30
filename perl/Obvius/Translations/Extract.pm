@@ -219,14 +219,17 @@ sub merge_and_update {
                 "--no-translator",
                 "-i", $base_dir . '/i18n/combined.pot',
                 "-o", $fname,
-                "-l", $lang
+                # Woraround for initial values being copied to english .po
+                # files
+                "-l", 'xx_XX'
             );
             # Fixup character set in header
             open(FH, $fname);
-            my $content = join("", <FH>);
+            my $content = Obvius::CharsetTools::mixed2utf8(join("", <FH>));
             close(FH);
+            $content =~ s{("Language: )xx_XX}{$1$lang}gs;
             open(FH, ">$fname");
-            print FH Obvius::CharsetTools::mixed2utf8($content);
+            print FH $content;
             close(FH);
         }
 
