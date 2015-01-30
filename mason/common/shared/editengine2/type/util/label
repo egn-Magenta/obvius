@@ -6,7 +6,7 @@
 % }
 % if (defined $name) {
 <label for="<% $name |h %>">
-  <& /shared/msg, text=> $label &>
+  <& /shared/msg, text => 'editpagelabel:' . $label &>
 </label>
 
 %if (defined $tooltip_url) {
