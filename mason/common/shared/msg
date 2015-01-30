@@ -5,12 +5,12 @@ $text
 </%args>\
 %
 <%once>
-use Obvius::Translations qw(gettext);
+use Obvius::Translations ();
 </%once>\
 <%init>
 $text =~ s[\r][]g;
 $text =~ s[\n][ ]g;
-$text = gettext($text);
+$text = Obvius::Translations::gettext($text);
 # Old behaviour, in case you have to restore it:
 # $text = $r->pnotes('site')->translate($text);
 </%init>

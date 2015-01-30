@@ -46,6 +46,7 @@ use WebObvius::Template::Provider;
 #use WebObvius::Cache::Flushing;
 use WebObvius::Cache::Cache;
 use WebObvius::RequestTools;
+use WebObvius::MasonCommands;
 use Encode;
 use Time::HiRes;
 
@@ -159,9 +160,10 @@ sub new
      if ($new_mason) {
           %apachehandler_options = ( %apachehandler_options, %interp_conf);
           $apachehandler_options{allow_globals} = [
-                                                   qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
-                                                  ];
+            qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
+           ];
           $apachehandler_options{args_method}   = 'mod_perl';
+          $apachehandler_options{in_package} = "WebObvius::MasonCommands";
      } else {
           $apachehandler_options{interp}        = $new->{interp};
      }

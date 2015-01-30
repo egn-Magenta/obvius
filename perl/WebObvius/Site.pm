@@ -36,7 +36,7 @@ use warnings;
 
 use Obvius;
 use Obvius::Data;
-use Obvius::Translations;
+use Obvius::Translations ();
 
 use WebObvius;
 use WebObvius::Cache::Cache;
