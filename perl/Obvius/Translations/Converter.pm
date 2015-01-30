@@ -9,6 +9,7 @@ use Data::Dumper;
 use Locale::Maketext::Extract;
 use Obvius::CharsetTools;
 use Obvius::Translations::Extract;
+use open qw(:utf8);
 
 sub convert {
     my ($dir) = @_;
@@ -18,6 +19,21 @@ sub convert {
     $msgcat_executeable =~ s{\s+$}{}s;
 
     my $import_comment = "Imported from old translations";
+
+    # Make a map for different labels used for doctypedata
+    my $dt_file = $dir . '/i18n/extracted_from_doctypes.pot';
+    my %label_map;
+    if(-f $dt_file) {
+        my $ext = Locale::Maketext::Extract->new;
+        $ext->read_po($dt_file);
+        my $comments = $ext->{comments} || {};
+        foreach my $key (keys %$comments) {
+            $key = Obvius::CharsetTools::mixed2utf8($key);
+            if($key =~ m{^([^:]+:)(.*)}) {
+                $label_map{$2} = $1;
+            }
+        }
+    }
 
     # Collect old translations
     my @files = grep { -f $_  } (
@@ -34,6 +50,9 @@ sub convert {
         foreach my $key (sort keys %$entries) {
             my $item = $entries->{$key};
             $key = Obvius::CharsetTools::mixed2utf8($key);
+            if(my $label = $label_map{$key}) {
+                $key = $label . $key;
+            }
             my $langs = $item->{translation} || [];
             foreach my $langobj (@$langs) {
                 my $lang = $langobj->{lang};
@@ -77,6 +96,7 @@ sub convert {
     system(
         $msgcat_executeable,
         '-o', $extra_file,
+        '--sort-output',
         $extra_tmp_file,
         $extra_file
     );
@@ -93,7 +113,6 @@ sub convert {
         my ($lang) = ($tdir =~ m{/(\w\w)(_\w\w)?$});
         my $lexicon = $translations{$lang};
         next unless($lexicon);
-
 
         foreach my $file (glob($tdir . "/LC_MESSAGES/*${src}.po")) {
             my $tmp_file = $file;
@@ -113,12 +132,22 @@ sub convert {
                     $ext_comments->{$key} = $import_comment;
                 }
             }
+
+            # Copy old unlabelled translations to the new labelled ones
+            # if the new translations are missing
+            while(my ($k, $l) = each(%label_map)) {
+                my $lk = $l . $k;
+                $ext_lexi->{$lk} ||= $lexicon->{$k} || $k;
+            }
+
             $ext->write_po($tmp_file);
 
             system(
                 $msgcat_executeable,
+                '-t', 'UTF-8',
                 '-o', $file,
                 '--use-first',
+                '--sort-output',
                 $tmp_file,
                 $file
             );
