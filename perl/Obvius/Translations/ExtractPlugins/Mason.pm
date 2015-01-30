@@ -57,6 +57,9 @@ sub extract {
 
         if($method eq 'msg') {
             if(my $text = $hash->{text}) {
+                # Same conversions as mason/common/shared/msg
+                $text =~ s[\r][]g;
+                $text =~ s[\n][ ]g;
                 $self->add_entry($text, $line);
             }
         }
