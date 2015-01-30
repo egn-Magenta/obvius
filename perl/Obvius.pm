@@ -106,6 +106,7 @@ use Obvius::Pubauth;
 use Obvius::Annotations;
 use Obvius::Queue;
 use Obvius::EncryptionModule;
+use Obvius::Translations;
 
 
 ########################################################################
@@ -222,6 +223,8 @@ sub connect {
         $this->read_type_info(1)
     }
 
+    Obvius::Translations::initialize_for_obvius($this);
+    
     $this->read_user_and_group_info;
 
     return $db;

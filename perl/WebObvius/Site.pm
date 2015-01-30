@@ -36,6 +36,7 @@ use warnings;
 
 use Obvius;
 use Obvius::Data;
+use Obvius::Translations;
 
 use WebObvius;
 use WebObvius::Cache::Cache;
@@ -130,7 +131,6 @@ sub get_special_handler {
     return $special_handler;
 }
 
-
 ########################################################################
 #
 #       Language handling
@@ -186,7 +186,6 @@ sub get_language_preferences {
 
 
 
-
 ########################################################################
 #
 #       Obvius interface methods
@@ -282,7 +281,6 @@ sub obvius_document_version {
     return $vdoc;
 }
 
-
 ########################################################################
 #
 #       Apache request helpers
@@ -383,7 +381,6 @@ sub set_expire_header {
     }
 }
 
-
 ########################################################################
 #
 #       Content Handler
@@ -724,7 +721,6 @@ sub handler ($$) {
     return OK;
 }
 
-
 ########################################################################
 #
 #       Session handling
@@ -854,12 +850,91 @@ sub expire_public_login_cookie {
     $cookie->bake($req);
 }
 
-
 ########################################################################
 #
 #       Translations
 #
 ########################################################################
+
+# Get languages supported by this Obvius instance
+sub get_supported_languages {
+    my ($this, $obvius) = @_;
+
+    # Set up the site-configuration of translations
+    my $supported_languages = $this->param('supported_languages');
+    unless($supported_languages) {
+        my $lang_cfg = $obvius->config->param('supported_languages') ||
+                       'da,en';
+        my @langs = split(/\s*,\s*/, $lang_cfg);
+        $supported_languages = { map { $_ => 1 } @langs };
+        my $default = $obvius->config->param('default_langauge') ||
+                      $langs[0] || 'da';
+        $supported_languages->{_default_} = $default;
+        $this->param('default_language' => $default);
+    }
+
+    return $supported_languages;
+}
+
+# Configure which language to use
+sub setup_translations {
+    my ($this, $req, $obvius, $doc, $vdoc, $doctype) = @_;
+
+    return if($obvius->config->param('use_old_translation_system'));
+
+    # If a custom handler exists, call that
+    if(my $custom = $this->param('translation_handler')) {
+        return $custom->(@_);
+    }
+
+    my $lang;
+    if($this->param('is_admin')) {
+        $lang = $this->get_translation_language_admin(
+            $req, $obvius, $doc, $vdoc, $doctype
+        );
+    } else {
+        $lang = $this->get_translation_language_public(
+            $req, $obvius, $doc, $vdoc, $doctype
+        );
+    }
+
+    Obvius::Translations::set_translation_lang($lang);
+    $req->notes('translation_lang' => $lang);
+}
+
+sub get_translation_language_admin {
+    my ($this, $req, $obvius, $doc, $vdoc, $doctype) = @_;
+
+    my $supported = $this->get_supported_languages($obvius);
+
+    my $lang = $supported->{_default_};
+    my $best = 0;
+
+    my $wanted_lang = $req->headers_in->{'Accept-Language'} || '';
+    foreach my $pref (split(/\s*,\s*/, $wanted_lang)) {
+        my $weight = 1000;
+        if ($pref =~ s/^(.+);\s*q=(.*)/$1/) {
+            $weight = int($2*1000);
+        }
+        if($supported->{$pref} && $weight > $best) {
+            $lang = $pref;
+            $best = $weight;
+        }
+    }
+
+    return $lang;
+}
+
+sub get_translation_language_public {
+    my ($this, $req, $obvius, $doc, $vdoc, $doctype) = @_;
+
+    my $supported = $this->get_supported_languages($obvius);
+
+    my $lang = $vdoc->Lang;
+    $lang = $supported->{_default_} unless($supported->{$lang});
+    
+    return $lang;
+}
 
 sub split_language_preferences {
     my ($lang, $default) = @_;

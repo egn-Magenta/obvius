@@ -55,7 +55,8 @@ if (!$tooltip_langs) {
         grep {
             $valid_tooltip_languages{$_}
         } (
-            @{ $r->pnotes('language_preferences') },
+            $r->notes('translation_lang'),
+            @{ $r->pnotes('language_preferences') || [] },
             ''
         )
     ];

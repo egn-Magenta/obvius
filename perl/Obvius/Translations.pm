@@ -10,13 +10,6 @@ use POSIX ();
 use Locale::Messages ();
 use Obvius::CharsetTools;
 
-my %lang_fallbacks = (
-    en => "en_US",
-    da => "da_DK",
-    en_DK => "en_US",
-    C => "en_US"
-);
-
 our @EXPORT_OK = qw(
     __
     gettext
@@ -30,6 +23,17 @@ our @EXPORT = qw(
     gettext
     set_translation_lang
 );
+
+my %lang_fallbacks = (
+    en => "en_US",
+    da => "da_DK",
+    en_DK => "en_US",
+    C => "en_US"
+);
+
+my %initialized;
+my $current_lang = '';
+my $active_domain = '';
 
 sub gettext {
     my $key = shift;
@@ -62,7 +66,7 @@ sub build_domain_name {
 sub register_domain {
     my ($domain, $dir) = @_;
 
-    $domain = get_translation_domain($domain);
+    $domain = build_domain_name($domain);
     Locale::Messages::bindtextdomain($domain, $dir);
     Locale::Messages::bind_textdomain_codeset($domain, "utf8");
 
@@ -70,15 +74,60 @@ sub register_domain {
 }
 
 sub set_domain {
-    Locale::Messages::textdomain($_[0]);
+    my $domain = shift;
+    if($domain ne $active_domain) {
+        Locale::Messages::textdomain($domain);
+        $active_domain = $domain;
+    }
 }
 
 sub set_translation_lang {
     my $lang = shift;
 
+    return if($current_lang eq $lang);
+
     $lang = $lang_fallbacks{$lang} || $lang;
     Locale::Messages::nl_putenv("LANGUAGE=${lang}");
-    POSIX::setlocale(POSIX::LC_MESSAGES, '');
+    my $result = POSIX::setlocale(POSIX::LC_ALL, $lang);
+
+    $current_lang = $lang;
+}
+
+
+sub initialize_for_obvius {
+    my ($obvius) = @_;
+
+    my $config = $obvius->config;
+    my $perlname = $config->param('perlname');
+
+    my $domain = $initialized{$perlname};
+
+    unless(defined($domain)) {
+        # We want to use pure-perl since the other implementation is broken
+        Locale::Messages->select_package("gettext_pp");
+
+        # Old translations system should not initialize anything
+        if($obvius->config->param('use_old_translation_system')) {
+            $initialized{$perlname} = '';
+            return;
+        }
+
+        my $dir = $config->param('sitebase');
+        unless($dir) {
+            die "No sitebase defined for Obvius config with perlname $perlname"
+        }
+        $dir =~ s{/$}{};
+        $dir .= '/i18n';
+
+        if(-d $dir) {
+            $domain = register_domain($perlname, $dir);
+        } else {
+            $domain = build_domain_name($perlname);
+        }
+        $initialized{$perlname} = $domain;
+    }
+
+    set_domain($domain) if($domain);
 }
 
 1;
