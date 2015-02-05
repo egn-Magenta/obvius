@@ -362,11 +362,11 @@ sub can_set_access_data {
 }
 
 sub can_create_new_user  {
-    $_[0]->is_superadmin_user() ||
+    $_[0]->is_superadmin_user() ? 2 :
     $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_users}
 }
 sub can_create_new_group {
-    $_[0]->is_superadmin_user() ||
+    $_[0]->is_superadmin_user() ? 2 :
     $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_groups}
 }
 

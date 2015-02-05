@@ -166,6 +166,7 @@ if($user->{is_admin}) {
 }
 if($r->param('confirm')) {
     $user->{is_admin} = 1;
+    $user->{grp} = $obvius->get_user_groups($user->{id});
     $obvius->update_user($user);
     succeed_with_message($m->scomp(
         '/shared/trans',
@@ -215,6 +216,7 @@ unless($user->{is_admin}) {
 }
 if($r->param('confirm')) {
     $user->{is_admin} = 0;
+    $user->{grp} = $obvius->get_user_groups($user->{id});
     $obvius->update_user($user);
     succeed_with_message($m->scomp(
         '/shared/trans',
