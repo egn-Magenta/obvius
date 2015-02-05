@@ -992,23 +992,16 @@ sub set_language_preferences
         $lang{$_} ||= $site_pref{$_} for keys %site_pref;
     }
 
-    # Add short names for languages as a fallback by adding them with 1
-    # lower priority than the lowest value for a long definition of that
-    # language.
-    my %shortlang;
+    # Add "short" version of languages as well as the long ones, but let them
+    # have one lower priority than the long version with highest priority
     while (my ($lang, $w) = each(%lang)) {
         if(my ($s) = ($lang =~ m{^(\w\w)[_-]\w\w$})) {
-            next if($lang{$s} && $lang{$s} > 1);
-            my $e = $shortlang{$s};
-            if(!$e || $w < $e) {
-                $shortlang{$s} = $w;
+            if(($lang{$s} || 0) < $w) {
+                $lang{$s} = $w - 1;
             }
         }
     }
-    while (my ($lang, $w) = each(%shortlang)) {
-        $lang{$lang} = $w - 1
-    }
-    
+
     $self->{LANGUAGE_PREFERENCES} = [
         sort { $lang{$b} <=> $lang{$a} } keys %lang
     ];
