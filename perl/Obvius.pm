@@ -2981,6 +2981,9 @@ sub find_closest_subsite {
 		}
 	    }
 	    # https subsites should only provide certain fields
+	    # If you change this list, you should also correct the fields
+	    # in the editing component
+	    # mason/admin/action/subsites_new_files/edit
 	    my @fields = $rec->{is_https} ? qw(
 		id
 		path
