@@ -43,6 +43,21 @@ use Encode;
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
 
+# This is a bit of a mess, these things get added to input, and there
+# is no way to tell them apart from incoming variables, so we strip
+# them, but we don't know if we strip enough, when more stuff gets
+# added to the input-object:
+my %incoming_variables_prune=(
+                              NOW=>1,
+                              IS_ADMIN=>1,
+                              THE_REQUEST=>1,
+                              REMOTE_IP=>1,
+                              OBVIUS_HEADERS_IN=>1,
+                              OBVIUS_COOKIES=>1,
+			      OBVIUS_RELURL => 1,
+			      OBVIUS_ORIGIN_IP => 1
+                             );
+
 # action - retrieves and handles the url to be proxied. Returns
 #          OBVIUS_OK when done.
 sub action {
@@ -72,8 +87,30 @@ sub action {
 
     # If additional parameters are set we add them to the URL:
     my $additional_parameters=$input->param('obvius_relurl');
-    if ($additional_parameters) {
-        $fetch_url = $base_url . $additional_parameters;
+    if (defined($additional_parameters)) {
+	my @newparams;
+
+        foreach my $key ($input->param()) {
+            next if ($incoming_variables_prune{$key});
+
+	    my $val = $input->param($key);
+	    next unless(defined($val));
+
+	    $val = [ $val ] unless(ref($val));
+	    $key = lc($key);
+
+	    foreach my $v (@$val) {
+		push(@newparams, [ $key => $v ]);
+	    }
+        }
+
+	if(@newparams) {
+	    $fetch_url = $base_url .
+		(($base_url =~ m{[?]}) ? '&' : '?') .
+		join("&",
+		    map { $_->[0] . "=" . uri_escape($_->[1]) } @newparams
+		);
+	}
     }
 
     $output->param(url=>$fetch_url);
@@ -364,19 +401,6 @@ my %client_to_proxy_headers=(
                              # 'cookie'=>1, # XXX For cookies not to bleed, handling is necessary!
                              'cache-control'=>1,
                              'via'=>1,
-                             );
-
-# This is a bit of a mess, these things get added to input, and there
-# is no way to tell them apart from incoming variables, so we strip
-# them, but we don't know if we strip enough, when more stuff gets
-# added to the input-object:
-my %incoming_variables_prune=(
-                              NOW=>1,
-                              IS_ADMIN=>1,
-                              THE_REQUEST=>1,
-                              REMOTE_IP=>1,
-                              OBVIUS_HEADERS_IN=>1,
-                              OBVIUS_COOKIES=>1,
                              );
 
 # make_request - given a url, a via-line and the input- and
