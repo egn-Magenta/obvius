@@ -41,11 +41,11 @@ use Obvius::SolrConvRoutines;
 
 #     The object contains two instances of Obvius::Data. Both contain
 #     fields associated with the object:
-#     FIELDS: Fields which cannot be changed after the object has been 
+#     FIELDS: Fields which cannot be changed after the object has been
 #             created. A new version must be created to change them.
 #     PUBLISH_FIELDS: Fields which can be changed without creating a new
-#                     version. These fields are usually associated with a 
-#                     published version of the document and usually 
+#                     version. These fields are usually associated with a
+#                     published version of the document and usually
 #                     dropped once the document is no longer published.
 
 our @ISA = qw( Obvius::Data );
@@ -64,7 +64,7 @@ sub new {
 
 sub mode {
      my ($this, $args) = @_;
-     
+
      my %modes = ('search' => 'search');
      my ($mode) = $args->{obvius_mode} && $modes{$args->{obvius_mode}};
 
@@ -80,49 +80,47 @@ sub add_link {
      shift;
      return map {"<link rel=\"stylesheet\" type=\"text/css\" href=\"$_\"></link>" } @_;
 }
-     
+
 sub generate_head_html {
      my ($this, $r, $doc, $vdoc, $obvius) = @_;
 
      my $mode = $this->mode({
-                             map { $_ => $r->param($_) || undef } 
-                             grep {$r->param($_)} $r->param 
+                             map { $_ => $r->param($_) || undef }
+                             grep {$r->param($_)} $r->param
                             });
 
      if ($mode && $mode eq 'search') {
           my @header;
-          push @header, $this->add_js('http://code.jquery.com/jquery-1.8.2.min.js',
-                                      'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+          push @header, $this->add_js('http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
                                       '/scripts/jsutils.js',
-                                      '/scripts/jquery/jquery.bgiframe.min.js',
                                       '/scripts/jquery/jquery.ajaxQueue.js');
           push @header, $this->add_link('/style/jquery-ui-1.7.2.custom.css',
                                         '/style/jquery.autocomplete.css');
-          
+
           return join "\n", @header;
      }
-     
+
      return '';
 }
 
 sub view {
      my ($this, $args) = @_;
-     
+
      my %views = (search => '/views/search');
      my $view;
 
      if (my $view_arg = $this->mode($args)) {
           $view = $views{$view_arg};
-     } 
+     }
 
      if (!defined $view) {
           ($view) = (ref $this) =~ m!::([^:]+$)!;
           $view = "/doctypes/$view";
      }
-     
+
      return $view;
 }
-     
+
 ########################################################################
 ### Methods regarding SOLR usage
 ########################################################################
@@ -131,7 +129,7 @@ sub view {
 # get_solr_fields
 # RETURN: A hash-reference where keys are obvius field-names
 #         and values are array refs, where:
-#         Element 1 (required) = 'f' (VFIELDS fieldname) OR 
+#         Element 1 (required) = 'f' (VFIELDS fieldname) OR
 #                                'd' (dokument fieldname) OR
 #                                'v' (version fieldname)
 #         Element 2 (required) = SOLR fieldname
@@ -142,7 +140,7 @@ sub view {
 #                                If not specified, then no tranformation is used - i.e
 #                                the field-value is used unmodified
 #         Element 4 (optional) = Source of alternative value which is used if elem1 and 2 yields an empty value
-#                                'f' (VFIELDS fieldname) OR 
+#                                'f' (VFIELDS fieldname) OR
 #                                'd' (dokument fieldname) OR
 #                                'v' (version fieldname)
 #         Element 5 (optional) = Alternative SOLR fieldname
@@ -166,7 +164,7 @@ sub get_solr_fields  {
     };
     return $fieldmap;
 }
-     
+
 ########################################################################
 ### Should be used by subclasses to insert entries in solr fields hashref
 ########################################################################
@@ -250,7 +248,7 @@ sub handle_path_info { return undef; }
 #
 #########################################################################
 
-     
+
 sub doctypemap {
     my ($this, $a, $b, $c, $d, $doctypename, $obvius)=@_;
 

@@ -30,6 +30,7 @@ use warnings;
 use utf8;
 use Exporter;
 use Encode;
+use Carp;
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mixed2utf8 mixed2perl mixed2charset debugstr);
@@ -37,7 +38,103 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK);
 
 our $VERSION="1.0";
 
+our $ascii =      '[\x00-\x7F]';
+our $not_ascii =  '[^\x00-\x7F]';
+our $two_byte =   '[\xc0-\xdf][\x80-\xbf]';
+our $three_byte = '[\xe0-\xef][\x80-\xbf][\x80-\xbf]';
+our $four_byte =  '[\xf0-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
+
+our $utf8_bytes_match = qr/(?:$two_byte|$three_byte|$four_byte)/;
+
+=head2 mixed2perl
+
+  my $perl_wide_string = mixed2perl($mixed_input);
+
+Converts a string with mixed data (wide-characters, latin1 and utf8 encoding
+in the same string) into a string containing only perl wide characters. If the
+input is a reference to a simple data structure a deep copy of the data
+structure will be made, running the mixed2perl method on all elements.
+
+=cut
+
+sub mixed2perl {
+    my ($txt) = shift;
+
+    return $txt unless($txt);
+
+    return _deep_copy($txt, \&mixed2perl) if(ref($txt));
+
+    my $out = '';
+
+    while(length($txt)) {
+        # Eat any ascii chars, removing utf8-flag from matched chars
+        if($txt =~ s!^(${ascii}+)!!) {
+            my $ascii = $1;
+            Encode::_utf8_off($ascii);
+            $out .= $ascii;
+        }
+
+        # Eat any utf8 bytes and convert them to wide characters
+        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
+            $out .= Encode::decode('utf-8', $1);
+        }
+
+        # Output next character, unless it's ascii
+        if($txt =~ s!^(${not_ascii})!!) {
+            $out .= $1;
+        }
+    }
+
+    return $out;
+}
+
+=head2 mixed2utf8
+
+  my $utf8_encoded_string = mixed2utf8($mixed_input);
+
+Converts a string with mixed data (wide-characters, latin1 and utf8 encoding
+in the same string) into a string containing only utf8-octet encoding. If the
+input is a reference to a simple data structure a deep copy of the data
+structure will be made, running the mixed2utf8 method on all elements.
+
+=cut
+
 sub mixed2utf8 {
+    my ($txt) = shift;
+
+    return $txt unless($txt);
+
+    return _deep_copy($txt, \&mixed2utf8) if(ref($txt));
+
+    my $out = '';
+    while(length($txt)) {
+        # Eat any ascii chars, removing utf8-flag from matched chars
+        if($txt =~ s!^(${ascii}+)!!) {
+            my $ascii = $1;
+            Encode::_utf8_off($ascii);
+            $out .= $ascii;
+        }
+
+        # Eat any utf8 chars
+        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
+            if(Encode::is_utf8($1)) {
+                # Repack octets to remove utf8 flag
+                $out .= pack('c*', unpack('c*', $1));
+            } else {
+                $out .= $1;
+            }
+        }
+
+        # Convert next character to utf8, if present and not ascii
+        if($txt =~ s!^(${not_ascii})!!) {
+            $out .= Encode::encode('utf-8', $1);
+        }
+    }
+
+    return $out;
+}
+
+sub mixed2utf8_old {
     my ($txt) = shift;
 
     return $txt unless($txt);
@@ -87,7 +184,7 @@ sub mixed2utf8 {
     return $out;
 }
 
-sub mixed2perl {
+sub mixed2perl_old {
     my ($txt) = shift;
     
     # TODO: Ref. ticket #6000. This function used to work as a destroyer of
@@ -99,7 +196,7 @@ sub mixed2perl {
     if (ref $txt) {
         return $txt;
     } else {
-        return Encode::decode("utf8", mixed2utf8($txt));
+        return Encode::decode("utf8", mixed2utf8_old($txt));
     }
 }
 
@@ -119,4 +216,39 @@ sub debugstr {
         $_ < 128 ? chr($_) : sprintf('\\x{%x}', $_);
     } unpack("U*", $txt));
 }
+
+sub _deep_copy {
+    my ($val, $method, $ref_cache) = @_;
+
+    $ref_cache ||= {};
+
+    my $ref = ref($val);
+    my $cache_key = $ref ? scalar($val) : '';
+    if(my $v = $ref_cache->{$cache_key}) {
+        return $v;
+    }
+
+    if (ref $val eq 'ARRAY') {
+        my @v;
+        $ref_cache->{$cache_key} = \@v;
+        @v = map { _deep_copy($_, $method, $ref_cache) } @$val;
+        return \@v;
+    } elsif (ref $val eq 'HASH') {
+        my %v;
+        $ref_cache->{$cache_key} = \%v;
+        %v = map { _deep_copy($_, $method, $ref_cache) } %$val;
+        return \%v;
+    } elsif (ref $val eq 'SCALAR') {
+        my $scal = _deep_copy($$val, $method, $ref_cache);
+        $ref_cache->{$cache_key} = \$scal;
+        return \$scal;
+    } elsif (ref $val) {
+	warn "Can not deep-copy unknown reference type '$ref': " .
+            "Returning orignal reference instead";
+        return $val;
+    } else {
+	return $method->($val);
+    }
+}
+
 1;

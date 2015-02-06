@@ -46,18 +46,13 @@ my %files = ();
 
 if ( $r->param( "import_files_do" ) )
 {    
-
-
     $u = $obvius->lookup_document( $dest_url );
     if ( $u )
     {
-
-
         # Make a temp dir for this session
         my $tmp = time();
         mkdir ( $zip_path . $tmp );
         $zip_path .= $tmp;
-
 
 	$dest_url = $r->param( "import_pictures_dest_url" );
 
@@ -74,55 +69,38 @@ if ( $r->param( "import_files_do" ) )
     	    if ( $upload->filename ne '' and $upload->size != 0 and my $fh = $upload->fh ) {
 		my $filename = $tmp . ".zip";
 		local $/ = undef;
-		if(open(FILE, ">$zip_path/" . $filename)) {
+		my $zip_file_name = $zip_path . "/" . $filename;
+		if(open(FILE, ">$zip_file_name")) {
 		    print FILE <$fh>;
 		    close(FILE);
 		}
-		
-		my $zipFile = Archive::Zip->new();
-		unless ( $zipFile->read( "$zip_path/$filename" ) == AZ_OK )
-		{
-		    print STDERR "Error reading: $zip_path/$filename\n";
-		    die 'read error';
-		}
-		
-		foreach my $member ( $zipFile->members() )
-		{
-		    my @x = split( "/", $member->fileName );
-		    my $file = pop( @x );
-		    my %info = 
-		    (    
-		      orgFile => $member->fileName,
-		      short => $file
-		    );
-		    
-		    
-		    if ( ! defined( $files{$file} ))
-		    {
-		      if ( $zipFile->extractMemberWithoutPaths( $member->fileName, 
-								"$zip_path/$file") != AZ_OK )  {
-			  $info{error} = 1;
-			  $info{text} = 'Error returned from Archive::Zip->extractMemberWithoutPaths (see log file)';
-			  $error = 1;
-		      }
-		      else {
-			  if ( ! $m->comp('import_files:do', source=>"$zip_path/$file", dest_url=>$dest_url) )
-			  {
-			      $info{error} = 1;
-			      $error = 1;
-			  }
-		      }
-		      $files{$file} = \%info;
-		    }
-		    else
-		    {
-		       $info{error} = 1;
-		       $error = 1;
-		       $files{$member->fileName} = \%info; 
-		    }
-		
-		}
+		my $extract_dir = $zip_path . '/output';
+		mkdir($extract_dir);
 
+		if(system('unzip', '-d', $extract_dir, $zip_file_name) == 0) {
+		    File::Find::find(sub {
+			if(-f $File::Find::name) {
+			    my $fname = $_;
+			    my %info = (
+				orgFile => $File::Find::name,
+	                        short => $fname
+	                    );
+			    return if($File::Find::name =~ m!__MACOSX/!);
+			    my $result = $m->comp(
+				'import_files:do',
+				source=>$File::Find::name,
+				dest_url=>$dest_url
+			    );
+			    unless ($result) {
+				$info{error} = 1;
+				$error = 1;
+			    }
+			    $files{$fname} = \%info;
+			}
+		    }, $extract_dir);
+		} else {
+		    $error = 1;
+		}
 	    }
 	}
     }
@@ -130,9 +108,8 @@ if ( $r->param( "import_files_do" ) )
 
 </%init>
 <%once>
-use Data::Dumper;
 use POSIX qw(strftime);
-use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
+use File::Find;
 </%once>
 
 
@@ -275,14 +252,16 @@ for (@mime_array) {
     }
 }
 
+$args->{name} =~ s/[^a-zA-Z0-9._-]/_/g;
+
 return 0 if (!$args);
 
 my ($status, $message)=$obvius->send_order(
-					   docid=>$parent->Id,
-					   user=>$obvius->user,
-					   command=>'new_document',
-					   args=>$args,
-					   );
+    docid=>$parent->Id,
+    user=>$obvius->user,
+    command=>'new_document',
+    args=>$args,
+);
 
 
 if ( $status eq "OK" )
@@ -291,7 +270,7 @@ if ( $status eq "OK" )
     my %args = ();
       
     # Lookup the new document and get the latest version
-    my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $parent ) . $title );
+    my $new_doc = $obvius->lookup_document( $obvius->get_doc_uri( $parent ) . $args{name} );
 
     my $new_vdoc = $obvius->get_public_version($new_doc) || $obvius->get_latest_version($new_doc);
     
