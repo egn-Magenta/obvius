@@ -82,12 +82,13 @@ sub action {
     }
 
     # Get fetch_url:
-    my $fetch_url=$input->param('obvius_proxy_url') || $base_url;
+    my $incoming_url = $input->param('obvius_proxy_url');
+    my $fetch_url = $incoming_url || $base_url;
     $fetch_url =~ s/%([a-f0-9]{2})/chr hex $1/gei;
 
     # If additional parameters are set we add them to the URL:
     my $additional_parameters=$input->param('obvius_relurl');
-    if (defined($additional_parameters)) {
+    if (!$incoming_url && defined($additional_parameters)) {
 	my @newparams;
 
         foreach my $key ($input->param()) {
