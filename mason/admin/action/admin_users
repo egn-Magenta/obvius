@@ -62,17 +62,20 @@ $mode = 'view' unless($mode =~m!^(view|delete|create)!);
             </td>
         </tr>
 %       foreach my $user (@admins) {
+%       my $current = $user->{login} eq $obvius->{USER} ? '**' : '';
         <tr>
-            <td><% $user->{login} %></td>
+            <td><% $user->{login} %><% $current %></td>
             <td><% $user->{name} %></td>
             <td><% $user->{email} %></td>
             <td>
+%           unless($current) {
                 <strong>[</strong>
                 <a href="<% $del_link . $user->{login} %>"><& /shared/trans,
                     da=>"Fjern",
                     en=>"Remove"
                 &></a>
                 <strong>]</strong>
+%           }
             </td>
         </tr>
 %       }
@@ -83,6 +86,11 @@ $mode = 'view' unless($mode =~m!^(view|delete|create)!);
     <& /shared/trans,
         da=>"Brugeren med login 'admin' er altid admin-bruger",
         en=>"The user with the login 'admin' is always an admin-user"
+    &><br />
+    <strong>**</strong>
+    <& /shared/trans,
+        da=>"Det er ikke muligt at fjerne admin-status fra den aktive bruger",
+        en=>"It is not possible to remove admin-status from the active user"
     &>
 </p>
 <hr />
@@ -206,6 +214,12 @@ unless($user) {
     fail_with_message($m->scomp('/shared/trans',
         da => "Kunne ikke finde bruger med login '${login}'",
         en => "Could not find a user with login '${login}'",
+    ));
+}
+if($obvius->{USER} eq $login) {
+    fail_with_message($m->scomp('/shared/trans',
+        da => "Du kan ikke fjerne admin-bruger status fra den aktive bruger",
+        en => "You can not remove admin-user status for the active user",
     ));
 }
 unless($user->{is_admin}) {
