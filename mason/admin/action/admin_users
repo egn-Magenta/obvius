@@ -1,0 +1,248 @@
+<h1><& /shared/trans, da=>"Admin-brugere", en=>"Admin users" &></h1>
+<& "SELF:${mode}", %ARGS &>
+<%once>
+sub fail_with_message {
+    my $message = shift;
+
+    return $m->comp('/shared/redirect_with_error',
+        location => $prefix . $uri . '?obvius_command_admin_users=1',
+        message => $message
+    );
+
+}
+
+sub succeed_with_message {
+    my $message = shift;
+
+    return $m->comp('/shared/redirect_with_message',
+        location => $prefix . $uri . '?obvius_command_admin_users=1',
+        message => $message
+    );
+}
+</%once>
+<%init>
+unless($obvius->is_superadmin_user()) {
+    return $m->comp('/shared/redirect_with_error',
+        location => $prefix . $uri,
+        message => $m->scomp('/shared/trans',
+            da => "Adgang nægtet",
+            en => "Access denied"
+        )
+    );
+}
+my $mode = $r->param('mode') || 'view';
+$mode = 'view' unless($mode =~m!^(view|delete|create)!);
+</%init>
+%
+%
+%
+<%method view>
+%if($message) {
+<div><% $message %></div>
+%}
+<p>
+    <& /shared/trans,
+        da=>"Følgende brugere er registreret som admin-brugere",
+        en=>"The following users are registered as admin-users"
+    &>:
+</p>
+<div>
+    <table>
+        <tr>
+            <th><& /shared/trans, da=>"Brugernavn", en=>"Login" &></th>
+            <th><& /shared/trans, da=>"Navn", en=>"Name" &></th>
+            <th><& /shared/trans, da=>"E-mail", en=>"Email" &></th>
+            <th></th>
+        </tr>
+        <tr>
+            <td><% $admin->{login} %><strong>*</strong></td>
+            <td><% $admin->{name} %></td>
+            <td><% $admin->{email} %></td>
+            <td>
+            </td>
+        </tr>
+%       foreach my $user (@admins) {
+%       my $current = $user->{login} eq $obvius->{USER} ? '**' : '';
+        <tr>
+            <td><% $user->{login} %><% $current %></td>
+            <td><% $user->{name} %></td>
+            <td><% $user->{email} %></td>
+            <td>
+%           unless($current) {
+                <strong>[</strong>
+                <a href="<% $del_link . $user->{login} %>"><& /shared/trans,
+                    da=>"Fjern",
+                    en=>"Remove"
+                &></a>
+                <strong>]</strong>
+%           }
+            </td>
+        </tr>
+%       }
+    </table>
+</div>
+<p>
+    <strong>*</strong>
+    <& /shared/trans,
+        da=>"Brugeren med login 'admin' er altid admin-bruger",
+        en=>"The user with the login 'admin' is always an admin-user"
+    &><br />
+    <strong>**</strong>
+    <& /shared/trans,
+        da=>"Det er ikke muligt at fjerne admin-status fra den aktive bruger",
+        en=>"It is not possible to remove admin-status from the active user"
+    &>
+</p>
+<hr />
+<div>
+<form action="<% $prefix . $uri %>" method="get">
+    <input type="hidden" name="obvius_command_admin_users" value="1" />
+    <input type="hidden" name="mode" value="create" />
+    <label for="newlogininput">
+        <& /shared/trans,
+            da=>"Tilføj ny admin-bruger",
+            en=>"Add new admin user",
+        &>
+    </label>
+    <input type="text" name="newlogin"
+        id="newlogininput"
+        value="<% $r->param('newlogin') %>" />
+    <input type="submit"
+        value="<& /shared/trans, da=>"Tilføj", en=>"Add" &>" />
+</form>
+</div>
+<%args>
+$message=>''
+</%args>
+<%init>
+my $admin = $obvius->get_user('admin');
+my $del_link = $prefix . $uri . '?obvius_command_admin_users=1' .
+               '&amp;mode=delete&amp;login=';
+my @admins;
+my $sth = $obvius->dbh->prepare(q|
+    select
+        id,
+        name,
+        login,
+        email
+    from
+        users
+    where
+        is_admin = 1
+        and
+        login != 'admin'
+    order by
+        login;
+|);
+$sth->execute();
+while(my $rec = $sth->fetchrow_hashref) {
+    push(@admins, $rec);
+}
+</%init>
+</%method>
+%
+%
+%
+<%method create>
+<form action="<% $prefix . $uri %>" method="get">
+    <input type="hidden" name="obvius_command_admin_users" value="1" />
+    <input type="hidden" name="mode" value="create" />
+    <input type="hidden" name="newlogin" value="<% $login |h %>" />
+    <p>
+        <& /shared/trans,
+            da=>"Er du sikker på at du vil gøre brugeren med login '${login}' til admin-bruger",
+            en=>"Are you sure you want to make the user with login '${login}' an admin-user",
+        &>?
+    </p>
+    <input type="submit" name="confirm" value="<& /shared/msg, text=>"yes" &>" />
+    <input type="submit" name="cancel" value="<& /shared/msg, text=>"no" &>" />
+</form>
+<%init>
+my $login = $r->param('newlogin') || '';
+my $user = $obvius->get_user($login);
+unless($user) {
+    fail_with_message($m->scomp('/shared/trans',
+        da => "Kunne ikke finde bruger med login '${login}'",
+        en => "Could not find a user with login '${login}'",
+    ));
+}
+if($user->{is_admin}) {
+    fail_with_message($m->scomp('/shared/trans',
+        da => "Bruger '${login}' er allerede admin-bruger",
+        en => "User '${login}' is already admin-user",
+    ));
+}
+if($r->param('confirm')) {
+    $user->{is_admin} = 1;
+    $user->{grp} = $obvius->get_user_groups($user->{id});
+    $obvius->update_user($user);
+    succeed_with_message($m->scomp(
+        '/shared/trans',
+        da => "Bruger '${login}' oprettet som admin-bruger",
+        en => "User '${login}' added as admin-user",
+    ));
+} elsif($r->param('cancel')) {
+    succeed_with_message( $m->scomp(
+        '/shared/trans',
+        da => "Annulleret",
+        en => "Cancelled",
+    ));
+}
+</%init>
+</%method>
+%
+%
+%
+<%method delete>
+<form action="<% $prefix . $uri %>" method="get">
+    <input type="hidden" name="obvius_command_admin_users" value="1" />
+    <input type="hidden" name="mode" value="delete" />
+    <input type="hidden" name="login" value="<% $login |h %>" />
+    <p>
+        <& /shared/trans,
+            da=>"Er du sikker på at du vil fjerne brugeren med login '${login}' som admin-bruger",
+            en=>"Are you sure you remove the user with login '${login}' as an admin-user",
+        &>?
+    </p>
+    <input type="submit" name="confirm" value="<& /shared/msg, text=>"yes" &>" />
+    <input type="submit" name="cancel" value="<& /shared/msg, text=>"no" &>" />
+</form>
+<%init>
+my $login = $r->param('login') || '';
+my $user = $obvius->get_user($login);
+unless($user) {
+    fail_with_message($m->scomp('/shared/trans',
+        da => "Kunne ikke finde bruger med login '${login}'",
+        en => "Could not find a user with login '${login}'",
+    ));
+}
+if($obvius->{USER} eq $login) {
+    fail_with_message($m->scomp('/shared/trans',
+        da => "Du kan ikke fjerne admin-bruger status fra den aktive bruger",
+        en => "You can not remove admin-user status for the active user",
+    ));
+}
+unless($user->{is_admin}) {
+    fail_with_message($m->scomp('/shared/trans',
+        da => "Bruger '${login}' er ikke admin-bruger",
+        en => "User '${login}' is not an admin-user",
+    ));
+}
+if($r->param('confirm')) {
+    $user->{is_admin} = 0;
+    $user->{grp} = $obvius->get_user_groups($user->{id});
+    $obvius->update_user($user);
+    succeed_with_message($m->scomp(
+        '/shared/trans',
+        da => "Bruger '${login}' er ikke længere admin-bruger",
+        en => "User '${login}' is no longer admin-user",
+    ));
+} elsif($r->param('cancel')) {
+    succeed_with_message( $m->scomp(
+        '/shared/trans',
+        da => "Annulleret",
+        en => "Cancelled",
+    ));
+}
+</%init>
+</%method>
