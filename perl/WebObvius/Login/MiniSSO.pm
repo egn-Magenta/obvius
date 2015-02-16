@@ -101,6 +101,18 @@ sub minisso_login_handler {
             );
             $req->notes(user => $login);
             $obvius->{USER} = $login;
+
+            # If admin-request check for the allow-admin-access field in the
+            # userdata and fail if it is not set.
+            if($r->uri =~ m{^/admin($|/)}) {
+                my $userdata = $obvius->get_user($obvius->{USER});
+                if(exists $userdata->{admin} and not $userdata->{admin}) {
+                    return $this->redirect(
+                        $r, $this->make_no_access_url($r), 1
+                    );
+                }
+            }
+
             # Redirect to current URL without the t parameter
             return $this->redirect(
                 $req,
@@ -162,6 +174,27 @@ sub make_sso_login_url {
     return "https://${host}/system/sso_login.mason?origin=$return_uri";
 }
 
+sub make_no_access_url {
+    my ($this, $req) = @_;
+
+    my $config = $this->param('obvius_config');
+    my $host = $config->param('https_roothost') ||
+               $config->param('roothost') ||
+               $req->hostname;
+
+    my $return_uri = uri_escape(
+        $this->request_to_origin_url($req, exclude_args => ['t'])
+    );
+
+    my $url = "https://${host}/system/no_admin_access.mason";
+    if(my $user = $req->notes('user')) {
+        $url .= '?user=' . $user;
+    }
+
+    return $url;
+    
+}
+
 sub redirect_to_minisso_login {
     my ($this, $req) = @_;
 
@@ -213,6 +246,13 @@ sub already_logged_in {
         $obvius->read_user_and_group_info;
 
         $req->notes(user => $login);
+
+        # Not logged in if request is to admin and the user does not have the
+        # allow-admin-login flag
+        if($req->uri =~ m{^/admin($|/)}) {
+            my $userdata = $obvius->get_user($login);
+            return 0 if(exists $userdata->{admin} and not $userdata->{admin});
+        }
 
         # Update last_access timestamp
         if($time_diff > 60) {

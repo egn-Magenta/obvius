@@ -1,0 +1,21 @@
+<& sso_login.mason:top_html, %ARGS, title => $m->scomp(
+    'translator',
+    da => "Ingen admin-adgang",
+    en => "No admin access"
+) &>
+<p>
+<& translator,
+    da => "Brugeren med login '$login' har ikke adgang til Obvius admin",
+    en => "The user with login '$login' does not have access to Obvius admin"
+&>
+</p>
+<p>
+    <a href="sso_logout.mason"><& translator,
+        da => "Klik her for at logge brugeren ud",
+        en => "Click here to log out"
+    &></a>
+</p>
+<& sso_login.mason:bottom_html, %ARGS &>
+<%init>
+my $login = $r->param('user') || $r->notes('user') || '&lt;unknown&gt;';
+</%init>
