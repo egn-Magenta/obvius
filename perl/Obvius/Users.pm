@@ -57,11 +57,16 @@ sub is_admin {
     return shift->is_admin_user;
 }
 
+
+# is_admin_user - determines whether the current user is a 'normal' admin user
+#                 with privileges to manage users globally
 sub is_admin_user {
     my ($this) = @_;
 
     return 0 if (!$this->{USER});
     my $user = $this->get_user($this->{USER});
+
+    return 1 if($user->{is_admin});
 
     my $mode = $this->config->param('is_admin_user_mode') || 'member_of_admin_group';
     if($mode eq 'can_manage_users') {
@@ -70,7 +75,25 @@ sub is_admin_user {
 	return grep { $_ == 1 } @{$this->get_user_groups($user->{id})};
     }
 }
-    
+
+# is_superadmin_user - determines whether a user (defaulting to the current) is
+#                      a superadmin user which always have all privileges.
+sub is_superadmin_user {
+    my ($this, $mixed) = @_;
+
+    $mixed ||= $this->{USER};
+
+    my $user;
+    if(ref($mixed)) {
+	$user = $mixed;
+    } else {
+	$user = $this->get_user($mixed);
+    }
+    return 0 unless($user);
+
+    return $user->{is_admin};
+}
+
 # get_userid - given a string containing a username, returns the id of
 #              the user.
 sub get_userid {

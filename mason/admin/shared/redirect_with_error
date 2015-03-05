@@ -1,0 +1,3 @@
+<%init>
+return $m->comp('redirect_with_message', %ARGS, status=>"ERROR");
+</%init>
