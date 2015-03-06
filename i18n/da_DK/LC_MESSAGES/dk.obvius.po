@@ -637,21 +637,17 @@ msgstr "ord"
 msgid "yes"
 msgstr ""
 
-#. ($vdoc)
-msgid "Dear"
-msgstr ""
+msgid "FormDoctype:Dear"
+msgstr "Kære"
 
-#. ($vdoc)
-msgid "formular"
-msgstr ""
+msgid "FormDoctype:formular"
+msgstr "Formular"
 
-#. ($vdoc)
-msgid "id"
-msgstr ""
+msgid "FormDoctype:id"
+msgstr "Løbenr"
 
-#. ($vdoc)
-msgid "tastede"
-msgstr ""
+msgid "FormDoctype:tastede"
+msgstr "Indtastede oplysninger"
 
 # Imported from old translations
 msgid " and "

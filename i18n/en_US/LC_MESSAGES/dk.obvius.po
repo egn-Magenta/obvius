@@ -507,21 +507,17 @@ msgstr "word(s)"
 msgid "yes"
 msgstr ""
 
-#. ($vdoc)
-msgid "Dear"
+msgid "FormDoctype:Dear"
 msgstr "Dear"
 
-#. ($vdoc)
-msgid "formular"
-msgstr "formular"
+msgid "FormDoctype:formular"
+msgstr "Form"
 
-#. ($vdoc)
-msgid "id"
-msgstr "id"
+msgid "FormDoctype:id"
+msgstr "ID"
 
-#. ($vdoc)
-msgid "tastede"
-msgstr "tastede"
+msgid "FormDoctype:tastede"
+msgstr "Registered information"
 
 # Imported from old translations
 msgid " and "
@@ -1768,3 +1764,15 @@ msgstr "version date (descending)"
 # Imported from old translations
 msgid "weeks"
 msgstr "weeks"
+
+#~ msgid "Dear"
+#~ msgstr "Dear"
+
+#~ msgid "formular"
+#~ msgstr "formular"
+
+#~ msgid "id"
+#~ msgstr "id"
+
+#~ msgid "tastede"
+#~ msgstr "tastede"
