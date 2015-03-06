@@ -481,7 +481,7 @@ msgid "merely hide it"
 msgstr "merely hide it"
 
 msgid "no"
-msgstr ""
+msgstr "no"
 
 msgid "or, upload text-file"
 msgstr "or, upload text-file"
@@ -505,7 +505,7 @@ msgid "word(s)"
 msgstr "word(s)"
 
 msgid "yes"
-msgstr ""
+msgstr "yes"
 
 msgid "FormDoctype:Dear"
 msgstr "Dear"
