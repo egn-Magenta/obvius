@@ -24,30 +24,44 @@ sub extract {
     if($self->{_current_file} =~ m{editpages\.txt$}) {
         my (%editpage, $doctypename);
 
-        my $line = 0;
-        foreach (split(/\n/, $input)) {
-            $line++;
+        my $linenr = 0;
+        foreach my $line (split(/\n/, $input)) {
+            $linenr++;
 
-            next if /^\#/;
-            next if /^\s*$/;
-            s/^\s*//;
-
-            if( /^DocType: (\w+)/ ) {
-                $self->add_entry('doctypename:' . $1, $line);
+            if($line =~ /^\#/ || $line =~ /^\s*$/) {
+                next;
             }
-            elsif( /^(\w+): (.*)/ ) {
+            $line =~ s/^\s*//;
+
+            if($line =~ /^\s*DocType: (\w+)/ ) {
+                $self->add_entry('doctypename:' . $1, $linenr);
+            }
+            elsif($line =~ /^\s*(\w+):\s*(.*)/ ) {
                 my($key, $value)=(lc($1), $2);
 
                 $value =~ s/(^\s+|\s+$)//g;
 
                 if($key eq 'title') {
-                    $self->add_entry('editpagetitle:' . $value, $line);
+                    $self->add_entry('editpagetitle:' . $value, $linenr);
                 } elsif($key eq 'fields') {
                     my ($field, $label) = (
                         $value =~ m{^(\S+)(?:\s+([^;]+))?}
                     );
                     $label ||= $field;
-                    $self->add_entry('editpagelabel:' . $label, $line);
+                    $self->add_entry('editpagelabel:' . $label, $linenr);
+                    # Find any labels in the options
+                    if($value =~ s{^[^;]+;\s*}{}) {
+                        foreach my $kv_pair (split(/\s*(?!\\),\s*/, $value)) {
+                            my ($k, $v) = (
+                                $kv_pair =~ m{((?:\\=|[^=])+)=\s*(.*)}
+                            );
+                            if($k =~ m{^label_} and $v) {
+                                $self->add_entry(
+                                    'editpagelabel:' . $v, $linenr
+                                );
+                            }
+                        }
+                    }
                 }
             }
         }
