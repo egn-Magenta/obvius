@@ -37,6 +37,7 @@ sub convert {
 
     # Collect old translations
     my @files = grep { -f $_  } (
+        (glob($dir . '/mason/*/legacy_translations.xml')),
         (glob($dir . '/mason/*/translations.xml')),
         (glob($dir . '/mason/*/translations_local.xml')),
     );
