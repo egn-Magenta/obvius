@@ -12,6 +12,8 @@ use Obvius::Translations::Extract;
 my $msg_match =
     qr{\$m->comp\((\s*)['"]?/shared/msg['"](\s*),(\s*)text(\s*)=>(\s*)};
 
+sub file_types { qr{.*} }
+
 sub known_file_type {
     my $self = shift;
 

@@ -8,6 +8,8 @@ use base qw(Locale::Maketext::Extract::Plugin::Base);
 use HTML::Mason::Compiler::ToObject;
 use Obvius::CharsetTools;
 
+sub file_types { qr{.+\.txt} }
+
 sub known_file_type {
     my $self = shift;
 
