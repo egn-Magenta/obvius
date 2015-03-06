@@ -18,154 +18,115 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:44
 msgid "Act."
 msgstr "Akt."
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/document_information:78
-#: /var/www/obvius/mason/common/doctypes/Newsbox:141
-#: /var/www/obvius/mason/common/shared/editengine2/type/category:19
 msgid "Add"
 msgstr "Tilføj"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:138
 msgid "Add item"
 msgstr "Tilføj dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/diff:21
 msgid "Added"
 msgstr "Tilføjet"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/handlingarea:6
 msgid "Administration"
 msgstr "Administration"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/type/sequence:8
 msgid "Advanced"
 msgstr "Avanceret"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:9
 msgid "All lang."
 msgstr "Alle sprog"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:31
 msgid "Also copy subdocuments"
 msgstr "Skal underdokumenter også kopieres"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:27
 msgid "Also delete subdocuments"
 msgstr "Skal underdokumenter også slettes"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:24
 msgid "Annotation"
 msgstr "Kommentar"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:10
 msgid "Are you sure you want to copy these"
 msgstr "Er du sikker på at du vil kopiere disse"
 
-#: /var/www/obvius/mason/edit/fieldtypes/formdata:142
 msgid "Are you sure you want to delete the field"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:11
 msgid "Are you sure you want to delete these"
 msgstr "Er du sikker på at du vil slette disse"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:6
 msgid "Back"
 msgstr "Tilbage"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:42
 msgid "Box"
 msgstr "Boks"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/changetype:2
 msgid "Change document type"
 msgstr "Skift dokumenttype"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/diff:20
 msgid "Changed"
 msgstr "Ændret"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Form:42
-#: /var/www/obvius/mason/common/doctypes/Form:48
 msgid "Click here to download collected form data in Excel format"
 msgstr "Hent data fra formularen i Excel-format"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:38
 msgid "Compare to"
 msgstr "Sammenlign med"
 
-#: /var/www/obvius/mason/common/shared/editengine2/type/not_found:39
 msgid "Component missing for type"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:2
 msgid "Copy document"
 msgstr "Kopiér dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:15
 msgid "Created by"
 msgstr "Oprettet af"
 
-#: /var/www/obvius/mason/common/shared/editengine2/type/fileupload2:3
 msgid "Current value"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:41
 msgid "Date"
 msgstr "Dato"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/link:1
-#: /var/www/obvius/mason/admin/portal/link:2
-#: /var/www/obvius/mason/admin/portal/link:3
-#: /var/www/obvius/mason/admin/portal/link:7
-#: /var/www/obvius/mason/admin/portal/link:8
 msgid "Default look"
 msgstr "Standard-udseende"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:125
-#: /var/www/obvius/mason/common/shared/editengine2/type/fileupload2:6
 msgid "Delete"
 msgstr "Slet"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:2
 msgid "Delete document"
 msgstr "Slet dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:23
-#: /var/www/obvius/mason/admin/action/move:13
-#: /var/www/obvius/mason/admin/action/rename:14
 msgid "Destination"
 msgstr "Til"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/changetype:23
 msgid ""
 "Doctypes marked with (*) are normally resticted in this area, but are "
 "visible to users with admin-rights."
@@ -174,312 +135,233 @@ msgstr ""
 "synlige for brugere med admin-rettighed."
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:4
 msgid "Document"
 msgstr "Dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/document_information:29
 msgid "Document information"
 msgstr "Dokumentinformation"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/changetype:6
-#: /var/www/obvius/mason/admin/action/newdocument:11
 msgid "Document type"
 msgstr "Dokumenttype"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/seqlist/main:49
-#: /var/www/obvius/mason/admin/app/seqlist/main:53
-#: /var/www/obvius/mason/common/doctypes/Newsbox:114
-#: /var/www/obvius/mason/common/doctypes/Newsbox:118
 msgid "Down"
 msgstr "Ned"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:92
 msgid "End"
 msgstr "Slut"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/diff:15
 msgid "End comparison"
 msgstr "Afslut sammenligning"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Form:151
-#: /var/www/obvius/mason/common/doctypes/Form:242
-#: /var/www/obvius/mason/common/doctypes/Form:245
-#: /var/www/obvius/mason/common/doctypes/Form:247
 msgid "Error"
 msgstr "Fejl"
 
-#: /var/www/obvius/mason/common/doctypes/Proxy:10
 msgid "Error: This proxy-document loops (i.e. it fetches itself). Stopped."
 msgstr ""
 
-#: /var/www/obvius/mason/common/doctypes/Form:199
 msgid "Fields marked with"
 msgstr ""
 
-#: /var/www/obvius/mason/admin/action/copy:24
-#: /var/www/obvius/mason/admin/action/import_files:8
-#: /var/www/obvius/mason/admin/action/import_pictures:13
-#: /var/www/obvius/mason/admin/action/move:14
-#: /var/www/obvius/mason/common/shared/editengine2/type/path:12
 msgid "Find"
 msgstr ""
 
-#: /var/www/obvius/mason/common/shared/editschemetypes/table:66
 msgid "First"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Form:76
 msgid "Flush XML file"
 msgstr "Slet alle data fra formularen"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/flushcache:2
 msgid "Flush cache"
 msgstr "Nulstil cache"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/flushcache:9
 msgid "Flush cache now"
 msgstr "Nulstil cache nu"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:7
 msgid "Forward"
 msgstr "Frem"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:19
-#: /var/www/obvius/mason/admin/action/move:9
-#: /var/www/obvius/mason/admin/action/rename:7
-#: /var/www/obvius/mason/admin/action/send:10
 msgid "From"
 msgstr "Fra"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/newdocument:16
-#: /var/www/obvius/mason/admin/portal/information:9
 msgid "Group"
 msgstr "Gruppe"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/handlingarea:9
 msgid "Help"
 msgstr "Hjælp"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/unpublish:2
 msgid "Hide"
 msgstr "Skjul"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/unpublish:6
 msgid "Hide this version"
 msgstr "Skjul denne version"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:13
 msgid "Image"
 msgstr "Billede"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:2
 msgid "Information"
 msgstr "Information"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:22
 msgid "Instead of deleting the document, you may want to"
 msgstr "I stedet for at slette dokumentet kan du overveje at"
 
-#: /var/www/obvius/mason/common/doctypes/Newsbox:89
 msgid "Item"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/document_information:61
 msgid "Kopier dokumentparametre"
 msgstr "Kopier dokumentparametre"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:43
 msgid "La."
 msgstr "Sp."
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/newdocument:21
-#: /var/www/obvius/mason/admin/action/newlanguage:6
 msgid "Language"
 msgstr "Sprog"
 
-#: /var/www/obvius/mason/common/shared/editschemetypes/table:104
 msgid "Last"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:24
 msgid "Link to admin"
 msgstr "Link til admin"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:23
 msgid "Link to public website"
 msgstr "Link til offentligt website"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/manual_subscription_notification:2
 msgid "Manual subscription for this document"
 msgstr "Manuel abonnementudsendelse for dette dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/move:2
 msgid "Move"
 msgstr "Flyt"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/newdocument:6
 msgid "Name"
 msgstr "Navn"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/subdocs:2
 msgid "Navigation"
 msgstr "Navigation"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/subdocs:10
 msgid "Navigator"
 msgstr "Navigator"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:9
 msgid "New"
 msgstr "Ny"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/newdocument:2
 msgid "New document"
 msgstr "Nyt dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/newlanguage:2
 msgid "New language"
 msgstr "Nyt sprog"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:27
 msgid "New uri"
 msgstr "Ny uri"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/newsboxes:31
 msgid "Newsbox documents here"
 msgstr "Nyhedsboks dokumenter her"
 
-#: /var/www/obvius/mason/common/shared/editschemetypes/table:95
 msgid "Next"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/markup/editend:4
 msgid "Next page"
 msgstr "Næste side"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:34
-#: /var/www/obvius/mason/admin/action/delete:30
 msgid "No"
 msgstr "Nej"
 
-#: /var/www/obvius/mason/common/doctypes/Proxy:25
 msgid "No content. Perhaps the page uses FRAMES?"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/type/keyword:7
 msgid "No keywords created yet"
 msgstr "Der er ikke oprettet nogen nøgleord endnu"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:25
 msgid "No link"
 msgstr "Intet link"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:88
 msgid "No."
 msgstr "Nr."
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:35
 msgid "None"
 msgstr "Ingen"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/subdocs:80
-#: /var/www/obvius/mason/admin/portal/versions:158
 msgid "Not published"
 msgstr "Ikke offentliggjort"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:20
 msgid "Not registered"
 msgstr "Ikke registreret"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Link:12
-#: /var/www/obvius/mason/common/doctypes/RSSFeed:5
 msgid "Notice"
 msgstr "Bemærk"
 
-#: /var/www/obvius/mason/common/doctypes/Form:21
 msgid "Obs, fejl i udfyldningen af formularen"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Link:13
 msgid "ObviusLinkDocumentExplanation"
 msgstr ""
 "Dette linkdokument ses ikke som et dokument på\n"
 "        det offentlige website; hvis man klikker sig ind på det, kommer man\n"
 "        automatisk direkte til adressen"
 
-#: /var/www/obvius/mason/common/doctypes/RSSFeed:6
 msgid "ObviusRSSFeedExplanation"
 msgstr ""
 
-#: /var/www/obvius/mason/admin/app/versionlist/main:10
 msgid "Ok"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:7
 msgid "Owner"
 msgstr "Ejer"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:139
 msgid "Path"
 msgstr "Sti"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:25
 msgid "Perform"
 msgstr "Udfør"
 
-#: /var/www/obvius/mason/common/doctypes/Form:112
 msgid "Please click the field name to correct the entry in the form below"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:18
 msgid ""
 "Please remember that if you delete the document, all versions will be "
 "deleted, and it can not be recovered"
@@ -487,177 +369,133 @@ msgstr ""
 "Husk at hvis du sletter et dokument, slettes alle versioner af dokumentet og "
 "det kan ikke gendannes"
 
-#: /var/www/obvius/mason/common/shared/editschemetypes/table:75
 msgid "Previous"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/markup/editend:3
 msgid "Previous page"
 msgstr "Foregående side"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:45
 msgid "Publ."
 msgstr "Off."
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/link:21
 msgid "Public"
 msgstr "Offentlig"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/subdocs:77
-#: /var/www/obvius/mason/admin/portal/versions:155
 msgid "Published"
 msgstr "Offentliggjort"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:125
-#: /var/www/obvius/mason/common/shared/editengine2/type/category:19
 msgid "Remove"
 msgstr "Fjern"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/diff:19
 msgid "Removed"
 msgstr "Fjernet"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/rename:2
 msgid "Rename"
 msgstr "Omdøb"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/seqlist/main:9
-#: /var/www/obvius/mason/admin/portal/newsboxes:26
-#: /var/www/obvius/mason/common/doctypes/Newsbox:28
 msgid "Save"
 msgstr "Gem"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:144
 msgid "Save changes"
 msgstr "Gem ændringer"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:4
-#: /var/www/obvius/mason/admin/portal/handlingarea:9
 msgid "Search"
 msgstr "Søg"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/current_document:2
 msgid "Select"
 msgstr "Vælg"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:2
 msgid "Send"
 msgstr "Send"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/seqlist/main:7
 msgid "Sequence number"
 msgstr "Placering"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:20
 msgid "Show complete list"
 msgstr "Vis hele listen"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:22
 msgid "Show document address"
 msgstr "Vis dokument-adresse"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/handlingarea:7
 msgid "Sitemap"
 msgstr "Sitemap"
 
-#: /var/www/obvius/mason/common/doctypes/Newsbox:6
 msgid "Sorry, nothing here."
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:16
 msgid "Sort"
 msgstr "Sortering"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Newsbox:91
 msgid "Start"
 msgstr "Start"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:14
 msgid "Subject"
 msgstr "Emne"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Form:198
 msgid "Submit"
 msgstr "Send"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:18
 msgid "Text"
 msgstr "Tekst"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/type/editors/tinymce:70
-#: /var/www/obvius/mason/common/shared/editengine2/type/tinymce3:183
 msgid "The XHTML in this field will be validated when you save the document"
 msgstr ""
 "XHTML-indholdet i dette felt vil blive checket når du gemmer dokumentet"
 
-#: /var/www/obvius/mason/common/doctypes/Proxy:3
 msgid "The content below was fetched from"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/versions:42
 msgid "Time"
 msgstr "Kl."
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/send:6
 msgid "To"
 msgstr "Til"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/newsboxes:31
 msgid "To add newsboxes, create"
 msgstr "For at tilføje bokse, opret"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:14
 msgid "Type"
 msgstr "Type"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/universal_accessrules:5
 msgid "Universal access rules"
 msgstr "Universal adgangsregler"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:8
-#: /var/www/obvius/mason/admin/app/seqlist/main:50
-#: /var/www/obvius/mason/admin/app/seqlist/main:54
-#: /var/www/obvius/mason/admin/portal/subdocs:8
-#: /var/www/obvius/mason/common/doctypes/Newsbox:115
-#: /var/www/obvius/mason/common/doctypes/Newsbox:119
 msgid "Up"
 msgstr "Op"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/navigator/toolbar:14
 msgid "Upload-document"
 msgstr "Upload-dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/flushcache:6
 msgid ""
 "Usually it is not necessary to flush the cache by hand, as the cache is "
 "automatically invalidated at the appropriate times. However, sometimes it is "
@@ -668,32 +506,24 @@ msgstr ""
 "at have muligheden alligevel."
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/type/editors/tinymce:66
 msgid "Validate field"
 msgstr "Check feltindhold"
 
-#: /var/www/obvius/mason/admin/portal/information:12
 msgid "Version"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/app/versionlist/main:4
-#: /var/www/obvius/mason/admin/portal/versions:2
 msgid "Versions"
 msgstr "Versioner"
 
-#: /var/www/obvius/mason/common/shared/editengine2/type/users:10
 msgid "Vælg bruger"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:33
-#: /var/www/obvius/mason/admin/action/delete:29
 msgid "Yes"
 msgstr "Ja"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:7
 msgid ""
 "You are about to copy this document and all the documents beneath it, in "
 "total"
@@ -702,7 +532,6 @@ msgstr ""
 "alt"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:8
 msgid ""
 "You are about to delete this document and all the documents beneath it, in "
 "total"
@@ -710,145 +539,117 @@ msgstr ""
 "Du er ved at slette dette dokument og alle dokumenter placeret under det, i "
 "alt"
 
-#: /var/www/obvius/mason/common/doctypes/Form:124
 msgid ""
 "You can only enter unique values in the following fields, and the values you "
 "have entered have already been registered"
 msgstr ""
 
-#: /var/www/obvius/mason/common/doctypes/Form:111
 msgid "You will need to correct the entries in the following fields"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/doctypes/Form:49
 msgid "all fields from all versions included"
 msgstr "inklusiv alle felter fra alle versioner"
 
-#: /var/www/obvius/mason/common/doctypes/Form:201
 msgid "are required"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:7
-#: /var/www/obvius/mason/admin/action/delete:11
-#: /var/www/obvius/mason/admin/action/delete:8
 msgid "documents"
 msgstr "dokumenter"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/copy:10
 msgid "documents to"
 msgstr "dokumenter til"
 
-#: /var/www/obvius/mason/common/doctypes/Form:247
 msgid "has been entered"
 msgstr ""
 
-#: /var/www/obvius/mason/common/doctypes/Form:245
 msgid "hasn't been entered"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:6
 msgid "lang_notification:msg1"
 msgstr "Stien til den"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:6
 msgid "lang_notification:msg2"
 msgstr "version af dette dokument er endnu ikke blevet oprettet"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:7
 msgid "lang_notification:msg3"
 msgstr "Klik her for at oprette den første manglende del"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:9
 msgid "lang_notification:msg4"
 msgstr "Den"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:9
 msgid "lang_notification:msg5"
 msgstr "version af dette dokument er endnu ikke oprettet"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:10
 msgid "lang_notification:msg6"
 msgstr "Klik her for at oprette den"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:15
 msgid "lang_notification:msg7"
 msgstr "Klik her for at gå til den"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/english_language_notification:15
 msgid "lang_notification:msg8"
 msgstr "version af dette dokument"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/action/delete:23
 msgid "merely hide it"
 msgstr "skjule det"
 
+msgid "no"
+msgstr ""
+
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/editengine2/type/editors/textwupload:49
 msgid "or, upload text-file"
 msgstr "eller, upload tekst-fil"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:43
 msgid "previous"
 msgstr "foregående"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:51
 msgid "public"
 msgstr "offentlig"
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/subdocs:29
 msgid "show all"
 msgstr "vis alle"
 
 # Imported from old translations
-#: /var/www/obvius/mason/common/shared/display_dateinterval:14
 msgid "to"
 msgstr "til"
 
-#: /var/www/obvius/mason/common/shared/editengine2/type/not_found:39
 msgid "value"
 msgstr ""
 
 # Imported from old translations
-#: /var/www/obvius/mason/admin/portal/information:29
 msgid "word(s)"
 msgstr "ord"
 
+msgid "yes"
+msgstr ""
+
 #. ($vdoc)
-#: /var/www/obvius/perl/Obvius/DocType/Form.pm:824
-#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:824
 msgid "Dear"
 msgstr ""
 
 #. ($vdoc)
-#: /var/www/obvius/perl/Obvius/DocType/Form.pm:838
-#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:838
 msgid "formular"
 msgstr ""
 
 #. ($vdoc)
-#: /var/www/obvius/perl/Obvius/DocType/Form.pm:809
-#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:809
 msgid "id"
 msgstr ""
 
 #. ($vdoc)
-#: /var/www/obvius/perl/Obvius/DocType/Form.pm:835
-#: /var/www/obvius/perl/blib/lib/Obvius/DocType/Form.pm:835
 msgid "tastede"
 msgstr ""
 
@@ -1164,7 +965,6 @@ msgstr "Oprettelse"
 msgid "Document moved from"
 msgstr "Dokument flyttet fra"
 
-# Imported from old translations
 msgid "Document names can not contain \"/\" characters, sorry"
 msgstr "Dokumentets navn kan ikke indeholde tegnet \"/\", beklager"
 
@@ -1483,7 +1283,6 @@ msgstr "Bestillingsformular"
 msgid "Password"
 msgstr "Kodeord"
 
-# Imported from old translations
 msgid "Path must start and end with a \"/\" character"
 msgstr "Stien skal have en \"/\" både først og sidst"
 
