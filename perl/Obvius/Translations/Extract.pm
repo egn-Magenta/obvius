@@ -207,7 +207,6 @@ sub merge_and_update {
                 "--no-fuzzy-matching",
                 "--backup=simple",
                 "--update",
-                "--lang=$lang",
                 $fname,
                 $base_dir . '/i18n/combined.pot'
             );
