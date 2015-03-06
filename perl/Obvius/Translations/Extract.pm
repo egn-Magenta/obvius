@@ -149,6 +149,7 @@ sub extract_all {
     system(
         $msgcat_executeable,
         '-t', 'UTF-8',
+        '--no-location',
         '-o', $dir . '/i18n/combined.pot',
         grep { -f $_ } (
             $dir . '/i18n/extracted_from_doctypes.pot',
@@ -202,6 +203,8 @@ sub merge_and_update {
 
             system(
                 $msgmerge_exe,
+                '--no-location',
+                "--no-fuzzy-matching",
                 "--backup=simple",
                 "--update",
                 "--lang=$lang",
@@ -256,6 +259,7 @@ sub merge_and_update {
                 $msgcat_exe,
                 '-t', 'UTF-8',
                 '-o', $final_file,
+                '--no-location',
                 '--use-first',
                 '--sort-output',
                 @files
