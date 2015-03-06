@@ -62,7 +62,7 @@ msgid "Are you sure you want to copy these"
 msgstr "Er du sikker på at du vil kopiere disse"
 
 msgid "Are you sure you want to delete the field"
-msgstr ""
+msgstr "Er du sikker på du vil slette feltet"
 
 # Imported from old translations
 msgid "Are you sure you want to delete these"
@@ -93,7 +93,7 @@ msgid "Compare to"
 msgstr "Sammenlign med"
 
 msgid "Component missing for type"
-msgstr ""
+msgstr "Komponent mangler for type"
 
 # Imported from old translations
 msgid "Copy document"
@@ -104,7 +104,7 @@ msgid "Created by"
 msgstr "Oprettet af"
 
 msgid "Current value"
-msgstr ""
+msgstr "Nuværende værdi"
 
 # Imported from old translations
 msgid "Date"
@@ -163,16 +163,16 @@ msgid "Error"
 msgstr "Fejl"
 
 msgid "Error: This proxy-document loops (i.e. it fetches itself). Stopped."
-msgstr ""
+msgstr "Fejl: Denne indlejrede side kører i loop (henter sig selv)."
 
 msgid "Fields marked with"
-msgstr ""
+msgstr "Felter markeret med"
 
 msgid "Find"
-msgstr ""
+msgstr "Find"
 
 msgid "First"
-msgstr ""
+msgstr "Første"
 
 # Imported from old translations
 msgid "Flush XML file"
@@ -238,7 +238,7 @@ msgid "Language"
 msgstr "Sprog"
 
 msgid "Last"
-msgstr ""
+msgstr "Sidste"
 
 # Imported from old translations
 msgid "Link to admin"
@@ -289,7 +289,7 @@ msgid "Newsbox documents here"
 msgstr "Nyhedsboks dokumenter her"
 
 msgid "Next"
-msgstr ""
+msgstr "Næste"
 
 # Imported from old translations
 msgid "Next page"
@@ -300,7 +300,7 @@ msgid "No"
 msgstr "Nej"
 
 msgid "No content. Perhaps the page uses FRAMES?"
-msgstr ""
+msgstr "Intet indhold. Måske kildesiden er baseret på frames?"
 
 # Imported from old translations
 msgid "No keywords created yet"
@@ -344,7 +344,7 @@ msgid "ObviusRSSFeedExplanation"
 msgstr ""
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 # Imported from old translations
 msgid "Owner"
@@ -359,7 +359,7 @@ msgid "Perform"
 msgstr "Udfør"
 
 msgid "Please click the field name to correct the entry in the form below"
-msgstr ""
+msgstr "Klik på felt-navnet i formularen nedenfor for at rette posten"
 
 # Imported from old translations
 msgid ""
@@ -370,7 +370,7 @@ msgstr ""
 "det kan ikke gendannes"
 
 msgid "Previous"
-msgstr ""
+msgstr "Forrige"
 
 # Imported from old translations
 msgid "Previous page"
@@ -437,7 +437,7 @@ msgid "Sitemap"
 msgstr "Sitemap"
 
 msgid "Sorry, nothing here."
-msgstr ""
+msgstr "Beklager, der er ikke noget indhold her"
 
 # Imported from old translations
 msgid "Sort"
@@ -465,7 +465,7 @@ msgstr ""
 "XHTML-indholdet i dette felt vil blive checket når du gemmer dokumentet"
 
 msgid "The content below was fetched from"
-msgstr ""
+msgstr "Indholdet nedenfor er hentet fra adressen"
 
 # Imported from old translations
 msgid "Time"
@@ -545,14 +545,14 @@ msgid ""
 msgstr ""
 
 msgid "You will need to correct the entries in the following fields"
-msgstr ""
+msgstr "Det vil være nødvendigt at rette følgende felter"
 
 # Imported from old translations
 msgid "all fields from all versions included"
 msgstr "inklusiv alle felter fra alle versioner"
 
 msgid "are required"
-msgstr ""
+msgstr "er påkrævet"
 
 # Imported from old translations
 msgid "documents"
@@ -563,10 +563,10 @@ msgid "documents to"
 msgstr "dokumenter til"
 
 msgid "has been entered"
-msgstr ""
+msgstr "er blevet udfyldt"
 
 msgid "hasn't been entered"
-msgstr ""
+msgstr "er ikke blevet udfyldt"
 
 # Imported from old translations
 msgid "lang_notification:msg1"
@@ -605,7 +605,7 @@ msgid "merely hide it"
 msgstr "skjule det"
 
 msgid "no"
-msgstr ""
+msgstr "nej"
 
 # Imported from old translations
 msgid "or, upload text-file"
@@ -628,14 +628,14 @@ msgid "to"
 msgstr "til"
 
 msgid "value"
-msgstr ""
+msgstr "værdi"
 
 # Imported from old translations
 msgid "word(s)"
 msgstr "ord"
 
 msgid "yes"
-msgstr ""
+msgstr "ja"
 
 msgid "FormDoctype:Dear"
 msgstr "Kære"
