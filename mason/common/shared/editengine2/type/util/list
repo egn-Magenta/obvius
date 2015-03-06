@@ -2,7 +2,7 @@
 %     my $id="obvius-$type-$name-$choice";
 %     $id=~s/[^\w-]//g;
 %     my $onclickhtml = $onclick->{$choice} ? ' onclick="' . $onclick->{$choice} . '"' : '';
-<input id="<% $id %>" type="<% $type |h %>" name="<% $name |h %>" value="<% $choice |h %>" <% $values{$choice} ? 'checked="checked" ' : '' %><% $onclickhtml %>/><label for="<% $id %>"><& /shared/msg, text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice) &></label>
+<input id="<% $id %>" type="<% $type |h %>" name="<% $name |h %>" value="<% $choice |h %>" <% $values{$choice} ? 'checked="checked" ' : '' %><% $onclickhtml %>/><label for="<% $id %>"><& /shared/msg, text=>(exists $labels->{$choice} ? ("editpagelabel:" . $labels->{$choice}) : $choice) &></label>
 % }
 %
 <%args>

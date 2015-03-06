@@ -1,7 +1,7 @@
 % if (scalar(@$choices)) {
 <select id="<% $name |h %>" name="<% $name |h %>"<% $multiple ? ' multiple="multiple"' : '' %><% $multiple ? ' size="' . $size . '"' : '' %>>
 % foreach my $choice (@$choices) {
-%     my $text=$translated_labels->{$choice} || $m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice));
+%     my $text=$translated_labels->{$choice} || $m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? ("editpagelabel:" . $labels->{$choice}) : $choice));
   <option value="<% $choice |h %>"<% $values{$choice} ? ' selected="selected"' : '' %>><% $text |h %></option>
 % }
 </select>
