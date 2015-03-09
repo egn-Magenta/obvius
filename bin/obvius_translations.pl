@@ -19,6 +19,7 @@ my %action_map = (
     compile => \&compile,
     import_old => \&import_old,
     update => \&update,
+    build => \&build,
     help => sub { usage(undef, 0); }
 );
 
@@ -39,7 +40,7 @@ sub usage {
         collect <confname>:
             Collect translations from the source files of the site specified
             by the confname and update the relevant template files and
-            *_src.po files.
+            *_src.po files. This will also build .mo files from the .po files.
 
         collect_obvius [obvius_root_dir]:
             Collect translations from the base Obvius source files and update
@@ -53,10 +54,14 @@ sub usage {
 
         update <confname>:
             Collects translations for both the Obvius base and the specified
-            confname. Run this to ensure all translations are up to date.
+            confname. Run this to ensure all translations are up to date. This
+            will also build .mo files from the collected .op files.
+
+        build <confname>:
+            Builds .mo files from the current .po files.
 
         help:
-            This message
+            This message.
 
 EOT
     exit defined($exitcode) ? $exitcode : 1;
@@ -154,6 +159,23 @@ sub update {
     
     collect_obvius(get_obvius_dir($config));
     collect();
+}
+
+sub build {
+    my $confname = $ARGV[1];
+
+    my $config = get_config($confname);
+
+    my $base_dir = get_basedir($config);
+
+    unless($base_dir) {
+        usage("No sitebase defined for configuration '$confname'");
+    }
+
+    my $domain = Obvius::Translations::build_domain_name($config);
+    Obvius::Translations::Extract::build(
+        $base_dir, $domain, get_obvius_dir($config)
+    );
 }
 
 sub setup_dir {
