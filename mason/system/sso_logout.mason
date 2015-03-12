@@ -1,0 +1,32 @@
+<& sso_login.mason:top_html, %ARGS, title => "Logout" &>
+<p><& translator,
+    da => "Du er nu logget ud",
+    en => "You have now been logged out"
+&></p>
+<& sso_login.mason:bottom_html, %ARGS &>
+<%once>
+use CGI::Cookie;
+</%once>
+<%init>
+my $obvius = Obvius->new(Obvius::Config->new($r->dir_config('site')));
+
+my $session_id;
+my %cookies = CGI::Cookie->fetch;
+if(my $cookie = $cookies{obvius_sso_session}) {
+    $session_id = $cookie->value;
+}
+
+if($session_id) {
+    $obvius->dbh->prepare(
+        'delete from sso_sessions where session_id = ?'
+    )->execute($session_id);
+}
+
+# Expire the admin-cookie
+my $cookie = CGI::Cookie->new(
+    -name => 'obvius_sso_session',
+    -value => '',
+    -expires => '-1M'
+);
+$cookie->bake($r);
+</%init>
