@@ -1,12 +1,16 @@
+<& SELF:top_html, %ARGS,
+  title => $m->scomp('translator',
+     da => "Godkendelse påkrævet",
+     en => "Authorization required"
+  )
+&>
+<%method top_html>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
 <head>
-<title>
-  <& translator,
-     da => "Godkendelse påkrævet",
-     en => "Authorization required" &>
+<title><% $ARGS{title} %></title>
 </title>
 <style type="text/css">
 body, th, td {
@@ -69,8 +73,8 @@ fieldset #submitDiv {
 </head>
 <body>
 <div id="mainarea">
-<h1><& translator, da => "Godkendelse påkrævet", en => "Authorization required" &>
-</h1>
+<h1><% $ARGS{title} %></h1>
+</%method>
 <form action="<% $r->uri %>" method="post" id="loginform">
 <input type="hidden" name="origin" value="<% $origin %>" />
 <fieldset>
@@ -148,10 +152,12 @@ fieldset #submitDiv {
   </a>
 </center>
 </div>
-
+<& SELF:bottom_html, %ARGS &>
+<%method bottom_html>
 </div>
 </body>
 </html>
+</%method>
 <%args>
 $origin => undef
 </%args>
