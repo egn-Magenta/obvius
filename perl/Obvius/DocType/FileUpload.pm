@@ -119,7 +119,7 @@ sub place_file_in_upload {
     my $id = md5_hex($filename);
     my $content_type = $type;
     $content_type =~ s!"!!g; $content_type =~ s!'!!g;
-    $content_type = 'unknown/unknown' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|);
+    $content_type = 'unknown/unknown' unless ($content_type =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.+-]+).*|$1|);
     
     my $docs_dir = $obvius->config->param('docs_dir');
     $docs_dir =~ s!/$!!;
