@@ -175,7 +175,7 @@ sub get_resized_data {
             $new_height = $maxh if($new_height > $maxh);
 
             # Scale the image
-            $image->Scale(geometry => $new_width . "x" . $new_height);
+            $image->Scale(width => $new_width, height => $new_height);
 
             # Get the new scaled sizes
             my ($scaled_width, $scaled_height) = $image->Get('width', 'height');
