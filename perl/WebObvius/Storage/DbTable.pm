@@ -183,8 +183,6 @@ sub update {
 sub remove {
     my ($this, $data, $session, $path_prefix)=@_;
 
-    use Data::Dumper; print STDERR 'DbTable->remove $data: ' . Dumper($data);
-
     my $success=0;
     my $error=0;
     # Remove all objects
@@ -201,11 +199,23 @@ sub remove {
             next;
         }
 
+	if ($this->param('source') eq 'users') {
+	    my $ids = $id_values->{'id'} || [];
+	    $ids = [ $ids ] unless(ref($ids)) eq 'ARRAY';
+	    foreach my $userid (@$ids) {
+	        $this->param('obvius')->delete_user($userid);
+	    }
+	    $success++;
+	    next;
+	}
+
         if ($this->param('obvius')->delete_table_record($this->param('source'), $object, $id_values)) {
             $success++;
         }
     }
-    return ('ERROR', "Could not delete $error of the " . ($error+$success) . " entries") if $error > 0;
+    if ($error > 0) {
+        return ('ERROR', "Could not delete $error of the " . ($error+$success) . " entries");
+    }
     return ('OK', "$success entries deleted");
 
 }
