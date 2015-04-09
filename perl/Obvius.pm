@@ -2943,6 +2943,8 @@ sub explode_path {
     return @result;
 }
 
+our @editable_https_subsite_fields;
+
 sub find_closest_subsite {
     my ($this, $doc) = @_;
 
@@ -2979,8 +2981,22 @@ sub find_closest_subsite {
 		}
 	    }
 	    # https subsites should only provide certain fields
+	    # If you change this list, you should also correct the fields
+	    # in the editing component
+	    # mason/admin/action/subsites_new_files/edit
 	    my @fields = $rec->{is_https} ? qw(
-		id path title domain user_id backend_faculty comments
+		id
+		path
+		title
+		lang
+		other_language_link
+		domain
+		is_https
+		user_id
+		backend_faculty
+		backend_faculty_id
+		brandingunit
+		comments
 	    ) : (keys %$rec);
 	    foreach my $k (@fields) {
 		$subsite_data{$k} = $rec->{$k};

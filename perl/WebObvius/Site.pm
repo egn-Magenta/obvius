@@ -130,7 +130,6 @@ sub get_special_handler {
     return $special_handler;
 }
 
-
 ########################################################################
 #
 #       Language handling
@@ -186,7 +185,6 @@ sub get_language_preferences {
 
 
 
-
 ########################################################################
 #
 #       Obvius interface methods
@@ -214,8 +212,8 @@ sub obvius_connect {
     my $passphrase = $this->{OBVIUS_ARGS}->{'tripleDES_pphr'} || '';
 
     $this->tracer($req, $user||'-user', $passwd||'-passwd') if ($this->{DEBUG});
-    
-    $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes, 
+
+    $obvius = new Obvius($this->{OBVIUS_CONFIG}, $user, $passwd, $doctypes,
 			 $fieldtypes, $fieldspecs, log => $this->{LOG},
 			 'encryption_pphr' => $passphrase);
 
@@ -282,7 +280,6 @@ sub obvius_document_version {
     return $vdoc;
 }
 
-
 ########################################################################
 #
 #       Apache request helpers
@@ -383,7 +380,6 @@ sub set_expire_header {
     }
 }
 
-
 ########################################################################
 #
 #       Content Handler
@@ -854,7 +850,6 @@ sub expire_public_login_cookie {
     $cookie->bake($req);
 }
 
-
 ########################################################################
 #
 #       Translations
@@ -975,32 +970,41 @@ sub set_translation_fileset
 
 sub set_language_preferences
 {
-        my ( $self, $r, $lang) = @_;
+    my ($self, $r, $lang) = @_;
 
-        my %lang;
-        if ($lang =~ /^=/) {
-                %lang = split_language_preferences(substr($lang, 1));
-#               print STDERR "$$ force lang $lang\n";
-        } elsif ( $r) {
-                my $accept_language = $r->headers_in->{'Accept-Language'};
+    my %lang;
+    if ($lang =~ /^=/) {
+        %lang = split_language_preferences(substr($lang, 1));
+    } elsif ($r) {
+        my $accept_language = $r->headers_in->{'Accept-Language'};
 
-                if ($accept_language) {
-#                       print STDERR "$$ accept lang $accept_language\n";
-                        %lang = split_language_preferences( $accept_language);
+        if ($accept_language) {
+            %lang = split_language_preferences($accept_language);
 
-                        my @vary;
-                        push @vary, $r-> header_out('Vary') if $r-> header_out('Vary');
-                        push @vary, "Accept-Language";
-                        $r-> header_out( 'Vary', join(', ', @vary));
-                }
+            my @vary;
+            push @vary, $r->header_out('Vary') if $r->header_out('Vary');
+            push @vary, "Accept-Language";
 
-                my %site_pref = split_language_preferences( $lang, 1);
-                $lang{$_} ||= $site_pref{$_} for keys %site_pref;
+            $r->header_out('Vary' => join(', ', @vary));
         }
 
+        my %site_pref = split_language_preferences($lang, 1);
+        $lang{$_} ||= $site_pref{$_} for keys %site_pref;
+    }
 
-        $self-> {LANGUAGE_PREFERENCES} = [ sort { $lang{$b} <=> $lang{$a} } keys %lang ];
-#       print STDERR "$$ lang_pref = ", join(",", @{$self-> {LANGUAGE_PREFERENCES}}), "\n";
+    # Add "short" version of languages as well as the long ones, but let them
+    # have one lower priority than the long version with highest priority
+    while (my ($lang, $w) = each(%lang)) {
+        if(my ($s) = ($lang =~ m{^(\w\w)[_-]\w\w$})) {
+            if(($lang{$s} || 0) < $w) {
+                $lang{$s} = $w - 1;
+            }
+        }
+    }
+
+    $self->{LANGUAGE_PREFERENCES} = [
+        sort { $lang{$b} <=> $lang{$a} } keys %lang
+    ];
 }
 
 sub translate

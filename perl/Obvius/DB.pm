@@ -600,6 +600,35 @@ sub db_delete_user_grp {
     return;
 }
 
+sub db_delete_user_sessions {
+    my ($this, $userid) = @_;
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+					     '!Table'      => 'users',
+					        });
+    $set->Search({id=>$userid});
+    my $userdata = $set->First;
+    $set->Disconnect;
+    if ($userdata) {
+	    eval {
+		    my $ssoset = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+							 '!Table'      => 'sso_sessions',
+						    });
+            if ($ssoset && ref($ssoset) eq "DBIx::Recordset") {
+                $ssoset->Delete({login=>$userdata->{'login'}});
+                $ssoset->Disconnect;
+            }
+        };
+        my $loginset = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+						     '!Table'      => 'login_sessions',
+						    });
+        if ($loginset && ref($loginset) eq "DBIx::Recordset") {
+            $loginset->Delete({login=>$userdata->{'login'}});
+            $loginset->Disconnect;
+        }
+    }
+}
+
 sub db_insert_user_grp {
     my ($this, $userid, $grp) = @_;
 
