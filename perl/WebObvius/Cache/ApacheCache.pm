@@ -97,7 +97,7 @@ sub find_cache_filename {
     my ($this, $req, $filename) = @_;
 
     my $ct = $req->content_type;
-    $ct =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+).*|$1|;
+    $ct =~ s|^([a-zA-Z0-9.-]+/[a-zA-Z0-9.+-]+).*|$1|;
     my $lang_array = $req->content_languages();
     my $lang = scalar @$lang_array ? $lang_array->[0] : 'da';
     my $extra = $req->notes('obvius_cache_extra') || '';
