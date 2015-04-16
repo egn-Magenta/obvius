@@ -7,12 +7,43 @@ use utf8;
 use Data::Dumper;
 use WebObvius::FormEngine::Fields;
 
+=head1 NAME
+
+  WebObvius::FormEngine
+
+=cut
+
+=head1 SYNOPSIS
+
+  use WebObvius::FormEngine;
+
+  my $formengine = WebObvius::FormEngine->new(
+    $formname, $mason, %options
+  );
+
+  
+
+=cut
+
 my $formcount = 0;
+
+
+=head1 OBJECT-ORIENTED METHODS
+
+=head2 new
+
+  my $formengine = WebObvius::FormEngine->new(
+    $formname, $mason, %options
+  );
+
+=cut
+
 
 sub new {
     my ($package, $formname, $mason, %options) = @_;
 
     my @themes = ("default");
+    # We still use the options object, but the theme key is no longer used, so remove it.
     if(my $theme = delete $options{theme}) {
         unshift(@themes, $theme);
     }
@@ -57,6 +88,7 @@ sub html5 { $_[0]->{html5} }
 
 # Field creators
 {
+    # Dynamically create methods for creating and adding fields
     no strict 'refs';
     foreach my $type (WebObvius::FormEngine::Fields::get_types()) {
         my $target_method = "${type}_field";
@@ -78,6 +110,13 @@ sub html5 { $_[0]->{html5} }
     }
 }
 
+
+=head2 extra_form_attributes
+
+  my $attributes = $formengine->extra_form_attributes;
+
+=cut
+
 sub extra_form_attributes {
     my $self = shift;
 
@@ -98,6 +137,13 @@ sub extra_form_attributes {
     return join(" ", @result);
 }
 
+
+=head2 set_fields
+
+  $formengine->set_fields($fieldData);
+
+=cut
+
 sub set_fields {
     my $self = shift;
 
@@ -109,6 +155,13 @@ sub set_fields {
 
     return $self;
 }
+
+
+=head2 add_fields
+
+  $formengine->add_fields($fieldData);
+
+=cut
 
 sub add_fields {
     my $self = shift;
@@ -131,9 +184,15 @@ sub add_fields {
             $self->add_field($fdata);
         }
     }
-
     return $self;
 }
+
+
+=head2 set_action
+
+  $formengine->set_action($action);
+
+=cut
 
 sub set_action {
     my ($self, $action) = @_;
@@ -141,17 +200,38 @@ sub set_action {
     return $self;
 }
 
+
+=head2 make_anonymous_fieldname
+
+  $formengine->make_anonymous_fieldname();
+
+=cut
+
 sub make_anonymous_fieldname {
     my ($self) = @_;
 
     return $self->{formname} . "_anonfield" . ++$self->{anon_field_nr};
 }
 
+
+=head2 make_field
+
+  $formengine->make_field($form, %options);
+
+=cut
+
 sub make_field {
     my $self = shift;
 
     return WebObvius::FormEngine::Fields::make_field($self, @_);
 }
+
+
+=head2 add_field
+
+  $formengine->add_field($field);
+
+=cut
 
 sub add_field {
     my ($self, $field) = @_;
@@ -166,6 +246,13 @@ sub add_field {
     return $self;
 }
 
+
+=head2 make_and_add_field
+
+  $formengine->make_and_add_field($fieldname, %options);
+
+=cut
+
 sub make_and_add_field {
     my $self = shift;
     my $name = shift;
@@ -176,17 +263,37 @@ sub make_and_add_field {
 
 # Rendering
 
+=head2 html_escape
+
+  $formengine->html_escape($value);
+
+=cut
+
 sub html_escape {
     my ($self, $value) = @_;
 
     return $self->mason->interp->apply_escapes($value, 'h');
 }
 
+
+=head2 translate
+
+  $formengine->translate($message);
+
+=cut
+
 sub translate {
     my ($self, $message) = @_;
 
     return $self->mason->scomp('/shared/msg', text => $message);
 }
+
+
+=head2 classnames
+
+  $formengine->classnames();
+
+=cut
 
 sub classnames {
     my ($self) = @_;
@@ -201,6 +308,13 @@ sub classnames {
         )
     ));
 }
+
+
+=head2 locate_comp
+
+  $formengine->locate_comp($comp);
+
+=cut
 
 sub locate_comp {
     my ($self, $comp) = @_;
@@ -227,6 +341,13 @@ sub locate_comp {
     return $comp_path;
 }
 
+
+=head2 render_comp
+
+  $formengine->render_comp($comp, %args);
+
+=cut
+
 sub render_comp {
     my ($self, $comp, %args) = @_;
 
@@ -234,6 +355,13 @@ sub render_comp {
 
     return $self->mason->scomp($comp_path, form => $self, %args);
 }
+
+
+=head2 execute_comp
+
+  $formengine->execute_comp($comp, %args);
+
+=cut
 
 sub execute_comp {
     my ($self, $comp, %args) = @_;
@@ -243,6 +371,12 @@ sub execute_comp {
     return $self->mason->comp($comp_path, form => $self, %args);
 }
 
+
+=head2 render
+
+  $formengine->render(%args);
+
+=cut
 
 sub render {
     my ($self, %args) = @_;
@@ -265,6 +399,13 @@ sub render {
     return $self->render_comp('form.mason', render_args => \%args);
 }
 
+
+=head2 render_fields
+
+  $formengine->render_fields();
+
+=cut
+
 sub render_fields {
     my $self = shift;
     my $output = "";
@@ -275,6 +416,13 @@ sub render_fields {
 
     return $output;
 }
+
+
+=head2 render_hidden_fields
+
+  $formengine->render_hidden_fields();
+
+=cut
 
 sub render_hidden_fields {
     my $self = shift;
@@ -287,6 +435,13 @@ sub render_hidden_fields {
     return $output;
 }
 
+
+=head2 render_nonhidden_fields
+
+  $formengine->render_nonhidden_fields();
+
+=cut
+
 sub render_nonhidden_fields {
     my $self = shift;
     my $output = "";
@@ -298,6 +453,13 @@ sub render_nonhidden_fields {
     return $output;
 }
 
+
+=head2 required_marker_label
+
+  $formengine->required_marker_label();
+
+=cut
+
 sub required_marker_label {
     my $self = shift;
 
@@ -307,6 +469,13 @@ sub required_marker_label {
     }
     return $marker;
 }
+
+
+=head2 required_marker
+
+  my $marker = $formengine->required_marker($required);
+
+=cut
 
 sub required_marker {
     my $self = shift;
@@ -324,13 +493,34 @@ sub required_marker {
     }
 }
 
+
+=head2 render_form_errors
+
+  $formengine->render_form_errors(%options);
+
+=cut
+
 sub render_form_errors {
     my ($self, %options) = @_;
 
     return $self->render_comp('form_errors.mason', %options, form => $self);
 }
 
+
+=head2 render_pre_javascript
+
+  $formengine->render_pre_javascript();
+
+=cut
+
 sub render_pre_javascript { "" }
+
+
+=head2 render_post_javascript
+
+  $formengine->render_post_javascript();
+
+=cut
 
 sub render_post_javascript {
     $_[0]->{backwards_compatibility} ?
@@ -340,6 +530,13 @@ sub render_post_javascript {
 
 # Validation and processing
 
+
+=head2 reset
+
+  $formengine->reset();
+
+=cut
+
 sub reset {
     my ($self) = @_;
 
@@ -348,15 +545,29 @@ sub reset {
     delete $self->{is_valid};
 }
 
+
+=head2 process_request
+
+  $formengine->process_request($request);
+
+=cut
+
 sub process_request {
-    my ($self, $r) = @_;
+    my ($self, $request) = @_;
 
     $self->reset;
 
     foreach my $field ($self->field_list) {
-        $field->process_request($r);
+        $field->process_request($request);
     }
 }
+
+
+=head2 add_error
+
+  $formengine->add_error($field, $message[, $param1[, $param2 ... ]]);
+
+=cut
 
 sub add_error {
     my ($self, $field, $message, @args) = @_;
@@ -366,6 +577,13 @@ sub add_error {
     push(@{ $self->{errors} }, [sprintf($message, @args), $field]);
 }
 
+
+=head2 add_warning
+
+  $formengine->add_warning($message, [, $param1[, $param2 ... ]]);
+
+=cut
+
 sub add_warning {
     my ($self, $message, @args) = @_;
 
@@ -373,6 +591,13 @@ sub add_warning {
 
     push(@{ $self->{warnings} }, sprintf($message, @args));
 }
+
+
+=head2 is_valid
+
+  $formengine->is_valid();
+
+=cut
 
 sub is_valid {
     my ($self) = @_;
@@ -394,6 +619,13 @@ sub is_valid {
     return $self->{is_valid};
 }
 
+
+=head2 cleaned_values
+
+  $formengine->cleaned_values();
+
+=cut
+
 sub cleaned_values {
     my ($self) = @_;
 
@@ -404,6 +636,13 @@ sub cleaned_values {
 
     return \%v;
 }
+
+
+=head2 cleaned_values_hash
+
+  $formengine->cleaned_values_hash();
+
+=cut
 
 sub cleaned_values_hash { %{ $_[0]->cleaned_values } }
 
