@@ -1,0 +1,94 @@
+<select id="<% $field->id %>" name="<% $ARGS{name} || $field->name %>"
+ multiple="multiple" style="display: none">
+%foreach my $option (@chosen) {
+    <option value="<% $option->value %>" selected="selected"></option>
+%}
+</select>
+<table border="0" class="groupselect">
+<thead>
+    <tr>
+        <th><& /shared/trans,
+            da => "Mulige grupper",
+            en => "Possible groups"
+        &></th>
+        <th></th>
+        <th><& /shared/trans,
+            da => "Valgte grupper",
+            en => "Chosen groups"
+        &></th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>
+            <div>
+                <label for="<% $field->id %>-available-filter"
+                ><& /shared/trans,
+                    da => "Filtrér",
+                    en => "Filter"
+                &></label>
+                <input type="text"
+                    id="<% $field->id %>-available-filter" />
+            </div>
+            <select id="<% $field->id %>-available"
+             name="<% $ARGS{name} || $field->name %>-available"
+             multiple="multiple" size="15">
+%foreach my $option (@available) {
+                <option value="<% $option->value |h %>">
+                    <% $option->label %>
+                </option>
+%}
+            </select>
+        </td>
+        <td>
+            <input id="<% $field->id %>-add" type="button"
+                value="&#x2192;" /><br />
+            <input id="<% $field->id %>-remove" type="button"
+                value="&#x2190;" /><br />
+        </td>
+        <td>
+            <div>
+                <label for="<% $field->id %>-chosen-filter"
+                ><& /shared/trans,
+                    da => "Filtrér",
+                    en => "Filter"
+                &></label>
+                <input type="text"
+                    id="<% $field->id %>-chosen-filter" />
+            </div>
+            <select id="<% $field->id %>-chosen"
+             name="<% $ARGS{name} || $field->name %>-chosen"
+             multiple="multiple"  size="15">
+%foreach my $option (@chosen) {
+                <option value="<% $option->value |h %>">
+                    <% $option->label %>
+                </option>
+%}
+            </select>
+        </td>
+    </tr>
+</tbody>
+</table>
+%unless($r->notes('groupselect_js_loaded')) {
+<script type="text/javascript" src="/scripts/groupselect.js"></script>
+%   $r->notes('groupselect_js_loaded' => 1);
+%}
+<script type="text/javascript"><!--
+$(function() {
+    Obvius.GroupSelect.init('<% $field->id %>');
+})
+//--></script>
+<%args>
+$field
+</%args>\
+<%init>
+my @chosen;
+my @available;
+foreach my $option ($field->options_list) {
+    if($option->selected) {
+        push(@chosen, $option);
+    } else {
+        push(@available, $option);
+    }
+}
+</%init>

@@ -1,0 +1,12 @@
+<%args>
+$field
+</%args>
+<tr>
+    <th><% $field->render_label(%ARGS) %></th>
+    <td>
+%       if(my $errors = $field->render_errors(%ARGS)) {
+        <% $errors %>
+%       }
+        <% $field->render_control(%ARGS) %>
+    </td>
+</tr>

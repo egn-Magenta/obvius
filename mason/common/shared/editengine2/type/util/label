@@ -30,6 +30,7 @@ $name=>undef
 </%args>
 %
 <%init>
+return '' if($r->notes('disable_editengine2_labels'));
 use WebObvius::Tooltip qw(get_tooltip_path);
 
 my $session=$r->pnotes('obvius_session');
