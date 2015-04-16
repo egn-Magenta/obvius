@@ -74,13 +74,14 @@ sub type { die "Field must have its own own type" }
 sub input_type { $_[0]->type }
 
 sub value { $_[0]->{value} }
+sub cleaned_value { $_[0]->value }
 sub selected_values { return ($_[0]->value => 1) }
 
 sub label {
     my $self = shift;
     my $label = $self->{label} || $self->{name};
 
-    if ($self->form->translate_labels) {
+    if ($self->translate_labels) {
         return $self->form->mason->scomp(
             '/shared/msg', text=>$label
         );
@@ -101,6 +102,12 @@ sub label_component { "label.mason" }
 sub field_component { "field.mason" }
 
 sub extra_attributes { (); }
+
+sub translate_labels {
+    exists $_[0]->{translate_labels} ?
+        $_[0]->{translate_labels} :
+        $_[0]->form->translate_labels
+}
 
 # Rendering
 
@@ -133,6 +140,25 @@ sub render_extra_attributes {
     my ($self) = @_;
     
     my %attrs = $self->extra_attributes;
+
+    my @classes;
+
+    # Get single class if specified
+    if(my $class = $self->{class}) {
+        push(@classes, $class);
+    }
+    # Get multiple classes if specified
+    if (my $classes = $self->{classes}) {
+        push(@classes, @$classes);
+    }
+    # Get classes specified as extra attributes
+    if (my $class = delete $attrs{class}) {
+        push(@classes, $class);
+    }
+    if (@classes) {
+        $attrs{class} = join(" ", @classes);
+    }
+
     return join(" ", map {
         my $k = $_;
         my $v = $attrs{$k};
@@ -592,7 +618,7 @@ use utf8;
 our @ISA = qw(WebObvius::FormEngine::Fields::MultipleBase);
 
 sub type { "radio" }
-sub label_component { "psuedo_label.mason" }
+sub label_component { "pseudo_label.mason" }
 sub edit_component { "radio.mason" }
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
@@ -615,7 +641,10 @@ sub new {
     
     my $obj = $package->SUPER::new(
         $form, $name,
-        options => [ [ "Yes" => 1 ], [ "No" => 0 ] ],
+        options => [
+            [ $form->translate("Yes") => 1 ],
+            [ $form->translate("No") => 0 ]
+        ],
         %data
     );
 
@@ -692,6 +721,45 @@ sub render_label {
         return '';
     }
 }
+
+package WebObvius::FormEngine::Fields::SubmitButtons;
+
+use strict;
+use warnings;
+use utf8;
+
+our @ISA = qw(WebObvius::FormEngine::Fields::MultipleBase);
+
+sub type { "submitbuttons" }
+sub input_type { "submit" }
+sub field_component { "full_width_field.mason" }
+sub edit_component { "input.mason" }
+
+sub render_label {
+    my $self = shift;
+
+    if ($self->{show_label}) {
+        return $self->SUPER::render_label(@_);
+    } else {
+        return '';
+    }
+}
+
+sub render_control {
+    my ($self, %options) = @_;
+
+    my $output = "";
+    foreach my $opt ($self->options_list) {
+        local $self->{class} = $opt->{class};
+        $output .= $self->SUPER::render_control(
+            value => $opt->text, # Text on button
+            name => $opt->value, # Name used when submitting
+            field_id => $self->id . '-' . $opt->value
+        ) . "\n";
+    }
+    return $output;
+}
+
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 

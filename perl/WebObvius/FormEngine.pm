@@ -42,8 +42,15 @@ sub method { $_[0]->{method} }
 sub form_id { $_[0]->{form_id} || $_[0]->{formname} }
 sub action { $_[0]->{action} || '' }
 sub field { $_[0]->{fields_by_name}->{$_[1]} }
+sub fields { $_[0]->{fields} }
+sub field_list { @{ $_[0]->fields } }
+sub fields_list { @{ $_[0]->fields } }
 sub errors { $_[0]->{errors} }
 sub error_list { @{ $_[0]->errors || [] } }
+sub errors_list { @{ $_[0]->errors || [] } }
+sub warnings { $_[0]->{warnings} || [] }
+sub warning_list { @{ $_[0]->warnings } }
+sub warnings_list { @{ $_[0]->warnings } }
 
 sub translate_labels { $_[0]->{translate_labels} }
 sub html5 { $_[0]->{html5} }
@@ -337,6 +344,7 @@ sub reset {
     my ($self) = @_;
 
     $self->{errors} = [];
+    $self->{warnings} = [];
     delete $self->{is_valid};
 }
 
@@ -345,7 +353,7 @@ sub process_request {
 
     $self->reset;
 
-    foreach my $field (@{ $self->{fields} }) {
+    foreach my $field ($self->field_list) {
         $field->process_request($r);
     }
 }
@@ -358,13 +366,21 @@ sub add_error {
     push(@{ $self->{errors} }, [sprintf($message, @args), $field]);
 }
 
+sub add_warning {
+    my ($self, $message, @args) = @_;
+
+    $message = $self->translate($message);
+
+    push(@{ $self->{warnings} }, sprintf($message, @args));
+}
+
 sub is_valid {
     my ($self) = @_;
 
     unless(exists $self->{is_valid}) {
         my $invalid = 0;
     
-        foreach my $field (@{ $self->{fields} }) {
+        foreach my $field ($self->field_list) {
             unless($field->validate(@_)) {
                 $invalid++;
                 # TODO: add generic message if we didn't get any
@@ -377,5 +393,18 @@ sub is_valid {
 
     return $self->{is_valid};
 }
+
+sub cleaned_values {
+    my ($self) = @_;
+
+    my %v;
+    foreach my $field ($self->field_list) {
+        $v{ $field->name } = $field->cleaned_value;
+    }
+
+    return \%v;
+}
+
+sub cleaned_values_hash { %{ $_[0]->cleaned_values } }
 
 1;

@@ -38,8 +38,8 @@ sub setup_options {
         ) || [];
         if(@$user_groups) {
             my $qms = join(",", map { "?" } @$user_groups);
-            $condition = "users.id in ($qms)";
-            push(@q_args, map { $_->{id} } @$user_groups);
+            $condition = "groups.id in ($qms)";
+            push(@q_args, @$user_groups);
         } else {
             $condition = "1=0";
         }

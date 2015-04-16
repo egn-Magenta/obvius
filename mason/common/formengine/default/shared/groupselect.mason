@@ -40,7 +40,7 @@
 %}
             </select>
         </td>
-        <td>
+        <td class="middle">
             <input id="<% $field->id %>-add" type="button"
                 value="&#x2192;" /><br />
             <input id="<% $field->id %>-remove" type="button"
