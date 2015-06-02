@@ -4,9 +4,38 @@ use strict;
 use warnings;
 use utf8;
 
+=head1 NAME
+
+  WebObvius::FormEngine::Fields
+
+=cut
+
+=head1 SYNOPSIS
+
+  use WebObvius::FormEngine::Fields;
+
+
+
+=cut
+
 my %typemap;
 
+=head1 CLASS METHODS
+
+=head2 get_types
+
+  WebObvius::FormEngine::Fields->get_types();
+
+=cut
+
 sub get_types { return keys %typemap }
+
+
+=head2 register_field_type
+
+  WebObvius::FormEngine::Fields->register_field_type($classOrPackage);
+
+=cut
 
 sub register_field_type {
     shift if((ref($_[0]) || $_[0]) eq __PACKAGE__);
@@ -24,7 +53,15 @@ sub register_field_type {
     }
 }
 
+
+=head2 make_field
+
+  my $field = $fieldsBase->make_field($classOrPackage);
+
+=cut
+
 sub make_field {
+    # Throw away package argument if it's the package name or a blessed object
     shift if((ref($_[0]) || $_[0]) eq __PACKAGE__);
 
     my $form = shift;
@@ -49,6 +86,16 @@ package WebObvius::FormEngine::Fields::Base;
 use strict;
 use warnings;
 use utf8;
+
+=head1 OBJECT-ORIENTED METHODS
+
+=head2 new
+
+  my $fieldsBase = WebObvius::FormEngine::Fields::Base->new(
+    $form, $name, %data
+  );
+
+=cut
 
 sub new {
     my ($package, $form, $name, %data) = @_;
@@ -76,6 +123,13 @@ sub input_type { $_[0]->type }
 sub value { $_[0]->{value} }
 sub cleaned_value { $_[0]->value }
 sub selected_values { return ($_[0]->value => 1) }
+
+
+=head2 label
+
+  my $label = $fieldsBase->label();
+
+=cut
 
 sub label {
     my $self = shift;
@@ -111,7 +165,21 @@ sub translate_labels {
 
 # Rendering
 
-sub html_escape { $_[0]->{form}->html_escape($_[1]) }
+
+=head2 html_escape
+
+  $fieldsBase->html_escape($text);
+
+=cut
+
+sub html_escape { $_[0]->form->html_escape($_[1]) }
+
+
+=head2 render_label
+
+  my $html = $fieldsBase->render_label();
+
+=cut
 
 sub render_label {
     my ($self, %options) = @_;
@@ -120,12 +188,26 @@ sub render_label {
     return $self->form->render_comp($comp, %options, field => $self);
 }
 
+
+=head2 render_control
+
+  my $html = $fieldsBase->render_control(%options);
+
+=cut
+
 sub render_control {
     my ($self, %options) = @_;
 
     my $comp = $self->edit_component(%options);
     return $self->form->render_comp($comp, %options, field => $self);
 }
+
+
+=head2 render
+
+  my $html = $fieldsBase->render(%options);
+
+=cut
 
 sub render {
     my ($self, %options) = @_;
@@ -134,7 +216,21 @@ sub render {
     return $self->form->render_comp($comp, %options, field => $self);
 }
 
+
+=head2 render_as_hidden
+
+  my $html = $fieldsBase->render_as_hidden();
+
+=cut
+
 sub render_as_hidden { '' }
+
+
+=head2 render_extra_attributes
+
+  my $attrString = $fieldsBase->render_extra_attributes();
+
+=cut
 
 sub render_extra_attributes {
     my ($self) = @_;
@@ -166,11 +262,25 @@ sub render_extra_attributes {
     } sort keys %attrs);
 }
 
+
+=head2 required_marker_label
+
+  my $label = $fieldsBase->required_marker_label();
+
+=cut
+
 sub required_marker_label {
     my ($self) = @_;
 
     return $self->required ? $self->form->required_marker_label : '';
 }
+
+
+=head2 required_marker
+
+  my $marker = $fieldsBase->required_marker();
+
+=cut
 
 sub required_marker {
     my ($self) = @_;
@@ -178,7 +288,21 @@ sub required_marker {
     return $self->form->required_marker($self->required);
 }
 
+
+=head2 required_message
+
+  my $message = $fieldsBase->required_message();
+
+=cut
+
 sub required_message { "Dette felt er påkrævet" }
+
+
+=head2 render_errors
+
+  my $html = $fieldsBase->render_errors(%options);
+
+=cut
 
 sub render_errors {
     my ($self, %options) = @_;
@@ -190,7 +314,14 @@ sub render_errors {
     );
 }
 
+
 # Validation and processing
+
+=head2 process_request
+
+  $fieldsBase->process_request($request);
+
+=cut
 
 sub process_request {
     my ($self, $r) = @_;
@@ -209,6 +340,13 @@ sub process_request {
     $self->{value} = $values[0];
 }
 
+
+=head2 get_clean_value
+
+  my $cleanvalue = $fieldsBase->get_clean_value();
+
+=cut
+
 sub get_clean_value {
     my ($self) = @_;
 
@@ -219,11 +357,25 @@ sub get_clean_value {
     return $self->{cleaned_value};
 }
 
+
+=head2 is_empty
+
+  my $empty = $fieldsBase->is_empty();
+
+=cut
+
 sub is_empty {
     my ($self) = @_;
 
     return !$self->get_clean_value();
 }
+
+
+=head2 add_error
+
+  $fieldsBase->add_error($message[, $param1[, $param2 ... ]]);
+
+=cut
 
 sub add_error {
     my ($self, $message, @args) = @_;
@@ -232,6 +384,13 @@ sub add_error {
 
     push(@{ $self->{errors} }, sprintf($message, @args));
 }
+
+
+=head2 validate
+
+  my $valid = $fieldsBase->validate();
+
+=cut
 
 sub validate {
     my ($self) = @_;
@@ -248,6 +407,13 @@ sub validate {
     return 1;
 }
 
+
+=head2 validate_by_required
+
+  my $valid = $fieldsBase->validate_by_required();
+
+=cut
+
 sub validate_by_required {
     my ($self) = @_;
 
@@ -261,6 +427,13 @@ sub validate_by_required {
         return 1;
     }
 }
+
+
+=head2 label
+
+  my $valid = $fieldsBase->validate_by_regex();
+
+=cut
 
 sub validate_by_regex {
     my ($self) = @_;
@@ -287,6 +460,13 @@ sub validate_by_regex {
     return 1;
 }
 
+
+=head2 validate_by_hook
+
+  my $valid = $fieldsBase->validate_by_hook();
+
+=cut
+
 sub validate_by_hook {
     my ($self) = @_;    
 
@@ -299,6 +479,22 @@ sub validate_by_hook {
 
 1;
 
+
+
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::MultipleBase
+
+=cut
+
+=head1 SYNOPSIS
+
+  use WebObvius::FormEngine::Fields::MultipleBase;
+
+=cut
+
 package WebObvius::FormEngine::Fields::MultipleBase;
 
 use strict;
@@ -308,6 +504,12 @@ use utf8;
 use WebObvius::FormEngine::Option;
 
 our @ISA = qw(WebObvius::FormEngine::Fields::Base);
+
+=head2 new
+
+  my $multipleBase = WebObvius::FormEngine::Fields::MultipleBase->new($form, $name, %data);
+
+=cut
 
 sub new {
     my ($package, $form, $name, %data) = @_;
@@ -488,6 +690,20 @@ sub validate_by_regex {
 
 1;
 
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::MultipleBase
+
+=cut
+
+=head1 SYNOPSIS
+
+  use WebObvius::FormEngine::Fields::MultipleBase;
+
+=cut
+
 package WebObvius::FormEngine::Fields::Hidden;
 
 use strict;
@@ -563,6 +779,13 @@ WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
 
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::MultipleBase
+
+=cut
+
 package WebObvius::FormEngine::Fields::Password;
 
 use strict;
@@ -584,6 +807,13 @@ WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
 
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::FileInput
+
+=cut
+
 package WebObvius::FormEngine::Fields::FileInput;
 
 use strict;
@@ -598,6 +828,13 @@ sub edit_component { "input.mason" }
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::TextArea
+
+=cut
 
 package WebObvius::FormEngine::Fields::TextArea;
 
@@ -614,6 +851,13 @@ WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
 
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::Radio
+
+=cut
+
 package WebObvius::FormEngine::Fields::Radio;
 
 use strict;
@@ -629,6 +873,13 @@ sub edit_component { "radio.mason" }
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::YesNo
+
+=cut
 
 package WebObvius::FormEngine::Fields::YesNo;
 
@@ -660,6 +911,13 @@ WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
 
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::CheckBox
+
+=cut
+
 package WebObvius::FormEngine::Fields::CheckBox;
 
 use strict;
@@ -674,6 +932,13 @@ sub type { "checkbox" }
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::Select
+
+=cut
 
 package WebObvius::FormEngine::Fields::Select;
 
@@ -690,6 +955,13 @@ WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
 
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::SelectMultiple
+
+=cut
+
 package WebObvius::FormEngine::Fields::SelectMultiple;
 
 use strict;
@@ -704,6 +976,13 @@ sub type { "select_multiple" }
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::Submit
+
+=cut
 
 package WebObvius::FormEngine::Fields::Submit;
 
@@ -769,6 +1048,13 @@ sub render_control {
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::EditEngine2
+
+=cut
 
 package WebObvius::FormEngine::Fields::EditEngine2;
 
@@ -848,6 +1134,15 @@ WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
 
+
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::Custom
+
+=cut
+
 package WebObvius::FormEngine::Fields::Custom;
 
 use strict;
@@ -875,6 +1170,14 @@ sub new {
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::CustomMultiple
+
+=cut
 
 package WebObvius::FormEngine::Fields::CustomMultiple;
 
@@ -908,6 +1211,13 @@ sub new {
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
+
+
+=head1 NAME
+
+  WebObvius::FormEngine::Fields::SubHeading
+
+=cut
 
 package WebObvius::FormEngine::Fields::SubHeading;
 
