@@ -331,6 +331,11 @@ sub new {
 sub options { shift->{options} }
 sub options_list { @{ shift->options } }
 
+sub cleaned_value {
+    my $self = shift;
+    my $v = $self->value;
+    return $self->is_multivalue ? $v : $v->[0]
+}
 sub value_list { @{ shift->value } }
 sub selected_map { return map { $_ => 1 } shift->value_list }
 
@@ -811,8 +816,17 @@ sub process_request {
     $self->SUPER::process_request($r);
 
     my $id = $self->name;
-    my $data = { $id => $self->value };
-    
+    my $data = {
+        $id => $self->value
+    };
+
+    # Copy in values from previous fields
+    foreach my $field ($self->form->field_list) {
+        my $name = $field->name;
+        last if($name eq $id);
+        $data->{$name} = $field->cleaned_value;
+    }
+
     foreach my $df (@{$self->{depends_on_fields} || []}) {
         my $field = $self->form->field($df);
         next unless($field);
@@ -872,6 +886,7 @@ our @ISA = qw(WebObvius::FormEngine::Fields::MultipleBase);
 
 sub type { "custommultiple" }
 sub edit_component { $_[0]->{edit_component} }
+sub is_multivalue { $_[0]->{is_multivalue} }
 
 sub new {
     my $package = shift;
@@ -883,6 +898,10 @@ sub new {
             "custom fields";
     }
 
+    unless($obj->{is_multivalue}) {
+        die "You must specify 'is_multivalue' for CustomMultiple fields ";
+    }
+    
     return bless($obj, $package);
 }
 

@@ -11,6 +11,7 @@ our @ISA = qw(WebObvius::FormEngine::Fields::MultipleBase);
 
 sub type { "groupselect" }
 sub edit_component { "groupselect.mason" }
+sub is_multivalue { 1 }
 
 sub new {
     my ($package, $form, $name, %data) = @_;
