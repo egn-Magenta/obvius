@@ -5,9 +5,9 @@ Obvius.GroupSelect = Obvius.GroupSelect || {};
     function merge_to_select(select, options) {
         if (options.length) {
             select.find("option").each(function() {
-                var txt = $(this).text().toLowerCase();
+                var txt = $(this).text().trim().toLowerCase();
                 while (options.length &&
-                       txt >= options[0].text().toLowerCase()) {
+                       txt >= options[0].text().trim().toLowerCase()) {
                     options.shift().insertBefore($(this));
                 }
                 return options.length > 0;
@@ -21,10 +21,21 @@ Obvius.GroupSelect = Obvius.GroupSelect || {};
     function filter_select(select, match) {
         match = match.toLowerCase();
         select.find("option").each(function() {
-            if ($(this).text().toLowerCase().indexOf(match) == -1) {
-                $(this).hide().removeAttr("selected");
+            var $option = $(this),
+                $parent = $option.parent(),
+                text = $option.text().trim().toLowerCase(),
+                matches = (text.indexOf(match) == -1);
+            if (matches) {
+                // Wrap in a hidden span element
+                if ($parent.prop("tagName").toLowerCase() != "span") {
+                    $option.wrap("<span>").parent().hide();
+                    $option.removeAttr("selected");
+                }
             } else {
-                $(this).show()
+                if ($parent.prop("tagName").toLowerCase() == "span") {
+                    $option.insertBefore($parent);
+                    $parent.remove();
+                }
             }
         });
     }
