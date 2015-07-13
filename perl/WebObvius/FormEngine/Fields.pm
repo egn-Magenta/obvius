@@ -295,7 +295,7 @@ sub required_marker {
 
 =cut
 
-sub required_message { "Dette felt er påkrævet" }
+sub required_message { $_[0]->form->translate("This field is required") }
 
 
 =head2 render_errors
@@ -420,7 +420,7 @@ sub validate_by_required {
     if($self->required && $self->is_empty) {
         $self->add_error($self->required_message);
         $self->form->add_error(
-            $self, "Feltet '%s' skal udfyldes", $self->label
+            $self, "The field '%s' must be specified", $self->label
         );
         return 0;
     } else {
@@ -442,13 +442,14 @@ sub validate_by_regex {
         unless($self->value =~ m{$regex}) {
             $self->add_error(
                 $self->{validate_regex_message} ||
-                'Den angivne værdi er ikke formateret korrekt'
+                'The specified value is not formatted correctly'
             );
             $self->form->add_error(
                 $self,
                 (
                     $self->{validate_regex_form_message} ||
-                    "Værdien i feltet '%s' er ikke udfyldt korrekt"
+                    ("The value of the field '%s' has not been filled " .
+                     "out correctly")
                 ),
                 $self->label
             );
@@ -549,9 +550,17 @@ sub default_list { @{ shift->default }}
 sub option_separator { "\n" }
 
 sub required_message {
-    shift->is_multivalue ?
-        "Du skal vælge mindst en værdi i dette felt" :
-        "Du skal vælge en værdi i dette felt"
+    my $self = shift;
+
+    if ($self->is_multivalue) {
+        return $self->form->translate(
+            "You must choose at least one value for this field"
+        )
+    } else {
+        return $self->form->translate(
+            "You must choose a value for this field"
+        )
+    }
 }
 
 sub next_id {
@@ -665,8 +674,10 @@ sub validate_by_regex {
             $self->add_error(
                 (
                     $self->{validate_regex_message} ||
-                    "Værdien '%s' i feltet '%s' er ikke formateret " .
-                    "korrekt."
+                    $self->form->translate(
+                        "The value '%s' for the field '%s' is not formatted " .
+                        "correctly."
+                    )
                 ),
                 $v,
                 $self->label
@@ -675,8 +686,10 @@ sub validate_by_regex {
                 $self,
                 (
                     $self->{validate_regex_form_message} ||
-                    "Værdien '%s' i feltet '%s' er ikke formateret " .
-                    "korrekt."
+                    $self->form->translate(
+                        "The value '%s' for the field '%s' is not formatted " .
+                        "correctly."
+                    )
                 ),
                 $v,
                 $self->label
