@@ -89,8 +89,9 @@ sub set_translation_lang {
     $lang = $lang_fallbacks{$lang} || $lang;
     Locale::Messages::nl_putenv("LANGUAGE=${lang}");
 
-    # Workaround for POSIX differences between mod_perl and standard
-    # perl.
+    # The POSIX implementation under mod_perl want a specific name for a
+    # locale that exists on the host machince before it allows the change,
+    # so we have to try the most likely candidates until one succeeds.
     my $result;
     foreach my $try ($lang, "${lang}.UTF8", "${lang}.ISO-8859-1") {
         $result = Locale::Messages::setlocale(
@@ -100,7 +101,7 @@ sub set_translation_lang {
     }
 
     unless($result && $result ne "C") {
-        die "Could not set language $lang. Is it available on the system?\n";
+        die "Could not set language $lang. Is it available on the system?";
     }
 
     $current_lang = $lang;
@@ -116,9 +117,6 @@ sub initialize_for_obvius {
     my $domain = $initialized{$perlname};
 
     unless(defined($domain)) {
-        # We want to use pure-perl since the other implementation is broken
-        # Locale::Messages->select_package("gettext_pp");
-
         # Old translations system should not initialize anything
         if($obvius->config->param('use_old_translation_system')) {
             $initialized{$perlname} = '';
