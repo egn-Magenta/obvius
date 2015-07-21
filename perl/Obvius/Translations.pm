@@ -117,6 +117,10 @@ sub initialize_for_obvius {
     my $domain = $initialized{$perlname};
 
     unless(defined($domain)) {
+        # The gettext_xs module does not respect changes in language under
+        # mod_perl, so use gettext_pp instead.
+        Locale::Messages->select_package("gettext_pp");
+
         # Old translations system should not initialize anything
         if($obvius->config->param('use_old_translation_system')) {
             $initialized{$perlname} = '';
