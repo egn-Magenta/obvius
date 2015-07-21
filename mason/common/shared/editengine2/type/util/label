@@ -32,7 +32,6 @@ use WebObvius::Tooltip qw(get_tooltip_path);
 sub t_label {
     my $key = shift;
     return $key unless($key);
-    print STDERR "key: '$key'\n";
     my $result = $m->scomp(
         '/shared/msg',
         text => 'editpagelabel:' . $key
