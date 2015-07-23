@@ -2,7 +2,7 @@
 <div style="height: 0px; width: 0px;" id="<% $name |h %>_tooltip"></div>
 %}
 % if (defined $subtitle) {
-<h4><& /shared/msg, text=>$subtitle &></h4>
+<h4><% t_label($subtitle) %></h4>
 % }
 % if (defined $name) {
 <label for="<% $name |h %>"><% t_label($label) %></label>
@@ -18,7 +18,7 @@
 <br />\
 % }
 % else {
-<& /shared/msg, text=>$label &><br />\
+<% t_label($label) %><br />\
 % }
 %
 <%args>
