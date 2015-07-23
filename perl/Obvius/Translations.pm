@@ -199,6 +199,10 @@ sub maketext_compile {
             push(@chunks, $output);
             $output = '';
         } elsif($1 eq ']') {
+            if ($group_open < 0) {
+                die sprintf("Unmatched closing bracket at position %s", $pos);
+            }
+
             # Add what was parsed so far to args
             push(@args, $output);
             $output = '';
