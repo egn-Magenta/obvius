@@ -8,6 +8,7 @@ use base qw(Exporter);
 
 use POSIX ();
 use Locale::Messages ();
+use Locale::Maketext;
 use Obvius::CharsetTools;
 
 our @EXPORT_OK = qw(
@@ -39,6 +40,11 @@ sub gettext {
     my $key = shift;
     $key = Obvius::CharsetTools::mixed2utf8($key);
     my $translation = Locale::Messages::gettext($key);
+
+    # If more arguments were specifed, assume we're dealing with a maketext
+    # encoded string.
+    $translation = maketext_compile($translation, @_) if (@_);
+
     return Encode::decode('utf8', $translation);
 }
 
@@ -143,6 +149,91 @@ sub initialize_for_obvius {
     }
 
     set_domain($domain) if($domain);
+}
+
+sub maketext_compile {
+    my ($input) = $_[0];
+
+    my $group_open = -1;
+    my @chunks;
+    my $output = '';
+    my $pos = 0;
+    my @args;
+
+    while($input =~  m/\G(
+        # Patterns taken from Locale::Maketext::Guts
+        [^\~\[\],]+  # non-~[] stuff
+        |
+        ~.       # ~[, ~], ~~, ~other
+        |
+        \[          # [ presumably opening a group
+        |
+        \]          # ] presumably closing a group
+        |
+        ~           # terminal ~ ?
+        |
+        $
+        # Not from Locale::Maketext::Guts:
+        |
+        ,           # unescaped ",", used to delimit args
+    )/xgs) {
+        if ($1 eq "[") {
+            if ($group_open >= 0) {
+                die sprintf(
+                    "Trying to open nested group at position %s " .
+                    "inside group starting at position %s.",
+                    $pos, $group_open
+                )
+            } else {
+                $group_open = $pos
+            }
+            push(@chunks, $output);
+            $output = '';
+        } elsif($1 eq '') {
+            if ($group_open >= 0) {
+                die sprintf(
+                    "Untermintaed group starting at position %s.",
+                    $group_open
+                )
+            }
+            push(@chunks, $output);
+            $output = '';
+        } elsif($1 eq ']') {
+            # Add what was parsed so far to args
+            push(@args, $output);
+            $output = '';
+            my $method = shift(@args);
+            unless($method) {
+                die sprintf("No args for group starting at %s", $group_open)
+            }
+            unless(grep { $method eq $_ } qw(quant numerate numf)) {
+                die "Unknown maketext method $method";
+            }
+            $output .= Locale::Maketext->$method(
+                map { $_ =~ m{^_(\d+)$} ? $_[$1] : $_ } @args
+            );
+            @args = ();
+            $group_open = -1;
+        } elsif($1 eq '~') {
+            # Single ~, only at string end?
+            $output .= $1;
+        } elsif(substr($1, 0, 1) eq '~') {
+            $output .= substr($1, 1, 1)
+        } elsif($1 eq ',') {
+            if ($group_open >= 0) {
+                push(@args, $output);
+                $output = ''
+            } else {
+                $output .= $1
+            }
+        } else {
+            $output .= $1
+        }
+
+        $pos += length($1);
+    }
+
+    return join("", @chunks);
 }
 
 1;
