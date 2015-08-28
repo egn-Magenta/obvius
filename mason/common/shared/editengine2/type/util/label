@@ -2,7 +2,7 @@
 <div style="height: 0px; width: 0px;" id="<% $name |h %>_tooltip"></div>
 %}
 % if (defined $subtitle) {
-<h4><% t_label($subtitle) %></h4>
+<h4><% t_subtitle($subtitle) %></h4>
 % }
 % if (defined $name) {
 <label for="<% $name |h %>"><% t_label($label) %></label>
@@ -37,6 +37,18 @@ sub t_label {
         text => 'editpagelabel:' . $key
     );
     if(!$result || $result =~ m{^editpagelabel:}) {
+        $result = $m->scomp('/shared/msg', text => $key);
+    }
+    return $result;
+}
+sub t_subtitle {
+    my $key = shift;
+    return $key unless($key);
+    my $result = $m->scomp(
+        '/shared/msg',
+        text => 'editpagesubtitle:' . $key
+    );
+    if(!$result || $result =~ m{^editpagesubtitle:}) {
         $result = $m->scomp('/shared/msg', text => $key);
     }
     return $result;

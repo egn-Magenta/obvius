@@ -61,6 +61,10 @@ sub extract {
                                 $self->add_entry(
                                     'editpagelabel:' . $v, $linenr
                                 );
+                            } elsif($k =~ m{^subtitle} and $v) {
+                                $self->add_entry(
+                                    'editpagesubtitle:' . $v, $linenr
+                                );
                             }
                         }
                     }
