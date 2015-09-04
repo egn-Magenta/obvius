@@ -1,0 +1,89 @@
+<& sso_login.mason:top_html, %ARGS, title => $m->scomp(
+    'translator',
+    da => "Fejl i IP-check ved SSO-login",
+    en => "IP-mismatch during SSO login"
+) &>
+<p>
+    <& translator,
+        da => "Dit login er blevet afvist da IP-adressen du bruger til at " .
+              "tilgå",
+        en => "Your login has been denied due to the IP-address you are " .
+              "using to access "
+    &><br />
+    <a href="<% $origin |h %>"><% $origin |h %></a><br />
+    <& translator,
+        da => "med er ikke den samme IP-adresse du bruger til at tilgå " .
+              "login-systemet på adressen",
+        en => "not being the same IP-address used to access the login " .
+               "system at"
+    &><br />
+    <a href="<% $login_url |h %>"><% $login_url |h %></a>.
+</p>
+<p>
+<& translator,
+    da => "Kontakt din IT-afdeling for at sikre at din browser bruger den ".
+          "samme kilde-adresse når den tilgår de to URL'er",
+    en => "Contact your IT-department to make sure your browser uses the " .
+          "same source IP-address when connecting to the two URLs"
+&>.
+</p>
+<p>
+    <h3>Information:</h3>
+    <ul style="text-align: left; width: 90%; margin-left: 5%">
+        <li>
+            <strong><& translator,
+                    da => "CMS adresse der blev forsøgt login til",
+                    en => "CMS address tried to log in to"
+            &></strong><br />
+            <% $origin %>
+        </li>
+        <li>
+            <strong><& translator,
+                    da => "Adresse på login-system",
+                    en => "Login system address"
+            &></strong><br />
+            <% $login_url %>
+        </li>
+        <li>
+            <strong><& translator,
+                    da => "IP-adresse brugt til at tilgå CMS",
+                    en => "IP-address used to access the CMS"
+            &></strong><br />
+            <% ($r->param('client_ip') || '-') |h %>
+        </li>
+        <li>
+            <strong><& translator,
+                    da => "IP-netværk brugt til at tilgå login-system",
+                    en => "IP-network used to access the login-system"
+            &></strong><br />
+            <% $match_ip |h %>
+        </li>
+        <li>
+            <strong><& translator,
+                    da => "IP-adresse brugt til at tilgå denne side",
+                    en => "IP-address used to access this page"
+            &></strong><br />
+            <% WebObvius::Login::MiniSSO::get_origin_ip_from_request($r) |h %>
+        </li>
+    </ul>
+</p>
+<div style="margin-bottom: 1em;">
+    <a href="sso_login.mason?origin=<% $origin %>"><& translator,
+        da => "Klik her for at forsøge at logge ind igen",
+        en => "Click here to try logging in again"
+    &></a>
+</div>
+<& sso_login.mason:bottom_html, %ARGS &>
+<%once>
+use WebObvius::Login::MiniSSO;
+</%once>
+<%init>
+my $origin = $r->param('origin') || '-';
+my $login_url = 'https://' . $r->hostname . '/system/sso_login.mason';
+my $match_ip = $r->param('match_ip') || '-';
+if ($match_ip) {
+    $match_ip .= '.*';
+} else {
+    $match_ip = '-';
+}
+</%init>
