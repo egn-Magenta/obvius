@@ -1,30 +1,31 @@
 <& sso_login.mason:top_html, %ARGS, title => $m->scomp(
     'translator',
     da => "Fejl i IP-check ved SSO-login",
-    en => "IP-mismatch during SSO login"
+    en => "Problem with login"
 ) &>
+
 <p>
     <& translator,
         da => "Dit login er blevet afvist da IP-adressen du bruger til at " .
               "tilgå",
-        en => "Your login has been denied due to the IP-address you are " .
-              "using to access "
+        en => "There was a conflict with determining the IP-address used " .
+              "during login. The IP-address using to access "
     &><br />
     <a href="<% $origin |h %>"><% $origin |h %></a><br />
     <& translator,
         da => "med er ikke den samme IP-adresse du bruger til at tilgå " .
               "login-systemet på adressen",
-        en => "not being the same IP-address used to access the login " .
+        en => "is not the same as the IP-address used to access the login " .
                "system at"
     &><br />
     <a href="<% $login_url |h %>"><% $login_url |h %></a>.
 </p>
+
 <p>
 <& translator,
-    da => "Kontakt din IT-afdeling for at sikre at din browser bruger den ".
-          "samme kilde-adresse når den tilgår de to URL'er",
-    en => "Contact your IT-department to make sure your browser uses the " .
-          "same source IP-address when connecting to the two URLs"
+    da => "Skriv venligst en e-mail til $support_link, " .
+          "der indeholder nedenstående informationer",
+    en => "Please write an email to $support_link with the information below"
 &>.
 </p>
 <p>
@@ -85,5 +86,14 @@ if ($match_ip) {
     $match_ip .= '.*';
 } else {
     $match_ip = '-';
+}
+my $support_link;
+if ($m->comp_exists('site_settings.mason:support_link')) {
+    $support_link = $m->scomp('site_settings.mason:support_link');
+} else {
+    $support_link = $m->scomp('translator',
+        da => "din IT-support",
+        en => "your IT support"
+    );
 }
 </%init>
