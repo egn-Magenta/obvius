@@ -1,0 +1,1766 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2015 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Act."
+msgstr "Act."
+
+msgid "Add"
+msgstr "Add"
+
+msgid "Add item"
+msgstr "Add item"
+
+msgid "Added"
+msgstr "Added"
+
+msgid "Administration"
+msgstr "Administration"
+
+msgid "Advanced"
+msgstr "Advanced"
+
+msgid "All lang."
+msgstr "All lang."
+
+msgid "Also copy subdocuments"
+msgstr "Also copy subdocuments"
+
+msgid "Also delete subdocuments"
+msgstr "Also delete subdocuments"
+
+msgid "Annotation"
+msgstr "Annotation"
+
+msgid "Are you sure you want to copy these"
+msgstr "Are you sure you want to copy these"
+
+msgid "Are you sure you want to delete the field"
+msgstr "Are you sure you want to delete the field"
+
+msgid "Are you sure you want to delete these"
+msgstr "Are you sure you want to delete these"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Box"
+msgstr "Box"
+
+msgid "Change document type"
+msgstr "Change document type"
+
+msgid "Changed"
+msgstr "Changed"
+
+msgid "Click here to download collected form data in Excel format"
+msgstr "Click here to download collected form data in Excel format"
+
+msgid "Compare to"
+msgstr "Compare to"
+
+msgid "Component missing for type"
+msgstr "Component missing for type"
+
+msgid "Copy document"
+msgstr "Copy document"
+
+msgid "Created by"
+msgstr "Created by"
+
+msgid "Current value"
+msgstr "Current value"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Default look"
+msgstr "Default look"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Delete document"
+msgstr "Delete document"
+
+msgid "Destination"
+msgstr "Destination"
+
+msgid ""
+"Doctypes marked with (*) are normally resticted in this area, but are "
+"visible to users with admin-rights."
+msgstr ""
+"Doctypes marked with (*) are normally resticted in this area, but are "
+"visible to users with admin-rights."
+
+msgid "Document"
+msgstr "Document"
+
+msgid "Document information"
+msgstr "Document information"
+
+msgid "Document type"
+msgstr "Document type"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "End"
+msgstr "End"
+
+msgid "End comparison"
+msgstr "End comparison"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Error: This proxy-document loops (i.e. it fetches itself). Stopped."
+msgstr "Error: This proxy-document loops (i.e. it fetches itself). Stopped."
+
+msgid "Fields marked with"
+msgstr "Fields marked with"
+
+msgid "Find"
+msgstr "Find"
+
+msgid "First"
+msgstr "First"
+
+msgid "Flush XML file"
+msgstr "Flush XML file"
+
+msgid "Flush cache"
+msgstr "Flush cache"
+
+msgid "Flush cache now"
+msgstr "Flush cache now"
+
+msgid "Forward"
+msgstr "Forward"
+
+msgid "From"
+msgstr "From"
+
+msgid "Group"
+msgstr "Group"
+
+msgid "Help"
+msgstr "Help"
+
+msgid "Hide"
+msgstr "Hide"
+
+msgid "Hide this version"
+msgstr "Hide this version"
+
+msgid "Image"
+msgstr "Image"
+
+msgid "Information"
+msgstr "Information"
+
+msgid "Instead of deleting the document, you may want to"
+msgstr "Instead of deleting the document, you may want to"
+
+msgid "Item"
+msgstr "Item"
+
+msgid "Kopier dokumentparametre"
+msgstr "Kopier dokumentparametre"
+
+msgid "La."
+msgstr "La."
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Last"
+msgstr "Last"
+
+msgid "Link to admin"
+msgstr "Link to admin"
+
+msgid "Link to public website"
+msgstr "Link to public website"
+
+msgid "Manual subscription for this document"
+msgstr "Manual subscription for this document"
+
+msgid "Move"
+msgstr "Move"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Navigation"
+msgstr "Navigation"
+
+msgid "Navigator"
+msgstr "Navigator"
+
+msgid "New"
+msgstr "New"
+
+msgid "New document"
+msgstr "New document"
+
+msgid "New language"
+msgstr "New language"
+
+msgid "New uri"
+msgstr "New uri"
+
+msgid "Newsbox documents here"
+msgstr "Newsbox documents here"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "Next page"
+msgstr "Next page"
+
+msgid "No"
+msgstr "No"
+
+msgid "No content. Perhaps the page uses FRAMES?"
+msgstr "No content. Perhaps the page uses FRAMES?"
+
+msgid "No keywords created yet"
+msgstr "No keywords created yet"
+
+msgid "No link"
+msgstr "No link"
+
+msgid "No."
+msgstr "No."
+
+msgid "None"
+msgstr "None"
+
+msgid "Not published"
+msgstr "Not published"
+
+msgid "Not registered"
+msgstr "Not registered"
+
+msgid "Notice"
+msgstr "Notice"
+
+msgid "Obs, fejl i udfyldningen af formularen"
+msgstr "Obs, fejl i udfyldningen af formularen"
+
+msgid "ObviusLinkDocumentExplanation"
+msgstr "ObviusLinkDocumentExplanation"
+
+msgid "ObviusRSSFeedExplanation"
+msgstr "ObviusRSSFeedExplanation"
+
+msgid "Ok"
+msgstr "Ok"
+
+msgid "Owner"
+msgstr "Owner"
+
+msgid "Path"
+msgstr "Path"
+
+msgid "Perform"
+msgstr "Perform"
+
+msgid "Please click the field name to correct the entry in the form below"
+msgstr "Please click the field name to correct the entry in the form below"
+
+msgid ""
+"Please remember that if you delete the document, all versions will be "
+"deleted, and it can not be recovered"
+msgstr ""
+"Please remember that if you delete the document, all versions will be "
+"deleted, and it can not be recovered"
+
+msgid "Previous"
+msgstr "Previous"
+
+msgid "Previous page"
+msgstr "Previous page"
+
+msgid "Publ."
+msgstr "Publ."
+
+msgid "Public"
+msgstr "Public"
+
+msgid "Published"
+msgstr "Published"
+
+msgid "Remove"
+msgstr "Remove"
+
+msgid "Removed"
+msgstr "Removed"
+
+msgid "Rename"
+msgstr "Rename"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Save changes"
+msgstr "Save changes"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Select"
+msgstr "Select"
+
+msgid "Send"
+msgstr "Send"
+
+msgid "Sequence number"
+msgstr "Sequence number"
+
+msgid "Show complete list"
+msgstr "Show complete list"
+
+msgid "Show document address"
+msgstr "Show document address"
+
+msgid "Sitemap"
+msgstr "Sitemap"
+
+msgid "Sorry, nothing here."
+msgstr "Sorry, nothing here."
+
+msgid "Sort"
+msgstr "Sort"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Subject"
+msgstr "Subject"
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Text"
+msgstr "Text"
+
+msgid "The XHTML in this field will be validated when you save the document"
+msgstr "The XHTML in this field will be validated when you save the document"
+
+msgid "The content below was fetched from"
+msgstr "The content below was fetched from"
+
+msgid "Time"
+msgstr "Time"
+
+msgid "To"
+msgstr "To"
+
+msgid "To add newsboxes, create"
+msgstr "To add newsboxes, create"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Universal access rules"
+msgstr "Universal access rules"
+
+msgid "Up"
+msgstr "Up"
+
+msgid "Upload-document"
+msgstr "Upload-document"
+
+msgid ""
+"Usually it is not necessary to flush the cache by hand, as the cache is "
+"automatically invalidated at the appropriate times. However, sometimes it is "
+"nice to be able to do so anyhow."
+msgstr ""
+"Usually it is not necessary to flush the cache by hand, as the cache is "
+"automatically invalidated at the appropriate times. However, sometimes it is "
+"nice to be able to do so anyhow."
+
+msgid "Validate field"
+msgstr "Validate field"
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Versions"
+msgstr "Versions"
+
+msgid "Vælg bruger"
+msgstr "Vælg bruger"
+
+msgid "Yes"
+msgstr "Yes"
+
+msgid ""
+"You are about to copy this document and all the documents beneath it, in "
+"total"
+msgstr ""
+"You are about to copy this document and all the documents beneath it, in "
+"total"
+
+msgid ""
+"You are about to delete this document and all the documents beneath it, in "
+"total"
+msgstr ""
+"You are about to delete this document and all the documents beneath it, in "
+"total"
+
+msgid ""
+"You can only enter unique values in the following fields, and the values you "
+"have entered have already been registered"
+msgstr ""
+"You can only enter unique values in the following fields, and the values you "
+"have entered have already been registered"
+
+msgid "You will need to correct the entries in the following fields"
+msgstr "You will need to correct the entries in the following fields"
+
+msgid "all fields from all versions included"
+msgstr "all fields from all versions included"
+
+msgid "are required"
+msgstr "are required"
+
+msgid "documents"
+msgstr "documents"
+
+msgid "documents to"
+msgstr "documents to"
+
+msgid "has been entered"
+msgstr "has been entered"
+
+msgid "hasn't been entered"
+msgstr "hasn't been entered"
+
+msgid "lang_notification:msg1"
+msgstr "lang_notification:msg1"
+
+msgid "lang_notification:msg2"
+msgstr "lang_notification:msg2"
+
+msgid "lang_notification:msg3"
+msgstr "lang_notification:msg3"
+
+msgid "lang_notification:msg4"
+msgstr "lang_notification:msg4"
+
+msgid "lang_notification:msg5"
+msgstr "lang_notification:msg5"
+
+msgid "lang_notification:msg6"
+msgstr "lang_notification:msg6"
+
+msgid "lang_notification:msg7"
+msgstr "lang_notification:msg7"
+
+msgid "lang_notification:msg8"
+msgstr "lang_notification:msg8"
+
+msgid "merely hide it"
+msgstr "merely hide it"
+
+msgid "no"
+msgstr "no"
+
+msgid "or, upload text-file"
+msgstr "or, upload text-file"
+
+msgid "previous"
+msgstr "previous"
+
+msgid "public"
+msgstr "public"
+
+msgid "show all"
+msgstr "show all"
+
+msgid "to"
+msgstr "to"
+
+msgid "value"
+msgstr "value"
+
+msgid "word(s)"
+msgstr "word(s)"
+
+msgid "yes"
+msgstr "yes"
+
+msgid "FormDoctype:Dear"
+msgstr "Dear"
+
+msgid "FormDoctype:formular"
+msgstr "Form"
+
+msgid "FormDoctype:id"
+msgstr "ID"
+
+msgid "FormDoctype:tastede"
+msgstr "Registered information"
+
+# Imported from old translations
+msgid " and "
+msgstr " and "
+
+# Imported from old translations
+msgid " subdocuments"
+msgstr " subdocuments"
+
+# Imported from old translations
+msgid "(and all its subdocuments) has been copied successfully to"
+msgstr "(and all its subdocuments) has been copied successfully to"
+
+# Imported from old translations
+msgid "(here)"
+msgstr "(here)"
+
+# Imported from old translations
+msgid "A document already exists with the selected name"
+msgstr "A document already exists with the selected name"
+
+# Imported from old translations
+msgid "Aborted"
+msgstr "Aborted"
+
+# Imported from old translations
+msgid "Access rules"
+msgstr "Access rules"
+
+# Imported from old translations
+msgid "Add new"
+msgstr "Add new"
+
+# Imported from old translations
+msgid "Add new field:"
+msgstr "Add new field:"
+
+# Imported from old translations
+msgid "Addition"
+msgstr "Addition"
+
+# Imported from old translations
+msgid "Address"
+msgstr "Address"
+
+# Imported from old translations
+msgid "All fields"
+msgstr "All fields"
+
+# Imported from old translations
+msgid "Alternative search-form (leave empty for default)"
+msgstr "Alternative search-form (leave empty for default)"
+
+# Imported from old translations
+msgid "Always last"
+msgstr "Always last"
+
+# Imported from old translations
+msgid "Author"
+msgstr "Author"
+
+# Imported from old translations
+msgid "Automatic"
+msgstr "Automatic"
+
+# Imported from old translations
+msgid "Base of search"
+msgstr "Base of search"
+
+# Imported from old translations
+msgid "Base of sitemap"
+msgstr "Base of sitemap"
+
+# Imported from old translations
+msgid "Box-status updated"
+msgstr "Box-status updated"
+
+# Imported from old translations
+msgid "By moderator"
+msgstr "By moderator"
+
+# Imported from old translations
+msgid "Cache flush cancelled"
+msgstr "Cache flush cancelled"
+
+# Imported from old translations
+msgid "Cache flushed"
+msgstr "Cache flushed"
+
+# Imported from old translations
+msgid "Calculated access rules"
+msgstr "Calculated access rules"
+
+# Imported from old translations
+msgid "Can not move document under itself"
+msgstr "Can not move document under itself"
+
+# Imported from old translations
+msgid "Can not recursively copy a document underneath itself"
+msgstr "Can not recursively copy a document underneath itself"
+
+# Imported from old translations
+msgid "Can't move last item down, sorry"
+msgstr "Can't move last item down, sorry"
+
+# Imported from old translations
+msgid "Can't move top item up, sorry"
+msgstr "Can't move top item up, sorry"
+
+# Imported from old translations
+msgid "Cancel"
+msgstr "Cancel"
+
+# Imported from old translations
+msgid "Categories"
+msgstr "Categories"
+
+# Imported from old translations
+msgid "Change type cancelled"
+msgstr "Change type cancelled"
+
+# Imported from old translations
+msgid "Changes to box saved"
+msgstr "Changes to box saved"
+
+# Imported from old translations
+msgid "Checkboxes"
+msgstr "Checkboxes"
+
+# Imported from old translations
+msgid "Choose the appropriate keywords for this document"
+msgstr "Choose the appropriate keywords for this document"
+
+# Imported from old translations
+msgid "Chronological"
+msgstr "Chronological"
+
+# Imported from old translations
+msgid "Classification and keywords"
+msgstr "Classification and keywords"
+
+# Imported from old translations
+msgid "Click here to download collected form data in XML format"
+msgstr "Click here to download collected form data in XML format"
+
+# Imported from old translations
+msgid "Cols"
+msgstr "Cols"
+
+# Imported from old translations
+msgid "ComboSearch"
+msgstr "ComboSearch"
+
+# Imported from old translations
+msgid "Command"
+msgstr "Command"
+
+# Imported from old translations
+msgid "Command not stored"
+msgstr "Command not stored"
+
+# Imported from old translations
+msgid "Command queue"
+msgstr "Command queue"
+
+# Imported from old translations
+msgid "Component"
+msgstr "Component"
+
+# Imported from old translations
+msgid "Component not found for document type"
+msgstr "Component not found for document type"
+
+# Imported from old translations
+msgid "Contributors"
+msgstr "Contributors"
+
+# Imported from old translations
+msgid "Copy"
+msgstr "Copy"
+
+# Imported from old translations
+msgid "Copy cancelled"
+msgstr "Copy cancelled"
+
+# Imported from old translations
+msgid "Copy of"
+msgstr "Copy of"
+
+# Imported from old translations
+msgid "Could not create document"
+msgstr "Could not create document"
+
+# Imported from old translations
+msgid "Could not create entry"
+msgstr "Could not create entry"
+
+# Imported from old translations
+msgid "Could not create new version"
+msgstr "Could not create new version"
+
+# Imported from old translations
+msgid "Could not create storage object"
+msgstr "Could not create storage object"
+
+# Imported from old translations
+msgid "Could not delete document "
+msgstr "Could not delete document "
+
+# Imported from old translations
+msgid "Could not get document"
+msgstr "Could not get document"
+
+# Imported from old translations
+msgid "Could not get version"
+msgstr "Could not get version"
+
+# Imported from old translations
+msgid "Could not hide version"
+msgstr "Could not hide version"
+
+# Imported from old translations
+msgid "Could not register type"
+msgstr "Could not register type"
+
+# Imported from old translations
+msgid "Could not update box-status"
+msgstr "Could not update box-status"
+
+# Imported from old translations
+msgid "Could not update type"
+msgstr "Could not update type"
+
+# Imported from old translations
+msgid "Create"
+msgstr "Create"
+
+# Imported from old translations
+msgid "Create new"
+msgstr "Create new"
+
+# Imported from old translations
+msgid "CreateDocument"
+msgstr "CreateDocument"
+
+# Imported from old translations
+msgid "Creation cancelled"
+msgstr "Creation cancelled"
+
+# Imported from old translations
+msgid "Current capabilities"
+msgstr "Current capabilities"
+
+# Imported from old translations
+msgid "Current document"
+msgstr "Current document"
+
+# Imported from old translations
+msgid "DBSearch"
+msgstr "Database Search"
+
+# Imported from old translations
+msgid "Danish"
+msgstr "Danish"
+
+# Imported from old translations
+msgid "Date (YYYY-MM-DD)"
+msgstr "Date (YYYY-MM-DD)"
+
+# Imported from old translations
+msgid "Date (yyyy-mm-dd)"
+msgstr "Date (yyyy-mm-dd)"
+
+# Imported from old translations
+msgid "Delete cancelled"
+msgstr "Delete cancelled"
+
+# Imported from old translations
+msgid "Description/explanation"
+msgstr "Description/explanation"
+
+# Imported from old translations
+msgid "Destination document"
+msgstr "Destination document"
+
+# Imported from old translations
+msgid "Display"
+msgstr "Display"
+
+# Imported from old translations
+msgid "Display all items"
+msgstr "Display all items"
+
+# Imported from old translations
+msgid "Display first items only"
+msgstr "Display first items only"
+
+# Imported from old translations
+msgid "Display-only"
+msgstr "Display-only"
+
+# Imported from old translations
+msgid "Document already exists"
+msgstr "Document already exists"
+
+# Imported from old translations
+msgid "Document creation"
+msgstr "Document creation"
+
+# Imported from old translations
+msgid "Document moved from"
+msgstr "Document moved from"
+
+msgid "Document names can not contain \"/\" characters, sorry"
+msgstr "Document names can not contain \"/\" characters, sorry"
+
+# Imported from old translations
+msgid "Document parameters"
+msgstr "Document parameters"
+
+# Imported from old translations
+msgid "Document renamed"
+msgstr "The document has been renamed."
+
+# Imported from old translations
+msgid "Document updated"
+msgstr "Document updated"
+
+# Imported from old translations
+msgid "Dutch"
+msgstr "Dutch"
+
+# Imported from old translations
+msgid "Edit"
+msgstr "Edit"
+
+# Imported from old translations
+msgid "Edit cancelled"
+msgstr "Edit cancelled"
+
+# Imported from old translations
+msgid "Edit category"
+msgstr "Edit category"
+
+# Imported from old translations
+msgid "Edit comment"
+msgstr "Edit comment"
+
+# Imported from old translations
+msgid "Edit keyword"
+msgstr "Edit keyword"
+
+# Imported from old translations
+msgid "Edit option"
+msgstr "Edit option"
+
+# Imported from old translations
+msgid "Edit validaterule"
+msgstr "Edit validaterule"
+
+# Imported from old translations
+msgid "Editor not found"
+msgstr "Editor not found"
+
+# Imported from old translations
+msgid "Email sent to"
+msgstr "Email sent to"
+
+# Imported from old translations
+msgid "Emailadresse data skal sendes til ved udfyldning (optional)"
+msgstr "Email-address data should be mailed to (optional)"
+
+# Imported from old translations
+msgid "English"
+msgstr "English"
+
+# Imported from old translations
+msgid "Error message"
+msgstr "Error message"
+
+# Imported from old translations
+msgid "Expiring"
+msgstr "Expiring"
+
+# Imported from old translations
+msgid ""
+"Failed to copy document to destination, document may only contain "
+"alpanumeric characters, dot(.), dash(-), and underscore(_)."
+msgstr ""
+"Failed to copy document to destination, document may only contain "
+"alpanumeric characters, dot(.), dash(-), and underscore(_)."
+
+# Imported from old translations
+msgid "Field width"
+msgstr "Field width"
+
+# Imported from old translations
+msgid "Fieldname"
+msgstr "Fieldname"
+
+# Imported from old translations
+msgid "Fieldset"
+msgstr "Fieldset"
+
+# Imported from old translations
+msgid "Fieldset End"
+msgstr "Fieldset End"
+
+# Imported from old translations
+msgid "Finnish"
+msgstr "Finnish"
+
+# Imported from old translations
+msgid "Flush"
+msgstr "Flush"
+
+# Imported from old translations
+msgid "Form"
+msgstr "Form"
+
+# Imported from old translations
+msgid "Free text search"
+msgstr "Free text search"
+
+# Imported from old translations
+msgid "French"
+msgstr "French"
+
+# Imported from old translations
+msgid "German"
+msgstr "German"
+
+# Imported from old translations
+msgid "Greek"
+msgstr "Greek"
+
+# Imported from old translations
+msgid "Group data"
+msgstr "Group data"
+
+# Imported from old translations
+msgid "Groups"
+msgstr "Groups"
+
+# Imported from old translations
+msgid "HTML and pictures"
+msgstr "HTML and pictures"
+
+# Imported from old translations
+msgid ""
+"HTML::Diff is missing from the server. Version comparison is not available."
+msgstr ""
+"HTML::Diff is missing from the server. Version comparison is not available."
+
+# Imported from old translations
+msgid "Has been filled"
+msgstr "Has been filled"
+
+# Imported from old translations
+msgid "Has not been filled"
+msgstr "Has not been filled"
+
+# Imported from old translations
+msgid "Hide cancelled"
+msgstr "Hide cancelled"
+
+# Imported from old translations
+msgid "High priority"
+msgstr "High priority"
+
+# Imported from old translations
+msgid "If.."
+msgstr "If.."
+
+# Imported from old translations
+msgid "Image-file"
+msgstr "Image-file"
+
+# Imported from old translations
+msgid "Include in subscription"
+msgstr "Include in subscription"
+
+# Imported from old translations
+msgid "Include subscription when publishing"
+msgstr "Include subscription when publishing"
+
+# Imported from old translations
+msgid "Inherited document parameters"
+msgstr "Inherited document parameters"
+
+# Imported from old translations
+msgid "Invalid data"
+msgstr "Invalid data"
+
+# Imported from old translations
+msgid "Invalid data entered, please correct."
+msgstr "Invalid data entered, please correct."
+
+# Imported from old translations
+msgid "Italian"
+msgstr "Italian"
+
+# Imported from old translations
+msgid "KeywordSearch"
+msgstr "KeywordSearch"
+
+# Imported from old translations
+msgid "Keywords"
+msgstr "Keywords"
+
+# Imported from old translations
+msgid "Kopier fra"
+msgstr "Copy from:"
+
+# Imported from old translations
+msgid "Levels"
+msgstr "Levels"
+
+# Imported from old translations
+msgid "Low priority"
+msgstr "Low priority"
+
+# Imported from old translations
+msgid "Mandatory"
+msgstr "Mandatory"
+
+# Imported from old translations
+msgid "Mandatory:"
+msgstr "Mandatory:"
+
+# Imported from old translations
+msgid "Manual"
+msgstr "Manual"
+
+# Imported from old translations
+msgid "Manual placement"
+msgstr "Manual placement"
+
+# Imported from old translations
+msgid "Maximum length"
+msgstr "Maximum length"
+
+# Imported from old translations
+msgid "Maximum length of teasers"
+msgstr "Maximum length of teasers"
+
+# Imported from old translations
+msgid "Move cancelled"
+msgstr "Move cancelled"
+
+# Imported from old translations
+msgid "New Image"
+msgstr "New image"
+
+# Imported from old translations
+msgid "New Upload"
+msgstr "New Upload"
+
+# Imported from old translations
+msgid "New category"
+msgstr "New category"
+
+# Imported from old translations
+msgid "New document cancelled"
+msgstr "New document cancelled"
+
+# Imported from old translations
+msgid "New language cancelled"
+msgstr "New language cancelled"
+
+# Imported from old translations
+msgid "New version created"
+msgstr "New version created"
+
+# Imported from old translations
+msgid "News item"
+msgstr "News item"
+
+# Imported from old translations
+msgid "Newsbox"
+msgstr "Newsbox"
+
+# Imported from old translations
+msgid "No limit"
+msgstr "No limit"
+
+# Imported from old translations
+msgid "No such application"
+msgstr "No such application"
+
+# Imported from old translations
+msgid "No version to compare with specified."
+msgstr "No version to compare with specified."
+
+# Imported from old translations
+msgid "Not on list"
+msgstr "Not on list"
+
+# Imported from old translations
+msgid "Now editing a new document named"
+msgstr "Now editing a new document named"
+
+# Imported from old translations
+msgid "Number of entries in news box"
+msgstr "Number of entries in news box"
+
+# Imported from old translations
+msgid "Number of subdocuments on one page"
+msgstr "Number of subdocuments on one page"
+
+# Imported from old translations
+msgid "Numbers only"
+msgstr "Numbers only"
+
+# Imported from old translations
+msgid "Options:"
+msgstr "Options:"
+
+# Imported from old translations
+msgid "Order of succession"
+msgstr "Order of succession"
+
+# Imported from old translations
+msgid "OrderForm"
+msgstr "OrderForm"
+
+# Imported from old translations
+msgid "Password"
+msgstr "Password"
+
+msgid "Path must start and end with a \"/\" character"
+msgstr "Path must start and end with a \"/\" character"
+
+# Imported from old translations
+msgid "Please choose a function to perform"
+msgstr "Please choose a function to perform"
+
+# Imported from old translations
+msgid "Please select one or more subdocuments for batch operation"
+msgstr "Please select one or more subdocuments for batch operation"
+
+# Imported from old translations
+msgid "Portuguese"
+msgstr "Portuguese"
+
+# Imported from old translations
+msgid "Predefined validations"
+msgstr "Predefined validations"
+
+# Imported from old translations
+msgid "Prefix for documents names"
+msgstr "Prefix for documents names"
+
+# Imported from old translations
+msgid "Preview"
+msgstr "Preview"
+
+# Imported from old translations
+msgid "Publish"
+msgstr "Publish"
+
+# Imported from old translations
+msgid "Publish at"
+msgstr "Publish at"
+
+# Imported from old translations
+msgid "Publish cancelled"
+msgstr "Publish cancelled"
+
+# Imported from old translations
+msgid "Publish document"
+msgstr "Publish document"
+
+# Imported from old translations
+msgid "Publish mode"
+msgstr "Publish mode"
+
+# Imported from old translations
+msgid "Radiobuttons"
+msgstr "Radiobuttons"
+
+# Imported from old translations
+msgid "Re-enter"
+msgstr "Re-enter"
+
+# Imported from old translations
+msgid "Reference"
+msgstr "Reference"
+
+# Imported from old translations
+msgid "Rename cancelled"
+msgstr "Rename cancelled"
+
+# Imported from old translations
+msgid "Reverse chronological"
+msgstr "Reverse chronological"
+
+# Imported from old translations
+msgid "Rows"
+msgstr "Rows"
+
+# Imported from old translations
+msgid "Rule applies"
+msgstr "Rule applies"
+
+# Imported from old translations
+msgid "Rule does not apply"
+msgstr "Rule does not apply"
+
+# Imported from old translations
+msgid "Rule invalid"
+msgstr "Rule invalid"
+
+# Imported from old translations
+msgid "Rules updated"
+msgstr "Rules updated"
+
+# Imported from old translations
+msgid "Search information"
+msgstr "Search information"
+
+# Imported from old translations
+msgid "Select classification codes"
+msgstr "Select classification codes"
+
+# Imported from old translations
+msgid "Select function"
+msgstr "Select function"
+
+# Imported from old translations
+msgid "Select multiple"
+msgstr "Select multiple"
+
+# Imported from old translations
+msgid "Send cancelled"
+msgstr "Send cancelled"
+
+# Imported from old translations
+msgid "Send email to"
+msgstr "Send email to"
+
+# Imported from old translations
+msgid "Sender in subscription emails"
+msgstr "Sender in subscription emails"
+
+# Imported from old translations
+msgid "Short title"
+msgstr "Short title"
+
+# Imported from old translations
+msgid "Show date"
+msgstr "Show date"
+
+# Imported from old translations
+msgid "Show date on subdocuments"
+msgstr "Show date on subdocuments"
+
+# Imported from old translations
+msgid "Show dates?"
+msgstr "Show dates?"
+
+# Imported from old translations
+msgid "Show in menu"
+msgstr "Show in menu"
+
+# Imported from old translations
+msgid "Show news"
+msgstr "Show news"
+
+# Imported from old translations
+msgid "Show subdocuments"
+msgstr "Show subdocuments"
+
+# Imported from old translations
+msgid "Show teaser"
+msgstr "Show teaser"
+
+# Imported from old translations
+msgid "Show teaser on subdocuments"
+msgstr "Show teaser on subdocuments"
+
+# Imported from old translations
+msgid "Show teasers?"
+msgstr "Show teasers?"
+
+# Imported from old translations
+msgid "Show title"
+msgstr "Show title"
+
+# Imported from old translations
+msgid "Sort order of sub documents - sort according to"
+msgstr "Sort order of sub documents - sort according to"
+
+# Imported from old translations
+msgid "Source"
+msgstr "Source"
+
+# Imported from old translations
+msgid "Spanish"
+msgstr "Spanish"
+
+# Imported from old translations
+msgid "Start editing"
+msgstr "Start editing"
+
+# Imported from old translations
+msgid "Subdocuments"
+msgstr "Subdocuments"
+
+# Imported from old translations
+msgid "Subscribe"
+msgstr "Subscribe"
+
+# Imported from old translations
+msgid "Subscriber"
+msgstr "Subscriber"
+
+# Imported from old translations
+msgid "Subscription"
+msgstr "Subscription"
+
+# Imported from old translations
+msgid "Subscription data"
+msgstr "Subscription data"
+
+# Imported from old translations
+msgid "Subscription data and display"
+msgstr "Subscription data and display"
+
+# Imported from old translations
+msgid "Subscription possibility"
+msgstr "Subscription possibility"
+
+# Imported from old translations
+msgid "Subscriptions"
+msgstr "Subscriptions"
+
+# Imported from old translations
+msgid "Suspended"
+msgstr "Suspended"
+
+# Imported from old translations
+msgid "Swedish"
+msgstr "Swedish"
+
+# Imported from old translations
+msgid "Teaser (filled out)"
+msgstr ""
+"Teaser (if this field is filled out, the text will replace the text above "
+"the checkboxes)"
+
+# Imported from old translations
+msgid "Tekst der vises efter udfyldning af formularen"
+msgstr "Text shown after submitting the form"
+
+# Imported from old translations
+msgid "Tekst over formular"
+msgstr "Text above form"
+
+# Imported from old translations
+msgid "Text and levels"
+msgstr "Text and levels"
+
+# Imported from old translations
+msgid "Text and options"
+msgstr "Text and options"
+
+# Imported from old translations
+msgid "Text and pictures"
+msgstr "Text and pictures"
+
+# Imported from old translations
+msgid "Text displayed on successful creation"
+msgstr "Text displayed on successful creation"
+
+# Imported from old translations
+msgid "Textarea"
+msgstr "Textarea"
+
+# Imported from old translations
+msgid "The document"
+msgstr "The document"
+
+# Imported from old translations
+msgid "The field:"
+msgstr "The field:"
+
+# Imported from old translations
+msgid "The page"
+msgstr "The page"
+
+# Imported from old translations
+msgid "The selected name"
+msgstr "The selected name"
+
+# Imported from old translations
+msgid "The template used send subscription passwords"
+msgstr ""
+"The template used send subscription passwords (e.g. mail/subscribe_passwd)"
+
+# Imported from old translations
+msgid "This document"
+msgstr "This document"
+
+# Imported from old translations
+msgid "Title"
+msgstr "Title"
+
+# Imported from old translations
+msgid "Type registered"
+msgstr "Type registered"
+
+# Imported from old translations
+msgid "Type updated"
+msgstr "Type updated"
+
+# Imported from old translations
+msgid "Unique"
+msgstr "Unique"
+
+# Imported from old translations
+msgid "Unique:"
+msgstr "Unique:"
+
+# Imported from old translations
+msgid "Unknown command"
+msgstr "Unknown command"
+
+# Imported from old translations
+msgid "Update"
+msgstr "Update"
+
+# Imported from old translations
+msgid "Use email-template"
+msgstr "Use email-template"
+
+# Imported from old translations
+msgid "User data"
+msgstr "User data"
+
+# Imported from old translations
+msgid "Users"
+msgstr "Users"
+
+# Imported from old translations
+msgid "Valid e-mail address"
+msgstr "Valid e-mail address"
+
+# Imported from old translations
+msgid "Valid phone number"
+msgstr "Valid phone number"
+
+# Imported from old translations
+msgid "Valid postal code"
+msgstr "Valid postal code"
+
+# Imported from old translations
+msgid "Validaterules"
+msgstr "Validaterules"
+
+# Imported from old translations
+msgid "Value"
+msgstr "Value"
+
+# Imported from old translations
+msgid "Version hidden"
+msgstr "Version hidden"
+
+# Imported from old translations
+msgid "Version published"
+msgstr "Version published"
+
+# Imported from old translations
+msgid "View public"
+msgstr "View public"
+
+# Imported from old translations
+msgid "Wants HTML"
+msgstr "Wants HTML"
+
+# Imported from old translations
+msgid "Web address"
+msgstr "Web address"
+
+# Imported from old translations
+msgid "You do not have access to this command. Sorry."
+msgstr "You do not have access to this command. Sorry."
+
+# Imported from old translations
+msgid "added to box"
+msgstr "added to box"
+
+# Imported from old translations
+msgid "admin"
+msgstr "admin"
+
+# Imported from old translations
+msgid "after end date"
+msgstr "after end date"
+
+# Imported from old translations
+msgid "already has a sub-document called"
+msgstr "already has a sub-document called"
+
+# Imported from old translations
+msgid "april"
+msgstr "april"
+
+# Imported from old translations
+msgid "august"
+msgstr "august"
+
+# Imported from old translations
+msgid "before start date"
+msgstr "before start date"
+
+# Imported from old translations
+msgid "category"
+msgstr "category"
+
+# Imported from old translations
+msgid "contains characters that are not allowed, please change the name"
+msgstr "contains characters that are not allowed, please change the name"
+
+# Imported from old translations
+msgid "copy_docparams_warning"
+msgstr ""
+" IMPORTANT! If the same document parameters are present on both documents "
+"the parameters on the current document will be overwritten with the values "
+"from the document you are copying from."
+
+# Imported from old translations
+msgid "could not be added to box"
+msgstr "could not be added to box"
+
+# Imported from old translations
+msgid "created under"
+msgstr "created under"
+
+# Imported from old translations
+msgid "date of expiry"
+msgstr "date of expiry"
+
+# Imported from old translations
+msgid "date of expiry (rev.)"
+msgstr "date of expiry (rev.)"
+
+# Imported from old translations
+msgid "december"
+msgstr "december"
+
+# Imported from old translations
+msgid "delete"
+msgstr "delete"
+
+# Imported from old translations
+msgid "deleted"
+msgstr "deleted"
+
+# Imported from old translations
+msgid "doc date (climbing)"
+msgstr "doc date (ascending)"
+
+# Imported from old translations
+msgid "doc date (falling)"
+msgstr "doc date (descending)"
+
+# Imported from old translations
+msgid "document"
+msgstr "document"
+
+# Imported from old translations
+msgid "documents copied from"
+msgstr "documents copied from"
+
+# Imported from old translations
+msgid "documents processed successfully"
+msgstr "documents processed successfully"
+
+# Imported from old translations
+msgid "does not exist"
+msgstr "does not exist"
+
+# Imported from old translations
+msgid "failed"
+msgstr "failed"
+
+# Imported from old translations
+msgid "february"
+msgstr "february"
+
+# Imported from old translations
+msgid "formdata_type"
+msgstr "formdata_type"
+
+# Imported from old translations
+msgid "formdata_type:"
+msgstr "formdata_type:"
+
+# Imported from old translations
+msgid "has been copied successfully to"
+msgstr "has been copied successfully to"
+
+# Imported from old translations
+msgid "has been deleted"
+msgstr "has been deleted."
+
+# Imported from old translations
+msgid "here, please choose another"
+msgstr "here, please choose another"
+
+# Imported from old translations
+msgid "january"
+msgstr "january"
+
+# Imported from old translations
+msgid "july"
+msgstr "july"
+
+# Imported from old translations
+msgid "june"
+msgstr "june"
+
+# Imported from old translations
+msgid "keyword"
+msgstr "keyword"
+
+# Imported from old translations
+msgid "march"
+msgstr "march"
+
+# Imported from old translations
+msgid "may"
+msgstr "may"
+
+# Imported from old translations
+msgid "month"
+msgstr "month"
+
+# Imported from old translations
+msgid "moved down"
+msgstr "moved down"
+
+# Imported from old translations
+msgid "moved up"
+msgstr "moved up"
+
+# Imported from old translations
+msgid "none"
+msgstr "none"
+
+# Imported from old translations
+msgid "not public"
+msgstr "not public"
+
+# Imported from old translations
+msgid "november"
+msgstr "november"
+
+# Imported from old translations
+msgid "oct"
+msgstr "oct"
+
+# Imported from old translations
+msgid "october"
+msgstr "october"
+
+# Imported from old translations
+msgid "please correct and try again"
+msgstr "please correct and try again"
+
+# Imported from old translations
+msgid "removed"
+msgstr "removed"
+
+# Imported from old translations
+msgid "september"
+msgstr "september"
+
+# Imported from old translations
+msgid "sequence number (climbing)"
+msgstr "sequence number (ascending)"
+
+# Imported from old translations
+msgid "sequence number (climbing), then short title"
+msgstr "sequence number (climbing), then short title"
+
+# Imported from old translations
+msgid "sequence number (falling)"
+msgstr "sequence number (descending)"
+
+# Imported from old translations
+msgid "stored for later execution"
+msgstr "stored for later execution"
+
+# Imported from old translations
+msgid "succeeded"
+msgstr "succeeded"
+
+# Imported from old translations
+msgid "title"
+msgstr "title"
+
+# Imported from old translations
+msgid "title (rev.)"
+msgstr "title (rev.)"
+
+# Imported from old translations
+msgid "unpublish"
+msgstr "hide"
+
+# Imported from old translations
+msgid "validate_type_max_checked"
+msgstr "validate_type_max_checked"
+
+# Imported from old translations
+msgid "validate_type_max_length"
+msgstr "validate_type_max_length"
+
+# Imported from old translations
+msgid "validate_type_min_checked"
+msgstr "validate_type_min_checked"
+
+# Imported from old translations
+msgid "validate_type_min_length"
+msgstr "validate_type_min_length"
+
+# Imported from old translations
+msgid "validate_type_regexp"
+msgstr "validate_type_regexp"
+
+# Imported from old translations
+msgid "validate_type_x_checked"
+msgstr "validate_type_x_checked"
+
+# Imported from old translations
+msgid "version date (climbing)"
+msgstr "version date (ascending)"
+
+# Imported from old translations
+msgid "version date (falling)"
+msgstr "version date (descending)"
+
+# Imported from old translations
+msgid "weeks"
+msgstr "weeks"

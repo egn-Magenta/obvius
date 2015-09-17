@@ -2,12 +2,10 @@
 <div style="height: 0px; width: 0px;" id="<% $name |h %>_tooltip"></div>
 %}
 % if (defined $subtitle) {
-<h4><& /shared/msg, text=>$subtitle &></h4>
+<h4><% t_subtitle($subtitle) %></h4>
 % }
 % if (defined $name) {
-<label for="<% $name |h %>">
-  <& /shared/msg, text=> $label &>
-</label>
+<label for="<% $name |h %>"><% t_label($label) %></label>
 
 %if (defined $tooltip_url) {
     <img src="/grafik/spg.gif" alt="?" style="cursor: pointer; cursor: hand"
@@ -20,7 +18,7 @@
 <br />\
 % }
 % else {
-<& /shared/msg, text=>$label &><br />\
+<% t_label($label) %><br />\
 % }
 %
 <%args>
@@ -29,9 +27,35 @@ $field
 $name=>undef
 </%args>
 %
+<%once>
+use WebObvius::Tooltip qw(get_tooltip_path);
+sub t_label {
+    my $key = shift;
+    return $key unless($key);
+    my $result = $m->scomp(
+        '/shared/msg',
+        text => 'editpagelabel:' . $key
+    );
+    if(!$result || $result =~ m{^editpagelabel:}) {
+        $result = $m->scomp('/shared/msg', text => $key);
+    }
+    return $result;
+}
+sub t_subtitle {
+    my $key = shift;
+    return $key unless($key);
+    my $result = $m->scomp(
+        '/shared/msg',
+        text => 'editpagesubtitle:' . $key
+    );
+    if(!$result || $result =~ m{^editpagesubtitle:}) {
+        $result = $m->scomp('/shared/msg', text => $key);
+    }
+    return $result;
+}
+</%once>
 <%init>
 return '' if($r->notes('disable_editengine2_labels'));
-use WebObvius::Tooltip qw(get_tooltip_path);
 
 my $session=$r->pnotes('obvius_session');
 my $doctype = $obvius->get_doctype_by_id($session->{obvius_new_doctypeid} || $vdoc->Type);
@@ -56,7 +80,8 @@ if (!$tooltip_langs) {
         grep {
             $valid_tooltip_languages{$_}
         } (
-            @{ $r->pnotes('language_preferences') },
+            $r->notes('translation_lang'),
+            @{ $r->pnotes('language_preferences') || [] },
             ''
         )
     ];
