@@ -1,7 +1,7 @@
 <%args>
 $field
 </%args>
-<tr>
+<tr <% $field->render_container_classes() %>>
     <th><% $field->render_label(%ARGS) %></th>
     <td>
 %       if(my $errors = $field->render_errors(%ARGS)) {

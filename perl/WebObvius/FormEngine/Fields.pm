@@ -262,6 +262,34 @@ sub render_extra_attributes {
     } sort keys %attrs);
 }
 
+=head2 render_container_classes
+
+  my $classesString = $fieldsBase->render_container_classes();
+  my $classesString = $fieldsBase->render_container_classes(
+    "myClass1", "otherClass", ...
+  );
+
+=cut
+
+sub render_container_classes {
+    my ($self) = shift;
+    
+    my @classes = @_;
+
+    # Get single class if specified
+    if(my $class = $self->{container_class}) {
+        push(@classes, $class);
+    }
+    # Get multiple classes if specified
+    if (my $classes = $self->{container_classes}) {
+        push(@classes, @$classes);
+    }
+    if (@classes) {
+        return 'class="' . join(" ", @classes) . '"';
+    }
+    return "";
+}
+
 
 =head2 required_marker_label
 

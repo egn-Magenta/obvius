@@ -50,48 +50,74 @@ Obvius.GroupSelect = Obvius.GroupSelect || {};
                 chosenFilter = $('#' + id + '-chosen-filter'),
                 availableFilter = $('#' + id + '-available-filter');
             
-            addButton.on('click', function() {
+            function add(add_list) {
                 var options = [];
-                availableSelect.find("option:selected").each(
-                    function() {
-                        options.push($(this));
-                        resultSelect.append(
-                            $('<option />').attr(
-                                "value", $(this).attr("value")
-                            ).attr(
-                                "selected", "selected"
-                            )
-                        );
-                    }
-                );
+                $.each(add_list, function() {
+                    options.push($(this));
+                    resultSelect.append(
+                        $('<option />').attr(
+                            "value", $(this).attr("value")
+                        ).attr(
+                            "selected", "selected"
+                        )
+                    );
+                });
                 merge_to_select(chosenSelect, options);
+                // Change dblclick handlers to remove
+                $.each(options, function() {
+                    $(this).off("dblclick").on("dblclick", function() {
+                        remove($(this));
+                    })
+                });
                 chosenFilter.trigger("keyup");
-            });
-            
-            removeButton.on('click', function() {
+            }
+        
+            function remove(remove_list) {
                 var options = [];
                 var removeValues = {};
-                chosenSelect.find("option:selected").each(
-                    function() {
-                        options.push($(this));
-                        removeValues[$(this).val()] = true
-                    }
-                );
+                $.each(remove_list, function() {
+                    options.push($(this));
+                    removeValues[$(this).val()] = true
+                });
                 merge_to_select(availableSelect, options);
                 resultSelect.find("option").each(function() {
                     if (removeValues[$(this).val()]) {
                         $(this).remove();
                     }
                 });
+                // Change dblclick handlers to add
+                $.each(options, function() {
+                    $(this).off("dblclick").on("dblclick", function() {
+                        add($(this));
+                    })
+                });
                 availableFilter.trigger("keyup");
+            }
+
+            addButton.on('click', function() {
+                add(availableSelect.find("option:selected"))
             });
             
+            removeButton.on('click', function() {
+                remove(chosenSelect.find("option:selected"))
+            });
+
             chosenFilter.on("keyup", function() {
                 filter_select(chosenSelect, $(this).val());
             });
 
             availableFilter.on("keyup", function() {
                 filter_select(availableSelect, $(this).val());
+            });
+
+            // Add on dblclick
+            availableSelect.find("option").on("dblclick", function() {
+                add($(this));
+            });
+
+            // Remove on dblclick
+            chosenSelect.find("option").on("dblclick", function() {
+                remove($(this));
             });
         }
     });

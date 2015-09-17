@@ -1,7 +1,8 @@
 <%args>
 $field
 </%args>
-<div id="fieldcontainer-<% $field->name %>" class="fieldcontainer">
+<div id="fieldcontainer-<% $field->name %>"\
+ <% $field->render_container_classes("fieldcontainer") %>>
     <% $field->render_label(%ARGS) %>
 %   my $marker = $field->required_marker;
 %   if(defined($marker)) {
