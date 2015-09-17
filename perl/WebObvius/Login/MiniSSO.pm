@@ -251,6 +251,7 @@ sub already_logged_in {
         # allow-admin-login flag
         if($req->uri =~ m{^/admin($|/)}) {
             my $userdata = $obvius->get_user($login);
+            return 0 unless($userdata);
             return 0 if(exists $userdata->{admin} and not $userdata->{admin});
         }
 

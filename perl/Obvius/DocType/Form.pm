@@ -18,6 +18,7 @@ use Fcntl qw( :flock );
 use JSON qw( to_json from_json );
 use URI::Escape;
 use Obvius::CharsetTools qw(:all);
+use Obvius::Translations qw(gettext);
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -806,7 +807,7 @@ sub generate_result_view {
         push @entries, [$field->{title}, show_field($fields->{$field->{name}})];
     }
 
-    push @entries, ("", [translate('id', $vdoc), $entry_nr]);
+    push @entries, ("", [gettext('FormDoctype:id'), $entry_nr]);
 
     return join "\n", map { ref $_ ? $_->[0] . ": " . $_->[1] : $_} @entries;
 
@@ -821,7 +822,7 @@ sub send_mail {
 
     my $subject = $vdoc->field('email_subject');
     my ($namefield) = grep { $_->{type} eq 'name' } values %$fields;
-    my $prepend = $namefield ? translate('Dear', $vdoc) . " " . $namefield->{value}: '';
+    my $prepend = $namefield ? gettext('FormDoctype:Dear') . " " . $namefield->{value}: '';
     
     my $result_view = generate_result_view($formspec,$fields, $entry_nr, $vdoc);
     
@@ -832,10 +833,10 @@ sub send_mail {
 
     my $text = mixed2perl($vdoc->field('email_text'));
     
-    my $result_prefix = translate("tastede", $vdoc);
+    my $result_prefix = gettext("FormDoctype:tastede");
     
     my $uri = get_full_uri($vdoc->Docid, $obvius);
-    my $form = translate("formular", $vdoc);
+    my $form = gettext("FormDoctype:formular");
 
     my $from = $obvius->config->param('mail_from_address') || 'noreply@adm.ku.dk';
 

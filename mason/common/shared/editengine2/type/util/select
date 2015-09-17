@@ -1,7 +1,7 @@
 % if (scalar(@$choices)) {
 <select id="<% $name |h %>" name="<% $name |h %>"<% $multiple ? ' multiple="multiple"' : '' %><% $multiple ? ' size="' . $size . '"' : '' %>>
 % foreach my $choice (@$choices) {
-%     my $text=$translated_labels->{$choice} || $m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice));
+%     my $text=$translated_labels->{$choice} || $m->scomp('/shared/msg', text=>(exists $labels->{$choice} ? t_label($labels->{$choice}) : $choice));
   <option value="<% $choice |h %>"<% $values{$choice} ? ' selected="selected"' : '' %>><% $text |h %></option>
 % }
 </select>
@@ -15,8 +15,22 @@ $translated_labels=>undef
 $value=>undef
 $multiple=>0
 $size=>8
-</%args>
+</%args>\
 %
+<%once>
+sub t_label {
+    my $key = shift;
+    return $key unless($key);
+    my $result = $m->scomp(
+        '/shared/msg',
+        text => 'editpagelabel:' . $key
+    );
+    if(!$result || $result =~ m{^editpagelabel:}) {
+        $result = $m->scomp('/shared/msg', text => $key);
+    }
+    return $result;
+}
+</%once>\
 <%init>
 $labels={} if (!defined $labels);
 $translated_labels={} if (!defined $translated_labels);

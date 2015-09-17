@@ -1,0 +1,20 @@
+<% $content %>\
+%
+%
+<%args>
+$args => undef
+</%args>\
+%
+%
+<%once>
+use Obvius::Translations;
+</%once>\
+%
+%
+<%init>
+my $content = Obvius::Translations::gettext($m->content());
+if($args) {
+    $args = [$args] unless(ref($args));
+    $content = sprintf($content, @$args);
+}
+</%init>
