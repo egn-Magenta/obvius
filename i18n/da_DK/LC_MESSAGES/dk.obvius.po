@@ -1,0 +1,1895 @@
+# Danish translations for PACKAGE package
+# Danske oversættelser for pakke PACKAGE.
+# Copyright (C) 2015 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: da_DK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Imported from old translations
+msgid "Act."
+msgstr "Akt."
+
+# Imported from old translations
+msgid "Add"
+msgstr "Tilføj"
+
+# Imported from old translations
+msgid "Add item"
+msgstr "Tilføj dokument"
+
+# Imported from old translations
+msgid "Added"
+msgstr "Tilføjet"
+
+# Imported from old translations
+msgid "Administration"
+msgstr "Administration"
+
+# Imported from old translations
+msgid "Advanced"
+msgstr "Avanceret"
+
+# Imported from old translations
+msgid "All lang."
+msgstr "Alle sprog"
+
+# Imported from old translations
+msgid "Also copy subdocuments"
+msgstr "Skal underdokumenter også kopieres"
+
+# Imported from old translations
+msgid "Also delete subdocuments"
+msgstr "Skal underdokumenter også slettes"
+
+# Imported from old translations
+msgid "Annotation"
+msgstr "Kommentar"
+
+# Imported from old translations
+msgid "Are you sure you want to copy these"
+msgstr "Er du sikker på at du vil kopiere disse"
+
+msgid "Are you sure you want to delete the field"
+msgstr "Er du sikker på du vil slette feltet"
+
+# Imported from old translations
+msgid "Are you sure you want to delete these"
+msgstr "Er du sikker på at du vil slette disse"
+
+# Imported from old translations
+msgid "Back"
+msgstr "Tilbage"
+
+# Imported from old translations
+msgid "Box"
+msgstr "Boks"
+
+# Imported from old translations
+msgid "Change document type"
+msgstr "Skift dokumenttype"
+
+# Imported from old translations
+msgid "Changed"
+msgstr "Ændret"
+
+# Imported from old translations
+msgid "Click here to download collected form data in Excel format"
+msgstr "Hent data fra formularen i Excel-format"
+
+# Imported from old translations
+msgid "Compare to"
+msgstr "Sammenlign med"
+
+msgid "Component missing for type"
+msgstr "Komponent mangler for type"
+
+# Imported from old translations
+msgid "Copy document"
+msgstr "Kopiér dokument"
+
+# Imported from old translations
+msgid "Created by"
+msgstr "Oprettet af"
+
+msgid "Current value"
+msgstr "Nuværende værdi"
+
+# Imported from old translations
+msgid "Date"
+msgstr "Dato"
+
+# Imported from old translations
+msgid "Default look"
+msgstr "Standard-udseende"
+
+# Imported from old translations
+msgid "Delete"
+msgstr "Slet"
+
+# Imported from old translations
+msgid "Delete document"
+msgstr "Slet dokument"
+
+# Imported from old translations
+msgid "Destination"
+msgstr "Til"
+
+# Imported from old translations
+msgid ""
+"Doctypes marked with (*) are normally resticted in this area, but are "
+"visible to users with admin-rights."
+msgstr ""
+"Dokumenttyper markeret med (*) er normalt begrænset i dette område, men er "
+"synlige for brugere med admin-rettighed."
+
+# Imported from old translations
+msgid "Document"
+msgstr "Dokument"
+
+# Imported from old translations
+msgid "Document information"
+msgstr "Dokumentinformation"
+
+# Imported from old translations
+msgid "Document type"
+msgstr "Dokumenttype"
+
+# Imported from old translations
+msgid "Down"
+msgstr "Ned"
+
+# Imported from old translations
+msgid "End"
+msgstr "Slut"
+
+# Imported from old translations
+msgid "End comparison"
+msgstr "Afslut sammenligning"
+
+# Imported from old translations
+msgid "Error"
+msgstr "Fejl"
+
+msgid "Error: This proxy-document loops (i.e. it fetches itself). Stopped."
+msgstr "Fejl: Denne indlejrede side kører i loop (henter sig selv)."
+
+msgid "Fields marked with"
+msgstr "Felter markeret med"
+
+msgid "Find"
+msgstr "Find"
+
+msgid "First"
+msgstr "Første"
+
+# Imported from old translations
+msgid "Flush XML file"
+msgstr "Slet alle data fra formularen"
+
+# Imported from old translations
+msgid "Flush cache"
+msgstr "Nulstil cache"
+
+# Imported from old translations
+msgid "Flush cache now"
+msgstr "Nulstil cache nu"
+
+# Imported from old translations
+msgid "Forward"
+msgstr "Frem"
+
+# Imported from old translations
+msgid "From"
+msgstr "Fra"
+
+# Imported from old translations
+msgid "Group"
+msgstr "Gruppe"
+
+# Imported from old translations
+msgid "Help"
+msgstr "Hjælp"
+
+# Imported from old translations
+msgid "Hide"
+msgstr "Skjul"
+
+# Imported from old translations
+msgid "Hide this version"
+msgstr "Skjul denne version"
+
+# Imported from old translations
+msgid "Image"
+msgstr "Billede"
+
+# Imported from old translations
+msgid "Information"
+msgstr "Information"
+
+# Imported from old translations
+msgid "Instead of deleting the document, you may want to"
+msgstr "I stedet for at slette dokumentet kan du overveje at"
+
+msgid "Item"
+msgstr ""
+
+# Imported from old translations
+msgid "Kopier dokumentparametre"
+msgstr "Kopier dokumentparametre"
+
+# Imported from old translations
+msgid "La."
+msgstr "Sp."
+
+# Imported from old translations
+msgid "Language"
+msgstr "Sprog"
+
+msgid "Last"
+msgstr "Sidste"
+
+# Imported from old translations
+msgid "Link to admin"
+msgstr "Link til admin"
+
+# Imported from old translations
+msgid "Link to public website"
+msgstr "Link til offentligt website"
+
+# Imported from old translations
+msgid "Manual subscription for this document"
+msgstr "Manuel abonnementudsendelse for dette dokument"
+
+# Imported from old translations
+msgid "Move"
+msgstr "Flyt"
+
+# Imported from old translations
+msgid "Name"
+msgstr "Navn"
+
+# Imported from old translations
+msgid "Navigation"
+msgstr "Navigation"
+
+# Imported from old translations
+msgid "Navigator"
+msgstr "Navigator"
+
+# Imported from old translations
+msgid "New"
+msgstr "Ny"
+
+# Imported from old translations
+msgid "New document"
+msgstr "Nyt dokument"
+
+# Imported from old translations
+msgid "New language"
+msgstr "Nyt sprog"
+
+# Imported from old translations
+msgid "New uri"
+msgstr "Ny uri"
+
+# Imported from old translations
+msgid "Newsbox documents here"
+msgstr "Nyhedsboks dokumenter her"
+
+msgid "Next"
+msgstr "Næste"
+
+# Imported from old translations
+msgid "Next page"
+msgstr "Næste side"
+
+# Imported from old translations
+msgid "No"
+msgstr "Nej"
+
+msgid "No content. Perhaps the page uses FRAMES?"
+msgstr "Intet indhold. Måske kildesiden er baseret på frames?"
+
+# Imported from old translations
+msgid "No keywords created yet"
+msgstr "Der er ikke oprettet nogen nøgleord endnu"
+
+# Imported from old translations
+msgid "No link"
+msgstr "Intet link"
+
+# Imported from old translations
+msgid "No."
+msgstr "Nr."
+
+# Imported from old translations
+msgid "None"
+msgstr "Ingen"
+
+# Imported from old translations
+msgid "Not published"
+msgstr "Ikke offentliggjort"
+
+# Imported from old translations
+msgid "Not registered"
+msgstr "Ikke registreret"
+
+# Imported from old translations
+msgid "Notice"
+msgstr "Bemærk"
+
+msgid "Obs, fejl i udfyldningen af formularen"
+msgstr ""
+
+# Imported from old translations
+msgid "ObviusLinkDocumentExplanation"
+msgstr ""
+"Dette linkdokument ses ikke som et dokument på\n"
+"        det offentlige website; hvis man klikker sig ind på det, kommer man\n"
+"        automatisk direkte til adressen"
+
+msgid "ObviusRSSFeedExplanation"
+msgstr ""
+
+msgid "Ok"
+msgstr "Ok"
+
+# Imported from old translations
+msgid "Owner"
+msgstr "Ejer"
+
+# Imported from old translations
+msgid "Path"
+msgstr "Sti"
+
+# Imported from old translations
+msgid "Perform"
+msgstr "Udfør"
+
+msgid "Please click the field name to correct the entry in the form below"
+msgstr "Klik på felt-navnet i formularen nedenfor for at rette posten"
+
+# Imported from old translations
+msgid ""
+"Please remember that if you delete the document, all versions will be "
+"deleted, and it can not be recovered"
+msgstr ""
+"Husk at hvis du sletter et dokument, slettes alle versioner af dokumentet og "
+"det kan ikke gendannes"
+
+msgid "Previous"
+msgstr "Forrige"
+
+# Imported from old translations
+msgid "Previous page"
+msgstr "Foregående side"
+
+# Imported from old translations
+msgid "Publ."
+msgstr "Off."
+
+# Imported from old translations
+msgid "Public"
+msgstr "Offentlig"
+
+# Imported from old translations
+msgid "Published"
+msgstr "Offentliggjort"
+
+# Imported from old translations
+msgid "Remove"
+msgstr "Fjern"
+
+# Imported from old translations
+msgid "Removed"
+msgstr "Fjernet"
+
+# Imported from old translations
+msgid "Rename"
+msgstr "Omdøb"
+
+# Imported from old translations
+msgid "Save"
+msgstr "Gem"
+
+# Imported from old translations
+msgid "Save changes"
+msgstr "Gem ændringer"
+
+# Imported from old translations
+msgid "Search"
+msgstr "Søg"
+
+# Imported from old translations
+msgid "Select"
+msgstr "Vælg"
+
+# Imported from old translations
+msgid "Send"
+msgstr "Send"
+
+# Imported from old translations
+msgid "Sequence number"
+msgstr "Placering"
+
+# Imported from old translations
+msgid "Show complete list"
+msgstr "Vis hele listen"
+
+# Imported from old translations
+msgid "Show document address"
+msgstr "Vis dokument-adresse"
+
+# Imported from old translations
+msgid "Sitemap"
+msgstr "Sitemap"
+
+msgid "Sorry, nothing here."
+msgstr "Beklager, der er ikke noget indhold her"
+
+# Imported from old translations
+msgid "Sort"
+msgstr "Sortering"
+
+# Imported from old translations
+msgid "Start"
+msgstr "Start"
+
+# Imported from old translations
+msgid "Subject"
+msgstr "Emne"
+
+# Imported from old translations
+msgid "Submit"
+msgstr "Send"
+
+# Imported from old translations
+msgid "Text"
+msgstr "Tekst"
+
+# Imported from old translations
+msgid "The XHTML in this field will be validated when you save the document"
+msgstr ""
+"XHTML-indholdet i dette felt vil blive checket når du gemmer dokumentet"
+
+msgid "The content below was fetched from"
+msgstr "Indholdet nedenfor er hentet fra adressen"
+
+# Imported from old translations
+msgid "Time"
+msgstr "Kl."
+
+# Imported from old translations
+msgid "To"
+msgstr "Til"
+
+# Imported from old translations
+msgid "To add newsboxes, create"
+msgstr "For at tilføje bokse, opret"
+
+# Imported from old translations
+msgid "Type"
+msgstr "Type"
+
+# Imported from old translations
+msgid "Universal access rules"
+msgstr "Universal adgangsregler"
+
+# Imported from old translations
+msgid "Up"
+msgstr "Op"
+
+# Imported from old translations
+msgid "Upload-document"
+msgstr "Upload-dokument"
+
+# Imported from old translations
+msgid ""
+"Usually it is not necessary to flush the cache by hand, as the cache is "
+"automatically invalidated at the appropriate times. However, sometimes it is "
+"nice to be able to do so anyhow."
+msgstr ""
+"Normalt er det ikke nødvendigt at nulstille cachen manuelt, da den "
+"automatisk bliver nulstillet, når det er nødvendigt. Det kan dog være rart "
+"at have muligheden alligevel."
+
+# Imported from old translations
+msgid "Validate field"
+msgstr "Check feltindhold"
+
+msgid "Version"
+msgstr ""
+
+# Imported from old translations
+msgid "Versions"
+msgstr "Versioner"
+
+msgid "Vælg bruger"
+msgstr ""
+
+# Imported from old translations
+msgid "Yes"
+msgstr "Ja"
+
+# Imported from old translations
+msgid ""
+"You are about to copy this document and all the documents beneath it, in "
+"total"
+msgstr ""
+"Du er ved at kopiere dette dokument og alle dokumenter placeret under det, i "
+"alt"
+
+# Imported from old translations
+msgid ""
+"You are about to delete this document and all the documents beneath it, in "
+"total"
+msgstr ""
+"Du er ved at slette dette dokument og alle dokumenter placeret under det, i "
+"alt"
+
+msgid ""
+"You can only enter unique values in the following fields, and the values you "
+"have entered have already been registered"
+msgstr ""
+
+msgid "You will need to correct the entries in the following fields"
+msgstr "Det vil være nødvendigt at rette følgende felter"
+
+# Imported from old translations
+msgid "all fields from all versions included"
+msgstr "inklusiv alle felter fra alle versioner"
+
+msgid "are required"
+msgstr "er påkrævet"
+
+# Imported from old translations
+msgid "documents"
+msgstr "dokumenter"
+
+# Imported from old translations
+msgid "documents to"
+msgstr "dokumenter til"
+
+msgid "has been entered"
+msgstr "er blevet udfyldt"
+
+msgid "hasn't been entered"
+msgstr "er ikke blevet udfyldt"
+
+# Imported from old translations
+msgid "lang_notification:msg1"
+msgstr "Stien til den"
+
+# Imported from old translations
+msgid "lang_notification:msg2"
+msgstr "version af dette dokument er endnu ikke blevet oprettet"
+
+# Imported from old translations
+msgid "lang_notification:msg3"
+msgstr "Klik her for at oprette den første manglende del"
+
+# Imported from old translations
+msgid "lang_notification:msg4"
+msgstr "Den"
+
+# Imported from old translations
+msgid "lang_notification:msg5"
+msgstr "version af dette dokument er endnu ikke oprettet"
+
+# Imported from old translations
+msgid "lang_notification:msg6"
+msgstr "Klik her for at oprette den"
+
+# Imported from old translations
+msgid "lang_notification:msg7"
+msgstr "Klik her for at gå til den"
+
+# Imported from old translations
+msgid "lang_notification:msg8"
+msgstr "version af dette dokument"
+
+# Imported from old translations
+msgid "merely hide it"
+msgstr "skjule det"
+
+msgid "no"
+msgstr "nej"
+
+# Imported from old translations
+msgid "or, upload text-file"
+msgstr "eller, upload tekst-fil"
+
+# Imported from old translations
+msgid "previous"
+msgstr "foregående"
+
+# Imported from old translations
+msgid "public"
+msgstr "offentlig"
+
+# Imported from old translations
+msgid "show all"
+msgstr "vis alle"
+
+# Imported from old translations
+msgid "to"
+msgstr "til"
+
+msgid "value"
+msgstr "værdi"
+
+# Imported from old translations
+msgid "word(s)"
+msgstr "ord"
+
+msgid "yes"
+msgstr "ja"
+
+msgid "FormDoctype:Dear"
+msgstr "Kære"
+
+msgid "FormDoctype:formular"
+msgstr "Formular"
+
+msgid "FormDoctype:id"
+msgstr "Løbenr"
+
+msgid "FormDoctype:tastede"
+msgstr "Indtastede oplysninger"
+
+# Imported from old translations
+msgid " and "
+msgstr " og "
+
+# Imported from old translations
+msgid " subdocuments"
+msgstr " underdokumenter"
+
+# Imported from old translations
+msgid "(and all its subdocuments) has been copied successfully to"
+msgstr "(og alle dens undersider) er kopieret til placeringen"
+
+# Imported from old translations
+msgid "(here)"
+msgstr "(her)"
+
+# Imported from old translations
+msgid "A document already exists with the selected name"
+msgstr "Der findes allerede et dokument med det valgte navn"
+
+# Imported from old translations
+msgid "Aborted"
+msgstr "Annulleret"
+
+# Imported from old translations
+msgid "Access rules"
+msgstr "Adgangsregler"
+
+# Imported from old translations
+msgid "Add new"
+msgstr "Tilføj ny"
+
+# Imported from old translations
+msgid "Add new field:"
+msgstr "Tilføj nyt felt"
+
+# Imported from old translations
+msgid "Addition"
+msgstr "Tilføjelse"
+
+# Imported from old translations
+msgid "Address"
+msgstr "Adresse"
+
+# Imported from old translations
+msgid "All fields"
+msgstr "Alle felter"
+
+# Imported from old translations
+msgid "Alternative search-form (leave empty for default)"
+msgstr "Alternativ søge-form (tom for standard)"
+
+# Imported from old translations
+msgid "Always last"
+msgstr "Altid sidst"
+
+# Imported from old translations
+msgid "Author"
+msgstr "Forfatter"
+
+# Imported from old translations
+msgid "Automatic"
+msgstr "Ja, automatisk udsendelse"
+
+# Imported from old translations
+msgid "Base of search"
+msgstr "Hvor skal der søges"
+
+# Imported from old translations
+msgid "Base of sitemap"
+msgstr "Udgangspunkt for sitemap"
+
+# Imported from old translations
+msgid "Box-status updated"
+msgstr "Boks-status opdateret"
+
+# Imported from old translations
+msgid "By moderator"
+msgstr "Af moderator"
+
+# Imported from old translations
+msgid "Cache flush cancelled"
+msgstr "Nulstilling af cache annulleret"
+
+# Imported from old translations
+msgid "Cache flushed"
+msgstr "Cache nulstillet"
+
+# Imported from old translations
+msgid "Calculated access rules"
+msgstr "Beregnede adgangsregler"
+
+# Imported from old translations
+msgid "Can not move document under itself"
+msgstr "Kan ikke flytte dokumentet under sig selv"
+
+# Imported from old translations
+msgid "Can not recursively copy a document underneath itself"
+msgstr "Kan ikke kopiere et dokument med underdokumenter ned under sig selv"
+
+# Imported from old translations
+msgid "Can't move last item down, sorry"
+msgstr "Det nederste dokument kan ikke flyttes ned, beklager"
+
+# Imported from old translations
+msgid "Can't move top item up, sorry"
+msgstr "Det øverste dokument kan ikke flyttes op, beklager"
+
+# Imported from old translations
+msgid "Cancel"
+msgstr "Annullér"
+
+# Imported from old translations
+msgid "Categories"
+msgstr "Klassifikationskoder"
+
+# Imported from old translations
+msgid "Change type cancelled"
+msgstr "Skift af dokumenttype annulleret"
+
+# Imported from old translations
+msgid "Changes to box saved"
+msgstr "Boksændringer gemt"
+
+# Imported from old translations
+msgid "Checkboxes"
+msgstr "Afkrydsningsknapper"
+
+# Imported from old translations
+msgid "Choose the appropriate keywords for this document"
+msgstr "Vælg de nøgleord der passer på dette dokument"
+
+# Imported from old translations
+msgid "Chronological"
+msgstr "Kronologisk"
+
+# Imported from old translations
+msgid "Classification and keywords"
+msgstr "Klassifikation og nøgleord"
+
+# Imported from old translations
+msgid "Click here to download collected form data in XML format"
+msgstr "Hent data fra formularen i XML-format"
+
+# Imported from old translations
+msgid "Cols"
+msgstr "Kolonner"
+
+# Imported from old translations
+msgid "ComboSearch"
+msgstr "Global søgning"
+
+# Imported from old translations
+msgid "Command"
+msgstr "Kommando"
+
+# Imported from old translations
+msgid "Command not stored"
+msgstr "Kommando ikke gemt"
+
+# Imported from old translations
+msgid "Command queue"
+msgstr "Kommando-kø"
+
+# Imported from old translations
+msgid "Component"
+msgstr "Komponenten"
+
+# Imported from old translations
+msgid "Component not found for document type"
+msgstr "Ingen komponent fundet til dokumenttypen"
+
+# Imported from old translations
+msgid "Contributors"
+msgstr "Bidragydere"
+
+# Imported from old translations
+msgid "Copy"
+msgstr "Kopier"
+
+# Imported from old translations
+msgid "Copy cancelled"
+msgstr "Kopiering annulleret"
+
+# Imported from old translations
+msgid "Copy of"
+msgstr "Kopieringen af"
+
+# Imported from old translations
+msgid "Could not create document"
+msgstr "Kunne ikke oprette dokument"
+
+# Imported from old translations
+msgid "Could not create entry"
+msgstr "Kunne ikke oprette indgang i databasen"
+
+# Imported from old translations
+msgid "Could not create new version"
+msgstr "Kunne ikke oprette ny version"
+
+# Imported from old translations
+msgid "Could not create storage object"
+msgstr "Kunne ikke oprette lagringsobjekt"
+
+# Imported from old translations
+msgid "Could not delete document "
+msgstr "Kunne ikke slette dokumentet "
+
+# Imported from old translations
+msgid "Could not get document"
+msgstr "Kunne ikke finde dokument"
+
+# Imported from old translations
+msgid "Could not get version"
+msgstr "Kunne ikke finde version"
+
+# Imported from old translations
+msgid "Could not hide version"
+msgstr "Kunne ikke skjule version"
+
+# Imported from old translations
+msgid "Could not register type"
+msgstr "Kunne ikke registrere sortering"
+
+# Imported from old translations
+msgid "Could not update box-status"
+msgstr "Kunne ikke opdatere boks-status"
+
+# Imported from old translations
+msgid "Could not update type"
+msgstr "Kunne ikke ændre sortering"
+
+# Imported from old translations
+msgid "Create"
+msgstr "Opret"
+
+# Imported from old translations
+msgid "Create new"
+msgstr "Opret ny"
+
+# Imported from old translations
+msgid "CreateDocument"
+msgstr "Opret dokument"
+
+# Imported from old translations
+msgid "Creation cancelled"
+msgstr "Oprettelse annulleret"
+
+# Imported from old translations
+msgid "Current capabilities"
+msgstr "Aktuelle rettigheder"
+
+# Imported from old translations
+msgid "Current document"
+msgstr "Dette dokument"
+
+# Imported from old translations
+msgid "DBSearch"
+msgstr "Databasesøgning"
+
+# Imported from old translations
+msgid "Danish"
+msgstr "Dansk"
+
+# Imported from old translations
+msgid "Date (YYYY-MM-DD)"
+msgstr "Dato (ÅÅÅÅ-MM-DD)"
+
+# Imported from old translations
+msgid "Date (yyyy-mm-dd)"
+msgstr "Dato (åååå-mm-dd)"
+
+# Imported from old translations
+msgid "Delete cancelled"
+msgstr "Slet annulleret"
+
+# Imported from old translations
+msgid "Description/explanation"
+msgstr "Beskrivelse/forklaring"
+
+# Imported from old translations
+msgid "Destination document"
+msgstr "Til-dokumentet"
+
+# Imported from old translations
+msgid "Display"
+msgstr "Visning"
+
+# Imported from old translations
+msgid "Display all items"
+msgstr "Vis alle dokumenter"
+
+# Imported from old translations
+msgid "Display first items only"
+msgstr "Vis kun første dokumenter"
+
+# Imported from old translations
+msgid "Display-only"
+msgstr "Visning af dette dokument"
+
+# Imported from old translations
+msgid "Document already exists"
+msgstr "Dokumentet findes allerede"
+
+# Imported from old translations
+msgid "Document creation"
+msgstr "Oprettelse"
+
+# Imported from old translations
+msgid "Document moved from"
+msgstr "Dokument flyttet fra"
+
+msgid "Document names can not contain \"/\" characters, sorry"
+msgstr "Dokumentets navn kan ikke indeholde tegnet \"/\", beklager"
+
+# Imported from old translations
+msgid "Document parameters"
+msgstr "Dokumentparametre"
+
+# Imported from old translations
+msgid "Document renamed"
+msgstr "Siden er omdøbt."
+
+# Imported from old translations
+msgid "Document updated"
+msgstr "Dokument opdateret"
+
+# Imported from old translations
+msgid "Dutch"
+msgstr "Hollandsk"
+
+# Imported from old translations
+msgid "Edit"
+msgstr "Redigér"
+
+# Imported from old translations
+msgid "Edit cancelled"
+msgstr "Redigéring annulleret"
+
+# Imported from old translations
+msgid "Edit category"
+msgstr "Rediger klassifikationskode"
+
+# Imported from old translations
+msgid "Edit comment"
+msgstr "Redigér kommentar"
+
+# Imported from old translations
+msgid "Edit keyword"
+msgstr "Redigér nøgleord"
+
+# Imported from old translations
+msgid "Edit option"
+msgstr "Redigér muligheder"
+
+# Imported from old translations
+msgid "Edit validaterule"
+msgstr "Redigér valideringsregel"
+
+# Imported from old translations
+msgid "Editor not found"
+msgstr "Tekstredigeringskomponent ikke til stede"
+
+# Imported from old translations
+msgid "Email sent to"
+msgstr "Email sendt til"
+
+# Imported from old translations
+msgid "Emailadresse data skal sendes til ved udfyldning (optional)"
+msgstr "Data skal sendes til følgende e-mail-adresse (valgfri)"
+
+# Imported from old translations
+msgid "English"
+msgstr "Engelsk"
+
+# Imported from old translations
+msgid "Error message"
+msgstr "Fejlmeddelelse"
+
+# Imported from old translations
+msgid "Expiring"
+msgstr "Udløber"
+
+# Imported from old translations
+msgid ""
+"Failed to copy document to destination, document may only contain "
+"alpanumeric characters, dot(.), dash(-), and underscore(_)."
+msgstr ""
+"Kopieringen af dokumentet fejlede: Dokument-stien må kun indeholde tal "
+"(0-9), bogstaver (a-z), punktum (.), bindestreg (-) og understreg (_)"
+
+# Imported from old translations
+msgid "Field width"
+msgstr "Feltbredde"
+
+# Imported from old translations
+msgid "Fieldname"
+msgstr "Feltnavn"
+
+# Imported from old translations
+msgid "Fieldset"
+msgstr "Feltområde"
+
+# Imported from old translations
+msgid "Fieldset End"
+msgstr "Afslutning af feltområde"
+
+# Imported from old translations
+msgid "Finnish"
+msgstr "Finsk"
+
+# Imported from old translations
+msgid "Flush"
+msgstr "Nulstil"
+
+# Imported from old translations
+msgid "Form"
+msgstr "Formular"
+
+# Imported from old translations
+msgid "Free text search"
+msgstr "Fritekstsøgning"
+
+# Imported from old translations
+msgid "French"
+msgstr "Fransk"
+
+# Imported from old translations
+msgid "German"
+msgstr "Tysk"
+
+# Imported from old translations
+msgid "Greek"
+msgstr "Græsk"
+
+# Imported from old translations
+msgid "Group data"
+msgstr "Gruppedata"
+
+# Imported from old translations
+msgid "Groups"
+msgstr "Grupper"
+
+# Imported from old translations
+msgid "HTML and pictures"
+msgstr "HTML og billeder"
+
+# Imported from old translations
+msgid ""
+"HTML::Diff is missing from the server. Version comparison is not available."
+msgstr ""
+"HTML::Diff findes ikke på serveren. Sammenligning af versioner kan ikke "
+"foretages."
+
+# Imported from old translations
+msgid "Has been filled"
+msgstr "Er udfyldt"
+
+# Imported from old translations
+msgid "Has not been filled"
+msgstr "Ikke er udfyldt"
+
+# Imported from old translations
+msgid "Hide cancelled"
+msgstr "Skjul annulleret"
+
+# Imported from old translations
+msgid "High priority"
+msgstr "Høj prioritet"
+
+# Imported from old translations
+msgid "If.."
+msgstr "Hvis.."
+
+# Imported from old translations
+msgid "Image-file"
+msgstr "Billed-fil"
+
+# Imported from old translations
+msgid "Include in subscription"
+msgstr "Inkludér i abonnementsudsendelse"
+
+# Imported from old translations
+msgid "Include subscription when publishing"
+msgstr "Inkludér i abonnement ved automatisk offentliggørelse"
+
+# Imported from old translations
+msgid "Inherited document parameters"
+msgstr "Nedarvede dokumentparametre"
+
+# Imported from old translations
+msgid "Invalid data"
+msgstr "Ugyldigt indhold"
+
+# Imported from old translations
+msgid "Invalid data entered, please correct."
+msgstr "Ugyldige data indtastet, ret venligst."
+
+# Imported from old translations
+msgid "Italian"
+msgstr "Italiensk"
+
+# Imported from old translations
+msgid "KeywordSearch"
+msgstr "Lokal søgning"
+
+# Imported from old translations
+msgid "Keywords"
+msgstr "Nøgleord"
+
+# Imported from old translations
+msgid "Kopier fra"
+msgstr "Kopier fra:"
+
+# Imported from old translations
+msgid "Levels"
+msgstr "Antal niveauer"
+
+# Imported from old translations
+msgid "Low priority"
+msgstr "Lav prioritet"
+
+# Imported from old translations
+msgid "Mandatory"
+msgstr "Skal udfyldes"
+
+# Imported from old translations
+msgid "Mandatory:"
+msgstr "Skal udfyldes:"
+
+# Imported from old translations
+msgid "Manual"
+msgstr "Ja, manuel udsendelse"
+
+# Imported from old translations
+msgid "Manual placement"
+msgstr "Angiv placering"
+
+# Imported from old translations
+msgid "Maximum length"
+msgstr "Maks. antal tegn"
+
+# Imported from old translations
+msgid "Maximum length of teasers"
+msgstr "Maksimum teaserlængde"
+
+# Imported from old translations
+msgid "Move cancelled"
+msgstr "Flyt annulleret"
+
+# Imported from old translations
+msgid "New Image"
+msgstr "Nyt billede"
+
+# Imported from old translations
+msgid "New Upload"
+msgstr "Nyt upload-dokument"
+
+# Imported from old translations
+msgid "New category"
+msgstr "Ny klassifikationskode"
+
+# Imported from old translations
+msgid "New document cancelled"
+msgstr "Nyt dokument annulleret"
+
+# Imported from old translations
+msgid "New language cancelled"
+msgstr "Nyt sprog annulleret"
+
+# Imported from old translations
+msgid "New version created"
+msgstr "Ny version oprettet"
+
+# Imported from old translations
+msgid "News item"
+msgstr "Nyhed"
+
+# Imported from old translations
+msgid "Newsbox"
+msgstr "Nyhedsboks"
+
+# Imported from old translations
+msgid "No limit"
+msgstr "Ingen begrænsning"
+
+# Imported from old translations
+msgid "No such application"
+msgstr "Der findes ingen applikation med navnet"
+
+# Imported from old translations
+msgid "No version to compare with specified."
+msgstr "Der er ikke angivet nogen version at sammenligne med."
+
+# Imported from old translations
+msgid "Not on list"
+msgstr "Ikke med"
+
+# Imported from old translations
+msgid "Now editing a new document named"
+msgstr "Redigerer et nyt dokument med navnet"
+
+# Imported from old translations
+msgid "Number of entries in news box"
+msgstr "Antal indgange i nyhedsboksen"
+
+# Imported from old translations
+msgid "Number of subdocuments on one page"
+msgstr "Antal underdokumenter per side"
+
+# Imported from old translations
+msgid "Numbers only"
+msgstr "Kun tal"
+
+# Imported from old translations
+msgid "Options:"
+msgstr "Muligheder:"
+
+# Imported from old translations
+msgid "Order of succession"
+msgstr "Skal dokumentet vises i menustrukturen?"
+
+# Imported from old translations
+msgid "OrderForm"
+msgstr "Bestillingsformular"
+
+# Imported from old translations
+msgid "Password"
+msgstr "Kodeord"
+
+msgid "Path must start and end with a \"/\" character"
+msgstr "Stien skal have en \"/\" både først og sidst"
+
+# Imported from old translations
+msgid "Please choose a function to perform"
+msgstr "Vælg venligst en funktion at udføre"
+
+# Imported from old translations
+msgid "Please select one or more subdocuments for batch operation"
+msgstr "Vælg venligst et eller flere underdokumenter"
+
+# Imported from old translations
+msgid "Portuguese"
+msgstr "Portugisisk"
+
+# Imported from old translations
+msgid "Predefined validations"
+msgstr "Prædefinerede valderinger"
+
+# Imported from old translations
+msgid "Prefix for documents names"
+msgstr "Dokumentnavnspræfix"
+
+# Imported from old translations
+msgid "Preview"
+msgstr "Preview"
+
+# Imported from old translations
+msgid "Publish"
+msgstr "Offentliggør"
+
+# Imported from old translations
+msgid "Publish at"
+msgstr "Offentliggør senere"
+
+# Imported from old translations
+msgid "Publish cancelled"
+msgstr "Offentliggør annulleret"
+
+# Imported from old translations
+msgid "Publish document"
+msgstr "Offentliggør dokument"
+
+# Imported from old translations
+msgid "Publish mode"
+msgstr "Offentliggørelse"
+
+# Imported from old translations
+msgid "Radiobuttons"
+msgstr "Radioknapper"
+
+# Imported from old translations
+msgid "Re-enter"
+msgstr "Indtast igen"
+
+# Imported from old translations
+msgid "Reference"
+msgstr "Reference"
+
+# Imported from old translations
+msgid "Rename cancelled"
+msgstr "Omdøb annulleret"
+
+# Imported from old translations
+msgid "Reverse chronological"
+msgstr "Omvendt kronologisk"
+
+# Imported from old translations
+msgid "Rows"
+msgstr "Rækker"
+
+# Imported from old translations
+msgid "Rule applies"
+msgstr "Regel ikraft"
+
+# Imported from old translations
+msgid "Rule does not apply"
+msgstr "Regel ej ikraft"
+
+# Imported from old translations
+msgid "Rule invalid"
+msgstr "Regel ugyldig"
+
+# Imported from old translations
+msgid "Rules updated"
+msgstr "Regler opdateret"
+
+# Imported from old translations
+msgid "Search information"
+msgstr "Søgning"
+
+# Imported from old translations
+msgid "Select classification codes"
+msgstr "Vælg klassifikationskoder"
+
+# Imported from old translations
+msgid "Select function"
+msgstr "Vælg funktion"
+
+# Imported from old translations
+msgid "Select multiple"
+msgstr "Vælg flere"
+
+# Imported from old translations
+msgid "Send cancelled"
+msgstr "Send annulleret"
+
+# Imported from old translations
+msgid "Send email to"
+msgstr "Send email til"
+
+# Imported from old translations
+msgid "Sender in subscription emails"
+msgstr "Afsenderadresse"
+
+# Imported from old translations
+msgid "Short title"
+msgstr "Kort titel"
+
+# Imported from old translations
+msgid "Show date"
+msgstr "Vis dato"
+
+# Imported from old translations
+msgid "Show date on subdocuments"
+msgstr "Vis underdokumenternes datoer"
+
+# Imported from old translations
+msgid "Show dates?"
+msgstr "Vis datoer?"
+
+# Imported from old translations
+msgid "Show in menu"
+msgstr "Vises i menu"
+
+# Imported from old translations
+msgid "Show news"
+msgstr "Vis nyheder"
+
+# Imported from old translations
+msgid "Show subdocuments"
+msgstr "Vis underdokumenter"
+
+# Imported from old translations
+msgid "Show teaser"
+msgstr "Vis teaser"
+
+# Imported from old translations
+msgid "Show teaser on subdocuments"
+msgstr "Vis underdokumenternes teasere"
+
+# Imported from old translations
+msgid "Show teasers?"
+msgstr "Vis teasere?"
+
+# Imported from old translations
+msgid "Show title"
+msgstr "Vis titel"
+
+# Imported from old translations
+msgid "Sort order of sub documents - sort according to"
+msgstr "Sortér underdokumenter efter"
+
+# Imported from old translations
+msgid "Source"
+msgstr "Kilde"
+
+# Imported from old translations
+msgid "Spanish"
+msgstr "Spansk"
+
+# Imported from old translations
+msgid "Start editing"
+msgstr "Begynd redigering"
+
+# Imported from old translations
+msgid "Subdocuments"
+msgstr "Underdokumenter"
+
+# Imported from old translations
+msgid "Subscribe"
+msgstr "Abonnement"
+
+# Imported from old translations
+msgid "Subscriber"
+msgstr "Abonnent"
+
+# Imported from old translations
+msgid "Subscription"
+msgstr "Abonnement"
+
+# Imported from old translations
+msgid "Subscription data"
+msgstr "Abonnementsdata"
+
+# Imported from old translations
+msgid "Subscription data and display"
+msgstr "Abonnementsdata og visning"
+
+# Imported from old translations
+msgid "Subscription possibility"
+msgstr "Mulighed for abonnement hér"
+
+# Imported from old translations
+msgid "Subscriptions"
+msgstr "Abonnementer"
+
+# Imported from old translations
+msgid "Suspended"
+msgstr "Suspenderet"
+
+# Imported from old translations
+msgid "Swedish"
+msgstr "Svensk"
+
+# Imported from old translations
+msgid "Teaser (filled out)"
+msgstr ""
+"Resumé (Hvis feltet udfyldes erstatter denne tekst teksten over checkboksene)"
+
+# Imported from old translations
+msgid "Tekst der vises efter udfyldning af formularen"
+msgstr "Tekst, der vises, når formularens indhold er modtaget og valideret"
+
+# Imported from old translations
+msgid "Tekst over formular"
+msgstr "Indledende tekst, der vises oven over formularen"
+
+# Imported from old translations
+msgid "Text and levels"
+msgstr "Tekst og niveauer"
+
+# Imported from old translations
+msgid "Text and options"
+msgstr "Tekst og opsætning"
+
+# Imported from old translations
+msgid "Text and pictures"
+msgstr "Tekst og billeder"
+
+# Imported from old translations
+msgid "Text displayed on successful creation"
+msgstr "Tekst der vises ved vellykket oprettelse"
+
+# Imported from old translations
+msgid "Textarea"
+msgstr "Tekstområde"
+
+# Imported from old translations
+msgid "The document"
+msgstr "Siden"
+
+# Imported from old translations
+msgid "The field:"
+msgstr "Feltet:"
+
+# Imported from old translations
+msgid "The page"
+msgstr "Siden"
+
+# Imported from old translations
+msgid "The selected name"
+msgstr "Det valgte navn"
+
+# Imported from old translations
+msgid "The template used send subscription passwords"
+msgstr "Skabelon til udsendelse af kodeord (eks.: mail/subscribe_passwd)"
+
+# Imported from old translations
+msgid "This document"
+msgstr "Dette dokument"
+
+# Imported from old translations
+msgid "Title"
+msgstr "Titel"
+
+# Imported from old translations
+msgid "Type registered"
+msgstr "Sortering registreret"
+
+# Imported from old translations
+msgid "Type updated"
+msgstr "Sortering opdateret"
+
+# Imported from old translations
+msgid "Unique"
+msgstr "Unik"
+
+# Imported from old translations
+msgid "Unique:"
+msgstr "Unik:"
+
+# Imported from old translations
+msgid "Unknown command"
+msgstr "Ukendt kommando"
+
+# Imported from old translations
+msgid "Update"
+msgstr "Opdatér"
+
+# Imported from old translations
+msgid "Use email-template"
+msgstr "Via email-skabelon"
+
+# Imported from old translations
+msgid "User data"
+msgstr "Brugerdata"
+
+# Imported from old translations
+msgid "Users"
+msgstr "Brugere"
+
+# Imported from old translations
+msgid "Valid e-mail address"
+msgstr "Gyldig email adresse"
+
+# Imported from old translations
+msgid "Valid phone number"
+msgstr "Gyldigt telefonnummer"
+
+# Imported from old translations
+msgid "Valid postal code"
+msgstr "Gyldigt postnummer"
+
+# Imported from old translations
+msgid "Validaterules"
+msgstr "Valideringsregler"
+
+# Imported from old translations
+msgid "Value"
+msgstr "Værdi"
+
+# Imported from old translations
+msgid "Version hidden"
+msgstr "Version skjult"
+
+# Imported from old translations
+msgid "Version published"
+msgstr "Version offentliggjort"
+
+# Imported from old translations
+msgid "View public"
+msgstr "Se offentlig"
+
+# Imported from old translations
+msgid "Wants HTML"
+msgstr "Ønsker HTML"
+
+# Imported from old translations
+msgid "Web address"
+msgstr "Web-adresse"
+
+# Imported from old translations
+msgid "You do not have access to this command. Sorry."
+msgstr "Du har ikke adgang til denne kommando. Beklager."
+
+# Imported from old translations
+msgid "added to box"
+msgstr "tilføjet til boks"
+
+# Imported from old translations
+msgid "admin"
+msgstr "admin"
+
+# Imported from old translations
+msgid "after end date"
+msgstr "efter slutdato"
+
+# Imported from old translations
+msgid "already has a sub-document called"
+msgstr "har allerede et underdokument der hedder"
+
+# Imported from old translations
+msgid "april"
+msgstr "april"
+
+# Imported from old translations
+msgid "august"
+msgstr "august"
+
+# Imported from old translations
+msgid "before start date"
+msgstr "før startdato"
+
+# Imported from old translations
+msgid "category"
+msgstr "Klassifikation"
+
+# Imported from old translations
+msgid "contains characters that are not allowed, please change the name"
+msgstr "indeholder tegn der ikke kan benyttes, ret venligst navnet"
+
+# Imported from old translations
+msgid "copy_docparams_warning"
+msgstr ""
+" VIGTIGT! Hvis de samme dokumentparametre optræder i begge dokumenter, vil "
+"parametrene på dette dokument blive overskrevet med værdierne fra det "
+"dokument, du kopierer fra."
+
+# Imported from old translations
+msgid "could not be added to box"
+msgstr "kunne ikke tilføjes til boks"
+
+# Imported from old translations
+msgid "created under"
+msgstr "oprettet under"
+
+# Imported from old translations
+msgid "date of expiry"
+msgstr "Efter udløbsdato"
+
+# Imported from old translations
+msgid "date of expiry (rev.)"
+msgstr "Efter udløbsdato (omvendt)"
+
+# Imported from old translations
+msgid "december"
+msgstr "december"
+
+# Imported from old translations
+msgid "delete"
+msgstr "slet"
+
+# Imported from old translations
+msgid "deleted"
+msgstr "slettet"
+
+# Imported from old translations
+msgid "doc date (climbing)"
+msgstr "Efter dokumentets dato (ældste først)"
+
+# Imported from old translations
+msgid "doc date (falling)"
+msgstr "Efter dokumentets dato (nyeste først)"
+
+# Imported from old translations
+msgid "document"
+msgstr "dokument"
+
+# Imported from old translations
+msgid "documents copied from"
+msgstr "dokumenter kopieret fra"
+
+# Imported from old translations
+msgid "documents processed successfully"
+msgstr "dokumenter behandlet med success"
+
+# Imported from old translations
+msgid "does not exist"
+msgstr "eksisterer ikke"
+
+# Imported from old translations
+msgid "failed"
+msgstr "mislykkedes"
+
+# Imported from old translations
+msgid "february"
+msgstr "februar"
+
+# Imported from old translations
+msgid "formdata_type"
+msgstr "Felt type"
+
+# Imported from old translations
+msgid "formdata_type:"
+msgstr "Felt type:"
+
+# Imported from old translations
+msgid "has been copied successfully to"
+msgstr "er kopieret til placeringen"
+
+# Imported from old translations
+msgid "has been deleted"
+msgstr "er blevet slettet."
+
+# Imported from old translations
+msgid "here, please choose another"
+msgstr "her, vælg venligst et andet"
+
+# Imported from old translations
+msgid "january"
+msgstr "januar"
+
+# Imported from old translations
+msgid "july"
+msgstr "juli"
+
+# Imported from old translations
+msgid "june"
+msgstr "juni"
+
+# Imported from old translations
+msgid "keyword"
+msgstr "Nøgleord"
+
+# Imported from old translations
+msgid "march"
+msgstr "marts"
+
+# Imported from old translations
+msgid "may"
+msgstr "maj"
+
+# Imported from old translations
+msgid "month"
+msgstr "Måned"
+
+# Imported from old translations
+msgid "moved down"
+msgstr "flyttet ned"
+
+# Imported from old translations
+msgid "moved up"
+msgstr "flyttet op"
+
+# Imported from old translations
+msgid "none"
+msgstr "ingen"
+
+# Imported from old translations
+msgid "not public"
+msgstr "ikke offentlig"
+
+# Imported from old translations
+msgid "november"
+msgstr "november"
+
+# Imported from old translations
+msgid "oct"
+msgstr "okt"
+
+# Imported from old translations
+msgid "october"
+msgstr "oktober"
+
+# Imported from old translations
+msgid "please correct and try again"
+msgstr "ret venligst og prøv igen"
+
+# Imported from old translations
+msgid "removed"
+msgstr "fjernet"
+
+# Imported from old translations
+msgid "september"
+msgstr "september"
+
+# Imported from old translations
+msgid "sequence number (climbing)"
+msgstr "Efter sekvens-nummer (stigende)"
+
+# Imported from old translations
+msgid "sequence number (climbing), then short title"
+msgstr "Efter sekvens-nummer (stigende), derefter kort titel"
+
+# Imported from old translations
+msgid "sequence number (falling)"
+msgstr "Efter sekvens-nummer (faldende)"
+
+# Imported from old translations
+msgid "stored for later execution"
+msgstr "registreret til senere udførelse"
+
+# Imported from old translations
+msgid "succeeded"
+msgstr "gennemført"
+
+# Imported from old translations
+msgid "title"
+msgstr "Efter dokumentets titel"
+
+# Imported from old translations
+msgid "title (rev.)"
+msgstr "Efter dokumentets titel (omvendt)"
+
+# Imported from old translations
+msgid "unpublish"
+msgstr "skjul"
+
+# Imported from old translations
+msgid "validate_type_max_checked"
+msgstr "Max. antal valgte værdier"
+
+# Imported from old translations
+msgid "validate_type_max_length"
+msgstr "max. antal tegn"
+
+# Imported from old translations
+msgid "validate_type_min_checked"
+msgstr "Min. antal valgte værdier"
+
+# Imported from old translations
+msgid "validate_type_min_length"
+msgstr "min. antal tegn"
+
+# Imported from old translations
+msgid "validate_type_regexp"
+msgstr "regulært udtryk"
+
+# Imported from old translations
+msgid "validate_type_x_checked"
+msgstr "Præcis x valgte værdier"
+
+# Imported from old translations
+msgid "version date (climbing)"
+msgstr "Efter versionens dato (ældste først)"
+
+# Imported from old translations
+msgid "version date (falling)"
+msgstr "Efter versionens dato (nyeste først)"
+
+# Imported from old translations
+msgid "weeks"
+msgstr "Uger"

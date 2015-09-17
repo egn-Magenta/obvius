@@ -1,0 +1,6 @@
+*.pot
+!/extra.pot
+*.po
+*.mo
+!dk.obvius.po
+!*_src.po

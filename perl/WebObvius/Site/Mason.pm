@@ -46,6 +46,7 @@ use WebObvius::Template::Provider;
 #use WebObvius::Cache::Flushing;
 use WebObvius::Cache::Cache;
 use WebObvius::RequestTools;
+use WebObvius::MasonCommands;
 use Encode;
 use Time::HiRes;
 
@@ -75,7 +76,6 @@ use Digest::MD5 qw(md5_hex);
 use POSIX qw(strftime);
 use Fcntl ':flock';
 
-
 ########################################################################
 #
 #       Construction
@@ -160,9 +160,10 @@ sub new
      if ($new_mason) {
           %apachehandler_options = ( %apachehandler_options, %interp_conf);
           $apachehandler_options{allow_globals} = [
-                                                   qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
-                                                  ];
+            qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
+           ];
           $apachehandler_options{args_method}   = 'mod_perl';
+          $apachehandler_options{in_package} = "WebObvius::MasonCommands";
      } else {
           $apachehandler_options{interp}        = $new->{interp};
      }
@@ -182,8 +183,6 @@ sub new
      return bless $new, $class;
 }
 
-
-
 ########################################################################
 #
 #       Handlers
@@ -391,6 +390,9 @@ sub handler ($$) {
      $req->notes('obvius_cache_extra' => $vdoc->param('Version'));
 
      my $doctype = $obvius->get_version_type($vdoc);
+
+    # Call method to setup translations;
+    $this->setup_translations($req, $obvius, $doc, $vdoc, $doctype);
 
     my $special_handler = $this->get_special_handler($req);
     if($special_handler) {
@@ -774,7 +776,6 @@ sub rulebased_authen_handler ($$)
      return AUTH_REQUIRED;
 }
 
-
 #######################################################################
 #
 #       Public handling functions
