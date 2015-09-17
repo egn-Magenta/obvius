@@ -1,0 +1,18 @@
+<%args>
+$field
+</%args>\
+<%init>
+my @attrs;
+foreach my $attr (qw(cols rows)) {
+    if(my $v = $ARGS{$attr} || $field->{$attr}) {
+        push(@attrs, [$attr, $v]);
+    }
+}
+</%init>\
+<textarea\
+ id="<% $ARGS{field_id} || $field->id %>"\
+ name="<% $ARGS{name} || $field->name %>"\
+%foreach my $a (@attrs) {
+ <% $a->[0] %>="<% $a->[1] %>"\
+%}
+><% $field->value |h %></textarea>

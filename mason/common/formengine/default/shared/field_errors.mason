@@ -1,0 +1,10 @@
+<%args>
+$field
+</%args>\
+%my @errors = $field->error_list;
+%return '' unless(@errors);
+<ul class="field-errors">
+%   foreach my $error (@errors) {
+    <li class="field-error"><% $error %></li>
+%   }
+</ul>

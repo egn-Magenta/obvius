@@ -55,6 +55,7 @@ sub t_subtitle {
 }
 </%once>
 <%init>
+return '' if($r->notes('disable_editengine2_labels'));
 
 my $session=$r->pnotes('obvius_session');
 my $doctype = $obvius->get_doctype_by_id($session->{obvius_new_doctypeid} || $vdoc->Type);
