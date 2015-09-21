@@ -59,7 +59,10 @@ foreach my $type (@{$obvius->{DOCTYPES}}) {
 	my $doctype = {
 		id              => $type-> {ID},
 		name            => $type-> {NAME},
-		translated_name => $m-> scomp('/shared/msg', text=> $type->{NAME}),
+		translated_name => $m-> scomp(
+		  '/shared/msg',
+		  text => "doctypename:" . $type->{NAME}
+		),
 	};
 
 	if ( $restricted and not $available_doctypes{ $doctype->{name} } ) {

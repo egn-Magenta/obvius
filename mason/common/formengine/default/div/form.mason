@@ -1,0 +1,23 @@
+<%args>
+$form
+$render_args=>{}
+</%args>\
+%$r->notes('disable_editengine2_labels' => 1);
+%if(my $pre_js = $form->render_pre_javascript()) {
+<% $pre_js %>\
+%}
+<form name="<% $form->name %>" id="<% $form->form_id %>"\
+ action="<% $form->action %>" class="<% $form->classnames %>"\
+ method="<% $form->method %>"\
+% if(my $extra = $form->extra_form_attributes) {
+ <% $extra %>\
+%}
+>
+<% $form->render_form_errors(%$render_args) %>\
+<% $form->render_hidden_fields(%$render_args) %>\
+<% $form->render_fields(%$render_args) %>\
+</form>
+%if(my $post_js = $form->render_post_javascript()) {
+<% $post_js %>\
+%}
+%$r->notes('disable_editengine2_labels' => 0);

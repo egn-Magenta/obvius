@@ -1,0 +1,20 @@
+<%args>
+$form
+</%args>
+<script type="text/javascript"><!--
+$(function() {
+    if(window.onsubmit_array) {
+        $('#<% $form->form_id %>').on("submit",
+            window.my_onsubmit_handler ||
+            function() {
+                for(var i in window.onsubmit_array) {
+                    var f = onsubmit_array[i];
+                    var test = f();
+                    if(!test)
+                        return test;
+                }
+            }
+        );
+    }
+});
+//--></script>
