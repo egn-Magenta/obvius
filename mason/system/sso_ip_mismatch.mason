@@ -1,24 +1,21 @@
 <& sso_login.mason:top_html, %ARGS, title => $m->scomp(
     'translator',
-    da => "Fejl i IP-check ved SSO-login",
-    en => "Problem with login"
+    da => "Fejl ved login",
+    en => "Login failed"
 ) &>
 
+<div id="ipmissmatchmessage">
 <p>
     <& translator,
-        da => "Dit login er blevet afvist da IP-adressen du bruger til at " .
-              "tilgå",
-        en => "There was a conflict with determining the IP-address used " .
-              "during login. The IP-address using to access "
-    &><br />
-    <a href="<% $origin |h %>"><% $origin |h %></a><br />
-    <& translator,
-        da => "med er ikke den samme IP-adresse du bruger til at tilgå " .
-              "login-systemet på adressen",
-        en => "is not the same as the IP-address used to access the login " .
-               "system at"
-    &><br />
-    <a href="<% $login_url |h %>"><% $login_url |h %></a>.
+        da => "Dit login er blevet afvist, da din computer forsøger at " .
+              "logge på CMS'et fra flere forskellige ip-adresser. Af hensyn " .
+              "til sikkerheden er login bundet til en enkelt ip-adresse. " .
+              "Denme fejl kan skyldes forkert opsætning af et netværk.",
+        en => "Login has been denied since your computer is using more than " .
+              "one ip adress whoen trying to log on to the CMS. For " .
+              "security reasons this is not allowed. This may be caused by " .
+              "a wrong configuration of your network."
+    &>
 </p>
 
 <p>
@@ -73,6 +70,7 @@
         da => "Klik her for at forsøge at logge ind igen",
         en => "Click here to try logging in again"
     &></a>
+</div>
 </div>
 <& sso_login.mason:bottom_html, %ARGS &>
 <%once>
