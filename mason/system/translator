@@ -2,9 +2,25 @@
 <%args>
 $en => undef
 $da => undef
-</%args>
-<%init>
+</%args>\
+<%once>
 use WebObvius::Site;
-my $lang_prefs = WebObvius::Site::get_language_preferences(undef, $r);
-my $msg = $lang_prefs->{en} > $lang_prefs->{da} ? $en : $da;
+</%once>\
+<%init>
+my $preferred_lang = $r->notes('preferred_lang');
+
+unless(defined($preferred_lang)) {
+    # Calculate preferred lang, only considering danish and english
+    my $lang_prefs = WebObvius::Site::get_language_preferences(undef, $r);
+    my $chosen_weight = 0;
+    while(my ($lang, $weight) = each(%$lang_prefs)) {
+        if($lang =~ m{^(da|en)}i && $weight > $chosen_weight) {
+            $preferred_lang = lc($1);
+            $chosen_weight = $weight;
+        }
+    }
+    $r->notes('preferred_lang' => ($preferred_lang || ''));
+}
+
+my $msg = $preferred_lang eq 'en' ? $en : $da;
 </%init>
