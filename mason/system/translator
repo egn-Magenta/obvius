@@ -22,5 +22,5 @@ unless(defined($preferred_lang)) {
     $r->notes('preferred_lang' => ($preferred_lang || ''));
 }
 
-my $msg = $preferred_lang eq 'en' ? $en : $da;
+my $msg = $preferred_lang eq 'da' ? $da : $en;
 </%init>
