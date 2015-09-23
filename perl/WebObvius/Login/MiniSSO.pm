@@ -27,8 +27,6 @@ sub minisso_login_handler {
 
     my $r = WebObvius::Apache::apache_module('Request')-> new($req);
     if(my $ticketcode = $r->param('t')) {
-        my $ip_match = get_origin_ip_from_request($req);
-        $ip_match =~ s!\.\d+$!!;
         my $origin_url = $this->request_to_origin_url(
             $req,
             exclude_args => ['t']
@@ -38,7 +36,8 @@ sub minisso_login_handler {
                 t.sso_ticket_id,
                 s.login,
                 s.permanent,
-                s.sso_session_id
+                s.sso_session_id,
+                s.ip_match
             from
                 sso_tickets t
                 join
@@ -50,18 +49,24 @@ sub minisso_login_handler {
                 and
                 t.origin = ?
                 and
-                s.ip_match = ?
-                and
                 t.expires >= NOW()
         |);
-        $sth->execute($ticketcode, $origin_url, $ip_match);
+        $sth->execute($ticketcode, $origin_url);
         my (
             $ticket_id,
             $login,
             $permanent,
-            $sso_session_id
+            $sso_session_id,
+            $ip_pattern
         ) = $sth->fetchrow_array;
         if($ticket_id) {
+            my $client_ip = get_origin_ip_from_request($req);
+
+            # Check IP match, redirect to error message if it fails
+            if ($client_ip !~ m{^\Q$ip_pattern\E}) {
+                return $this->redirect_to_ip_mismatch($req, $ip_pattern);
+            }
+
             my $session_id;
             my $inserter = $obvius->dbh->prepare(q|
                 insert into login_sessions (
@@ -81,7 +86,7 @@ sub minisso_login_handler {
                     $inserter->execute(
                         $login,
                         $session_id,
-                        $ip_match,
+                        $ip_pattern,
                         $permanent,
                         $sso_session_id
                     );
@@ -182,23 +187,42 @@ sub make_no_access_url {
                $config->param('roothost') ||
                $req->hostname;
 
-    my $return_uri = uri_escape(
-        $this->request_to_origin_url($req, exclude_args => ['t'])
-    );
-
     my $url = "https://${host}/system/no_admin_access.mason";
     if(my $user = $req->notes('user')) {
         $url .= '?user=' . $user;
     }
 
     return $url;
-    
 }
+
+sub make_ip_mismatch_url {
+    my ($this, $req, $matched_against) = @_;
+
+    my $config = $this->param('obvius_config');
+    my $host = $config->param('https_roothost') ||
+               $config->param('roothost') ||
+               $req->hostname;
+
+    my $url = "https://${host}/system/sso_ip_mismatch.mason";
+    $url .= "?client_ip=" . uri_escape(get_origin_ip_from_request($req));
+    $url .= "&match_ip=" . uri_escape($matched_against);
+    $url .= "&origin=" . uri_escape($this->request_to_origin_url($req));
+
+    return $url;
+}
+
 
 sub redirect_to_minisso_login {
     my ($this, $req) = @_;
 
     return $this->redirect($req, $this->make_sso_login_url($req), 1);
+}
+
+sub redirect_to_ip_mismatch {
+    my ($this, $req, $matched_against) = @_;
+
+    my $url = $this->make_ip_mismatch_url($req, $matched_against);
+    return $this->redirect($req, $url, 1);
 }
 
 sub already_logged_in {
