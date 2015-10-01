@@ -204,7 +204,7 @@ sub parse_access_rule {
     $userid=$this->get_userid($this->user) if (!defined $userid);
     $user_groups=$this->get_user_groups($userid) if (!defined $user_groups);
 
-    if ($line =~ /^([^=+\-]+)(!|=|=!|\+|-)\s*([^=+!\-]+)$/) {
+    if ($line =~ /^([^=]+)(!|=|=!|\+|-)\s*([^=+!\-]+)$/g) {
         my ($who_list, $how, $capabilities)=($1, $2, $3);
 
         my $apply=0;

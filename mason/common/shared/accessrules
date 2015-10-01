@@ -1,75 +1,73 @@
 %# $Id: accessrules,v 1.9 2007/02/16 14:58:46 dk Exp $
 <%args>
-$universal	  => ''
-$inherited	  => ''
-$value		  => ''
-$groups		  => []
-$users		  => []
-$allow_inherited  =>  1
-$show_universal   =>  1
-$inactive         =>  0
+  $universal	  => ''
+  $inherited	  => ''
+  $value		  => ''
+  $groups		  => []
+  $users		  => []
+  $allow_inherited  =>  1
+  $show_universal   =>  1
+  $inactive         =>  0
 </%args>
+
 <%init>
-$universal =~ s/\r//gs;
-$inherited =~ s/\r//gs;
-$inherited =~ s/\r//gs;
-my ( $js_universal, $js_inherited) = map {
-	s/\n/\\n/g;
-	s/(['"])/\\$1/g;
-	$_;	
-} ( $universal, $inherited);
+  $universal =~ s/\r//gs;
+  $inherited =~ s/\r//gs;
+  $inherited =~ s/\r//gs;
+  my ($js_universal, $js_inherited) = map {
+    s/\n/\\n/g;
+    s/(['"])/\\$1/g;
+    $_;
+  } ( $universal, $inherited);
 </%init>
 
-<div id="editlayer" class="obvius-ac-editlayer" >
+<div id="editlayer" class="obvius-ac-editlayer">
 
-<div class="obvius-ac-editheader" style="background-color: #050;">Access rule</div>
+  <div class="obvius-ac-editheader" style="background-color: #050;">Access rule</div>
 
-<div class="obvius-ac-editcontrols">
+  <div class="obvius-ac-editcontrols">
+    
+    <label><input type="radio" name="entity" value="owner">Owner</label>
 
-<label>
-<input type="radio" name="entity" value="owner">
-Owner
-</label>
-<select name="users" onClick="form.entity[0].checked=true;">
-<% map { "<option value='$$_[0]'>$$_[1]</option>\n"} @$users %>
-	<option value="ALL">All users</option>
-</select>
+    <select name="users" onClick="form.entity[0].checked=true;">
+      <% map { "<option value='$$_[0]'>$$_[1]</option>\n"} @$users %>
+      <option value="ALL">All users</option>
+    </select>
 
-<p>
+    <p>
+      <label><input type="radio" name="entity" value="group">Group</label>
+      <select name="groups" onClick="form.entity[1].checked=true;">
+        <% map { "<option value='$_'>$_</option>\n"} @$groups %>
+      </select>
+    </p>
 
-<label>
-<input type="radio" name="entity" value="group">
-Group
-</label>
-<select name="groups" onClick="form.entity[1].checked=true;">
-<% map { "<option value='$_'>$_</option>\n"} @$groups %>
-</select>
-<p>
+    <p>
+      can
+      <select name="action">
+        <option value="=">only</option>
+        <option value="+">also</option>
+        <option value="-">not</option>
+        <option value="=!">always</option>
+        <option value="!">never</option>
+      </select>
+    </p>
 
-can
-<select name="action">
-	<option value="=">only</option>
-	<option value="+">also</option>
-	<option value="-">not</option>
-	<option value="=!">always</option>
-	<option value="!">never</option>
-</select>
-<p>
+    <p>
 
 
-<label><input type="checkbox" name="roles" value="view"> View</label><br>
-<label><input type="checkbox" name="roles" value="create"> Create</label><br>
-<label><input type="checkbox" name="roles" value="edit"> Edit</label><br>
-<label><input type="checkbox" name="roles" value="publish"> Publish</label><br>
-<label><input type="checkbox" name="roles" value="delete"> Delete</label><br>
-<label><input type="checkbox" name="roles" value="modes"> Change access</label><br>
+    <label><input type="checkbox" name="roles" value="view"> View</label><br/>
+    <label><input type="checkbox" name="roles" value="create"> Create</label><br/>
+    <label><input type="checkbox" name="roles" value="edit"> Edit</label><br/>
+    <label><input type="checkbox" name="roles" value="publish"> Publish</label><br/>
+    <label><input type="checkbox" name="roles" value="delete"> Delete</label><br/>
+    <label><input type="checkbox" name="roles" value="modes"> Change access</label><br/>
 
-</div>   <!-- editcontrols -->
+  </div>   <!-- editcontrols -->
 
-<div class="obvius-ac-editbuttons">
-	<input type="button" value="Ok" onClick="accessrules_editbox_ok();">
-	<input type="button" value="Cancel" onClick="accessrules_editbox_visible(0);">
-</div>
+  <div class="obvius-ac-editbuttons">
+    <input type="button" value="Ok" onClick="accessrules_editbox_ok();">
+    <input type="button" value="Cancel" onClick="accessrules_editbox_visible(0);">
+  </div>
 
 </div>  <!-- editlayer -->
 
@@ -77,91 +75,94 @@ can
 <!-- hide if no javascript -->
 <div id="js-panel" style="display:none">
 % if ( $show_universal) {
-Universal access rules
-<p>
-<div class="obvius-ac-ruleset" id="universal-content">
-<% $universal %>
-</div>
-<p>
+  Universal access rules
+  <p>
+    <div class="obvius-ac-ruleset" id="universal-content">
+      <% $universal %>
+    </div>
+  </p>
 % } # endif
 
-% if ( $allow_inherited) {
-<label>
-<input type="checkbox" name="inherited" onClick="accessrules_update_textarea()"
-	<% $inactive ? 'disabled="disabled" ' : '' %>
->
-Inherited access rules
-</label>
-<!-- displayed as is if no javascript -->
-<div class="obvius-ac-ruleset" id="inherited-content">
-<% $inherited %>
-</div>
-<p>
+% if ($allow_inherited) {
+  <p>
+    <label>
+      <input type="checkbox" name="inherited" onClick="accessrules_update_textarea()" <% $inactive ? 'disabled="disabled" ' : '' %>>
+      Inherited access rules
+    </label>
+    <!-- displayed as is if no javascript -->
+    <div class="obvius-ac-ruleset" id="inherited-content">
+      <% $inherited %>
+    </div>
+  </p>
 % } # endif
 
-Access rules for this document:<p>
-<div class="obvius-ac-ruleset">
-<div id="arena"></div>
-<p>
-% if ( not $inactive) {
-<input type="button" value="Create new access rule" onClick="accessrules_new();">
-% }
-</div>
+  Access rules for this document:
+  <p>
+    <div class="obvius-ac-ruleset">
+      <div id="arena"></div>
+%     if (not $inactive) {
+      <input type="button" value="Create new access rule" onClick="accessrules_new();">
+%     }
+    </div>
+  </p>
 
-<p>
+  <p>
 
-<div id="raw-edit-hide" style="display:block">
-<a href="" onClick="
-get_element('raw-edit-show').style.display='block';
-get_element('raw-edit-hide').style.display='none';
-return false;
-">
-Show raw rules
-</a>
-</div>
+    <div id="raw-edit-hide" style="display:block">
+      <a href="" onClick="
+      get_element('raw-edit-show').style.display='block';
+      get_element('raw-edit-hide').style.display='none';
+      return false;
+      ">
+      Show raw rules
+      </a>
+    </div>
+
+  </p>
 
 </div> <!-- js-panel -->
 
 <!-- show if no javascript -->
 <div id="raw-edit-show" style="display:block">
 
-<div id="js-autohide-part1" style="display:none">
-<a href="" onClick="
-get_element('raw-edit-hide').style.display='block';
-get_element('raw-edit-show').style.display='none';
-return false;
-">
-Hide raw rules
-</a>
-<p>
-</div> <!-- js-autohide-part1 -->
+  <div id="js-autohide-part1" style="display:none">
+    <a href="" onClick="
+      get_element('raw-edit-hide').style.display='block';
+      get_element('raw-edit-show').style.display='none';
+      return false;
+    ">
+    Hide raw rules
+    </a>
+  </div> <!-- js-autohide-part1 -->
 
-<div class="obvius-ac-ruleset">
-<br>
-<div id="js-autohide-part2" style="display:none">
-% if ( not $inactive) {
-Raw rules. Use with caution.<p>
-% }
-</div>
+  <div class="obvius-ac-ruleset">
+    <br/>
+    <div id="js-autohide-part2" style="display:none">
+%     if (not $inactive) {
+      Raw rules. Use with caution.<p>
+%     }
+    </div>
 
-<textarea name="accessrules" rows=6 cols=50><% $value %></textarea>
-<p>
+    <textarea name="accessrules" rows=6 cols=50><% $value %></textarea>
 
-<div id="js-autohide-part3" style="display:none">
-% if ( not $inactive) {
-<input type="button" value="Parse ruleset" onClick="accessrules_parse_textarea();">
-% }
-</div>
+    <p>
+      <div id="js-autohide-part3" style="display:none">
+%       if ( not $inactive) {
+        <input type="button" value="Parse ruleset" onClick="accessrules_parse_textarea();">
+%       }
+      </div>
+    </p>
 
-
-</div>
+  </div>
 
 </div> <!-- raw-edit-show -->
 
-<p><font size="-1" color="#CC0000">
-<div id="js-error">
-error in <b>scripts/admin_accessrules.js</b>, please investigate
-</div>
+
+
+<font size="-1" color="#CC0000">
+  <div id="js-error">
+    error in <b>scripts/admin_accessrules.js</b>, please investigate
+  </div>
 </font>
 
 <script language="JavaScript">

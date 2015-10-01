@@ -37,20 +37,23 @@ function accessrules_init(
 	readonly
 ) {
 	// check fancy functions
-	if ( typeof(Array.prototype.splice) != "function")
+	if ( typeof(Array.prototype.splice) != "function") {
 		raise("Unable to work correctly under this browser, consider installing a newer version, or Firefox");
+	}
 
 	ac_allow_inherited = allow_inherited;
 	ac_readonly        = readonly;
 
 	// get hold of required dom elements
 	ac_form = document.forms[form];
-	if ( typeof(ac_form) == "undefined")
+	if ( typeof(ac_form) == "undefined") {
 		raise("error: accessrules_init(): form '" + form + "' not found");
+	}
 
 	get_control('accessrules');
-	if ( ac_allow_inherited)
+	if ( ac_allow_inherited) {
 		get_control('inherited');
+	}
 	get_control('users');
 	get_control('groups');
 	get_control('entity');
@@ -64,9 +67,8 @@ function accessrules_init(
 	ac_editor.style.left = (document.body.clientWidth  - ac_editor.offsetWidth) / 2 + 'px';
 
 	// populate roles lookup table
-	var i;
 	ac_roles_hash = new Array;
-	for ( i = 0; i < ac_form.roles.length; i++) {
+	for (var i = 0; i < ac_form.roles.length; i++) {
 		ac_roles_hash[ ac_form.roles[i].value ] = i; 
 	}
 	ac_roles_imperatives = new Array;
@@ -75,9 +77,8 @@ function accessrules_init(
 	
 	
 	// populate actions lookup table
-	var i;
 	ac_actions_hash = new Array;
-	for ( i = 0; i < ac_form.action.length; i++) {
+	for (var i = 0; i < ac_form.action.length; i++) {
 		ac_actions_hash[ ac_form.action[i].value ] = i; 
 	}
 
@@ -128,73 +129,67 @@ function get_element(id)
 crudely parse the content, store parsed data in the passed array,
 returns boolean flag if INHERIT section is present.
 */
-function accessrules_parse( storage, text)
-{
-	var i;
-	var n;
-	var m = text.match(/[^\n\r]+/g); 
+function accessrules_parse(storage, text) {
+	var chunks;
+	var lines = text.match(/[^\n\r]+/g);
 	var has_inherited = false;
 
 	/* special case as written in Obvius/Access.pm: document without
 	access rules is treated as INHERITED . Go figure why not vice versa. */
-	if ( m == null) return true; 
-
-	for ( i = 0; i < m.length; i++) {
-		if ( ac_allow_inherited && m[i].match(/^inherit$/i)) {
-			has_inherited = true;
-		} else if ( n = m[i].match(/^(\@?)([^\=\+\-\!]+)(\+|-|=|=!|!)([\w,]+)$/)) {
-			var a = new Array();
-			a['valid']        = true;
-			a['is_group']     = ( n[1] == '@');
-			a['entity']       = n[2];
-			a['action']       = n[3];
-			a['roles']        = n[4].match(/\w+/g);
-			a['line']         = m[i];
-			
-			/*
-			check that group/owner is ok
-			*/
-			if ( 
-				accessrules_find_select_value( 
-					( a['is_group'] ? ac_form.groups : ac_form.users),
-					a['entity']
-				) < 0
-			) {
-				a['warning'] = 
-					( a['is_group'] ? 'Group ' : 'User ') +
-					"'" + a['entity'] + "'" +
-					' is invalid. ';
-			}
-
-			/*
-			check that all roles are understood
-			*/
-			var j;
-			var bad_roles = new Array;
-
-			for ( j = 0; j < a['roles'].length; j++) {
-				if ( ac_roles_hash[
-					a['roles'][j]
-				] >= 0)
-					continue;
-				bad_roles.push(a['roles'][j]);
-			}
-			if ( bad_roles.length > 0) {
-				a['warning'] = 
-				( a['warning'] ? a['warning'] : '')
-				+ 
-				'Role(s) [' + bad_roles.join(',') + '] is/are invalid';
-			}
-			
-			storage.push(a);
-		} else {
-			var a = new Array();
-			a['valid']    = false;
-			a['line']     = m[i];
-			storage.push(a);
-		}
+	if (lines == null) {
+		return true;
 	}
 
+	var lineparser = /^(\@?)([^=]+)(\+|-|=|=!|!)([\w,]+)$/g;
+
+	for (var i = 0; i < lines.length; i++) {
+		var line = lines[i];
+		if (ac_allow_inherited && line.toLowerCase() === "inherit") {
+			has_inherited = true;
+		} else {
+			lineparser.lastIndex = 0;
+			var chunks = lineparser.exec(line);
+			if (chunks) {
+				var rule = {};
+				rule['valid']        = true;
+				rule['is_group']     = (chunks[1] == '@');
+				rule['entity']       = chunks[2];
+				rule['action']       = chunks[3];
+				rule['roles']        = chunks[4].match(/\w+/g);
+				rule['line']         = line;
+
+				/*
+				check that group/owner is ok
+				*/
+				if (accessrules_find_select_value( (rule['is_group'] ? ac_form.groups : ac_form.users), rule['entity'] ) < 0) {
+					rule['warning'] = ( rule['is_group'] ? 'Group ' : 'User ') + "'" + rule['entity'] + "'" +	' is invalid. ';
+				}
+
+				/*
+				check that all roles are understood
+				*/
+				var bad_roles = new Array;
+
+				for (var j = 0; j < rule['roles'].length; j++) {
+					if (ac_roles_hash[rule['roles'][j]] >= 0){
+						continue;
+					}
+					bad_roles.push(rule['roles'][j]);
+				}
+				if (bad_roles.length > 0) {
+					rule['warning'] = ( rule['warning'] ? rule['warning'] : '') + 'Role(s) [' + bad_roles.join(',') + '] is/are invalid';
+				}
+
+				storage.push(rule);
+			} else {
+				console.log("invalid rule!",line,!!lineparser.exec(line));
+				var rule = {};
+				rule['valid']    = false;
+				rule['line']     = line;
+				storage.push(rule);
+			}
+		}
+	}
 	return has_inherited;
 }
 
@@ -227,67 +222,64 @@ function accessrules_find_select_value( select, value)
 /*
 given a rule index, creates a human readable string
 */
-function accessrules_create_readable_accessrule( a)
+function accessrules_create_readable_accessrule(rule)
 {
-	if ( a['valid']) {
+	if (rule['valid']) {
 		var i, can, what;
-		var r = new Array();
-		var roles = a['roles'];
+		var capabilities = [];
+		var roles = rule['roles'];
 
-		for ( i = 0; i < roles.length; i++)
-			r.push(
+		for (i = 0; i < roles.length; i++) {
+			capabilities.push(
 				(ac_roles_imperatives[roles[i]] != null) ?
 					ac_roles_imperatives[roles[i]] :
 					roles[i]
 			);
-
-		// only, not, always, etc
-		can = ac_actions_hash[ a['action']];
-		if ( can == null) 
-			return a['line'];
-		can = ac_form.action[can].text;
-
-		switch ( r.length) {
-		case 0:
-			can = '';
-			what = 'do nothing, empty rule';
-			break;
-		case 1:
-			what = r[0];
-			break;
-		case 2:
-			what = r[0] + ' and ' + r[1];
-			break;
-		default:
-			var local = r[r.length-1];
-			r[r.length-1] = 'and ' + local;
-			what = r.join(', ');
-			r[r.length-1] = local;
 		}
 
-		var j, entity_name = 
-			( a['is_group'] ? '' : 'User ') +
-			'with id=\''+ a['entity'] +'\'';
-		var entity = a['is_group'] ? ac_form.groups : ac_form.users;
-		for ( j = 0; j < entity.length; j++) {
-			if ( a['entity'] != entity[j].value) 
+		// only, not, always, etc
+		can = ac_actions_hash[rule['action']];
+		if (can == null) {
+			return rule['line'];
+		}
+		can = ac_form.action[can].text;
+
+		switch ( capabilities.length) {
+			case 0:
+				can = '';
+				what = 'do nothing, empty rule';
+				break;
+			case 1:
+				what = capabilities[0];
+				break;
+			case 2:
+				what = capabilities[0] + ' and ' + capabilities[1];
+				break;
+			default:
+				var local = capabilities[capabilities.length-1];
+				capabilities[capabilities.length-1] = 'and ' + local;
+				what = capabilities.join(', ');
+				capabilities[capabilities.length-1] = local;
+		}
+
+		var entity_name = ( rule['is_group'] ? '' : 'User ') + 'with id=\''+ rule['entity'] +'\'';
+		var entity = rule['is_group'] ? ac_form.groups : ac_form.users;
+		for (var j = 0; j < entity.length; j++) {
+			if (rule['entity'] != entity[j].value) {
 				continue;
+			}
 			entity_name = '<i>' + entity[j].text + '</i>';
 			break;
 		}
 
-		var t = 
-			( a['is_group'] ? 'Group ' : '') + 
-			entity_name + 
-			" can " + can + ' ' + what
-			;
-		if ( a['warning'] != null) {
-			t = t + '<br>(<font size="-1" color="#CC0000">warning: ' + a['warning'] + '</font>)';
+		var text = (rule['is_group'] ? 'Group ' : '') +	entity_name + " can " + can + ' ' + what;
+		if (rule['warning'] != null) {
+			text += '<br>(<font size="-1" color="#CC0000">warning: ' + rule['warning'] + '</font>)';
 		}
-		return t;
+		return text;
 
 	} else {
-		return '<font color="#CC0000">Invalid rule: </font><b>' + a['line'] + '</b>';
+		return '<font color="#CC0000">Invalid rule: </font><b>' + rule['line'] + '</b>';
 	}
 }
 
@@ -296,9 +288,8 @@ based on ac_content() information, reshapes accesrule controls
 */
 function accessrules_reshape_controls()
 {
-	var i;
 	var arena = '';
-	for ( i = 0; i < ac_content.length; i++) {
+	for (var i = 0; i < ac_content.length; i++) {
 		arena = arena +
 			accessrules_create_readable_accessrule(ac_content[i]) +
 			( ac_readonly ? '' : (
