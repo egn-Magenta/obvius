@@ -39,11 +39,6 @@ sub extract_mason {
 
     # Process mason files
     my $extractor = Locale::Maketext::Extract->new(
-        plugins => {
-            'Obvius::Translations::ExtractPlugins::Mason' => ['*'],
-            'mason' => ['*'],
-            'perl' => ['*']
-        },
         warnings => $WARNINGS,
         verbose => $DEBUG
     );
@@ -52,11 +47,20 @@ sub extract_mason {
 
     print STDERR "Extracting translations from mason\n";
 
-    File::Find::find(sub {
-        return if(m{.xml});
-        return unless(-f $File::Find::name);
-        $extractor->extract_file($File::Find::name);
-    }, $dir . '/mason');
+    # Workaround for each file only getting processed by one plugin
+    foreach my $parser (
+        'Obvius::Translations::ExtractPlugins::Mason',
+        'mason',
+        'perl'
+    ) {
+        # Set the current parser to be used for all files
+        $extractor->plugins({ $parser => ['*'] });
+        File::Find::find(sub {
+            return if(m{.xml});
+            return unless(-f $File::Find::name);
+            $extractor->extract_file($File::Find::name);
+        }, $dir . '/mason');
+    }
 
     $extractor->compile(1);
     $extractor->write_po($i18n_dir . '/extracted_from_mason.pot');
