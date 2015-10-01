@@ -150,6 +150,7 @@ sub extract_all {
         $msgcat_executeable,
         '-t', 'UTF-8',
         '--no-location',
+        '--sort-output',
         '-o', $dir . '/i18n/combined.pot',
         grep { -f $_ } (
             $dir . '/i18n/extracted_from_doctypes.pot',
@@ -157,7 +158,7 @@ sub extract_all {
             $dir . '/i18n/extracted_from_perl.pot',
             $dir . '/i18n/extra.pot',
         )
-    );
+    ) && die "msgcat command failed";
 
     print STDERR "Done\n";
 }
@@ -186,7 +187,7 @@ sub merge_and_update {
     $msginit_exe =~ s{\s+}{}s;
 
     my $msgcat_exe = qx{which msgcat};
-    die "Could not find msginit executable" unless($msgcat_exe);
+    die "Could not find msgcat executable" unless($msgcat_exe);
     $msgcat_exe =~ s{\s+}{}s;
 
     foreach my $dname (sort keys %dirs) {
@@ -203,9 +204,10 @@ sub merge_and_update {
                 "--no-fuzzy-matching",
                 "--backup=simple",
                 "--update",
+                "--sort-output",
                 $fname,
                 $base_dir . '/i18n/combined.pot'
-            );
+            ) && die "msgmerge command failed";
         } else {
 
             print STDERR "Creating new translation file $fname\n";
@@ -220,7 +222,7 @@ sub merge_and_update {
                 # Woraround for initial values being copied to english .po
                 # files
                 "-l", 'xx_XX'
-            );
+            ) && die "msginit command failed";
             # Fixup character set in header
             open(FH, $fname);
             my $content = Obvius::CharsetTools::mixed2utf8(join("", <FH>));
@@ -231,6 +233,7 @@ sub merge_and_update {
             close(FH);
         }
     }
+    sort_translations($base_dir, $domain);
     build($base_dir, $domain, $obvius_dir);
 }
 
@@ -240,11 +243,11 @@ sub build {
     die "No domain specified" unless($domain);
 
     my $msgcat_exe = qx{which msgcat};
-    die "Could not find msginit executable" unless($msgcat_exe);
+    die "Could not find msgcat executable" unless($msgcat_exe);
     $msgcat_exe =~ s{\s+}{}s;
 
     my $msgfmt_exe = qx{which msgfmt};
-    die "Could not find msginit executable" unless($msgfmt_exe);
+    die "Could not find msgfmt executable" unless($msgfmt_exe);
     $msgfmt_exe =~ s{\s+}{}s;
 
     my %dirs = map { $_ => 1 } (
@@ -292,4 +295,41 @@ sub build {
         system($msgfmt_exe, '-o', $mo_file, $final_file);
     }
 }
+
+sub sort_translations {
+    my ($base_dir, $domain) = @_;
+
+    die "No domain specified" unless($domain);
+
+    my $msgcat_exe = qx{which msgcat};
+    die "Could not find msgcat executable" unless($msgcat_exe);
+    $msgcat_exe =~ s{\s+}{}s;
+
+    my %dirs = map { $_ => 1 } (
+        $base_dir . '/i18n/da_DK',
+        $base_dir . '/i18n/en_US',
+        grep { -d $_ } glob($base_dir . '/i18n/*'),
+    );
+
+    my $postfix = $domain eq 'dk.obvius' ? '.po' : '_src.po';
+    
+    foreach my $dname (sort keys %dirs) {
+        my $fname = $dname . '/LC_MESSAGES/' . $domain . $postfix;
+        next unless(-f $fname);
+        my $sorted_fname = $fname . ".sorted";
+        my ($lang) = ($dname =~ m{/(\w\w|\w\w_\w\w)$});
+        next unless($lang);
+        system(
+            $msgcat_exe,
+            '-t', 'UTF-8',
+            '-o', $sorted_fname,
+            '--no-location',
+            '--use-first',
+            '--sort-output',
+            $fname
+        ) && die "msgcat command failed";
+        system("mv", $sorted_fname, $fname) && die "mv command failed";
+    }
+}
+
 1;
