@@ -61,7 +61,8 @@ sub copy_out
 	if (!defined $value) {
 		return $value;
 	}
-	if ($fspec->param('fieldtype') eq 'date' && $value eq '') {
+	my $ftype = $fspec->param('fieldtype');
+	if ($ftype->param('value_field') eq 'date' && $value eq '') {
 		return '0000-00-00 00:00:00';
 	}
 	return $value;
