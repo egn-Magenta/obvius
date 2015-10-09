@@ -58,6 +58,12 @@ sub copy_in
 sub copy_out
 {
 	my ($this, $obvius, $fspec, $value) = @_;
+	if (!defined $value) {
+		return $value;
+	}
+	if ($fspec->param('fieldtype') eq 'date' && $value eq '') {
+		return '0000-00-00 00:00:00';
+	}
 	return $value;
 }
 
