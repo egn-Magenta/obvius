@@ -343,7 +343,7 @@ sub set_expire_header {
         my $agent = $req->headers_in->{'User-Agent'};
         # See this address for explanation of the -1
         # http://support.microsoft.com/support/kb/articles/Q234/0/67.ASP
-        if ($agent =~ m/[Mm][Ss][Ii][Ee]/) {
+        if (defined($agent) && $agent =~ m/msie/i) {
             $req->header_out('Expires', -1);
         } else {
             $req->header_out('Expires', Apache::Util::ht_time($req->request_time));

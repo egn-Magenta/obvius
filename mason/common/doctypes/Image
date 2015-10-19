@@ -13,7 +13,7 @@
 </table>
 
 <p>
-% if (!$vdoc->Width || !$vdoc->Height) {
+% if (!defined($vdoc->Width) || !$vdoc->Width || !defined($vdoc->Height) || $vdoc->Height) {
   <img src="<% $linkuri %>" alt="Picture: <% $vdoc->field('short_title') %>" /><br />
 %} else {
   <img width="<% $vdoc->Width %>" height="<% $vdoc->Height %>" src="<% $linkuri %>"
