@@ -221,6 +221,7 @@ sub gitignore_template {
 !/extra.pot
 *.po
 *.mo
+*~
 !dk.obvius.po
 !*_src.po
 EOT
