@@ -1,0 +1,9 @@
+<%args>
+$editscheme
+</%args>\
+<%init>
+my $comp = $editscheme->{component_path};
+die "No component_path key specified on editscheme" unless($comp);
+my $args = $editscheme->{component_args} || {};
+return $m->comp($comp, %$args);
+</%init>
