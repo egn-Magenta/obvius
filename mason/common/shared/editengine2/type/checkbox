@@ -10,7 +10,8 @@ $onclick=>""
 </%args>
 %
 
-<input id="<% $id |h %>" type="checkbox" name="<% $prefix . $field->{name} |h %>" value="1" <% $checked ? 'checked="checked" ' : '' %> <% $onclickhtml %> />
+<input type="hidden" class="disable-on-submit" name="<% $name |h %>" value="0"/>
+<input id="<% $id |h %>" type="checkbox" name="<% $name |h %>" value="1" <% $checked ? 'checked="checked" ' : '' %> <% $onclickhtml %> />
 
 <& util/label, name=>$id, label=>$field->{label}, field=>$field &>
 
@@ -18,6 +19,7 @@ $onclick=>""
 <%init>
 my @choices = [1];
 my $id = $prefix . $field->{name};
+my $name = $prefix . $field->{name};
 my $checked = $value->{value};
 my $onclickhtml = $onclick ? ' onclick="' . $onclick . '"' : '';
 </%init>

@@ -277,3 +277,10 @@ function start_ror_navigator(url, path, fallback_uri, field_name) {
     }
     return window.open(url, 'navigator','resizable=1,width=1150,height=500');
 }
+
+
+$(function(){
+	$("form").on("submit", function(){
+		$(this).find(".disable-on-submit").attr("disabled", "disabled");
+	});
+});
