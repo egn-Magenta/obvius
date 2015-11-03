@@ -9,6 +9,7 @@ use Obvius::Data;
 
 my @overloaded_vfields = qw(
     title
+    show_title
     short_title
     seq
     internal_proxy_path
