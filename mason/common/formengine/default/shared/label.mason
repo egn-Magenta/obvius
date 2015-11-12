@@ -1,0 +1,7 @@
+<%args>
+$field
+</%args>\
+<label for="<% $field->id %>" id="label-for-<% $field->id %>">\
+<% $field->label |h %>\
+<% $field->required_marker_label %>\
+</label>

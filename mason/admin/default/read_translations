@@ -1,14 +1,19 @@
 <%init>
-# Default language 'da':
-my $site = $r->pnotes('site');
+if($obvius->config->param('use_old_translation_system')) {
+    my $site = $r->pnotes('site');
 
-$site->set_language_preferences($r, 'da');
+    $site->set_language_preferences($r, 'da');
 
-my $lang_list = $site->param('LANGUAGE_PREFERENCES') || [];
-my $preferred_language = $lang_list->[0] || 'da';
-$preferred_language = substr($preferred_language, 0, 2);
+    my $lang_list = $site->param('LANGUAGE_PREFERENCES') || [];
+    my $preferred_language = $lang_list->[0] || 'da';
+    $preferred_language = substr($preferred_language, 0, 2);
 
-$r->pnotes('language_preferences' => $lang_list);
-$r->notes('editor_language' => $preferred_language);
-$r->notes('preferred_language' => $preferred_language);
+    $r->pnotes('language_preferences' => $lang_list);
+    $r->notes('editor_language' => $preferred_language);
+    $r->notes('preferred_language' => $preferred_language);
+} else {
+    my $lang = $r->notes('translation_lang') || 'da';
+    $r->notes('editor_language' => $lang);
+    $r->notes('preferred_language' => $lang);
+}
 </%init>

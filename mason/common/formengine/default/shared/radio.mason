@@ -1,0 +1,21 @@
+<%args>
+$field
+</%args>
+%foreach my $option ($field->options_list) {
+<div class="radiocontainer">\
+<input\
+ id="<% $option->id %>"\
+ name="<% $ARGS{name} || $field->name %>"\
+ type="<% $ARGS{input_type} || $field->input_type %>"\
+ value="<% $option->value |h %>"\
+% if($option->selected) {
+ checked="checked"\
+% }
+ />\
+<label\
+ for="<% $option->id %>"\
+ class="radiolabel"\
+><% $option->label %></label>\
+</div>\
+<% $field->option_separator %>\
+%}

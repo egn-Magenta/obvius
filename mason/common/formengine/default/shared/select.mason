@@ -1,0 +1,21 @@
+<%args>
+$field
+</%args>
+<select\
+ id="<% $field->id %>"\
+ name="<% $ARGS{name} || $field->name %>"\
+% if($field->is_multivalue) {
+ multiple="multiple"\
+% }
+>
+%foreach my $option ($field->options_list) {
+<option\
+ id="<% $option->id %>"\
+ value="<% $option->value |h %>"\
+% if($option->selected) {
+ selected="selected"\
+% }
+><% $option->label %></option>\
+<% $field->option_separator %>\
+%}
+</select>

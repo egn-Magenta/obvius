@@ -1,11 +1,14 @@
 % my $id = "id='$layout->{id}'" if $layout->{id};
 <div <% $id %> class="obvius-editengine-confirmation">
 % if (defined $layout->{label}) {
-<h2><& '/shared/msg', text=>$layout->{label} &></h2>
+<h2><% translate_editpagetitle($layout->{label}) %></h2>
 % }
 % if (defined $layout->{desc}) {
 <p><& '/shared/msg', text=>$layout->{desc} &>></p>
 %}
+<%once>
+use Obvius::Translations qw(translate_editpagetitle);
+</%once>\
 <%args>
 $layout
 </%args>

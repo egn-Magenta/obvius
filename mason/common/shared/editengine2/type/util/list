@@ -2,6 +2,7 @@
 %     my $id="obvius-$type-$name-$choice";
 %     $id=~s/[^\w-]//g;
 %     my $onclickhtml = $onclick->{$choice} ? ' onclick="' . $onclick->{$choice} . '"' : '';
+<input id="<% $id %>" type="<% $type |h %>" name="<% $name |h %>" value="<% $choice |h %>" <% $values{$choice} ? 'checked="checked" ' : '' %><% $onclickhtml %>/><label for="<% $id %>"><& /shared/msg, text=>(exists $labels->{$choice} ? t_label($labels->{$choice}) : $choice) &></label>
 <input id="<% $id %>" type="<% $type |h %>" name="<% $name |h %>" value="<% $choice |h %>" <% $values{$choice} ? 'checked="checked" ' : '' %><% $onclickhtml %>/><label for="<% $id %>"><& /shared/msg, text=>(exists $labels->{$choice} ? $labels->{$choice} : $choice) &></label>
 %     if ($separate_lines) {
 <br/>
@@ -16,8 +17,12 @@ $value=>undef
 $type=>'radio'
 $onclick=>{}
 $separate_lines=>0
-</%args>
+</%args>\
 %
+<%once>
+use Obvius::Translations qw(translate_editpagelabel);
+sub t_label { translate_editpagelabel(@_) }
+</%once>\
 <%init>
 $labels={} if (!defined $labels);
 

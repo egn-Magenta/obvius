@@ -1,9 +1,11 @@
 <% $text %>\
 <%init>
 my $default = 'en';
-my $langs = $r->pnotes('site')-> {LANGUAGE_PREFERENCES};
+my $chosen_lang = $r->notes('translation_lang');
+my $langs = $chosen_lang ?
+	    [ $chosen_lang, $default ] :
+	    ($r->pnotes('site')-> {LANGUAGE_PREFERENCES} || []);
 my $text;
-
 for my $lang (@$langs, $default) {
      $lang =~ s|^(.{2})|$1|;
 
@@ -12,5 +14,4 @@ for my $lang (@$langs, $default) {
 	  last;
      }
 }
-
 </%init>
