@@ -3,6 +3,9 @@
 %     $id=~s/[^\w-]//g;
 %     my $onclickhtml = $onclick->{$choice} ? ' onclick="' . $onclick->{$choice} . '"' : '';
 <input id="<% $id %>" type="<% $type |h %>" name="<% $name |h %>" value="<% $choice |h %>" <% $values{$choice} ? 'checked="checked" ' : '' %><% $onclickhtml %>/><label for="<% $id %>"><& /shared/msg, text=>(exists $labels->{$choice} ? t_label($labels->{$choice}) : $choice) &></label>
+%     if ($separate_lines) {
+<br/>
+%     }
 % }
 %
 <%args>
@@ -12,6 +15,7 @@ $labels=>undef
 $value=>undef
 $type=>'radio'
 $onclick=>{}
+$separate_lines=>0
 </%args>\
 %
 <%once>
