@@ -138,24 +138,24 @@ sub get_resized_data {
         my ($new_width, $new_height);
 
 
-		if($size =~ /^(\d+)x(\d+)$/i) {
+        if($size =~ /^(\d+)x(\d+)$/i) {
             $new_width = $1;
             $new_height = $2;
-		} elsif (defined($org_width) && defined($org_height)) {
-			if ($size =~ /^(\d+)%$/) {
-				$new_width = $org_width * $1 / 100;
-				$new_height = $org_height * $1 / 100;
-			} elsif ($size =~ /^(\d+)x$/i) {
-				$new_width = $1;
-				$new_height = $org_height * ($new_width / $org_width);
-			} elsif ($size =~ /^x(\d+)$/i) {
-				$new_height = $1;
-				$new_width = $org_width * ($new_height / $org_height);
-			} else {
-				$new_width = $org_width;
-				$new_height = $org_height;
-			}
-		}
+        } elsif (defined($org_width) && defined($org_height)) {
+            if ($size =~ /^(\d+)%$/) {
+                $new_width = $org_width * $1 / 100;
+                $new_height = $org_height * $1 / 100;
+            } elsif ($size =~ /^(\d+)x$/i) {
+                $new_width = $1;
+                $new_height = $org_height * ($new_width / $org_width);
+            } elsif ($size =~ /^x(\d+)$/i) {
+                $new_height = $1;
+                $new_width = $org_width * ($new_height / $org_height);
+            } else {
+                $new_width = $org_width;
+                $new_height = $org_height;
+            }
+        }
 
         my $mimetype;
         my $final_image;
