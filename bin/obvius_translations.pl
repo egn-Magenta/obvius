@@ -20,6 +20,7 @@ my %action_map = (
     import_old => \&import_old,
     update => \&update,
     build => \&build,
+    sort_translations => \&sort_translations,
     help => sub { usage(undef, 0); }
 );
 
@@ -40,7 +41,8 @@ sub usage {
         collect <confname>:
             Collect translations from the source files of the site specified
             by the confname and update the relevant template files and
-            *_src.po files. This will also build .mo files from the .po files.
+            *_src.po files. This will also sort .mo files and build them into
+            .po files.
 
         collect_obvius [obvius_root_dir]:
             Collect translations from the base Obvius source files and update
@@ -55,10 +57,13 @@ sub usage {
         update <confname>:
             Collects translations for both the Obvius base and the specified
             confname. Run this to ensure all translations are up to date. This
-            will also build .mo files from the collected .op files.
+            will also sort and build .mo files from the collected .po files.
 
         build <confname>:
             Builds .mo files from the current .po files.
+        
+        sort_translations <confname>:
+            Sorts translations in generated *_src.po files.
 
         help:
             This message.
@@ -178,6 +183,22 @@ sub build {
     );
 }
 
+sub sort_translations {
+    my $confname = $ARGV[1];
+
+    my $config = get_config($confname);
+
+    my $base_dir = get_basedir($config);
+
+    unless($base_dir) {
+        usage("No sitebase defined for configuration '$confname'");
+    }
+
+    my $domain = Obvius::Translations::build_domain_name($config);
+    
+    Obvius::Translations::Extract::sort_translations($base_dir, $domain);
+}
+
 sub setup_dir {
     my ($dir) = @_;
 
@@ -200,6 +221,7 @@ sub gitignore_template {
 !/extra.pot
 *.po
 *.mo
+*~
 !dk.obvius.po
 !*_src.po
 EOT

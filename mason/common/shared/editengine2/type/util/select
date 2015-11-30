@@ -18,18 +18,8 @@ $size=>8
 </%args>\
 %
 <%once>
-sub t_label {
-    my $key = shift;
-    return $key unless($key);
-    my $result = $m->scomp(
-        '/shared/msg',
-        text => 'editpagelabel:' . $key
-    );
-    if(!$result || $result =~ m{^editpagelabel:}) {
-        $result = $m->scomp('/shared/msg', text => $key);
-    }
-    return $result;
-}
+use Obvius::Translations qw(translate_editpagelabel);
+sub t_label { translate_editpagelabel(@_) }
 </%once>\
 <%init>
 $labels={} if (!defined $labels);
