@@ -41,7 +41,7 @@ use locale;
 
 use WebObvius::Template;
 
-use WebObvius::Apache qw(Request Util);
+use URI::Escape;
 
 use HTML::Entities ();
 
@@ -84,12 +84,7 @@ sub doctype  { return shift->{PROVIDER}->doctype; }
 sub escape_html {
     my ($string) = @_;
 
-    if (Apache::Util->can('escape_html')) {
-	return Apache::Util::escape_html($string);
-    }
-    else {
-	return HTML::Entities::encode($string);
-    }
+    return HTML::Entities::encode($string);
 }
 
 
@@ -384,7 +379,7 @@ sub do_insert_url_hook {
 
 sub do_urlencode_hook {
     my ($this, $n) = @_;
-    return Apache::Util::escape_uri($this->_value_safe($n));
+    return URI::Escape::uri_escape($this->_value_safe($n))
 }
 
 # do_htmlencode_hook - implements the htmlencode-command for use in
