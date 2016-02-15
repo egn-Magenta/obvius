@@ -15,8 +15,12 @@ sub new {
         uri => '/',
         method => 'GET',
         method_numer => 0,
-        _obvius_notes => Obvius::Data->new(),
-        _obvius_pnotes => Obvius::Data->new(),
+        _obvius_notes => Obvius::Data->new(
+            translation_lang => 'da'
+        ),
+        _obvius_pnotes => Obvius::Data->new(
+            site => Obvius::Data->new()
+        ),
         _obvius_params => Obvius::Data->new(),
         %args
     );
