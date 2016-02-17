@@ -15,7 +15,7 @@ if($old_htmlize) {
   # Fake one:
   $tmpl->{PROVIDER}={
 		    request=>$r,
-		    mcms=>$mcms, # XXX ?!
+		    mcms=>$obvius, # XXX ?!
 		  };
   $text=$tmpl->do_htmlize_hook('MASON_CONTENT', $class, dont_wrap=>$dont_wrap);
   $text=~s/[&]amp;#(\d+);/&#$1;/g;
