@@ -282,7 +282,7 @@ $(function(){
     $("form").on("submit", function(){
         var form = $(this);
         form.find("input[type=checkbox]").each(function(){
-            if (this.checked) {
+            if (this.checked && this.name) {
                 form.find("input.checkboxmirror[type=hidden][name='"+this.name+"']").attr("disabled","disabled");
             }
         });
