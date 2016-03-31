@@ -10,7 +10,7 @@ $onclick=>""
 </%args>
 %
 
-<input type="hidden" name="<% $name |h %>" value="0"/>
+<input type="hidden" name="<% $name |h %>" class="checkboxmirror" value="0"/>
 <input id="<% $id |h %>" type="checkbox" name="<% $name |h %>" value="1" <% $checked ? 'checked="checked" ' : '' %> <% $onclickhtml %> />
 
 <& util/label, name=>$id, label=>$field->{label}, field=>$field &>

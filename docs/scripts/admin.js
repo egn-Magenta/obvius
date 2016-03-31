@@ -283,7 +283,7 @@ $(function(){
         var form = $(this);
         form.find("input[type=checkbox]").each(function(){
             if (this.checked) {
-                form.find("input[type=hidden][name='"+this.name+"']").attr("disabled","disabled");
+                form.find("input.checkboxmirror[type=hidden][name='"+this.name+"']").attr("disabled","disabled");
             }
         });
     });
