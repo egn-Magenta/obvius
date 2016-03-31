@@ -10,11 +10,10 @@ $onclick=>""
 </%args>
 %
 
-<input type="hidden" class="disable-on-submit" name="<% $name |h %>" value="0"/>
+<input type="hidden" name="<% $name |h %>" value="0"/>
 <input id="<% $id |h %>" type="checkbox" name="<% $name |h %>" value="1" <% $checked ? 'checked="checked" ' : '' %> <% $onclickhtml %> />
 
 <& util/label, name=>$id, label=>$field->{label}, field=>$field &>
-
 %
 <%init>
 my @choices = [1];
