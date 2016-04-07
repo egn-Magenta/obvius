@@ -25,6 +25,10 @@ msgstr " og "
 msgid " subdocuments"
 msgstr " underdokumenter"
 
+#. (@_)
+msgid "$prefix:$key"
+msgstr ""
+
 # Imported from old translations
 msgid "(and all its subdocuments) has been copied successfully to"
 msgstr "(og alle dens undersider) er kopieret til placeringen"
