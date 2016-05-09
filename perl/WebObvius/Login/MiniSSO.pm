@@ -62,8 +62,11 @@ sub minisso_login_handler {
         if($ticket_id) {
             my $client_ip = get_origin_ip_from_request($req);
 
+            # IP-check can be disabled in the config file
+            my $check_ip = $obvius->config->param('enable_login_ip_check');
+
             # Check IP match, redirect to error message if it fails
-            if ($client_ip !~ m{^\Q$ip_pattern\E}) {
+            if ($check_ip && ($client_ip !~ m{^\Q$ip_pattern\E})) {
                 return $this->redirect_to_ip_mismatch($req, $ip_pattern);
             }
 
