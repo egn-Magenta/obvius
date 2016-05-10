@@ -243,16 +243,26 @@ sub already_logged_in {
         20 * 60
     ) * 60;
 
-    my $ip_match = get_origin_ip_from_request($req);
-    $ip_match =~ s!\.\d+$!!;
+    my $ip_condition = '';
+    my @args = ($session_id, $session_timeout);
 
-    my $sth = $obvius->dbh->prepare(q|
+    if($obvius->config->param('enable_login_ip_check')) {
+        my $ip_match = get_origin_ip_from_request($req);
+        $ip_match =~ s!\.\d+$!!;
+
+        $ip_condition = 'and ip_match = ?';
+        push(@args, $ip_match);
+    }
+
+    my $sth = $obvius->dbh->prepare(qq|
         select
             login,
             UNIX_TIMESTAMP() - last_access time_diff
         from
             login_sessions
         where
+            sso_session_id is not null
+            and
             session_id = ?
             and
             (
@@ -260,13 +270,10 @@ sub already_logged_in {
                 or
                 last_access >= (UNIX_TIMESTAMP() - ?)
             )
-            and
-            ip_match = ?
-            and
-            sso_session_id is not null
+            $ip_condition
     |);
 
-    $sth->execute($session_id, $session_timeout, $ip_match);
+    $sth->execute(@args);
 
     if(my ($login, $time_diff) = $sth->fetchrow_array) {
         $obvius->{USER} = $login;
