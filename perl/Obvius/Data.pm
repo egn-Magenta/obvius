@@ -166,7 +166,7 @@ sub validate {
     eval {
 	no strict 'refs';
 	my $name = ref($this) . '::validate';
-	$validate = \%$name if (defined %$name);
+	$validate = \%$name if (%$name);
     };
 
     return () unless ($validate);
