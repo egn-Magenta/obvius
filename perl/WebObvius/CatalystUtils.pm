@@ -17,7 +17,6 @@ use WebObvius::CatalystUtils::FakeRequest;
 #                 directory
 
 use Catalyst qw/
-    -Debug
     ConfigLoader
     Static::Simple
 /;
