@@ -192,6 +192,32 @@ sub get_language_preferences {
 #
 ########################################################################
 
+
+
+my $a2_sizelimit_handler;
+sub get_apache2_sizelimit_handler {
+    if (not defined($a2_sizelimit_handler)) {
+        eval {
+            use Apache2::SizeLimit;
+            # Old versions use "exit_if_too_big"
+            if (my $handler = Apache2::SizeLimit->can('exit_if_too_big')) {
+                $a2_sizelimit_handler = $handler;
+            }
+            else {
+                $a2_sizelimit_handler = Apache2::SizeLimit->can('handler');
+            }
+        };
+
+        warn $@ if($@);
+
+        # If we did not get a handler default to a no-op
+        $a2_sizelimit_handler ||= sub {}
+    }
+
+    return $a2_sizelimit_handler;
+}
+
+
 # obvius_connect - given a request object, strings containing username
 #                  and password, array-refs to doctypes, fieldtypes
 #                  and fieldspecs returns an obvius-object if a
@@ -223,23 +249,23 @@ sub obvius_connect {
 
     $obvius->cache(1);
     $req->register_cleanup(sub {
-				my $i = 0;
-				while ($i < 5 && $obvius->modified) {
-				     my $cache = WebObvius::Cache::Cache->new($obvius);
-				     my $modified = $obvius->modified;
-				     $obvius->clear_modified;
-				     $cache->find_and_flush($modified);
-				     $i++;
-				}
-				warn "Error: updated $i times\n" if ($i >= 5);
-				$obvius->{DB} = undef;
+        my $i = 0;
+        while ($i < 5 && $obvius->modified) {
+            my $cache = WebObvius::Cache::Cache->new($obvius);
+            my $modified = $obvius->modified;
+            $obvius->clear_modified;
+            $cache->find_and_flush($modified);
+            $i++;
+        }
+        warn "Error: updated $i times\n" if ($i >= 5);
+        $obvius->{DB} = undef;
 
-                                if($obvius->config->param('apache2_sizelimit_process_size')) {
-                                    Apache2::SizeLimit::exit_if_too_big($req);
-                                }
+        if($obvius->config->param('apache2_sizelimit_process_size')) {
+            get_apache2_sizelimit_handler()->($req)
+        }
 
-				return 1;
-			   });
+        return 1;
+    });
     $req->pnotes(obvius => $obvius);
     return $obvius;
 }
