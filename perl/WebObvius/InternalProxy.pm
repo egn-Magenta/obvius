@@ -10,6 +10,7 @@ use Obvius::Data;
 my @overloaded_vfields = qw(
     title
     show_title
+    show_proxied_title
     short_title
     seq
     internal_proxy_path
@@ -135,11 +136,17 @@ sub create_internal_proxy_document {
 					     int_value => $fields{internal_proxy_overload_rightboxes}
 					    });
 	  $obvius->dbprocedures->add_vfield({
-					     docid => $docid, 
-					     version => $version, 
+					     docid => $docid,
+					     version => $version,
 					     name => "internal_proxy_overload_tags",
 					     int_value => $fields{internal_proxy_overload_tags}
 					    });
+      $obvius->dbprocedures->add_vfield({
+					     docid => $docid,
+					     version => $version,
+					     name => "show_proxied_title",
+					     int_value => $fields{show_proxied_title}
+                        });
      };
      warn @$ if ($@);
      
@@ -222,6 +229,13 @@ sub create_internal_proxy_version {
 					     version => $new_version, 
 					     name => "internal_proxy_overload_tags",
 					     int_value => $fields{internal_proxy_overload_tags}
+					    });
+
+      $obvius->dbprocedures->add_vfield({
+					     docid => $referrer_doc->Id,
+					     version => $new_version,
+					     name => "show_proxied_title",
+					     int_value => $fields{show_proxied_title}
 					    });
      };
      warn $@ if ($@);

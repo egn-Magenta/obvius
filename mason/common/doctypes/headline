@@ -1,9 +1,34 @@
 %if ($show_title == 1) {
 <h1 class="title"><% $title %></h1>
 %}
-%
+%if ($show_proxied_title == 1 && $proxied_title) {
+<h1 class="title"><% $proxied_title %></h1>
+%}
 <%init>
 $obvius->get_version_fields($vdoc, [qw(title show_title)]);
 my $title = $vdoc->field('Title');
 my $show_title = $vdoc->field('Show_title') || 0;
+my $proxied_title;
+my $show_proxied_title; # Apparently we can't get this with $vdoc->field()
+
+if ($obvius->dbprocedures->is_internal_proxy_document($vdoc->Docid)) {
+    my $pdoc;
+    # Why isn't this a core Obvius method?
+    my $proxied_docid_result = $obvius->execute_select("select dependent_on from internal_proxy_documents where docid = ? and version = ? limit 1", $vdoc->Docid, $vdoc->Version);
+    if (scalar @$proxied_docid_result) {
+        my $proxied_id = $proxied_docid_result->[0]->{dependent_on};
+        $pdoc = $obvius->get_doc_by_id($proxied_id);
+    }
+    if ($pdoc) {
+        my $pvdoc = $obvius->get_public_version($pdoc) or $obvius->get_latest_version($pdoc);
+        $obvius->get_version_fields($pvdoc, [qw(title)]);
+        $proxied_title = $pvdoc->field('Title');
+    }
+
+    # TODO: When InternalProxy will let us extract 'show_proxied_title', rewrite this to do things properly
+    my $show_proxied_title_result = $obvius->execute_select("select int_value from vfields where docid = ? and version = ? and name = SHOW_PROXIED_TITLE", $vdoc->Docid, $vdoc->Version);
+    if (scalar @$show_proxied_title_result) {
+        $show_proxied_title = $show_proxied_title_result->[0]->{int_value}
+    }
+}
 </%init>
