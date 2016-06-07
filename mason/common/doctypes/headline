@@ -26,7 +26,7 @@ if ($obvius->dbprocedures->is_internal_proxy_document($vdoc->Docid)) {
     }
 
     # TODO: When InternalProxy will let us extract 'show_proxied_title', rewrite this to do things properly
-    my $show_proxied_title_result = $obvius->execute_select("select int_value from vfields where docid = ? and version = ? and name = SHOW_PROXIED_TITLE", $vdoc->Docid, $vdoc->Version);
+    my $show_proxied_title_result = $obvius->execute_select("select int_value from vfields where docid = ? and version = ? and name = 'SHOW_PROXIED_TITLE'", $vdoc->Docid, $vdoc->Version);
     if (scalar @$show_proxied_title_result) {
         $show_proxied_title = $show_proxied_title_result->[0]->{int_value}
     }
