@@ -210,7 +210,7 @@ sub absolute_uri {
 #                     hostname is the roothost.
 #                     Returns the translated URL.
 sub translate_uri {
-    my ($this, $uri, $hostname) = @_;
+    my ($this, $uri, $hostname, $incoming_protocol) = @_;
 
     my $hostmap = $this->get_hostmap;
     my $roothost = $this->{roothost} || '';
@@ -243,6 +243,15 @@ sub translate_uri {
         }
     } else {
         if($hostname ne $roothost) {
+            # If we come from a https page, roothost pages should use the
+            # https roothost.
+            if($incoming_protocol and
+               $incoming_protocol eq 'https' and
+               $this->{https_roothost}
+            ) {
+                $protocol = 'https';
+                $roothost = $this->{https_roothost};
+            }
             $uri = $protocol .  '://' . $roothost . $uri;
         }
     }
