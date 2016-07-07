@@ -1,0 +1,65 @@
+<%method block>
+%
+% # XXX Consider if validation should be called definition, data_definition or similar?
+<%args>
+$prefix
+$field
+$validation
+$value
+$onclick=>""
+</%args>
+%
+
+<input type="hidden" name="<% $name |h %>" class="checkboxmirror" value="0"/>
+<input id="<% $id |h %>" type="checkbox" name="<% $name |h %>" value="1" <% $checked ? 'checked="checked" ' : '' %> <% $onclickhtml %> />
+
+<& util/label, name=>$id, label=>$field->{label}, field=>$field &>
+%
+<%init>
+my @choices = [1];
+my $id = $prefix . $field->{name};
+my $name = $prefix . $field->{name};
+my $checked = $value->{value};
+my $onclickhtml = $onclick ? ' onclick="' . $onclick . '"' : '';
+</%init>
+%
+</%method>
+%
+%
+%
+<%method inline>
+%
+<%args>
+$value
+$field
+</%args>
+%
+<% join ", ", (map { $m->scomp('/shared/msg', text=>$labels{$_->{value}}) } @$value) |h %>
+%
+<%init>
+return unless (defined $value);
+
+$value=[$value] unless (ref $value eq 'ARRAY');
+
+my %labels=$m->comp('util/get_labels_from_field', field=>$field);
+</%init>
+%
+</%method>
+%
+%
+%
+% # Validate:
+<%args>
+$data
+$id
+$validation
+</%args>
+%
+<%init>
+my $value=$data->{$id};
+
+# XXX Perhaps this should be done one step up in the chain?
+return $m->comp('util/validate_by_fieldspec', %ARGS) if (exists $validation->{validate_by_fieldspec});
+
+return 'OK';
+</%init>
