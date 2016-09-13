@@ -1,5 +1,5 @@
 %if (defined $tooltip_url) {
-<div style="height: 0px; width: 0px;" id="<% $name |h %>_tooltip"></div>
+<div style="height: 0px; width: 0px; display: inline;" id="<% $name |h %>_tooltip"></div>
 %}
 % if (defined $subtitle) {
 <h4><% t_subtitle($subtitle) %></h4>
