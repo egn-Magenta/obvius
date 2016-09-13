@@ -25,7 +25,9 @@ sub minisso_login_handler {
 
     return OK if $this->already_logged_in($obvius, $req);
 
-    my $r = WebObvius::Apache::apache_module('Request')-> new($req);
+    my $r = $req->UNIVERSAL::can('param') ?
+        $req : 
+        WebObvius::Apache::apache_module('Request')-> new($req);
     if(my $ticketcode = $r->param('t')) {
         my $origin_url = $this->request_to_origin_url(
             $req,
