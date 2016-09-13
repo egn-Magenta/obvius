@@ -24,6 +24,10 @@ msgstr " and "
 msgid " subdocuments"
 msgstr " subdocuments"
 
+#. (@_)
+msgid "$prefix:$key"
+msgstr ""
+
 # Imported from old translations
 msgid "(and all its subdocuments) has been copied successfully to"
 msgstr "(and all its subdocuments) has been copied successfully to"
