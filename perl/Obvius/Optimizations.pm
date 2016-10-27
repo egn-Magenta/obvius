@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 
 my %config = (
-    'documents' => {
+    'documents_extra' => {
         'public_or_latest_version' =>
             "Automatically updated reference to public or latest version",
         'has_public_path' => q|
@@ -41,9 +41,9 @@ EOT
 
 my %aliases = (
     path_tree => "path_tree.id",
-    public_or_latest_version => "documents.public_or_latest_version",
-    has_public_path => "documents.has_public_path",
-    closest_subsite => "documents.closest_subsite",
+    public_or_latest_version => "documents_extra.public_or_latest_version",
+    has_public_path => "documents_extra.has_public_path",
+    closest_subsite => "documents_extra.closest_subsite",
 );
 
 sub get_optimizations {

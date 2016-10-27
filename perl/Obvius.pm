@@ -1002,7 +1002,11 @@ sub search {
     }
     
     if(@document_fields) {
-        push(@table, "documents as obvius_documents");
+        if($this->has_optimization("public_or_latest_version")) {
+            push(@table, "docs_with_extra as obvius_documents");
+        } else {
+            push(@table, "documents as obvius_documents");
+        }
         push(@join, "(obvius_documents.id = versions.docid)");
         my %seen;
         foreach my $f (@document_fields) {
