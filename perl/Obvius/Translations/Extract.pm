@@ -55,11 +55,15 @@ sub extract_mason {
     ) {
         # Set the current parser to be used for all files
         $extractor->plugins({ $parser => ['*'] });
-        File::Find::find(sub {
-            return if(m{.xml});
-            return unless(-f $File::Find::name);
-            $extractor->extract_file($File::Find::name);
-        }, $dir . '/mason');
+        File::Find::find(
+            sub {
+                return if(m{.xml});
+                return unless(-f $File::Find::name);
+                $extractor->extract_file($File::Find::name);
+            },
+            $dir . '/mason',
+            $dir . '/bootstrap',
+        );
     }
 
     $extractor->compile(1);
