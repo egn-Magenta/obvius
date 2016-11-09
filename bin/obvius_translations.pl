@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use lib '/var/www/obvius/perl';
+
 use Obvius;
 use Obvius::Config;
 use Obvius::Translations;
