@@ -115,7 +115,12 @@ sub admin_auth_check {
     if (! grep { $auth_res == $_ } (0, 200)) {
         return $c->detach();
     }
+}
 
+sub set_admin_translations {
+    my ($c) = @_;
+
+    $c->siteconfig->{admin}->setup_translations($c->fakerequest, $c->obvius);
 }
 
 1;
