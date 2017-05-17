@@ -337,12 +337,15 @@ sub get_full_url {
         }
     }
 
-    return $this->translate_uri(
+    # Use temporary variable to avoid conflict with wantarray
+    my $result = $this->translate_uri(
         $uri,
         ':bogus:',
         $protocol_in,
         always_https_mode => $always_https
     );
+
+    return $result;
 }
 
 1;
