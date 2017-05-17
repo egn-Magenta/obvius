@@ -49,6 +49,21 @@ sub create_hostmap {
         $options{https_hostmap} = $https_hostmap;
     }
 
+    # If the file hostmap.always_https_env_key exists in the same directory
+    # as the hostmap file, read the environment variable that should be checked
+    # for always https mode from the file.
+    my $always_https_file = $path;
+    $always_https_file =~ s{/[^/]+$}{/hostmap.always_https_env_key};
+    if(-f $always_https_file) {
+        open(ALWAYS, $always_https_file);
+        my $tmp = join("", <ALWAYS>);
+        close(ALWAYS);
+        $tmp =~ s{^\s+|\s+$}{}gs;
+        if($tmp) {
+            $options{always_https_env_key} = $tmp;
+        }
+    }
+
     my %new = (
                 path => $path,
                 roothost => $roothost,
@@ -210,7 +225,7 @@ sub absolute_uri {
 #                     hostname is the roothost.
 #                     Returns the translated URL.
 sub translate_uri {
-    my ($this, $uri, $hostname, $incoming_protocol) = @_;
+    my ($this, $uri, $hostname, $incoming_protocol, %options) = @_;
 
     my $hostmap = $this->get_hostmap;
     my $roothost = $this->{roothost} || '';
@@ -220,6 +235,12 @@ sub translate_uri {
     my $new_host = '';
     my $subsiteuri = '';
     my $levels_matched = 0;
+    # Always HTTPS mode tells the rewrite system that all URLs should be
+    # https, whether or not they actually point to subsites that uses https.
+    my $always_https = $options{always_https_mode};
+    if($always_https) {
+        $protocol = 'https';
+    }
 
     if($uri =~ m!$this->{regexp}!i) {
         $subsiteuri = $1;
@@ -228,7 +249,7 @@ sub translate_uri {
 
     if($new_host) {
         my $remove_prefix = 1;
-        if($this->{is_https}->{$new_host}) {
+        if($always_https || $this->{is_https}->{$new_host}) {
             $protocol = 'https';
             $remove_prefix = 0 if($new_host eq $this->{https_roothost});
         }
@@ -245,10 +266,11 @@ sub translate_uri {
         if($hostname ne $roothost) {
             # If we come from a https page, roothost pages should use the
             # https roothost.
-            if($incoming_protocol and
-               $incoming_protocol eq 'https' and
-               $this->{https_roothost}
-            ) {
+            if($always_https || (
+                $incoming_protocol and
+                $incoming_protocol eq 'https' and
+                $this->{https_roothost}
+            )) {
                 $protocol = 'https';
                 $roothost = $this->{https_roothost};
             }
@@ -297,6 +319,30 @@ sub url_to_uri {
         }
     }
     return undef;
+}
+
+
+# Turns an into a full URL with protocol and hostname. Protocol will be output
+# according to the environment settings for https vs non-https.
+sub get_full_url {
+    my ($this, $uri) = @_;
+
+    my $protocol_in = $ENV{IS_HTTPS} ? 'https' : 'http';
+
+    my $always_https = 0;
+    if(my $env_key = $this->{always_https_env_key}) {
+        my $env_val = $ENV{$env_key};
+        if($env_val && $env_val eq 'https') {
+            $always_https = 1;
+        }
+    }
+
+    return $this->translate_uri(
+        $uri,
+        ':bogus:',
+        $protocol_in,
+        always_https_mode => $always_https
+    );
 }
 
 1;
