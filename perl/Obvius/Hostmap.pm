@@ -52,10 +52,10 @@ sub create_hostmap {
     # If the file hostmap.always_https_env_key exists in the same directory
     # as the hostmap file, read the environment variable that should be checked
     # for always https mode from the file.
-    my $always_https_file = $path;
-    $always_https_file =~ s{/[^/]+$}{/hostmap.always_https_env_key};
-    if(-f $always_https_file) {
-        open(ALWAYS, $always_https_file);
+    my $always_https_env_file = $path;
+    $always_https_env_file =~ s{/[^/]+$}{/hostmap.always_https_env_key};
+    if(-f $always_https_env_file) {
+        open(ALWAYS, $always_https_env_file);
         my $tmp = join("", <ALWAYS>);
         close(ALWAYS);
         $tmp =~ s{^\s+|\s+$}{}gs;
@@ -64,6 +64,16 @@ sub create_hostmap {
         }
     }
 
+    # If the file hostmap.always_https_mode_enabled exists always consider
+    # everything to be https.
+    my $always_https_file = $path;
+    $always_https_file =~ s{/[^/]+$}{/hostmap.always_https_mode_enabled};
+    if(-f $always_https_file) {
+         $options{always_https_mode} = 1;
+    } else {
+         $options{always_https_mode} = 0;
+    }
+    
     my %new = (
                 path => $path,
                 roothost => $roothost,
@@ -170,11 +180,19 @@ sub get_hostmap {
 sub is_https {
     my ($this, $subsite_uri_or_hostname) = @_;
 
+    if($this->{always_https_mode}) {
+        return 1;
+    }
+    
     return $this->{is_https}->{$subsite_uri_or_hostname};
 }
 
 sub lookup_is_https {
     my ($this, $url) = @_;
+
+    if($this->{always_https_mode}) {
+        return 1;
+    }
 
     # Add last slash in uri if missing
     $url .= '/' unless($url =~ m!/$!);
@@ -225,7 +243,7 @@ sub absolute_uri {
 #                     hostname is the roothost.
 #                     Returns the translated URL.
 sub translate_uri {
-    my ($this, $uri, $hostname, $incoming_protocol, %options) = @_;
+    my ($this, $uri, $hostname, $incoming_protocol) = @_;
 
     my $hostmap = $this->get_hostmap;
     my $roothost = $this->{roothost} || '';
@@ -237,7 +255,7 @@ sub translate_uri {
     my $levels_matched = 0;
     # Always HTTPS mode tells the rewrite system that all URLs should be
     # https, whether or not they actually point to subsites that uses https.
-    my $always_https = $options{always_https_mode};
+    my $always_https = $this->{always_https_mode};
     if($always_https) {
         $protocol = 'https';
     }
@@ -329,7 +347,7 @@ sub get_full_url {
 
     my $protocol_in = $ENV{IS_HTTPS} ? 'https' : 'http';
 
-    my $always_https = 0;
+    my $always_https = $this->{always_https_mode};
     if(my $env_key = $this->{always_https_env_key}) {
         my $env_val = $ENV{$env_key};
         if($env_val && $env_val eq 'https') {
@@ -338,12 +356,15 @@ sub get_full_url {
     }
 
     # Use temporary variable to avoid conflict with wantarray
-    my $result = $this->translate_uri(
-        $uri,
-        ':bogus:',
-        $protocol_in,
-        always_https_mode => $always_https
-    );
+    my $result;
+    {
+        local $this->{always_https_mode} = $always_https;
+        $result = $this->translate_uri(
+            $uri,
+            ':bogus:',
+            $protocol_in
+        );
+    }
 
     return $result;
 }
