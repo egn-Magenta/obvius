@@ -984,7 +984,7 @@ sub search {
                 v.docid=versions.docid
                 ORDER BY
                 v.public DESC,
-                v.
+                v.version DESC
                 LIMIT 1
             )");
         }
