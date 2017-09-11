@@ -27,14 +27,22 @@ package Obvius::Hostmap;
 use strict;
 use warnings;
 
+use Obvius::Config;
+
 our $VERSION="1.0";
 
 *new = \&create_hostmap;
 
 sub new_with_obvius {
-     my ($class, $obvius) = @_;
-     return $class->create_hostmap($obvius->{OBVIUS_CONFIG}{HOSTMAP_FILE},
-                                   $obvius->{OBVIUS_CONFIG}{ROOTHOST});
+     my ($class, $obvius, %options) = @_;
+     return $class->create_hostmap(
+        $obvius->config->param('HOSTMAP_FILE'),
+        $obvius->config->param('ROOTHOST'),
+        obvius_config => $obvius->config,
+        always_https_mode =>
+            $obvius->config->param('always_https_mode') ? 1 : 0,
+        %options
+    );
 }
 
 sub create_hostmap {
@@ -49,31 +57,6 @@ sub create_hostmap {
         $options{https_hostmap} = $https_hostmap;
     }
 
-    # If the file hostmap.always_https_env_key exists in the same directory
-    # as the hostmap file, read the environment variable that should be checked
-    # for always https mode from the file.
-    my $always_https_env_file = $path;
-    $always_https_env_file =~ s{/[^/]+$}{/hostmap.always_https_env_key};
-    if(-f $always_https_env_file) {
-        open(ALWAYS, $always_https_env_file);
-        my $tmp = join("", <ALWAYS>);
-        close(ALWAYS);
-        $tmp =~ s{^\s+|\s+$}{}gs;
-        if($tmp) {
-            $options{always_https_env_key} = $tmp;
-        }
-    }
-
-    # If the file hostmap.always_https_mode_enabled exists always consider
-    # everything to be https.
-    my $always_https_file = $path;
-    $always_https_file =~ s{/[^/]+$}{/hostmap.always_https_mode_enabled};
-    if(-f $always_https_file) {
-         $options{always_https_mode} = 1;
-    } else {
-         $options{always_https_mode} = 0;
-    }
-    
     my %new = (
                 path => $path,
                 roothost => $roothost,
@@ -82,12 +65,83 @@ sub create_hostmap {
                 forwardmap => {},
                 regexp => '',
                 is_https => {},
+                obvius_config => $options{obvius_config},
                 %options
             );
     my $new = bless(\%new, $this);
+    $new->configure_https_mode();
     $new->get_hostmap;
 
     return $new;
+}
+
+=head2 $hostmap->locate_obvius_config($path)
+
+Tries to find the Obvius::Config object associated with the hostmap, store it
+in $self and return it.
+
+This is done by assuming the setup.pl file for the Obvius site will be located
+in the same folder as the hostmap and that this file will have a line creating
+an Obvius::Config object.
+
+=cut
+sub locate_obvius_config {
+    my ($self, $path) = @_;
+
+    if(ref($self) && $self->{obvius_config}) {
+        return $self->{obvius_config};
+    }
+
+    $path ||= $self->{path};
+    die "No path when looking for config key" unless($path);
+
+    my $conf_file = $path;
+    $conf_file =~ s{/[^/]+$}{/setup.pl};
+    if(! -f $conf_file) {
+        die "Could not find site setup.pl when looking for config key";
+    }
+    my $conf_key;
+    open(FH, $conf_file) or die "Could not open $conf_file for reading";
+    while(my $line = <FH>) {
+        if($line =~ m{Obvius::Config\(\s*['"]([^'"]+)['"]\s*\)}s) {
+            $conf_key = $1;
+            last;
+        } elsif(
+            $line =~ m{Obvius::Config\s*->\s*new\s*\(\s*['"]([^'"]+)['"]\s*\)}s
+        ) {
+            $conf_key = $1;
+            last;
+        }
+    }
+    close(FH);
+    if(!$conf_key) {
+        die "Could not find config key";
+    }
+    my $config = Obvius::Config->new($conf_key);
+    die "Could not load config" unless($config);
+
+    if(ref($self)) {
+        $self->{obvius_config} = $config;
+    }
+    return $self->{obvius_config};
+}
+
+=head2 $hostmap->configure_https_mode()
+
+Ensures that $hostmap->{always_https_mode} is set up according to settings in
+the hostmap site's Obvius::Config file.
+
+=cut
+sub configure_https_mode {
+    my ($self) = @_;
+
+    if(exists $self->{always_https_mode}) {
+        return;
+    }
+
+    my $config = $self->locate_obvius_config($self->{path});
+    $self->{always_https_mode} =
+        $config->param('always_https_mode') ? 1 : 0;
 }
 
 # sub get_hostmap - Returns the hostmap as a hashref. If the hostmap
@@ -347,25 +401,8 @@ sub get_full_url {
 
     my $protocol_in = $ENV{IS_HTTPS} ? 'https' : 'http';
 
-    my $always_https = $this->{always_https_mode};
-    if(my $env_key = $this->{always_https_env_key}) {
-        my $env_val = $ENV{$env_key};
-        if($env_val && $env_val eq 'https') {
-            $always_https = 1;
-        }
-    }
-
     # Use temporary variable to avoid conflict with wantarray
-    my $result;
-    {
-        local $this->{always_https_mode} = $always_https;
-        $result = $this->translate_uri(
-            $uri,
-            ':bogus:',
-            $protocol_in
-        );
-    }
-
+    my $result = $this->translate_uri($uri, ':bogus:', $protocol_in);
     return $result;
 }
 
