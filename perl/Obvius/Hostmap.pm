@@ -319,6 +319,11 @@ sub translate_uri {
         $new_host = $hostmap->{lc $1};
     }
 
+    my $protocol_mismatch = (
+        defined($incoming_protocol) &&
+        $incoming_protocol ne $protocol
+    );
+
     if($new_host) {
         my $remove_prefix = 1;
         if($always_https || $this->{is_https}->{$new_host}) {
@@ -331,7 +336,7 @@ sub translate_uri {
 
         # If hostname is not the same as the current prefix the URI
         # with correct hostname:
-        if($new_host ne $hostname) {
+        if($new_host ne $hostname or $protocol_mismatch) {
             $uri = $protocol . '://' . $new_host . $uri;
         }
     } else {
@@ -347,6 +352,8 @@ sub translate_uri {
                 $roothost = $this->{https_roothost};
             }
             $uri = $protocol .  '://' . $roothost . $uri;
+        } elsif($protocol_mismatch) {
+            $uri = $protocol . '://' . $hostname . $uri;
         }
     }
 

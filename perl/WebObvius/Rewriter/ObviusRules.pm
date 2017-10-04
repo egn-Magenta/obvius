@@ -226,14 +226,10 @@ sub rewrite {
     my ($new_uri, $new_host, undef, undef, $protocol)
         = $this->hostmap->translate_uri($lookup_uri, $hostname, $protocol_in);
 
-    # If using the wrong protocol, redirect to the new one
-    if($protocol_in ne $protocol) {
-        return (REDIRECT, "${protocol}://${new_host}${new_uri}");
-    }
-
-    if($new_host and $new_host ne $hostname) {
-        return (REDIRECT, $new_uri);
-    }
+    return (REDIRECT, $new_uri) if(
+        ($protocol ne $protocol_in) or
+        ($new_host and $new_host ne $hostname)
+    );
 
     if($rewritten) {
         return (REWRITE, $args{uri});
