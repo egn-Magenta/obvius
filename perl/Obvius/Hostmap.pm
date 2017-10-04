@@ -212,7 +212,7 @@ sub get_hostmap {
             # Force some URLs to https:
             for my $uri (qw(/system/login /system/logout)) {
                 $is_https->{$uri} = 1;
-                $siteroot_map->{$uri} = $this->{https_roothost};
+                $siteroot_map->{$uri} = $this->https_roothost;
             }
         }
 
@@ -262,7 +262,11 @@ sub lookup_is_https {
 
 sub https_roothost {
     my ($this) = @_;
-    return $this->{https_roothost} || $this->{roothost};
+    if($this->{always_https_mode}) {
+        return $this->{roothost};
+    } else {
+        return $this->{https_roothost} || $this->{roothost};
+    }
 }
 
 #Finds the longest subsite the uri belongs to.
@@ -328,7 +332,7 @@ sub translate_uri {
         my $remove_prefix = 1;
         if($always_https || $this->{is_https}->{$new_host}) {
             $protocol = 'https';
-            $remove_prefix = 0 if($new_host eq $this->{https_roothost});
+            $remove_prefix = 0 if($new_host eq $this->https_roothost);
         }
         # Remove the subsiteuri from the URI:
         $uri =~ s!^\Q$subsiteuri\E!/!i if($remove_prefix);
@@ -346,10 +350,11 @@ sub translate_uri {
             if($always_https || (
                 $incoming_protocol and
                 $incoming_protocol eq 'https' and
+                # Variable instead of method, since method always true
                 $this->{https_roothost}
             )) {
                 $protocol = 'https';
-                $roothost = $this->{https_roothost};
+                $roothost = $this->https_roothost;
             }
             $uri = $protocol .  '://' . $roothost . $uri;
         } elsif($protocol_mismatch) {
