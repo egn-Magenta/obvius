@@ -66,22 +66,22 @@ sub mixed2perl {
 
     my $out = '';
 
-    while(length($txt)) {
-        # Eat any ascii chars, removing utf8-flag from matched chars
-        if($txt =~ s!^(${ascii}+)!!) {
+    while($txt =~ m{
+        \G
+        (?:
+            (${ascii}+) |
+            (${utf8_bytes_match}{1,32000}) |
+            ($not_ascii+)
+        )
+    }gx) {
+        if(defined($1)) {
             my $ascii = $1;
             Encode::_utf8_off($ascii);
             $out .= $ascii;
-        }
-
-        # Eat any utf8 bytes and convert them to wide characters
-        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
-            $out .= Encode::decode('utf-8', $1);
-        }
-
-        # Output next character, unless it's ascii
-        if($txt =~ s!^(${not_ascii})!!) {
-            $out .= $1;
+        } elsif(defined($2)) {
+            $out .= Encode::decode('utf-8', $2);
+        } else {
+            $out .= $3;
         }
     }
 
@@ -107,27 +107,27 @@ sub mixed2utf8 {
     return _deep_copy($txt, \&mixed2utf8) if(ref($txt));
 
     my $out = '';
-    while(length($txt)) {
-        # Eat any ascii chars, removing utf8-flag from matched chars
-        if($txt =~ s!^(${ascii}+)!!) {
+    while($txt =~ m{
+        \G
+        (?:
+            (${ascii}+) |
+            (${utf8_bytes_match}{1,32000}) |
+            ($not_ascii+)
+        )
+    }gx) {
+        if(defined($1)) {
             my $ascii = $1;
             Encode::_utf8_off($ascii);
             $out .= $ascii;
-        }
-
-        # Eat any utf8 chars
-        while($txt =~ s/^($utf8_bytes_match{1,32000})//) {
-            if(Encode::is_utf8($1)) {
+        } elsif(defined($2)) {
+            if(Encode::is_utf8($2)) {
                 # Repack octets to remove utf8 flag
-                $out .= pack('c*', unpack('c*', $1));
+                $out .= pack('c*', unpack('c*', $2));
             } else {
-                $out .= $1;
+                $out .= $2;
             }
-        }
-
-        # Convert next character to utf8, if present and not ascii
-        if($txt =~ s!^(${not_ascii})!!) {
-            $out .= Encode::encode('utf-8', $1);
+        } else {
+            $out .= Encode::encode('utf-8', $3);
         }
     }
 
