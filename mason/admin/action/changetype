@@ -1,3 +1,6 @@
+<%once>
+use Obvius::Translations qw(translate_doctypename);
+</%once>\
 <div class="obvius-command">
   <h2><& /shared/msg, text=>'Change document type' &></h2>
 
@@ -59,10 +62,7 @@ foreach my $type (@{$obvius->{DOCTYPES}}) {
 	my $doctype = {
 		id              => $type-> {ID},
 		name            => $type-> {NAME},
-		translated_name => $m-> scomp(
-		  '/shared/msg',
-		  text => "doctypename:" . $type->{NAME}
-		),
+		translated_name => translate_doctypename($type->{NAME})
 	};
 
 	if ( $restricted and not $available_doctypes{ $doctype->{name} } ) {

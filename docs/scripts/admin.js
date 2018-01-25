@@ -1,6 +1,6 @@
 /* admin.js - utility scripts for Obvius administration.
 
-   Copyright (C) 2004-2005, Magenta ApS. By Adam Sjøgren. Under the GPL.
+   Copyright (C) 2004-2005, Magenta ApS. By Adam SjÃ¸gren. Under the GPL.
 
    $Id$
 */
@@ -277,3 +277,14 @@ function start_ror_navigator(url, path, fallback_uri, field_name) {
     }
     return window.open(url, 'navigator','resizable=1,width=1150,height=500');
 }
+
+$(function(){
+    $("form").on("submit", function(){
+        var form = $(this);
+        form.find("input[type=checkbox]").each(function(){
+            if (this.checked && this.name) {
+                form.find("input.checkboxmirror[type=hidden][name='"+this.name+"']").attr("disabled","disabled");
+            }
+        });
+    });
+});

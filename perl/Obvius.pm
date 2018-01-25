@@ -2956,7 +2956,10 @@ sub find_closest_subsite {
     return $doc->{_cached_closest_subsite} if
         (ref $doc && $doc->{_cached_closest_subsite});
 
-    my $uri = $this->get_doc_uri($doc);
+    # Special case for preview documents
+    my $lookup_doc = $doc->{preview_doc} ? $doc->{doc} : $doc;
+
+    my $uri = $this->get_doc_uri($lookup_doc);
     my $subsite_doc;
 
     my @uris = $this->explode_path($uri);

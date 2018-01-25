@@ -25,7 +25,9 @@ sub minisso_login_handler {
 
     return OK if $this->already_logged_in($obvius, $req);
 
-    my $r = WebObvius::Apache::apache_module('Request')-> new($req);
+    my $r = $req->UNIVERSAL::can('param') ?
+        $req : 
+        WebObvius::Apache::apache_module('Request')-> new($req);
     if(my $ticketcode = $r->param('t')) {
         my $origin_url = $this->request_to_origin_url(
             $req,
@@ -62,8 +64,11 @@ sub minisso_login_handler {
         if($ticket_id) {
             my $client_ip = get_origin_ip_from_request($req);
 
+            # IP-check can be disabled in the config file
+            my $check_ip = $obvius->config->param('enable_login_ip_check');
+
             # Check IP match, redirect to error message if it fails
-            if ($client_ip !~ m{^\Q$ip_pattern\E}) {
+            if ($check_ip && ($client_ip !~ m{^\Q$ip_pattern\E})) {
                 return $this->redirect_to_ip_mismatch($req, $ip_pattern);
             }
 
@@ -240,16 +245,26 @@ sub already_logged_in {
         20 * 60
     ) * 60;
 
-    my $ip_match = get_origin_ip_from_request($req);
-    $ip_match =~ s!\.\d+$!!;
+    my $ip_condition = '';
+    my @args = ($session_id, $session_timeout);
 
-    my $sth = $obvius->dbh->prepare(q|
+    if($obvius->config->param('enable_login_ip_check')) {
+        my $ip_match = get_origin_ip_from_request($req);
+        $ip_match =~ s!\.\d+$!!;
+
+        $ip_condition = 'and ip_match = ?';
+        push(@args, $ip_match);
+    }
+
+    my $sth = $obvius->dbh->prepare(qq|
         select
             login,
             UNIX_TIMESTAMP() - last_access time_diff
         from
             login_sessions
         where
+            sso_session_id is not null
+            and
             session_id = ?
             and
             (
@@ -257,13 +272,10 @@ sub already_logged_in {
                 or
                 last_access >= (UNIX_TIMESTAMP() - ?)
             )
-            and
-            ip_match = ?
-            and
-            sso_session_id is not null
+            $ip_condition
     |);
 
-    $sth->execute($session_id, $session_timeout, $ip_match);
+    $sth->execute(@args);
 
     if(my ($login, $time_diff) = $sth->fetchrow_array) {
         $obvius->{USER} = $login;

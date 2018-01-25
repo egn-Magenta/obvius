@@ -353,6 +353,10 @@ sub perform_command_copy {
     my $destination=$info{args}->{destination};
     my $destdoc=$obvius->lookup_document($destination);
     my $dest_name = $info{args}->{new_name};
+
+    my $dest_uri = '/' . $destination . '/' . $dest_name . '/';
+    $dest_uri =~ s{/+}{/}g;
+
     return ('ERROR', [ 'Could not get destination document', ' (', $destination, ')' ]) unless ($destdoc);
 
     return ('ERROR', [ 'No permission to create documents under', ' ', $destination ]) unless ($obvius->can_create_new_document($destdoc));
@@ -363,12 +367,32 @@ sub perform_command_copy {
         my ($status, $message)=_copy_documents_recursive(
 	    $obvius, $doc, $destdoc, $dest_name, %{ $info{args} }
 	);
+        if($info{args}->{change_owner_to}) {
+            if($obvius->lookup_document($dest_uri)) {
+                $obvius->db_chown(
+                    $info{args}->{change_owner_to},
+                    $info{args}->{change_group_to},
+                    uri => $dest_uri,
+                    recursive => 1,
+                )
+            }
+        }
         return ($status, $message);
     }
     else {
         my @result = _copy_single_document(
 	    $obvius, $doc, $destdoc, $dest_name, %{ $info{args} }
 	);
+        if($info{args}->{change_owner_to}) {
+            my $dest_uri = sprintf('%s/%s/', $destination, $dest_name);
+            if(my $d = $obvius->lookup_document($dest_uri)) {
+                $obvius->db_chown(
+                    $info{args}->{change_owner_to},
+                    $info{args}->{change_group_to},
+                    docid => $d->Id,
+                )
+            }
+        }
 	return @result;
 	
     }
@@ -401,6 +425,13 @@ sub perform_command_move {
 	# Change language for if requested
 	if(my $chlang = $info{args}->{change_language_to}) {
 	    $obvius->db_chlang($chlang, uri => $dest_uri, recursive => 1);
+	}
+
+	if(my $owner = $info{args}->{change_owner_to}) {
+            my $group = $info{args}->{change_group_to};
+            $obvius->db_chown(
+                $owner, $group, uri => $dest_uri, recursive => 1
+            );
 	}
 
         return ('OK',

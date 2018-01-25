@@ -17,6 +17,11 @@ our @EXPORT_OK = qw(
     register_domain
     set_domain
     set_translation_lang
+    translate_with_prefix
+    translate_doctypename
+    translate_editpagelabel
+    translate_editpagetitle
+    translate_editpagesubtitle
 );
 
 our @EXPORT = qw(
@@ -49,6 +54,33 @@ sub gettext {
 }
 
 *__ = \&gettext;
+
+sub translate_with_prefix {
+    my $prefix = shift;
+    my $key = shift;
+    
+    my $translated = gettext("$prefix:$key", @_) || '';
+    if (substr($translated, 0, length($prefix) + 1) eq "$prefix:") {
+        $translated = gettext($key, @_);
+    }
+    return $translated;
+}
+
+sub translate_doctypename {
+    return translate_with_prefix("doctypename", @_);
+}
+
+sub translate_editpagelabel {
+    return translate_with_prefix("editpagelabel", @_);
+}
+
+sub translate_editpagetitle {
+    return translate_with_prefix("editpagetitle", @_);
+}
+
+sub translate_editpagesubtitle {
+    return translate_with_prefix("editpagesubtitle", @_);
+}
 
 sub build_domain_name {
     my $obj = shift;

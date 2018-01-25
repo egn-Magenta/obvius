@@ -224,7 +224,7 @@ sub rewrite {
     # Now, redirect to the correct protocol/hostname if we're not already on
     # it:
     my ($new_uri, $new_host, undef, undef, $protocol)
-        = $this->hostmap->translate_uri($lookup_uri, $hostname);
+        = $this->hostmap->translate_uri($lookup_uri, $hostname, $protocol_in);
 
     return (REDIRECT, $new_uri) if(
         ($protocol ne $protocol_in) or
@@ -340,7 +340,7 @@ sub connect_dbh {
             AND
             versions.type=doctypes.id
             AND
-            docid_path.path = ?;
+            docid_path.path = binary ?;
     |);
 }
 

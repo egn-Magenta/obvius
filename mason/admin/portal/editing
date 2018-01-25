@@ -10,7 +10,7 @@
 % if (!$r->notes('inactive_editing')) {
 <a title="Alt-<% $pagenum |h %>" accesskey="<% $pagenum |h %>" href="./?obvius_command_edit=<% $pagenum |h %>&amp;obvius_version=<% $vdoc->Version |u %>" onclick="javascript:this.blur(); return(obvius_goto_editpage('obvius-edit-page-<% $pagenum |h %>', obvius_all_ids));">\
 % }
-<& /shared/msg, text=>$ep_prefix . $editpage->Title &><% $r->notes('inactive_editing') ? '' : '</a>' %></li>
+<% translate_editpagetitle($editpage->Title) %><% $r->notes('inactive_editing') ? '' : '</a>' %></li>
 %     $class='';
 % }
          <li>\
@@ -33,6 +33,9 @@ $obvius_command_edit=>0
 $current=>''
 </%args>
 %
+<%once>
+use Obvius::Translations qw(translate_editpagetitle);
+</%once>
 <%init>
 my $session=$r->pnotes('obvius_session');
 my $edit_doctype=$doctype;
@@ -46,6 +49,4 @@ if ($session->{obvius_new_doctypeid}) {
 my $editpages=$obvius->get_editpages($edit_doctype);
 
 $r->notes('inactive_editing'=>1) if (!$obvius->can_create_new_version($doc));
-my $ep_prefix = 'editpagetitle:';
-$ep_prefix = '' if($obvius->config->param('use_old_translation_system'));
 </%init>

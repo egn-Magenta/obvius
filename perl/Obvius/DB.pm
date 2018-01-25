@@ -999,6 +999,57 @@ sub db_chlang {
     $sth->execute(@args);
 }
 
+# chown method for easy changing of user/group
+sub db_chown {
+    my ($this, $owner_id, $group_id, %options) = @_;
+
+    $owner_id = int($owner_id);
+    $group_id = int($group_id);
+
+    die "Invalid owner id: $owner_id" unless($owner_id > 0);
+    die "Invalid group id: $group_id" unless($group_id > 0);
+
+    my @args = ($owner_id, $group_id);
+    my $where;
+
+    if(my $docid = $options{docid}) {
+	if($options{recursive}) {
+	    my $d = $this->get_doc_by_id($docid);
+	    return $this->db_chlang(
+		$owner_id,
+                $group_id,
+		uri => $this->get_doc_uri($d),
+		recursive => 1
+	    );
+	} else {
+	    $where = "d.id = ?";
+	    push(@args, $docid);
+	}
+    } elsif(my $uri = $options{uri}) {
+	if($options{recursive}) {
+	    $where = "dp.path like ?";
+	    push(@args, $uri . '%');
+	} else {
+	    $where = "dp.path = ?";
+	    push(@args, $uri);
+	}
+    } else {
+	die "You must specify either an uri or a docid for db_chown";
+    }
+
+    my $sth = $this->dbh->prepare(qq|
+	update
+            documents d
+            join docid_path dp on d.id = dp.docid
+        set
+            d.owner = ?,
+            d.grp = ?
+        where
+            $where
+    |);
+
+    $sth->execute(@args);
+}
     
 1;
 __END__
