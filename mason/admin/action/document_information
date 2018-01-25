@@ -144,19 +144,10 @@ my $access_error;
 my $current_access_rules = join '<br />', map {
         my $status = $obvius->access_rule_applies($_, $doc, $doc->Owner);
         defined($status) ? (
-                $status ?
-                        "<span title=\"" .
-                        $m->scomp('/shared/msg', text=>'Rule applies') .
-                        "\" class=\"obvius-rule-used\">$_</span>"
-                :
-                        "<span title=\"" .
-                        $m->scomp('/shared/msg', text=>'Rule does not apply') .
-                        "\">$_</span>"
+                $status ? "<span title=\"" . $m->scomp('/shared/msg', text=>'Rule applies') . "\" class=\"obvius-rule-used\">$_</span>"
+                : "<span title=\"" . $m->scomp('/shared/msg', text=>'Rule does not apply') . "\">$_</span>"
         )
-        :
-                        "<span title=\"" .
-                        $m->scomp('/shared/msg', text=>'Rule invalid') .
-                        "\" class=\"obvius-rule-invalid\">$_</span>"
+        : "<span title=\"" . $m->scomp('/shared/msg', text=>'Rule invalid') . "\" class=\"obvius-rule-invalid\">$_</span>"
 } $obvius->get_capability_rules($doc);
 
 my $dummy = $obvius->get_versions($doc);
