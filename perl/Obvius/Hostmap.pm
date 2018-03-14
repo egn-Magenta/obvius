@@ -28,14 +28,15 @@ use strict;
 use warnings;
 
 use Obvius::Config;
+use DBI;
 
 our $VERSION="1.0";
 
 *new = \&create_hostmap;
 
 sub new_with_obvius {
-     my ($class, $obvius, %options) = @_;
-     return $class->create_hostmap(
+    my ($class, $obvius, %options) = @_;
+    return $class->create_hostmap(
         $obvius->config->param('HOSTMAP_FILE'),
         $obvius->config->param('ROOTHOST'),
         obvius_config => $obvius->config,
@@ -63,6 +64,7 @@ sub create_hostmap {
                 last_change => 0,
                 hostmap => {},
                 forwardmap => {},
+                non_https_hosts => {},
                 regexp => '',
                 is_https => {},
                 obvius_config => $options{obvius_config},
@@ -226,16 +228,56 @@ sub get_hostmap {
         $this->{regexp} = "^(" . join("|", reverse sort keys %$siteroot_map) . ")";
 
         $this->{last_change} = $file_timestamp;
+
+        if($this->{always_https_mode}) {
+            $this->update_non_https_map;
+        }
     }
 
     return $this->{hostmap};
+}
+
+sub update_non_https_map {
+    my ($self) = @_;
+
+    my $config = $self->locate_obvius_config;
+    my $dbh = DBI->connect(
+        $config->param('dsn'),
+        $config->param('normal_db_login'),
+        $config->param('normal_db_passwd')
+    );
+    my $sth = $dbh->prepare(q|
+        SELECT
+            value
+        FROM
+            config
+        WHERE
+            name = ?
+    |);
+    $sth->execute('non_https_hostnames');
+    my ($non_https_hostnames) = $sth->fetchrow_array;
+    $sth->finish;
+    $dbh->disconnect;
+
+    my @hostnames = grep { $_ } split(/\s*\n\s*/s, $non_https_hostnames || '');
+
+    # Register all non-https hosts
+    $self->{non_https_hosts} = {
+        map { $_ => 1 } @hostnames
+    };
+    # Register each URI for the non-https hosts
+    foreach my $hostname (@hostnames) {
+        if(my $uri = $self->host_to_uri($hostname)) {
+            $self->{non_https_hosts}->{$uri} = 1;
+        }
+    }
 }
 
 sub is_https {
     my ($this, $subsite_uri_or_hostname) = @_;
 
     if($this->{always_https_mode}) {
-        return 1;
+        return $this->{non_https_hosts}->{$subsite_uri_or_hostname} ? 0 : 1;
     }
     
     return $this->{is_https}->{$subsite_uri_or_hostname};
@@ -243,10 +285,6 @@ sub is_https {
 
 sub lookup_is_https {
     my ($this, $url) = @_;
-
-    if($this->{always_https_mode}) {
-        return 1;
-    }
 
     # Add last slash in uri if missing
     $url .= '/' unless($url =~ m!/$!);
@@ -311,16 +349,19 @@ sub translate_uri {
     my $new_host = '';
     my $subsiteuri = '';
     my $levels_matched = 0;
-    # Always HTTPS mode tells the rewrite system that all URLs should be
-    # https, whether or not they actually point to subsites that uses https.
     my $always_https = $this->{always_https_mode};
-    if($always_https) {
-        $protocol = 'https';
-    }
 
     if($uri =~ m!$this->{regexp}!i) {
         $subsiteuri = $1;
         $new_host = $hostmap->{lc $1};
+    }
+
+    if($always_https) {
+        if($this->is_https($new_host || $hostname)) {
+            $protocol = 'https'
+        } else {
+            $protocol = 'http';
+        }
     }
 
     my $protocol_mismatch = (
@@ -330,13 +371,13 @@ sub translate_uri {
 
     if($new_host) {
         my $remove_prefix = 1;
-        if($always_https || $this->{is_https}->{$new_host}) {
-            $protocol = 'https';
-            $remove_prefix = 0 if($new_host eq $this->https_roothost);
+        # HTTPS URLs pointing to the roothost should not ahve their subsite
+        # URI removed.
+        if($protocol eq 'https' and $new_host eq $this->https_roothost) {
+            $remove_prefix = 0;
         }
         # Remove the subsiteuri from the URI:
         $uri =~ s!^\Q$subsiteuri\E!/!i if($remove_prefix);
-
 
         # If hostname is not the same as the current prefix the URI
         # with correct hostname:
@@ -361,7 +402,6 @@ sub translate_uri {
             $uri = $protocol . '://' . $hostname . $uri;
         }
     }
-
 
     if(wantarray) {
         if($subsiteuri) {
