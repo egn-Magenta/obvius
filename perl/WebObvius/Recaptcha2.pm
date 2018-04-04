@@ -57,6 +57,11 @@ sub validate_from_input {
 sub validate_from_request {
     my ($request) = @_;
 
+    # Try to configure the module if it has not already been done.
+    if(!defined $secret && $request->pnotes('obvius')) {
+        WebObvius::Recaptcha2::setup($request->pnotes('obvius'));
+    }
+
     return validate(
         $request->param("g-recaptcha-response"),
         get_origin_ip_from_request($request) || $ENV{'REMOTE_ADDR'}
