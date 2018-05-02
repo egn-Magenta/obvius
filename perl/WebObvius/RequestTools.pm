@@ -19,6 +19,8 @@ our @EXPORT = qw( get_origin_ip_from_request );
 sub get_origin_ip_from_request {
     my ($req) = @_;
 
+    return $req->useragent_ip;
+
     # Get the first IP in the X-FORWARDED-FOR header
     if(my $ip = $req->headers_in->{"X-FORWARDED-FOR"}) {
 	$ip =~ s!,.*!!;
