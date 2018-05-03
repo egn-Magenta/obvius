@@ -301,9 +301,8 @@ sub public_authen_handler {
 
      return SERVER_ERROR if !$obvius;
 
-    # Ensure we always set a user!
-    $req->user("nobody");
-
+     # Ensure we always set a user!
+     $req->user("nobody");
 
      my $uri = $req->notes('uri');
      $uri = "/" . $uri . "/";
@@ -336,13 +335,12 @@ sub public_authen_handler {
      my $res = $this->session_authen_handler($req);
      return $res if ($res ne OK);
 
-     my $cur_user = $obvius->get_user($obvius->{USER});
-
      return OK if $obvius->is_admin;
 
      my $users = $obvius->execute_select("select user from forbidden_docs_users
                                           where docid=?", $docid);
 
+     my $cur_user = $obvius->get_user($obvius->{USER});
      for my $user (@$users) {
           return OK if $user->{user} == $cur_user->{id};
      }
@@ -598,8 +596,6 @@ sub authen_handler ($$) {
 sub already_logged_in {
      my ($this, $obvius, $req) = @_;
 
-     print STDERR "Already logged in start\n";
-     
      my $session_id;
      my %cookies = Apache::Cookie->fetch;
      $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
@@ -615,7 +611,6 @@ sub already_logged_in {
      $obvius->{USER} = $res->{login};
      $obvius->read_user_and_group_info;
 
-     print STDERR "Already logged in success\n";
      $req->notes(user => $res->{login});
      $req->user($res->{login});
 
@@ -632,8 +627,6 @@ sub already_logged_in {
 sub session_authen_handler ($$) {
     my ($this, $req) = @_;
 
-    print STDERR "Session authen handler start\n";
-    
     return OK if not $req->is_initial_req;
     my $benchmark = Obvius::Benchmark-> new('mason::session_authen_handler')
       if $this-> {BENCHMARK};
@@ -655,15 +648,12 @@ sub session_authen_handler ($$) {
     my $password = $r->param('obvius_sessionlogin_password');
     my $secret = $r->param('obvius_sessionlogin_secret') || '';
 
-
     goto redirect if
       !$r->param('obvius_sessionlogin_submit');
     goto login_failed if !$password || !$login;
 
     my $userdata = $obvius->{USERS}->{$login};
-
     goto redirect if not $userdata;
-
 
     my $hash = md5_hex($login . $userdata->{passwd} . $secret);
 
@@ -678,16 +668,12 @@ sub session_authen_handler ($$) {
     $this->register_session($obvius, $r, $login);
     $req->user($login);
 
-    print STDERR "Session authen handler success\n";
-
     return OK;
 
   login_failed:
-    print STDERR "Session authen handler fail\n";
     $req->notes(login_failed => 1);
 
   redirect:
-    print STDERR "Session authen handler redirect\n";
     return $this->redirect($r, '/system/login');
 }
 
@@ -728,8 +714,6 @@ sub authz_handler ($$) {
 
      Obvius::log->debug(" Mason::autz_handler ($this : " . $req->uri . ")");
 
-     print STDERR "Autz_handler start\n";
-     
      # Lookup user-permissions...
      return $this->access_handler($req);
 }

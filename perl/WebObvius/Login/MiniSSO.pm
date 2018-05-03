@@ -14,8 +14,6 @@ sub minisso_login_handler {
 
     return OK if not $req->is_initial_req;
 
-    print STDERR "minisso_login_handler start\n";
-
     my $obvius = $this->obvius_connect($req,
                                        undef,
                                        undef,
@@ -112,7 +110,6 @@ sub minisso_login_handler {
                 "obvius_login_session=$session_id; path=/;${expires}"
             );
             $req->notes(user => $login);
-            print STDERR "minisso_login_handler setting user\n";
             $req->user($login);
             $obvius->{USER} = $login;
 
@@ -237,8 +234,6 @@ sub redirect_to_ip_mismatch {
 sub already_logged_in {
     my ($this, $obvius, $req) = @_;
 
-    print STDERR "Already logged in start\n";
-
     my $session_id;
     my %cookies = CGI::Cookie->fetch;
     $session_id = $cookies{obvius_login_session}->value if($cookies{obvius_login_session});
@@ -287,7 +282,6 @@ sub already_logged_in {
         $obvius->{USER} = $login;
         $obvius->read_user_and_group_info;
 
-        print STDERR "Already logged in success\n";
         $req->notes(user => $login);
         $req->user($login);
 
