@@ -759,6 +759,7 @@ sub rulebased_authen_handler ($$)
      $uid = $obvius-> get_user( $login);
      return SERVER_ERROR unless $uid;
      $req-> notes( user => $login);
+     $req->user($login);
 
      # check if the user can view the document
      my $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
