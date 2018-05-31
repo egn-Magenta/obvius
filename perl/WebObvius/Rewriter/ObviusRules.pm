@@ -215,10 +215,13 @@ sub rewrite {
         $rewritten = 1;
     }
 
-    # Ensure that the path used for hostmap lookup ends in a slash
+    # Ensure that the path used for hostmap lookup ends in a slash, but remove
+    # that slash again in case of a redirect.
     my $lookup_uri = $args{uri};
+    my $no_ending_slash = 0;
     if ($args{uri} !~ m{/$}) {
-        $lookup_uri .= "/"
+        $lookup_uri .= "/";
+        $no_ending_slash = 1;
     }
 
     # Now, redirect to the correct protocol/hostname if we're not already on
@@ -226,10 +229,12 @@ sub rewrite {
     my ($new_uri, $new_host, undef, undef, $protocol)
         = $this->hostmap->translate_uri($lookup_uri, $hostname, $protocol_in);
 
-    return (REDIRECT, $new_uri) if(
-        ($protocol ne $protocol_in) or
-        ($new_host and $new_host ne $hostname)
-    );
+    if(($protocol ne $protocol_in) or ($new_host and $new_host ne $hostname)) {
+        if($no_ending_slash) {
+            $new_uri =~ s{/$}{};
+        }
+        return (REDIRECT, $new_uri);
+    }
 
     if($rewritten) {
         return (REWRITE, $args{uri});
