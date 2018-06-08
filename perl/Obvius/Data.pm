@@ -194,59 +194,59 @@ sub validate {
 # is_int_01 - Returns true if the argument is an integer with the value 0 or 1
 sub is_int_01 {
     my $id = shift;
-    return defined $id and $id =~ /^[01]$/;
+    return defined($id) && ($id =~ /^[01]$/);
 }
 
 # is_int_positive - Return true if the supplied value is a positive integer
 sub is_int_positive {
     my $id = shift;
-    return defined $id and $id =~ /^\d+$/ and $id > 0;
+    return defined($id) && ($id =~ /^\d+$/) && ($id > 0);
 }
 
 # is_int_nonnegative - Return true if an integer is larger or equal to 0
 sub is_int_nonnegative {
     my $id = shift;
-    return defined $id and $id =~ /^\d+$/ and $id >= 0;
+    return defined($id) && ($id =~ /^\d+$/) && ($id >= 0);
 }
 
 # is_word - Return true if the argument is an empty string or matches the word 
 #           character (alphanumeric plus "_").
 sub is_word {
     my $id = shift;
-    return defined $id and $id =~ /^\w*$/;
+    return defined($id) && ($id =~ /^\w*$/);
 }
 
 # is_word_nonnull - Return true if argument matches the word character (alphanumeric plus "_").
 sub is_word_nonnull {
     my $id = shift;
-    return defined $id and $id =~ /^\w+$/;
+    return defined($id) && ($id =~ /^\w+$/);
 }
 
 # is_lang_code - Return true if the argument is a language code (eg. "en" or "en_UK").
 sub is_lang_code {
     my $id = shift;
-    return defined $id and $id =~ /^\w\w(_\w\w)?$/;
+    return defined($id) && ($id =~ /^\w\w(_\w\w)?$/);
 }
 
 # is_data - Return true if the argument is a date in the format "xxxx-xx-xx". Note that no actual
 #           validation of the date takes place. Only the format gets checked.
 sub is_date {
     my $id = shift;
-    return defined $id and $id =~ /^\d\d\d\d-\d\d-\d\d$/;
+    return defined($id) && ($id =~ /^\d\d\d\d-\d\d-\d\d$/);
 }
 
 # is_time - Return true if the argument is a time value in the format "xx:xx:xx". The actual value
 #           is not validated - only its format.
 sub is_time {
     my $id = shift;
-    return defined $id and $id =~ /^\d\d:\d\d:\d\d$/;
+    return defined($id) && ($id =~ /^\d\d:\d\d:\d\d$/);
 }
 
 # is_datetime - Return true if the argument matches the date-time format "xxxx-xx-xx xx:xx:xx".
 #               The actual value is not validated - only its format.
 sub is_datetime {
     my $id = shift;
-    return defined $id and $id =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/;
+    return defined($id) && ($id =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/);
 }
 
 sub tracer {
