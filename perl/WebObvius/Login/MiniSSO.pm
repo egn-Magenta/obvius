@@ -11,7 +11,7 @@ use Digest::MD5 qw(md5_hex);
 
 sub minisso_login_handler {
     my ($this, $req) = @_;
-    
+
     return OK if not $req->is_initial_req;
 
     my $obvius = $this->obvius_connect($req,
@@ -110,6 +110,7 @@ sub minisso_login_handler {
                 "obvius_login_session=$session_id; path=/;${expires}"
             );
             $req->notes(user => $login);
+            $req->user($login);
             $obvius->{USER} = $login;
 
             # If admin-request check for the allow-admin-access field in the
@@ -282,6 +283,7 @@ sub already_logged_in {
         $obvius->read_user_and_group_info;
 
         $req->notes(user => $login);
+        $req->user($login);
 
         # Not logged in if request is to admin and the user does not have the
         # allow-admin-login flag

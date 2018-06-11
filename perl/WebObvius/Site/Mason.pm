@@ -301,6 +301,9 @@ sub public_authen_handler {
 
      return SERVER_ERROR if !$obvius;
 
+     # Ensure we always set a user!
+     $req->user("nobody");
+
      my $uri = $req->notes('uri');
      $uri = "/" . $uri . "/";
      $uri =~ s!/+!/!g;
@@ -609,6 +612,7 @@ sub already_logged_in {
      $obvius->read_user_and_group_info;
 
      $req->notes(user => $res->{login});
+     $req->user($res->{login});
 
      # If more than a minute has passed since last login update the
      # timestamp in the database as well:
@@ -662,6 +666,7 @@ sub session_authen_handler ($$) {
     }
 
     $this->register_session($obvius, $r, $login);
+    $req->user($login);
 
     return OK;
 
@@ -710,7 +715,6 @@ sub authz_handler ($$) {
      Obvius::log->debug(" Mason::autz_handler ($this : " . $req->uri . ")");
 
      # Lookup user-permissions...
-
      return $this->access_handler($req);
 }
 
@@ -739,6 +743,7 @@ sub rulebased_authen_handler ($$)
      $uid = $obvius-> get_user( $login);
      return SERVER_ERROR unless $uid;
      $req-> notes( user => $login);
+     $req->user($login);
 
      # check if the user can view the document
      my $caps = $obvius-> compute_user_capabilities( $doc, $uid->{id});
