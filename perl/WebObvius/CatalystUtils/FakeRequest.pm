@@ -42,6 +42,7 @@ my @direct_proxy_methods = qw(
     parameters
     params
     path_info
+    user
 );
 
 {
