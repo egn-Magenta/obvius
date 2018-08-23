@@ -27,7 +27,7 @@ sub generate_head_html {
     my ($this, @args) = @_;
     my $super = $this->SUPER::generate_head_html(@args);
 
-    return join "\n", ($this->add_js('/scripts/jquery/jquery-1.3.2.min.js'), $super);
+    return join "\n", ($this->add_js('//code.jquery.com/jquery-1.8.3.min.js'), $super);
 }
 
 sub ensure_decoded {
