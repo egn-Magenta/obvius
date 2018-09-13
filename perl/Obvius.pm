@@ -61,6 +61,7 @@ our @ISA = qw(  Obvius::Data
                 Obvius::Pubauth
                 Obvius::Annotations
                 Obvius::Queue
+                Obvius::Optimizations
                 Exporter
             );
 our $VERSION="1.0";
@@ -107,8 +108,8 @@ use Obvius::Annotations;
 use Obvius::Queue;
 use Obvius::EncryptionModule;
 use Obvius::Translations ();
+use Obvius::Optimizations;
 
-
 ########################################################################
 #
 #       Construction and connection
@@ -246,7 +247,6 @@ sub user {
     return $this->{USER};
 }
 
-
 ########################################################################
 #
 #       Object cache
@@ -277,7 +277,6 @@ sub cache_find {
     return ($this->{CACHE}) ? $this->{CACHE}->find($domain, \%key) : undef;
 }
 
-
 ########################################################################
 #
 #       Error logging
@@ -298,7 +297,6 @@ sub log {
     return $LOG;
 }
 
-
 ########################################################################
 #
 #       Encryption handler
@@ -314,7 +312,6 @@ sub encryption_handler {
     }
 }
 
-
 ########################################################################
 #
 #       Path to document mapping and vice versa
@@ -458,7 +455,6 @@ sub is_doc_below_doc {
     return 0;
 }
 
-
 ########################################################################
 #
 #       Look up documents by id or (name,parent)
@@ -535,7 +531,6 @@ sub get_docs_by {
 }
 
 
-
 ########################################################################
 #
 #       Public document check
@@ -580,7 +575,6 @@ sub is_public_document {
 }
 
 
-
 ########################################################################
 #
 #       Multilingual helpers
@@ -649,7 +643,6 @@ sub select_best_language_match_multiple {
 }
 
 
-
 ########################################################################
 #
 #       Look up versions of a document
@@ -751,7 +744,6 @@ sub get_versions {
 }
 
 
-
 ########################################################################
 #
 #       Look up document public subdocs (returns array of Obvius::Version)
@@ -875,7 +867,6 @@ sub get_nr_of_docs_in_subtree {
 
 }
 
-
 ########################################################################
 #
 #       Search for documents (returns array of Obvius::Version)
@@ -949,6 +940,12 @@ sub search {
     my @where;
     my %map;
     my $having = '';
+    my @document_fields;
+
+    # Setup debug flag
+    local $DBIx::Recordset::Debug = (
+        $options{debug} || $DBIx::Recordset::Debug
+    );
 
     my $i = 0;
     my $xrefs = 0;
@@ -972,18 +969,25 @@ sub search {
     } else {
         # If we're not searching for public documents, we want to get either
         # the public version if it exists or the latest version if it doesn't.
-	push(@where, "versions.version=(
-	    SELECT
-		v.version
-	    FROM
-		versions v
-	    WHERE
-		v.docid=versions.docid
-	    ORDER BY
-		v.public DESC,
-		v.version DESC
-	    LIMIT 1
-	)");
+        if($this->has_optimization("public_or_latest_version")) {
+            push(@document_fields, "public_or_latest_version");
+            push(@join,
+                "(obvius_documents.public_or_latest_version = versions.id)"
+            );
+        } else {
+            push(@where, "versions.version=(
+                SELECT
+                v.version
+                FROM
+                versions v
+                WHERE
+                v.docid=versions.docid
+                ORDER BY
+                v.public DESC,
+                v.version DESC
+                LIMIT 1
+            )");
+        }
     }
 
     # Sorting:
@@ -992,12 +996,23 @@ sub search {
 
     map { push @$fields, $_ } (keys %$sort_fields);
 
-    if($options{'needs_document_fields'} and ref($options{'needs_document_fields'}) eq 'ARRAY') {
-        push(@table, "documents as obvius_documents");
+    my $docfields = $options{'needs_document_fields'};
+    if($docfields and ref($docfields) eq 'ARRAY') {
+        push(@document_fields, @$docfields);
+    }
+    
+    if(@document_fields) {
+        if($this->has_optimization("public_or_latest_version")) {
+            push(@table, "docs_with_extra as obvius_documents");
+        } else {
+            push(@table, "documents as obvius_documents");
+        }
         push(@join, "(obvius_documents.id = versions.docid)");
-        for(@{$options{'needs_document_fields'}}) {
-            push(@fields, "obvius_documents.$_ as $_");
-            $map{$_} = "obvius_documents.$_";
+        my %seen;
+        foreach my $f (@document_fields) {
+            next if($seen{$f}++);
+            push(@fields, "obvius_documents.${f} as ${f}");
+            $map{$f} = "obvius_documents.${f}";
         }
     }
 
@@ -1118,34 +1133,41 @@ sub search {
     }
 
     $this->{LOG}->notice(" Search query: " . Dumper($query)) if ($options{'obvius_dump'});
-    $set->Search($query);
+    if(my $debuglevel = $options{debug}) {
+        # Temporarily enable debugging
+        {
+            $set->Search($query);
+        }
+    } else {
+        $set->Search($query);
+    }
 
     if ( $options{'count_only'} ) {
-	my $count_result = 0;
-	if ( my $rec = $set->Next) {
-	    $count_result = $rec->{count_only};
-	}
-	$set->Disconnect;
-	return $count_result;
+        my $count_result = 0;
+        if (my $rec = $set->Next) {
+            $count_result = $rec->{count_only};
+        }
+        $set->Disconnect;
+        return $count_result;
     } else {
-	my @subdocs;
-	while (my $rec = $set->Next) {
-	    # Quick workaround to exclude previews.
-	    next if !$options{include_preview} && $rec->{path} =~ m!/admin/previews/!;
-	    if ($options{public}) {
-		# If we've got a parent (from the search), check from the parent up:
-		
-		my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
-		
-		# If there is no parent, we pass the hint that the document being checked _is_
-		# public itself (options{public} ensures that):
-		next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
-	    }
-	    push(@subdocs, new Obvius::Version($rec));
-	}
-	$set->Disconnect;
+        my @subdocs;
+        while (my $rec = $set->Next) {
+            # Quick workaround to exclude previews.
+            next if !$options{include_preview} && $rec->{path} =~ m!/admin/previews/!;
+            if ($options{public}) {
+            # If we've got a parent (from the search), check from the parent up:
 
-	return $this->select_best_language_match_multiple(@subdocs ? \@subdocs : undef);
+            my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
+
+            # If there is no parent, we pass the hint that the document being checked _is_
+            # public itself (options{public} ensures that):
+            next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
+            }
+            push(@subdocs, new Obvius::Version($rec));
+        }
+        $set->Disconnect;
+
+        return $this->select_best_language_match_multiple(@subdocs ? \@subdocs : undef);
     }
 }
 
@@ -1297,7 +1319,6 @@ sub get_distinct_vfields {
 }
 
 
-
 ########################################################################
 #
 #       Methods to get fields of versions
@@ -1439,7 +1460,6 @@ sub get_version_field {
 }
 
 
-
 ########################################################################
 #
 #       Look up document and field types
@@ -1548,7 +1568,6 @@ sub set_fieldspec {
 }
 
 
-
 ########################################################################
 #
 #       Document parameters
@@ -1706,7 +1725,6 @@ sub set_docparams {
 }
 
 
-
 ########################################################################
 #
 #       Read and validate all info about doctypes, fieldtypes etc.
@@ -1980,7 +1998,6 @@ sub read_type_info {
 }
 
 
-
 ########################################################################
 #
 #       Basic quick-creation of a new document or a new version.
@@ -2085,7 +2102,6 @@ sub quick_create_new_document {
     }
 }
 
-
 ########################################################################
 #
 #       Create a new document or a new version.
@@ -2259,7 +2275,6 @@ sub create_new_version {
 }
 
 
-
 ########################################################################
 #
 #       Delete a document, rename a document
@@ -2420,7 +2435,6 @@ sub rename_document {
     return 1;
 }
 
-
 ########################################################################
 #
 #       Publish and unpublish versions
@@ -2600,7 +2614,6 @@ sub unpublish_version {
     return 1;
 }
 
-
 ########################################################################
 #
 #                       Deleting a single version
@@ -2656,7 +2669,6 @@ sub delete_single_version {
 }
 
 
-
 ########################################################################
 #
 #       Registering modifications
@@ -2682,7 +2694,6 @@ sub modified {
     return $this->{MODIFIED};
 }
 
-
 ########################################################################
 ########################################################################
 #
@@ -3158,7 +3169,6 @@ sub get_year_statistics_for_doc {
     return $result || 0;
 }
           
-
 package Obvius::Benchmark;
 
 use strict;
