@@ -138,6 +138,15 @@ sub save {
     return ('OK', 'Entry stored');
 }
 
+sub save_and_publish {
+    my ($this, $data, $session, $key) = @_;
+
+    $this->save($data, $session, $key);
+    $key =~ s!save_and_publish!save!g;
+
+    return $this->save($data, $session, $key)
+}
+
 sub preview {
      return save(@_);
 }
