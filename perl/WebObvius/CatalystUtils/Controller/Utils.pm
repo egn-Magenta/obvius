@@ -7,23 +7,7 @@ use JSON;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
-sub begin :Private {
-    my ($self, $c) = @_;
-
-    my $auth_res = $c->siteconfig->{admin}->session_authen_handler(
-        $c->fakerequest
-    );
-    if (my $status = $c->response->status) {
-        if (!$auth_res) {
-            $auth_res = $status;
-        }
-    }
-
-    if (! grep { $auth_res == $_ } (0, 200)) {
-        return $c->detach();
-    }
-}
-
+sub begin :Private { $_[1]->admin_auth_check }
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
