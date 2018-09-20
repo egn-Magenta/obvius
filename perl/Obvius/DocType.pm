@@ -91,11 +91,19 @@ sub generate_head_html {
 
      if ($mode && $mode eq 'search') {
           my @header;
-          push @header, $this->add_js("//code.jquery.com/ui/1.10.3/jquery-ui.min.js",
-                                      '/scripts/jsutils.js',
-                                      '/scripts/jquery/jquery.ajaxQueue.js');
-          push @header, $this->add_link("//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css",
-                                        '/style/jquery.autocomplete.css');
+          my @search_js = (
+              '/scripts/jsutils.js',
+              '/scripts/jquery/jquery.ajaxQueue.js'
+          );
+          my @search_css = ('/style/jquery.autocomplete.css');
+          if(!$r->notes('bootstrap')) {
+               unshift(@search_js, "//code.jquery.com/ui/1.10.3/jquery-ui.min.js");
+               unshift(@search_css,
+                       "//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css");
+          }
+
+          push @header, $this->add_js(@search_js);
+          push @header, $this->add_link(@search_css);
 
           return join "\n", @header;
      }
