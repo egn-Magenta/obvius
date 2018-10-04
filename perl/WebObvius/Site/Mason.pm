@@ -816,6 +816,9 @@ sub create_output_object {
           $req->pnotes(OBVIUS_OUTPUT => $output);
      }
 
+     # Whether running with bootstrap layout
+     $output->param(BOOTSTRAP=>$req->notes('bootstrap'));
+
      return $output;
 }
 
