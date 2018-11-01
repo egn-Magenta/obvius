@@ -235,7 +235,7 @@ function formdata_add_new(elem) {
     }
 
 
-    window.open("/admin/?obvius_app_formdata&mode=edit&new=" + type_value + "&fieldname=" + elem.name + "&scriptmode=" + (scriptmode ? '1' : '0'), "formdata_edit", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height);
+    window.open("./?obvius_app_formdata&mode=edit&new=" + type_value + "&fieldname=" + elem.name + "&scriptmode=" + (scriptmode ? '1' : '0'), "formdata_edit", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height);
 }
 
 
