@@ -123,7 +123,7 @@ function formdata_populate_fieldtable(name) {
             edit_a.href = document.location.href;
 
             // Hmmm, have to wrap this in eval to avoid problems with global variables
-            var edit_url = "/admin/?obvius_app_formdata=1&mode=edit&field=" + obj.name + "&fieldname=" + name;
+            var edit_url = "./?obvius_app_formdata=1&mode=edit&field=" + obj.name + "&fieldname=" + name;
             edit_url = edit_url + "&scriptmode=" + ( scriptmode ? '1' : '0' );
 	    edit_url = edit_url + "&edittype=" + obj.type;
             var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_field_dialog_width + ",height=" + formdata_field_dialog_height;
