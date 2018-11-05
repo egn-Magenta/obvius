@@ -133,11 +133,11 @@ sub minisso_login_handler {
                 )
             );
         } else {
-            return $this->redirect_to_minisso_login($req);
+            return $this->redirect_to_login($req);
         }
     }
 
-    return $this->redirect_to_minisso_login($req);
+    return $this->redirect_to_login($req);
 }
 
 # Overwrite the old session authentication handler
@@ -170,19 +170,21 @@ sub request_to_origin_url {
     return $url;
 }
 
-sub make_sso_login_url {
+sub make_login_url {
     my ($this, $req) = @_;
 
     my $config = $this->param('obvius_config');
     my $host = $config->param('https_roothost') ||
                $config->param('roothost') ||
                $req->hostname;
+               
+    my $login_handler = $config->param('login_handler_template') || "sso_login.mason";
 
     my $return_uri = uri_escape(
         $this->request_to_origin_url($req, exclude_args => ['t'])
     );
 
-    return "https://${host}/system/sso_login.mason?origin=$return_uri";
+    return "https://${host}/system/${login_handler_template}?origin=$return_uri";
 }
 
 sub make_no_access_url {
@@ -218,10 +220,10 @@ sub make_ip_mismatch_url {
 }
 
 
-sub redirect_to_minisso_login {
+sub redirect_to_login {
     my ($this, $req) = @_;
 
-    return $this->redirect($req, $this->make_sso_login_url($req), 1);
+    return $this->redirect($req, $this->make_login_url($req), 1);
 }
 
 sub redirect_to_ip_mismatch {
