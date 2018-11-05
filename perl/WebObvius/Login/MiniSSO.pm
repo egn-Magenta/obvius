@@ -178,7 +178,7 @@ sub make_login_url {
                $config->param('roothost') ||
                $req->hostname;
                
-    my $login_handler = $config->param('login_handler_template') || "sso_login.mason";
+    my $login_handler_template = $config->param('login_handler_template') || "sso_login.mason";
 
     my $return_uri = uri_escape(
         $this->request_to_origin_url($req, exclude_args => ['t'])
