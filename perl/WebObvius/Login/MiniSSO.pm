@@ -350,6 +350,8 @@ sub perform_sso_logout {
     my $host = $config->param('https_roothost') ||
                $config->param('roothost') ||
                $req->hostname;
+               
+    my $login_handler_template = $config->param('login_handler_template') || "sso_login.mason";
 
     my $return_uri = uri_escape(
         $this->request_to_origin_url($req, exclude_args => [
@@ -358,7 +360,7 @@ sub perform_sso_logout {
         ])
     );
 
-    return "https://${host}/system/sso_login.mason" .
+    return "https://${host}/system/${login_handler_template}" .
            "?origin=$return_uri&logged_out=true";
 
 }
