@@ -500,7 +500,7 @@ function formdata_populate_validaterules(fieldNode) {
         var edit_a = document.createElement('a');
         edit_a.href = document.location.href;
 
-	var edit_url = "/admin/?obvius_app_formdata&mode=edit_validaterule&rulenr=" + i;
+	var edit_url = "./?obvius_app_formdata&mode=edit_validaterule&rulenr=" + i;
         var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height;
         eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit_valrule', '" + window_options + "'); return false;}");
         edit_a.innerHTML = formdata_translations['Edit'];
@@ -572,7 +572,7 @@ function formdata_populate_options(fieldNode) {
         var edit_a = document.createElement('a');
         edit_a.href = document.location.href;
 
-        var edit_url = "/admin/?obvius_app_formdata&mode=edit_option&rulenr=" + i;
+        var edit_url = "./?obvius_app_formdata&mode=edit_option&rulenr=" + i;
         var window_options = "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_option_dialog_width + ",height=" + formdata_option_dialog_height;
         eval("edit_a.onclick = function () { window.open('" + edit_url + "', 'formdata_edit_option', '" + window_options + "'); return false;}");
         edit_a.innerHTML = formdata_translations['Edit'];
@@ -1059,7 +1059,7 @@ function formdata_validate_and_add_option() {
 }
 
 function formdata_add_new_option() {
-    window.open("/admin/?obvius_app_formdata&mode=edit_option", "formdata_edit_option", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_option_dialog_width + ",height=" + formdata_option_dialog_height);
+    window.open("./?obvius_app_formdata&mode=edit_option", "formdata_edit_option", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_option_dialog_width + ",height=" + formdata_option_dialog_height);
     return false;
 }
 
@@ -1312,7 +1312,7 @@ function formdata_validate_and_add_valrule() {
 }
 
 function formdata_add_new_valrule() {
-    window.open("/admin/?obvius_app_formdata&mode=edit_validaterule", "formdata_edit_valrule", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height);
+    window.open("./?obvius_app_formdata&mode=edit_validaterule", "formdata_edit_valrule", "menubar=no,toolbar=no,scrollbars=yes,width=" + formdata_valrule_dialog_width + ",height=" + formdata_valrule_dialog_height);
     return false;
 }
 
