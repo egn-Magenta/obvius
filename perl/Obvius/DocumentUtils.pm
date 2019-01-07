@@ -133,7 +133,7 @@ sub create_new_document_version {
     my Obvius::Data $vdoc_fields = $vdoc->param('fields') || {};
 
     # Copy fields
-    foreach my $vfield (values @{$new_vfields}) {
+    foreach my $vfield (@{$new_vfields}) {
         $vdoc_fields->param($vfield->{name} => $vfield->{value});
     }
 
