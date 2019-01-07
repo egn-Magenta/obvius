@@ -129,11 +129,12 @@ sub create_new_document_version {
     my $obvius = $self->obvius;
     my Obvius::Document $doc = $obvius->get_doc_by_id($docid);
     my Obvius::Version $vdoc = $obvius->get_public_version($doc) || $obvius->get_latest_version($doc);
+    $obvius->get_version_fields($vdoc, 255);
     my Obvius::Data $vdoc_fields = $vdoc->param('fields') || {};
 
     # Copy fields
-    foreach my $vfield_key (keys %{$new_vfields}) {
-        $vdoc_fields->param($vfield_key => $new_vfields->{$vfield_key});
+    foreach my $vfield (values @{$new_vfields}) {
+        $vdoc_fields->param($vfield->{name} => $vfield->{value});
     }
 
     # Create new version
