@@ -288,3 +288,54 @@ $(function(){
         });
     });
 });
+
+function wrap_edit_fields_in_accordion(startField, additionalFields, header) {
+  var startFieldNode = document.querySelector('[name="' + startField + '"]');
+  if (!startFieldNode) {
+    console.log("Couldn't find " + startField);
+    return;
+  }
+  console.log(additionalFields);
+  var additionalFieldNodes = [];
+  for (var i = 0; i < additionalFields.length; i++) {
+    var additionalFieldNode = document.querySelector('[name="' + additionalFields[i] + '"]');
+    if (!additionalFieldNode) {
+      console.log("Couldn't find " + additionalFields[i]);
+      return;
+    }
+    additionalFieldNodes.push(additionalFieldNode.parentNode);
+  }
+  var id = new Date().getTime();
+  var editengine_field = startFieldNode.parentNode;
+  editengine_field.outerHTML = generate_accordion_html(id, header, editengine_field.outerHTML);
+
+  var editFieldParentDiv = document.querySelector("#editfield-parent-" + id);
+  for (var j = 0; j < additionalFieldNodes.length; j++) {
+    console.log(additionalFieldNodes[j]);
+    editFieldParentDiv.appendChild(additionalFieldNodes[j]);
+  }
+}
+
+var generate_accordion_html = function(id, header, content) {
+  return '<div class="panel panel-accordion">' +
+      '    <div class="panel-heading" role="tab" id="heading-' + id + '">' +
+      '        <h4 class="panel-title">' +
+      '            <a class="collapsed bootstrap-accordion-title"' +
+      '                role="button" data-toggle="collapse"' +
+      '                href="#collapse-' + id + '"' +
+      '                aria-expanded="false"' +
+      '                aria-controls="collapse-' + id + '">' + header +
+      '                </a>' +
+      '        </h4>' +
+      '    </div>' +
+      '    <div id="collapse-' + id + '"' +
+      '        class="panel-collapse collapse"' +
+      '        role="tabpanel"' +
+      '        aria-expanded="false"' +
+      '        aria-labelledby="heading-' + id + '">' +
+      '        <div class="panel-body bootstrap-accordion-content" id="editfield-parent-' + id + '">' +
+                  content +
+      '        </div>' +
+      '    </div>' +
+      ' </div>';
+};
