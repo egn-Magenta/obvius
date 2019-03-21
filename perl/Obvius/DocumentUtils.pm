@@ -138,7 +138,8 @@ sub create_new_document_version {
     }
 
     # Create new version
-    my $new_version_string = $obvius->create_new_version($doc, $doc->_type, $vdoc->Lang, $vdoc_fields);
+    my $doctype = $vdoc->Type || $doc->Type;
+    my $new_version_string = $obvius->create_new_version($doc, $doctype, $vdoc->Lang, $vdoc_fields);
     die "Could not create new version" unless ($new_version_string);
 
     #Publish version
