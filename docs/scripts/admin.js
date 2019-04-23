@@ -295,7 +295,6 @@ function wrap_edit_fields_in_accordion(startField, additionalFields, header) {
     console.log("Couldn't find " + startField);
     return;
   }
-  console.log(additionalFields);
   var additionalFieldNodes = [];
   for (var i = 0; i < additionalFields.length; i++) {
     var additionalFieldNode = document.querySelector('[name="' + additionalFields[i] + '"]');
@@ -311,7 +310,6 @@ function wrap_edit_fields_in_accordion(startField, additionalFields, header) {
 
   var editFieldParentDiv = document.querySelector("#editfield-parent-" + id);
   for (var j = 0; j < additionalFieldNodes.length; j++) {
-    console.log(additionalFieldNodes[j]);
     editFieldParentDiv.appendChild(additionalFieldNodes[j]);
   }
 }

@@ -27,6 +27,7 @@
      <div class="obvius-filler">&nbsp;</div>
      <& newsboxes &>
    </div>
+<div style="display: none" id="accordion-collapse-title"><& /shared/trans, da => "Sidens kontaktperson til sidefod (udfyldes kun hvis det skal være andet end på siden over)", en => "Page contact person for footer (only relevant if it another person than the page above)" &></div>
 %
 <%args>
 $obvius_command_edit=>0
