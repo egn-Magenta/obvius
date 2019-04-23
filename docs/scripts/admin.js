@@ -312,6 +312,7 @@ function wrap_edit_fields_in_accordion(startField, additionalFields, header) {
   for (var j = 0; j < additionalFieldNodes.length; j++) {
     editFieldParentDiv.appendChild(additionalFieldNodes[j]);
   }
+  return "editfield-parent-" + id; // DOM ID of accordion content
 }
 
 var generate_accordion_html = function(id, header, content) {
