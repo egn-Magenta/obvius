@@ -289,7 +289,7 @@ $(function(){
     });
 });
 
-function wrap_edit_fields_in_accordion(startField, additionalFields, header) {
+function wrap_edit_fields_in_accordion(startField, additionalFields, header, non_bootstrap) {
   var startFieldNode = document.querySelector('[name="' + startField + '"]');
   if (!startFieldNode) {
     console.log("Couldn't find " + startField);
@@ -306,13 +306,32 @@ function wrap_edit_fields_in_accordion(startField, additionalFields, header) {
   }
   var id = new Date().getTime();
   var editengine_field = startFieldNode.parentNode;
-  editengine_field.outerHTML = generate_accordion_html(id, header, editengine_field.outerHTML);
+  var accordionHtml;
+  if (non_bootstrap) {
+    accordionHtml = generate_old_accordion_html(id, header, editengine_field.outerHTML);
+  } else {
+    accordionHtml = generate_accordion_html(id, header, editengine_field.outerHTML);
+  }
+  editengine_field.outerHTML = accordionHtml;
 
-  var editFieldParentDiv = document.querySelector("#editfield-parent-" + id);
+  var editFieldParentDivSelector;
+  var editFieldContentSelector;
+  if (non_bootstrap) {
+    editFieldParentDivSelector = "#accordion-" + id;
+    editFieldContentSelector = "#content-" + id;
+  } else {
+    editFieldParentDivSelector = "#editfield-parent-" + id;
+  }
+  var editFieldParentDiv;
+  if (non_bootstrap) {
+    editFieldParentDiv = document.querySelector(editFieldContentSelector);
+  } else {
+    editFieldParentDiv = document.querySelector(editFieldParentDivSelector);
+  }
   for (var j = 0; j < additionalFieldNodes.length; j++) {
     editFieldParentDiv.appendChild(additionalFieldNodes[j]);
   }
-  return "editfield-parent-" + id; // DOM ID of accordion content
+  return editFieldParentDivSelector; // DOM ID of accordion content
 }
 
 var generate_accordion_html = function(id, header, content) {
@@ -337,4 +356,11 @@ var generate_accordion_html = function(id, header, content) {
       '        </div>' +
       '    </div>' +
       ' </div>';
+};
+
+var generate_old_accordion_html = function(id, header, content) {
+  return '<div id="accordion-' + id + '">' +
+      '<h3>' + header + '</h3>' +
+      '<div id="content-' + id + '">' + content + '</div>'+
+      '</div>';
 };
