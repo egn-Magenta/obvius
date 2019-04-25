@@ -288,3 +288,79 @@ $(function(){
         });
     });
 });
+
+function wrap_edit_fields_in_accordion(startField, additionalFields, header, non_bootstrap) {
+  var startFieldNode = document.querySelector('[name="' + startField + '"]');
+  if (!startFieldNode) {
+    console.log("Couldn't find " + startField);
+    return;
+  }
+  var additionalFieldNodes = [];
+  for (var i = 0; i < additionalFields.length; i++) {
+    var additionalFieldNode = document.querySelector('[name="' + additionalFields[i] + '"]');
+    if (!additionalFieldNode) {
+      console.log("Couldn't find " + additionalFields[i]);
+      return;
+    }
+    additionalFieldNodes.push(additionalFieldNode.parentNode);
+  }
+  var id = new Date().getTime();
+  var editengine_field = startFieldNode.parentNode;
+  var accordionHtml;
+  if (non_bootstrap) {
+    accordionHtml = generate_old_accordion_html(id, header, editengine_field.outerHTML);
+  } else {
+    accordionHtml = generate_accordion_html(id, header, editengine_field.outerHTML);
+  }
+  editengine_field.outerHTML = accordionHtml;
+
+  var editFieldParentDivSelector;
+  var editFieldContentSelector;
+  if (non_bootstrap) {
+    editFieldParentDivSelector = "#accordion-" + id;
+    editFieldContentSelector = "#content-" + id;
+  } else {
+    editFieldParentDivSelector = "#editfield-parent-" + id;
+  }
+  var editFieldParentDiv;
+  if (non_bootstrap) {
+    editFieldParentDiv = document.querySelector(editFieldContentSelector);
+  } else {
+    editFieldParentDiv = document.querySelector(editFieldParentDivSelector);
+  }
+  for (var j = 0; j < additionalFieldNodes.length; j++) {
+    editFieldParentDiv.appendChild(additionalFieldNodes[j]);
+  }
+  return editFieldParentDivSelector; // DOM ID of accordion content
+}
+
+var generate_accordion_html = function(id, header, content) {
+  return '<div class="panel panel-accordion">' +
+      '    <div class="panel-heading" role="tab" id="heading-' + id + '">' +
+      '        <h4 class="panel-title">' +
+      '            <a class="collapsed bootstrap-accordion-title"' +
+      '                role="button" data-toggle="collapse"' +
+      '                href="#collapse-' + id + '"' +
+      '                aria-expanded="false"' +
+      '                aria-controls="collapse-' + id + '">' + header +
+      '                </a>' +
+      '        </h4>' +
+      '    </div>' +
+      '    <div id="collapse-' + id + '"' +
+      '        class="panel-collapse collapse"' +
+      '        role="tabpanel"' +
+      '        aria-expanded="false"' +
+      '        aria-labelledby="heading-' + id + '">' +
+      '        <div class="panel-body bootstrap-accordion-content" id="editfield-parent-' + id + '">' +
+                  content +
+      '        </div>' +
+      '    </div>' +
+      ' </div>';
+};
+
+var generate_old_accordion_html = function(id, header, content) {
+  return '<div id="accordion-' + id + '">' +
+      '<h3>' + header + '</h3>' +
+      '<div id="content-' + id + '">' + content + '</div>'+
+      '</div>';
+};
