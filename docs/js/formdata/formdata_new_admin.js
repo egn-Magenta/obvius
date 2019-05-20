@@ -1465,3 +1465,10 @@ function OpenWin(url, w, h) {
                   +'width='+w+',height='+h);
   window.open (url + '', '', features);
 }
+
+function charcountupdate(str) {
+    var total = 255;
+    var remaining = total - str;
+    var message = document.getElementById("char-message").innerHTML;
+    document.getElementById("charcount").innerHTML = message + ' ' + total;
+}
