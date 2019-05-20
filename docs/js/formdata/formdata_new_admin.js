@@ -1465,12 +1465,3 @@ function OpenWin(url, w, h) {
                   +'width='+w+',height='+h);
   window.open (url + '', '', features);
 }
-
-function charcountupdate(str) {
-    console.log('charcountupadate');
-    var lng = str.length;
-    var total = 255;
-    var remaining = total - lng;
-
-    document.getElementById("charcount").innerHTML = ' ' + remaining;
-}
