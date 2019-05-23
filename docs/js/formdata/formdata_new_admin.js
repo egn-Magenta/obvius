@@ -1468,7 +1468,8 @@ function OpenWin(url, w, h) {
 
 function charcountupdate(str) {
     var total = 255;
-    var remaining = total - str;
+    var length = str.length;
+    var remaining = total - length;
     var message = document.getElementById("char-message").innerHTML;
-    document.getElementById("charcount").innerHTML = message + ' ' + total;
+    document.getElementById("charcount").innerHTML = message + ' ' + remaining;
 }
