@@ -20,7 +20,7 @@ if ($obvius->dbprocedures->is_internal_proxy_document($vdoc->Docid)) {
         $pdoc = $obvius->get_doc_by_id($proxied_id);
     }
     if ($pdoc) {
-        my $pvdoc = $obvius->get_public_version($pdoc) or $obvius->get_latest_version($pdoc);
+        my $pvdoc = $obvius->get_public_version($pdoc) || $obvius->get_latest_version($pdoc);
         $obvius->get_version_fields($pvdoc, [qw(title)]);
         $proxied_title = $pvdoc->field('Title');
     }
