@@ -991,6 +991,7 @@ our @ISA = qw(WebObvius::FormEngine::Fields::MultipleBase);
 
 sub type { "select" }
 sub edit_component { "select.mason" }
+sub is_empty { shift->value->[0] eq "" }
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
