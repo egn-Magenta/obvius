@@ -6,7 +6,7 @@ package Obvius::Queue;
 #
 # Copyright (C) 2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
+# Authors: Adam SjÃ¸gren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -318,6 +318,11 @@ sub _copy_single_document {
         $obvius->get_latest_version($source_doc);
 
     $obvius->get_version_fields($source_vdoc, 255);
+    my $source_title = $source_vdoc->field('title');
+    if ($options{new_title}) {
+        $source_vdoc->field('title', $options{new_title});
+    }
+
     my $error ='';
 
     my ($new_docid, $new_version)=$obvius->create_new_document(
@@ -331,7 +336,7 @@ sub _copy_single_document {
         my $new_doc=$obvius->get_doc_by_id($new_docid);
         my $dest_uri=$obvius->get_doc_uri($new_doc);
         #                                                                           XXX Prefix?
-        return('OK', ['The page', ' "' . $source_vdoc->field('title') . '" ', 
+        return('OK', ['The page', ' "' . $source_title . '" ',
 		      'has been copied successfully to', 
 		      " <a href=\"/admin$dest_uri\">$dest_uri</a> "], $new_doc);
     }
@@ -512,7 +517,7 @@ queuing, please remove 'www-data' from /etc/at.deny.
 
 =head1 AUTHOR
 
-Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
+Adam SjÃ¸gren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
