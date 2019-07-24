@@ -1092,6 +1092,7 @@ sub render_control {
     my $output = "";
     foreach my $opt ($self->options_list) {
         local $self->{class} = $opt->{class};
+        local $self->{button_type} = $opt->{button_type};
         $output .= $self->SUPER::render_control(
             value => $opt->text, # Text on button
             name => $opt->value, # Name used when submitting
