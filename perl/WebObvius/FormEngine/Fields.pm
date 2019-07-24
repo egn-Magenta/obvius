@@ -1048,6 +1048,21 @@ sub render_label {
     }
 }
 
+package WebObvius::FormEngine::Fields::SubmitButtonsBootstrap;
+
+use strict;
+use warnings;
+use utf8;
+
+our @ISA = qw(WebObvius::FormEngine::Fields::SubmitButtons);
+
+sub type { "submitbuttonsbootstrap" }
+sub edit_component { "button.mason" }
+
+WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
+
+1;
+
 package WebObvius::FormEngine::Fields::SubmitButtons;
 
 use strict;
