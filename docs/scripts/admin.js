@@ -304,8 +304,12 @@ function show_hide_fields(checkbox_source) {
         }
         var editengine_parent = editengine_field.parentNode;
         if (do_show) {
+            editengine_field.value = editengine_field.value.replace("0000-00-00", ""); // remove placeholder date for optional field
             editengine_parent.classList.remove("hidden");
         } else {
+            if (editengine_field.value === "") {
+              editengine_field.value = "0000-00-00";
+            }
             editengine_parent.classList.add("hidden");
         }
     }
