@@ -182,7 +182,7 @@
 
 					//adjust top, left calculations to parent element instead of window if it's relative or absolute
 					this.draggedItem.parents().each(function() {
-						if ($(this).css("position") != "static" && (!$.browser.mozilla || $(this).css("display") != "table")) {
+						if ($(this).css("position") != "static" && (navigator.userAgent.indexOf("Mozilla") === -1 || $(this).css("display") != "table")) {
 							var offset = $(this).offset();
 							top -= offset.top;
 							left -= offset.left;
