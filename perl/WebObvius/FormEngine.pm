@@ -465,7 +465,7 @@ sub required_marker_label {
 
     my $marker = $self->{required_marker_label};
     unless(defined($marker)) {
-        $marker = '<span class="mandatory">*</span>' ;
+        $marker = ' <span class="mandatory">*</span>' ;
     }
     return $marker;
 }
