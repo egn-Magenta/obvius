@@ -289,6 +289,39 @@ $(function(){
     });
 });
 
+function show_hide_fields(checkbox_source) {
+    var do_show = checkbox_source.checked;
+    var fields = checkbox_source.getAttribute("data-dependent-fields").split("|");
+    var edit_key_prefix = "edit_.key::KRAKOW._save:editengine_value:key::KRAKOW:";
+    for (var i = 0; i < fields.length; i++) {
+        var editengine_field = document.getElementById(edit_key_prefix + fields[i]);
+        if (!editengine_field) {
+            editengine_field = document.getElementById(fields[i]); // some input fields do not have edit_key_prefix
+        }
+        if (!editengine_field) {
+            console.log("Could not find input field " + fields[i]);
+            continue;
+        }
+        var editengine_parent = editengine_field.parentNode;
+        if (do_show) {
+            editengine_field.value = editengine_field.value.replace("0000-00-00", ""); // remove placeholder date for optional field
+            editengine_parent.classList.remove("hidden");
+        } else {
+            if (editengine_field.value === "") {
+              editengine_field.value = "0000-00-00";
+            }
+            editengine_parent.classList.add("hidden");
+        }
+    }
+}
+
+window.addEventListener("load", function() {
+    var control_checkboxes = document.querySelectorAll('input[data-dependent-fields][type="checkbox"]:not([data-dependent-fields=""])');
+    for (var i = 0; i < control_checkboxes.length; i++) {
+        show_hide_fields(control_checkboxes[i]);
+    }
+});
+
 function wrap_edit_fields_in_accordion(startField, additionalFields, header, non_bootstrap) {
   var startFieldNode = document.querySelector('[name="' + startField + '"]');
   if (!startFieldNode) {

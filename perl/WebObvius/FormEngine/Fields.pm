@@ -991,6 +991,7 @@ our @ISA = qw(WebObvius::FormEngine::Fields::MultipleBase);
 
 sub type { "select" }
 sub edit_component { "select.mason" }
+sub is_empty { shift->value->[0] eq "" }
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
@@ -1047,6 +1048,21 @@ sub render_label {
     }
 }
 
+package WebObvius::FormEngine::Fields::SubmitButtonsBootstrap;
+
+use strict;
+use warnings;
+use utf8;
+
+our @ISA = qw(WebObvius::FormEngine::Fields::SubmitButtons);
+
+sub type { "submitbuttonsbootstrap" }
+sub edit_component { "button.mason" }
+
+WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
+
+1;
+
 package WebObvius::FormEngine::Fields::SubmitButtons;
 
 use strict;
@@ -1076,6 +1092,7 @@ sub render_control {
     my $output = "";
     foreach my $opt ($self->options_list) {
         local $self->{class} = $opt->{class};
+        local $self->{button_type} = $opt->{button_type};
         $output .= $self->SUPER::render_control(
             value => $opt->text, # Text on button
             name => $opt->value, # Name used when submitting

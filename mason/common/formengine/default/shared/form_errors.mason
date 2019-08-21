@@ -3,14 +3,14 @@ $form
 </%args>\
 %my @errors = $form->error_list;
 %if(@errors) {
-<div class="form-errors">
+<div class="form-errors alert alert-danger">
 <p>
 %if(my $msg = $form->{form_error_header}) {
 <% $msg %>
 %} else {
 <& /shared/trans,
-    da => "Der var følgende fejl i dine indtastninger:",
-    en => "The submitted data contained the following errors:"
+    da => "Der var fejl i indtastningen af følgende felter. Klik på feltnavnet for at rette feltet i formularen nedenfor.",
+    en => "The submitted data contained errors in the following fields. Click the field name below to edit the form."
 &>
 %}
 </p>
