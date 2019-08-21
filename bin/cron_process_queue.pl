@@ -28,11 +28,15 @@ for my $confname (@ARGV) {
         $sitebase =~ s!/$!!;
         my $timefile = "$sitebase/var/queue_last_processed.time";
         my $logfile = "$sitebase/logs/queue_processing.log";
-        my $time = strftime('%Y-%m-%d %H:%M:%S', localtime(time - 60*60));
+        # Default to processing jobs from within the last 24 hours
+        my $time = strftime('%Y-%m-%d %H:%M:%S', localtime(time - 60*60*24));
         my $starttime = time;
         if(-f $timefile) {
             my @stat = stat($timefile);
-            $time = strftime('%Y-%m-%d %H:%M:%S', localtime($stat[9]));
+            # Adjust time to be 24 hours since last run
+            $time = strftime(
+                '%Y-%m-%d %H:%M:%S', localtime($stat[9] - 60*60*24)
+            );
         }
 
         my $dbh = DBI->connect(
@@ -41,6 +45,7 @@ for my $confname (@ARGV) {
             $config->param('normal_db_passwd')
         ) or die "Couldn't connect to database for $confname";
 
+        # Select the 5 most recent unprocessed jobs
         my $sth = $dbh->prepare(q|
             SELECT
                 id
@@ -56,6 +61,8 @@ for my $confname (@ARGV) {
                     or
                     status = ""
                 )
+            ORDER BY date
+            LIMIT 5
         |);
         $sth->execute($time);
 
@@ -65,7 +72,7 @@ for my $confname (@ARGV) {
 
         # Make sure time file exists and set its mtime to when we started
         system("touch $timefile") unless(-f $timefile);
-        utime(time(), $starttime, $timefile);
+        utime($starttime, $starttime, $timefile);
     };
 
     if($@) {
