@@ -1,0 +1,11 @@
+<%args>
+    $field
+</%args>
+<button\
+ id="<% $ARGS{field_id} || $field->id %>"\
+ name="<% $ARGS{name} || $field->name %>"\
+ value="<% $ARGS{value} || $field->value |h%>"\
+% if(my $extra = $field->render_extra_attributes) {
+    <% $extra %>\
+% }
+/>
