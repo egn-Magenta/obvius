@@ -923,6 +923,44 @@ sub calc_order_for_query {
     return(\%sort_fields, \@order);
 }
 
+sub replace_where_fields {
+    my ($this, $where_string, $map) = @_;
+
+    my $output = '';
+
+    my $regex = $map->{_obvius_search_regex};
+    if(!$regex) {
+        delete $map->{_obvius_search_regex};;
+        # Build regexp that matches the fields in the map
+        $regex = '(^|[^\w])(' . join('|',
+            map { quotemeta($_) } sort { length($b)<=>length($a) } keys %$map
+        ) . ')';
+    }
+    $map->{_obvius_search_regex} = $regex;
+
+    # Only replace unquoted parts of the where expression
+    my $q_string = "'(?:\\'|[^'])+'";
+    my $qq_string = '"(?:\\"|[^"])+"';
+
+    # This matches a (possibly zero-length) unquoted string possibly
+    # followed by a quoted string found with one of the regexps above.
+    # \G and the x modifier for the regexps ensures that we keep trying
+    # to make this match until we match the end of the string.
+    while($where_string =~ m{\G([^'"]*)($q_string|$qq_string)?}gxs) {
+        my ($unquoted, $quoted) = ($1, $2);
+
+        if(defined($unquoted)) {
+            $unquoted =~ s/$regex/$1 . $map->{$2}/gie;
+            $output .= $unquoted;
+        }
+        if(defined($quoted)) {
+            $output .= $quoted;
+        }
+    }
+
+    return $output;
+}
+
 ######
 ### 1. Normal use - Returns a reference to an array containing version objects satisfying the conditions
 ### 2. Count use  - returns a count of the objects in the database satisfying the conditions
@@ -1100,11 +1138,8 @@ sub search {
     push @join, "(dp.docid = versions.docid)";
     push @fields, "dp.path as path";
 
-    # XXX This is still problematic, if someone searches for
-    #     %fieldnamewhatever%, 'fieldnamewhatever' or
-    #     "fieldnamewhatever":
-    my $regex = '(^|[^\w])(' . join('|', map { quotemeta($_) } sort { length($b)<=>length($a) } keys %map) . ')';
-    $where =~ s/$regex/$1 . $map{$2}/gie;
+
+    $where = $this->replace_where_fields($where, \%map);
 
     ### Eskild: If option count_only is set then replace the whole @fields arra
     @fields = ( "count(DISTINCT versions.docid) as count_only" ) if ( $options{'count_only'} );
@@ -1125,9 +1160,14 @@ sub search {
 	unless( $options{'count_only'});
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
-    $query->{'$order'}=~ s/$regex/$1 . $map{$2}/gie if ($query->{'$order'});
 
-    $options{order} =~ s/$regex/$1 . $map{$2}/gie if ($options{order});
+    if (my $order = $query->{'$order'}) {
+        $query->{'$order'} = $this->replace_where_fields($order, \%map);
+    }
+
+    if (my $order = $options{order}) {
+        $options{order} = $this->replace_where_fields($order, \%map);
+    }
     for (keys %options) {
         $query->{"\$$_"} = $options{$_};
     }
