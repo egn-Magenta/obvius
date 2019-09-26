@@ -86,6 +86,7 @@ package WebObvius::FormEngine::Fields::Base;
 use strict;
 use warnings;
 use utf8;
+use Obvius::CharsetTools qw(mixed2perl);
 
 =head1 OBJECT-ORIENTED METHODS
 
@@ -365,7 +366,7 @@ sub process_request {
         ));
     }
     
-    $self->{value} = $values[0];
+    $self->{value} = mixed2perl($values[0]);
 }
 
 
@@ -529,7 +530,7 @@ package WebObvius::FormEngine::Fields::MultipleBase;
 use strict;
 use warnings;
 use utf8;
-
+use Obvius::CharsetTools qw(mixed2perl);
 use WebObvius::FormEngine::Option;
 
 our @ISA = qw(WebObvius::FormEngine::Fields::Base);
@@ -602,7 +603,7 @@ sub process_request {
 
     my @values = $r->param($self->name);
 
-    $self->{value} = \@values;
+    $self->{value} = mixed2perl(\@values);
     $self->update_selected;
 }
 
