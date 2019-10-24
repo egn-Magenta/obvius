@@ -939,8 +939,8 @@ sub replace_where_fields {
     $map->{_obvius_search_regex} = $regex;
 
     # Only replace unquoted parts of the where expression
-    my $q_string = "'(?:\\'|[^'])+'";
-    my $qq_string = '"(?:\\"|[^"])+"';
+    my $q_string = "'(?:\\'|[^'])*'";
+    my $qq_string = '"(?:\\"|[^"])*"';
 
     # This matches a (possibly zero-length) unquoted string possibly
     # followed by a quoted string found with one of the regexps above.
