@@ -6,7 +6,7 @@ package Obvius::Hostmap;
 #
 # Copyright (C) 2001-2006 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+# Authors: Jï¿½rgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -437,8 +437,16 @@ sub url_to_uri {
 
     if($url =~ m!https?://([^/]+)(.*)!) {
         my $host = $1;
-        my $rest = $2;
-        if(my $host_uri = $this->host_to_uri($host)) {
+        my $rest = $2 || '';
+
+        # If the host is the roothost the URI is just the rest
+        if($host eq $this->{roothost}) {
+            return $rest;
+        }
+
+        if(my $host_uri = $this->host_to_uri($host) || '') {
+            # Avoid double slashes by removing first slash of $rest
+            $rest =~ s{^/}{};
             return $host_uri . $rest;
         }
     }
