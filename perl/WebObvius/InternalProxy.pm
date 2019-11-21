@@ -16,6 +16,7 @@ my @overloaded_vfields = qw(
     internal_proxy_path
     internal_proxy_overload_rightboxes
     internal_proxy_overload_tags
+    internal_proxy_overload_gridcontent_right
 );
 
 sub new {
@@ -104,6 +105,7 @@ sub create_internal_proxy_document {
      my @overloaded_fields = @overloaded_vfields;
      push @overloaded_fields, "rightboxes" if (!$fields{internal_proxy_overload_rightboxes});
      push @overloaded_fields, "tags" if (!$fields{internal_proxy_overload_tags});
+     push @overloaded_fields, "gridcontent_right" if (!$fields{internal_proxy_overload_gridcontent_right});
 	  
      my $parent = $obvius->get_doc_by_id($options{parent});
      my $error;
@@ -140,6 +142,12 @@ sub create_internal_proxy_document {
 					     version => $version,
 					     name => "internal_proxy_overload_tags",
 					     int_value => $fields{internal_proxy_overload_tags}
+					    });
+	  $obvius->dbprocedures->add_vfield({
+					     docid => $docid,
+					     version => $version,
+					     name => "internal_proxy_overload_gridcontent_right",
+					     int_value => $fields{internal_proxy_overload_gridcontent_right}
 					    });
       $obvius->dbprocedures->add_vfield({
 					     docid => $docid,
@@ -207,6 +215,7 @@ sub create_internal_proxy_version {
      my @overloaded_fields = @overloaded_vfields;
      push @overloaded_fields, "rightboxes" if (!$fields{internal_proxy_overload_rightboxes});
      push @overloaded_fields, "tags" if (!$fields{internal_proxy_overload_tags});
+     push @overloaded_fields, "gridcontent_right" if (!$fields{internal_proxy_overload_gridcontent_right});
      
      $this->new_internal_proxy_entry($options{docid}, $new_version, $fields{internal_proxy_path}, \@overloaded_fields);
      eval {
@@ -229,6 +238,13 @@ sub create_internal_proxy_version {
 					     version => $new_version, 
 					     name => "internal_proxy_overload_tags",
 					     int_value => $fields{internal_proxy_overload_tags}
+					    });
+
+	  $obvius->dbprocedures->add_vfield({
+					     docid => $referrer_doc->Id,
+					     version => $new_version,
+					     name => "internal_proxy_overload_gridcontent_right",
+					     int_value => $fields{internal_proxy_overload_gridcontent_right}
 					    });
 
       $obvius->dbprocedures->add_vfield({
