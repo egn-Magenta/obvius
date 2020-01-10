@@ -100,6 +100,11 @@ sub new
           $new->param( SITE_SCALAR_REF   => $options{out_method});
      }
 
+     # Allow setting eg 'h' as a global, default escape flag
+     if (defined $options{default_escape_flags}) {
+          $interp_conf{default_escape_flags} = $options{default_escape_flags};
+     }
+
      # If $class ends in ::Common or ::Public, set auto_send_headers to
      # false (we still want headers sent automatically in admin,
      # because less of the handler() is used there (and more is handled
