@@ -130,7 +130,7 @@ sub extra_form_attributes {
         $value = [ $value ] unless(ref($value) eq  'ARRAY');
         foreach my $v (@$value) {
             $v =~ s{"}{&quot;}g;
-            push(@result, q|${key}="${v}"|);
+            push(@result, qq|${key}="${v}"|);
         }
     }
 
