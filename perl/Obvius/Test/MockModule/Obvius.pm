@@ -36,8 +36,14 @@ sub _get_by {
         foreach my $key (keys %filters) {
             # Test all filters and skip to next item if something does not match
             my $value = $filters{$key};
-            if(!$item->{$key} || $item->{$key} ne $value) {
-                next ITEMS;
+            if (defined($value)) {
+                if (!$item->{$key} || $item->{$key} ne $value) {
+                    next ITEMS;
+                }
+            } else {
+                if (!defined($item->{$key})) {
+                    next ITEMS;
+                }
             }
         }
         # All filters matched this item, return it.
@@ -49,16 +55,36 @@ sub _filter_by {
     my ($list, %filters) = @_;
 
     my @result;
-    ITEMS: foreach my $item (@$list) {
+    my %meta;
+
+    foreach my $key (keys %filters) {
+        $meta{$key} = $filters{$key};
+    }
+
+    my @items = @$list;
+    if ($meta{'$order'}) {
+        my ($field, $direction) = split(/ /, $meta{'$order'});
+        @items = sort {$a->{$field} <=> $b->{$field}} @items;
+        if ($direction eq 'DESC') {
+            @items = reverse(@items);
+        }
+    }
+
+    ITEMS: foreach my $item (@items) {
         foreach my $key (keys %filters) {
-            # Test all filters and skip to next item if something does not match
-            my $value = $filters{$key};
-            if(!$item->{$key} || $item->{$key} ne $value) {
-                next ITEMS;
+            if (!($key =~ /^\$/)) {
+                # Test all filters and skip to next item if something does not match
+                my $value = $filters{$key};
+                if (!$item->{$key} || $item->{$key} ne $value) {
+                    next ITEMS;
+                }
             }
         }
         # All filters matched this item, return it.
         push(@result, $item);
+        if ($meta{'$max'} && $meta{'$max'} <= scalar(@result)) {
+            last;
+        }
     }
 
     return @result;
@@ -134,7 +160,7 @@ sub _lookup_document {
     my $current = _get_by(\@documents, id => 1);
     my @path = grep { $_ } split(m{/}, $path);
     foreach my $path_part (@path) {
-        $current = _get_by(\@documents, parent => $current->{id}, name => $path_part);
+        $current = _get_by(\@documents, PARENT => $current->{id} || $current->{ID}, NAME => $path_part);
         if(!$current) {
             return;
         }
@@ -146,7 +172,6 @@ sub _lookup_document {
 sub _add_document {
     my ($path, $owner_id, $group_id, $accessrules) = @_;
 
-
     my $name;
     my $parent_path = $path || '';
     $parent_path =~ s{/([^/]+)/$}{/};
@@ -155,17 +180,21 @@ sub _add_document {
     my $parent = _lookup_document($parent_path);
     die "No parent" unless($parent);
 
-    my $doc = {
+    my $doc = Obvius::Document->new({
         id => ++$documents_seq,
-        parent => $parent->{"id"},
+        parent => $parent->{"id"} || $parent->{"ID"},
         name => $name,
         owner => $owner_id,
         grp => $group_id,
         accessrules => $accessrules,
-    };
+    });
 
     push(@documents, $doc);
-    $doc->{path} = _get_path_by_docid($doc->{id});
+
+    my $p = _get_path_by_docid($doc->Id);
+    $doc->param('path', $p);
+
+    return $doc;
 }
 
 _add_document('/subsite/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
@@ -178,7 +207,7 @@ _add_document('/subsite/subsite-without-domain-under-subsite/standard/', ADMIN_U
 sub _get_path_by_docid {
     my ($docid) = @_;
 
-    my $current = _get_by(\@documents, id => $docid);
+    my $current = _get_by(\@documents, ID => $docid);
     if(!$current) {
         return undef;
     }
@@ -256,6 +285,7 @@ sub config {
 
     $config = bless({
         ROOTHOST => 'obvius.test',
+        ROOTHOST => 'obvius.test',
         https_roothost => 'ssl.obvius.test',
         ALWAYS_HTTPS => 1,
     }, "Obvius::Config");
@@ -267,14 +297,32 @@ sub config {
 
 sub lookup_document {
     my ($self, $path) = @_;
+    return _lookup_document($path);
+}
 
-    my $data = _lookup_document($path);
-    if(!$data) {
-        return $data;
+sub add_document {
+    my ($self, $path, $owner_id, $group_id, $accessrules) = @_;
+    return _add_document($path, $owner_id, $group_id, $accessrules);
+}
+
+sub get_versions {
+    my ($this, $doc, %options) = @_;
+
+    if (!(ref $doc and $doc->UNIVERSAL::isa('Obvius::Document'))) {
+        die("doc not an Obvius::Document\n");
     }
 
-    my $doc = Obvius::Document->new($data);
-    return $doc;
+    my @versions = values(%{$doc->versions});
+
+    if (scalar(@versions)) {
+        @versions = _filter_by(\@versions, %options);
+        return \@versions;
+    }
+}
+
+sub get_version_fields {
+    my ($this, $version, $threshold, $type) = @_;
+    return $version->fields($type);
 }
 
 1;
