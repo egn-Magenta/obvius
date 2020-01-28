@@ -1003,7 +1003,17 @@ sub search {
         $where.=' AND expires > NOW()';
     }
     if (defined $options{public} and $options{public}) {
-        $where.=' AND public = 1'; # Formerly "public > 0", but = is more effective when using indexes.
+        # Only search for public versions
+        $where.=' AND public = 1';
+        # "public" actually means "public and has a fully public path"
+        # if we have the "has_public_path" optimization we can search directly
+        # for this in the database. Otherwise documents without public paths
+        # have to be filtered out after searching in the database, which
+        # messes around with LIMIT <offset>, <limit> queries.
+        if($this->has_optimization("has_public_path")) {
+            push(@document_fields, "has_public_path");
+            push(@where, "has_public_path = 1");
+        }
     } else {
         # If we're not searching for public documents, we want to get either
         # the public version if it exists or the latest version if it doesn't.
@@ -1052,6 +1062,11 @@ sub search {
             push(@fields, "obvius_documents.${f} as ${f}");
             $map{$f} = "obvius_documents.${f}";
         }
+    }
+
+    # Exclude admin previews unless explicitly asked to include them
+    if(!$options{include_preview}) {
+        push(@where, "dp.path NOT LIKE '/admin/previews/%'");
     }
 
     my %seen;
@@ -1191,17 +1206,17 @@ sub search {
         return $count_result;
     } else {
         my @subdocs;
+        my $has_public_path_optimization = $this->has_optimization("has_public_path");
         while (my $rec = $set->Next) {
-            # Quick workaround to exclude previews.
-            next if !$options{include_preview} && $rec->{path} =~ m!/admin/previews/!;
-            if ($options{public}) {
-            # If we've got a parent (from the search), check from the parent up:
+            # If we only want public documents and we do not have the has_public_path
+            # optimization, filter out documents without a fully public path here.
+            if ($options{public} && !$has_public_path_optimization) {
+                # If we've got a parent (from the search), check from the parent up:
+                my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
 
-            my $recdoc=$this->get_doc_by_id(($rec->{parent} ? $rec->{parent} : $rec->{docid}));
-
-            # If there is no parent, we pass the hint that the document being checked _is_
-            # public itself (options{public} ensures that):
-            next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
+                # If there is no parent, we pass the hint that the document being checked _is_
+                # public itself (options{public} ensures that):
+                next unless ($this->is_public_document($recdoc, doc_is_public=>!($rec->{parent})));
             }
             push(@subdocs, new Obvius::Version($rec));
         }
