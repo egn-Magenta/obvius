@@ -8,10 +8,10 @@ package Obvius;
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #          Peter Makholm (pma@fi.dk)
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk),
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ use Data::Dumper;
 use Cache::FileCache;
 use Email::Date::Format qw(email_date);
 
-use WebObvius::Cache::CacheObjects; 
+use WebObvius::Cache::CacheObjects;
 use WebObvius::Cache::AdminLeftmenuCache qw( cache_new_version_p );
 use WebObvius::Cache::ApacheCache qw(is_relevant_for_leftmenu_cache is_relevant_for_tags
                                      is_relevant_for_tags_on_unpublish );
@@ -121,7 +121,7 @@ sub new {
 
     croak("Configuration missing")
         unless ($obvius_config);
-    
+
     my $this = $class->SUPER::new(OBVIUS_CONFIG => $obvius_config,
                                   USER        => $user,
                                   PASSWORD    => $password,
@@ -133,22 +133,22 @@ sub new {
                                   FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
                                   LANGUAGES   => {},
-				  ENCRYPTION_HANDLER => (defined $options{'encryption_pphr'} ? 
-							 Obvius::EncryptionModule->new($options{'encryption_pphr'}) : 
+				  ENCRYPTION_HANDLER => (defined $options{'encryption_pphr'} ?
+							 Obvius::EncryptionModule->new($options{'encryption_pphr'}) :
 							 undef)
                                  );
-    
+
     $this->{IGNORE_DOCTYPES} = $options{ignore_doctypes};
     croak("No database specified")
         unless ( $this->Obvius_Config->DSN );
-    
+
     $this->connect;
 
     if ($this->{USER} and not $this->validate_user) {
 	 print STDERR "User not valid.\n";
 	 return undef;
     }
-    
+
     $this->{dbprocedures} = Obvius::DBProcedures->new($this->dbh);
 
     return $this;
@@ -162,7 +162,7 @@ sub connect {
     my ($this) = @_;
 
     $this->tracer() if ($this->{DEBUG});
-    
+
     return $this->{DB} if (defined($this->{DB}));
 
     $this->{LOG}->debug( ref($this) . ": connecting");
@@ -198,7 +198,7 @@ sub connect {
                                                     ShowErrorStatement => 1,
                                                    },
                                  } );
-    
+
     croak(ref($this), ": failed to connect to database")
         unless (defined($db));
 
@@ -219,13 +219,13 @@ sub connect {
     # If the object doesnt have any DOCTYPES, FIELDTYPES or FIELDSPECS, read from the database:
     if ((!scalar(@{$this->{DOCTYPES}}) ||
         !scalar(@{$this->{FIELDTYPES}}) ||
-        !scalar($this->{FIELDSPECS}->param)) && !$this->{IGNORE_DOCTYPES}) 
+        !scalar($this->{FIELDSPECS}->param)) && !$this->{IGNORE_DOCTYPES})
     {
         $this->read_type_info(1)
     }
 
     Obvius::Translations::initialize_for_obvius($this);
-    
+
     $this->read_user_and_group_info;
 
     return $db;
@@ -304,8 +304,8 @@ sub log {
 ########################################################################
 sub encryption_handler {
     my($this) = @_;
-    
-    if ( defined $this && defined $this->{ENCRYPTION_HANDLER} ) { 
+
+    if ( defined $this && defined $this->{ENCRYPTION_HANDLER} ) {
 	return $this->{ENCRYPTION_HANDLER};
     } else {
 	die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER \n";
@@ -343,8 +343,8 @@ sub lookup_document {
 
     $path = $path . '/';
     $path =~ s!/+!/!g;
-    my $paths = $this->execute_select("select d.*,dp.path path from docid_path dp join  
-                                       documents d on (dp.docid = d.id) where 
+    my $paths = $this->execute_select("select d.*,dp.path path from docid_path dp join
+                                       documents d on (dp.docid = d.id) where
                                        dp.path = ?", $path);
     return @$paths ? Obvius::Document->new($paths->[0]) : undef;
 }
@@ -353,20 +353,20 @@ sub lookup_document_by_id {
     my ($this, $docid) = @_;
 
     return undef if ( $docid !~ /^\d+$/ );
-    my $elems = $this->execute_select("select d.*, dp.path path from docid_path dp join  
-                                       documents d on (dp.docid = d.id) where 
+    my $elems = $this->execute_select("select d.*, dp.path path from docid_path dp join
+                                       documents d on (dp.docid = d.id) where
                                        d.id = ?", $docid);
     return @$elems ? Obvius::Document->new($elems->[0]) : undef;
 }
 
-# Overveje at tilføje stiens id'er til Obvius::Document når de alligevel slås op hér
-# (så er get_doc_path triviel):
+# Overveje at tilfÃ¸je stiens id'er til Obvius::Document nÃ¥r de alligevel slÃ¥s op hÃ©r
+# (sÃ¥ er get_doc_path triviel):
 #
-# Bemærk: Giver alle dokumenterne på stien tilbage i et array:
+# BemÃ¦rk: Giver alle dokumenterne pÃ¥ stien tilbage i et array:
 sub get_doc_by_path {
      my ($this, $uri, $path_info) = @_;
-     
-     
+
+
      if ($path_info) {
           die "This interface is deprecated\n";
      }
@@ -374,10 +374,10 @@ sub get_doc_by_path {
      if (my ($id) = $uri =~ /^\/(\d+).docid\/?$/) {
           return $this->$this->get_doc_by_id($id);
      }
-     
+
      my @uri = split m!/+!, $uri;
      my @interesting_docs;
-     
+
      my $cur_uri = '/';
      push @interesting_docs, $cur_uri;
      for my $part (@uri) {
@@ -385,20 +385,20 @@ sub get_doc_by_path {
           $cur_uri .= $part . '/';
           push @interesting_docs, $cur_uri;
      }
-     
+
      my $param = join ",", (("?") x @interesting_docs);
-     
+
      my $docs = $this->execute_select(
-                             "select 
+                             "select
                                      d.id id, d.parent parent, d.type type,d.owner owner,
                                      d.grp grp, d.accessrules accessrules, dp.path path,
                                      d.name name
                               from
-                                     docid_path dp join documents d on (d.id = dp.docid) 
+                                     docid_path dp join documents d on (d.id = dp.docid)
                               where
                                      dp.path in ($param)
                               order by length(dp.path) asc", @interesting_docs);
-     
+
      if (@$docs != @interesting_docs) {
           return ();
      }
@@ -406,7 +406,7 @@ sub get_doc_by_path {
      my @docs = map { Obvius::Document->new($_) } @$docs;
      return @docs;
 }
-     
+
 
 sub get_doc_path {
     my ($this, $doc) = @_;
@@ -425,12 +425,12 @@ sub get_doc_path {
 
 sub get_doc_uri {
     my ($this, $doc) = @_;
-    
+
     return $doc->{path} if ref $doc && $doc->{path};
-    
+
     my $docid = ref $doc ? $doc->Id : $doc;
     my $paths = $this->execute_select("select path from docid_path where docid=?", $docid);
-    
+
     if (@$paths) {
          $doc->{path} = $paths->[0]{path} if ref $doc;
          return $paths->[0]{path};
@@ -479,7 +479,7 @@ sub get_doc_by_name_parent {
 
 sub get_doc_by {
     my ($this, @how) = @_;
-    
+
     $this->tracer(@how) if ($this->{DEBUG});
 
     my $doc = $this->cache_find('Obvius::Document', @how);
@@ -527,7 +527,7 @@ sub get_docs_by {
     }
 
     $set->Disconnect;
-    return (@subdocs ? \@subdocs : undef); 
+    return (@subdocs ? \@subdocs : undef);
 }
 
 
@@ -538,9 +538,9 @@ sub get_docs_by {
 ########################################################################
 
 # is_public_document - et dokument er offentligt hvis der findes en offentlig
-#             version af dokumentet og alle dokumenter på stien til
-#             det er offentlige. Noget andet er så hvilke(t) sprog
-#             det er offentligt på.
+#             version af dokumentet og alle dokumenter pÃ¥ stien til
+#             det er offentlige. Noget andet er sÃ¥ hvilke(t) sprog
+#             det er offentligt pÃ¥.
 
 sub is_public_document {
     my ($this, $doc, %options) = @_;
@@ -724,9 +724,9 @@ sub get_versions {
     croak "doc not an Obvius::Document\n"
         unless (ref $doc and $doc->UNIVERSAL::isa('Obvius::Document'));
 
-    # Måske noget tilsvarende nedenstående linie for samtlige
-    # versions? Måske i virkeligheden kun for samtlige versions, og så
-    # kan get_public_versions filtrere i den fuldstændige liste?
+    # MÃ¥ske noget tilsvarende nedenstÃ¥ende linie for samtlige
+    # versions? MÃ¥ske i virkeligheden kun for samtlige versions, og sÃ¥
+    # kan get_public_versions filtrere i den fuldstÃ¦ndige liste?
     #  return $doc->param('public_versions') if ($doc->param('public_versions'));
 
     my $set = DBIx::Recordset->SetupObject({'!DataSource' => $this->{DB},
@@ -1038,7 +1038,7 @@ sub search {
     if($docfields and ref($docfields) eq 'ARRAY') {
         push(@document_fields, @$docfields);
     }
-    
+
     if(@document_fields) {
         if($this->has_optimization("public_or_latest_version")) {
             push(@table, "docs_with_extra as obvius_documents");
@@ -1127,7 +1127,7 @@ sub search {
         $i++;
     }
     $map{$_} = "versions.$_" for (qw(docid version public lang type));
-    
+
     ### Eskild: Introduced option 'dont_replace_docid' to stop Obvius->search(...) from
     ### converting 'docid' substrings in the SQL to 'versions.docid'.
     ### This way you can for instance search for RIGHTBOXES in ('0:/11111.docid')
@@ -1152,11 +1152,11 @@ sub search {
                                         });
 
     $having = ($having ? " HAVING $having" : '');
-    
+
     my $query = {
                     '$where'    => join(' AND ', @where, "($where)"),
                 };
-    $query->{'$group'} = "versions.docid, versions.version, versions.lang $having" 
+    $query->{'$group'} = "versions.docid, versions.version, versions.lang $having"
 	unless( $options{'count_only'});
 
     $query->{'$order'}=join(', ', @$order) if (defined $order and @$order);
@@ -1371,8 +1371,8 @@ sub get_version_fields_by_threshold {
 
 #    print STDERR "entering";
     $this->tracer($version, $threshold||'N/A', $type) if ($this->{DEBUG});
-    
-    
+
+
     my $doctype = $this->get_version_type($version);
     if (!$doctype) {
          print STDERR "Version: ", $version->Version, "Docid: ", $version->Docid;
@@ -1442,7 +1442,7 @@ sub get_version_fields {
         next unless ($fspec);
 #	my $escape_me = !$fspec->param('dont_escape_me');
         my $field = $fspec->param('fieldtype')->param('value_field') . '_value';
-	
+
         my $value = $fields->param($rec->{name});
         # Apparantly the db returns -1.0 as -1, which is not what we want:
         my $field_value = $rec->{$field};
@@ -1702,7 +1702,7 @@ sub get_docparams_recursive {
     if (ref $doc && (my $v = $doc->{_cached_docparams_recursive})) {
          return $v;
     }
-    
+
     my @paramslist;
 
     do {
@@ -1744,7 +1744,7 @@ sub set_docparams {
         $this->db_insert_docparams($doc, $params);
 	$this->db_commit;
     };
-    
+
     if($@) {
         $this->{DB_Error} = $@;
         $this->db_rollback;
@@ -2025,7 +2025,7 @@ sub read_type_info {
     my ($this, $make_objects) = @_;
 
     $this->tracer() if ($this->{DEBUG});
-    
+
     $this->read_doctypes_table($make_objects);
 
     $this->read_fieldtypes_table($make_objects);
@@ -2118,9 +2118,9 @@ sub quick_create_new_document {
 
 	eval {
 	    my($usr_id) = $this->get_userid($this->user());
-	    my($grp_id) = defined($options{'group-id'}) ? $options{'group-id'} : 
+	    my($grp_id) = defined($options{'group-id'}) ? $options{'group-id'} :
 		$this->get_user_groups($usr_id)->[0];
-	    ($docid, $version) = $this->create_new_document($parent, $child, $doctype_obj->param('ID'), 
+	    ($docid, $version) = $this->create_new_document($parent, $child, $doctype_obj->param('ID'),
 						  'da', $docfields, $usr_id, $grp_id);
 
             die "Document creation failed" unless($docid);
@@ -2134,8 +2134,8 @@ sub quick_create_new_document {
 	    }
 	};
 	if ( $@ ) {
-	  die "Error in quick_create_new_document (when calling create_new_document)\n" . 
-	      "$@";  
+	  die "Error in quick_create_new_document (when calling create_new_document)\n" .
+	      "$@";
 	} else {
 	    return ($docid, $version);
 	}
@@ -2170,7 +2170,7 @@ sub create_new_document {               # RS 20010819 - ok
     eval {
         die "Parent object is not an Obvius::Document\n"
             unless (ref $parent and $parent->UNIVERSAL::isa('Obvius::Document'));
-	
+
 	$name = lc $name; # Make sure name is lowercased.
         die "Document name is malformed\n" unless ($name and $name =~ /^[a-zA-Z0-9._-]+$/);
 
@@ -2203,7 +2203,7 @@ sub create_new_document {               # RS 20010819 - ok
         # but with the undef/NULL value.
         push @fields, @{$status{missing}}
             if ($status{missing});
-	
+
 
         $this->{LOG}->info("====> Inserting new document ... insert into documents");
         $docid = $this->db_insert_document($name, $parent->param('id'), $type, $owner, $grp);
@@ -2306,8 +2306,8 @@ sub create_new_version {
 
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Inserting new version ... done");
-    
-    $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent])  
+
+    $this->register_modified(admin_leftmenu => [$doc->Id, $doc->Parent])
       if (cache_new_version_p($this, $doc->Id, $lang));
 
     $this->register_modified( docid => $doc->Id);
@@ -2331,7 +2331,7 @@ sub delete_document {
     my $doctype = $doc->Type;
     my $doc_uri=$this->get_doc_uri($doc);
     my $doc_parent_id=$doc->Parent;
-    
+
     $this->db_begin;
     eval {
         die "Document has sub documents\n"
@@ -2489,14 +2489,14 @@ sub publish_version {
 
     die "User $this->{USER} does not have access to publish the document."
         unless $this->can_publish_version($vdoc);
-    
+
     if($delayed_publish) {
         delete $vdoc->{PUBLISH_FIELDS}->{PUBLISHED};
     }
 
     my $related = is_relevant_for_leftmenu_cache($this, $vdoc->Docid, $vdoc);
     my $tags_related = is_relevant_for_tags($this, $vdoc->Docid, $vdoc);
-    
+
     my $doctype = $this->get_doctype_by_id($vdoc->Type);
     $tags_related ||= $doctype && $doctype->Name eq 'TagCloud';
 
@@ -2554,7 +2554,7 @@ sub publish_version {
     }
 
     undef $this->{DB_Error};
-    $this->{LOG}->info("====> Publishing version ... done"); 
+    $this->{LOG}->info("====> Publishing version ... done");
     $this->register_modified(
 	docid=>$vdoc->Docid,
 	clear_leftmenu => $related,
@@ -2717,7 +2717,7 @@ sub delete_single_version {
 
 sub register_modified {
     my ($this, %options)=@_;
-    
+
     if (!$this->{MODIFIED}) {
 	 $this->{MODIFIED} = WebObvius::Cache::CacheObjects->new($this);
     }
@@ -2806,7 +2806,7 @@ sub execute_command {
      my ($this, $sql, @args) = @_;
 
      my $sth = $this->{DB}->DBHdl->prepare($sql);
-     
+
      if (ref $args[0] eq 'ARRAY') {
           @args = @{$args[0]};
      } else {
@@ -2820,28 +2820,28 @@ sub execute_command {
 
 sub execute_transaction {
      my ($this, $sql, @args) = @_;
-     
+
      eval {
           $this->{DB}->DBHdl->begin_work;
           my $sth = $this->{DB}->DBHdl->prepare($sql);
-          $sth->execute(@args); 
+          $sth->execute(@args);
           $sth->finish();
      };
 
-     
+
      if ($@) {
 	  $this->{DB}->DBHdl->rollback;
 	  die $@;
-     } 
+     }
      $this->{DB}->DBHdl->commit;
 }
 
-     
+
 sub execute_select {
      my ($this, $sql, @args) = @_;
 
      my $sth = $this->{DB}->DBHdl->prepare($sql);
-     
+
      $sth->execute(@args);
      my @res;
 
@@ -2849,7 +2849,7 @@ sub execute_select {
 	  my %row = %$row;
 	  push @res, \%row;
      }
-     
+
      $sth->finish;
      return \@res;
 }
@@ -2861,7 +2861,7 @@ sub just_publish_fucking_version {
      $this->execute_command('update versions set public=0 where docid=?', $docid);
      $this->execute_command('update versions set public=1 where docid=? and version=?', $docid, $version);
 }
-     
+
 sub get_fieldspec_XXX {
     my ($this, $doctype, $name) = @_;
 
@@ -3126,14 +3126,14 @@ sub get_lang_base {
           $base = "$subsite_path/$base/";
           $base = shorten_url($base);
      }
-     
+
      $base =~ s!/+!/!g;
      return $base;
 }
 
 sub get_lang_uri {
      my ($this, $lang, $doc) = @_;
-     
+
      my $subsite_doc = $this->find_closest_subsite($doc);
      return undef unless ($subsite_doc);
 
@@ -3141,24 +3141,24 @@ sub get_lang_uri {
 
      my $subsite_path = $this->get_doc_uri($subsite_doc);
      $path =~ s/^\Q$subsite_path\E//;
-     
+
      my $base = $this->get_lang_base($lang, $doc);
      $path = "$base/$path";
      $path =~ s!/+!/!g;
-     
+
      return $path;
 }
 
 sub get_lang_path_or_base {
      my ($this, $lang, $doc) = @_;
-     
+
      my $uri = $this->get_lang_uri($lang, $doc);
      return $this->lookup_document($uri) ? $uri : $this->get_lang_base($lang, $doc);
 }
 
 sub alternative_langs {
      my ($this, $doc) = @_;
-     
+
      my $subsite_doc = $this->find_closest_subsite($doc);
      return [] if !$subsite_doc;
      my $docparams = $subsite_doc->param('subsite_info') || {};
@@ -3208,7 +3208,7 @@ sub get_year_statistics_for_doc {
     my ($result) = $sth->fetchrow_array;
     return $result || 0;
 }
-          
+
 package Obvius::Benchmark;
 
 use strict;
@@ -3217,7 +3217,7 @@ use Time::HiRes qw(gettimeofday);
 sub new
 {
         my ( $self, $id, $filehandle) = @_;
-	
+
         $id = join(':', (caller)[1,2]) unless defined $id;
 	open $filehandle, '>>', "/tmp/obvius_benchmark" if(!$filehandle);
 
@@ -3231,7 +3231,7 @@ sub lap
         return unless $self-> [3];
 
         $id = join(':', (caller)[1,2]) unless defined $id;
-	
+
 	my $now  = scalar gettimeofday();
         my $diff = $now - $self->[1];
 	my $now_string = scalar localtime;
@@ -3309,10 +3309,10 @@ None by default.
 
 =head1 AUTHOR
 
-Jørgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
+JÃ¸rgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
 Peter Makholm <lt>pma@fi.dk<gt>
-René Seindal
-Adam Sjøgren <lt>asjo@magenta-aps.dk<gt>
+RenÃ© Seindal
+Adam SjÃ¸gren <lt>asjo@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 
