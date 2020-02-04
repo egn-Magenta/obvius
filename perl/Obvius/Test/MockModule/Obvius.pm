@@ -20,6 +20,7 @@ use constant {
 
 sub mockclass { "Obvius" }
 
+# Enable mocking for Obvius and its dependencies
 sub mock {
     my ($self) = @_;
 
@@ -27,6 +28,7 @@ sub mock {
     $self->SUPER::mock();
 }
 
+# Disable mocking for Obvius and its dependencies
 sub unmock {
     my ($self) = @_;
 
@@ -34,6 +36,7 @@ sub unmock {
     $self->SUPER::unmock();
 }
 
+# Get a single item from a list using filter criteria
 sub _get_by {
     my ($list, %filters) = @_;
 
@@ -42,6 +45,34 @@ sub _get_by {
     return $items[0];
 }
 
+=pod
+=begin text
+Get multiple items from a list using filter criteria.
+Criteria can be:
+
+  A simple key value pair:
+
+    title => "My title"
+
+    Will match items where $item->{title} equals "My title"
+
+  A list of values:
+
+    title => ["My title", "My other title"]
+
+    Will match items where $item->{title} is in the list
+    specified.
+
+  A reference to a method:
+
+    title => sub {
+        my $value = shift;
+        return $value eq "My title";
+    }
+
+    Matches items where the method returns true.
+=end
+=cut
 sub _filter_by {
     my ($list, %filters) = @_;
 
@@ -119,6 +150,7 @@ sub _filter_by {
     return @result;
 }
 
+# Default list of users for the in-memory database
 my @users = (
     {
         'deactivated' => undef,
@@ -142,6 +174,7 @@ my @users = (
         'passwd' => 'Passw0rd!'
     }
 );
+# Default list of groups for the in-memory database
 my @groups = (
     {
         'id' => ADMIN_GROUP_ID,
@@ -152,6 +185,7 @@ my @groups = (
         'name' => 'Group2'
     }
 );
+# Default user/group relations for the in-memory database
 my @user_groups = (
     {
         'grp' => _get_by(\@groups, id => 1),
@@ -163,6 +197,7 @@ my @user_groups = (
     }
 );
 
+# Default documents for the in-memory database
 my @documents = (
     {
         id => 1,
@@ -179,6 +214,7 @@ ALL+view|,
 );
 my $documents_seq = 1;
 
+# Looks up a document data-item, given a path
 sub _lookup_document {
     my ($path) = @_;
 
@@ -198,6 +234,12 @@ sub _lookup_document {
     return $current;
 }
 
+# Adds a new documen to the in-memory database
+# Arguments are:
+#  path - the path for the created document
+#  owner_id - userid of the owner of the document
+#  group_id - groupid for the group for the document
+#  accessrules - a list of accessrules.
 sub _add_document {
     my ($path, $owner_id, $group_id, $accessrules) = @_;
 
@@ -223,6 +265,7 @@ sub _add_document {
     return $doc;
 }
 
+# Default versions for the in-memory database
 my @versions = (
     {
         id => 1,
@@ -237,6 +280,20 @@ my @versions = (
 );
 my $versions_seq = 1;
 
+# Adds a new version to the in-memory database.
+# Arguments are:
+#   docid - docid for the version
+#   version - version timestamp in "YYYY-MM-DD HH:mm:ss" format
+#   doctype_id - doctypeid for the version
+#   %options:
+#     $option{public} - whether the version should be public.
+#                       Default: 0
+#     $options{valid} - whether the version is valid
+#                       Default: 1
+#     $options{lang}  - version language
+#                       Default: "da"
+#     $options{user}  - userid of the user who created the version
+#                       Default: ADMIN_USER_ID
 sub _add_version {
     my ($docid, $version, $doctype_id, %options) = @_;
 
@@ -261,6 +318,7 @@ sub _add_version {
     return $version_rec;
 }
 
+# Default vfields for the in-memory database
 my @vfields = (
     {
         id => 1,
@@ -272,6 +330,14 @@ my @vfields = (
 );
 my $vfields_seq = 1;
 
+# Adds a vfield to the in-memory database
+# Arguments are:
+#  $docid - docid for the vfield
+#  $version - version for the vfield
+#  $name - name of the vfield
+#  $value - value of the vfield
+#           Note that this can be specified as an arrayref to
+#           support multiple values.
 sub _add_vfield {
     my ($docid, $version, $name, $value) = @_;
 
@@ -288,6 +354,15 @@ sub _add_vfield {
     return $vfield;
 }
 
+# Adds multiple vfields to the in-memory database
+# Arguments are:
+#  $docid - docid for the vfield
+#  $version - version for the vfield
+#  vfields, which can be specified in two ways:
+#    A list of key-value pairs:
+#       field1 => "val1", field2 => "val2" ...
+#    A single hashref:
+#       { field1 => "val1", field2 => "val2" }
 sub _add_vfields {
     my ($docid, $version, @fields) = @_;
 
@@ -312,6 +387,14 @@ sub _add_vfields {
     }
 }
 
+# Creates a document, a public version and vfields all in one go.
+# Arguments are:
+#   $path - the path for the new document.
+#   $version - the version timestamp in "YYYY-MM-DD HH:mm:ss" format.
+#              If no value is given, "now" will be used for version
+#              timestamp.
+#   $doctype_id - the doctypeid of the version created.
+#   @vfields - list of vfields. Accepts same formats as the _add_vfields method.
 sub _add_full_document_with_defaults {
     my ($path, $version, $doctype_id, @vfields) = @_;
 
@@ -327,9 +410,12 @@ sub _add_full_document_with_defaults {
     _add_vfields($versiondata->{docid}, $versiondata->{version}, @vfields);
 }
 
+# The next section creates additional default test-data
+
 # Add a new non-public version on the root document
 _add_version(1, "2020-01-01 00:00:00", 2, public => 0);
 
+# Add more vfields to the public version of the root document.
 _add_vfields(
     $versions[0]->{docid}, $versions[0]->{version},
     {
@@ -369,6 +455,7 @@ _add_vfields(
     }
 );
 
+# Add a series of documents used for testing subsites
 _add_full_document_with_defaults(
     "/subsite/", undef, 2, {title => "Subsite root",}
 );
@@ -393,6 +480,7 @@ _add_full_document_with_defaults(
     {title => "Standard document under subsite without domain under another subsite",}
 );
 
+# Given a docid returns the path for the matched document
 sub _get_path_by_docid {
     my ($docid) = @_;
 
@@ -409,6 +497,7 @@ sub _get_path_by_docid {
     return "/" . join("", reverse(@path_parts));
 }
 
+# Default subsites for the in-memory database
 my @subsites = (
     {
         'id' => 1,
@@ -445,6 +534,8 @@ my @subsites = (
     },
 );
 
+# Returns a list of all subsites - used by the mock module
+# for Obvius::Hostmap.
 sub get_all_subsites { return @subsites }
 
 ### Actual mocked methods starts here ###
@@ -477,6 +568,10 @@ sub get_doc_uri {
 
 my $config;
 
+# Returns an Obvius::Config object with values corresponding to the
+# mockup test environment.
+# $config->param("hostmap") will be a mocked-up Obvius::Hostmap
+# with the subsites specified in the in-memory database.
 sub config {
     my ($self) = @_;
     return $config if($config);
