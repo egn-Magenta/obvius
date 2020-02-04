@@ -4,9 +4,14 @@ use strict;
 use warnings;
 use utf8;
 
-use base 'Obvius::Test::MockModule';
 use Data::Dumper;
 use Obvius::Test::MockModule::Obvius::Hostmap;
+
+# Load the module we're mocking to make sure we have all
+# its dependencies.
+use Obvius;
+
+use base 'Obvius::Test::MockModule';
 
 use constant {
     ADMIN_USER_ID => 1,
@@ -32,23 +37,9 @@ sub unmock {
 sub _get_by {
     my ($list, %filters) = @_;
 
-    ITEMS: foreach my $item (@$list) {
-        foreach my $key (keys %filters) {
-            # Test all filters and skip to next item if something does not match
-            my $value = $filters{$key};
-            if (defined($value)) {
-                if (!$item->{$key} || $item->{$key} ne $value) {
-                    next ITEMS;
-                }
-            } else {
-                if (!defined($item->{$key})) {
-                    next ITEMS;
-                }
-            }
-        }
-        # All filters matched this item, return it.
-        return $item;
-    }
+    my @items = _filter_by($list, '$max' => 1, %filters);
+
+    return $items[0];
 }
 
 sub _filter_by {
@@ -57,32 +48,70 @@ sub _filter_by {
     my @result;
     my %meta;
 
+    # Fish meta values out of filter
     foreach my $key (keys %filters) {
-        $meta{$key} = $filters{$key};
+        if($key =~ m{^\$}) {
+            $meta{$key} = $filters{$key};
+            delete $filters{$key};
+        }
     }
 
     my @items = @$list;
     if ($meta{'$order'}) {
-        my ($field, $direction) = split(/ /, $meta{'$order'});
-        @items = sort {$a->{$field} <=> $b->{$field}} @items;
+        my ($field, $direction) = split(/\s+/, $meta{'$order'});
+        $direction ||= 'ASC';
+
+        my $has_lexical_values = 0;
+        for my $i (@items) {
+            if(defined($i->{$field}) && $i->{$field} =~ m{\D+}) {
+                $has_lexical_values = 1;
+                last;
+            }
+        }
+
+        # Try to figure out whether to use lexical or
+        my $cmp = $has_lexical_values ?
+            sub { return $_[0] cmp $_[1] } :
+            sub { return $_[0] <=> $_[1] };
+
+        @items = sort { $cmp->($a->{$field}, $b->{$field}) } @items;
+
         if ($direction eq 'DESC') {
             @items = reverse(@items);
         }
     }
 
+    # Convert fitlers to a list of coderefs we can call
+    foreach my $filter_key (keys %filters) {
+        my $filter_value = $filters{$filter_key};
+        if(ref($filter_value) eq "CODE") {
+            # do nothing
+        } elsif(ref($filter_value) eq 'ARRAY') {
+            # Match any value in the listed array
+            $filters{$filter_key} = sub {
+                my $value = shift;
+                grep { $value eq $_ } @$filter_value;
+            };
+        } elsif(!ref($filter_value)) {
+            if(!defined($filter_value)) {
+                $filters{$filter_key} = sub { !defined(shift) }
+            } else {
+                $filters{$filter_key} = sub { shift eq $filter_value };
+            }
+        }
+    }
+
     ITEMS: foreach my $item (@items) {
+        # Test all filters and skip to next item if something does not match
         foreach my $key (keys %filters) {
-            if (!($key =~ /^\$/)) {
-                # Test all filters and skip to next item if something does not match
-                my $value = $filters{$key};
-                if (!$item->{$key} || $item->{$key} ne $value) {
-                    next ITEMS;
-                }
+            my $filter_method = $filters{$key};
+            if(!$filter_method->($item->{$key})) {
+                next ITEMS;
             }
         }
         # All filters matched this item, return it.
         push(@result, $item);
-        if ($meta{'$max'} && $meta{'$max'} <= scalar(@result)) {
+        if ($meta{'$max'} && scalar(@result) >= $meta{'$max'}) {
             last;
         }
     }
@@ -160,7 +189,7 @@ sub _lookup_document {
     my $current = _get_by(\@documents, id => 1);
     my @path = grep { $_ } split(m{/}, $path);
     foreach my $path_part (@path) {
-        $current = _get_by(\@documents, PARENT => $current->{id} || $current->{ID}, NAME => $path_part);
+        $current = _get_by(\@documents, parent => $current->{id}, name => $path_part);
         if(!$current) {
             return;
         }
@@ -180,34 +209,194 @@ sub _add_document {
     my $parent = _lookup_document($parent_path);
     die "No parent" unless($parent);
 
-    my $doc = Obvius::Document->new({
+    my $doc = {
         id => ++$documents_seq,
         parent => $parent->{"id"} || $parent->{"ID"},
         name => $name,
         owner => $owner_id,
         grp => $group_id,
         accessrules => $accessrules,
-    });
+    };
 
     push(@documents, $doc);
-
-    my $p = _get_path_by_docid($doc->Id);
-    $doc->param('path', $p);
 
     return $doc;
 }
 
-_add_document('/subsite/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
-_add_document('/subsite/standard/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
-_add_document('/subsite-without-domain/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
-_add_document('/subsite-without-domain/standard/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
-_add_document('/subsite/subsite-without-domain-under-subsite/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
-_add_document('/subsite/subsite-without-domain-under-subsite/standard/', ADMIN_USER_ID, ADMIN_GROUP_ID, '');
+my @versions = (
+    {
+        id => 1,
+        docid => 1,
+        version => "2007-02-16 16:45:13",
+        type => 2,
+        public => 1,
+        valid => 1,
+        lang => "da",
+        user => ADMIN_USER_ID,
+    }
+);
+my $versions_seq = 1;
+
+sub _add_version {
+    my ($docid, $version, $doctype_id, %options) = @_;
+
+    my $doc = _get_by(\@documents, id => $docid);
+    if(!$doc) {
+        die "Trying to add version to non-existent document with id $docid";
+    }
+
+    my $version_rec = {
+        id => ++$versions_seq,
+        docid => $docid,
+        version => $version,
+        type => $doctype_id,
+        public => $options{public} || 0,
+        valid => $options{valid} || 1,
+        lang => $options{lang} || "da",
+        user => $options{user} || ADMIN_USER_ID,
+    };
+
+    push(@versions, $version_rec);
+
+    return $version_rec;
+}
+
+my @vfields = (
+    {
+        id => 1,
+        docid => $versions[0]->{docid},
+        version => $versions[0]->{version},
+        name => "title",
+        value => "Frontpage"
+    },
+);
+my $vfields_seq = 1;
+
+sub _add_vfield {
+    my ($docid, $version, $name, $value) = @_;
+
+    my $vfield = {
+        id => ++$vfields_seq,
+        docid => $docid,
+        version => $version,
+        name => lc($name),
+        value => $value,
+    };
+
+    push(@vfields, $vfield);
+
+    return $vfield;
+}
+
+sub _add_vfields {
+    my ($docid, $version, @fields) = @_;
+
+    my $fields_count = scalar(@fields);
+
+    if(!$fields_count) {
+        return;
+    }
+
+    my $fields;
+
+    if($fields_count == 1 && ref($fields[0]) eq "HASH") {
+        $fields = $fields[0];
+    } elsif($fields_count >= 2 && ($fields_count %2) == 0) {
+        $fields = { @fields };
+    } else {
+        die "Wrong arguments to _add_vfields";
+    }
+
+    foreach my $name (keys %$fields) {
+        _add_vfield($docid, $version, $name, $fields->{$name});
+    }
+}
+
+sub _add_full_document_with_defaults {
+    my ($path, $version, $doctype_id, @vfields) = @_;
+
+    my $docdata = _add_document($path, ADMIN_USER_ID, ADMIN_GROUP_ID, "");
+    if(!$docdata) {
+        die "Could not make document in _add_full_document";
+    }
+    $version ||= POSIX::strftime('%Y-%m-%d %H:%M:%S', localtime);
+    my $versiondata = _add_version($docdata->{id}, $version, $doctype_id, public => 1);
+    if(!$versiondata) {
+        die "Could not make version in _add_full_document";
+    }
+    _add_vfields($versiondata->{docid}, $versiondata->{version}, @vfields);
+}
+
+# Add a new non-public version on the root document
+_add_version(1, "2020-01-01 00:00:00", 2, public => 0);
+
+_add_vfields(
+    $versions[0]->{docid}, $versions[0]->{version},
+    {
+        AUTHOR => q|carn|,
+        CONTENT => "<p>Some HTML content</p>",
+        CONTRIBUTORS => q||,
+        DOCDATE => q|2006-06-27 00:00:00|,
+        DOCREF => q||,
+        ENABLE_COMMENTS => q|0|,
+        ENHED => q|Kommunikationsafdelingen|,
+        ENHED_URL => q|http://www.ku.dk/kommunikation|,
+        EXPIRES => q|9999-01-01 00:00:00|,
+        FARVEVALG => q||,
+        FREE_KEYWORDS => q||,
+        KONTAKT_ADRESSE => q|Nørregade 10, DK-1017 KÃ¸benhavn K|,
+        KONTAKT_EMAIL => q|cms-support@adm.ku.dk|,
+        KONTAKT_NAVN => q|CMS support|,
+        KONTAKT_TLF => q||,
+        MIMETYPE => q||,
+        RIGHTBOXES => q|0:/2.docid|,
+        ROBOTSMETA => [q|index,follow|],
+        SEQ => q|10|,
+        SHORT_TITLE => q|CMS support|,
+        SHOW_DATE => q|0|,
+        SHOW_NEWS => q|1|,
+        SHOW_SUBDOCS => q|0|,
+        SHOW_SUBDOC_DATE => q|0|,
+        SHOW_SUBDOC_TEASER => q|0|,
+        SHOW_TEASER => q|1|,
+        SHOW_TITLE => q|0|,
+        SORTORDER => q|+seq,+title|,
+        SOURCE => q|Obvius|,
+        SUBSCRIBEABLE => q|none|,
+        UPDATEALERTSENT => q|0|,
+        UPDATEALERTTIME => q|0000-00-00 00:00:00|,
+        UPDATEALERTUSER => q|admin|,
+    }
+);
+
+_add_full_document_with_defaults(
+    "/subsite/", undef, 2, {title => "Subsite root",}
+);
+_add_full_document_with_defaults(
+    "/subsite/standard/", undef, 2,
+    {title => "Standard document under subsite",}
+);
+_add_full_document_with_defaults(
+    "/subsite-without-domain/", undef, 2,
+    {title => "Subsite without domain root",}
+);
+_add_full_document_with_defaults(
+    "/subsite-without-domain/standard/", undef, 2,
+    {title => "Standard document under subsite without domain",}
+);
+_add_full_document_with_defaults(
+    "/subsite/subsite-without-domain-under-subsite/", undef, 2,
+    {title => "Subsite without domain under another subsite root",
+});
+_add_full_document_with_defaults(
+    "/subsite/subsite-without-domain-under-subsite/standard/", undef, 2,
+    {title => "Standard document under subsite without domain under another subsite",}
+);
 
 sub _get_path_by_docid {
     my ($docid) = @_;
 
-    my $current = _get_by(\@documents, ID => $docid);
+    my $current = _get_by(\@documents, id => $docid);
     if(!$current) {
         return undef;
     }
@@ -262,13 +451,22 @@ sub get_all_subsites { return @subsites }
 
 sub new { return bless({obvius_mockup_object => 1}, "Obvius") }
 
-sub get_doc_by_id {
-    my ($self, $docid) = @_;
-    my $res = _get_by(\@documents, id => $docid);
+sub get_doc_by {
+    my ($this, @how) = @_;
 
-    if($res) {
-        return Obvius::Document->new($res);
+    $this->tracer(@how) if ($this->{DEBUG});
+
+    my $doc = $this->cache_find('Obvius::Document', @how);
+    return $doc if ($doc);
+
+    my $rec = _get_by(\@documents, @how);
+    if($rec) {
+        $doc = new Obvius::Document($rec);
+
+        $this->cache_add($doc);
     }
+
+    return $doc;
 }
 
 sub get_doc_uri {
@@ -297,7 +495,9 @@ sub config {
 
 sub lookup_document {
     my ($self, $path) = @_;
-    return _lookup_document($path);
+
+    my $rec = _lookup_document($path);
+    return $rec ? Obvius::Document->new($rec) : undef;
 }
 
 sub add_document {
@@ -312,17 +512,72 @@ sub get_versions {
         die("doc not an Obvius::Document\n");
     }
 
-    my @versions = values(%{$doc->versions});
+    my @versions = map {
+        Obvius::Version->new($_)
+    } _filter_by(\@versions, docid => $doc->Id, %options);
 
-    if (scalar(@versions)) {
-        @versions = _filter_by(\@versions, %options);
-        return \@versions;
+    return @versions ? \@versions : undef;
+}
+
+sub get_version_fields_by_threshold {
+    my ($self, $version, $threshold, $type) = @_;
+
+    # TODO: We cannot handle thresholds yet => any threshold means ALL FIELDS.
+    if(ref($threshold) ne "ARRAY") {
+        $threshold = [map {
+            $_->{name}
+        } _filter_by(
+            \@vfields,
+            docid => $version->Docid,
+            version => $version->Version
+        )];
     }
+
+    # Fetch existing fields.
+    my $existing = $version->fields($type);
+    # If no existing fields exist we need everthing, so return the entire list
+    if(!$existing) {
+        return $threshold;
+    }
+
+    my @needed;
+    foreach my $fieldname (@$threshold) {
+        if(!exists $existing->{uc($fieldname)}) {
+            push(@needed, $fieldname);
+        }
+    }
+
+    return @needed ? \@needed : undef;
 }
 
 sub get_version_fields {
     my ($this, $version, $threshold, $type) = @_;
+
+    $type=(defined $type ? $type : 'FIELDS');
+
+    $this->tracer($version, $threshold||'N/A', $type) if ($this->{DEBUG});
+
+    my $needed = $this->get_version_fields_by_threshold($version, $threshold, $type);
+    return $version->fields($type) unless ($needed);
+
+    my $fields = new Obvius::Data;
+
+    # TODO: Once we can mock up fieldtypes we need to add default values.
+
+    my @vfields = _filter_by(
+        \@vfields,
+        docid => $version->Docid,
+        version => $version->Version,
+        name => $needed
+    );
+
+    foreach my $vfield (@vfields) {
+        $fields->param($vfield->{name} => $vfield->{value});
+        $version->field($vfield->{name} => $vfield->{value}, $type);
+    }
+
     return $version->fields($type);
+
 }
 
 1;
