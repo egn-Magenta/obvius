@@ -1,0 +1,84 @@
+# For `docker push` to work, the following envionment variables have to set in
+# the Gitlab UI.
+# RELEASE_REGISTRY_USER
+# RELEASE_REGISTRY_PASSWORD
+
+stages:
+    - lint-build
+    - test
+    - release
+
+variables:
+    RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
+    IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+    IMAGE_DEV: ${CI_REGISTRY_IMAGE}:development
+    IMAGE_VERSION: ${RELEASE_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+    IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:debian-latest
+
+
+# Build stage
+#############
+
+build:
+    stage: lint-build
+    image:
+      name: gcr.io/kaniko-project/executor:debug_793
+      entrypoint: [""]
+    tags:
+      - docker
+    script:
+      - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+      - /kaniko/warmer
+        --cache-dir=$CI_PROJECT_DIR/cache
+        --image=${IMAGE_DEV}
+      - /kaniko/executor
+        --context=$CI_PROJECT_DIR
+        --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
+        --destination=${IMAGE_SHA}
+        --cache=true
+        --cache-dir=$CI_PROJECT_DIR/cache
+
+dependency-test:
+    stage: test
+    image: ${IMAGE_SHA}
+    variables:
+        GIT_STRATEGY: none
+    tags:
+        - docker
+    script:
+        - cd /var/www/obvius
+        - tests/list_module_usages.sh . | perl
+
+
+# Release stage
+###############
+
+.release-default: &release-default
+    stage: release
+    image: alpine
+    variables:
+        GIT_STRATEGY: none # We do not need the source code
+    tags:
+        - docker
+    before_script:
+        - apk add skopeo
+
+release-branch:
+    <<: *release-default
+    script:
+        - skopeo copy
+            --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+            --dest-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+            "docker://${IMAGE_SHA}"
+            "docker://${IMAGE_DEV}"
+
+release-dev:
+    <<: *release-default
+    rules:
+        - if: $CI_COMMIT_REF_NAME == "development"    
+    script:
+        - skopeo copy
+            --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+            --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+            "docker://${IMAGE_SHA}"
+            "docker://${IMAGE_LATEST}"
