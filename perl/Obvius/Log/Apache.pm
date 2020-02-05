@@ -34,24 +34,9 @@ package Obvius::Log::Apache;
 use strict;
 use warnings;
 
-our $MOD_PERL = (exists $ENV{'MOD_PERL'}) ? (
-	( $ENV{'MOD_PERL'} =~ /mod_perl\/2/) ? 2 : 1
-) : 0;
-
-if ( $MOD_PERL == 2) {
-	eval <<AP2;
 use Apache2::RequestUtil; 
 use Apache2::ServerUtil; 
 use Apache2::Log;
-AP2
-	die $@ if $@;
-} elsif ( $MOD_PERL == 1) {
-	eval <<AP1;
-use Apache;
-use Apache::Log;
-AP1
-	die $@ if $@;
-}
 use Obvius::Log;
 
 
@@ -79,19 +64,11 @@ sub AUTOLOAD {
 
     my $log;
 
-    if ($MOD_PERL == 1) {
-        if (my $r = Apache->request) {
-            $log = $r->log;
-        } elsif (my $s = Apache->server) {
-            $log = $s->log;
+    if (my $r = Apache2::RequestUtil->request) {
+        $log = $r->log;
+    } elsif (my $s = Apache2::ServerUtil->server) {
+        $log = $s->log;
 	}
-    } elsif ( $MOD_PERL == 2) {
-        if (my $r = Apache2::RequestUtil->request) {
-            $log = $r->log;
-        } elsif (my $s = Apache2::ServerUtil->server) {
-            $log = $s->log;
-	}
-    }
 
     unless ($log) {
         $log = new Obvius::Log;

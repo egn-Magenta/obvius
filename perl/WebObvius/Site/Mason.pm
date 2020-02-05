@@ -58,18 +58,6 @@ use WebObvius::Apache
 use Digest::MD5 qw(md5_hex);
 
 use HTML::Mason;
-# Support Mason before version 1.10 and after simultaneously:
-my $new_mason;
-BEGIN {
-     # The way to specify args_method was changed from version 1.10 and onwards:
-     if ($HTML::Mason::VERSION < 1.10) {
-          eval "use HTML::Mason::ApacheHandler (args_method=>'mod_perl');";
-          $new_mason=0;
-     } else {
-          eval "use HTML::Mason::ApacheHandler;";
-          $new_mason=1;
-     }
-}
 
 use Digest::MD5 qw(md5_hex);
 
@@ -92,42 +80,21 @@ sub new
 
      my $obvius_config = $options{obvius_config} || new Obvius::Data;
 
-     unless ( $new_mason) {
-          $new->{parser} = new HTML::Mason::Parser(
-                                                   in_package    => $class,
-                                                   # XXX have both $mcms and $obvius here!
-                                                   allow_globals => [qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)],
-                                                  );
-     }
-
      my %interp_conf = (
                         comp_root       => $options{comp_root},
                         data_dir        => "$basedir/var/$options{site}/",
                         max_recurse     => 64, # Default is 32
                        );
 
-     if ($new_mason) {
-          $interp_conf{autoflush}        = 0;
-          $interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
-          # we need it for compability with the old admin.
-          $interp_conf{preamble}         =
-            "my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
-     } else {
-          $interp_conf{parser}           = $new->{parser};
-          $interp_conf{static_file_root} = "$basedir/docs";
-          $interp_conf{out_mode}         = 'batch';
-     }
-
+     $interp_conf{autoflush}        = 0;
+     $interp_conf{data_cache_api}   = '1.0'; # XXX This won't be supported by Mason forever, but
+     # we need it for compability with the old admin.
+     $interp_conf{preamble}         =
+          "my \$benchmark = Obvius::Benchmark->new( __FILE__) if \$obvius->{BENCHMARK};\n";
 
      if (defined $options{out_method}) {
           $interp_conf{out_method}       = $options{out_method};
           $new->param( SITE_SCALAR_REF   => $options{out_method});
-     }
-
-     if (!$new_mason) {
-          # Interp was a Mason<1.10 thing. In later Masonae all options
-          # are passed to ApacheHandler instead.
-          $new-> {interp} = new HTML::Mason::Interp( %interp_conf);
      }
 
      # If $class ends in ::Common or ::Public, set auto_send_headers to
@@ -157,26 +124,14 @@ sub new
                                   %error_options
                                  );
 
-     if ($new_mason) {
-          %apachehandler_options = ( %apachehandler_options, %interp_conf);
-          $apachehandler_options{allow_globals} = [
-            qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
-           ];
-          $apachehandler_options{args_method}   = 'mod_perl';
-          $apachehandler_options{in_package} = "WebObvius::MasonCommands";
-     } else {
-          $apachehandler_options{interp}        = $new->{interp};
-     }
+     %apachehandler_options = ( %apachehandler_options, %interp_conf);
+     $apachehandler_options{allow_globals} = [
+          qw($mcms $obvius $doc $vdoc $doctype $prefix $uri)
+          ];
+     $apachehandler_options{args_method}   = 'mod_perl';
+     $apachehandler_options{in_package} = "WebObvius::MasonCommands";
 
      $new-> {handler} = new HTML::Mason::ApacheHandler( %apachehandler_options);
-
-     if (!$new_mason) {
-          # In Mason<1.10 this has to be done "manually":
-          # It would be nice, if the user Apache runs as could be detected, instead of this:
-          my $httpd_user  = scalar(getpwnam 'www-data' || getpwnam 'httpd' || getpwnam 'apache');
-          my $httpd_group = scalar(getgrnam 'www-data' || getgrnam 'httpd' || getgrnam 'apache');
-          chown ($httpd_user, $httpd_group, $new->{interp}->files_written);
-     }
 
      $new->{is_admin} = $options{is_admin};
 
