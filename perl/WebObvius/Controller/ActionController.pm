@@ -13,7 +13,7 @@ sub new {
         doc     => $WebObvius::MasonCommands::doc,
         prefix  => $WebObvius::MasonCommands::prefix,
         uri     => $WebObvius::MasonCommands::uri,
-        vdoc    => $WebObvius::MasonCommands::mcms,
+        vdoc    => $WebObvius::MasonCommands::vdoc,
         obvius  => $WebObvius::MasonCommands::obvius,
         doctype => $WebObvius::MasonCommands::doctype,
         r       => $WebObvius::MasonCommands::r,
