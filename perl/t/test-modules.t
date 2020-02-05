@@ -84,7 +84,7 @@ is($obvius->get_version_field($public_version, "title"),
     '$obvius->get_version_field');
 
 # Check that number of fields is correct.
-is(scalar(%{$obvius->get_version_fields($public_version, 255) || {}}),
+is(scalar(keys %{$obvius->get_version_fields($public_version, 255) || {}}),
     34,
     '$obvius->get_version_fields'
 );

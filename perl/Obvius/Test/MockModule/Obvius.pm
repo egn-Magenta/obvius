@@ -13,10 +13,8 @@ use Obvius;
 
 use base 'Obvius::Test::MockModule';
 
-use constant {
-    ADMIN_USER_ID => 1,
-    ADMIN_GROUP_ID => 1
-};
+our $ADMIN_USER_ID = 1;
+our $ADMIN_GROUP_ID = 1;
 
 sub mockclass { "Obvius" }
 
@@ -155,7 +153,7 @@ my @users = (
     {
         'deactivated' => undef,
         'notes' => '',
-        'id' => ADMIN_USER_ID,
+        'id' => $ADMIN_USER_ID,
         'is_admin' => 1,
         'can_manage_users' => 2,
         'created' => '2015-03-10 15:19:19',
@@ -177,7 +175,7 @@ my @users = (
 # Default list of groups for the in-memory database
 my @groups = (
     {
-        'id' => ADMIN_GROUP_ID,
+        'id' => $ADMIN_GROUP_ID,
         'name' => 'Admin'
     },
     {
@@ -203,8 +201,8 @@ my @documents = (
         id => 1,
         parent => 0,
         name => "dummy",
-        owner => ADMIN_USER_ID,
-        grp => ADMIN_GROUP_ID,
+        owner => $ADMIN_USER_ID,
+        grp => $ADMIN_GROUP_ID,
         accessrules => q|admin=create,edit,delete,publish,modes
 OWNER=create,edit,delete,publish,modes
 GROUP+create,edit,delete,publish
@@ -275,7 +273,7 @@ my @versions = (
         public => 1,
         valid => 1,
         lang => "da",
-        user => ADMIN_USER_ID,
+        user => $ADMIN_USER_ID,
     }
 );
 my $versions_seq = 1;
@@ -293,7 +291,7 @@ my $versions_seq = 1;
 #     $options{lang}  - version language
 #                       Default: "da"
 #     $options{user}  - userid of the user who created the version
-#                       Default: ADMIN_USER_ID
+#                       Default: $ADMIN_USER_ID
 sub _add_version {
     my ($docid, $version, $doctype_id, %options) = @_;
 
@@ -310,7 +308,7 @@ sub _add_version {
         public => $options{public} || 0,
         valid => $options{valid} || 1,
         lang => $options{lang} || "da",
-        user => $options{user} || ADMIN_USER_ID,
+        user => $options{user} || $ADMIN_USER_ID,
     };
 
     push(@versions, $version_rec);
@@ -398,7 +396,7 @@ sub _add_vfields {
 sub _add_full_document_with_defaults {
     my ($path, $version, $doctype_id, @vfields) = @_;
 
-    my $docdata = _add_document($path, ADMIN_USER_ID, ADMIN_GROUP_ID, "");
+    my $docdata = _add_document($path, $ADMIN_USER_ID, $ADMIN_GROUP_ID, "");
     if(!$docdata) {
         die "Could not make document in _add_full_document";
     }
@@ -502,7 +500,7 @@ my @subsites = (
     {
         'id' => 1,
         'responsive' => 0,
-        'user_id' => ADMIN_USER_ID,
+        'user_id' => $ADMIN_USER_ID,
         'title' => 'Subsite 1 (/subsite/)',
         'lang' => 'da',
         'own_leftmenu' => 1,
@@ -513,7 +511,7 @@ my @subsites = (
     {
         'id' => 2,
         'responsive' => 0,
-        'user_id' => ADMIN_USER_ID,
+        'user_id' => $ADMIN_USER_ID,
         'title' => 'Subsite 2 (/subsite-without-domain/)',
         'lang' => 'da',
         'own_leftmenu' => 1,
@@ -524,7 +522,7 @@ my @subsites = (
     {
         'id' => 3,
         'responsive' => 0,
-        'user_id' => ADMIN_USER_ID,
+        'user_id' => $ADMIN_USER_ID,
         'title' => 'Subsite 3 (/subsite/subsite-without-domain-under-subsite/)',
         'lang' => 'da',
         'own_leftmenu' => 1,
@@ -577,7 +575,6 @@ sub config {
     return $config if($config);
 
     $config = bless({
-        ROOTHOST => 'obvius.test',
         ROOTHOST => 'obvius.test',
         https_roothost => 'ssl.obvius.test',
         ALWAYS_HTTPS => 1,
