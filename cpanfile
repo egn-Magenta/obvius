@@ -68,6 +68,7 @@ requires 'Spreadsheet::ParseExcel';
 requires 'Spreadsheet::WriteExcel';
 #requires 'Term::ReadLine::Gnu';
 requires 'Term::Shell';
+requires 'Test::MockModule';
 requires 'Text::CSV';
 requires 'Time::Clock';
 requires 'Try::Tiny';
