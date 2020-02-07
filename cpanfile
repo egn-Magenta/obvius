@@ -70,6 +70,7 @@ requires 'Spreadsheet::WriteExcel';
 requires 'Term::Shell';
 requires 'Test::MockModule';
 requires 'Text::CSV';
+requires 'Tie::iCal';
 requires 'Time::Clock';
 requires 'Try::Tiny';
 requires 'Unicode::String';
