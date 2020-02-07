@@ -31,6 +31,7 @@ RUN apt-get update && \
     mc \
     mariadb-client \
     net-tools \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/obvius
