@@ -12,8 +12,11 @@ variables:
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
     IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     IMAGE_DEV: ${CI_REGISTRY_IMAGE}:development
-    IMAGE_VERSION: ${RELEASE_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
     IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:debian-latest
+    IMAGE_TESTING: ${RELEASE_REGISTRY_IMAGE}:debian-testing
+    IMAGE_MASTER: ${RELEASE_REGISTRY_IMAGE}:debian-master
+    #TODO: Push tagged versions to Docker Hub
+    #IMAGE_VERSION: ${RELEASE_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
 
 
 # Build stage
@@ -22,7 +25,7 @@ variables:
 build:
     stage: lint-build
     image:
-      name: gcr.io/kaniko-project/executor:debug_793
+      name: gcr.io/kaniko-project/executor:debug
       entrypoint: [""]
     tags:
       - docker
@@ -63,6 +66,7 @@ dependency-test:
     before_script:
         - apk add skopeo
 
+# Push latest image to internal registry to enable build caching
 release-branch:
     <<: *release-default
     script:
@@ -72,13 +76,36 @@ release-branch:
             "docker://${IMAGE_SHA}"
             "docker://${IMAGE_DEV}"
 
+# Push public images based on development, testing and master
 release-dev:
     <<: *release-default
     rules:
-        - if: $CI_COMMIT_REF_NAME == "development"    
+        - if: $CI_COMMIT_REF_NAME == "development"
     script:
         - skopeo copy
             --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
             --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
             "docker://${IMAGE_SHA}"
             "docker://${IMAGE_LATEST}"
+
+release-testing:
+    <<: *release-default
+    rules:
+        - if: $CI_COMMIT_REF_NAME == "testing"
+    script:
+        - skopeo copy
+            --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+            --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+            "docker://${IMAGE_SHA}"
+            "docker://${IMAGE_TESTING}"
+
+release-master:
+    <<: *release-default
+    rules:
+        - if: $CI_COMMIT_REF_NAME == "production"
+    script:
+        - skopeo copy
+            --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+            --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+            "docker://${IMAGE_SHA}"
+            "docker://${IMAGE_MASTER}"
