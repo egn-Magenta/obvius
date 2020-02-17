@@ -15,6 +15,7 @@ requires 'Clone::PP';
 requires 'Convert::NLS_DATE_FORMAT';
 #requires 'Crypt::SMIME';
 requires 'Crypt::TripleDES';
+requires 'Data::Compare';
 requires 'Date::Calc';
 #requires 'Date::ICal';
 requires 'DateTime';
