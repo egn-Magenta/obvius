@@ -7,6 +7,7 @@ stages:
     - lint-build
     - test
     - release
+    - trigger
 
 variables:
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
@@ -109,3 +110,21 @@ release-master:
             --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
             "docker://${IMAGE_SHA}"
             "docker://${IMAGE_MASTER}"
+
+
+# Trigger downstream stage
+##########################
+
+trigger-ku:
+    stage: trigger
+    image: alpine
+    variables:
+        GIT_STRATEGY: none # We do not need the source code
+    tags:
+        - docker
+    before_script:
+        - apk add curl
+    rules:
+        - if: '$CI_COMMIT_REF_NAME == "testing" || $CI_COMMIT_REF_NAME == "development"'
+    script:
+        - "curl -X POST -F token=$KU_TRIGGER_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"
