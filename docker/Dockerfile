@@ -1,40 +1,23 @@
 FROM debian:stretch-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
-
-#Install Apache, perl and dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    apache2 \
-    apache2-dev \
-    libfile-spec-native-perl \
-    make \
-    gcc \
-    libperl-dev \
-    libapache2-mod-apreq2 \
-    libapache2-request-perl \
-    libapache-session-perl \
-    locales \
-    libberkeleydb-perl \
-    libcatalyst-devel-perl \
-    libcatalyst-modules-perl \
-    libdbix-recordset-perl \
-    libdbd-mysql-perl \
-    libdbd-sybase-perl \
-    libcrypt-smime-perl \
-    libterm-readline-gnu-perl \
-    libxml-libxslt-perl \
-    libgraphics-magick-perl \
-    perlmagick \
-    vim \
-    nano \
-    mc \
-    mariadb-client \
-    net-tools \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+ARG SUPERCRONIC_VERSION=v0.1.9
+ARG SUPERCRONIC_SHA1SUM=5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85
 
 WORKDIR /var/www/obvius
+
+# Add list of apt packages
+COPY ./sys-requirements.txt sys-requirements.txt
+
+# Install system dependencies from file.
+RUN apt-get -y update \
+    && apt-get -y install --no-install-recommends $(grep -o '^[^#][[:alnum:].-]*' sys-requirements.txt) \
+    # clean up after apt-get and man-pages
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_* \
+    # Install supercronic
+    && curl -fsSL "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" -o /usr/local/bin/supercronic\
+    && echo "${SUPERCRONIC_SHA1SUM}  /usr/local/bin/supercronic" | sha1sum -c - \
+    && chmod +x /usr/local/bin/supercronic
 
 # Only add requirements file; this rarely changes so we try to cache dependencies
 COPY ./cpanfile .
@@ -42,8 +25,7 @@ COPY ./cpanfile .
 # Install cpanm & deps
 RUN cpan App::cpanminus && \
     cpanm --installdeps . && \
-    cpanm Date::ICal --force && \
-    cpanm GnuPG::Interface --force
+    cpanm Date::ICal --force
 
 # Set up locales
 COPY ./docker/locale.gen /etc/locale.gen
