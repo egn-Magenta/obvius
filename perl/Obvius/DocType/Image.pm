@@ -45,13 +45,13 @@ our $VERSION="1.0";
 
 sub action {
     my ($this, $input, $output, $doc, $vdoc, $obvius) = @_;
-    
+
     unless($input->param('is_admin')) {
 	my $uri = $obvius->get_doc_uri($doc);
 	$obvius->log("Not serving HTML-page for image on public website: $uri");
 	return OBVIUS_ERROR;
     }
-    
+
     return OBVIUS_OK;
 }
 
@@ -60,26 +60,55 @@ sub get_data {
     $obvius->get_version_fields($vdoc, ['data', 'uploadfile']);
     my $data;
     if (my $path = $vdoc->field('uploadfile')) {
-	$path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . '/' . $path;
-	$path =~ s!/+!/!g;
-	my $fh;
-	open $fh, $path || die "File not found: $path";
-	eval {
-	    local $/ = undef;
-	    $data = <$fh>;
-	};
-	close $fh;
-	if ($@) {
-	    die $@;
-	}
+        $path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . '/' . $path;
+        $path =~ s!/+!/!g;
+        my $fh;
+        $path =~ s{\s+$}{}s;
+        open($fh, $path) || die "File not found: $path";
+        eval {
+            local $/ = undef;
+            $data = <$fh>;
+        };
+        close $fh;
+        if ($@) {
+            die $@;
+        }
     } else {
-	$data = $vdoc->field('data');
+        $data = $vdoc->field('data');
     }
     return $data;
 }
-	
-    
+
 sub raw_document_data {
+    my ($this, $doc, $vdoc, $obvius, $input) = @_;
+
+    my @result;
+    eval {
+        @result = $this->raw_document_data_internal($doc, $vdoc, $obvius, $input);
+    };
+    if(my $error = $@) {
+        if($obvius->config->param('upload_maintenance_mode')) {
+            my $placeholder_image_path = $obvius->config->param(
+                'upload_maintenance_placeholder_image_path'
+            ) || '/var/www/obvius/docs/grafik/admin/1x1.gif';
+            my $placeholder_image_mimetype = $obvius->config->param(
+                'upload_maintenance_placeholder_image_mimetype'
+            ) || 'image/gif';
+            open(FH, $placeholder_image_path);
+            local $/ = undef;
+            my $data = <FH>;
+            close(FH);
+            @result = ("image/gif", $data);
+        } else {
+            die $error;
+        }
+    }
+
+    return @result;
+}
+
+
+sub raw_document_data_internal {
     my ($this, $doc, $vdoc, $obvius, $input) = @_;
 
     $this->tracer($doc, $vdoc, $obvius) if ($this->{DEBUG});
