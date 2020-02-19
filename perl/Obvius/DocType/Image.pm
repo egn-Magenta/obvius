@@ -94,11 +94,20 @@ sub raw_document_data {
             my $placeholder_image_mimetype = $obvius->config->param(
                 'upload_maintenance_placeholder_image_mimetype'
             ) || 'image/gif';
+            my $cache_placeholder_image = $obvius->config->param(
+                'upload_maintenance_cache_placeholder_images'
+            ) || 0;
             open(FH, $placeholder_image_path);
             local $/ = undef;
             my $data = <FH>;
             close(FH);
             @result = ("image/gif", $data);
+            # Unless caching of placeholder images are enabled in config, make
+            # sure the placeholder image is not cached.
+            if(!$cache_placeholder_image &&
+                $input && $input->UNIVERSAL::can("notes")) {
+                $input->notes(nocache => 1);
+            }
         } else {
             die $error;
         }
