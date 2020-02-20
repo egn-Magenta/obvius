@@ -41,7 +41,7 @@
      eg. 'block:ghosted', 'inline:labeled' etc.
 
 </%doc>
-<& 'type/' . $call_type . ":$style->{context}", field=>$layout, style=>$style, value=>$value, prefix=>$history, validation=>$validation &>\
+<& 'type/' . $call_type . ":$style->{context}", field=>$layout, style=>$style, value=>$value, prefix=>$history, validation=>$validation, editscheme=>$editscheme &>\
 <%args>
  $layout
  $value

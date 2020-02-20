@@ -356,7 +356,6 @@ NormalMgr - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use NormalMgr;
   blah blah blah
 
 =head1 DESCRIPTION
