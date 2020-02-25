@@ -8,9 +8,9 @@ package Obvius::Access;
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #          Peter Makholm (pma@fi.dk)
-#          Adam Sjøgren (asjo@magenta-aps.dk),
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -370,6 +370,54 @@ sub can_create_new_group {
     $_[0]->{USERS}->{$_[0]->{USER}}->{can_manage_groups}
 }
 
+sub can_edit_user {
+    my ($self, $edited_user) = @_;
+    my $this_user = $self->get_user($self->user());
+    if (!ref($edited_user)) {
+        $edited_user = $self->get_user($edited_user);
+    }
+    if ($this_user->{id} == 1) {
+        return 1;  # Bow down before root almighty
+    }
+    if ($edited_user->{id} < 3) {
+        return 0;  # Non-root users may not edit root users & "nobody"
+    }
+    if ($this_user->{is_admin}) {
+        return 1;  # Superadmin users may edit all users that are not root or "nobody"
+    }
+    # if ($this_user->is_admin_user) {
+    # }
+    if (!$edited_user->{is_admin}) {  # Don't even think about editing superadmins
+        my $manage_level = $this_user->{can_manage_users};
+        if ($manage_level == 2) {
+            return 1;  # May edit all non-superadmin users
+        } elsif ($manage_level == 1) {
+            # May only edit users whose groups we control
+            my %my_groups = map { $_ => 1 } @{$self->get_user_groups($this_user->{id})};
+            my @unaccounted_groups = grep { !exists($my_groups{$_}) } @{$self->get_user_groups($edited_user->{id})};
+            my @accounted_groups = grep { exists($my_groups{$_}) } @{$self->get_user_groups($edited_user->{id})};
+            if (scalar(@unaccounted_groups)) {
+                return 0;  # If the subject is a member of a group of which we are not, we may not edit
+            }
+            if (scalar(@accounted_groups)) {
+                return 1;  # It would be pretty stupid to have access if neither user has zero groups. Require at least one match
+            }
+        }
+    }
+    return 0;
+}
+
+sub can_delete_user {
+    my ($self, $edited_user) = @_;
+    if (!ref($edited_user)) {
+        $edited_user = $self->get_user($edited_user);
+    }
+    if ($edited_user->{id} < 3) {
+        return 0;  # Do not delete system-critical users
+    }
+    return $self->can_edit_user($edited_user);
+}
+
 sub can_update_comment {
     my ($this, $doc) = @_;
 
@@ -430,9 +478,9 @@ It is not intended for use as a standalone module.
 
 =head1 AUTHORS
 
-Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+JÃ¸rgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
 Peter Makholm E<lt>pma@fi.dkE<gt>
-Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
+Adam SjÃ¸gren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
