@@ -181,6 +181,11 @@ sub get_query_sql {
     return ('select * from documents', []);
 }
 
+sub get_count_sql {
+    my ($self) = @_;
+    return ('select count(*) from documents', []);
+}
+
 # Gets the SQL and the SQL arguments used for ordering the query
 sub get_order_by_sql {
     my ($self) = @_;
@@ -290,20 +295,12 @@ sub perform_default { shift->perform_search(@_) }
 sub perform_search {
     my ($self) = @_;
 
-    my ($query_sql, $query_args) = $self->get_query_sql;
+    my ($query_sql, $query_args, $count_sql) = $self->get_query_sql;
     my ($order_sql, $order_args) = $self->get_order_by_sql;
     my ($limit_sql, $limit_args) = $self->get_limit_sql;
 
-    my $sql = join("\n",
-        $query_sql,
-        $order_sql,
-        $limit_sql
-    );
-    my @args = (
-        @{$query_args || []},
-        @{$order_args || []},
-        @{$limit_args || []},
-    );
+    my $sql = join("\n", $query_sql, $order_sql, $limit_sql);
+    my @args = (@{$query_args || []}, @{$order_args || []}, @{$limit_args || []});
 
     my $sth = $self->obvius->dbh->prepare($sql);
     $sth->execute(@args);
@@ -335,8 +332,19 @@ sub perform_search {
             by_name => \%by_name
         });
     }
+    $sth->finish();
 
     my $count = @result;
+    if (defined($count_sql)) {
+        $sth = $self->obvius->dbh->prepare($count_sql);
+        $sth->execute(@{$query_args || []});
+        my $row = $sth->fetchrow_hashref();
+        if (defined($row)) {
+            my @v = values(%$row);
+            $count = $v[0];
+        }
+        $sth->finish();
+    }
     $self->{result_count} = $count;
 
     return $self->output_template(
