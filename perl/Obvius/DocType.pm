@@ -714,7 +714,7 @@ sub validate_publish_fields {
 sub encrypt_fields {
     my ($this, $obvius, $fields) = @_;
     for my $fieldname ($fields->param) {
-        if ($this->field($fieldname) && $this->field($fieldname)->Encrypt) {
+        if ($this->field($fieldname) && $this->field($fieldname)->param('encrypt')) {
             $fields->param($fieldname, $obvius->encryption_handler->encrypt_data($fields->param($fieldname)));
         }
     }
@@ -723,7 +723,7 @@ sub encrypt_fields {
 sub decrypt_fields {
     my ($this, $obvius, $fields) = @_;
     for my $fieldname ($fields->param) {
-        if ($this->field($fieldname) && $this->field($fieldname)->Encrypt) {
+        if ($this->field($fieldname) && $this->field($fieldname)->param('encrypt')) {
             $fields->param($fieldname, $obvius->encryption_handler->decrypt_data($fields->param($fieldname)));
         }
     }
