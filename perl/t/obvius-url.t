@@ -71,4 +71,6 @@ is(Obvius::URL->new("https://subsite.obvius.test/standard/")->docid, 3, "Resolve
 is(Obvius::URL->new("/subsite/")->admin_path, "/admin/subsite/", "Admin path with ending slash");
 is(Obvius::URL->new("/subsite/")->admin_path(1), "/admin/subsite", "Admin path without ending slash");
 
+is(Obvius::URL->new("https://obvius.test/subsite/")->admin_path, "/admin/subsite/", "Admin path from full URL with roothost");
+
 done_testing();
