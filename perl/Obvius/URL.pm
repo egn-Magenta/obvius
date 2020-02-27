@@ -474,22 +474,36 @@ sub _hostmap_data {
     my ($self) = @_;
 
     if(!exists $self->{hostmap_data}) {
+        # By default set hostmap data to nothing
         $self->{hostmap_data} = undef;
-        # Only lookup the path if we don't have a hostname. If we have a
-        # hostname it should have been handled by the
-        # `resolve_with_hostname` method.
-        if(!$self->{hostname}) {
-            if(my $path = $self->obvius_path) {
-                my ($url, $hostname, $subsite_root_path, $levels, $scheme) =
-                    $self->hostmap->translate_uri($path);
-                $self->{hostmap_data} = {
-                    public_url => $url,
-                    public_hostname => $hostname,
-                    subsite_root_path => $subsite_root_path,
-                    levels_from_roothost => $levels,
-                    scheme => $scheme
-                };
-            }
+
+        # Handle URLs under the roothost
+        if($self->{hostname} && (
+            $self->{hostname} eq $self->roothost ||
+            $self->{hostname} eq $self->https_roothost
+        )) {
+            $self->{hostmap_data} = {
+                public_url => join("",
+                    $self->scheme, "://",
+                    $self->{hostname},
+                    $self->port ? (":" . $self->port) : '',
+                    $self->obvius_path
+                ),
+                public_hostname => $self->{hostname},
+                subsite_root_path => "/",
+                levels_from_roothost => 0,
+                scheme => $self->scheme,
+            };
+        } elsif(my $path = $self->obvius_path) {
+            my ($url, $hostname, $subsite_root_path, $levels, $scheme) =
+                $self->hostmap->translate_uri($path);
+            $self->{hostmap_data} = {
+                public_url => $url,
+                public_hostname => $hostname,
+                subsite_root_path => $subsite_root_path,
+                levels_from_roothost => $levels,
+                scheme => $scheme
+            };
         }
     }
 
