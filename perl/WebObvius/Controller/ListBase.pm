@@ -150,6 +150,10 @@ sub request_param_hash {
 sub build_order_link {
     my ($self, $field) = @_;
 
+    if ($field->{no_ordering}) {
+        return undef;
+    }
+
     my $order_data = $self->order_data;
     my $name = $field->{name};
     my $direction = $field->{order_default} || "asc";
