@@ -22,8 +22,29 @@ variables:
 # Build stage
 #############
 
+# Disables cache to ensure upstream image is updated
+# Scheduled build ensures that cache for continuous builds will be populated & fresh
+build-nocache:
+    stage: lint-build
+    only:
+        - schedules
+    image:
+        name: gcr.io/kaniko-project/executor:debug-v0.19.0
+        entrypoint: [""]
+    tags:
+    - docker
+    script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
+      --destination=${IMAGE_SHA}
+      --cache=false
+
 build:
     stage: lint-build
+    except:
+        - schedules
     image:
       name: gcr.io/kaniko-project/executor:debug-v0.19.0
       entrypoint: [""]
