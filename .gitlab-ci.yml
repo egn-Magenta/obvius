@@ -112,4 +112,4 @@ trigger-ku:
     rules:
         - if: '$CI_COMMIT_REF_NAME == "testing" || $CI_COMMIT_REF_NAME == "development"'
     script:
-        - "curl -X POST -F token=$KU_TRIGGER_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"
+        - "curl -X POST -F token=$CI_JOB_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"
