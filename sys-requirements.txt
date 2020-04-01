@@ -24,6 +24,7 @@ libfile-spec-native-perl
 libgnupg-interface-perl
 libgraphics-magick-perl
 libterm-readline-gnu-perl
+libtext-iconv-perl
 libxml-libxslt-perl
 
 # Various system tools and developer nice-to-haves
