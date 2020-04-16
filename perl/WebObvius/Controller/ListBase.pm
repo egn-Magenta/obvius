@@ -245,7 +245,7 @@ sub pager_info {
         my $first_page = 1;
         my $last_page = $pagesize eq 'all' ? 1 : (ceil($self->{result_count} / $pagesize));
 
-        my $next_page = $page + 1;
+        my $next_page = $last_page > $page ? $page + 1 : $last_page;
         my $prev_page = $page > 1 ? $page - 1 : 1;
 
         if ($last_page == 0) {

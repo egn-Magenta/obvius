@@ -1,0 +1,38 @@
+<div class="pagination">
+%   if ($pager_info->{first_page_link}) {
+        <a href="<% $pager_info->{first_page_link} %>" title="<& /shared/trans, da => 'Første side', en => 'First page' &>"><img src="/pics/icons/left.png"/><img src="/pics/icons/left.png"/></a>
+%   } else {
+        <img src="/pics/icons/left-inactive.png"/><img src="/pics/icons/left-inactive.png"/>
+%   }
+%   if ($pager_info->{prev_page_link}) {
+        <a href="<% $pager_info->{prev_page_link} %>" title="<& /shared/trans, da => 'Forrige side', en => 'Previous page' &>"><img src="/pics/icons/left.png"/></a>
+%   } else {
+        <img src="/pics/icons/left-inactive.png"/>
+%   }
+    <& /shared/trans, da => 'Side', en => 'Page' &> <% $pager_info->{page} %> <& /shared/trans, da => 'af', en => 'of' &> <% $pager_info->{last_page} %>
+%   if ($pager_info->{next_page_link}) {
+        <a href="<% $pager_info->{next_page_link} %>" title="<& /shared/trans, da => 'Næste side', en => 'Next page' &>"><img src="/pics/icons/right.png"/></a>
+%   } else {
+        <img src="/pics/icons/right-inactive.png"/>
+%   }
+%   if ($pager_info->{last_page_link}) {
+        <a href="<% $pager_info->{last_page_link} %>" title="<& /shared/trans, da => 'Sidste side', en => 'Last page' &>"><img src="/pics/icons/right.png"/><img src="/pics/icons/right.png"/></a>
+%   } else {
+        <img src="/pics/icons/right-inactive.png"/><img src="/pics/icons/right-inactive.png"/>
+%   }
+</div>
+
+<div class="pagesize">
+  <& /shared/trans, da => 'Pr. side:', en => 'Per page:'&>
+% foreach my $pagesize_option (@{$pager_info->{pagesize_options}}) {
+%   if ($pagesize_option->{text} eq $pager_info->{pagesize}) {
+      <strong><% $pagesize_option->{text} %></strong>
+%   } else {
+      <a href="<% $pagesize_option->{link} %>"><% $pagesize_option->{text} %></a>
+%   }
+% }
+</div>
+
+<%args>
+$pager_info
+</%args>
