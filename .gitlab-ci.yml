@@ -12,7 +12,6 @@ stages:
 variables:
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
     IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
-    IMAGE_DEV: ${CI_REGISTRY_IMAGE}:development
     IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:debian-latest
     IMAGE_TESTING: ${RELEASE_REGISTRY_IMAGE}:debian-testing
     IMAGE_MASTER: ${RELEASE_REGISTRY_IMAGE}:debian-master
@@ -23,24 +22,41 @@ variables:
 # Build stage
 #############
 
+# Disables cache to ensure upstream image is updated
+# Scheduled build ensures that cache for continuous builds will be populated & fresh
+build-nocache:
+    stage: lint-build
+    only:
+        - schedules
+    image:
+        name: gcr.io/kaniko-project/executor:debug-v0.19.0
+        entrypoint: [""]
+    tags:
+    - docker
+    script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
+      --destination=${IMAGE_SHA}
+      --cache=false
+
 build:
     stage: lint-build
+    except:
+        - schedules
     image:
-      name: gcr.io/kaniko-project/executor:debug-v0.17.1
+      name: gcr.io/kaniko-project/executor:debug-v0.19.0
       entrypoint: [""]
     tags:
       - docker
     script:
       - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-      - /kaniko/warmer
-        --cache-dir=$CI_PROJECT_DIR/cache
-        --image=${IMAGE_DEV}
       - /kaniko/executor
         --context=$CI_PROJECT_DIR
         --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
         --destination=${IMAGE_SHA}
         --cache=true
-        --cache-dir=$CI_PROJECT_DIR/cache
 
 dependency-test:
     stage: test
@@ -66,16 +82,6 @@ dependency-test:
         - docker
     before_script:
         - apk add skopeo
-
-# Push latest image to internal registry to enable build caching
-release-branch:
-    <<: *release-default
-    script:
-        - skopeo copy
-            --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
-            --dest-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
-            "docker://${IMAGE_SHA}"
-            "docker://${IMAGE_DEV}"
 
 # Push public images based on development, testing and master
 release-dev:
@@ -127,4 +133,4 @@ trigger-ku:
     rules:
         - if: '$CI_COMMIT_REF_NAME == "testing" || $CI_COMMIT_REF_NAME == "development"'
     script:
-        - "curl -X POST -F token=$KU_TRIGGER_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"
+        - "curl -X POST -F token=$CI_JOB_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"

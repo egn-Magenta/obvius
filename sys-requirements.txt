@@ -1,0 +1,39 @@
+# A list of debian packages needed to build an Obvius image
+# Contains system deps as well as perl packages that cannot
+# be installed from cpan.
+
+# Perl and apache
+apache2
+apache2-dev
+make
+gcc
+libperl-dev
+libapache2-mod-apreq2
+libapache2-request-perl
+libapache-session-perl
+
+# Perl packages
+libberkeleydb-perl
+libcatalyst-devel-perl
+libcatalyst-modules-perl
+libcrypt-smime-perl
+libdbd-mysql-perl
+libdbd-sybase-perl
+libdbix-recordset-perl
+libfile-spec-native-perl
+libgnupg-interface-perl
+libgraphics-magick-perl
+libterm-readline-gnu-perl
+libtext-iconv-perl
+libxml-libxslt-perl
+
+# Various system tools and developer nice-to-haves
+locales
+perlmagick
+vim
+nano
+mc
+mariadb-client
+net-tools
+git
+curl
