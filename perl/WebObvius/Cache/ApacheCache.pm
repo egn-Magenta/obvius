@@ -492,7 +492,7 @@ sub special_actions {
 						 args => ['NyArrangementsliste']
 						}]
 				  );
-     
+     my %seen;
      for my $doc (@$docs) {
 	  next if (!$doc->{doctype});
 	  my $doctype = $obvius->get_doctype_by_id($doc->{doctype});
@@ -502,6 +502,12 @@ sub special_actions {
 	  $cmd_list = [$cmd_list] if (ref $cmd_list ne 'ARRAY');
 	  
 	  for my $cmd (@$cmd_list) {
+	       # Skip command if it has been issued before
+	       my $seen_key = join(",", $cmd->{command}, @{$cmd->{args}});
+	       if($seen{$seen_key}++) {
+	            next;
+	       }
+	       # Perform the command
 	       my $func = "perform_command_" . $cmd->{command};
 	       my @args = (@{$cmd->{args}}, [$doc]);
 	       my $cmds = $this->$func(@args);
