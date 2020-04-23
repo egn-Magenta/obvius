@@ -73,11 +73,15 @@ unit-test:
         - ../tests/list_module_usages.sh /var/www/obvius/ > t/moduletest.t
         # Run tests with Devel::Cover, generate Clover and HTML reports
         - cover -test $CI_PROJECT_DIR/db-cover -report clover -report html
+        # Run tests using JUnit formatter
+        - prove -r --formatter=TAP::Formatter::JUnit --timer t/| tee $CI_PROJECT_DIR/db-cover/junit.xml
     coverage: /^Total.*\s(\d+\.\d)$/
     artifacts:
         when: always
         paths:
           - $CI_PROJECT_DIR/db-cover/
+        reports:
+            junit: $CI_PROJECT_DIR/db-cover/junit.xml
     
 
 # Release stage

@@ -69,6 +69,7 @@ requires 'SOAP::Lite';
 requires 'SOAP::Transport::HTTP2';
 requires 'Spreadsheet::ParseExcel';
 requires 'Spreadsheet::WriteExcel';
+requires 'TAP::Formatter::JUnit';
 #requires 'Term::ReadLine::Gnu';
 requires 'Term::Shell';
 requires 'Test::MockModule';
