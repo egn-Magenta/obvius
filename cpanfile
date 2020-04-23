@@ -25,6 +25,8 @@ requires 'DateTime::Format::Oracle';
 requires 'DBI';
 requires 'DBIx::Class';
 #requires 'DBIx::Recordset';
+requires 'Devel::Cover';
+requires 'Devel::Cover::Report::Clover';
 requires 'Digest::SHA1';
 requires 'Email::MIME';
 requires 'Encode::Locale';

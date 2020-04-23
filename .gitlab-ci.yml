@@ -58,7 +58,7 @@ build:
         --destination=${IMAGE_SHA}
         --cache=true
 
-dependency-test:
+unit-test:
     stage: test
     image: ${IMAGE_SHA}
     variables:
@@ -66,9 +66,19 @@ dependency-test:
     tags:
         - docker
     script:
-        - cd /var/www/obvius
-        - tests/list_module_usages.sh . | perl
-
+        - cd /var/www/obvius/perl
+        # Ensure all modules are installed to allow for testing
+        - perl Makefile.PL && make
+        # Dynamically generate perl script that attempts to load all modules
+        - ../tests/list_module_usages.sh /var/www/obvius/ > t/moduletest.t
+        # Run tests with Devel::Cover, generate Clover and HTML reports
+        - cover -test $CI_PROJECT_DIR/db-cover -report clover -report html
+    coverage: /^Total.*\s(\d+\.\d)$/
+    artifacts:
+        when: always
+        paths:
+          - $CI_PROJECT_DIR/db-cover/
+    
 
 # Release stage
 ###############
