@@ -49,6 +49,8 @@ use WebObvius::RequestTools;
 use WebObvius::MasonCommands;
 use Encode;
 use Time::HiRes;
+use JSON;
+use Obvius::CharsetTools qw(mixed2perl);
 
 use WebObvius::Apache
   Constants       => qw(:common :methods :response),
@@ -489,7 +491,42 @@ sub execute_cache {
             my $end_time = [Time::HiRes::gettimeofday];
             my $elapsed = Time::HiRes::tv_interval($start_time, $end_time);
             if($elapsed * 1000 > $threshold) {
-                $obvius->log->warn("Slow request: " . $req->hostname . " " . $req->uri . " " . $elapsed);
+                # Collect the data we want to log for slow requests
+                my $qstring = $req->args;
+                my @logdata = (
+                    [hostname => $req->hostname],
+                    [uri => $req->uri],
+                    [querystring => $qstring],
+                );
+                if(my $doctype = $req->pnotes('doctype')) {
+                    push(@logdata, [doctype => $doctype->Name]);
+                }
+                if(my $doc = $req->pnotes('document')) {
+                    my $closest_subsite = $obvius->find_closest_subsite($doc);
+                    if($closest_subsite) {
+                        my $subsite_info = $closest_subsite->param(
+                            'subsite_info'
+                        );
+                        push(@logdata, [
+                            closest_subsite => $subsite_info->{id} || ''
+                        ]);
+                    }
+                }
+                push(@logdata, [elapsed_time => $elapsed]);
+
+                # Output values as a JSON object with preserved key order.
+                # JSON does not do this by default, so we have to construct
+                # the object ourselves by joining key value pairs.
+                my $json = JSON->new()->ascii->allow_nonref(1);
+                my $log_string = "{" . join(", ", map {
+                    sprintf(
+                         '%s: %s',
+                         $json->encode(mixed2perl($_->[0])),
+                         $json->encode(mixed2perl($_->[1])),
+                    );
+                } @logdata) . "}";
+
+                $obvius->log->warn("Slow request: " . $log_string);
             }
         }
      }
