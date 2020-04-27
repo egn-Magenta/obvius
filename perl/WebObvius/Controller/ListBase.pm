@@ -102,7 +102,7 @@ sub order_data {
 
         foreach my $field ($self->get_field_list) {
             if($field->{name} eq $name) {
-                $sql_field = $field->{sql} || $field->{name};
+                $sql_field = $field->{name};
                 last;
             }
         }
