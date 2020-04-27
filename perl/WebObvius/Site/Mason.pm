@@ -49,6 +49,8 @@ use WebObvius::RequestTools;
 use WebObvius::MasonCommands;
 use Encode;
 use Time::HiRes;
+use JSON;
+use Obvius::CharsetTools qw(mixed2perl);
 
 use WebObvius::Apache
   Constants       => qw(:common :methods :response),
@@ -512,13 +514,17 @@ sub execute_cache {
                 }
                 push(@logdata, [elapsed_time => $elapsed]);
 
-                # Format a log string with key/value pairs where values are
-                # quoted.
-                my $log_string = join(", ", map {
-                    # Escape quotes in 2nd argument
-                    $_->[1] =~ s{"}{\\"};
-                    sprintf('%s => "%s"', $_->[0], $_->[1]);
-                } @logdata);
+                # Output values as a JSON object with preserved key order.
+                # JSON does not do this by default, so we have to construct
+                # the object ourselves by joining key value pairs.
+                my $json = JSON->new()->ascii->allow_nonref(1);
+                my $log_string = "{" . join(", ", map {
+                    sprintf(
+                         '%s: %s',
+                         $json->encode(mixed2perl($_->[0])),
+                         $json->encode(mixed2perl($_->[1])),
+                    );
+                } @logdata) . "}";
 
                 $obvius->log->warn("Slow request: " . $log_string);
             }
