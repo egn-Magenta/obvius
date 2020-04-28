@@ -9,9 +9,9 @@ package Obvius::DocType::Image;
 #                         FI, Denmark (http://www.fi.dk/)
 #
 # Authors: Jason Armstrong,
-#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk),
+#          JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -129,9 +129,14 @@ sub raw_document_data_internal {
         my $apr = ref($input) eq 'Apache' ? Apache::Request->new($input) : $input;
 
         my $size = $apr->param('size') || '';
+        my $resize = $apr->param('resize') || '';
 
         if($size and $size =~ /^(\d+X\d+|\d+%|\d+x|x\d+)$/i) {
-            return $this->get_resized_data($size, $vdoc, $obvius, $apr);
+            return $this->get_resized_data($size, $vdoc, $obvius, $apr, 1);
+        }
+
+        if($resize and $resize =~ /^(\d+X\d+|\d+%|\d+x|x\d+)$/i) {
+            return $this->get_resized_data($resize, $vdoc, $obvius, $apr, 0);
         }
     }
 
@@ -140,7 +145,7 @@ sub raw_document_data_internal {
 }
 
 sub get_resized_data {
-    my($this, $size, $vdoc, $obvius, $r) = @_;
+    my($this, $size, $vdoc, $obvius, $r, $use_legacy_version) = @_;
 
     my $siteobj = $r->pnotes('site');
     my $cachedir = $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY};
@@ -195,12 +200,12 @@ sub get_resized_data {
             }
         }
 
-        my $mimetype;
+        # Set initial mimetype; can be overridden with GIF later
+        my $mimetype = $obvius->get_version_field($vdoc, 'mimetype');
         my $final_image;
 
         if(!defined($new_width) || !defined($new_height) || $new_width == $org_width) {
             # Dont perform any scaling
-            $mimetype = $obvius->get_version_field($vdoc, 'mimetype');
             $final_image = $image;
         } else {
             # Limit images to 300 pixels in both width and height
@@ -215,38 +220,29 @@ sub get_resized_data {
             $new_width = $maxw if($new_width > $maxw);
             $new_height = $maxh if($new_height > $maxh);
 
-            # Scale the image
-            $image->Scale(width => $new_width, height => $new_height);
+            my ($scaled_width, $scaled_height) = (0, 0);
+            if ($use_legacy_version) {
+                # Scale the image
+                $image->Scale(width => $new_width, height => $new_height);
 
-            # Get the new scaled sizes
-            my ($scaled_width, $scaled_height) = $image->Get('width', 'height');
+                # Get the new scaled sizes
+                ($scaled_width, $scaled_height) = $image->Get('width', 'height');
+            }
 
-            # If the image already have the correct size don't change the
-            # mimetype
             if($scaled_width == $new_width and $scaled_height == $new_height) {
-                $mimetype = $obvius->get_version_field($vdoc, 'mimetype');
                 $final_image = $image;
             } else {
-                # Make a transparent image exactly width x height (eg. gif type)
-
                 my $imagesize = $new_width . "x" . $new_height;
-                my $new_img = Image::Magick->new();
-                $new_img->Set(size=>$imagesize);
-
-                # Add frames one by one.
-                for(my $i=0; $image->[$i]; $i++) {
-                    $new_img->ReadImage('xc:magenta');
-                    $new_img->Transparent(color=>'magenta');
-
-                    # Add the old, resized image to the new one and center it
-                    $new_img->[$i]->CompositeImage(compose=>'Over', image=>$image->[$i], geometry=>$imagesize, gravity=>'Center');
+                my $new_img;
+                if ($use_legacy_version) {
+                    $new_img = $this->convert_to_gif($image, $imagesize);
+                    $mimetype = 'image/gif';
+                } else {
+                    $new_img = $this->resize_image($image, $imagesize);
                 }
 
-                # And set $image to the new one
+                # Set $image to the new one
                 $final_image = $new_img;
-
-                #These images should always have mimetype gif
-                $mimetype = 'image/gif';
             }
         }
 
@@ -279,6 +275,34 @@ sub get_resized_data {
         return($mimetype, $data);
 
     }
+}
+
+sub convert_to_gif {
+    my ($this, $image, $imagesize) = @_;
+
+    # Make a transparent image exactly width x height (eg. gif type)
+    my $new_img = Image::Magick->new();
+    $new_img->Set(size=>$imagesize);
+
+    # Add frames one by one.
+    for(my $i=0; $image->[$i]; $i++) {
+        $new_img->ReadImage('xc:magenta');
+        $new_img->Transparent(color=>'magenta');
+
+        # Add the old, resized image to the new one and center it
+        $new_img->[$i]->CompositeImage(compose=>'Over', image=>$image->[$i], geometry=>$imagesize, gravity=>'Center');
+    }
+
+    return $new_img;
+}
+
+sub resize_image {
+    my ($this, $image, $imagesize, $quality) = @_;
+    if ($quality) {
+        $image->Set(quality => $quality);
+    }
+    $image->Resize(geometry => $imagesize);
+    return $image;
 }
 
 # create_new_version_handler - doesn't do anything. Why it is still
@@ -429,9 +453,9 @@ None by default.
 =head1 AUTHOR
 
 Jason Armstrong
-Jørgen Ulrik B. Krag <gt>jubk@magenta-aps.dk<lt>
-René Seindal
-Adam Sjøgren <gt>asjo@magenta-aps.dk<lt>
+JÃ¸rgen Ulrik B. Krag <gt>jubk@magenta-aps.dk<lt>
+RenÃ© Seindal
+Adam SjÃ¸gren <gt>asjo@magenta-aps.dk<lt>
 
 =head1 SEE ALSO
 
