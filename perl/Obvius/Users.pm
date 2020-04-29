@@ -8,10 +8,10 @@ package Obvius::Users;
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #          Peter Makholm (pma@fi.dk)
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk)
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ use strict;
 use warnings;
 
 use Cache::FileCache;
+use JSON;
 
 our $VERSION="1.0";
 
@@ -49,6 +50,11 @@ sub get_user {
     return undef unless (defined $userid);
 
     return $this->{USERS}->{$userid};
+}
+
+sub get_user_from_db {
+    my ($this, $userid) = @_;
+    return $this->get_table_record('users', {'id' => $userid});
 }
 
 # is_admin - depricated. Kept for backwards compatibility, but should use
@@ -211,8 +217,8 @@ sub delete_user {
     my ($this, $userid) = @_;
 
     return undef unless $this->can_create_new_user();
-
-    return undef unless $this->get_user($userid);
+    my $user = $this->get_user($userid);
+    return undef unless $user;
 
     # we change owner to "nobody"
     my $nobody = $this-> get_userid('nobody');
@@ -231,6 +237,7 @@ sub delete_user {
         $set-> Disconnect;
 
 	$this->db_delete_user_sessions($userid);
+        $this->update_user_history($user, 'delete');
         $this->db_delete_user_grp($userid);
         $this->db_delete_user($userid);
 
@@ -265,6 +272,7 @@ sub create_new_user {
     my $userid;
     $this->db_begin;
     eval {
+        $this->update_user_history($user, 'create');
         $userid=$this->db_insert_user($user);
         die "No userid returned" unless $userid;
         $this->db_insert_user_grp($userid, $user->{grp});
@@ -320,7 +328,7 @@ sub update_user {
 
     $user->{grp}=[$user->{grp}] if (defined $user->{grp} and ref $user->{grp} ne 'ARRAY');
 
-    #print STDERR "update_user, user: " . Dumper($user);
+    $this->update_user_history($user, 'update');
     $this->db_begin;
     eval {
         die "No user id!" unless $user->{id};
@@ -336,7 +344,7 @@ sub update_user {
     if ($ev_error) {                    # handle error
         $this->{DB_Error} = $ev_error;
         $this->db_rollback;
-        $this->{LOG}->error("====> Delete group ... failed ($ev_error)");
+        $this->{LOG}->error("====> Update user ... failed ($ev_error)");
         return undef;
     }
 
@@ -444,6 +452,49 @@ sub update_group {
     return 1;
 }
 
+sub update_user_history {
+    my ($this, $user, $operation) = @_;
+    if ($operation ne 'create' && $operation ne 'update' && $operation ne 'delete') {
+        die "Invalid user history operation $operation\n";
+    }
+    my $old = $this->get_user_from_db($user->{id});
+    my $editor = $this->get_user($this->{USER});
+
+    my $changes = undef;
+
+    if ($operation eq 'create' || $operation eq 'update') {
+        sub compare {
+            my ($a, $b) = @_;
+            if (defined($a) && defined($b)) {
+                return "$a" eq "$b";
+            } else {
+                return (!defined($a) && !defined($b));
+            }
+        }
+        my $changes_object = { 'before' => {}, 'after' => {} };
+        for my $field (keys(%$old)) {
+            if (exists($user->{$field})) {
+                my $old_value = $old->{$field};
+                my $new_value = $user->{$field};
+                if (!compare($old_value, $new_value)) {
+                    $changes_object->{'before'}->{$field} = $old_value;
+                    $changes_object->{'after'}->{$field} = $new_value;
+                }
+            }
+        }
+        $changes = to_json($changes_object, {'canonical' => 1});
+    }
+
+    $this->insert_table_record('user_history', {
+        'user_id'      => $user->{id},
+        'user_login'   => $user->{login},
+        'editor_id'    => $editor->{id},
+        'editor_login' => $editor->{login},
+        'operation'    => $operation,
+        'changes'      => $changes
+    });
+}
+
 1;
 __END__
 
@@ -486,8 +537,8 @@ None.
 
 =head1 AUTHOR
 
-Jørgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
-Adam Sjøgren, E<lt>asjo@magenta-aps.dk<gt>
+JÃ¸rgen Ulrik B. Krag, E<lt>jubk@magenta-aps.dkE<gt>
+Adam SjÃ¸gren, E<lt>asjo@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 
