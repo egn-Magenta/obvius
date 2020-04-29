@@ -98,8 +98,11 @@ if ( $r->param( "import_files_do" ) ) {
                 } else {
                     $error = 1;
                 }
+                rmtree($extract_dir);
             }
         }
+
+        rmtree($zip_path);
     }
 }
 
@@ -107,6 +110,7 @@ if ( $r->param( "import_files_do" ) ) {
 <%once>
 use POSIX qw(strftime);
 use File::Find;
+use File::Path;
 </%once>
 
 
