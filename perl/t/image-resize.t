@@ -8,6 +8,7 @@ use Image::Magick;
 use File::Basename;
 use File::Path;
 use File::Copy;
+use File::Compare;
 
 ### To run this test properly, copy images from t/testimages/input to t/testimages
 ### Otherwise, this test is a no-op
@@ -20,7 +21,7 @@ my @input_files = glob 't/testimages/*';
 my $output_folder = 't/testimages/output';
 
 # Setup tests; fall back to one smoke test if no images are given
-my $tests_per_image = 5;
+my $tests_per_image = 6;
 plan tests => scalar @input_files * $tests_per_image + 1;
 
 if (! scalar @input_files) {
@@ -60,26 +61,33 @@ sub test_convert_image {
     my $output_gif = "${output_folder}/${file}_755px.gif";
 
     # Read input file and test ok
-    # We re-read input file repeatedly but ignore the error value in subsequent reads
     my ($image, $error) = get_image_object($input_filename);
     ok($error eq '', "Read $input_filename ok");
 
     # Resize, no compress, no convert
-    my $new_image = Obvius::DocType::Image->resize_image($image, $geometry);
+    my $new_image = $image->Clone();
+    $new_image = Obvius::DocType::Image->resize_image($image, $geometry);
     $error = $new_image->Write(filename => $output_resized);
     ok($error eq '', "Write $output_resized ok");
-    undef $image;
 
     # Resize, compress, no convert
-    ($image, $error) = get_image_object($input_filename);
-    my $new_compressed_image = Obvius::DocType::Image->resize_image($image, $geometry, $quality);
+    my $new_compressed_image = $image->Clone();
+    $new_compressed_image = Obvius::DocType::Image->resize_image($image, $geometry, $quality);
     $error = $new_compressed_image->Write(filename => $output_resized_compressed);
     ok($error eq '', "Write $output_resized_compressed ok");
-    undef $image;
+
+    # Do a binary comparison of output images (compare returns 0 if equal)
+    my $exists_diff_compressed_nocompressed = compare($output_resized, $output_resized_compressed) != 0;
+    if ((my $mimetype = $image->Get('mime')) ne 'image/jpeg') {
+        ok(!$exists_diff_compressed_nocompressed, "$mimetype skipped compression");
+    } else {
+        ok($exists_diff_compressed_nocompressed, 'Jpg file did compression');
+    }
+
 
     # Resize, compress, convert to gif
-    ($image, $error) = get_image_object($input_filename);
-    my $new_gif_image = Obvius::DocType::Image->convert_to_gif($image, $geometry);
+    my $new_gif_image = $image->Clone();
+    $new_gif_image = Obvius::DocType::Image->convert_to_gif($image, $geometry);
     $new_gif_image->Set('GIF');
     $error = $new_gif_image->Write(filename => $output_gif);
     ok($error eq '', "Write $output_gif ok");
@@ -87,7 +95,7 @@ sub test_convert_image {
     return 1;
 }
 
-# Convenience method for (re-)reading image from file
+# Convenience method for reading image from file
 sub get_image_object {
     my ($input_filename) = @_;
 

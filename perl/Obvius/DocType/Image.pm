@@ -238,7 +238,8 @@ sub get_resized_data {
                     $new_img = $this->convert_to_gif($image, $imagesize);
                     $mimetype = 'image/gif';
                 } else {
-                    $new_img = $this->resize_image($image, $imagesize);
+                    my $quality = $obvius->config->param('image_quality') || 60;
+                    $new_img = $this->resize_image($image, $imagesize, $quality);
                 }
 
                 # Set $image to the new one
@@ -298,7 +299,9 @@ sub convert_to_gif {
 
 sub resize_image {
     my ($this, $image, $imagesize, $quality) = @_;
-    if ($quality) {
+
+    # Only try to set quality if dealing with jpg images
+    if ($quality && $image->Get('mime') eq 'image/jpeg') {
         $image->Set(quality => $quality);
     }
     $image->Resize(geometry => $imagesize);
