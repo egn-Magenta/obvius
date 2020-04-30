@@ -50,6 +50,7 @@ requires 'Image::Size';
 #requires 'Image::Magick';
 requires 'JSON';
 requires 'JSON::PP';
+requires 'JSON::SL';
 requires 'Locale::Maketext::Extract';
 requires 'Locale::Messages';
 requires 'LWP';
