@@ -150,7 +150,8 @@ sub get_resized_data {
     my $siteobj = $r->pnotes('site');
     my $cachedir = $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY};
 
-    my $imagedir = $cachedir . '/sizedimagecache/' . $vdoc->DocId . '/' . $vdoc->Version . '/';
+    my $image_cache_dirname = $use_legacy_version ? '/sizedimagecache/' : '/resizedimagecache/';
+    my $imagedir = $cachedir . $image_cache_dirname . $vdoc->DocId . '/' . $vdoc->Version . '/';
 
     my $cachefile = $imagedir . $size;
 
