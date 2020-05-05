@@ -82,6 +82,31 @@ unit-test:
           - $CI_PROJECT_DIR/db-cover/
         reports:
             junit: $CI_PROJECT_DIR/db-cover/junit.xml
+
+# Image resizing test
+# Only run if we change the module, the test or the input files
+# Or we edit this file itself
+image-test:
+    stage: test
+    image: ${IMAGE_SHA}
+    only:
+        changes:
+          - perl/Obvius/DocType/Image.pm
+          - perl/t/image-resize.t
+          - perl/t/testimages/**/*
+          - .gitlab-ci.yml
+    tags:
+        - docker
+    script:
+        - cd /var/www/obvius/perl
+        - cp t/testimages/input/* t/testimages/
+        - perl t/image-resize.t
+        - mkdir $CI_PROJECT_DIR/image_resize_output
+        - mv t/testimages/output/* $CI_PROJECT_DIR/image_resize_output/
+    artifacts:
+        when: on_success
+        paths:
+            - $CI_PROJECT_DIR/image_resize_output/
     
 
 # Release stage
