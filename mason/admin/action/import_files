@@ -17,8 +17,7 @@
 F&oslash;lgende filer fra zipfilen blev ikke uploadet:<br />
 
 <table>
-%   foreach ( keys %files )
-%   {
+%   foreach ( keys %files ) {
       <tr>
 %     my $file = $files{$_};
 %     if ( defined( $file->{error} ) ) {                                                                    
@@ -44,65 +43,66 @@ my $zip_path = $r->pnotes('site')->{BASE} . "/var/picture_upload/";
 my $error;
 my %files = ();  
 
-if ( $r->param( "import_files_do" ) )
-{    
+if ( $r->param( "import_files_do" ) ) {
     $u = $obvius->lookup_document( $dest_url );
-    if ( $u )
-    {
+    if ( $u ) {
         # Make a temp dir for this session
         my $tmp = time();
         mkdir ( $zip_path . $tmp );
         $zip_path .= $tmp;
 
-	$dest_url = $r->param( "import_pictures_dest_url" );
+        $dest_url = $r->param( "import_pictures_dest_url" );
 
         my $upload;
 
         for (( $r->upload )) {
-    	    if ( $_->name =~ m/^zip_file$/ ) {
-		$upload = $_;
-		last;
-	    }
-	}
+            if ( $_->name =~ m/^zip_file$/ ) {
+            $upload = $_;
+            last;
+            }
+        }
 
         if ( $upload ) {
-    	    if ( $upload->filename ne '' and $upload->size != 0 and my $fh = $upload->fh ) {
-		my $filename = $tmp . ".zip";
-		local $/ = undef;
-		my $zip_file_name = $zip_path . "/" . $filename;
-		if(open(FILE, ">$zip_file_name")) {
-		    print FILE <$fh>;
-		    close(FILE);
-		}
-		my $extract_dir = $zip_path . '/output';
-		mkdir($extract_dir);
+            if ( $upload->filename ne '' and $upload->size != 0 and my $fh = $upload->fh ) {
+                my $filename = $tmp . ".zip";
+                local $/ = undef;
+                my $zip_file_name = $zip_path . "/" . $filename;
+                if(open(FILE, ">$zip_file_name")) {
+                    print FILE <$fh>;
+                    close(FILE);
+                }
+                my $extract_dir = $zip_path . '/output';
+                mkdir($extract_dir);
 
-		if(system('unzip', '-d', $extract_dir, $zip_file_name) == 0) {
-		    File::Find::find(sub {
-			if(-f $File::Find::name) {
-			    my $fname = $_;
-			    my %info = (
-				orgFile => $File::Find::name,
-	                        short => $fname
-	                    );
-			    return if($File::Find::name =~ m!__MACOSX/!);
-			    my $result = $m->comp(
-				'import_files:do',
-				source=>$File::Find::name,
-				dest_url=>$dest_url
-			    );
-			    unless ($result) {
-				$info{error} = 1;
-				$error = 1;
-			    }
-			    $files{$fname} = \%info;
-			}
-		    }, $extract_dir);
-		} else {
-		    $error = 1;
-		}
-	    }
-	}
+                if(system('unzip', '-d', $extract_dir, $zip_file_name) == 0) {
+                    File::Find::find(sub {
+                        if(-f $File::Find::name) {
+                            my $fname = $_;
+                            my %info = (
+                                orgFile => $File::Find::name,
+                                short => $fname
+                            );
+                            return if($File::Find::name =~ m!__MACOSX/!);
+                            my $result = $m->comp(
+                                'import_files:do',
+                                source=>$File::Find::name,
+                                dest_url=>$dest_url
+                            );
+                            unless ($result) {
+                                $info{error} = 1;
+                                $error = 1;
+                            }
+                            $files{$fname} = \%info;
+                        }
+                    }, $extract_dir);
+                } else {
+                    $error = 1;
+                }
+                rmtree($extract_dir);
+            }
+        }
+
+        rmtree($zip_path);
     }
 }
 
@@ -110,6 +110,7 @@ if ( $r->param( "import_files_do" ) )
 <%once>
 use POSIX qw(strftime);
 use File::Find;
+use File::Path;
 </%once>
 
 
@@ -130,16 +131,17 @@ sub upload_image {
     open ($fh, $filename) or return 0;
     
     my $path = $m->scomp('/shared/place_file_in_upload',
-                             fh => $fh,
-			     type => $mime_type,
-			     filename => $filename);
+                 fh => $fh,
+                 type => $mime_type,
+                 filename => $filename
+                 );
     
     
     seek $fh, 0, 0;
     my $raw;
     do {
-     local $/ = undef;
-     $raw = <$fh>
+        local $/ = undef;
+        $raw = <$fh>
     };
     close $fh;
     my ( $w, $h ) = imgsize( \$raw );
@@ -151,14 +153,13 @@ sub upload_image {
     $data->param( mimetype => $mime_type );
 
     my %args=(
-	      name=>$title,
-	      grpid=>1,
-	      lang=>"da",
-	      doctypeid=>$obvius->get_doctype_by_name("Image")->Id,
-	      fields=>$data,
-	     );
+          name=>$title,
+          grpid=>1,
+          lang=>"da",
+          doctypeid=>$obvius->get_doctype_by_name("Image")->Id,
+          fields=>$data,
+         );
     return \%args;
-
 }
 
 sub upload_file {
@@ -170,42 +171,38 @@ sub upload_file {
     open (FH, $f) or return 0;
 
     my $filename =  $m->scomp('/shared/place_file_in_upload', 
-			  fh => \*FH, 
-			  type => $mime_type,
-			  filename => $title);
-
+              fh => \*FH, 
+              type => $mime_type,
+              filename => $title);
 
     $data->param( mimetype => $mime_type);
     $data->param( size => -s $f );
     $data->param( uploadfile => $filename);
 
     my %args=(
-	      name=>$title,
-	      grpid=>1,
-	      lang=>"da",
-	      doctypeid=>$obvius->get_doctype_by_name("FileUpload")->Id,
-	      fields=>$data,
-	     );
+          name=>$title,
+          grpid=>1,
+          lang=>"da",
+          doctypeid=>$obvius->get_doctype_by_name("FileUpload")->Id,
+          fields=>$data,
+         );
 
     return \%args;
 }
 
-my @fe_array = ({ regex => qr|\.jpe?g$|,
-		 mime_type => "image/jpeg"},
-	       { regex => qr|\.bmp$|,
-		 mime_type => "image/bmp" },
-	       { regex => qr|\.gif$|,
-		 mime_type => "image/gif" },
-	       { regex => qr|\.txt$|, 
-		 mime_type => "text/plain"},
-	       { regex => qr|.*|,
-		 mime_type => "application/octet-stream"});
+my @fe_array = (
+    { regex => qr|\.jpe?g$|,  mime_type => "image/jpeg"},
+    { regex => qr|\.bmp$|,    mime_type => "image/bmp" },
+    { regex => qr|\.gif$|,    mime_type => "image/gif" },
+    { regex => qr|\.txt$|,    mime_type => "text/plain"},
+    { regex => qr|.*|,        mime_type => "application/octet-stream"}
+);
 
 
-my @mime_array = ({ regex => qr|image/|,
-		    function => \&upload_image},
-		  { regex => qr|.*|,
-		    function => \&upload_file });
+my @mime_array = (
+    { regex => qr|image/|, function => \&upload_image},
+    { regex => qr|.*|,     function => \&upload_file }
+);
 
 my $parent = $obvius->lookup_document( $dest_url );
 die "Could not find dest path ($dest_url)" unless( $parent );
@@ -213,11 +210,11 @@ die "Could not find dest path ($dest_url)" unless( $parent );
 
 # Prepare a data fieldset for the document
 my $data = new Obvius::Data( seq             => '-10',
-			     sortorder       => '+seq,+title',
-			     expires         => '9999-01-01 00:00:00',
-			     docdate         => strftime('%Y-%m-%d 00:00:00', localtime),
-			     subscribeable   => 'none',
-			     );
+                 sortorder       => '+seq,+title',
+                 expires         => '9999-01-01 00:00:00',
+                 docdate         => strftime('%Y-%m-%d 00:00:00', localtime),
+                 subscribeable   => 'none',
+                 );
 
 # Get filename and set it as title
 
@@ -236,19 +233,19 @@ eval {
 
 if (!defined($mime_type)) {
     for (@fe_array) {
-	my $r = $_->{regex};
-	if ( $source =~ /$r/) {
-	    $mime_type = $_->{mime_type};
-	    last;
-	}
+        my $r = $_->{regex};
+        if ( $source =~ /$r/) {
+            $mime_type = $_->{mime_type};
+            last;
+        }
     }
 }
 
 for (@mime_array) {
     my $regex = $_->{regex};
     if ($mime_type =~ /$regex/) {
-	$args = $_->{function}->($data, $source, $mime_type, $obvius);
-	last;
+        $args = $_->{function}->($data, $source, $mime_type, $obvius);
+        last;
     }
 }
 
@@ -264,8 +261,7 @@ my ($status, $message)=$obvius->send_order(
 );
 
 
-if ( $status eq "OK" )
-{
+if ( $status eq "OK" ) {
     # Reset the args array
     my %args = ();
       
@@ -280,35 +276,30 @@ if ( $status eq "OK" )
     
     # Load the default values
     for(keys %{$doctype->{PUBLISH_FIELDS}}) {
-	my $default_value = $doctype->{PUBLISH_FIELDS}->{$_}->{DEFAULT_VALUE};
-	$publish_fields->param($_ => $default_value)  if(defined($default_value));
+        my $default_value = $doctype->{PUBLISH_FIELDS}->{$_}->{DEFAULT_VALUE};
+        $publish_fields->param($_ => $default_value)  if(defined($default_value));
     }
     
     # published always defaults to now:
     $publish_fields->param('published' => $r->notes('now'));
     # Set the version and publish fields on the args hash
-    $args{version} = $new_vdoc->Version if ( $new_vdoc );	
+    $args{version} = $new_vdoc->Version if ( $new_vdoc );    
     $args{publish_fields} = $publish_fields;
     
     ($status, $message)=$obvius->send_order(
-					       docid=>$new_doc->Id,
-					       user=>$obvius->user,
-					       command=>'publish',
-					       args=>\%args,
-					       );
-    if ( $status eq "OK" )
-    {
-      return 1;
+                           docid=>$new_doc->Id,
+                           user=>$obvius->user,
+                           command=>'publish',
+                           args=>\%args,
+                           );
+    if ( $status eq "OK" ) {
+        return 1;
+    } else {
+        return 0;
     }
-    else
-    {
-      return 0;
-    }
-      
-}
-else
-{
-  return 0;
+
+} else {
+    return 0;
 }
 
 </%init>
