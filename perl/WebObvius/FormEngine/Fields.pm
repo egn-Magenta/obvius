@@ -155,6 +155,7 @@ sub is_multivalue { 0 }
 sub edit_component { "input.mason" }
 sub label_component { "label.mason" }
 sub field_component { "field.mason" }
+sub wrapper_tag { }
 
 sub extra_attributes { (); }
 
@@ -933,6 +934,7 @@ our @ISA = qw(WebObvius::FormEngine::Fields::Radio);
 
 sub type { "yesno" }
 sub input_type { "radio" }
+sub wrapper_tag { 'fieldset' }
 
 sub new {
     my ($package, $form, $name, %data) = @_;
