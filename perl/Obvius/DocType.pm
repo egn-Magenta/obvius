@@ -8,10 +8,10 @@ package Obvius::DocType;
 #                         aparte A/S, Denmark (http://www.aparte.dk/)
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #          Peter Makholm
-#          René Seindahl
-#          Adam Sjøgren (asjo@magenta-aps.dk)
+#          RenÃ© Seindahl
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -185,6 +185,75 @@ sub set_solr_field {
 	    $fieldhash->{$key} = $spec;
 	}
     }
+}
+
+# Default fieldspec for JSON export of a $vdoc
+# Individual DocTypes can override one or many of the fields
+# Possible keys per field:
+## source = ('version'|'vfield'); denotes whether value is tied to the vdoc itself or a vfield
+## field_name = <string>; allows overriding the name of field we are looking for
+## function = sub {}; a function to run to process the value of the field
+## function_extra_args = ['hostmap', 'obvius']; extra context needed to run the function
+sub get_news_feed_fields {
+    my ($self) = @_;
+
+    my $fieldmap = {
+        docid => {
+            source => 'version',
+            field_name => 'DocId'
+        },
+        title => {
+            source => 'vfield'
+        },
+        teaser => {
+            source => 'vfield',
+            function => sub {
+                # Strip HTML
+                my ($teaser) = @_;
+                $teaser =~ s|<.+?>||g;
+                $teaser =~ s|&nbsp;||g;
+                return $teaser;
+            }
+        },
+        public_url => {
+            source => 'version',
+            field_name => 'DocId',
+            function_extra_args => ['hostmap', 'obvius'],
+            function => sub {
+                my ($value, %extra_args) = @_;
+                my $obvius = $extra_args{'obvius'};
+                my $hostmap = $extra_args{'hostmap'};
+
+                my $doc = $obvius->get_doc_by_id($value);
+                if (!$doc) {
+                    return;
+                }
+
+                my $uri = $obvius->get_doc_uri($doc);
+                return $hostmap->get_full_url($uri);
+            }
+        },
+        picture_url => {
+            source => 'vfield',
+            field_name => 'picture'
+        },
+        tags => {
+            source => 'vfield',
+            function => sub {
+                my ($tags) = @_;
+                if (!$tags) {
+                    return '';
+                }
+                # Convert to comma-separated list
+                if (ref $tags ne 'ARRAY') {
+                    $tags = [ $tags ];
+                }
+                return join q{,}, @{$tags};
+            }
+        }
+
+    };
+    return $fieldmap;
 }
 
 # action - the action method in the document type is called by Obvius
@@ -598,10 +667,10 @@ sub validate_data {
 	}
 
 	if ($ok) {
-	    #print STDERR "VALID $_ = «$value»\n";
+	    #print STDERR "VALID $_ = $value\n";
 	    push(@valid, $_);
 	} else {
-	    #print STDERR "INVALID $_ = «$value»\n";
+	    #print STDERR "INVALID $_ = $value\n";
 	    push(@invalid, $_);
 	}
     }
@@ -699,10 +768,10 @@ stub-methods here define the interface that Obvius::DocType::* have.
 
 =head1 AUTHOR
 
- Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+ JÃ¸rgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
  Peter Makholm
- René Seindahl
- Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
+ RenÃ© Seindahl
+ Adam SjÃ¸gren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
