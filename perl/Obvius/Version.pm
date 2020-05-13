@@ -7,9 +7,9 @@ package Obvius::Version;
 # Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #                         aparte A/S (http://www.aparte.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk)
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk),
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@ our $VERSION="1.0";
 
 our %SOLR_MAPS = ();
 our %SOLR_FIELD_LISTS = ();
+
+our %NEWS_FEED_FIELD_MAPS = ();
 
 use Carp;
 
@@ -81,6 +83,58 @@ sub real_doctype {
      } else {
 	  return $obvius->get_doctype_by_id($this->Type);
      }
+}
+
+##############################
+####### Export to JSON #######
+##############################
+sub export_to_news_feed {
+    my ($self, $obvius, $hostmap) = @_;
+
+    my $doctype = $obvius->get_doctype_by_id($self->Type);
+    $hostmap ||= $obvius->config->param('hostmap') || Obvius::Hostmap->new_with_obvius($obvius);
+
+    # These are used as function arguments when processing values
+    my %context = ('hostmap' => $hostmap, 'obvius' => $obvius);
+
+    # Load cached fieldmap if possible, set cache otherwise
+    my $fieldmap = $NEWS_FEED_FIELD_MAPS{$doctype->Id};
+    if (!$fieldmap) {
+        $fieldmap = $NEWS_FEED_FIELD_MAPS{$doctype->Id} = $doctype->get_news_feed_fields();
+    }
+
+    # We preload vfield data to avoid individual calls to get_version_fields
+    # For fields with source marked as 'vfield', use the overridden field name or the key itself
+    my @vfield_list = map { $fieldmap->{$_}->{field_name} || $_ } grep { $fieldmap->{$_}->{source} eq 'vfield' } keys %{$fieldmap};
+    $obvius->get_version_fields($self, \@vfield_list);
+
+    my $result = {};
+    # Iterate over keyvalpairs in fieldmap
+    while (my ($name, $field_spec) = each %{$fieldmap}) {
+        my $source = $field_spec->{source};
+        my $field_name = $field_spec->{field_name} || $name;
+        my $raw_value = '';
+        if ($source eq 'vfield') {
+            $raw_value = $self->field($field_name);
+        } elsif ($source eq 'version') {
+            $raw_value = $self->$field_name;
+        }
+
+        # If field has a custom function defined
+        if ((my $func = $field_spec->{function})) {
+            # Allow loading %context into function
+            my $extra_arg_names = $field_spec->{function_extra_args};
+            my %extra_args;
+            if ($extra_arg_names) {
+                %extra_args = %{ {map { $_ => $context{$_}} @$extra_arg_names }};
+            }
+            # Call function with optional extra args
+            $result->{$name} = $func->($raw_value, %extra_args);
+        } else {
+            $result->{$name} = $raw_value;
+        }
+    }
+    return $result;
 }
 
 ####################################################
@@ -249,9 +303,9 @@ Obvius::Data with specialized AUTOLOAD and field-methods..
 
 =head1 AUTHORS
 
-Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>,
-René Seindal,
-Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
+JÃ¸rgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>,
+RenÃ© Seindal,
+Adam SjÃ¸gren E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
