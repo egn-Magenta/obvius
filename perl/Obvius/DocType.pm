@@ -277,7 +277,9 @@ sub is_cacheable { return 1; }
 # alternate_location - if this method returns a string, Obvius
 #                      redirects to the location given in the
 #                      string. Return undef to avoid redirection.
-sub alternate_location { return undef; }
+#                      Second return parameter indicates redirect
+#                      status code, ie. 301 or 302
+sub alternate_location { return (undef, undef); }
 
 # internal_redirect - 	if the document should serve the contents of a local
 #			static file residing inside the document root this

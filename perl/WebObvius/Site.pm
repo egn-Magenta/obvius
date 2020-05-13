@@ -8,10 +8,10 @@ package WebObvius::Site;
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #          Peter Makholm (pma@fi.dk)
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk),
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -315,9 +315,11 @@ sub obvius_document_version {
 
 # Perform a redirect
 sub redirect {
-    my ($this, $req, $uri, $force_external) = @_;
+    my ($this, $req, $uri, $force_external, $http_status) = @_;
 
-    $this->tracer($req, $uri, $force_external||'undef') if ($this->{DEBUG});
+    $http_status ||= REDIRECT;
+
+    $this->tracer($req, $uri, $force_external||'undef', $http_status) if ($this->{DEBUG});
 
     if ($uri =~ m!^(=)?/!) {
         if ($1) {
@@ -352,11 +354,11 @@ sub redirect {
         $req->headers_in->unset('Content-Length');
     }
 
-    $req->status(REDIRECT);
+    $req->status($http_status);
     $req->headers_out->add(Location => $uri);
     $req->send_http_header;
 
-    return REDIRECT;
+    return $http_status;
 }
 
 sub set_expire_header {
@@ -515,7 +517,7 @@ sub generate_subsite {
 }
 
 # $this er evt. en subsite (hvis this != site)
-# $site er forældre-siten
+# $site er forÃ¦ldre-siten
 sub generate_page {
     my ($this, $site, $req, $doc, $vdoc, $doctype, $obvius, %options) = @_;
 
@@ -709,9 +711,10 @@ sub handler ($$) {
         return $res if(defined($res));
     }
 
-    if (my $alternate = $doctype->alternate_location($doc, $vdoc, $obvius)) {
+    my ($alternate, $http_status) = $doctype->alternate_location($doc, $vdoc, $obvius);
+    if ($alternate) {
         return NOT_FOUND if (Apache->define('NOREDIR'));
-        return $this->redirect($req, $alternate, 'force-external');
+        return $this->redirect($req, $alternate, 'force-external', $http_status);
     }
 
     $benchmark-> lap( 'raw data') if $benchmark;
@@ -1202,10 +1205,10 @@ None by default.
 
 =head1 AUTHORS
 
-Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+JÃ¸rgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
 Peter Makholm E<lt>pma@fi.dk<gt>
-René Seindal
-Adam Sjøgren E<lt>asjo@magenta-aps.dk<gt>
+RenÃ© Seindal
+Adam SjÃ¸gren E<lt>asjo@magenta-aps.dk<gt>
 
 =head1 SEE ALSO
 

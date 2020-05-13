@@ -365,11 +365,10 @@ sub handler ($$) {
      # The document can have a "alternate_location" method if the user
      # should be redirected to a different URL.
      # The method should return a path or URL to the new location.
-     my $alternate;
-     $alternate = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri) if (!$is_admin);
+     my ($alternate, $http_status) = $doctype->alternate_location($doc, $vdoc, $obvius, $req->uri) if (!$is_admin);
      if($alternate) {
           return NOT_FOUND if (Apache->define('NOREDIR'));
-          return $this->redirect($req, $alternate, 'force-external');
+          return $this->redirect($req, $alternate, 'force-external', $http_status);
      }
      # For collecting newsletter statistics:
      my $collect_newsletter_stats = ($obvius->config->param('newsletter_collect_stats') || 0);
