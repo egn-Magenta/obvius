@@ -12,6 +12,26 @@ use Obvius::Hostmap;
 my $obvius_ref;
 my $hostmap_ref;
 
+=pod
+General usage:
+
+    Before the module can be used it needs a reference to an Obvius object.
+    This only has to be set once:
+
+    # Load the module
+    use Obvius::URL;
+
+    # Set Obvius reference.
+    Obvius::URL->set_obvius($some_obvius_object);
+
+    # Start making instanses
+    my $url = Obvius::URL->new("/some/path/");
+
+    Not that Obvius::URL will have a weakened reference to the Obvius object.
+    If the Obvius object goes out of scope Obvius::URL will lose its reference
+    to it.
+
+=cut
 
 =head1 METHODS
 
@@ -23,7 +43,14 @@ Examples:
 
     my $url = Obvius::URL->new("/some/path/")
     my $url = Obvius::URL->new("/1234.docid")
+    my $url = Obvius::URL->new(1234);
     my $url = Obvius::URL->new("https://example.com:666/some/path/?param=value#fragment")
+
+    my $doc = $obvius->get_doc_by_id(1234);
+    my $url = Obvius::URL->new($doc);
+
+    my $vdoc = $obvius->get_public_version($doc);
+    my $url = Obvius::URL->new($vdoc);
 
     my $uri = URI->new(...)
     Obvius::URL->new($uri)
@@ -35,7 +62,10 @@ Input:
     One of:
         - A path
         - A path in /<docid>.docid format
+        - A docid
         - A full URL
+        - An Obvius document
+        - An Obvius version
         - An URI object
         - Another Obvius::URL object
 
@@ -243,8 +273,6 @@ sub _resolve_relative_to_root {
             $self->{obvius_path} = $non_admin_uri;
         }
     }
-
-    # TODO: Handle when the path is relative to a subsite
 }
 
 # Method intended for internal use: Handles sources that provide a

@@ -41,6 +41,8 @@ $validation
 %
 <%once>
 use Image::Magick;
+use File::Type;
+
 my %check_extension_types = map { $_ => 1 } qw(
     application/octet-stream
     application/x-zip-compressed
@@ -68,19 +70,12 @@ if ($upload) {
 
         my $mimetype = $data->{mimetype}= $upload->type;
 	if($check_extension_types{$mimetype} and (-r "/etc/mime.types")) {
-	    my ($extension) = ($upload->filename =~ m!\.([^.]+)$!);
-	    if($extension) {
-		open(FH, "/etc/mime.types") or die "Couldn't open /etc/mime.types";
-		while(<FH>) {
-		    my($type, $rest) = m!^(\S+)\s+(.*)$!;
-		    my @exts = split(/\s+/, $rest);
-		    if(grep { $_ eq $extension } @exts) {
-			$mimetype = $data->{mimetype} = $type;
-			last;
-		    }
-		}
-		close(FH);
-	    }
+
+		my $ft = File::Type->new();
+		my $slurp_data;
+		$upload->slurp($slurp_data);
+		$mimetype = $data->{mimetype} = $ft->mime_type($slurp_data);
+
 	}
         $data->{size}= $upload->size;
 
