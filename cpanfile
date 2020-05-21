@@ -51,6 +51,7 @@ requires 'Image::Size';
 requires 'JSON';
 requires 'JSON::PP';
 requires 'JSON::SL';
+requires 'List::Compare';
 requires 'Locale::Maketext::Extract';
 requires 'Locale::Messages';
 requires 'LWP';
