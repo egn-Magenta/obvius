@@ -20,6 +20,7 @@ requires 'Date::Calc';
 #requires 'Date::ICal';
 requires 'DateTime';
 requires 'DateTime::Format::Oracle';
+requires 'DateTime::Format::Duration';
 #requires 'DBD::mysql';
 #requires 'DBD::Sybase';
 requires 'DBI';
