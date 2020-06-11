@@ -58,6 +58,11 @@ if ($obvius_perform_cancel) {
     # Always redirect:
     $m->comp('/shared/redirect', location=>'./?obvius_session_id=' . $session->{_session_id});
 }
+# If a download was requested, run the command in a comp (instead of scomp)
+# to let the command write directly to $r
+if ($r->param("obvius_download")) {
+    return $m->comp("/action/$command", %ARGS);
+}
 $r->pnotes('common_data'=>$m->scomp("/action/$command", %ARGS));
 $m->comp('perform_action_local', %ARGS); # Notice the calls, on redirect above, as well.
 </%init>

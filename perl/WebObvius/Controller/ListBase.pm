@@ -6,6 +6,7 @@ use utf8;
 use POSIX qw(ceil);
 
 use URI::Escape;
+use Spreadsheet::WriteExcel;
 
 use base 'WebObvius::Controller::ActionController';
 
@@ -15,6 +16,10 @@ our %valid_order_by = map { $_ => 1 } qw(asc desc);
 sub default_pagesize { 10 }
 sub pagesizes {
     return (10, 20, 50, 100, 'all');
+}
+
+sub spreadsheet_filename {
+    return 'list';
 }
 
 # List of field to display in the list
@@ -205,11 +210,17 @@ sub get_limit_sql {
     my $limit_sql = "";
     my @sql_args;
 
-    if (!(grep { $_ eq $pagesize } $self->pagesizes)) {
-        $pagesize = $self->default_pagesize;
-    }
-    if ($page !~ m{^\d+$} || $page < 1) {
+    if ($r->param('obvius_download')) {
+        # If we're downloading a file, force pagesize="all" and page=1
+        $pagesize = 'all';
         $page = 1;
+    } else {
+        if (!(grep {$_ eq $pagesize} $self->pagesizes)) {
+            $pagesize = $self->default_pagesize;
+        }
+        if ($page !~ m{^\d+$} || $page < 1) {
+            $page = 1;
+        }
     }
 
     if($pagesize eq "all") {
@@ -290,9 +301,70 @@ sub pager_info {
     return $self->{pager_info};
 }
 
-sub perform_default { shift->perform_search(@_) }
+sub perform_default {
+    my ($self) = @_;
+    my $download = $self->r->param("obvius_download");
+    if (defined($download)) {
+        return $self->download($download);
+    }
+    return $self->perform_search()
+}
 
 sub perform_search {
+    my ($self) = @_;
+    return $self->output_template(
+        'search',
+        results => $self->do_query()
+    );
+}
+
+sub download {
+    my ($self, $type) = @_;
+    if ($type eq "excel") {
+        return $self->download_excel();
+    }
+    $self->m->abort(400);
+}
+
+sub download_excel {
+    my ($self) = @_;
+    my $m = $self->m;
+    my $r = $self->r;
+    my $results = $self->do_query();
+    my $filename = $self->spreadsheet_filename . ".xls";
+    open my $fh, '>', \my $buffer;
+    my $excel = Spreadsheet::WriteExcel->new($fh);
+    my $format = $excel->add_format();
+    $format->set_bold();
+    my $worksheet = $excel->add_worksheet();
+    my ($row, $col) = (0, 0);
+    my @fields = $self->field_list();
+    for my $field (@fields) {
+        $worksheet->write($row, $col++, $field->{title}, $format);
+    }
+    for my $entry (@{$results}) {
+        $col = 0;
+        $row++;
+        for my $cell (@{$entry->{'fieldlist'}}) {
+            $worksheet->write($row, $col++, $cell->{display_value});
+        }
+    }
+    $excel->close();
+    close($fh);
+
+    $r->content_type("application/vnd.ms-excel");
+    $r->set_content_length(length($buffer));
+    $r->header_out("Content-Disposition", "attachment; filename=$filename");
+    $r->send_http_header;
+    if ($r->header_only) {
+        return 200;
+    }
+    $r->print($buffer);
+    $m->flush_buffer();
+    $m->abort();
+}
+
+sub do_query {
     my ($self) = @_;
 
     my ($query_sql, $query_args, $count_sql) = $self->get_query_sql;
@@ -345,12 +417,10 @@ sub perform_search {
         }
         $sth->finish();
     }
+
     $self->{result_count} = $count;
 
-    return $self->output_template(
-        'search',
-        results => \@result
-    );
+    return \@result;
 }
 
 1;
