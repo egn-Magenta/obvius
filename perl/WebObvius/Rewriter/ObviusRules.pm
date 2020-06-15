@@ -121,7 +121,7 @@ sub rewrite {
 package WebObvius::Rewriter::ObviusRules::SubSites;
 
 use Obvius::Hostmap;
-use WebObvius::Rewriter::RewriteRule qw(REDIRECT REWRITE);
+use WebObvius::Rewriter::RewriteRule qw(REDIRECT REDIRECT_PERMANENT REWRITE);
 use WebObvius::Cache::MysqlApacheCache::QueryStringMapper;
 
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
@@ -200,9 +200,10 @@ sub rewrite {
         my $rest = $1 || '/';
         if($subsite_uri) {
             $subsite_uri =~ s!/$!!;
-            return (REDIRECT, "$protocol://$roothost/admin$subsite_uri$rest");
+            return (REDIRECT_PERMANENT,
+                    "$protocol://$roothost/admin$subsite_uri$rest");
         } else {
-            return (REDIRECT, "$protocol://$roothost/admin$rest");
+            return (REDIRECT_PERMANENT, "$protocol://$roothost/admin$rest");
         }
     }
 
@@ -233,7 +234,7 @@ sub rewrite {
         if($no_ending_slash) {
             $new_uri =~ s{/$}{};
         }
-        return (REDIRECT, $new_uri);
+        return (REDIRECT_PERMANENT, $new_uri);
     }
 
     if($rewritten) {
