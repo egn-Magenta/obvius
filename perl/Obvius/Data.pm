@@ -6,8 +6,8 @@ package Obvius::Data;
 #
 # Copyright (C) 2001-2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Authors: René Seindal (rene@magenta-aps.dk)
-#          Adam Sjøgren (asjo@magenta-aps.dk)
+# Authors: RenÃ© Seindal (rene@magenta-aps.dk)
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -258,8 +258,8 @@ sub tracer {
     print STDERR "- $subroutine($this, @_)\n\tat $filename: $line\n";
 }
 
+sub TO_JSON { return { %{ shift() } }; }
 
-
 1;
 __END__
 # Below is stub documentation for your module. You better edit it!
