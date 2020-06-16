@@ -395,6 +395,12 @@ sub do_query {
                     $field->{to_display_value}($rec):
                     $raw_value
             };
+            my $link = $field->{link};
+            if (defined($link)) {
+                # Replace ${x} with $rec->{x} in the link
+                $link =~ s/\$\{\s*([^\}\s]+)\s*\}/$rec->{$1}/e;
+                $data->{link} = $link;
+            }
             push(@list, $data);
             $by_name{$field->{name}} = $data;
         }
