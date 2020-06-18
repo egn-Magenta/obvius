@@ -28,6 +28,7 @@ libtext-iconv-perl
 libxml-libxslt-perl
 
 # Various system tools and developer nice-to-haves
+awstats
 locales
 perlmagick
 vim
@@ -37,3 +38,5 @@ mariadb-client
 net-tools
 git
 curl
+rsync
+ssh-client
