@@ -1,3 +1,13 @@
+#### Perl packages needed for running Obvius
+##
+## These are all installed by App::Cpanminus using
+## `cpanm --installdeps .`
+##
+## Packages commented out are not able to be installed from cpan
+## Instead, they are installed using the OS package manager but
+## are kept here for documentation reasons. Updating to a newer
+## version of Perl or using another base OS may necessitate
+## changes.
 requires 'Algorithm::Diff';
 requires 'Apache::Session';
 requires 'Apache::Test';
@@ -25,7 +35,7 @@ requires 'DateTime::Format::Duration';
 #requires 'DBD::Sybase';
 requires 'DBI';
 requires 'DBIx::Class';
-requires 'DBIx::Recordset';
+#requires 'DBIx::Recordset';
 requires 'Devel::Cover';
 requires 'Devel::Cover::Report::Clover';
 requires 'Digest::SHA1';
