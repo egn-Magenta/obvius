@@ -26,6 +26,8 @@ requires 'Convert::NLS_DATE_FORMAT';
 #requires 'Crypt::SMIME';
 requires 'Crypt::TripleDES';
 requires 'Data::Compare';
+requires 'Database::Migrator';
+requires 'Database::Migrator::mysql';
 requires 'Date::Calc';
 #requires 'Date::ICal';
 requires 'DateTime';
