@@ -37,6 +37,7 @@ ENV PERL5LIB=/var/www/obvius/perl
 # Add source code
 COPY --chown=www-data:www-data ./bin ./bin
 COPY --chown=www-data:www-data ./catalyst_utils ./catalyst_utils
+COPY --chown=www-data:www-data ./db ./db
 COPY --chown=www-data:www-data ./docs ./docs
 COPY --chown=www-data:www-data ./i18n ./i18n
 COPY --chown=www-data:www-data ./mason ./mason
