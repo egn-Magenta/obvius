@@ -10,6 +10,7 @@ use warnings;
 use Obvius::Config;
 use DBI;
 use POSIX qw(strftime);
+use Time::HiRes;
 use Data::Dumper;
 
 for my $confname (@ARGV) {
@@ -21,8 +22,8 @@ for my $confname (@ARGV) {
 
         my $sitebase = $config->param('sitebase');
         die "No sitebase for $confname" unless($sitebase);
-        
-        die "Config $confname not configured to use cron queque"
+
+        die "Config $confname not configured to use cron queue"
             unless($config->param('use_cron_for_queue'));
 
         $sitebase =~ s!/$!!;
@@ -45,7 +46,7 @@ for my $confname (@ARGV) {
             $config->param('normal_db_passwd')
         ) or die "Couldn't connect to database for $confname";
 
-        # Select the 5 most recent unprocessed jobs
+        # Select the 50 most recent unprocessed jobs
         my $sth = $dbh->prepare(q|
             SELECT
                 id
@@ -62,12 +63,15 @@ for my $confname (@ARGV) {
                     status = ""
                 )
             ORDER BY date
-            LIMIT 5
+            LIMIT 50
         |);
         $sth->execute($time);
 
         while(my ($id) = $sth->fetchrow_array) {
             system("/var/www/obvius/bin/perform_order --site $confname $id >> $logfile 2>&1 &");
+            # Stagger jobs by 1 second to prevent failure due to concurrent database writes
+            # This also ensures we don't run out of memory
+            Time::HiRes::sleep(1);
         }
 
         # Make sure time file exists and set its mtime to when we started

@@ -8,7 +8,7 @@
 #
 #                   $ /var/www/obvius/bin/perform_order --site testobvius 17
 #
-# Copyright (C) 2005, Magenta ApS. By Adam Sjøgren. Under the GPL.
+# Copyright (C) 2005, Magenta ApS. By Adam SjÃ¸gren. Under the GPL.
 #
 # $Id$
 
@@ -69,13 +69,13 @@ my $order=$obvius->get_table_record('queue', { id=>$id });
 
 if (!$order) {
     # This is perfectly fine, the order was deleted:
-    $obvius->log->notice($obvius->config->Sitename . ": Couldn't find order $id on site $site");
+    $obvius->log->notice($obvius->config->param('sitename') . ": Couldn't find order $id on site $site");
     exit 0;
 }
 
 # Examine order-status and see if it is still to be run:
 if (defined $order->{status} and $order->{status} ne '') {
-    $obvius->log->notice($obvius->config->Sitename . ": Status is " . $order->{status} . " for order $id, skipping.");
+    $obvius->log->notice($obvius->config->param('sitename') . ": Status is " . $order->{status} . " for order $id, skipping.");
     exit 0;
 }
 
@@ -90,11 +90,11 @@ my %do_order=%$order;
 #  Unflatten arguments:
 $do_order{args}=Obvius::Queue::blowup($order->{args});
 
-#  Set user (XXX):
-my $user=$obvius->get_user($order->{user});
+# Do a table lookup instead of relying on user cache
+my $user=$obvius->get_user_from_db($order->{user});
 if (!$user) {
     my $failure="Could not locate user, id: " . $order->{user} . ", command not performed.";
-    $obvius->log->error($obvius->config->Sitename . ": $failure");
+    $obvius->log->error($obvius->config->param('sitename') . ": $failure");
     report_status_message($order, 'ERROR', $failure);
     exit 10;
 }
@@ -121,7 +121,7 @@ $complete_uri = $hostmap->absolute_uri($uri) if ($uri);
 my ($host) = $complete_uri =~ m|^([^/]+)|;
 
 $smtp=Net::SMTP->new($smtp);
-my $from='noreply@' . $obvius->config->Sitename;
+my $from='noreply@' . $obvius->config->param('sitename');
 my $to=$user->{email};
 my $now=localtime;
 my $subject= "$host: " . $order->{command} . ' ' . $order->{status};
@@ -153,7 +153,7 @@ $smtp->datasend(" Message: " . $order->{message}. "\n");
 $smtp->datasend("\n");
 $smtp->datasend("   " . $status_regards{$order->{status}} . ",\n");
 $smtp->datasend("\n");
-$smtp->datasend("    " . $obvius->config->Sitename . "\n");
+$smtp->datasend("    " . $obvius->config->param('sitename') . "\n");
 $smtp->dataend();
 $smtp->quit;
 
