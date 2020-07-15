@@ -152,9 +152,6 @@ sub export_to_solr {
     my $fieldsmap = $SOLR_MAPS{$doctype->Id};
     my $fieldlist = $SOLR_FIELD_LISTS{$doctype->Id};
     unless ( $fieldsmap ) {
-	if ( $doctype->Name =~ /^GeoNat/ ) {
-	    print STDERR "GotOne\n";
-	}
 	$fieldsmap = $SOLR_MAPS{$doctype->Id} = $doctype->get_solr_fields($obvius);
 	$fieldlist = [];
 	foreach my $mkey ( keys(%$fieldsmap) ) {
