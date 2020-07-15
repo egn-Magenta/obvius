@@ -497,20 +497,22 @@ sub execute_cache {
                     [uri => $req->uri],
                     [querystring => $qstring],
                 );
+                my $doctypename = 'None';
                 if(my $doctype = $req->pnotes('doctype')) {
-                    push(@logdata, [doctype => $doctype->Name]);
+                    $doctypename = $doctype->Name;
                 }
+                push(@logdata, [doctype => $doctypename]);
+                my $closest_subsite_id = 0;
                 if(my $doc = $req->pnotes('document')) {
                     my $closest_subsite = $obvius->find_closest_subsite($doc);
                     if($closest_subsite) {
                         my $subsite_info = $closest_subsite->param(
                             'subsite_info'
                         );
-                        push(@logdata, [
-                            closest_subsite => $subsite_info->{id} || ''
-                        ]);
+                        $closest_subsite_id = $subsite_info->{id} || 0;
                     }
                 }
+                push(@logdata, [closest_subsite => $closest_subsite_id]);
                 push(@logdata, [elapsed_time => $elapsed]);
 
                 # Output values as a JSON object with preserved key order.
