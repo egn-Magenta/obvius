@@ -75,6 +75,7 @@ requires 'Module::Install::Base';
 requires 'Mojo::DOM';
 requires 'Net::IDN::Encode';
 requires 'Net::LDAP';
+requires 'Number::Format';
 requires 'Params::Validate';
 requires 'Rose::DateTime';
 requires 'Rose::DB::Object';
