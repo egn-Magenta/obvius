@@ -28,6 +28,7 @@ libtext-iconv-perl
 libxml-libxslt-perl
 
 # Various system tools and developer nice-to-haves
+python
 awstats
 locales
 perlmagick
