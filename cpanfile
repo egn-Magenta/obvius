@@ -69,6 +69,7 @@ requires 'Locale::Maketext::Extract';
 requires 'Locale::Messages';
 requires 'LWP';
 requires 'LWP::MediaTypes';
+requires 'MCE::Shared';
 requires 'MD5';
 requires 'MIME::Types';
 requires 'Module::Install::Base';
