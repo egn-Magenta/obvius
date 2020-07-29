@@ -76,6 +76,7 @@ requires 'Mojo::DOM';
 requires 'Net::IDN::Encode';
 requires 'Net::LDAP';
 requires 'Number::Format';
+requires 'Parallel::ForkManager';
 requires 'Params::Validate';
 requires 'Rose::DateTime';
 requires 'Rose::DB::Object';
