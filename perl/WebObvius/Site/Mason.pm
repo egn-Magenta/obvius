@@ -60,6 +60,7 @@ use WebObvius::Apache
 use Digest::MD5 qw(md5_hex);
 
 use HTML::Mason;
+use HTML::Mason::ApacheHandler;
 
 use Digest::MD5 qw(md5_hex);
 
