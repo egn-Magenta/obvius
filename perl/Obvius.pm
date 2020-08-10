@@ -232,7 +232,20 @@ sub connect {
 }
 
 
-sub dbh { shift-> {DB}->{'*DBHdl'} }
+
+sub disconnect {
+    my ($this) = @_;
+    if ($this->{DB}) {
+        $this->dbh->disconnect();
+        delete $this->{DB};
+    }
+}
+
+
+sub dbh {
+    my ($this) = @_;
+    return $this->{DB}->{'*DBHdl'};
+}
 
 sub config {
     my ($this) = @_;
@@ -2820,7 +2833,7 @@ sub sanity_check {
 sub execute_command {
      my ($this, $sql, @args) = @_;
 
-     my $sth = $this->{DB}->DBHdl->prepare($sql);
+     my $sth = $this->dbh->prepare($sql);
 
      if (ref $args[0] eq 'ARRAY') {
           @args = @{$args[0]};
@@ -2835,27 +2848,28 @@ sub execute_command {
 
 sub execute_transaction {
      my ($this, $sql, @args) = @_;
+     my $dbh = $this->dbh;
 
      eval {
-          $this->{DB}->DBHdl->begin_work;
-          my $sth = $this->{DB}->DBHdl->prepare($sql);
+          $dbh->begin_work;
+          my $sth = $dbh->prepare($sql);
           $sth->execute(@args);
           $sth->finish();
      };
 
 
      if ($@) {
-	  $this->{DB}->DBHdl->rollback;
+	  $dbh->rollback;
 	  die $@;
      }
-     $this->{DB}->DBHdl->commit;
+     $dbh->commit;
 }
 
 
 sub execute_select {
      my ($this, $sql, @args) = @_;
 
-     my $sth = $this->{DB}->DBHdl->prepare($sql);
+     my $sth = $this->dbh->prepare($sql);
 
      $sth->execute(@args);
      my @res;
