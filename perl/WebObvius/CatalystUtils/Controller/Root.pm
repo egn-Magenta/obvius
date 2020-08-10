@@ -53,8 +53,6 @@ Attempt to render a view, if needed.
 
 sub end : ActionClass('RenderView') {
     my ($self, $c) = @_;
-
-    print STDERR "END\n";
 }
 
 =head1 AUTHOR
