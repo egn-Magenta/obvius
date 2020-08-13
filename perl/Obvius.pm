@@ -165,8 +165,6 @@ sub connect {
 
     return $this->{DB} if (defined($this->{DB}));
 
-    $this->{LOG}->debug( ref($this) . ": connecting");
-
     #
     # ACHTUNG: We should really make DBIx::Recordset::LOG a tied filehandle
     #          using $this->{LOG} as backend.
