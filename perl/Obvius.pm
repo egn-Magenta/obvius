@@ -133,9 +133,11 @@ sub new {
                                   FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
                                   LANGUAGES   => {},
-				  ENCRYPTION_HANDLER => (defined $options{'encryption_pphr'} ?
-							 Obvius::EncryptionModule->new($options{'encryption_pphr'}) :
-							 undef)
+                                  ENCRYPTION_HANDLER => (
+                                    defined $options{'encryption_pphr'} ?
+                                    Obvius::EncryptionModule->new($options{'encryption_pphr'}) :
+                                    undef
+                                  )
                                  );
 
     $this->{IGNORE_DOCTYPES} = $options{ignore_doctypes};
@@ -310,17 +312,29 @@ sub log {
 
 ########################################################################
 #
-#       Encryption handler
+#       Encryption
 #
 ########################################################################
 sub encryption_handler {
     my($this) = @_;
 
     if ( defined $this && defined $this->{ENCRYPTION_HANDLER} ) {
-	return $this->{ENCRYPTION_HANDLER};
+	    return $this->{ENCRYPTION_HANDLER};
     } else {
-	die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER \n";
+	    die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER";
     }
+}
+
+sub encrypt_value {
+    my ($this, $value) = @_;
+
+    return $this->encryption_handler->encrypt_data($value);
+}
+
+sub decrypt_value {
+    my ($this, $value) = @_;
+
+    return $this->encryption_handler->decrypt_data($value);
 }
 
 ########################################################################
@@ -1483,8 +1497,6 @@ sub get_version_fields {
     }
     $set->Disconnect;
 
-    $doctype->decrypt_fields($this, $fields);
-
     for (@$needed) {
 #        print STDERR "VFIELD STORE $_\n";
         my $fspec = $doctype->field($_, undef, $type);
@@ -2223,8 +2235,6 @@ sub create_new_document {               # RS 20010819 - ok
         $this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
         $this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
 
-        $doctype->encrypt_fields($this, $fields);
-
         my @fields = @{$status{valid}};
         # Same as new_version:
         push @fields, @{$status{invalid}}
@@ -2306,8 +2316,6 @@ sub create_new_version {
         $this->{LOG}->notice("Invalid fields stored anyway: @{$status{invalid}}\n") if ($status{invalid});
         $this->{LOG}->info("Missing fields stored undef: @{$status{missing}}\n") if ($status{missing});
         $this->{LOG}->info("Excess fields not stored: @{$status{excess}}\n") if ($status{excess});
-
-        $doctype->encrypt_fields($this, $fields);
 
         my @fields = @{$status{valid}};
         # Equivalent to new_document:
@@ -2542,8 +2550,6 @@ sub publish_version {
         die "Version document type does not exist\n" unless ($doctype);
 
         my %status = $doctype->validate_publish_fields($vdoc->publish_fields, $this);
-
-        $doctype->encrypt_fields($this, $vdoc->publish_fields);
 
         # published is not missing if we are doing a delayed publish.
         if($delayed_publish) {

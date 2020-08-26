@@ -340,7 +340,6 @@ sub add_fieldspecs {
         threshold
         default_value
         extra
-        encrypt
     );
 
     my %defaults = (
@@ -349,8 +348,7 @@ sub add_fieldspecs {
 	publish => 0,
 	threshold => 128,
 	searchable => 0,
-	sortable => 0,
-	encrypt => 0
+	sortable => 0
     );
 
     my $fspec_inserter = $dbh->prepare(

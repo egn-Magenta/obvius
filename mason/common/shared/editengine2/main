@@ -201,9 +201,6 @@ else {
                         # Determine type
                         my ($type) = $data_description->{$data}->{type} =~ /^(\w+)$/ if $data_description->{$data};
                         my ($status, $msg);
-                        my @display_array = grep { $_->{name} eq $data } @{$editscheme->{display}};
-                        my $display = $display_array[0];
-
                         if (!$type) {
                             #                        warn 'missing $type; template use?';
                             $status = '(internal)';
@@ -214,11 +211,6 @@ else {
                                                        id=>$data, 
                                                        validation=>$data_description->{$data},
                                                        global_data => WebObvius::Storage::key_to_identifiers(undef, $object)) if $data_description->{$data};
-
-                            my $writeonly = $display->{options} && $display->{options}->{writeonly};
-                            if ($writeonly && $objects{$history}->{$object}->{$data} eq "") {
-                                delete $objects{$history}->{$object}->{$data};
-                            }
                         }
                         $object_errors{$data} = { value => $objects{$history}->{$object}->{$data}, status => $status };
                         
@@ -246,7 +238,7 @@ else {
 
             # [!] Work still needs to be done here: The scheme might have
 
-            #   returned to the firstcoming nonembedded predecessor
+            #  · returned to the firstcoming nonembedded predecessor
 
             if ($accumulated_errors) {
                 # Assign the %errors hash to the $session object

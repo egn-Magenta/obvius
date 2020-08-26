@@ -711,24 +711,6 @@ sub validate_publish_fields {
     return $this->validate_data($this->publish_fields, @_);
 }
 
-sub encrypt_fields {
-    my ($this, $obvius, $fields) = @_;
-    for my $fieldname ($fields->param) {
-        if ($this->field($fieldname) && $this->field($fieldname)->param('encrypt')) {
-            $fields->param($fieldname, $obvius->encryption_handler->encrypt_data($fields->param($fieldname)));
-        }
-    }
-}
-
-sub decrypt_fields {
-    my ($this, $obvius, $fields) = @_;
-    for my $fieldname ($fields->param) {
-        if ($this->field($fieldname) && $this->field($fieldname)->param('encrypt')) {
-            $fields->param($fieldname, $obvius->encryption_handler->decrypt_data($fields->param($fieldname)));
-        }
-    }
-}
-
 
 # XXX I'm not sure why this is here, perhaps it predates Obvius::Data,
 # perhaps there is a reason:
