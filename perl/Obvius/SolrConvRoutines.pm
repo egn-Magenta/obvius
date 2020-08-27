@@ -14,9 +14,9 @@ my $utc_tz = new DateTime::TimeZone(name => 'UTC');
 ###### values to SOLR field values
 ###### All routines SUBROUTINE must have the formal parameter list signature:
 ######      SUBROUTINE(CMSVAL)
-###### Where CMSVAL is 1) a literal for conversion of fieldvalue of 
+###### Where CMSVAL is 1) a literal for conversion of fieldvalue of
 ######                    a non-repeatable field
-######              or 2) A reference to an array of literals for conversion of 
+######              or 2) A reference to an array of literals for conversion of
 ######                    fieldvalue of a repeatable field
 ###############################################################################
 
@@ -28,13 +28,25 @@ sub toUTCDateTime {
 
     $cmsval = '0000-01-01 00:00:00' if ( $cmsval eq '0000-00-00 00:00:00' );
     if ( my($Y, $M, $D, $h, $m, $s) = $cmsval =~ /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/ ) {
-	my $dt = new DateTime(year => $Y, month => $M, day => $D, hour => $h,
-			      minute => $m, second => $s, time_zone => $local_tz);
-	# Make it UTC
-	$dt->subtract(seconds => $dt->offset());
-	return $dt->iso8601 . "Z";
+        # Doing calculations on timestamps far into the future is very slow, so return a static
+        # timestamp for anything after the year 9000:
+        if($Y && "$Y" gt "9000") {
+            return "9999-01-01T00:00:00Z";
+        }
+        # Default to first day of month if we get a value with YYYY-00-00 in the date part
+        if(!$M || $M eq "00") {
+            $M = 1;
+        }
+        if(!$D || $D eq "00") {
+            $D = 1;
+        }
+        my $dt = new DateTime(year => $Y, month => $M, day => $D, hour => $h,
+                    minute => $m, second => $s, time_zone => $local_tz);
+        # Make it UTC
+        $dt->subtract(seconds => $dt->offset());
+        return $dt->iso8601 . "Z";
     } else {
-	return $cmsval;
+        return $cmsval;
     }
 }
 
@@ -71,7 +83,7 @@ sub toPERL {
 
 sub multipath2Id {
     my($cmsval) = @_;
-    return [ map { 
+    return [ map {
 	if (/^\d+\:\/(\d+)\.docid$/) {
 	    $1;
 	} elsif (/^(\d+)$/) {
