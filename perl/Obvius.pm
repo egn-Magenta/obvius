@@ -133,9 +133,11 @@ sub new {
                                   FIELDTYPES  => (defined $fieldtypes ? $fieldtypes : []),
                                   FIELDSPECS  => (defined $fieldspecs ? $fieldspecs : new Obvius::Data),
                                   LANGUAGES   => {},
-				  ENCRYPTION_HANDLER => (defined $options{'encryption_pphr'} ?
-							 Obvius::EncryptionModule->new($options{'encryption_pphr'}) :
-							 undef)
+                                  ENCRYPTION_HANDLER => (
+                                    defined $options{'encryption_pphr'} ?
+                                    Obvius::EncryptionModule->new($options{'encryption_pphr'}) :
+                                    undef
+                                  )
                                  );
 
     $this->{IGNORE_DOCTYPES} = $options{ignore_doctypes};
@@ -310,17 +312,29 @@ sub log {
 
 ########################################################################
 #
-#       Encryption handler
+#       Encryption
 #
 ########################################################################
 sub encryption_handler {
     my($this) = @_;
 
     if ( defined $this && defined $this->{ENCRYPTION_HANDLER} ) {
-	return $this->{ENCRYPTION_HANDLER};
+	    return $this->{ENCRYPTION_HANDLER};
     } else {
-	die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER \n";
+	    die __PACKAGE__ . "::encryption_handler -> Request for Non-existing ENCRYPTION_HANDLER";
     }
+}
+
+sub encrypt_value {
+    my ($this, $value) = @_;
+
+    return $this->encryption_handler->encrypt_data($value);
+}
+
+sub decrypt_value {
+    my ($this, $value) = @_;
+
+    return $this->encryption_handler->decrypt_data($value);
 }
 
 ########################################################################

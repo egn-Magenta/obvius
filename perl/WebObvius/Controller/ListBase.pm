@@ -75,7 +75,7 @@ sub field_list {
             $field->{untranslated_title} = $title;
             $field->{title} = $self->translate($title);
             $field->{order_by_link} = $self->build_order_link($field);
-            $field->{is_ordered} = $order_data->{field} eq $field->{name};
+            $field->{is_ordered} = defined($order_data) ? ($order_data->{field} eq $field->{name}) : 0;
             $field->{order_by_direction} = $field->{is_ordered} ?
                 $order_data->{direction} :
                 $field->{order_default} || "asc";
@@ -162,12 +162,9 @@ sub build_order_link {
     my $order_data = $self->order_data;
     my $name = $field->{name};
     my $direction = $field->{order_default} || "asc";
-    if($field->{name} eq $order_data->{field}) {
-        $direction = $order_data->{direction} eq "asc" ?
-                     'desc':
-                     'asc';
+    if (defined($order_data) && $field->{name} eq $order_data->{field}) {
+        $direction = $order_data->{direction} eq "asc" ? 'desc':'asc';
     }
-
     return $self->build_link(
         remove => "order_by",
         append => "order_by=$name:$direction"
@@ -182,7 +179,6 @@ sub filter_options {
 # ordering and limiting.
 sub get_query_sql {
     my ($self) = @_;
-
     return ('select * from documents', []);
 }
 
@@ -194,10 +190,12 @@ sub get_count_sql {
 # Gets the SQL and the SQL arguments used for ordering the query
 sub get_order_by_sql {
     my ($self) = @_;
-
-    my $order = $self->order_data->{sql};
-
-    return ("ORDER BY $order");
+    my $order_data = $self->order_data;
+    if (defined($order_data)) {
+        my $order = $self->order_data->{sql};
+        return "ORDER BY $order";
+    }
+    return "";
 }
 
 # Gets the SQL and the SQL arguments used for limiting the query
@@ -256,8 +254,8 @@ sub pager_info {
         my $first_page = 1;
         my $last_page = $pagesize eq 'all' ? 1 : (ceil($self->{result_count} / $pagesize));
 
-        my $next_page = $last_page > $page ? $page + 1 : $last_page;
-        my $prev_page = $page > 1 ? $page - 1 : 1;
+        my $next_page = ($last_page > $page) ? ($page + 1) : $last_page;
+        my $prev_page = ($page > 1) ? ($page - 1) : 1;
 
         if ($last_page == 0) {
             $page = 0;
@@ -272,7 +270,7 @@ sub pager_info {
                 @pagesizes,
                 {
                     text => ($pagesize_option eq 'all') ? $self->translate_raw('all') : $pagesize_option,
-                    link => $self->build_link(remove => "pagesize", append => "pagesize=$pagesize_option")
+                    link => $self->build_link(remove => ["page", "pagesize"], append => "pagesize=$pagesize_option")
                 }
             );
         }
@@ -280,19 +278,19 @@ sub pager_info {
         $self->{pager_info} = {
             pagesize         => $pagesize,
             page             => $page,
-            first_page_link  => $first_page != $page ?
+            first_page_link  => $first_page < $page ?
                 $self->build_link(remove => "page", append => "page=$first_page") :
                 "",
             prev_page        => $prev_page,
-            prev_page_link   => $prev_page != $page ?
+            prev_page_link   => $prev_page < $page ?
                 $self->build_link(remove => "page", append => "page=$prev_page") :
                 "",
             next_page        => $next_page,
-            next_page_link   => $next_page != $page ?
+            next_page_link   => $next_page > $page ?
                 $self->build_link(remove => "page", append => "page=$next_page") :
                 "",
             last_page        => $last_page,
-            last_page_link   => $last_page != $page ?
+            last_page_link   => $last_page > $page ?
                 $self->build_link(remove => "page", append => "page=$last_page") :
                 "",
             pagesize_options => \@pagesizes
