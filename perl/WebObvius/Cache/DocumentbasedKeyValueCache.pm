@@ -317,7 +317,7 @@ sub get_migration_statements {
     my @statements = map {s/^ {12}//gm; $_ } (
         qq|CREATE TABLE IF NOT EXISTS `${store_table}` (
                 `id` INT(8) unsigned NOT NULL AUTO_INCREMENT,
-                `key` VARCHAR(4096) NOT NULL,
+                `key` VARCHAR(1024) NOT NULL,
                 `value` MEDIUMBLOB NULL,
                 `expires` datetime NOT NULL,
                 PRIMARY KEY (`id`),
