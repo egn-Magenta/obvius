@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 
 use Storable qw(freeze thaw);
+use Digest::MD5;
 
 # This type of cache works as key/value store that uses mysql to
 # store its values. It also allows docids to be associated with
@@ -107,9 +108,9 @@ sub get_value_row {
         from
             `${table}` `store`
         where
-            `store`.`key` = ?
+            `store`.`md5_key` = ?
     |);
-    $sth->execute($key);
+    $sth->execute(Digest::MD5::md5_hex($key));
 
     if(my $row = $sth->fetchrow_hashref) {
         if($row->{expired}) {
@@ -181,15 +182,15 @@ sub set_value {
 
     my $sth = $self->obvius->dbh->prepare(qq|
         INSERT INTO `${table}`
-            (`key`, `value`, `expires`)
+            (`original_key`, `md5_key`, `value`, `expires`)
         VALUES
-            (?, ?, DATE_ADD(NOW(), INTERVAL ${expire_seconds} SECOND))
+            (?, ?, ?, DATE_ADD(NOW(), INTERVAL ${expire_seconds} SECOND))
         ON DUPLICATE KEY UPDATE
             value = ?,
             expires = DATE_ADD(NOW(), INTERVAL ${expire_seconds} SECOND)
     |);
     $sth->execute(
-        $key, $value,
+        $key, Digest::MD5::md5_hex($key), $value,
         $value
     );
 
@@ -317,11 +318,12 @@ sub get_migration_statements {
     my @statements = map {s/^ {12}//gm; $_ } (
         qq|CREATE TABLE IF NOT EXISTS `${store_table}` (
                 `id` INT(8) unsigned NOT NULL AUTO_INCREMENT,
-                `key` VARCHAR(1024) NOT NULL,
+                `original_key` VARCHAR(4096) NOT NULL,
+                `md5_key` VARCHAR(255) NOT NULL,
                 `value` MEDIUMBLOB NULL,
                 `expires` datetime NOT NULL,
                 PRIMARY KEY (`id`),
-                UNIQUE KEY `${store_table}_key_unique` (`key`)
+                UNIQUE KEY `${store_table}_key_unique` (`md5_key`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8|,
 
         qq|CREATE TABLE IF NOT EXISTS `${ref_table}` (
