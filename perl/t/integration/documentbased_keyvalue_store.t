@@ -55,6 +55,12 @@ lives_ok {
 
 is(scalar(keys %docid_map), $docid_limit, 'Got correct number of docids');
 
+# Eval implementation of a subclass that uses the main module but
+# does not implement the required methods. This is done by eval'ing
+# a string with the package declarion inside a { ... } block so
+# we do not pollute the current namespace. Eval is neccessary to make
+# the creation of the package happen at runtime so it is possible to
+# check whether the subclassing succeeds or not.
 eval qq|{
     package UnimplementedTestDbKvCache;
 
@@ -83,6 +89,10 @@ foreach my $method (@implemented_methods) {
     } "Uninplemented method ${method} dies"
 }
 
+# Eval another subclass definition, this time with the correct
+# methods implemented via some string interpolation. Again eval
+# is used to make it possible to check if the declaration of the
+# package went ok.
 eval qq|{
     package TestDbKvCache;
 
