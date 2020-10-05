@@ -25,7 +25,7 @@ use Test;
 BEGIN { plan tests => 1 };
 EOT
 
-egrep -ohr "^\s*?use (base )?'?(qw\()?[A-Za-z0-9:]+'?\)?;" "$FOLDERS_TO_CHECK" | egrep -v "Magenta|$EXCLUDE_MODULES" | sed 's/^ *//g' | sort -u
+egrep -Iohr "^\s*?use (base )?'?(qw\()?[A-Za-z0-9:]+'?\)?;" "$FOLDERS_TO_CHECK" | egrep -v "Magenta|$EXCLUDE_MODULES" | sed 's/^ *//g' | sort -u
 
 cat <<EOT
 
