@@ -197,7 +197,7 @@ sub get {
   # Check whether it is a login protected URL
   my $protected = $this->{PASSWORD_PROTECTED};
   my $check = $this->Base;
-  $check .= '/' unless ($check =~ m¡/$¡);
+  $check .= '/' unless ($check =~ m{/$});
   if (grep { index($check, $_->{url}) == 0} @$protected) {
     $this->{obvius}->log->notice("xml *** Document $check is loginprotected *** ");
     return;
@@ -338,7 +338,7 @@ sub _action {
   my $protected = $this->{PASSWORD_PROTECTED};
   my $check = $path;
   $check =~ s|^dummy||g;
-  $check .= '/' unless ($check =~ m¡/$¡);
+  $check .= '/' unless ($check =~ m{/$});
   if (grep { index($check, $_->{url}) == 0} @$protected) {
     $obvius->log->notice("xml *** Document $check is loginprotected *** ");
     return -1;
@@ -399,7 +399,7 @@ sub _action {
         # XXX
 
         my $tmppath = $path;
-        $tmppath .= "?size=$1" if ($k =~ /^DATA_(\d+X\d+)$/);
+        $tmppath .= "?resize=$1" if ($k =~ /^DATA_(\d+X\d+)$/);
 
         print "  <binary dt='binary.base64' name='$k' xmlns:xlink='http://www.w3.org/1999/xlink' xlink:type='locator' xlink:href='$tmppath'/>\n";
       }
