@@ -2981,7 +2981,7 @@ sub send_mail {
 
      use Net::SMTP;
      my $mail_error;
-     my $mail_debug_level = 1;
+     my $mail_debug_level = 0;
      $mail_debug_level = $options{mail_debug_level}
 	if(defined($options{mail_debug_level}));
 
