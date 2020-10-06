@@ -23,7 +23,7 @@ function navigator_choose(path, title) {
                 title_field.value = title;
             }
             this.close();
-        } else {
+        } else {
             var field = window.opener.document.pageform[fieldname];
             field.value = path;
             var title_field;
@@ -90,7 +90,7 @@ document.pageform.method = 'GET';
         <td>
 <table width="100%" border="0" style="border-collapse: collapse" bordercolor="#111111" cellspacing="0">
   <tr>
-    <td width="100%" class="navheader"><font color="#FFFFFF"><b><font size="1"><& SELF:msg, text=>'Navigér' &></font></b></font><& /help, link=>'operation/navigate' &></td>
+    <td width="100%" class="navheader"><font color="#FFFFFF"><b><font size="1"><& SELF:msg, text=>'NavigÃ©r' &></font></b></font><& /help, link=>'operation/navigate' &></td>
     <td class="navheader"><font size="1">
     <font color="#FFFFFF"><a href="javascript:window.close()"><font color="#FFFFFF">[<& SELF:msg, text=>'Luk' &>]</font></a></td>
   </tr>
@@ -125,7 +125,7 @@ document.pageform.method = 'GET';
 %      if($dtype->Name eq 'Image') {
 %      my $imgpath = $path;
 %      $imgpath =~ s!/$!!;
-          <td valign="top"  bgcolor="#CCCCCC" nowrap><img src="/admin<% $imgpath %>?size=50x62" width="50" height="62" border="0"></td>
+          <td valign="top" bgcolor="#CCCCCC" nowrap><img src="/admin<% $imgpath %>?resize=navigator" width="50" height="62" border="0" alt=""/></td>
 %      }
           <td valign="top" bgcolor="#CCCCCC" nowrap>
             <font size="1">

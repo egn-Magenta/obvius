@@ -3,6 +3,8 @@ package Obvius::Test::MockModule::Obvius;
 use strict;
 use warnings;
 use utf8;
+use Cwd qw(abs_path);
+use File::Basename;
 
 use Data::Dumper;
 use Obvius::Test::MockModule::Obvius::Hostmap;
@@ -380,9 +382,11 @@ sub _add_vfields {
         die "Wrong arguments to _add_vfields";
     }
 
+    my @added_vfields;
     foreach my $name (keys %$fields) {
-        _add_vfield($docid, $version, $name, $fields->{$name});
+        push(@added_vfields, _add_vfield($docid, $version, $name, $fields->{$name}));
     }
+    return \@added_vfields;
 }
 
 # Creates a document, a public version and vfields all in one go.
@@ -405,7 +409,9 @@ sub _add_full_document_with_defaults {
     if(!$versiondata) {
         die "Could not make version in _add_full_document";
     }
-    _add_vfields($versiondata->{docid}, $versiondata->{version}, @vfields);
+    my $vfields = _add_vfields($versiondata->{docid}, $versiondata->{version}, @vfields);
+
+    return ($docdata, $versiondata, $vfields);
 }
 
 # The next section creates additional default test-data
@@ -574,10 +580,15 @@ sub config {
     my ($self) = @_;
     return $config if($config);
 
+    # print __FILE__ . "\n";
+    # print File::Basename::dirname(File::Basename::dirname(__FILE__)). "\n";
+
     $config = bless({
-        ROOTHOST => 'obvius.test',
+        ROOTHOST       => 'obvius.test',
         https_roothost => 'ssl.obvius.test',
-        ALWAYS_HTTPS => 1,
+        ALWAYS_HTTPS   => 1,
+        DOCS_DIR       => '/tmp/obvius/docs',
+        CACHE_DIRECTORY=> '/tmp/obvius/cache'
     }, "Obvius::Config");
 
     $config->param(hostmap => Obvius::Hostmap->new_with_obvius($self));

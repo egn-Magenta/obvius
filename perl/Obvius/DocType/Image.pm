@@ -39,6 +39,7 @@ use Obvius::DocType;
 
 use Image::Magick;
 use File::Path;
+use Data::Dumper;
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -60,7 +61,7 @@ sub get_data {
     $obvius->get_version_fields($vdoc, ['data', 'uploadfile']);
     my $data;
     if (my $path = $vdoc->field('uploadfile')) {
-        $path = $obvius->{OBVIUS_CONFIG}{DOCS_DIR} . '/' . $path;
+        $path = $obvius->config->param('DOCS_DIR') . '/' . $path;
         $path =~ s!/+!/!g;
         my $fh;
         $path =~ s{\s+$}{}s;
@@ -116,6 +117,36 @@ sub raw_document_data {
     return @result;
 }
 
+my %sizes = (
+    'ombud'         => '90x90',
+    'navigator'     => '50x62',
+    'icon'          => '55x55',
+    'bootstrapform' => '100x',
+    'globalmenu'    => '115x',
+    'rightbox'      => '235x',
+    'listlayout'    => '755x'
+);
+my %reverse_sizes = reverse(%sizes);
+
+sub valid_qs {
+    my ($qs) = @_;
+    if ($qs =~ m/^(?:re)?size=(\w+)$/) {
+        return valid_size($1);
+    }
+    return 0;
+}
+
+sub valid_size {
+    my ($size) = @_;
+    if (exists($sizes{$size})) {
+        return $sizes{$size};
+    }
+    if (exists($reverse_sizes{$size})) {
+        return $size;
+    }
+    return undef;
+}
+
 
 sub raw_document_data_internal {
     my ($this, $doc, $vdoc, $obvius, $input) = @_;
@@ -131,13 +162,15 @@ sub raw_document_data_internal {
         my $size = $apr->param('size') || '';
         my $resize = $apr->param('resize') || '';
 
-        if($size and $size =~ /^(\d+X\d+|\d+%|\d+x|x\d+)$/i) {
-            return $this->get_resized_data($size, $vdoc, $obvius, $apr, 1);
+        my $valid_size = valid_size($size);
+        if ($valid_size) {
+            return $this->get_resized_data($valid_size, $vdoc, $obvius, $apr, 1);
+        }
+        $valid_size = valid_size($resize);
+        if ($valid_size) {
+            return $this->get_resized_data($valid_size, $vdoc, $obvius, $apr, 0);
         }
 
-        if($resize and $resize =~ /^(\d+X\d+|\d+%|\d+x|x\d+)$/i) {
-            return $this->get_resized_data($resize, $vdoc, $obvius, $apr, 0);
-        }
     }
 
     my $fields = $obvius->get_version_fields($vdoc, ['mimetype']);
@@ -147,8 +180,7 @@ sub raw_document_data_internal {
 sub get_resized_data {
     my($this, $size, $vdoc, $obvius, $r, $use_legacy_version) = @_;
 
-    my $siteobj = $r->pnotes('site');
-    my $cachedir = $obvius->{OBVIUS_CONFIG}{CACHE_DIRECTORY};
+    my $cachedir = $obvius->config->param('CACHE_DIRECTORY');
 
     my $image_cache_dirname = $use_legacy_version ? '/sizedimagecache/' : '/resizedimagecache/';
     my $imagedir = $cachedir . $image_cache_dirname . $vdoc->DocId . '/' . $vdoc->Version . '/';
@@ -169,6 +201,7 @@ sub get_resized_data {
         open(FH, $cachefile);
         $data = <FH>;
         close(FH);
+
 
         return($mimetype, $data);
     } else {
@@ -205,22 +238,10 @@ sub get_resized_data {
         my $mimetype = $obvius->get_version_field($vdoc, 'mimetype');
         my $final_image;
 
-        if(!defined($new_width) || !defined($new_height) || $new_width == $org_width) {
+        if(!defined($new_width) || !defined($new_height) || ($new_width == $org_width && $new_height == $org_height)) {
             # Dont perform any scaling
             $final_image = $image;
         } else {
-            # Limit images to 300 pixels in both width and height
-            # This is so outsiders can't bring the server down by
-            # requesting huge pictures. The 300px limit can be
-            # overruled in the config file with max_image_width and
-            # max_image_height.
-            #
-            my ($maxw, $maxh) = (
-                $obvius->config->param('max_image_width')  || 300,
-                $obvius->config->param('max_image_height') || 300);
-            $new_width = $maxw if($new_width > $maxw);
-            $new_height = $maxh if($new_height > $maxh);
-
             my ($scaled_width, $scaled_height) = (0, 0);
             if ($use_legacy_version) {
                 # Scale the image
@@ -233,14 +254,13 @@ sub get_resized_data {
             if($scaled_width == $new_width and $scaled_height == $new_height) {
                 $final_image = $image;
             } else {
-                my $imagesize = $new_width . "x" . $new_height;
                 my $new_img;
                 if ($use_legacy_version) {
-                    $new_img = $this->convert_to_gif($image, $imagesize);
+                    $new_img = $this->convert_to_gif($image, $new_width, $new_height);
                     $mimetype = 'image/gif';
                 } else {
                     my $quality = $obvius->config->param('image_quality') || 60;
-                    $new_img = $this->resize_image($image, $imagesize, $quality);
+                    $new_img = $this->resize_image($image, $new_width, $new_height, $quality);
                 }
 
                 # Set $image to the new one
@@ -280,11 +300,11 @@ sub get_resized_data {
 }
 
 sub convert_to_gif {
-    my ($this, $image, $imagesize) = @_;
+    my ($this, $image, $width, $height) = @_;
 
     # Make a transparent image exactly width x height (eg. gif type)
     my $new_img = Image::Magick->new();
-    $new_img->Set(size=>$imagesize);
+    $new_img->Set(size=>"${width}x${height}");
 
     # Add frames one by one.
     for(my $i=0; $image->[$i]; $i++) {
@@ -292,20 +312,20 @@ sub convert_to_gif {
         $new_img->Transparent(color=>'magenta');
 
         # Add the old, resized image to the new one and center it
-        $new_img->[$i]->CompositeImage(compose=>'Over', image=>$image->[$i], geometry=>$imagesize, gravity=>'Center');
+        $new_img->[$i]->CompositeImage(compose=>'Over', image=>$image->[$i], width=>$width, height=>$height, gravity=>'Center');
     }
 
     return $new_img;
 }
 
 sub resize_image {
-    my ($this, $image, $imagesize, $quality) = @_;
+    my ($this, $image, $width, $height, $quality) = @_;
 
     # Only try to set quality if dealing with jpg images
     if ($quality && $image->Get('mime') eq 'image/jpeg') {
         $image->Set(quality => $quality);
     }
-    $image->Resize(geometry => $imagesize);
+    $image->Resize(width => $width, height => $height);
     return $image;
 }
 
