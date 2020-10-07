@@ -3078,26 +3078,8 @@ sub find_closest_subsite {
 		    $subsite_data{$ifield} = $v;
 		}
 	    }
-	    # https subsites should only provide certain fields
-	    # If you change this list, you should also correct the fields
-	    # in the editing component
-	    # mason/admin/action/subsites_new_files/edit
-	    my @fields = $rec->{is_https} ? qw(
-		id
-		path
-		title
-		lang
-		other_language_link
-		domain
-		is_https
-		user_id
-		backend_faculty
-		backend_faculty_id
-		brandingunit
-		comments
-	    ) : (keys %$rec);
-	    foreach my $k (@fields) {
-		$subsite_data{$k} = $rec->{$k};
+	    foreach my $k (keys %$rec) {
+		    $subsite_data{$k} = $rec->{$k};
 	    }
 	}
 	if($subsite_data{path}) {
