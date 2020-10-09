@@ -5,6 +5,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use File::Temp qw(tempdir);
 
 # Load mock module
 require_ok("Obvius::Test::MockModule::Obvius");
@@ -31,8 +32,20 @@ undef $obvius;
 dies_ok { Obvius::URL->obvius } "Obvius object reference removed when out of scope";
 
 # Test setting Obvius object using confname
-Obvius::URL->set_obvius("test");
-ok(Obvius::URL->obvius, "Obvius set using configname");
+{
+    # We have to make a temporary config file. We create it in a temporary
+    # dir and make Obvius::Config look for it there
+
+    local $Obvius::Config::confdir = tempdir( CLEANUP => 1 );;
+    my $temp_config_file = "${Obvius::Config::confdir}/test.conf";
+
+    open(FH, ">", $temp_config_file) or die "Can not write to $temp_config_file";
+    print FH "\n";
+    close(FH);
+
+    Obvius::URL->set_obvius("test");
+    ok(Obvius::URL->obvius, "Obvius set using configname");
+}
 
 # Test docid format translation
 my $from_existing_docid = Obvius::URL->new("/7.docid?query=string#fragment");
