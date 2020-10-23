@@ -55,11 +55,11 @@ GetOptions(
 
 die 'Please specify a confname' if !$confname;
 
-my $obvius = Obvius->new(Obvius::Config->new($confname));
-die "Could not load Obvius for $confname" if !$obvius;
+my $obvius_config = Obvius::Config->new($confname);
+die "Could not load Obvius for $confname" if !$obvius_config;
 
 if (!$migration_dirs) {
-    $migration_dirs = $obvius->config->param('migration_dirs');
+    $migration_dirs = $obvius_config->param('migration_dirs');
     die 'No migration dir(s) specified' if !$migration_dirs;
 }
 
@@ -68,12 +68,13 @@ foreach my $migration_dir (@dirs) {
     die "$migration_dir is not a valid directory" if ! -d $migration_dir;
 }
 
-Obvius::DatabaseMigrator->set_obvius($obvius);
-
 foreach my $migration_dir (@dirs) {
-    my $migrator = Obvius::DatabaseMigrator->new_with_options({
-        'migrations_dir' => $migration_dir,
-        'migration_table' => $migration_table,
-    });
+    my $migrator = Obvius::DatabaseMigrator->new_with_obvius_config(
+        $obvius_config,
+        {
+            'migrations_dir' => $migration_dir,
+            'migration_table' => $migration_table,
+        }
+    );
     $migrator->create_or_update_database();
 }
