@@ -5,145 +5,149 @@ use Carp;
 use Moose;
 extends 'Database::Migrator::mysql';
 
-use Obvius;
-my $obvius_ref; # See set_obvius subroutine
+use Obvius::Config;
+use Carp;
 
-### ATTRIBUTES ###
-# Used by Database::Migrator::mysql when running SQL commands
-# Attributes are lazy-loaded because we want to be able to set
-# an Obvius reference before Moose tries to initialise the
-# attributes
-
-## KEYS ##
-# required: set to 0 to indicate we don't need to specify it when invoking the Migrator
-# lazy: see above
-# default: the actual value; can be overridden when invoking
-has '+database' => (
-    required => 0,
-    lazy => 1,
-    default => sub {
-        my $self = shift;
-        return $self->obvius->config->param('db_database');
-    },
+has 'config' => (
+    is => 'rw',
+    isa => 'Obvius::Config',
+    required => 1
 );
 
-has '+host' => (
-    required => 0,
-    lazy => 1,
-    default => sub {
-        my $self = shift;
-        return $self->obvius->config->param('db_host');
-    },
-);
+# Make username and password rw so we can change them when escalating privileges
+has 'username' => (is => 'rw');
+has 'password' => (is => 'rw');
 
-has '+username' => (
-    required => 0,
-    lazy => 1,
-    default => sub {
-        my $self = shift;
-        return $self->obvius->config->param('normal_db_login');
-    },
-);
+sub new_with_obvius_config {
+    my ($class, $obvius_config, $options) = @_;
 
-has '+password' => (
-    required => 0,
-    lazy => 1,
-    default => sub {
-        my $self = shift;
-        return $self->obvius->config->param('normal_db_passwd');
-    },
-);
+    if(!$obvius_config) {
+        croak 'You must specify an Obvius::Config object or a confname';
+    }
 
-# We don't want to provide an initial schema
-has '+schema_file' => (
-    required => 0,
-    default  => '',
-);
+    if(!ref $obvius_config) {
+        $obvius_config = Obvius::Config->new($obvius_config);
+    } elsif(ref $obvius_config eq 'Obvius') {
+        $obvius_config = $obvius_config->config;
+    }
 
-# We don't want to try to create a database, so just make it a no-op
-sub _create_database {}
+    if(ref $obvius_config ne 'Obvius::Config') {
+        croak "Do not know how to make an Obvius::Config object from $obvius_config";
+    }
 
-# Only used when checking for existance of database
-# All other methods on Database::Migrator use raw mysql CLI calls
-# ¯\_(ツ)_/¯
+    my $sitebase = $obvius_config->param('sitebase');
+    my $database_name = $obvius_config->param('db_database');
+    my $schema_name = lc $obvius_config->param('perlname'); # Constant name for each Obvius project
+    my $schema_file = join q{/}, $sitebase, 'db', "schema", "${schema_name}.sql";
+    $schema_file =~ s{/+}{/}gx; # Remove double slashes
+
+    $options ||= {};
+
+    return $class->new_with_options({
+        config => $obvius_config,
+        database => $database_name,
+        host => $obvius_config->param('db_host'),
+        username => $obvius_config->param('normal_db_login'),
+        password => $obvius_config->param('normal_db_passwd'),
+        schema_file => $schema_file,
+        %$options
+    });
+}
+
+sub _switch_to_privileged_user {
+    my ($self) = @_;
+
+    my $config = $self->config;
+    my $priv_user = $config->param('privileged_db_login');
+    my $priv_password = $config->param('privileged_db_passwd');
+
+    if(!$priv_user || !$priv_password) {
+        croak "Can not switch to privileged user: No privileged login information";
+    }
+
+    $self->username($priv_user);
+    $self->password($priv_password);
+
+    return;
+}
+
+sub _switch_to_normal_user {
+    my ($self) = @_;
+
+    my $config = $self->config;
+    $self->username($config->param('normal_db_login'));
+    $self->password($config->param('normal_db_passwd'));
+
+    return;
+}
+
+# Builds a dbh that actually uses the correct hostname
 sub _build_dbh {
-    my $self = shift;
+    my ($self) = @_;
 
-    my $config = $self->obvius->config;
+    my $config = $self->config;
+
     return DBI->connect(
         $config->param('dsn'),
-        $config->param('normal_db_login'),
-        $config->param('normal_db_passwd')
+        $self->username,
+        $self->password,
+        {
+            RaiseError         => 1,
+            PrintError         => 1,
+            PrintWarn          => 1,
+            ShowErrorStatement => 1,
+        }
     );
 }
 
-=item obvius()
+# Check if tables have been created in the database by testing if
+# the documents table exists
+sub _check_obvius_schema_exists {
+    my ($self) = @_;
 
-Returns the current obvius object if set. Dies if not obvius
-object has been set.
+    my $tables = $self->_build_dbh->selectcol_arrayref(
+        "show tables like 'documents'"
+    );
 
-Example:
-    my $obvius = $url->obvius
-
-Output:
-    An Obvius object
-
-=cut
-sub obvius {
-    if(!$obvius_ref) {
-        carp 'Obvius ref not set. Please set it using ' .
-        'Obvius::DatabaseMigrator->set_obvius() before calling ' .
-        'Obvius::DatabaseMigrator->obvius.';
-    }
-
-    return $obvius_ref;
+    return $tables->[0] ? 1: 0;
 }
 
-=item set_obvius($obvius)
+# Override create_or_update_database to make it run the DDL if the database
+# exists but is empty.
+sub create_or_update_database {
+    my $self = shift;
 
-Sets the obvius object used to look up db config params. If set to
-an existing Obvius object a weak reference will be used to refer to the
-object.
-If a configname is used a new Obvius object will be created and
-refered with a non-weak reference, so it does not go out of scope.
-
-Example:
-    Obvius::DatabaseMigrator->set_obvius($obvius)
-    Obvius::DatabaseMigrator->set_obvius("myconfname")
-
-Input:
-    An existing Obvius object
-    or
-    A confname
-
-Output:
-    An Obvius object
-
-=cut
-
-sub set_obvius {
-    my ($obvius) = @_;
-
-    # Make callable with both Obvius::DatabaseMigrator->set_obvius, Obvius::DatabaseMigrator::set_obvius
-    # and $obj->set_obvius;
-    if($obvius && (ref($obvius) || $obvius) eq __PACKAGE__) {
-        shift @_;
-        ($obvius) = @_;
+    if ( $self->_database_exists() ) {
+        my $database = $self->database();
+        $self->logger()->debug("The $database database already exists");
+        if(!$self->_check_obvius_schema_exists) {
+            $self->logger()->info('Schema not found, running DDL');
+            $self->_run_ddl( $self->schema_file() );
+        }
+    }
+    else {
+        $self->_create_database();
+        $self->_run_ddl( $self->schema_file() );
     }
 
-    # If we get a config name as first parameter, just create an Obvius
-    # object and do not weaken the reference to it, since this module
-    # will have the only reference.
-    if(!ref $obvius) {
-        $obvius_ref = Obvius->new(Obvius::Config->new($obvius));
-        return 1;
+    $self->_run_migrations();
+
+    return;
+}
+
+
+sub _run_one_migration {
+    my ($self, $migration, @args) = @_;
+
+    if($migration->basename =~ m{privileged}) {
+        $self->logger()->info("Enabling privileges for " . $migration->basename);
+        $self->_switch_to_privileged_user;
+        $self->SUPER::_run_one_migration($migration, @args);
+        $self->_switch_to_normal_user;
+    } else {
+        $self->SUPER::_run_one_migration($migration, @args);
     }
-
-    # Set and weaken reference
-    $obvius_ref = $obvius;
-    Scalar::Util::weaken($obvius_ref);
-
-    return 1;
+    return;
 }
 
 1;

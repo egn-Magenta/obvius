@@ -314,13 +314,33 @@ sub setup {
 
     $this->{debug} = $rewriter->{debug};
 
-    $this->connect_dbh;
+    # Create a temporary dbh
+    my $dbh = DBI->connect(
+        $this->{dsn},
+        $this->{username},
+        $this->{passwd}
+    ) or die "Could not create temporary dbh";
+
+    # Create the cache table if it does not already exist
+    my $table = $this->{table};
+    $dbh->do(qq|
+        CREATE TABLE IF NOT EXISTS `${table}` (
+            `uri` blob NOT NULL,
+            `querystring` varchar(255) NOT NULL DEFAULT '',
+            `cache_uri` varbinary(255) NOT NULL DEFAULT '',
+            PRIMARY KEY (`uri`(255),`querystring`),
+            KEY `${table}_querystring_idx` (`querystring`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+    |);
+
+    # Store the database handle for later use
+    $this->connect_dbh($dbh);
 }
 
 sub connect_dbh {
-    my ($this) = @_;
+    my ($this, $existing_dbh) = @_;
 
-    $this->{dbh} = DBI->connect(
+    $this->{dbh} = $existing_dbh || DBI->connect(
         $this->{dsn},
         $this->{username},
         $this->{passwd}
