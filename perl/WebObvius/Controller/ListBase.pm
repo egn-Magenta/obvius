@@ -396,7 +396,7 @@ sub do_query {
             my $link = $field->{link};
             if (defined($link)) {
                 # Replace ${x} with $rec->{x} in the link
-                $link =~ s/\$\{\s*([^\}\s]+)\s*\}/$rec->{$1}/e;
+                $link =~ s/\$\{\s*([^\}\s]+)\s*\}/$rec->{$1}/ge;
                 $data->{link} = $link;
             }
             push(@list, $data);
