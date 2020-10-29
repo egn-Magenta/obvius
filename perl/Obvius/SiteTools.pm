@@ -7,6 +7,10 @@ use Obvius::Config;
 use Carp;
 use Data::Dumper;
 use DBI;
+use DateTime::Format::Strptime;
+
+my $date_parser = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d %H:%M:%S');
+my $date_format = DateTime::Format::Strptime->new(pattern => '%d-%m-%Y');
 
 sub update_doctypes {
     my($confname) = @_;
@@ -619,6 +623,12 @@ sub hash_diff {
     }
 
     return undef;
+}
+
+sub convert_datetime_to_ddmmyyyy {
+    my ($datetime) = @_;
+    my $date = $date_parser->parse_datetime($datetime);
+    return $date_format->format_datetime($date);
 }
 
 1;

@@ -38,6 +38,7 @@ use Obvius;
 use Obvius::Data;
 use Data::Dumper;
 use Obvius::SolrConvRoutines;
+use Obvius::SiteTools;
 
 #     The object contains two instances of Obvius::Data. Both contain
 #     fields associated with the object:
@@ -194,6 +195,7 @@ sub set_solr_field {
 ## field_name = <string>; allows overriding the name of field we are looking for
 ## function = sub {}; a function to run to process the value of the field
 ## function_extra_args = ['hostmap', 'obvius']; extra context needed to run the function
+## function_extra_vfields = ['title', 'another_vfield']; extra vfields needed to run the function
 sub get_news_feed_fields {
     my ($self) = @_;
 
@@ -241,14 +243,19 @@ sub get_news_feed_fields {
             source => 'vfield',
             function => sub {
                 my ($tags) = @_;
-                if (!$tags) {
-                    return '';
-                }
                 # Convert to comma-separated list
                 if (ref $tags ne 'ARRAY') {
                     $tags = [ $tags ];
                 }
                 return join q{,}, @{$tags};
+            }
+        },
+        dato => {
+            source => 'publish_field',
+            field_name => 'published',
+            function => sub {
+                my ($publish_datetime) = @_;
+                return Obvius::SiteTools::convert_datetime_to_ddmmyyyy($publish_datetime);
             }
         }
 
