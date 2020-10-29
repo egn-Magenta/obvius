@@ -103,10 +103,8 @@ sub export_to_news_feed {
         $fieldmap = $NEWS_FEED_FIELD_MAPS{$doctype->Id} = $doctype->get_news_feed_fields();
     }
 
-    # We preload vfield data to avoid individual calls to get_version_fields
-    # For fields with source marked as 'vfield', use the overridden field name or the key itself
-    my @vfield_list = map { $fieldmap->{$_}->{field_name} || $_ } grep { $fieldmap->{$_}->{source} eq 'vfield' } keys %{$fieldmap};
-    $obvius->get_version_fields($self, \@vfield_list);
+   $obvius->get_version_fields($self, 255, 'PUBLISH_FIELDS');
+   $obvius->get_version_fields($self, 255);
 
     my $result = {};
     # Iterate over keyvalpairs in fieldmap
@@ -118,15 +116,23 @@ sub export_to_news_feed {
             $raw_value = $self->field($field_name);
         } elsif ($source eq 'version') {
             $raw_value = $self->$field_name;
+        } elsif ($source eq 'publish_field') {
+            $raw_value = $self->publish_field($field_name);
         }
 
         # If field has a custom function defined
-        if ((my $func = $field_spec->{function})) {
+        if ((my $func = $field_spec->{function}) && $raw_value) {
             # Allow loading %context into function
             my $extra_arg_names = $field_spec->{function_extra_args};
             my %extra_args;
             if ($extra_arg_names) {
                 %extra_args = %{ {map { $_ => $context{$_}} @$extra_arg_names }};
+            }
+            my $extra_vfield_names = $field_spec->{function_extra_vfields};
+            if ($extra_vfield_names) {
+                foreach (@{$extra_vfield_names}) {
+                    $extra_args{$_} = $self->field($_);
+                }
             }
             # Call function with optional extra args
             $result->{$name} = $func->($raw_value, %extra_args);
