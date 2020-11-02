@@ -363,6 +363,10 @@ sub get_universal_document
 sub lookup_document {
     my ($this, $path) = @_;
 
+    if (!$path) {
+        carp 'lookup_document called with empty path';
+        return;
+    }
     my ($docid) = $path =~ m!/(?:\d*:)?(\d+)\.docid$!;
     return $this->get_doc_by_id($docid) if ($docid);
 
@@ -572,7 +576,7 @@ sub is_public_document {
 
     $this->tracer($doc) if ($this->{DEBUG});
     unless ($doc) {
-        warn "IS_PUBLIC_DOCUMENT CALLED ON AN UNDEFINED DOC - there's a bug somewhere calling is_public_document. Go hunt.";
+        carp "IS_PUBLIC_DOCUMENT CALLED ON AN UNDEFINED DOC - there's a bug somewhere calling is_public_document. Go hunt.";
         return 0;
     }
 

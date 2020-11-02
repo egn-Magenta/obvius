@@ -6,7 +6,7 @@ package Obvius::Hostmap;
 #
 # Copyright (C) 2001-2006 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Authors: J�rgen Ulrik B. Krag (jubk@magenta-aps.dk),
+# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ use warnings;
 
 use Obvius::Config;
 use DBI;
+use Carp qw(carp);
 
 our $VERSION="1.0";
 
@@ -341,6 +342,9 @@ sub absolute_uri {
 sub translate_uri {
     my ($this, $uri, $hostname, $incoming_protocol) = @_;
 
+    if (!$uri) {
+        carp 'translate_uri called with empty uri';
+    }
     my $hostmap = $this->get_hostmap;
     my $roothost = $this->{roothost} || '';
     my $protocol = 'http';
