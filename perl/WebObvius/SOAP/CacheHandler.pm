@@ -16,7 +16,9 @@ sub import {
 
 my @good_caches = qw( WebObvius::Cache::UserCache 
                       WebObvius::Cache::ApacheCache 
-                      WebObvius::Cache::MedarbejderoversigtCache );
+                      WebObvius::Cache::MedarbejderoversigtCache
+                      WebObvius::Cache::CacheSyncHelper
+                  );
 
 sub flush {
      my ($this, $command) = @_;
