@@ -29,7 +29,7 @@ sub users :Path('users') :Args(0) {
         push(@result, mixed2perl($rec));
     }
 
-    $c->response->content_type('application/json; charset=utf8');
+    $c->response->content_type('application/json; charset=utf-8');
     $c->response->body(JSON::encode_json(\@result));
 }
 
@@ -81,7 +81,7 @@ sub paged_autocomplete {
     }
     $sth->finish;
 
-    $c->response->content_type('application/json; charset=utf8');
+    $c->response->content_type('application/json; charset=utf-8');
     $c->response->body(JSON::encode_json({
         totalresults => $total,
         results => \@result
@@ -119,8 +119,8 @@ sub groups :Path('groups') :Args(0) {
     while (my $rec = $sth->fetchrow_hashref) {
         push(@result, mixed2perl($rec));
     }
-    
-    $c->response->content_type('application/json; charset=utf8');
+
+    $c->response->content_type('application/json; charset=utf-8');
     $c->response->body(JSON::encode_json(\@result));
 }
 
