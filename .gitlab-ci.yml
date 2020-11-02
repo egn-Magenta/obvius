@@ -29,7 +29,7 @@ build-nocache:
     only:
         - schedules
     image:
-        name: gcr.io/kaniko-project/executor:debug-v0.19.0
+        name: gcr.io/kaniko-project/executor:debug-v0.16.0
         entrypoint: [""]
     tags:
     - docker
@@ -46,7 +46,7 @@ build:
     except:
         - schedules
     image:
-      name: gcr.io/kaniko-project/executor:debug-v0.19.0
+      name: gcr.io/kaniko-project/executor:debug-v0.16.0
       entrypoint: [""]
     tags:
       - docker
