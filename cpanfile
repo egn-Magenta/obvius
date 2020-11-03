@@ -40,6 +40,7 @@ requires 'DBIx::Class';
 #requires 'DBIx::Recordset';
 requires 'Devel::Cover';
 requires 'Devel::Cover::Report::Clover';
+requires 'Devel::NYTProf';
 requires 'Digest::SHA1';
 requires 'Email::Address::XS';
 requires 'Email::MIME';
