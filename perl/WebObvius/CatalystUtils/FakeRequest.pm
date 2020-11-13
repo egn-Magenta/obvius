@@ -144,6 +144,8 @@ sub register_cleanup {}
 
 sub subprocess_env { shift->c->engine->env }
 
+sub method { return shift->cr->method }
+
 sub method_number {
     my $r = shift->cr;
     my $method = "M_" . $r->method;
