@@ -1,9 +1,9 @@
 <%method block>\
 <div>
 <script type="text/javascript">
-function <% $add_element_function %> () {
+function <% $add_element_function %>(list_name) {
   var textfield = document.getElementById('<% $textfield_name %>');
-  var list = document.getElementById('<% $list_name %>');
+  var list = document.getElementById(list_name);
   var elm = document.createElement('option');
 
   elm.text = textfield.value;
@@ -15,23 +15,19 @@ function <% $add_element_function %> () {
   }
 }
 
-function <% $remove_element_function %> () {
-  var list = document.getElementById('<% $list_name %>');
-  for (var i = 0 ; i < list.options.length; i++) {
-    if(list.options[i].selected) {
-       list.remove(i);
-    }
-  }
+function <% $remove_element_function %>(list_name) {
+  var list = $(document.getElementById(list_name));
+  list.find("option:selected").remove();
 }
-function <% $onsubmit_function %>() {
-    var select = document.getElementById('<% $list_name %>');
+function <% $onsubmit_function %>(list_name) {
+    var select = document.getElementById(list_name);
     for(var i=0; i<select.length; i++) {
         select[i].selected=1;
     }
     return true;
 }
 
-onsubmit_array[onsubmit_array.length] = <% $onsubmit_function %>;
+onsubmit_array.push(<% $onsubmit_function %>.bind(this, '<% $list_name %>'));
 
 </script>
 <& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
@@ -40,9 +36,9 @@ onsubmit_array[onsubmit_array.length] = <% $onsubmit_function %>;
     <option value="<% $item %>"> <% $item %> </option>
 % }
 </select>
-<input type="button" value="remove" name="remove" id="remove" onclick="javascript:<% $remove_element_function %> ()"><BR/>
+<input type="button" value="remove" name="remove" id="remove" onclick="javascript:<% $remove_element_function %>('<% $list_name %>')"><br/>
 <input type="text" id="<% $textfield_name %>">
-<input type="button" value="add" name="add" onclick="javascript:<% $add_element_function %>()">
+<input type="button" value="add" name="add" onclick="javascript:<% $add_element_function %>('<% $list_name %>')">
 %
 </div>
 <%args>
