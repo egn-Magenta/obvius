@@ -157,7 +157,16 @@ sub label_component { "label.mason" }
 sub field_component { "field.mason" }
 sub wrapper_tag { }
 
-sub extra_attributes { (); }
+sub extra_attributes {
+    my ($self) = @_;
+    my %attrs;
+    for my $valid_attr ('readonly', 'disabled') {
+        if (exists($self->{$valid_attr})) {
+            $attrs{$valid_attr} = $self->{$valid_attr};
+        }
+    }
+    return %attrs;
+}
 
 sub translate_labels {
     exists $_[0]->{translate_labels} ?
@@ -236,7 +245,7 @@ sub render_as_hidden { '' }
 
 sub render_extra_attributes {
     my ($self) = @_;
-    
+
     my %attrs = $self->extra_attributes;
 
     my @classes;
@@ -777,7 +786,10 @@ sub type { "text" }
 sub edit_component { "input.mason" }
 
 sub extra_attributes {
-    ( size => ($_[0]->{size} || 72) )
+    my ($self) = @_;
+    my %attrs = $self->SUPER::extra_attributes;
+    $attrs{size} = ($_[0]->{size} || 72);
+    return %attrs;
 }
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
@@ -816,6 +828,33 @@ sub validate {
             );
         }
     }
+}
+
+WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
+
+1;
+
+
+package WebObvius::FormEngine::Fields::Number;
+
+use strict;
+use warnings;
+use utf8;
+
+our @ISA = qw(WebObvius::FormEngine::Fields::Base);
+
+sub type { "number" }
+sub edit_component { "input.mason" }
+
+sub extra_attributes {
+    my ($self) = @_;
+    my %attrs = $self->SUPER::extra_attributes();
+    for my $valid_attr ('min', 'max') {
+        if (exists($self->{$valid_attr})) {
+            $attrs{$valid_attr} = $self->{$valid_attr};
+        }
+    }
+    return %attrs;
 }
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);

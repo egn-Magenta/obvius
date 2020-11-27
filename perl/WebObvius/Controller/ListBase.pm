@@ -99,23 +99,27 @@ sub order_data {
             $direction = $default_direction || "asc";
         }
 
-        if(!grep { $_->{name} eq $name } $self->get_field_list) {
+        my @field_list = $self->get_field_list;
+
+        if(!grep { $_->{name} eq $name } @field_list) {
             $name = $default_field;
         }
 
         my $sql_field;
 
-        foreach my $field ($self->get_field_list) {
+        foreach my $field (@field_list) {
             if($field->{name} eq $name) {
                 $sql_field = $field->{name};
                 last;
             }
         }
 
-        $self->{order_data} = {
-            field => $name,
-            direction => $direction,
-            sql => "$sql_field $direction",
+        if (defined($sql_field)) {
+            $self->{order_data} = {
+                field     => $name,
+                direction => $direction,
+                sql       => "$sql_field $direction",
+            }
         }
     }
 
