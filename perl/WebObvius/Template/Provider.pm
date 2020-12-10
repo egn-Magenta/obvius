@@ -53,7 +53,7 @@ sub make_field_map {
 
     my %map;
     for (@$fields) {
-	#print STDERR "MAKE_MAP �$_�\n";
+	#print STDERR "MAKE_MAP '$_'\n";
 
 	if (/^(\w+)=(\w+)$/) {
 	    $map{$2} = $1;
@@ -874,7 +874,7 @@ sub provide_loopdata {			# RS 20010806 - ej testet
 
 #needs mapped_upload_url name
 #	Fjerne evt. indledende = fra NAME
-sub provide_mapped_upload_url {		# ikke �ndret
+sub provide_mapped_upload_url {		# ikke ændret
     my ($this, $template, $name) = @_;
 
     my $url = $template->param($name);
