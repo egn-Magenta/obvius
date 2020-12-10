@@ -2,7 +2,7 @@
 
 # send_email.pl - send email to a range of subscribers in Obvius
 #
-# Copyright (C) 2002, Adam Sj�gren. Under the GPL.
+# Copyright (C) 2002, Adam Sjøgren. Under the GPL.
 
 # Usage: Modify the send_email sub at the bottom of the script, then
 #        run it with --site <sitename> --min <first subscriber-id to send to>
