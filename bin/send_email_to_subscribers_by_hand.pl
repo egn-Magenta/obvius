@@ -43,7 +43,7 @@ $obvius->{USER} = 'admin';
 # Send email to each subscriber in the range:
 foreach my $id ($min..$max) {
     if (my $subscriber=$obvius->get_subscriber({id=>$id})) {
-	send_email($obvius, $subscriber->{name}, $subscriber->{email}, $subscriber->{passwd});
+	send_email($subscriber->{name}, $subscriber->{email}, $subscriber->{passwd});
     }
     else {
 	warn "No subscriber with id $id found on $site.";
