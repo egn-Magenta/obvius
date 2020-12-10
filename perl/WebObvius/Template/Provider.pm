@@ -53,7 +53,6 @@ sub make_field_map {
 
     my %map;
     for (@$fields) {
-	#print STDERR "MAKE_MAP '$_'\n";
 
 	if (/^(\w+)=(\w+)$/) {
 	    $map{$2} = $1;
