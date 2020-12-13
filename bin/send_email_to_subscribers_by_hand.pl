@@ -68,7 +68,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 
-Køre abonnent på Sportsfiskeren.dk
+Kære abonnent på Sportsfiskeren.dk
 
 Vi har nu overflyttet dit abonnement til det nye website. Du er
 registreret med flg. oplysninger:
