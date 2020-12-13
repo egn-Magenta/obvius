@@ -2,7 +2,7 @@
 
 # send_email.pl - send email to a range of subscribers in Obvius
 #
-# Copyright (C) 2002, Adam Sjøgren. Under the GPL.
+# Copyright (C) 2002, Adam SjÃ¸gren. Under the GPL.
 
 # Usage: Modify the send_email sub at the bottom of the script, then
 #        run it with --site <sitename> --min <first subscriber-id to send to>
@@ -62,13 +62,13 @@ sub send_email {
     my $text=<<EOT;
 From: Sportsfiskeren.dk <$from>
 To: $email
-Subject: Abonnement på Sportsfiskeren.dk overflyttet
+Subject: Abonnement pÃ¥ Sportsfiskeren.dk overflyttet
 Reply-to: webmaster\@sportsfiskeren.dk
 MIME-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 
-Kære abonnent på Sportsfiskeren.dk
+KÃ¦re abonnent pÃ¥ Sportsfiskeren.dk
 
 Vi har nu overflyttet dit abonnement til det nye website. Du er
 registreret med flg. oplysninger:
@@ -77,13 +77,13 @@ registreret med flg. oplysninger:
     email: $email
   kodeord: $name
 
-Du kan ændre dine abonnementsoplysninger ved hjælp af din
+Du kan Ã¦ndre dine abonnementsoplysninger ved hjÃ¦lp af din
 email-adresse og dit kodeord.
 
-Bemærk at vi har sat dit kodeord til dit navn. Dette kan ændres på
-websitet. Husk i øvrigt at store og små bogstaver gør forskel.
+BemÃ¦rk at vi har sat dit kodeord til dit navn. Dette kan Ã¦ndres pÃ¥
+websitet. Husk i Ã¸vrigt at store og smÃ¥ bogstaver gÃ¸r forskel.
 
-Du kan gå direkte til abonnementsstyringen ved at klikke på dette
+Du kan gÃ¥ direkte til abonnementsstyringen ved at klikke pÃ¥ dette
 link:
 
  <http://sportsfiskeren.dk/abonner/?mode=login&email=$email&password=$enc_passwd>
@@ -93,7 +93,7 @@ link:
    Sportsfiskeren.dk
 EOT
 
-    my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => $debug) or warn "@_";
+    my $smtp = Net::SMTP->new($obvius->config->param('smtp') || 'localhost', Timeout=>30, Debug => $debug) or warn "@_";
     $smtp->mail($from) or warn "@_";
     $smtp->to($email) or warn "@_";
     $smtp->data() or warn "@_";

@@ -53,7 +53,6 @@ sub make_field_map {
 
     my %map;
     for (@$fields) {
-	#print STDERR "MAKE_MAP «$_»\n";
 
 	if (/^(\w+)=(\w+)$/) {
 	    $map{$2} = $1;
@@ -585,7 +584,7 @@ sub provide_send_mail_ok {
 	my $msg = $template->expand($mailtemplate);
 
 
-	my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug => 1);
+	my $smtp = Net::SMTP->new($this->obvius->config->param('smtp') || 'localhost', Timeout=>30, Debug => 1);
     unless ($smtp->mail($from)) {
 		$template->param($name => "Failed to specify a sender [$from]\n");
 		return 1;
@@ -874,7 +873,7 @@ sub provide_loopdata {			# RS 20010806 - ej testet
 
 #needs mapped_upload_url name
 #	Fjerne evt. indledende = fra NAME
-sub provide_mapped_upload_url {		# ikke ændret
+sub provide_mapped_upload_url {		# ikke Ã¦ndret
     my ($this, $template, $name) = @_;
 
     my $url = $template->param($name);

@@ -12,7 +12,7 @@ $output
 $obvius->get_version_fields($vdoc, ['aftersubmittext', 'mailto', 
                                     'entries_for_advert', 'entries_for_close']);
 my @mailto = split /;/, $vdoc->field('mailto');
-my $server = $obvius->{OBVIUS_CONFIG}{SMTP} || 'localhost';
+my $server = $obvius->config->param('smtp') || 'localhost';
 
 for my $mailto  (@mailto) {
     my $mail_error = '';

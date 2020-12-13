@@ -163,7 +163,7 @@ my $datatext=`/usr/bin/w3m -T text/html -dump '$tmpnam'`;
 $tmpfh->close();
 #
 
-my $smtp = Net::SMTP->new('localhost', Timeout=>30, Debug =>0);
+my $smtp = Net::SMTP->new($obvius->config->param('smtp') || 'localhost', Timeout=>30, Debug =>0);
 
 my $from = $fields->param('from') || '';
 if($from =~ /<([^>]+)>/) {

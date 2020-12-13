@@ -2981,7 +2981,7 @@ sub send_mail {
 
      $from ||= $this->config->param('email_from_address') || 'noreply@adm.ku.dk';
 
-     my $server = $this->{OBVIUS_CONFIG}{SMTP} || 'localhost';
+     my $server = $this->config->param('smtp') || 'localhost';
 
      use Net::SMTP;
      my $mail_error;
