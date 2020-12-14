@@ -1,23 +1,19 @@
 FROM debian:stretch-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SUPERCRONIC_VERSION=v0.1.9
-ARG SUPERCRONIC_SHA1SUM=5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85
-
 WORKDIR /var/www/obvius
 
 # Add list of apt packages
 COPY ./sys-requirements.txt sys-requirements.txt
 
 # Install system dependencies from file.
+# Hadolint fails to recognize that we are installing from a file. Suppress version warning
+# Hadolint also suggests we quote the grep command to avoid word splitting. Quoting it causes, err, word splitting
+# hadolint ignore=SC2046,DL3008
 RUN apt-get -y update \
     && apt-get -y install --no-install-recommends $(grep -o '^[^#][[:alnum:].-]*' sys-requirements.txt) \
     # clean up after apt-get and man-pages
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_* \
-    # Install supercronic
-    && curl -fsSL "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" -o /usr/local/bin/supercronic\
-    && echo "${SUPERCRONIC_SHA1SUM}  /usr/local/bin/supercronic" | sha1sum -c - \
-    && chmod +x /usr/local/bin/supercronic
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
 # Only add requirements file; this rarely changes so we try to cache dependencies
 COPY ./cpanfile .
