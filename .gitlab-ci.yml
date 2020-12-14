@@ -19,8 +19,16 @@ variables:
     #IMAGE_VERSION: ${RELEASE_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
 
 
-# Build stage
+# Lint/Build stage
 #############
+
+Lint dockerfile:
+    stage: lint-build
+    image: hadolint/hadolint:latest-debian
+    tags:
+        - docker
+    script:
+        - hadolint $CI_PROJECT_DIR/docker/Dockerfile
 
 # Disables cache to ensure upstream image is updated
 # Scheduled build ensures that cache for continuous builds will be populated & fresh
@@ -107,7 +115,7 @@ image-test:
         when: on_success
         paths:
             - $CI_PROJECT_DIR/image_resize_output/
-    
+
 
 # Release stage
 ###############
