@@ -97,6 +97,7 @@ requires 'Test::MockModule';
 requires 'Text::CSV';
 requires 'Tie::iCal';
 requires 'Time::Clock';
+requires 'Time::Out';
 requires 'Try::Tiny';
 requires 'Unicode::String';
 requires 'URI';
