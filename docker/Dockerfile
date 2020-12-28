@@ -3,6 +3,11 @@ FROM debian:stretch-slim
 ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /var/www/obvius
 
+# Set supercronic env
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.12/supercronic-linux-amd64 \
+    SUPERCRONIC=supercronic-linux-amd64 \
+    SUPERCRONIC_SHA1SUM=048b95b48b708983effb2e5c935a1ef8483d9e3e
+
 # Add list of apt packages
 COPY ./sys-requirements.txt sys-requirements.txt
 
@@ -14,6 +19,14 @@ RUN apt-get -y update \
     && apt-get -y install --no-install-recommends $(grep -o '^[^#][[:alnum:].-]*' sys-requirements.txt) \
     # clean up after apt-get and man-pages
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
+
+# Install supercronic
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -fsSLO "$SUPERCRONIC_URL" \
+    && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+    && chmod +x "$SUPERCRONIC" \
+    && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+    && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
 # Only add requirements file; this rarely changes so we try to cache dependencies
 COPY ./cpanfile .
