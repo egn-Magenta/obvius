@@ -3236,6 +3236,24 @@ sub get_year_statistics_for_doc {
     return $result || 0;
 }
 
+sub exit_if_wrong_env {
+    my (%options) = @_;
+    my @s = split('/', $0);
+    my $script_name = pop(@s);
+    my $environment = $ENV{OBVIUS_ENVIRONMENT};
+    if (!$environment) {
+        die("Skipping $script_name because OBVIUS_ENVIRONMENT is not set\n");
+    }
+    my $wanted_envs = $options{'wanted_envs'};
+    if (!$wanted_envs) {
+        die("Called exit_if_wrong_env from $script_name without setting wanted_envs");
+    }
+    if (!(grep { $_ eq $environment } @$wanted_envs)) {
+        print("Skipping $script_name because OBVIUS_ENVIRONMENT is $environment\n");
+        exit(0);
+    }
+}
+
 package Obvius::Benchmark;
 
 use strict;
