@@ -215,11 +215,14 @@ else {
                         $object_errors{$data} = { value => $objects{$history}->{$object}->{$data}, status => $status };
                         
                         if (defined $status and $status ne 'OK' and $status ne '(internal)') {
+                            my $translated_label = $m->scomp('/shared/msg', text => "editpagelabel:".$labels{$data});
+                            if ($translated_label eq "editpagelabel:".$labels{$data}) {
+                                $translated_label = $m->scomp('/shared/msg', text => $labels{$data});
+                            }
                              if (!$msg) {
-                                  push @invalid_field_titles, $labels{$data};
+                                  push(@invalid_field_titles, $translated_label);
                              } else {
-                                  push @invalid_field_messages, 
-                                    $m->scomp('/shared/msg', text => $labels{$data}). ": $msg";
+                                  push(@invalid_field_messages, "${translated_label}: ${msg}");
                              }
                         }
                         # Further reporting should go here...
@@ -238,7 +241,7 @@ else {
 
             # [!] Work still needs to be done here: The scheme might have
 
-            #  · returned to the firstcoming nonembedded predecessor
+            #  returned to the firstcoming nonembedded predecessor
 
             if ($accumulated_errors) {
                 # Assign the %errors hash to the $session object
@@ -256,14 +259,16 @@ else {
                 
                 my $message = '';
                 if (@invalid_field_titles) {
-                     $message .= 'Invalid data (' . (join ', ', @invalid_field_titles) . 
-                                 '), please correct and try again';
+                    $message .= sprintf(
+                        __('Invalid data (%s), please correct and try again'),
+                        join(', ', @invalid_field_titles)
+                    )
                 }
 
                 $message .= '<br />' if (@invalid_field_titles && @invalid_field_messages);
 
                 if (@invalid_field_messages) {
-                     $message .= join '<br />', @invalid_field_messages;
+                     $message .= join('<br />', @invalid_field_messages);
                 }
 
 		$m->comp('/shared/set_status_message', message => $message, status => 'Warning');
