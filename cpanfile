@@ -22,6 +22,7 @@ requires 'Captcha::reCAPTCHA';
 #requires 'Catalyst::Plugin::Static::Simple';
 #requires 'Catalyst::View::Mason';
 requires 'Clone::PP';
+requires 'Config::IOD';
 requires 'Convert::NLS_DATE_FORMAT';
 #requires 'Crypt::SMIME';
 requires 'Crypt::TripleDES';
