@@ -91,7 +91,8 @@ requires 'SOAP::Lite';
 requires 'SOAP::Transport::HTTP2';
 requires 'Spreadsheet::ParseExcel';
 requires 'Spreadsheet::WriteExcel';
-requires 'TAP::Formatter::JUnit';
+# Pin to old version because 0.12 doesn't include tap2junit needed in comp test
+requires 'TAP::Formatter::JUnit', '==0.11';
 #requires 'Term::ReadLine::Gnu';
 requires 'Term::Shell';
 requires 'Test::MockModule';
