@@ -1,0 +1,14 @@
+var oe = unescape('%F8');
+var ae = unescape('%E6');
+tinyMCE.addI18n('da.advimage_dlg',{
+insert_image_margin : 'Margener (px)',
+insert_image_margin_top : 'Over',
+insert_image_margin_right : 'H'+oe+'jre',
+insert_image_margin_bottom : 'Under',
+insert_image_margin_left : 'Venstre',
+caption : 'Billedtekst',
+usecaption : 'Vis billedtekst under billedet',
+caption_align_conflict : 'Hvis du vil have en billedtekst under billedet kan du kun venstre eller h'+oe+'jrestille billedet. ' +
+                         'Billedet er derfor blevet sat til at v'+ae+'re venstrejusteret. Du kan '+ae+'ndre dette under fanebladet "Udseende".',
+dimensions:"Dimensioner"
+});

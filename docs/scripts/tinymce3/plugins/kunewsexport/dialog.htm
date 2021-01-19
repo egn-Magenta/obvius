@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>{#example.desc}</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="../../tiny_mce_popup.js"></script>
+	<script type="text/javascript" src="../../utils/mctabs.js"></script>
+	<script type="text/javascript" src="../../utils/form_utils.js"></script>
+	<script type="text/javascript" src="../../utils/editable_selects.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/multiselect.js"></script>
+	<script type="text/javascript" src="js/helper.js"></script>
+
+<link href="css/example.css" rel="stylesheet" type="text/css" />
+</head>
+<body id="example" style="display: none;">
+
+<form onsubmit="ExampleDialog.insert();return false;" action="#">
+	<div class="tabs">
+		<ul>
+			<li id="general_tab" class="current"><span><a href="javascript:mcTabs.displayTab('general_tab','general_panel');" onmousedown="return false;">Vælg dokumenter</a></span></li>
+			<li id="settings_tab"><span><a href="javascript:mcTabs.displayTab('settings_tab','settings_panel');get_documents();" onmousedown="return false;">Udseende</a></span></li>
+		</ul>
+	</div>
+
+
+	<div class="panel_wrapper">
+		<div id="general_panel" class="panel current" style="height: 220px">
+			<fieldset>
+			    <legend>Dokumenter</legend>
+
+
+<table border="0">
+    <tr>
+        <td>
+            <select multiple="multiple" name="documents_select" id="documents_select"  tabindex="10" style="width: 350px; height: 150px;">
+            </select>
+        </td>
+        <td>
+            <input type="button" value="Op" onclick="multiselect_up()" /><br />
+            <br />
+            <input type="button" value="Ned" onclick="multiselect_down()" />
+        </td>
+    </tr>
+</table>
+
+<table>
+  <tr>
+    <td><input type="button" onclick="multiselect_delete()" value="Slet" /></td>
+    <td><input type="text" size="40" name="multiselect_finder" id="multiselect_finder" tabindex="10" /></td>
+    <td id="srcbrowsercontainer">&nbsp;</td>
+    <td><input type="button" value="Tilføj" onclick="multiselect_add()" /></td>
+  </tr>
+</table>
+
+
+
+
+			    
+			</fieldset>
+		</div>
+
+		<div id="settings_panel" class="panel" style="height: 280px">
+			<fieldset>
+				<legend>Resultat</legend>
+<div style="border: 1px black solid; height: 250px; overflow: auto; padding: 3px" id="result"></div>
+			</fieldset>
+		</div>
+	</div>
+
+
+	<div class="mceActionPanel">
+		<input type="button" id="insert" name="insert" value="{#insert}" onclick="ExampleDialog.insert();" />
+		<input type="button" id="cancel" name="cancel" value="{#cancel}" onclick="tinyMCEPopup.close();" />
+	</div>
+</form>
+
+</body>
+</html>

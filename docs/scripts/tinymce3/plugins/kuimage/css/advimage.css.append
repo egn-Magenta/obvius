@@ -1,0 +1,9 @@
+#kuimagehtml {
+    display: none;
+}
+
+#margintop, #marginright, #marginbottom, #marginleft {
+	vertical-align: middle;
+	width: 30px;
+	text-align: center;
+}

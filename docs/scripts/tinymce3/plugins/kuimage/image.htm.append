@@ -1,0 +1,59 @@
+<div id="kuimagehtml">
+    <table>
+        <tbody id="marginsourcetable">
+        <tr>
+            <td class="column1" colspan="2"><label id="marginlabel" for="margintop">{#advimage_dlg.insert_image_margin}</label></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <span style="margin-left: 75px">
+                    <label id="margintoplabel" for="margintop">{#advimage_dlg.insert_image_margin_top}</label>
+                    <input name="margintop" type="text" id="margintop" value="" size="3" maxlength="3" onchange="ImageDialog.changeAppearance();ImageDialog.updateStyle();" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <label id="marginleftlabel" for="marginleft">{#advimage_dlg.insert_image_margin_left}</label>
+                <input name="marginleft" type="text" id="marginleft" value="" size="3" maxlength="3" onchange="ImageDialog.changeAppearance();ImageDialog.updateStyle();" />
+                <span style="width: 50px">&nbsp</span>
+                <input name="marginright" type="text" id="marginright" value="" size="3" maxlength="3" onchange="ImageDialog.changeAppearance();ImageDialog.updateStyle();" />
+                <label id="marginrightlabel" for="marginright">{#advimage_dlg.insert_image_margin_right}</label>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <span style="margin-left: 68px">
+                    <label id="marginbottomlabel" for="marginbottom">{#advimage_dlg.insert_image_margin_bottom}</label>
+                    <input name="marginbottom" type="text" id="marginbottom" value="" size="3" maxlength="3" onchange="ImageDialog.changeAppearance();ImageDialog.updateStyle();" />
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <table>
+        <tbody id="captionsourcetable">
+            <tr> 
+                <td colspan="3">
+                    <input id="usecaption" type="checkbox" name="usecaption" class="checkbox" style="width: auto;" onclick="ImageDialog['change_caption_checkbox'](this)"/>
+                    <label id="usecaptionlabel" for="usecaption">{#advimage_dlg.usecaption}</label>
+                </td>
+            </tr> 
+            <tr style="display: none;" id="captionrow"> 
+                <td class="column1"><label id="captionlabel" for="caption">{#advimage_dlg.caption}</label></td> 
+                <td colspan="2">
+		    <input id="caption" name="caption" type="text" value="" />
+		    <input type="hidden" name="captionlinkdata" id="captionlinkdata" value="" />
+		</td>
+		
+            </tr> 
+        </tbody>
+    </table>
+    <form name="sourceform" action="." method="get">
+        <select name="hiddenalignoptions" id="hiddenalignoptions">
+            <option value="left">{#advimage_dlg.align_left}</option>
+            <option value="right">{#advimage_dlg.align_right}</option>
+	    <option value="">På linie med tekst</option> 
+        </select>
+    </form>
+</div>
