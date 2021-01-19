@@ -7,7 +7,7 @@ package WebObvius::Storage::DbTable;
 # Copyright (C) 2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
 # Authors: Jens K. Jensen (jensk@magenta-aps.dk),
-#          Adam Sjøgren (asjo@magenta-aps.dk)
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -90,9 +90,6 @@ sub lookup {
 
 sub create {
     my ($this, $data, $session, $path_prefix)=@_;
-
-    use Data::Dumper; print STDERR 'DbTable->create $data: ' . Dumper($data);
-
 
     my $success=0;
     my $error=0;
@@ -255,7 +252,7 @@ sub list {
     push @where, $this->param('where') if $this->param('where');
     $options->{where} = join(' and ', @where) if @where;
 
-    $options->{sort}  = $this-> param('sort') 
+    $options->{sort}  = $this-> param('sort')
     	if not (exists $options->{sort}) and defined $this-> param('sort');
 
     my ($table_data, $total) = $this->param('obvius')->get_table_data($this->param('source'), %$options);
@@ -333,7 +330,7 @@ This class stores data in database tables.
 =head1 AUTHORS
 
 Jens K. Jensen (jensk@magenta-aps.dk),
-Adam Sjøgren (asjo@magenta-aps.dk).
+Adam SjÃ¸gren (asjo@magenta-aps.dk).
 
 =head1 SEE ALSO
 

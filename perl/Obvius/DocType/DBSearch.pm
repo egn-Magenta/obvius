@@ -132,9 +132,7 @@ sub action {
 	}
 
 	# doctype is actually type:
-	#print STDERR "WHERE1: $where\n";
 	$where =~ s/([^\w])doctype(\s?)([^\w]+)(\s?)['\"]([^\'\"]+)['\"]/$this->doctypemap($1, $2, $3, $4, $5, $obvius)/egi;
-       #print STDERR "WHERE2: $where\n";
 
 	if ($where) {
 	    $output->param(Obvius_DEPENCIES => 1);

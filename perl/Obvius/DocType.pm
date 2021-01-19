@@ -487,11 +487,9 @@ sub export_paged_doclist {
 
     # map from 1 based to zero based
     $page--;
-    # print STDERR ("PAGE SIZE $pagesize PAGE $page\n");
 
     # max number of pages available
     my $page_max = int(($#$doclist+$pagesize)/$pagesize);
-    # print STDERR ("PAGE MAX $page_max\n");
     return undef if ($page >= $page_max); # out of range
 
     # calculate document range to use
@@ -499,7 +497,6 @@ sub export_paged_doclist {
     my $doc_first = $page * $pagesize;
     my $doc_last = ($page+1) * $pagesize - 1;
     $doc_last = $#$doclist if ($doc_last > $#$doclist);
-    # print STDERR ("DOCS $doc_first..$doc_last TOTAL $doc_total\n");
 
     # slice out the relevant parts of the document list
     my @subdocs = @$doclist[$doc_first .. $doc_last];
@@ -676,10 +673,8 @@ sub validate_data {
 	}
 
 	if ($ok) {
-	    #print STDERR "VALID $_ = $value\n";
 	    push(@valid, $_);
 	} else {
-	    #print STDERR "INVALID $_ = $value\n";
 	    push(@invalid, $_);
 	}
     }
@@ -688,12 +683,6 @@ sub validate_data {
 	if (wantarray);
     my @missing = grep { not ( defined $fields->param($_)
 			       or $type_fields->param($_)->Optional) } $type_fields->param;
-
-    #local $, = ', ';
-    #print STDERR "VALIDATE: valid: @valid\n";
-    #print STDERR "VALIDATE: invalid: @invalid\n";
-    #print STDERR "VALIDATE: excess: @excess\n";
-    #print STDERR "VALIDATE: missing: @missing\n";
 
     return (wantarray
 	    ? ( valid	 => (scalar(@valid)   ? \@valid   : undef),

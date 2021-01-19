@@ -593,10 +593,6 @@ sub is_public_document {
             $public = 1;
         }
 
-        #printf STDERR ("ID %5d NAME %-20s PUBLIC %d\n",
-        #              $_->_id, $_->_name, $public)
-        #    if ($this->{DEBUG});
-
         return '' if ($public == 0);
     }
 
@@ -1413,7 +1409,6 @@ sub get_version_fields_by_threshold {
     my ($this, $version, $threshold, $type) = @_;
     $type=(defined $type ? $type : 'FIELDS');
 
-#    print STDERR "entering";
     $this->tracer($version, $threshold||'N/A', $type) if ($this->{DEBUG});
 
 
@@ -1441,13 +1436,11 @@ sub get_version_fields_by_threshold {
     }
     #$this->{LOG}->debug("Second list of fields: @fields");
 
-#    print STDERR "exiting";
     return @fields ? \@fields : undef;
 }
 
 sub get_version_fields {
     my ($this, $version, $threshold, $type) = @_;
-#    print STDERR "Entering get_version_fields";
 
     $type=(defined $type ? $type : 'FIELDS');
 
@@ -1461,7 +1454,6 @@ sub get_version_fields {
 
     for (@$needed) {
         my $fspec = $doctype->field($_, undef, $type);
-#        print STDERR "VFIELD FROM TYPE $_ (threshold $fspec->{THRESHOLD})\n";
         if ($fspec->Repeatable) {
             $fields->param($_ => []);
         } else {
@@ -1473,8 +1465,6 @@ sub get_version_fields {
                                             '!Table'     =>'vfields',
                                            });
 
-#    printf STDERR " get_version_fields %5d %s", $version->Docid, $version->Version;
-#    print STDERR " ", (join ", ", @$needed), "\n";
 
     $set->Search({docid      => $version->Docid,
                   version    => $version->Version,
@@ -1502,7 +1492,6 @@ sub get_version_fields {
     $set->Disconnect;
 
     for (@$needed) {
-#        print STDERR "VFIELD STORE $_\n";
         my $fspec = $doctype->field($_, undef, $type);
         my $ftype = $fspec->param('fieldtype');
 
@@ -1523,9 +1512,6 @@ sub get_version_fields {
         # become 0! But does changing this break all sorts of other things? XXX MUST TEST!
         $version->field($_ => $value, $type);
     }
-
-    # print STDERR Dumper($version->fields($type));
-#    print STDERR "Exiting same";
 
     return $version->fields($type);
 }
@@ -1943,12 +1929,10 @@ sub read_fieldtypes_table {
                                            } );
     $set->Search;
     while (my $rec = $set->Next()) {
-        #print STDERR "FieldType $rec->{name}\n" if ($this->{DEBUG});
         $this->{FIELDTYPES}->[$rec->{id}] = new Obvius::FieldType($rec);
     }
     $set->Disconnect;
 
-    #print STDERR "Fieldtypes: ", Dumper($this->{FIELDTYPES});
 }
 
 # read_fieldspecs_table - reads the fieldspecs from the database,
@@ -1967,9 +1951,6 @@ sub read_fieldspecs_table {
                                             } );
     $set->Search;
     while (my $rec = $set->Next()) {
-        #print STDERR "FieldSpec $rec->{name}/$rec->{doctypeid} Publish $rec->{publish}\n";
-        #    if ($this->{DEBUG});
-
         croak "Document type $rec->{doctypeid} for fieldspec $rec->{name} not known"
             unless (defined $this->get_doctype($rec->{doctypeid}));
         croak "Field type $rec->{type} for fieldspec $rec->{name}/$rec->{doctypeid} not known"
@@ -2007,16 +1988,13 @@ sub adjust_doctype_hierarchy {
 
     for my $doctype (@{$this->{DOCTYPES}}) {
         next unless $doctype;
-        #print STDERR "Copying to $doctype->{NAME}\n" if ($this->{DEBUG});
 
         my $ancestor = $this->get_doctype($doctype->Parent);
         while ($ancestor) {
-            #print STDERR "\tfrom $ancestor->{NAME}\n" if ($this->{DEBUG});
             # sortorder_field_is is also inherited:
             $doctype->param('sortorder_field_is'=>$ancestor->param('sortorder_field_is'))
                 unless ($doctype->param('sortorder_field_is'));
             for ($ancestor->field) {
-                #print STDERR "\t\tfield $_\n" if ($this->{DEBUG});
 
                 my $af = $ancestor->field($_);
                 my $df = $doctype->field($_);
@@ -2038,8 +2016,6 @@ sub adjust_doctype_hierarchy {
                 }
             }
             for ($ancestor->publish_field) {
-                #print STDERR "\t\tpublish_field $_\n" if ($this->{DEBUG});
-
                 my $af = $ancestor->publish_field($_);
                 my $df = $doctype->publish_field($_);
 
@@ -2077,8 +2053,6 @@ sub read_type_info {
     $this->read_fieldspecs_table($make_objects);
 
     $this->adjust_doctype_hierarchy();
-
-    #print STDERR Dumper($this->{DOCTYPES}) if ($this->{DEBUG});
 }
 
 
@@ -2390,18 +2364,6 @@ sub delete_document {
         $this->db_delete_vfields($doc->Id);
         $this->{LOG}->info("====> Deleting versions ... delete from versions");
         $this->db_delete_versions($doc->Id);
-
-        # We could delete docparms as well:
-
-        #  print STDERR "====> Deleting document ... delete from docparms\n";
-        #  $this->db_delete_docparms($doc->Id);
-
-        # We could delete voters and votes as well:
-
-        #  print STDERR "====> Deleting document ... delete from voters\n";
-        #  $this->db_delete_voters($doc->Id);
-        #  print STDERR "====> Deleting document ... delete from votes\n";
-        #  $this->db_delete_votes($doc->Id);
 
         $this->{LOG}->info("====> Deleting document ... delete from subscriptions");
         $this->db_delete_subscriptions($doc->Id);

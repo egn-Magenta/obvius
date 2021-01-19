@@ -416,8 +416,6 @@ sub transform_image_at_upload() {
 
     $magick ||= lc($image->Get('magick')) || 'gif';
 
-#    print STDERR "\nWriting to blob\n";
-
     my $tmpfilename = "/tmp/obviusimage_$$.$magick";
 
     if($magick eq 'gif') {

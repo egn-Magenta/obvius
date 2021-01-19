@@ -23,7 +23,7 @@ package Obvius::Version;
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 ########################################################################
 
@@ -150,7 +150,7 @@ sub export_to_solr {
     my($self, $obvius, $doc) =  @_;
 
     ### Get document if not supplied
-    $doc = ($doc && ref($doc) eq 'Obvius::Document' ? $doc : 
+    $doc = ($doc && ref($doc) eq 'Obvius::Document' ? $doc :
 	    $obvius->get_doc_by_id($self->DocId));
     my $doctype = $obvius->get_doctype_by_id($self->Type);
 
@@ -207,14 +207,6 @@ sub export_to_solr {
     return $specs;
 }
 
-sub delete_from_solr {
-    my($self, $obvius, $doc) =  @_;
-
-    my $specs = { 'id' => $self->DocId };
-    print STDERR Dumper($specs);
-}
-     
-
 #
 # AUTOLOAD - special for fetching the fields
 #
@@ -247,7 +239,7 @@ sub AUTOLOAD {
 
 
 
-     
+
 
 sub fields {
     my ($this, $type) = @_;

@@ -8,11 +8,11 @@ package Obvius::DB;
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #                         FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk),
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk),
 #          Peter Makholm (pma@fi.dk),
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk),
-#          Martin Skøtt (martin@magenta-aps.dk)
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk),
+#          Martin SkÃ¸tt (martin@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,12 +48,12 @@ my $count=$obvius->db_number_of_rows_in_table('comments');
 
 $obvius->db_insert_comment({
                             docid=>$doc->Id,
-                            name=>'Søren Hansen',
+                            name=>'SÃ¸ren Hansen',
                             email=>'sh@example.invalid',
                             text=>'Jeg synes bare det er helt, ja det er.',
                            });
 
-$obvius->db_update_table(table=>'synonyms', synonyms=>'Søren Soeren');
+$obvius->db_update_table(table=>'synonyms', synonyms=>'SÃ¸ren Soeren');
 $obvius->db_update_table(table=>'docparms', key=>'docid', name=>'fancy_box', value=>'NO!', type=>0);
 
 $obvius->db_insert_docparams($doc, $paramobj);
@@ -93,7 +93,7 @@ my %DBIx;
 
 	$DBIx{RS_SetupObject} = \&DBIx::Recordset::SetupObject;
 	*DBIx::Recordset::SetupObject = \&DBIx_Recordset_SetupObject;
-	
+
 	$DBIx{RS_SQLInsert} = \&DBIx::Recordset::SQLInsert;
 	*DBIx::Recordset::SQLInsert = \&DBIx_Recordset_SQLInsert;
 }
@@ -103,12 +103,12 @@ my %DBIx;
 sub DBIx_Database_new
 {
 	my ( $class, $datasource) = @_;
-	
+
 	return $DBIx{DB_new}->(@_) if ref($datasource) ne 'HASH';
 
-	if ( 
+	if (
 		$datasource->{'!DataSource'} =~ /DBI:Pg/ and
-		not exists $datasource->{'!TableFilter'} 
+		not exists $datasource->{'!TableFilter'}
 	) {
 		$datasource->{'!TableFilter'} = 'public';
 	}
@@ -124,8 +124,8 @@ sub DBIx_Recordset_SetupObject
 {
 	my ( $class, $parm) = @_;
 
-	if ( 
-		exists $parm->{'!Serial'} and 
+	if (
+		exists $parm->{'!Serial'} and
 		not exists $parm->{'!Sequence'} and
 		$parm->{'!DataSource'}->{'*Driver'} eq 'Pg'
 	) {
@@ -311,7 +311,7 @@ sub db_delete_versions {
 #         Please notice that this violates the entire notion of
 #         versioning within Obvius.
 #
-#         XXX: No check is done on input values before the command is run. 
+#         XXX: No check is done on input values before the command is run.
 #              What would happen if this method is called only with $lanf defined?
 #
 #         (Note that the db_*-methods are internal to Obvius, the
@@ -481,7 +481,6 @@ sub db_insert_vfields {
 	    }
 	} else {
 	    $field->{$value_field} = $ftype->copy_out($this, $fspec, $v);
-	    #print STDERR ">>>> inserting field: " . Dumper($field);
 	    $set->Insert($field);
 	}
     }
@@ -518,7 +517,7 @@ sub db_update_version_mark_public {
 					    });
 
     unless($this->config->param('allow_multiple_public_languages')) {
-	# Clear all other public versions for this document	
+	# Clear all other public versions for this document
 	$set->Update({public => 0}, { $vdoc->params('docid') });
     } else {
 	# Clear other public version for same language
@@ -729,7 +728,7 @@ sub db_insert_grp_user {
     return;
 }
 
-    
+
 # db_insert_comment - given a hash-ref containing key-value pairs for
 #                     a comment (docid, name, email and text - date is
 #                     set to now automatically), inserts the comment
@@ -740,7 +739,7 @@ sub db_insert_comment {
     $this->tracer($data) if ($this->{DEBUG});
 
     $this->{LOG}->info("====> Inserting comment ($data->{docid}, $data->{name}) ...");
-    
+
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
 					     '!Table'      => 'comments',
 					    });
@@ -923,7 +922,7 @@ sub db_insert_docparams {
 
     $this->{LOG}->info("====> Inserting docparams for docid " . $doc->Id . "...");
 
-    
+
     my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
                                             '!Table'      => 'docparms',
                                             });
@@ -1050,17 +1049,17 @@ sub db_chown {
 
     $sth->execute(@args);
 }
-    
+
 1;
 __END__
 
 =head1 AUTHORS
 
-Jørgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
+JÃ¸rgen Ulrik B. Krag E<lt>jubk@magenta-aps.dkE<gt>
 Peter Makholm E<lt>pma@fi.dkE<gt>
-René Seindal
-Adam Sjøgren E<lt>asjo@magenta-aps.dkE<gt>
-Martin Skøtt E<lt>martin@magenta-aps.dkE<gt>
+RenÃ© Seindal
+Adam SjÃ¸gren E<lt>asjo@magenta-aps.dkE<gt>
+Martin SkÃ¸tt E<lt>martin@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 
