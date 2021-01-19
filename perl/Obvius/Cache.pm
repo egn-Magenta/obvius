@@ -6,8 +6,8 @@
 #                    aparte A/S, Denmark (http://www.aparte.dk/),
 #                    FI, Denmark (http://www.fi.dk/)
 #
-# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
-#          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Authors: Adam SjÃ¸gren (asjo@magenta-aps.dk),
+#          JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #          Peter Makholm (pma@fi.dk)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -67,19 +67,17 @@ sub add {
 
     $domain ||= ref $obj;
     for ($this->_find_keys($obj, $keys)) {
-	#print STDERR "CACHE_SET_RECORD $_ -> $obj\n";
 	$this->{$domain}->{$_} = $obj;
     }
     return $obj;
 }
 # find ($domain, $key) - Returns a cache entry based on domain and key.
-#                        $key must be a reference. 
+#                        $key must be a reference.
 #
 sub find {
     my ($this, $domain, $key) = @_;
 
     $key = $this->_make_key($key) if (ref $key);
-    #print STDERR "CACHE_GET_RECORD $domain/$key -> $this->{$domain}->{$key}\n" if ($this->{$domain}->{$key});
     return $this->{$domain}->{$key};
 }
 
@@ -124,8 +122,8 @@ None by default.
 
 =head1 AUTHOR
 
-Adam Sjøgren <lt>asjo@magenta-aps.dk<gt>
-Jørgen Ulrik B. Krag <lt>jubk@magenta-aps.dk<gt>
+Adam SjÃ¸gren <asjo@magenta-aps.dk>
+JÃ¸rgen Ulrik B. Krag <jubk@magenta-aps.dk>
 
 =head1 SEE ALSO
 

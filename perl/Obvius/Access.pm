@@ -85,7 +85,7 @@ sub user_has_capabilities {
     return 1;
 }
 
-# user_has_any_capability - Return a count of how many of the capabilites in @capabilites the user 
+# user_has_any_capability - Return a count of how many of the capabilites in @capabilites the user
 #                           has on $doc. Always returns 1 for 'admin'.
 sub user_has_any_capability {
     my ($this, $doc, @capabilities) = @_;
@@ -117,14 +117,9 @@ sub compute_user_capabilities
     my @deny;
     my @unconditional_deny;
     foreach (@rules) {
-	#print STDERR "  accept: " . Dumper(\@accept);
-	#print STDERR "  deny: " . Dumper(\@deny);
-	#print STDERR " zee rule: $_\n";
-
         my ($apply, $who_list, $how, $capabilities)=$this->parse_access_rule($_, $doc, $userid);
         if (defined $apply) {
 	    if ($apply) {
-		#print STDERR " applying rule $_\n";
 		my @capabilities=split /\s*,\s*/, $capabilities;
 		if ( $how eq "=" ) {
 		    @accept=@capabilities;
@@ -142,17 +137,11 @@ sub compute_user_capabilities
 		    push @unconditional_deny, @capabilities;
 		}
 	    }
-	    #else {
-            #    print STDERR " not applying rule $_\n";
-	    #}
 	}
 	else {
 	    $this->log->warn("Unrecognized access rule '$_' for docid " . $doc->Id);
 	}
     }
-
-    #print STDERR "  accept: " . Dumper(\@accept);
-    #print STDERR "  deny: " . Dumper(\@deny);
 
     my %capabilities;
     foreach (@accept) {
@@ -284,7 +273,7 @@ sub can_create_new_document {
     return $this->user_has_capabilities($parent, qw(create));
 }
 
-# can_create_new_version - return true if the current user is allowed to 
+# can_create_new_version - return true if the current user is allowed to
 #                          create new versions of $doc. Returns false if
 #                          the user doesn't have the necessary rights.
 sub can_create_new_version {
@@ -426,7 +415,7 @@ sub can_update_comment {
 
 sub can_delete_comment {
     my ($this, $docid) = @_;
-    
+
     my $doc = ref($docid) eq 'Obvius::Document' ? $docid : $this->get_doc_by_id($docid);
     return $this->user_has_capabilities($doc, qw(delete));
 }

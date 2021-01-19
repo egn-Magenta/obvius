@@ -21,7 +21,7 @@ package Obvius::Data;
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 ########################################################################
 
@@ -176,7 +176,6 @@ sub validate {
     my @error;
     for (@$fields) {
 	next unless (exists $validate->{$_});
-	print STDERR "Validating $_\n";
 	push(@error, $_) unless ((
 				  ref $validate->{$_} eq 'CODE'
 				  and $validate->{$_}->($this->{uc $_})
@@ -209,7 +208,7 @@ sub is_int_nonnegative {
     return defined($id) && ($id =~ /^\d+$/) && ($id >= 0);
 }
 
-# is_word - Return true if the argument is an empty string or matches the word 
+# is_word - Return true if the argument is an empty string or matches the word
 #           character (alphanumeric plus "_").
 sub is_word {
     my $id = shift;

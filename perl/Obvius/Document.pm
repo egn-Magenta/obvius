@@ -6,9 +6,9 @@ package Obvius::Document;
 #
 # Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Authors: Jørgen Ulrik Balslev Krag (jubk@magenta-aps.dk),
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk)
+# Authors: JÃ¸rgen Ulrik Balslev Krag (jubk@magenta-aps.dk),
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,7 +44,6 @@ our %validate =
      grp     => \&Obvius::Data::is_int_positive,
      name    => sub {
 	 my $name = shift;
-	 print STDERR "Testing XXXXX $name\n";
 	 return ($name and $name =~ /^[a-zA-Z0-9._-]+$/);
      },
     );
@@ -111,9 +110,9 @@ definitions of keys and such are used by the built in object-cache.
 
 =head1 AUTHOR
 
-Jørgen Ulrik Balslev Krag, E<lt>jubk@magenta-aps.dkE<gt>,
-René Seindal,
-Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
+JÃ¸rgen Ulrik Balslev Krag, E<lt>jubk@magenta-aps.dkE<gt>,
+RenÃ© Seindal,
+Adam SjÃ¸gren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 

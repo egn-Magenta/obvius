@@ -131,7 +131,6 @@ sub action {
     }
 
     # doctype is actually type:
-    #print STDERR "WHERE1: $where\n";
     $where =~ s/([^\w])doctype(\s?)([^\w]+)(\s?)[\'\"]([^\'\"]+)[\'\"]/$this->doctypemap($1, $2, $3, $4, $5, $obvius)/egi;
     $obvius->log->debug("ComboSearch: WHERE2: $where");
 
@@ -157,9 +156,6 @@ sub action {
     unless ($vdocs) {
         return OBVIUS_OK;
     }
-
-    #print STDERR "vdoc: " . Dumper($vdoc);
-    #print STDERR "search-result: " . Dumper($vdocs);
 
     # If the search was on repeatable fields and the conditions
     # thereupon were negated (NOT IN, !=, NOT LIKE, other?), Obvius::search
