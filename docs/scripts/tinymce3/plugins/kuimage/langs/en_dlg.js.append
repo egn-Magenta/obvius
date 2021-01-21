@@ -1,0 +1,14 @@
+
+tinyMCE.addI18n('en.advimage_dlg',{
+insert_image_margin : 'Margins (px)',
+insert_image_margin_top : 'Top',
+insert_image_margin_right : 'Right',
+insert_image_margin_bottom : 'Bottom',
+insert_image_margin_left : 'Left',
+caption : 'Caption below image',
+usecaption : 'Add a caption text under the image',
+caption_align_conflict : 'If you want to use an image caption the picture can only be left or right aligned. ' +
+                         'Therefore the picture has been set to be left aligned. ' +
+                         'You can change this under the tab "Appearance".'
+
+});
