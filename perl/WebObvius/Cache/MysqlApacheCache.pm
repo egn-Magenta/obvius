@@ -25,7 +25,6 @@ sub new {
     my $config = $obvius->config;
 
     $new->{local_table} = $config->param('mysql_apachecache_table');
-    die "No cache table for mysql-based cache specified" unless($new->{local_table});
 
     $new->{other_tables} = [grep {$_} split(/\s*,\s*/, $config->param('mysql_apachecache_other_tables') || '')];
 
@@ -45,6 +44,9 @@ sub insert_or_update {
     my ($this, $uri, $querystring, $cache_path) = @_;
     
     my $table = $this->{local_table};
+    if(!$table) {
+        return;
+    }
     my $sth = $this->{obvius}->dbh->prepare(qq|
         INSERT INTO ${table}
             (uri, querystring, cache_uri)
@@ -193,8 +195,10 @@ sub copy_file_to_cache {
 
 sub flush {
     my ($this, $commands) = @_;
-    
-    for my $table ($this->{local_table}, @{$this->{other_tables}}) {
+
+    foreach my $table (
+        grep { $_ } ($this->{local_table}, @{$this->{other_tables}})
+    ) {
         $this->flush_in_table($commands, $table);
     }
 }
@@ -282,9 +286,11 @@ sub flush_in_table {
 
 sub flush_by_pattern {
     my ($this, $pred) = @_;
-    
-    for my $table ($this->{local_table}, @{$this->{other_tables}}) {
-	 $this->flush_by_pattern_in_table($pred, $table);
+
+    foreach my $table (
+        grep { $_ } ($this->{local_table}, @{$this->{other_tables}})
+    ) {
+        $this->flush_by_pattern_in_table($pred, $table);
     }
 }
 

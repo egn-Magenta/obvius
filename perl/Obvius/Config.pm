@@ -77,11 +77,8 @@ sub parse_file {
 	  # Remove extra start and ending spaces
 	  $key =~ s{^\s+}{};
 	  $val =~ s{\s+$}{};
+      $val = read_array($val);
 
-	  if (my ($list) = $val =~ /^\s*\((.*)\)\s*$/) {
-	       my @vals = grep { $_ and !m/^\s*$/ } split /\s*,\s*/, $list;
-	       $val = [@vals];
-	  }
 	  if($DEBUG) {
 	      _add_debug_line($file, $key, exists $data{uc $key});
 	  }
@@ -90,6 +87,15 @@ sub parse_file {
      close F;
 
      return \%data;
+}
+
+sub read_array {
+    my ($val) = @_;
+    if (my ($list) = $val =~ /^\s*\((.*)\)\s*$/) {
+        my @vals = grep { $_ and !m/^\s*$/ } split(/\s*,\s*/, $list);
+        $val = \@vals;
+    }
+    return $val;
 }
 
 # Loads configuration from files with the given configuration name
@@ -159,7 +165,7 @@ sub new {
     foreach my $key ($this->param) {
         my $env_key = uc("OBVIUS_CONFIG_${name}_${key}");
         if(exists $ENV{$env_key}) {
-            $this->param($key => $ENV{$env_key});
+            $this->param($key => read_array($ENV{$env_key}));
             if($DEBUG) {
                 _add_debug_line('%ENV', $key, $this->param($key));
             }

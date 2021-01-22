@@ -26,7 +26,8 @@ sub new {
     }
 
     my $apache_cache;
-    if($obvius->config->param('mysql_apachecache_table')) {
+    if($obvius->config->param('mysql_apachecache_table') ||
+       $obvius->config->param('mysql_apachecache_other_tables')) {
         $apache_cache = WebObvius::Cache::MysqlApacheCache->new($obvius);
     } else {
         $apache_cache = WebObvius::Cache::ExternalApacheCache->new($obvius);
