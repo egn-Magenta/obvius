@@ -41,3 +41,4 @@ git
 curl
 rsync
 ssh-client
+wget
