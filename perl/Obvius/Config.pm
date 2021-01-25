@@ -65,28 +65,23 @@ sub _add_debug_line {
 
 # use Data::Dumper;
 sub parse_file {
-     my $file = shift;
-
-     my %data;
-
-     open F, "<", $file or return undef;
-     for (grep { ! ( /^\#/ or /^\s*$/ ) } <F>) {
-	  chomp;
-	  my ($key, $val) = split(/\s*=\s*/, $_, 2);
-
-	  # Remove extra start and ending spaces
-	  $key =~ s{^\s+}{};
-	  $val =~ s{\s+$}{};
-      $val = read_array($val);
-
-	  if($DEBUG) {
-	      _add_debug_line($file, $key, exists $data{uc $key});
-	  }
-	  $data{uc $key} = $val;
-     }
-     close F;
-
-     return \%data;
+    my $file = shift;
+    my %data;
+    open F, "<", $file or return undef;
+    for (grep { ! ( /^\#/ or /^\s*$/ ) } <F>) {
+        chomp;
+        my ($key, $val) = split(/\s*=\s*/, $_, 2);
+        # Remove extra start and ending spaces
+        $key =~ s{^\s+}{};
+        $val =~ s{\s+$}{};
+        $val = read_array($val);
+        if($DEBUG) {
+            _add_debug_line($file, $key, exists $data{uc $key});
+        }
+        $data{uc $key} = $val;
+    }
+    close F;
+    return \%data;
 }
 
 sub read_array {
@@ -200,17 +195,17 @@ sub debug {
 
 sub read_roothost_conf
 {
-	my ( $self, $conf) = @_;
+    my ( $self, $conf) = @_;
 
-	return unless -f $conf;
+    return unless -f $conf;
 
-	open F, '<', $conf or die "Cannot open $conf:$!\n";
-	my ($roothost) = (<F> =~ m!:([^\]]+)!);
-	close F;
+    open F, '<', $conf or die "Cannot open $conf:$!\n";
+    my ($roothost) = (<F> =~ m!:([^\]]+)!);
+    close F;
 
-	die "Cannot extract roothost from $conf\n" unless $roothost;
+    die "Cannot extract roothost from $conf\n" unless $roothost;
 
-	$roothost;
+    $roothost;
 }
 
 # Returns text string with a sorted list of all config values

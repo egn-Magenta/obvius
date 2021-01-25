@@ -16,7 +16,7 @@ our @ISA = qw( WebObvius::Cache::Collection );
 
 sub new {
     my ($class, $obvius) = @_;
-    
+
     my $user_cache     = WebObvius::Cache::ExternalUserCache->new($obvius);
     my $leftmenu_cache;
     if($obvius->config->param('use_old_admin_leftmenu_cache')) {
@@ -34,7 +34,7 @@ sub new {
     }
 
     my $internal_proxy_cache = WebObvius::Cache::InternalProxyCache->new($obvius);
-    
+
     my $medarbejderoversigt_cache = WebObvius::Cache::ExternalMedarbejderoversigtCache->new($obvius);
 
     my @extras;
@@ -50,10 +50,10 @@ sub new {
             warn $@ if($@);
         }
     }
-   
-    return $class->SUPER::new($user_cache, 
-                              $leftmenu_cache, 
-                              $apache_cache, 
+
+    return $class->SUPER::new($user_cache,
+                              $leftmenu_cache,
+                              $apache_cache,
                               $internal_proxy_cache,
                               $medarbejderoversigt_cache,
                               @extras);
