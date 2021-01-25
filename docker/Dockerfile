@@ -8,6 +8,10 @@ ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.
     SUPERCRONIC=supercronic-linux-amd64 \
     SUPERCRONIC_SHA1SUM=048b95b48b708983effb2e5c935a1ef8483d9e3e
 
+# Change the UID and GID for the www-data user and group to reflect
+# the ones used by the old KU Obvius setup.
+RUN groupmod -g 48 www-data && usermod -u 48 www-data
+
 # Add list of apt packages
 COPY ./sys-requirements.txt sys-requirements.txt
 
