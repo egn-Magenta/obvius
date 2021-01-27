@@ -41,6 +41,7 @@ build-nocache:
         entrypoint: [""]
     tags:
     - docker
+    - high-mem
     script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor
@@ -58,6 +59,7 @@ build:
       entrypoint: [""]
     tags:
       - docker
+      - high-mem
     script:
       - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
       - /kaniko/executor
