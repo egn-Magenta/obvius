@@ -28,7 +28,6 @@ for my $confname (@ARGV) {
 
         $sitebase =~ s!/$!!;
         my $timefile = "$sitebase/var/queue_last_processed.time";
-        my $logfile = "$sitebase/logs/queue_processing.log";
         # Default to processing jobs from within the last 24 hours
         my $time = strftime('%Y-%m-%d %H:%M:%S', localtime(time - 60*60*24));
         my $starttime = time;
@@ -68,7 +67,7 @@ for my $confname (@ARGV) {
         $sth->execute($time);
 
         while(my ($id) = $sth->fetchrow_array) {
-            system("/var/www/obvius/bin/perform_order --site $confname $id >> $logfile 2>&1 &");
+            system("/var/www/obvius/bin/perform_order --site $confname $id 2>&1 &");
             # Stagger jobs by 1 second to prevent failure due to concurrent database writes
             # This also ensures we don't run out of memory
             Time::HiRes::sleep(1);
