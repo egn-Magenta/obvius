@@ -31,8 +31,6 @@ $obvius_page=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /clear_cache\n";
-
 if (defined $obvius_page and $obvius_page eq 'done') {
   $m->comp('/clear_cache:do');
 }

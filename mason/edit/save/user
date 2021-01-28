@@ -3,7 +3,5 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/save/user XXX\n";
-
 return (1, '/new/user:Do');
 </%init>

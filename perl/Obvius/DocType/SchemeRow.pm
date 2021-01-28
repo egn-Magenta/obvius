@@ -6,7 +6,7 @@ package Obvius::DocType::SchemeRow;
 #
 # Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Author: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,7 +53,6 @@ sub action {
     my @out_fields;
     for(@fields) {
         my $data = $vdoc->field($_);
-        print STDERR $_ ."\n";
         /(\d+)$/;
         my $fieldnr = $1;
         push(@out_fields, { fieldnr => $fieldnr, text => $data }) if($data);

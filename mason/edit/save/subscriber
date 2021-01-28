@@ -20,8 +20,6 @@ $session
 %
 %
 <%init>
-print STDERR ">>> /edit/save/subscriber XXX\n";
-
 my $already_there=undef;
 unless ($session->{fields_out}->param('id')) { # New, not update - check if email already exists:
     $already_there=$obvius->get_subscriber({ email=>$session->{fields_out}->param('email') });

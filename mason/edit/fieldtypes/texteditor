@@ -32,7 +32,6 @@ $no_msie_editor=>undef
 my $use_msie = 0;
 my $use_java = 0;
 my $user_agent = $r->header_in('user-agent');
-print STDERR "$user_agent\n";
 unless($no_msie_editor) {
     if($user_agent =~ /Win/ and $user_agent !~ /Win3.11/) {
         if($user_agent =~ /MSIE/) {
@@ -90,12 +89,12 @@ if(defined($html)) {
         # in a newsbox on another document.
         # $mcmsval =~ s!L<([^;]*);$uri!L<$1;!g;
 
-        print STDERR "Fancy HTML:\n'$html'\n\n";
-        print STDERR "Fancy MCMS:\n'" . $mcmsval . "'\n\n";
-        open(FH, '>/tmp/obviusorig'); print FH $value; close(FH);
-        open(FH, '>/tmp/obviusnew'); print FH $mcmsval; close(FH);
-        my $cmdoutput = `diff /tmp/obviusorig /tmp/obviusnew`;
-        print STDERR "Diffing:\n$cmdoutput\nEnd diffing\n";
+        # print STDERR "Fancy HTML:\n'$html'\n\n";
+        # print STDERR "Fancy MCMS:\n'" . $mcmsval . "'\n\n";
+        # open(FH, '>/tmp/obviusorig'); print FH $value; close(FH);
+        # open(FH, '>/tmp/obviusnew'); print FH $mcmsval; close(FH);
+        # my $cmdoutput = `diff /tmp/obviusorig /tmp/obviusnew`;
+        # print STDERR "Diffing:\n$cmdoutput\nEnd diffing\n";
 
         $value = $mcmsval if(defined($mcmsval));
     }

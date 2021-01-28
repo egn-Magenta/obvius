@@ -57,7 +57,6 @@ my $use_msie = 0;
 my $user_agent = $r->header_in('user-agent');
 my $is_composite_compatible = 0;
 my $mcmscodes = $obvius->config->param('ALLOW_EDIT_MCMSCODES');
-print STDERR "User agent: " . $user_agent . "\n";
 unless($no_msie_editor) {
     if($user_agent =~ /Win/ and $user_agent !~ /Win3.11/ and $user_agent =~ /MSIE [^1234]/) {
         $use_msie = 1;

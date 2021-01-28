@@ -5,8 +5,3 @@
 <& SELF:msg, text=>'Cancelled' &>
 </p>
 <!-- end abort -->
-
-%
-<%init>
-print STDERR ">>> /edit/abort ($prefix$uri)\n";
-</%init>

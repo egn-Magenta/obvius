@@ -3,16 +3,12 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/validate/document\n";
-
 # Transfer fields that have not been modified from fields_in to fields_final:
 map {
     my $k=lc($_);
     if ($m->comp('shared/field_edited', session=>$session, k=>$k)) {
-	print STDERR "asjo: field $k edited";
     }
     else {
-	print STDERR "asjo: field $k unchanged";
 	$m->comp('shared/field_unedited', session=>$session, k=>$k);
     }
     $m->comp('shared/field_print_debug', session=>$session, k=>$k);

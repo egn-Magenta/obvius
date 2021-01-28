@@ -4,13 +4,6 @@ $obvius_lang=>undef
 $obvius_new=>undef
 </%args>
 <%init>
-print STDERR ">>> /edit/new_version\n";
-
-print STDERR "obvius_doctype: $obvius_doctype\n";
-print STDERR "vdoc->Type  : $vdoc->Type\n";
-print STDERR "obvius_lang   : $obvius_lang\n";
-print STDERR "vdoc->Lang  : $vdoc->Lang\n";
-
 if ($obvius_doctype == $vdoc->Type and $obvius_lang eq $vdoc->Lang) {
     $m->comp('/new/version', obvius_error=>"If you're not going to change it, you need to <a href=\"$prefix$uri?obvius_op=edit&obvius_version=". $vdoc->Version ."\">edit the version</a> instead.", obvius_new=>$obvius_new);
     return undef;

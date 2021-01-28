@@ -36,7 +36,3 @@
 $obvius_error=>undef
 $obvius_new=>'language'
 </%args>
-%
-<%init>
-print STDERR ">>> /new/version\n";
-</%init>

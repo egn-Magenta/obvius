@@ -3,9 +3,7 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/save/version\n";
-
-# Jason : We need to create a new msgdigest if the document 
+# Jason : We need to create a new msgdigest if the document
 # is being edited via the admin interface.
 if ($session->{doctype}->{FIELDS}->Msgdigest) {
 

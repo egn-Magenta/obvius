@@ -6,7 +6,7 @@ package Obvius::DocType::Proxy;
 #
 # Copyright (C) 2004 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: Adam Sjøgren (asjo@magenta-aps.dk)
+# Author: Adam SjÃ¸gren (asjo@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -451,7 +451,7 @@ sub make_request {
         $response=$ua->get($url, %headers);
     }
     else {
-        warn "Unknown request method \"$request_method\", aborting";
+        warn("Unknown request method \"$request_method\" for url \"$url\", aborting");
         return undef;
     }
 
@@ -582,7 +582,7 @@ The Via-header has HTTP/1.1 hardcoded into it.
 
 =head1 AUTHOR
 
-Adam Sjøgren, E<lt>asjo@magenta-aps.dkE<gt>
+Adam SjÃ¸gren, E<lt>asjo@magenta-aps.dkE<gt>
 
 =head1 SEE ALSO
 

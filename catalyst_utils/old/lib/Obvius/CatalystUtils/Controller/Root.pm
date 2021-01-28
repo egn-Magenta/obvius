@@ -12,7 +12,6 @@ __PACKAGE__->config(namespace => '');
 
 sub begin :Private {
     my ($self, $c) = @_;
-    print STDERR "BEGIN\n";
 }
 
 =head1 NAME
@@ -59,7 +58,6 @@ Attempt to render a view, if needed.
 =cut
 
 sub end : ActionClass('RenderView') {
-    print STDERR "END\n";
 }
 
 =head1 AUTHOR

@@ -97,8 +97,6 @@ onload_array[onload_array.length] = initEditor_<% $name %>;
 my $use_msie = 0;
 my $user_agent = $r->header_in('user-agent');
 
-print STDERR "User-agent: $user_agent\n";
-
 my $value=$session->{fields_out}->param(uc($name));
    $value=$session->{fields_in}->param(uc($name)) unless defined($value);
 

@@ -82,22 +82,16 @@ sub combo_search_parse {
     my $text = shift;
     my $parser = new Obvius::DocType::ComboSearch::Parser(@_);
 
-    Obvius::log()->debug("PARSE TEXT: $text");
-
     my $tree = $parser->parse($text);
-    Obvius::log()->debug("PARSE TREE: " . Dumper($tree));
 
     return undef unless ($tree);
 
     my $where = $parser->query($tree);
-    Obvius::log()->debug("WHERE: $where");
 
     # Remove duplicates from required fields
     #my %dups;
     #my @fields = grep { not $dups{$_}++ } @{$parser->{USED_FIELDS}};
     my @fields=@{$parser->{USED_FIELDS}};
-
-    Obvius::log()->debug(Dumper(@fields));
 
     return ($where, @fields);
 }

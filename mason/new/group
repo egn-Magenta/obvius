@@ -6,8 +6,6 @@ $obvius_id=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /new/group\n";
-
 my $session;
 
 $session=$r->pnotes('site')->get_session(undef, $obvius);
@@ -87,8 +85,6 @@ $r->notes(obvius_session=>$obvius_session);
 $session
 </%args>
 <%perl>
-print STDERR ">>> /new/group:Do\n";
-
 $obvius->get_version_field($vdoc, 'fields');
 my @fields=map {
     my ($field, $title, $options)=split /\s+/;
@@ -97,12 +93,10 @@ my @fields=map {
 
 my $group={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
 if (my $id=$session->{fields_out}->param('id')) {
-    print STDERR "call update_group\n";
     $group->{id}=$id;
     return $obvius->update_group($group);
 }
 else {
-    print STDERR "call create_group\n";
     return $obvius->create_new_group($group);
 }
 
@@ -127,10 +121,6 @@ $obvius_id
 <input type="submit" class="okknap" value="<& SELF:msg, text=>'Delete' &>" accesskey="S">
 <input type="button" class="cancelknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
 
-%
-<%init>
-print STDERR ">>> /new/group:ReallyDelete\n";
-</%init>
 </%method>
 %
 <%method Delete>

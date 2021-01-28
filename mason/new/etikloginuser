@@ -17,7 +17,3 @@ return $m->comp('/new/loginuser:ReallyDelete', %ARGS, prefix=>'etik');
 return $m->comp('/new/loginuser:Delete', %ARGS, prefix=>'etik');
 </%perl>
 </%method>
-%
-<%init>
-print STDERR ">>> new/etikloginuser\n";
-</%init>

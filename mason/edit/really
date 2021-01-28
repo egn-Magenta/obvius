@@ -24,13 +24,3 @@ $obvius_shownpage=>1
 $invalid=>undef
 </%args>
 %
-<%init>
-print STDERR ">>> /edit/really\n";
-
-#print STDERR " obvius_page: $obvius_page\n";
-#print STDERR " obvius_shownpage: $obvius_shownpage\n";
-#print STDERR " session: $session\n";
-#use Data::Dumper;
-#print STDERR " invalid: " . Dumper($invalid);
-
-</%init>

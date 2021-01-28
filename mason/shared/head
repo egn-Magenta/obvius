@@ -13,6 +13,3 @@
 <& SELF:javascript &>
 </script>
 </head>
-<%init>
-# print STDERR ">>> /shared/head\n";
-</%init>

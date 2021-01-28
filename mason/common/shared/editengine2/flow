@@ -17,8 +17,6 @@
                parent  => $parent,
               };
  push @{$session->{cesi}->{queue}}, $vertex;
-#  print STDERR "<flow:insert> ";
-#  use Data::Dumper; print STDERR '$session->{cesi}: ' . Dumper($session->{cesi});
 </%init>
 </%method>
 
@@ -30,8 +28,6 @@
 </%args>
 <%init>
 
- #print STDERR "<flow:extract>\t";
-
  # [!] Remember to handle pooled overwritings, translations
  #     etc. before extraction!
 
@@ -39,15 +35,10 @@
  return (undef, undef, undef) unless $node;
 
  my $vertex = $m->comp('history:extract_vertex', history=>$node->{history}) . "[$node->{execute}]" . 'store';
-#use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
 
  # Check for dependencies by "Round Robin"; modify later to use eg. topological sorting if necessary
  while (defined $session->{cesi}->{pool}->{$vertex} and scalar(grep { !$_ } values %{$session->{cesi}->{pool}->{$vertex}})) {
-     #print STDERR "...skipping ";
-     #use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
-
      my $n2 = $node;
-
      push @{$session->{cesi}->{queue}}, $node;
      $node = shift @{$session->{cesi}->{queue}};
      $vertex = $m->comp('history:extract_vertex', history=>$node->{history}) . "[$node->{execute}]" . 'store';
@@ -56,12 +47,7 @@
      die "unsatisfied node " . Dumper($node) if $node eq $n2;
  }
 
-#use Data::Dumper; print STDERR '$node: ' . Dumper($node);
-# use Data::Dumper; print STDERR '$vertex: ' . Dumper($vertex);
-
-
   if (defined $session->{cesi}->{pool}->{$vertex}) {
-      #use Data::Dumper; print STDERR '$session->{cesi}->{pool}->{$vertex}: ' . Dumper($session->{cesi}->{pool}->{$vertex});
       foreach my $source ( keys %{$session->{cesi}->{pool}->{$vertex}} ) {
           # Integrate the pooled data from $source as described in $edges
           $m->comp('flow:source', node=>$node, source => $session->{cesi}->{edges}->{$source}->{$vertex}, pool=>$session->{cesi}->{pool}->{$vertex}->{$source});
@@ -84,20 +70,13 @@
  $data
 </%args>
 <%init>
-#use Data::Dumper; print STDERR "\t" . '<flow:route> $vertex: ' . "$vertex";
-
  if (exists $session->{cesi}->{edges}->{$vertex}) {
-   #print STDERR "\t»»» routing...\n";
 
    # Store $data in target pools
    foreach my $target (keys %{$session->{cesi}->{edges}->{$vertex}}) {
-#     print STDERR "\tStoring data in pool for $target\n";
      # Also use appropriate projection here!!
      $session->{cesi}->{pool}->{$target}->{$vertex} = $data;
    }
-
-#use Data::Dumper; print STDERR '$session->{cesi}->{pool}: ' . Dumper($session->{cesi}->{pool});
-
 
    # Check for a redirection request
    if (exists $session->{cesi}->{edges}->{$vertex}->{sink}) {
@@ -126,9 +105,6 @@
          print STDERR "\tNo action for $vertex->sink\n";
      }
    }
- }
- else {
-   #print STDERR "\t    no routing!\n";
  }
 
 </%init>
@@ -159,8 +135,6 @@
  $session->{cesi}->{edges}= { %{$session->{cesi}->{edges}}, %$edges };
  $session->{cesi}->{actions} = {} unless $session->{cesi}->{actions};
  $session->{cesi}->{actions}= { %{$session->{cesi}->{actions}}, %$actions };
-
-#use Data::Dumper; print STDERR '$session->{cesi}: ' . Dumper($session->{cesi});
 
  # Setup additional pools
  foreach my $vertex (keys %$edges) {
@@ -206,10 +180,7 @@
  $pool
 </%args>
 <%init>
-#print STDERR "<flow:source>";
  if ($source->{merge} eq 'insert') {
-#    use Data::Dumper; print STDERR '$node: ' . Dumper($node);
-# use Data::Dumper; print STDERR '$pool: ' . Dumper($pool);
 
    # Note: This assumes only one object
    my ($source_object_id) = keys %$pool;

@@ -4,8 +4,6 @@ $obvius_shownpage
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/validate/page_user\n";
-
 my $editpages=$session->{pages};
 my $editpage=$editpages->[($obvius_shownpage-1)];
 my $fieldlist=$editpage->{fieldlist};
@@ -44,7 +42,6 @@ foreach (@$fieldlist) {
     }
 
     unless ($ok) {
-	print STDERR "$name does not validate\n";
 	push @invalid, $name;
     }
 

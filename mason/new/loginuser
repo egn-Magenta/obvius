@@ -7,8 +7,6 @@ $prefix=>''
 </%args>
 %
 <%init>
-print STDERR ">>> /new/loginuser\n";
-
 my @novals;
 @novals = qw(email kontakt address tlf cvr niveau ansatte diverse branche indbetaling lang) if ($prefix eq 'etik');
 
@@ -96,8 +94,6 @@ $session
 $prefix=>''
 </%args>
 <%perl>
-print STDERR ">>> /new/loginuser:Do\n";
-
 $obvius->get_version_field($vdoc, 'fields');
 my @fields=map {
     my ($field, $title, $options)=split /\s+/;
@@ -137,10 +133,6 @@ $prefix=>''
 <input type="submit" class="okknap" value="<& SELF:msg, text=>'Delete' &>" accesskey="S">
 <input type="button" class="cancelknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
 
-%
-<%init>
-print STDERR ">>> /new/loginuser:ReallyDelete ($prefix)\n";
-</%init>
 </%method>
 %
 <%method Delete>

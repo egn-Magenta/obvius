@@ -69,7 +69,6 @@
   </body>
 
 <%init>
-print STDERR ">>> public/switch\n";
 
 $obvius->get_version_fields($vdoc, [qw(title show_news)]);
 my $title = $vdoc->Title;

@@ -24,7 +24,6 @@ $value=$session->{fields_in}->param(uc($name)) unless defined($value);
 $value = '' unless(defined($value));
 my @sizes;
 for(keys %{$image_doctype->{FIELDS}}) {
-    print STDERR "$_\n";
     if(/^DATA_(\d+)x(\d+)$/i) {
         push(@sizes, "$1x$2");
     }

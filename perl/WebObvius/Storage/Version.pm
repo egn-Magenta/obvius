@@ -88,7 +88,6 @@ sub search {
     my ($this, $how)=@_;
 
     my $versions = $this->param('obvius')->search($how->{fields}, $how->{where}, %{$how->{options}} );
-use Data::Dumper; print STDERR '$versions: ' . Dumper($versions);
     map {$this->param('obvius')->get_version_fields($_, 255)} @$versions;
 
     my @results;

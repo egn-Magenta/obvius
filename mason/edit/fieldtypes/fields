@@ -235,7 +235,6 @@ my @fields;
 if (defined $doctypeid) {
     $subvdoctype=$obvius->get_doctype($doctypeid);
     $doctypename=$subvdoctype->Name;
-    print STDERR " doctypename: $doctypename\n";
     foreach ($subvdoctype->{FIELDS}->param) {
 	push @fields, lc($_) unless $_ =~ /_comment$/i;
     }

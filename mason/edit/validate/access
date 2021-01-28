@@ -3,7 +3,5 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/validate/access XXX\n";
-
 return (1, '/access:Do');
 </%init>
