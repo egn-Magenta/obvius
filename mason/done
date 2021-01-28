@@ -26,8 +26,6 @@ $no_redirect=>0
 </%args>
 %
 <%init>
-print STDERR ">>> /done ($prefix$uri)\n";
-
 $uri.=$postfix if ($postfix);
 my $linkuri=$uri;
 

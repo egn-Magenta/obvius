@@ -7,7 +7,6 @@ $obvius_session=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /access\n";
 my $ok;
 my $session;
 
@@ -110,8 +109,6 @@ if (!defined $obvius_session) {
 $session
 </%args>
 <%perl>
-print STDERR ">>> /access:Do\n";
-
 $obvius->set_access_data($doc,
  $session->{fields_out}->param('owner'),
  $session->{fields_out}->param('grp'),

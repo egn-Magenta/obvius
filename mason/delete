@@ -53,8 +53,6 @@ $obvius_page=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /delete\n";
-
 if (defined $obvius_page and $obvius_page eq 'done') {
   $m->comp('/delete:do');
 }

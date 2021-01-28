@@ -5,7 +5,6 @@
       <& '.data', editscheme=>$editscheme, history=>$history, layout=>$layout, value=>$value->{$layout->{name}}, style=>$style &>\
 %   }
 %   else {
-%     use Data::Dumper; print STDERR '$layout: ' . Dumper($layout);
 %     print STDERR '$value should be of the form:' . "\n" . '$value => {' . "\n\tid1=>{value=>'1', status=>'OK'}\n\tid2=>{value=>'2', status=>'OK'}\n}";
 %     die 'display/data: $value is not a hash: [' . (defined $value ? $value : 'undef') . ']';
 %   }

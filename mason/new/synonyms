@@ -6,8 +6,6 @@ $obvius_id=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /new/synonyms\n";
-
 my $session;
 
 $session=$r->pnotes('site')->get_session(undef, $obvius);
@@ -88,8 +86,6 @@ $r->notes(obvius_session=>$obvius_session);
 $session
 </%args>
 <%perl>
-print STDERR ">>> /new/synonyms:Do\n";
-
 $obvius->get_version_field($vdoc, 'fields');
 my @fields=map {
     my ($field, $title, $options)=split /\s+/;
@@ -99,11 +95,9 @@ my @fields=map {
 my $synonyms={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
 my $ret;
 if ($obvius->get_synonyms($session->{fields_out}->param('id'))) {
-    print STDERR "call update_synonyms\n";
     $ret=$obvius->update_synonyms($synonyms);
 }
 else {
-    print STDERR "call create_synonyms\n";
     $ret=$obvius->create_new_synonyms($synonyms);
 }
 
@@ -132,10 +126,6 @@ $obvius_id
 <input type="submit" class="okknap" value="<& SELF:msg, text=>'Remove' &>" accesskey="S">
 <input type="button" class="cancelknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
 
-%
-<%init>
-print STDERR ">>> /new/synonyms:ReallyDelete\n";
-</%init>
 </%method>
 %
 <%method Delete>

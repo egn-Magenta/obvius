@@ -11,7 +11,6 @@ use Obvius::Config;
 use DBI;
 use POSIX qw(strftime);
 use Time::HiRes;
-use Data::Dumper;
 
 for my $confname (@ARGV) {
     my $config;

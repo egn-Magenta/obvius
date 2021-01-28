@@ -6,8 +6,6 @@ $obvius_id=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /new/user\n";
-
 my $session;
 
 $session=$r->pnotes('site')->get_session(undef, $obvius);
@@ -128,8 +126,6 @@ $r->notes(obvius_session=>$obvius_session);
 $session
 </%args>
 <%perl>
-print STDERR ">>> /new/user:Do\n";
-
 $obvius->get_version_field($vdoc, 'fields');
 my @fields=map {
     my ($field, $title, $options)=split /\s+/;
@@ -140,13 +136,10 @@ my $user={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields}
 $user->{password}=$session->{fields_out}->param('password1');
 $user->{notes}=$session->{fields_out}->param('notes');
 if (my $id=$session->{fields_out}->param('id')) {
-    print STDERR "call update_user\n";
     $user->{id}=$id;
     return $obvius->update_user($user);
 }
 else {
-    print STDERR "call create_user\n";
-    
     # back-compat stuff
     $user->{admin} = 1;
     $user->{can_manage_users} = 2;
@@ -176,10 +169,6 @@ $obvius_id
 <input type="submit" class="okknap" value="<& SELF:msg, text=>'Delete' &>" accesskey="S">
 <input type="button" class="cancelknap" onclick="javascript:this.form.obvius_op.value=''; submit_page();" value="<& SELF:msg, text=>'Cancel' &>" accesskey="Z">
 
-%
-<%init>
-print STDERR ">>> /new/user:ReallyDelete\n";
-</%init>
 </%method>
 %
 <%method Delete>
@@ -188,7 +177,6 @@ $obvius_id
 </%args>
 <& /done &>
 <%perl>
-print STDERR ">>> /new/user:Delete\n";
 return $obvius->delete_user($obvius_id);
 </%perl>
 </%method>

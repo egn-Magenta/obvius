@@ -48,7 +48,6 @@ $obvius_page=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /rename\n";
 
 if (defined $obvius_page and $obvius_page eq 'done') {
   $m->comp('/rename:do', %ARGS);

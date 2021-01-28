@@ -3,18 +3,14 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/validate/version\n";
-
 # Transfer fields that have not been modified from fields_in to fields_out:
 map {
     my $k=lc($_);
     if ($m->comp('shared/field_edited', session=>$session, k=>$k)) {
-	print STDERR "asjo: field $k edited";
 	# If an optional field that has been edited to '' it is turned
 	# into undef by field_edited!
     }
     else {
-	print STDERR "asjo: field $k unchanged";
 	$m->comp('shared/field_unedited', session=>$session, k=>$k);
     }
     $m->comp('shared/field_print_debug', session=>$session, k=>$k);
@@ -39,8 +35,6 @@ if ($status{invalid}) {
 	    my $fspec=$obvius->get_fieldspec($k);
 	    if (defined $fspec->Default_value) {
 		$session->{fields_out}->param($k=>$fspec->Default_value);
-		print STDERR "asjo: setting invalid empty field $k to default value "
-		    . $fspec->Default_value . "\n";
 	    }
 	}
     }

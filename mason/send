@@ -10,7 +10,6 @@ $version=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /send\n";
 my $ok;
 my $session;
 
@@ -133,7 +132,6 @@ if (!defined $obvius_session) {
 $session
 </%args>
 <%perl>
-print STDERR ">>> /send:Do\n";
 use Apache::File;
 
 my $sitename=$r->pnotes('site')->Sitename;

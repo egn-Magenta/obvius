@@ -6,7 +6,7 @@ package Obvius::DocType::Scheme;
 #
 # Copyright (C) 2001 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #
-# Author: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
+# Author: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -107,7 +107,6 @@ sub action {
         }
     }
     $scheme_data[0]->{start_table} = 1;
-    print STDERR Dumper(\@scheme_data);
 
     $output->param(scheme_data => \@scheme_data);
 

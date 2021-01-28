@@ -4,7 +4,6 @@ $obvius_new_doctype_name
 $obvius_parent_doctype
 </%args>
 <%init>
-print STDERR ">>> /edit/new_doctype\n";
 
 unless ($obvius_new_doctype_name =~ /^[a-zA-Z0-9._-]+$/) {
     $m->comp(

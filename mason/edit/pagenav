@@ -37,8 +37,6 @@ $tabindex=>undef
 </%args>
 %
 <%init>
-#print STDERR ">>> /edit/pagenav\n";
-
 $done_label='Save' unless $done_label;
 $tabindex=(defined $tabindex ? (' tabindex="' . $tabindex . '"') : '');
 

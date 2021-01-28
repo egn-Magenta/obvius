@@ -3,7 +3,5 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/save/synonyms XXX\n";
-
 return (1, '/new/synonyms:Do');
 </%init>

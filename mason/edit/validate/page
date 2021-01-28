@@ -5,8 +5,6 @@ $obvius_shownpage=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/validate/page\n";
-
 # Validate and store input from previous page (number in $obvius_shownpage):
 my $editpages=$session->{pages};
 

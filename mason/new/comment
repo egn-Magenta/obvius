@@ -7,8 +7,6 @@ $obvius_date=>undef
 </%args>
 %
 <%init>
-print STDERR ">>> /new/comment\n";
-
 my $session;
 
 $session=$r->pnotes('site')->get_session(undef, $obvius);
@@ -84,8 +82,6 @@ if (defined $obvius_docid and defined $obvius_date) {
     }
     $fields->param(docid=>$obvius_docid);
     $fields->param(date=>$obvius_date);
-    use Data::Dumper;
-    print STDERR "fields->in: " . Dumper($fields);
     #$fields->param(id=>$obvius_id);
     # Remember the groups:
     #if (my $user_groups=$obvius->get_user_groups($obvius_id)) {
@@ -112,8 +108,6 @@ $r->notes(obvius_session=>$obvius_session);
 $session
 </%args>
 <%perl>
-print STDERR ">>> /new/comment:Do\n";
-
 $obvius->get_version_field($vdoc, 'fields');
 my @fields=map {
     my ($field, $title, $options)=split /\s+/;
@@ -123,10 +117,7 @@ my @fields=map {
 my $comment={map { $_->{name}=>$session->{fields_out}->param($_->{name}) } @fields};
 $comment->{docid}=$session->{fields_out}->param('docid');
 if (my $date=$session->{fields_out}->param('date')) {
-    print STDERR "call update_comment\n";
     $comment->{date}=$date;
-    use Data::Dumper;
-    print STDERR "comment: " . Dumper($comment);
     return $obvius->update_comment($doc, $comment);
 }
 #else {
@@ -166,7 +157,6 @@ $obvius_date
 </td>
 %
 <%init>
-print STDERR ">>> /new/comment:ReallyDelete\n";
 </%init>
 </%method>
 %

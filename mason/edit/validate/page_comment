@@ -4,8 +4,6 @@ $obvius_shownpage
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/validate/page_comment\n";
-
 my $editpages=$session->{pages};
 my $editpage=$editpages->[($obvius_shownpage-1)];
 my $fieldlist=$editpage->{fieldlist};
@@ -26,9 +24,6 @@ foreach (@$fieldlist) {
     }
 
     my $value=$session->{fields_out}->param($name);
-    use Data::Dumper;
-    print STDERR "$name: " . Dumper($value);
-    #print STDERR "$name (value: " . (ref $value ? Dumper($value) : $value) . "): " . Dumper($fieldspec);
     my $ok=0;
     if ($fieldspec->Repeatable) {
 	if (ref $value) {
@@ -44,7 +39,6 @@ foreach (@$fieldlist) {
     }
 
     unless ($ok) {
-	print STDERR "$name does not validate\n";
 	push @invalid, $name;
     }
 
@@ -63,8 +57,6 @@ if (my $date=$session->{fields_in}->param('date')) {
 }
 $session->{fields_out}=$session->{fields_out}; # Make Apache::Session notice the change(!)
 
-use Data::Dumper;
-print STDERR "fields_out: " . Dumper($session->{fields_out});
 
 return (@invalid ? \@invalid : undef);
 </%init>

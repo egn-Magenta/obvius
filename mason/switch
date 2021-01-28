@@ -124,8 +124,6 @@ if (defined $obvius_page and $obvius_page eq 'abort') {
     $invalid=$m->comp($validate_comp, %ARGS, session=>$session);
 
     if ($obvius_page eq 'done') {
-	print STDERR "||| $validate_comp returned: " . (defined $invalid ? @$invalid : 'undef') . "\n";
-	print STDERR "||| obvius_page: $obvius_page\n";
 	if (defined $invalid and @$invalid) {
 	    $content='/edit/really';
 	}

@@ -3,8 +3,6 @@ $session
 </%args>
 %
 <%init>
-print STDERR ">>> /edit/save/document\n";
-
 return $obvius->create_new_document(
 				  $session->{document}->Parent,
 				  $session->{document}->Name,

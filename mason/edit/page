@@ -124,7 +124,6 @@ my @invalid_titles=map {
 </%method>
 %
 <%init>
-print STDERR ">>> /edit/page (obvius_page: $obvius_page)\n";
 $r->notes('help_doctype'=>$session->{doctype}->Name);
 
 my $editpages=$session->{pages};
