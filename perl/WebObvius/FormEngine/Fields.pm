@@ -812,11 +812,16 @@ sub input_type { $_[0]->form->html5 ? "email" : "text" }
 sub validate {
     my $self = shift;
     
-    $self->SUPER::validate(@_);
+    my $valid = $self->SUPER::validate(@_);
+    if (defined($valid) && !$valid) {
+        return $valid;
+    }
 
     unless($self->error_list) {
         my $val = $self->value;
-        return if(!$self->required and !$val);
+        if(!$self->required and !$val) {
+            return 1;
+        }
         
         unless(Email::Valid->address($val)) {
             $self->add_error(
@@ -826,8 +831,10 @@ sub validate {
                 $self,
                 "'%s' is not a valid email address", $val
             );
+            return 0;
         }
     }
+    return 1;
 }
 
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
