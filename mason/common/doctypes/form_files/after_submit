@@ -20,7 +20,7 @@ for my $mailto  (@mailto) {
 
      $mail_error = "Kunne ikke generere mail besked" unless($mailtxt);
 
-     my $smtp = Net::SMTP->new($server, Timeout=>5, Debug => 1) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
+     my $smtp = Net::SMTP->new($server, Timeout=>5, Debug => 0) or $mail_error = 'Error connecting to SMTP: '. $server . ' timeout after 5 seconds';
 
      my $from = $r->notes('formdata_mail_from') || $mailto;
 

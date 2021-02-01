@@ -584,7 +584,7 @@ sub provide_send_mail_ok {
 	my $msg = $template->expand($mailtemplate);
 
 
-	my $smtp = Net::SMTP->new($this->obvius->config->param('smtp') || 'localhost', Timeout=>30, Debug => 1);
+	my $smtp = Net::SMTP->new($this->obvius->config->param('smtp') || 'localhost', Timeout=>30, Debug => 0);
     unless ($smtp->mail($from)) {
 		$template->param($name => "Failed to specify a sender [$from]\n");
 		return 1;
