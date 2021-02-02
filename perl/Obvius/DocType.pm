@@ -39,6 +39,7 @@ use Obvius::Data;
 use Data::Dumper;
 use Obvius::SolrConvRoutines;
 use Obvius::SiteTools;
+use WebObvius qw(parse_editpage_fieldlist);
 
 #     The object contains two instances of Obvius::Data. Both contain
 #     fields associated with the object:
@@ -609,6 +610,31 @@ sub field_type_map {
 sub publish_type_map {
     my ($this) = @_;
     return $this->type_map($this->{PUBLISH_FIELDS});
+}
+
+# editable_fields($obvius)
+# Returns arrayref of fields of the doctype that are present in its editpages entry
+sub editable_fields {
+    my ($this, $obvius) = @_;
+    my $fields = $this->{EDITABLE_FIELDS};
+    if (!defined($fields)) {
+        my $editpages = $obvius->get_editpages($this);
+        my @fields;
+        for my $page (sort(keys(%$editpages))) {
+            my $fieldlist = $editpages->{$page}->param('fieldlist');
+            if ($fieldlist) {
+                my $pagefields = WebObvius::parse_editpage_fieldlist(
+                    undef,
+                    $fieldlist,
+                    $this,
+                    $obvius
+                );
+                push(@fields, @$pagefields);
+            }
+        }
+        $fields = $this->{EDITABLE_FIELDS} = \@fields;
+    }
+    return $fields;
 }
 
 ########################################################################
