@@ -22,16 +22,16 @@ our @EXPORT = qw(
 sub get_origin_ip_from_request {
     my ($req) = @_;
 
+    # Get the first IP in the X-FORWARDED-FOR header
+    if(my $ip = $req->headers_in->{"X-FORWARDED-FOR"}) {
+        $ip =~ s!,.*!!;
+        return $ip;
+    }
+
     # Apace 2.4 provides $req->useragent_ip, event though it is not in the
     # documentation.
     if($req->UNIVERSAL::can("useragent_ip")) {
         return $req->useragent_ip;
-    }
-
-    # Get the first IP in the X-FORWARDED-FOR header
-    if(my $ip = $req->headers_in->{"X-FORWARDED-FOR"}) {
-	$ip =~ s!,.*!!;
-	return $ip;
     }
 
     # Default to the remote ip of the connection
