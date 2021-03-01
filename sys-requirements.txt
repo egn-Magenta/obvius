@@ -27,6 +27,9 @@ libterm-readline-gnu-perl
 libtext-iconv-perl
 libxml-libxslt-perl
 
+# Needed for mass-upload feature
+unzip
+
 # Various system tools and developer nice-to-haves
 python
 awstats
@@ -42,3 +45,4 @@ curl
 rsync
 ssh-client
 wget
+less
