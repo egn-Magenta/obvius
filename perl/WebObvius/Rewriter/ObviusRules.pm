@@ -2,6 +2,26 @@ use strict;
 use warnings;
 
 use DBI;
+use WebObvius::Rewriter::RewriteRule;
+
+# Stops malformed requests from being further rewritten
+package WebObvius::Rewriter::ObviusRules::SanityCheck;
+
+use JSON;
+our @ISA = qw(WebObvius::Rewriter::RewriteRule);
+
+sub rewrite {
+    my ($this, %args) = @_;
+
+    # Stop rewriting if the request does not have a HTTP method.
+    if(!$args{method}) {
+        die 'Request without method';
+    }
+
+    return;
+}
+
+1;
 
 package WebObvius::Rewriter::ObviusRules::StaticDocs;
 use WebObvius::Rewriter::RewriteRule qw(LAST);
