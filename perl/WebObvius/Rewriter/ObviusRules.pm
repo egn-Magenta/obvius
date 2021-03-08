@@ -338,7 +338,11 @@ sub setup {
     my $dbh = DBI->connect(
         $this->{dsn},
         $this->{username},
-        $this->{passwd}
+        $this->{passwd},
+        {
+            RaiseError => 1,
+            PrintError => 0,
+        }
     ) or die "Could not create temporary dbh";
 
     # Create the cache table if it does not already exist
@@ -363,7 +367,11 @@ sub connect_dbh {
     $this->{dbh} = $existing_dbh || DBI->connect(
         $this->{dsn},
         $this->{username},
-        $this->{passwd}
+        $this->{passwd},
+        {
+            RaiseError => 1,
+            PrintError => 0,
+        }
     ) or die "Could not connect to database";
 
     $this->{dbh}->do("set names utf8");
