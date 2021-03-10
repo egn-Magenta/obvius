@@ -2,6 +2,30 @@ use strict;
 use warnings;
 
 use DBI;
+use WebObvius::Rewriter::RewriteRule;
+
+# Stops malformed requests from being further rewritten
+package WebObvius::Rewriter::ObviusRules::SanityCheck;
+
+use JSON;
+our @ISA = qw(WebObvius::Rewriter::RewriteRule);
+
+sub rewrite {
+    my ($this, %args) = @_;
+
+    # Stop rewriting if the request does not have a HTTP method.
+    if(!$args{method}) {
+        die 'Request without method';
+    }
+
+    # TODO: This should be expanded later when further requests are
+    # found that we do not want to deal with. This could for example
+    # be obvius searching-for-exploit requests.
+
+    return;
+}
+
+1;
 
 package WebObvius::Rewriter::ObviusRules::StaticDocs;
 use WebObvius::Rewriter::RewriteRule qw(LAST);
@@ -314,16 +338,10 @@ sub setup {
 
     $this->{debug} = $rewriter->{debug};
 
-    # Create a temporary dbh
-    my $dbh = DBI->connect(
-        $this->{dsn},
-        $this->{username},
-        $this->{passwd}
-    ) or die "Could not create temporary dbh";
-
     # Create the cache table if it does not already exist
     my $table = $this->{table};
-    $dbh->do(qq|
+    print STDERR Data::Dumper::Dumper($this->database_handles);
+    $this->database_handles->{dbh}->do(qq|
         CREATE TABLE IF NOT EXISTS `${table}` (
             `uri` blob NOT NULL,
             `querystring` varchar(255) NOT NULL DEFAULT '',
@@ -332,42 +350,57 @@ sub setup {
             KEY `${table}_querystring_idx` (`querystring`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8
     |);
-
-    # Store the database handle for later use
-    $this->connect_dbh($dbh);
 }
 
-sub connect_dbh {
-    my ($this, $existing_dbh) = @_;
+sub database_handles {
+    my ($this) = @_;
 
-    $this->{dbh} = $existing_dbh || DBI->connect(
-        $this->{dsn},
-        $this->{username},
-        $this->{passwd}
-    ) or die "Could not connect to database";
+    # Replace all database handles if we cannot ping the database
+    if(!($this->{database_handles}->{dbh} &&
+         $this->{database_handles}->{dbh}->ping())) {
 
-    $this->{dbh}->do("set names utf8");
+        # (Re-)create DBH unless we already have a live dbh
+        my $dbh = DBI->connect(
+            $this->{dsn},
+            $this->{username},
+            $this->{passwd},
+            {
+                RaiseError => 1,
+                PrintError => 0,
+            }
+        ) or die "Could not connect to database";
 
-    my $table = $this->{table};
-    $this->{lookup} = $this->{dbh}->prepare("SELECT cache_uri FROM $table WHERE uri = ? and querystring = ?");
+        $dbh->do("set names utf8");
 
-    $this->{doctype_lookup} = $this->{dbh}->prepare(q|
-        SELECT
-            doctypes.id AS doctypeid,
-            doctypes.name AS doctypename
-        FROM
-            docid_path,
-            versions,
-            doctypes
-        WHERE
-            docid_path.docid = versions.docid
-            AND
-            versions.public = 1
-            AND
-            versions.type=doctypes.id
-            AND
-            docid_path.path = ?;
-    |);
+        my $table = $this->{table};
+        my $lookup_sth = $dbh->prepare("SELECT cache_uri FROM $table WHERE uri = ? and querystring = ?");
+
+        my $doctype_sth = $dbh->prepare(q|
+            SELECT
+                doctypes.id AS doctypeid,
+                doctypes.name AS doctypename
+            FROM
+                docid_path,
+                versions,
+                doctypes
+            WHERE
+                docid_path.docid = versions.docid
+                AND
+                versions.public = 1
+                AND
+                versions.type=doctypes.id
+                AND
+                docid_path.path = ?;
+        |);
+
+        $this->{database_handles} = {
+            dbh => $dbh,
+            lookup => $lookup_sth,
+            doctype_lookup => $doctype_sth,
+        }
+    }
+
+    return $this->{database_handles};
 }
 
 sub rewrite {
@@ -379,18 +412,20 @@ sub rewrite {
     return undef unless($args{method} =~ m!^(GET|HEAD)$!);
     print STDERR "$args{method} method OK\n" if($this->{debug});
 
-    $this->connect_dbh unless($this->{dbh} && $this->{dbh}->ping());
+    # Make sure we have a live database handle and that statement handles
+    # are up to date.
+    my $handles = $this->database_handles;
 
-    $this->{doctype_lookup}->execute($args{uri});
-    my ($doctypeid, $doctypename) = ($this->{doctype_lookup}->fetchrow_array);
+    $handles->{doctype_lookup}->execute($args{uri});
+    my ($doctypeid, $doctypename) = ($handles->{doctype_lookup}->fetchrow_array);
     return undef unless(defined($doctypeid));
     print STDERR "Uri '$args{uri}?$args{query_string}' mapped to doctype $doctypename, $doctypeid\n" if($this->{debug});
     my ($can_cache, $qstring) = $this->{qstring_mapper}->map_querystring_for_cache($doctypeid, $doctypename, $args{query_string});
     return undef unless($can_cache);
     print STDERR "Querystring '$args{query_string}' OK, mapped to '$qstring'\n" if($this->{debug});
 
-    $this->{lookup}->execute($args{uri}, $qstring);
-    my ($cached) = ($this->{lookup}->fetchrow_array);
+    $handles->{lookup}->execute($args{uri}, $qstring);
+    my ($cached) = ($handles->{lookup}->fetchrow_array);
 
     if($cached) {
         print STDERR "Found cached URI: $cached\n" if($this->{debug});

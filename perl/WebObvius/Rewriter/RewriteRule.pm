@@ -13,6 +13,7 @@ use constant PASSTHROUGH => 'passthrough';
 use constant FORBIDDEN => 'forbidden';
 use constant LAST => 'last';
 use constant PROXY => 'proxy';
+use constant BAD_REQUEST => 'bad_request';
 
 our @EXPORT_OK = qw(
     REWRITE
@@ -22,6 +23,7 @@ our @EXPORT_OK = qw(
     FORBIDDEN
     LAST
     PROXY
+    BAD_REQUEST
 );
 
 our %EXPORT_TAGS = (
@@ -46,7 +48,7 @@ sub setup {
 
 sub rewrite {
     my ($this, %args) = @_;
-    
+
     # Default to doing nothing
     warn ("Using default rewrite rule in package " . ref($this));
     return (REWRITE, '-');
