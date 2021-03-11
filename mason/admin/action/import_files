@@ -48,7 +48,7 @@ if ( $r->param( "import_files_do" ) ) {
     if ( $u ) {
         # Make a temp dir for this session
         my $tmp = time();
-        mkdir ( $zip_path . $tmp );
+        File::Path::make_path($zip_path . $tmp);
         $zip_path .= $tmp;
 
         $dest_url = $r->param( "import_pictures_dest_url" );
