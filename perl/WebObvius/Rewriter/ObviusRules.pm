@@ -340,7 +340,6 @@ sub setup {
 
     # Create the cache table if it does not already exist
     my $table = $this->{table};
-    print STDERR Data::Dumper::Dumper($this->database_handles);
     $this->database_handles->{dbh}->do(qq|
         CREATE TABLE IF NOT EXISTS `${table}` (
             `uri` blob NOT NULL,
