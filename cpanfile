@@ -71,6 +71,7 @@ requires 'List::Compare';
 requires 'Locale::Maketext::Extract';
 requires 'Locale::Messages';
 requires 'LWP';
+requires 'LWP::ConsoleLogger', '==0.000043';
 requires 'LWP::MediaTypes';
 requires 'MCE::Shared';
 requires 'MD5';
