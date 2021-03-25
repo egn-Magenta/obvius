@@ -1064,6 +1064,15 @@ our @ISA = qw(WebObvius::FormEngine::Fields::Select);
 sub is_multivalue { 1 }
 sub type { "select_multiple" }
 
+sub extra_attributes {
+    my ($self) = @_;
+    my %attrs = $self->SUPER::extra_attributes;
+    if ($self->{size}) {
+        $attrs{size} = $self->{size};
+    }
+    return %attrs;
+}
+
 WebObvius::FormEngine::Fields->register_field_type(__PACKAGE__);
 
 1;
