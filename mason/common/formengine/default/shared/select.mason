@@ -7,6 +7,9 @@ $field
 % if($field->is_multivalue) {
  multiple="multiple"\
 % }
+% if(my $extra = $field->render_extra_attributes) {
+    <% $extra %>\
+% }
 >
 %foreach my $option ($field->options_list) {
 <option\
