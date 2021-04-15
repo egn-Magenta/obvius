@@ -12,4 +12,15 @@ my $value = $fileupload_doctype->place_file_in_upload(
      $type,
      $filename,
 );
+
+if ( $type =~ m{^image/.+} ) {
+    my $image_doctype = $obvius->get_doctype_by_name('Image');
+    eval {
+    $image_doctype->process_uploaded_image($obvius, $value, $type);
+    };
+    if ($@) {
+        $@ =~ s{\s+Stack:.*}{}gs;
+        print STDERR "ProcessUploadedImage: Failed with message: $@\n";
+    }
+}
 </%init>

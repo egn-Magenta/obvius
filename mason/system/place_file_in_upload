@@ -89,6 +89,17 @@ unless($error) {
     );
     $path = $result;
     $path =~ s!\Q$filename\E$!!;
+
+    if ( $type =~ m{^image/.+} ) {
+        my $image_doctype = $obvius->get_doctype_by_name('Image');
+        eval {
+            $image_doctype->process_uploaded_image($obvius, $result, $type);
+        };
+        if ($@) {
+            $@ =~ s{\s+Stack:.*}{}gs;
+            print STDERR "ProcessUploadedImage: Failed with message: $@\n";
+        }
+    }
 }
 
 $r->content_type('application/json; charset=utf-8');
