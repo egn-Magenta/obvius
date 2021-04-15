@@ -341,6 +341,12 @@ sub create_new_version_handler {
     return OBVIUS_OK;
 }
 
+sub process_uploaded_image {
+    # Perform processing of image that was just uploaded
+    my ($obvius, $path, $type) = @_;
+    # Overload in subclasses
+}
+
 our %magick_map = (
     'gif' => 'GIF',
     'jpeg' => 'JPEG',
