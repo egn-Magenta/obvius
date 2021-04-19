@@ -24,11 +24,16 @@ variables:
 
 Lint dockerfile:
     stage: lint-build
-    image: hadolint/hadolint:latest-debian
-    tags:
-        - docker
+    image: hadolint/hadolint:latest-alpine
+    before_script:
+        - apk add fd
     script:
-        - hadolint $CI_PROJECT_DIR/docker/Dockerfile
+        - echo "Running Hadolint, a Dockerfile linter"
+        - echo "For more information about reported errors, visit the Hadolint wiki on https://github.com/hadolint/hadolint/wiki"
+        # Run fd without exec arg to produce a list of files to be linted
+        - fd Dockerfile
+        # Run hadolint on every Dockerfile
+        - fd Dockerfile --exec hadolint
 
 # Disables cache to ensure upstream image is updated
 # Scheduled build ensures that cache for continuous builds will be populated & fresh
