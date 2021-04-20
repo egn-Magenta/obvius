@@ -596,6 +596,10 @@ sub config {
     return $config;
 }
 
+sub dbh {
+    return {};
+}
+
 sub lookup_document {
     my ($self, $path) = @_;
 
