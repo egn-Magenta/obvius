@@ -86,4 +86,8 @@ is(Obvius::URL->new("/subsite/")->admin_path(1), "/admin/subsite", "Admin path w
 
 is(Obvius::URL->new("https://obvius.test/subsite/")->admin_path, "/admin/subsite/", "Admin path from full URL with roothost");
 
+dies_ok {Obvius::URL->new("example.com") } "Die if unresolvable URL";
+is(Obvius::URL->new("path/")->closest_subsite_path, undef, "Subsite not found if path invalid");
+is(Obvius::URL->new("path.com/ok/")->closest_subsite_path, undef, "Subsite not found if path invalid");
+
 done_testing();
