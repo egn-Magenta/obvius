@@ -649,6 +649,10 @@ sub _closest_subsite_data {
                 };
             }
         } elsif(my $path = $self->path) {
+            if ($path !~ m{^/}) {
+                print STDERR "UrlClosestSubsiteError: Invalid path $path\n";
+                return undef;
+            }
             my $sth = $self->obvius->dbh->prepare(q|
                 select
                     subsites2.id subsite_id,
