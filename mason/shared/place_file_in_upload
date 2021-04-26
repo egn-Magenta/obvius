@@ -42,7 +42,7 @@ if(-d $upload_dir || mkpath($upload_dir, 0, 0775)) {
 if ( $content_type =~ m{^image/.+} ) {
     my $image_doctype = $obvius->get_doctype_by_name('Image');
     eval {
-        $image_doctype->process_uploaded_image($obvius, $value, $content_type);
+        $image_doctype->process_uploaded_image($obvius, $value, $content_type, $vdoc);
     };
     if ($@) {
         $@ =~ s{\s+Stack:.*}{}gs;

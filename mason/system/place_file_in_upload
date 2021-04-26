@@ -93,7 +93,7 @@ unless($error) {
     if ( $type =~ m{^image/.+} ) {
         my $image_doctype = $obvius->get_doctype_by_name('Image');
         eval {
-            $image_doctype->process_uploaded_image($obvius, $result, $type);
+            $image_doctype->process_uploaded_image($obvius, $result, $type, undef);
         };
         if ($@) {
             $@ =~ s{\s+Stack:.*}{}gs;

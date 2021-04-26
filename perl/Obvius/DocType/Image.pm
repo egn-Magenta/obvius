@@ -128,6 +128,10 @@ my %sizes = (
 );
 my %reverse_sizes = reverse(%sizes);
 
+sub get_sizes {
+    return \%sizes;
+}
+
 sub valid_qs {
     my ($qs) = @_;
     if ($qs =~ m/^(?:re)?size=(\w+)$/) {
@@ -212,27 +216,7 @@ sub get_resized_data {
 
         my ($org_width, $org_height) = $image->Get('width', 'height');
 
-        my ($new_width, $new_height);
-
-
-        if($size =~ /^(\d+)x(\d+)$/i) {
-            $new_width = $1;
-            $new_height = $2;
-        } elsif (defined($org_width) && defined($org_height)) {
-            if ($size =~ /^(\d+)%$/) {
-                $new_width = $org_width * $1 / 100;
-                $new_height = $org_height * $1 / 100;
-            } elsif ($size =~ /^(\d+)x$/i) {
-                $new_width = $1;
-                $new_height = $org_height * ($new_width / $org_width);
-            } elsif ($size =~ /^x(\d+)$/i) {
-                $new_height = $1;
-                $new_width = $org_width * ($new_height / $org_height);
-            } else {
-                $new_width = $org_width;
-                $new_height = $org_height;
-            }
-        }
+        my ($new_width, $new_height) = $this->get_new_size($org_width, $org_height, $size);
 
         # Set initial mimetype; can be overridden with GIF later
         my $mimetype = $obvius->get_version_field($vdoc, 'mimetype');
@@ -299,6 +283,30 @@ sub get_resized_data {
     }
 }
 
+sub get_new_size {
+    my ($this, $org_width, $org_height, $size) = @_;
+    my ($new_width, $new_height);
+    if($size =~ /^(\d+)x(\d+)$/i) {
+        $new_width = $1;
+        $new_height = $2;
+    } elsif (defined($org_width) && defined($org_height)) {
+        if ($size =~ /^(\d+)%$/) {
+            $new_width = $org_width * $1 / 100;
+            $new_height = $org_height * $1 / 100;
+        } elsif ($size =~ /^(\d+)x$/i) {
+            $new_width = $1;
+            $new_height = $org_height * ($new_width / $org_width);
+        } elsif ($size =~ /^x(\d+)$/i) {
+            $new_height = $1;
+            $new_width = $org_width * ($new_height / $org_height);
+        } else {
+            $new_width = $org_width;
+            $new_height = $org_height;
+        }
+    }
+    return ($new_width, $new_height);
+}
+
 sub convert_to_gif {
     my ($this, $image, $width, $height) = @_;
 
@@ -343,7 +351,7 @@ sub create_new_version_handler {
 
 sub process_uploaded_image {
     # Perform processing of image that was just uploaded
-    my ($obvius, $path, $type) = @_;
+    my ($obvius, $path, $type, $vdoc) = @_;
     # Overload in subclasses
 }
 
