@@ -77,17 +77,16 @@ if ($upload) {
 		$mimetype = $data->{mimetype} = $ft->mime_type($slurp_data);
 
 	}
-        $data->{size}= $upload->size;
 
-        $value = $m->scomp('/shared/place_file_in_upload', 
+        $value = $m->scomp('/shared/place_file_in_upload',
 			    fh => $fh, type => $mimetype, 
 			    filename => $upload->filename);
+        my $full_path = $obvius->config->param('docs_dir') . '/' . $value;
+        $full_path =~ s{/+}{/}g;
+        $data->{size} = -s $full_path;
         $new_upload = 1;
 	if($r->param('obvius_upload_' . $id . '_get_image_dimensions')) {
 	    eval {
-		my $full_path =
-		    $obvius->config->param('docs_dir') . '/' . $value;
-		$full_path =~ s!/+!/!g;
 		my $img = new Image::Magick();
 		$img->Read($full_path);
 		if(my $width = $img->Get('width')) {

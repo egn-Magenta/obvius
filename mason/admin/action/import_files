@@ -135,8 +135,9 @@ sub upload_image {
                  type => $mime_type,
                  filename => $filename
                  );
-    
-    
+    my $full_path = $obvius->config->param('docs_dir') . '/' . $path;
+    $full_path =~ s{/+}{/}g;
+
     seek $fh, 0, 0;
     my $raw;
     do {
@@ -149,7 +150,7 @@ sub upload_image {
     $data->param( uploadfile => $path );
     $data->param( width => $w );
     $data->param( height => $h );
-    $data->param( size => -s $filename );
+    $data->param( size => -s $full_path );
     $data->param( mimetype => $mime_type );
 
     my %args=(
@@ -174,9 +175,11 @@ sub upload_file {
               fh => \*FH, 
               type => $mime_type,
               filename => $title);
+    my $full_path = $obvius->config->param('docs_dir') . $filename;
+    $full_path =~ s{/+}{/}g;
 
     $data->param( mimetype => $mime_type);
-    $data->param( size => -s $f );
+    $data->param( size => -s $full_path );
     $data->param( uploadfile => $filename);
 
     my %args=(

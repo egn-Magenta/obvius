@@ -33,10 +33,11 @@ if (my $upload=$r->upload($name)) {
     if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
 
         $fields->param('mimetype'=>$upload->type) if ($fields->param('mimetype') eq '');
-        $fields->param('size'=>$upload->size);
-
         $value = $m->scomp('/shared/place_file_in_upload', fh => $fh, type => $upload->type, filename => $upload->filename);
         $new_upload = 1;
+        my $full_path = $obvius->config->param('docs_dir') . '/' . $value;
+        $full_path =~ s{/+}{/}g;
+        $fields->param('size'=> -s $full_path);
     }
 }
 if(! $new_upload  and $r->param('obvius_upload_' . $name . '_delete')) {
