@@ -152,13 +152,27 @@ sub valid_size {
 }
 
 
+# Mimetypes that we will resize with ImageMagick. Users can actually
+# upload any file type (including documents), but ImageMagick borks
+# if we try a non-bitmap (even svg)
+my %resizable_mimetypes = map {$_ => 1} (
+    'image/png',
+    'image/jpeg',
+    'image/gif',
+    'image/bmp',
+    'image/tiff',
+);
+
 sub raw_document_data_internal {
     my ($this, $doc, $vdoc, $obvius, $input) = @_;
 
     $this->tracer($doc, $vdoc, $obvius) if ($this->{DEBUG});
 
+    my $fields = $obvius->get_version_fields($vdoc, ['mimetype']);
+    my $mimetype = $fields->param('mimetype');
+
     # Check for sized data
-    if($input) {
+    if($input && defined($mimetype) && $resizable_mimetypes{$mimetype}) {
         my $sized_data;
         # Handle childish $input behavior :)
         my $apr = ref($input) eq 'Apache' ? Apache::Request->new($input) : $input;
@@ -177,8 +191,7 @@ sub raw_document_data_internal {
 
     }
 
-    my $fields = $obvius->get_version_fields($vdoc, ['mimetype']);
-    return ($fields->param('mimetype'), $this->get_data($vdoc, $obvius));
+    return ($mimetype, $this->get_data($vdoc, $obvius));
 }
 
 sub get_resized_data {
