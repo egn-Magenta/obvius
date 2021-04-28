@@ -264,9 +264,16 @@ sub update_internal_proxies {
      
      $docids = [$docids] if (!ref($docids));
      return if (!@$docids);
-     eval { $this->{obvius}->dbprocedures->update_internal_proxy_docids(join ',', @$docids )};
-     warn $@ if ($@);
-     
+
+     # Limit param length to below "varchar(16384)" as defined in stored procedure
+     my $MAX_DOCIDS = 50;
+     # Copy the docid array so the original array is left intact
+     my @spliceable_docids = @{$docids};
+     while (my @docid_chunk = splice @spliceable_docids, 0, $MAX_DOCIDS) {
+          eval { $this->{obvius}->dbprocedures->update_internal_proxy_docids(join ',', @docid_chunk )};
+          warn $@ if ($@);
+     }
+
      my $docids_template = join ',', (('?') x @$docids);
      my $updated = $this->{obvius}->execute_select("select distinct docid from 
                                                     internal_proxy_documents where 
