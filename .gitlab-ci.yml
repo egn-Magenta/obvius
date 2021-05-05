@@ -10,6 +10,7 @@ stages:
     - trigger
 
 variables:
+    KANIKO_VERSION: v1.6.0
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
     IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:debian-latest
@@ -42,7 +43,7 @@ build-nocache:
     only:
         - schedules
     image:
-        name: gcr.io/kaniko-project/executor:debug-v0.16.0
+        name: gcr.io/kaniko-project/executor:${KANIKO_VERSION}-debug
         entrypoint: [""]
     tags:
     - docker
@@ -60,7 +61,7 @@ build:
     except:
         - schedules
     image:
-      name: gcr.io/kaniko-project/executor:debug-v0.16.0
+      name: gcr.io/kaniko-project/executor:${KANIKO_VERSION}-debug
       entrypoint: [""]
     tags:
       - docker
