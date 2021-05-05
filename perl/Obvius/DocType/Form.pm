@@ -95,6 +95,9 @@ sub is_unique {
     return !@$res;
 }
 
+# Show placeholder when system is in readonly mode
+sub is_readonly { return 0; }
+
 sub validate_mandatory {
     my ($mandatory, $has_value, $fields) = @_;
 

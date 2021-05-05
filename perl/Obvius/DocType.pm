@@ -282,6 +282,11 @@ sub action {
 #                cachable and false if not.
 sub is_cacheable { return 1; }
 
+# is_readonly - should return true if normal user interaction does not update the database
+# when system readonly mode is enabled (such as when upgrading the DB), documents that
+# write to the DB should display a placeholder.
+sub is_readonly { return 1; }
+
 # alternate_location - if this method returns a string, Obvius
 #                      redirects to the location given in the
 #                      string. Return undef to avoid redirection.
