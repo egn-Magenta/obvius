@@ -3217,7 +3217,7 @@ sub exit_if_wrong_env {
 }
 
 sub is_readonly_mode {
-    return -e "/etc/obvius/readonly_mode/readonly_mode_enabled.txt";
+    return -e "/etc/obvius/maintenance_mode/readonly_mode_enabled.txt";
 }
 
 package Obvius::Benchmark;
