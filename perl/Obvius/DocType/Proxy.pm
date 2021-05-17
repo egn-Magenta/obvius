@@ -420,6 +420,8 @@ sub make_request {
     # Add to via:
     $headers_to_external_server{Via}=(exists $headers_to_external_server{Via} ? $headers_to_external_server{Via} . ', ' . $via : $via);
 
+    # Avoid blocking the CMS by setting a lower timeout value than the default (180s)
+    my $proxy_request_timeout = $obvius->config->param('proxy_request_timeout') || 60;
 
     # User-Agent, Request, Response:
     my $ua=LWP::UserAgent->new(
@@ -428,6 +430,7 @@ sub make_request {
                                parse_head=>0,
                                protocols_forbidden=>[qw(mailto file)],
                                max_size=>4*1024*1024,
+                               timeout=>$proxy_request_timeout,
                               );
 
     my %headers=map { $_=>$headers_to_external_server{$_} } keys %headers_to_external_server;
