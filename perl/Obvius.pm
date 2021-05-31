@@ -457,6 +457,8 @@ sub get_doc_uri {
 
     return $doc->{path} if ref $doc && $doc->{path};
 
+    return $doc->param('path') if ref $doc eq 'Obvius::Document' && $doc->param('path');
+
     my $docid = ref $doc ? $doc->Id : $doc;
     my $paths = $this->execute_select("select path from docid_path where docid=?", $docid);
 
@@ -3022,24 +3024,6 @@ sub find_closest_subsite {
 
     my @uris = $this->explode_path($uri);
 
-    if (!scalar(@uris) && $this->config->param('debug_find_closest_subsite')) {
-        eval {
-            print STDERR "find_closest_subsite called with doc id " . $doc->Id . ", resulting in uri '$uri'\n";
-            print STDERR Dumper($doc);
-            my @trace;
-            push(@trace, "Stacktrace:");
-            my $i = 1;
-            while ((my @call_details = (caller($i++)))) {
-                push(@trace, $call_details[1] . ":" . $call_details[2] . " in function " . $call_details[3]);
-            }
-            push(@trace, "");
-            print STDERR join("\n", @trace);
-        };
-        if ($@) {
-            # If anything goes wrong, don't die but just print error
-            print STDERR $@;
-        }
-    }
     my $question_marks = join ", ", (("?") x @uris);
 
     if ($this->config->param('new_subsite_interface')) {
