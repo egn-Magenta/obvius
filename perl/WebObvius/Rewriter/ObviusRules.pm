@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use DBI;
+use Obvius::CharsetTools;
 use WebObvius::Rewriter::RewriteRule;
 
 # Stops malformed requests from being further rewritten
@@ -16,6 +17,12 @@ sub rewrite {
     # Stop rewriting if the request does not have a HTTP method.
     if(!$args{method}) {
         die 'Request without method';
+    }
+
+    # Check for non latin1 characters in URI
+    my $wide_char_uri = Obvius::CharsetTools::mixed2perl($args{uri});
+    if($wide_char_uri !~ m{^[\x00-\xFF]+$}) {
+        die "Non latin1 characters in uri";
     }
 
     # TODO: This should be expanded later when further requests are
