@@ -216,6 +216,14 @@ function formdata_delete_field(formfield_name, fieldname) {
         }
     }
 
+    var mandNodes = rootDoc.getElementsByTagName('mandatory');
+    for(var j=0;j<mandNodes.getLength();j++) {
+        var mandNode = mandNodes.item(j);
+        if(formdata_get_node_text(mandNode) == fieldname) {
+            formdata_set_node_text(mandNode, '0');
+        }
+    }
+
     formdata_populate_fieldtable(formfield_name);
     document.pageform[formfield_name].value = rootDoc.getXML();
 }
@@ -1411,6 +1419,13 @@ function formdata_get_node_text(node) {
     }
 
     return "NOT_TEXT";
+}
+
+function formdata_set_node_text(node, text) {
+    var firstChild = node.getFirstChild();
+    if(firstChild && firstChild.getNodeType() === 3) {
+        firstChild.setNodeValue(text);
+    }
 }
 
 
