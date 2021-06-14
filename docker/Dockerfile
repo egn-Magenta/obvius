@@ -36,7 +36,9 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
 COPY ./cpanfile .
 
 # Install cpanm & deps
+# Skip tests for HTTP::CookieJar::LWP until https://github.com/dagolden/HTTP-CookieJar/issues/11 is resolved
 RUN cpan App::cpanminus && \
+    cpanm HTTP::CookieJar::LWP -n && \
     cpanm --installdeps . && \
     cpanm Date::ICal --force
 
