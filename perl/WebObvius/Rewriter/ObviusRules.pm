@@ -5,35 +5,6 @@ use DBI;
 use Obvius::CharsetTools;
 use WebObvius::Rewriter::RewriteRule;
 
-# Stops malformed requests from being further rewritten
-package WebObvius::Rewriter::ObviusRules::SanityCheck;
-
-use JSON;
-our @ISA = qw(WebObvius::Rewriter::RewriteRule);
-
-sub rewrite {
-    my ($this, %args) = @_;
-
-    # Stop rewriting if the request does not have a HTTP method.
-    if(!$args{method}) {
-        die 'Request without method';
-    }
-
-    # Check for non latin1 characters in URI
-    my $wide_char_uri = Obvius::CharsetTools::mixed2perl($args{uri});
-    if($wide_char_uri !~ m{^[\x00-\xFF]+$}) {
-        die "Non latin1 characters in uri";
-    }
-
-    # TODO: This should be expanded later when further requests are
-    # found that we do not want to deal with. This could for example
-    # be obvius searching-for-exploit requests.
-
-    return;
-}
-
-1;
-
 package WebObvius::Rewriter::ObviusRules::StaticDocs;
 use WebObvius::Rewriter::RewriteRule qw(LAST);
 our @ISA = qw(WebObvius::Rewriter::RewriteRule);
