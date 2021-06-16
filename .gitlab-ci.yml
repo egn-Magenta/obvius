@@ -130,7 +130,7 @@ image-test:
 
 .release-default: &release-default
     stage: release
-    image: alpine
+    image: alpine:3.13
     variables:
         GIT_STRATEGY: none # We do not need the source code
     tags:
