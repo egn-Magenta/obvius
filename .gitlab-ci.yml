@@ -136,7 +136,7 @@ image-test:
     tags:
         - docker
     before_script:
-        - apk add skopeo
+        - apk add skopeo=1.2.1-r0
 
 # Push public images based on development, testing and master
 release-dev:
