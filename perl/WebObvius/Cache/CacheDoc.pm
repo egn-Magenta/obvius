@@ -10,8 +10,8 @@ sub new {
      return if (!($obj{uri} || $obj{docid}));
 
      my $doc = $obj{docid} ? $obvius->get_doc_by_id($obj{docid}) :
-               $obvius->lookup_document($obj{url});
-     
+               $obvius->lookup_document($obj{uri});
+
      return if (!$doc);
 
      $obj{docid} = $doc->Id;
