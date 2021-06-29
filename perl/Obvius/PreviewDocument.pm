@@ -40,8 +40,8 @@ sub new {
      
      my $doc = $obvius->get_doc_by_id($docid);
      my $preview_doc = $obvius->lookup_document($preview_base_path . $docid);
-     
-     die "Error reading some document" if (!$doc || ! $preview_doc);
+
+     return undef if (!$doc || ! $preview_doc);
 
      my $self = {preview_doc => $preview_doc, doc => $doc} ;
      
