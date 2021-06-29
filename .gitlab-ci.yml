@@ -26,20 +26,23 @@ Lint dockerfile:
         # Run hadolint on every Dockerfile
         - fd Dockerfile --exec hadolint
 
-# Disables cache to ensure upstream image is updated
-# Scheduled build ensures that cache for continuous builds will be populated & fresh
-build-nocache:
+.build-default: &build-default
     stage: lint-build
-    only:
-        - schedules
     image:
         name: gcr.io/kaniko-project/executor:${KANIKO_VERSION}-debug
         entrypoint: [""]
     tags:
-    - docker
     - high-mem
-    script:
+    before_script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+
+# Disables cache to ensure upstream image is updated
+# Scheduled build ensures that cache for continuous builds will be populated & fresh
+build-nocache:
+    <<: *build-default
+    only:
+        - schedules
+    script:
     - /kaniko/executor
       --context=$CI_PROJECT_DIR
       --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
@@ -47,17 +50,10 @@ build-nocache:
       --cache=false
 
 build:
-    stage: lint-build
+    <<: *build-default
     except:
         - schedules
-    image:
-      name: gcr.io/kaniko-project/executor:${KANIKO_VERSION}-debug
-      entrypoint: [""]
-    tags:
-      - docker
-      - high-mem
     script:
-      - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
       - /kaniko/executor
         --context=$CI_PROJECT_DIR
         --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
