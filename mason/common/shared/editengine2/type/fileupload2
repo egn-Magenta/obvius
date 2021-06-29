@@ -59,57 +59,71 @@ my $upload;
 
 for(($r->upload)) {
     if($_->name =~ m!:${id}$!) {
-	$upload = $_;
-	last;
+        $upload = $_;
+        last;
     }
 }
 
+my $full_path;
+my $mimetype;
 
-if ($upload) {
-    if ($upload->filename ne '' and $upload->size!=0 and my $fh=$upload->fh) {
-
-        my $mimetype = $data->{mimetype}= $upload->type;
-	if($check_extension_types{$mimetype} and (-r "/etc/mime.types")) {
-
-		my $ft = File::Type->new();
-		my $slurp_data;
-		$upload->slurp($slurp_data);
-		$mimetype = $data->{mimetype} = $ft->mime_type($slurp_data);
-
-	}
-
-        $value = $m->scomp('/shared/place_file_in_upload',
-			    fh => $fh, type => $mimetype, 
-			    filename => $upload->filename);
-        my $full_path = $obvius->config->param('docs_dir') . '/' . $value;
-        $full_path =~ s{/+}{/}g;
-        $data->{size} = -s $full_path;
-        $new_upload = 1;
-	if($r->param('obvius_upload_' . $id . '_get_image_dimensions')) {
-	    eval {
-		my $img = new Image::Magick();
-		$img->Read($full_path);
-		if(my $width = $img->Get('width')) {
-		    $data->{width} = $width;
-		}
-		if(my $height = $img->Get('height')) {
-		    $data->{height} = $height;
-		}
-		undef($img);
-	    };
-	    warn "ImageMagick problem: $@" if($@);
-	}
+if ($upload && $upload->filename ne '' && $upload->size!=0 && $upload->fh) {
+    $mimetype = $upload->type;
+    if ($check_extension_types{$mimetype} and (-r "/etc/mime.types")) {
+        my $ft = File::Type->new();
+        my $slurp_data;
+        $upload->slurp($slurp_data);
+        $mimetype = $data->{mimetype} = $ft->mime_type($slurp_data);
     }
+    $value = $m->scomp('/shared/place_file_in_upload', fh => $upload->fh, type => $mimetype, filename => $upload->filename);
+    $full_path = $obvius->config->param('docs_dir') . '/' . $value;
+    $new_upload = 1;
 }
-if(! $new_upload) {
+
+if (!$new_upload) {
     if($r->param('obvius_upload_' . $id . '_delete')) {
         $value = '';
+        $data->{size} = 0;
+        $data->{mimetype} = 'unknown/unknown';
+        if ($r->param("obvius_upload_${id}_get_image_dimensions")) {
+            $data->{width} = $data->{height} = 0;
+        }
     } else {
         $value = $r->param('obvius_upload_' . $id . '_old_value');
+        if ($value) {
+            $full_path = $obvius->config->param('docs_dir') . '/' . $value;
+        }
     }
 }
 
-$data->{$id}=$value;
+if ($full_path) {
+    $full_path =~ s{/+}{/}g;
+    if (-e $full_path) {
+        $data->{size} = -s $full_path;
+        if ($r->param("obvius_upload_${id}_get_image_dimensions")) {
+            eval {
+                my $img = new Image::Magick();
+                $img->Read($full_path);
+                if (my $width = $img->Get('width')) {
+                    $data->{width} = $width;
+                }
+                if (my $height = $img->Get('height')) {
+                    $data->{height} = $height;
+                }
+                undef($img);
+            };
+            warn "ImageMagick problem: $@" if($@);
+        }
+    }
+    if (!$mimetype && $value =~ m{/upload/(\w+/\w+)/}) {
+        $mimetype = $1;
+    }
+    if ($mimetype) {
+        $data->{mimetype} = $mimetype;
+    }
+}
+
+$data->{$id} = $value;
 
 return 'OK';
 </%init>
