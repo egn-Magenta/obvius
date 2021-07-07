@@ -614,7 +614,10 @@ sub generate_page {
         }
 
         if (my $redir=$output->param('OBVIUS_REDIRECT')) {
-            $this->redirect($req, $redir, 1);
+            my $status_code = $output->param(
+                'obvius_redirect_status_code'
+            ) || REDIRECT;
+            $this->redirect($req, $redir, 1, $status_code);
         }
 
 	# Transfer notes and pnotes to the req object
@@ -961,7 +964,7 @@ sub get_translation_language_public {
 
     my $lang = $vdoc->Lang;
     $lang = $supported->{_default_} unless($supported->{$lang});
-    
+
     return $lang;
 }
 
