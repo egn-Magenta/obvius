@@ -151,6 +151,9 @@ sub action {
         # Output should still be ascii with entities
         $output->param(proxy_content=>$content);
     }
+    elsif(($ENV{REQUEST_METHOD} || '') eq 'HEAD') {
+        $output->param(proxy_content=>"");
+    }
     elsif ($response->is_success) {
         # Success, but we don't know how to filter the page, so
         # redirect to the actual url:
@@ -452,6 +455,9 @@ sub make_request {
     }
     elsif ($request_method eq 'GET') { # It's all in the URL, so it will be passed
         $response=$ua->get($url, %headers);
+    }
+    elsif ($request_method eq 'HEAD') {
+        $response=$ua->head($url, %headers);
     }
     else {
         warn("Unknown request method \"$request_method\" for url \"$url\", aborting");
