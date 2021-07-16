@@ -119,7 +119,7 @@ sub action {
     # Check whether fetch_url is within what we are allowed to proxy:
     if (!check_url_against_prefixes($fetch_url, [ $base_url, @$prefixes ])) {
         $output->param('error'=>'URL to be fetched is outside the allowed range for this proxy-document. Nothing fetched.');
-        warn "URL $fetch_url to be fetched is outside the allowed range $base_url @$prefixes. Nothing fetched.";
+        #warn "URL $fetch_url to be fetched is outside the allowed range $base_url @$prefixes. Nothing fetched.";
         return OBVIUS_OK;
     }
 
