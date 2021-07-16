@@ -343,7 +343,7 @@ sub absolutify_and_proxy {
 
     # Now, if the uri matches $base_url or one of the prefixes,
     # change it to ./?obvius_proxy_url=$uri
-    if (check_url_against_prefixes($url, [$base_url, @$prefixes])) {
+    if (check_url_against_prefixes($url, [$base_url, @{$prefixes || []}])) {
         # Don't escape the anchor part of the URL if present:
         my $anchor = '';
         if($url =~ s!(#[^#]+)$!!) {
