@@ -135,3 +135,15 @@ release-latest:
             --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
             "docker://${IMAGE_SHA}"
             "docker://${IMAGE_LATEST}"
+
+Trigger KU rebuild:
+    stage: trigger
+    image: alpine
+    variables:
+        GIT_STRATEGY: none # We do not need the source code
+    before_script:
+        - apk add curl
+    rules:
+        - if: $CI_COMMIT_REF_NAME == "master"
+    script:
+        - "curl -X POST -F token=$CI_JOB_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"
