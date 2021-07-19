@@ -81,6 +81,7 @@ requires 'Module::Install::Base';
 requires 'Mojo::DOM';
 requires 'Net::IDN::Encode';
 requires 'Net::LDAP';
+requires 'Number::Bytes::Human', '==0.11';
 requires 'Number::Format';
 requires 'Parallel::ForkManager';
 requires 'Params::Validate';
