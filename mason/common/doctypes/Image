@@ -46,8 +46,8 @@ use Number::Bytes::Human qw(format_bytes);
 my @fields=(
     { name=>'mimetype', title=>'MIME-type', },
     { name=>'width',    title=>'Bredde',    unit=>'pixels'},
-    { name=>'height',   title=>'Hjde',     unit=>'pixels'},
-    { name=>'size',     title=>'Strrelse', display=>
+    { name=>'height',   title=>'Højde',     unit=>'pixels'},
+    { name=>'size',     title=>'Størrelse', display=>
         sub {
             my ($size) = @_;
             return format_bytes($size, bs=>1024, suffixes=>'si_1000', precision=>2);
