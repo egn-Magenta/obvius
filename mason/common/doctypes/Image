@@ -6,7 +6,9 @@
 %    if (defined $value) {
 <tr>
 <td><% $field->{title} %>:</td>
-<td><% $value %><% (defined $field->{unit} ? ' ' . $field->{unit} : '') %></td>
+<td>
+<% exists($field->{display}) ? $field->{display}($value) : $value %><% (defined $field->{unit} ? ' ' . $field->{unit} : '') %>
+</td>
 </tr>
 %    }
 % }
@@ -40,11 +42,17 @@ $linkuri .= "?obvius_version=$obvius_version" if (defined $obvius_version);
 </%init>
 %
 <%once>
+use Number::Bytes::Human qw(format_bytes);
 my @fields=(
-	    { name=>'mimetype', title=>'MIME-type', },
-	    { name=>'width',    title=>'Bredde',    unit=>'pixels'},
-	    { name=>'height',   title=>'Højde',     unit=>'pixels'},
-	    { name=>'size',     title=>'Størrelse', unit=>'b' },
-	    { name=>'align',    title=>'Placering', },
-	   );
+    { name=>'mimetype', title=>'MIME-type', },
+    { name=>'width',    title=>'Bredde',    unit=>'pixels'},
+    { name=>'height',   title=>'Hjde',     unit=>'pixels'},
+    { name=>'size',     title=>'Strrelse', display=>
+        sub {
+            my ($size) = @_;
+            return format_bytes($size, bs=>1024, suffixes=>'si_1000', precision=>2);
+        }
+    },
+    { name=>'align',    title=>'Placering', },
+);
 </%once>
