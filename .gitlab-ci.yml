@@ -106,7 +106,7 @@ image-test:
         - mkdir $CI_PROJECT_DIR/image_resize_output
         - mv t/testimages/output/* $CI_PROJECT_DIR/image_resize_output/
     artifacts:
-        when: on_success
+        when: always
         paths:
             - $CI_PROJECT_DIR/image_resize_output/
 
