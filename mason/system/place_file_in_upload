@@ -4,7 +4,8 @@
         uri => mixed2perl($result),
         error => mixed2perl($error),
         filename => mixed2perl($filename),
-        path => mixed2perl($path)
+        path => mixed2perl($path),
+        size => $size
     }, {
         ascii => 1
     })
@@ -36,7 +37,7 @@ sub check_login {
 </%once>
 <%init>
 my ($result, $error, $site, $config, $obvius, $doctype, $upload,
-    $filename, $path);
+    $filename, $path, $size);
 
 my $user = $r->param('user');
 my $time = $r->param('time');
@@ -100,6 +101,9 @@ unless($error) {
             print STDERR "ProcessUploadedImage: Failed with message: $@\n";
         }
     }
+    my $docs_dir = $obvius->config->param('docs_dir');
+    $docs_dir =~ s!/$!!;
+    $size = -s "$docs_dir/$result";
 }
 
 $r->content_type('application/json; charset=utf-8');
