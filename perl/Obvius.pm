@@ -3222,6 +3222,15 @@ sub is_readonly_mode {
     return -e "/etc/obvius/maintenance_mode/readonly_mode_enabled.txt";
 }
 
+sub hostmap {
+    # Use this implementation instead of the various identical methods around the codebase
+    my ($this) = @_;
+    if (!$this->config->param('hostmap')) {
+        $this->config->param(hostmap => Obvius::Hostmap->new_with_obvius($this));
+    }
+    return $this->config->param('hostmap');
+}
+
 package Obvius::Benchmark;
 
 use strict;
