@@ -76,8 +76,6 @@
 
  # Save the scheme on the $session object
  # Note that this overwrites existing schemes!
- # Warn about overwritings!
- print STDERR "  overwriting existing scheme!\n" if exists $session->{editscheme}->{$relation};
  $session->{editscheme}->{$relation} = $editscheme;
 
  # Handle initial object and function selections
