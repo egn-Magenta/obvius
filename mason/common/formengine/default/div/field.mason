@@ -2,14 +2,14 @@
 $field
 </%args>
 <div id="fieldcontainer-<% $field->name %>"\
- <% $field->render_container_classes("fieldcontainer") %>>
-    <% $field->render_label(%ARGS) %>
+ <% $field->render_container_classes("fieldcontainer") |n %>>
+    <% $field->render_label(%ARGS) |n %>
 %   my $marker = $field->required_marker;
 %   if(defined($marker)) {
-    <% $marker %>
+    <% $marker |n %>
 %   }
 %   if(my $errors = $field->render_errors(%ARGS)) {
-    <% $errors %>
+    <% $errors |n %>
 %   }
-    <% $field->render_control(%ARGS) %>
+    <% $field->render_control(%ARGS) |n %>
 </div>

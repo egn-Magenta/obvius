@@ -3,5 +3,5 @@ $field
 </%args>\
 <label for="<% $field->id %>" id="label-for-<% $field->id %>">\
 <% $field->label |h %>\
-<% $field->required_marker_label %>\
+<% $field->required_marker_label |n %>\
 </label>

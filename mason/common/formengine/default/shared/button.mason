@@ -5,6 +5,6 @@
  id="<% $ARGS{field_id} || $field->id %>"\
  name="<% $ARGS{name} || $field->name %>"\
 % if(my $extra = $field->render_extra_attributes) {
-    <% $extra %>\
+    <% $extra |n %>\
 % }
 ><% $ARGS{value} || $field->value |h%></button>

@@ -27,4 +27,4 @@ if($no_first_paragraph) {
     $text =~ s/<\/P>//;
 }
 </%init>
-<% $text %>
+<% $text |n %>
