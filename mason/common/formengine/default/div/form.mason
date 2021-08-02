@@ -10,14 +10,14 @@ $render_args=>{}
  action="<% $form->action %>" class="<% $form->classnames %>"\
  method="<% $form->method %>"\
 % if(my $extra = $form->extra_form_attributes) {
- <% $extra %>\
+ <% $extra |n %>\
 %}
 >
-<% $form->render_form_errors(%$render_args) %>\
-<% $form->render_hidden_fields(%$render_args) %>\
-<% $form->render_fields(%$render_args) %>\
+<% $form->render_form_errors(%$render_args) |n %>\
+<% $form->render_hidden_fields(%$render_args) |n %>\
+<% $form->render_fields(%$render_args) |n %>\
 </form>
 %if(my $post_js = $form->render_post_javascript()) {
-<% $post_js %>\
+<% $post_js |n %>\
 %}
 %$r->notes('disable_editengine2_labels' => 0);

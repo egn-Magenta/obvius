@@ -15,7 +15,7 @@ $field
 <label\
  for="<% $option->id %>"\
  class="radiolabel"\
-><% $option->label %></label>\
+><% $option->label |n %></label>\
 </div>\
 <% $field->option_separator %>\
 %}

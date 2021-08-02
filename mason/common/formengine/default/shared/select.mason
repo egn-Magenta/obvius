@@ -8,7 +8,7 @@ $field
  multiple="multiple"\
 % }
 % if(my $extra = $field->render_extra_attributes) {
-    <% $extra %>\
+    <% $extra |n %>\
 % }
 >
 %foreach my $option ($field->options_list) {

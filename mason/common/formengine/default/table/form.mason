@@ -29,6 +29,6 @@ $render_args=>{}
 </table>
 </form>
 %if(my $post_js = $form->render_post_javascript()) {
-<% $post_js %>\
+<% $post_js |n %>\
 %}
 %$r->notes('disable_editengine2_labels' => 0);

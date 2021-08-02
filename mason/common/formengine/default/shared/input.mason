@@ -7,6 +7,6 @@ $field
  type="<% $ARGS{input_type} || $field->input_type %>"\
  value="<% $ARGS{value} || $field->value |h%>"\
 % if(my $extra = $field->render_extra_attributes) {
- <% $extra %>\
+ <% $extra |n %>\
 % }
  />
