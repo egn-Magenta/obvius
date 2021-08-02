@@ -401,7 +401,7 @@ sub get_doc_by_path {
      }
 
      if (my ($id) = $uri =~ /^\/(\d+).docid\/?$/) {
-          return $this->$this->get_doc_by_id($id);
+          return $this->get_doc_by_id($id);
      }
 
      my @uri = split m!/+!, $uri;
