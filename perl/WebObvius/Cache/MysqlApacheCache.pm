@@ -25,6 +25,9 @@ sub new {
     my $config = $obvius->config;
 
     $new->{local_table} = $config->param('mysql_apachecache_table');
+    if($config->param('disable_per_page_cache')) {
+        $new->{local_table} = undef;
+    }
 
     $new->{other_tables} = [grep {$_} split(/\s*,\s*/, $config->param('mysql_apachecache_other_tables') || '')];
 
