@@ -144,11 +144,11 @@ sub store_order {
     $info{args}=flatten($info{args});
 
     if (my $queue_id=$obvius->insert_table_record('queue', \%info)) {
-        $info{date}=~/^\s*(\d{4}-\d{2}-\d{2})\s*(\d{1,2}:\d{2})(:\d{2})?\s*$/;
-        my $date_part=$1;
-        my $time_part=$2;
-        $ENV{PATH}='';
         unless($obvius->config->param('use_cron_for_queue')) {
+            $info{date}=~/^\s*(\d{4}-\d{2}-\d{2})\s*(\d{1,2}:\d{2})(:\d{2})?\s*$/;
+            my $date_part=$1;
+            my $time_part=$2;
+            local $ENV{PATH}='';
             system "/bin/echo '".
                 $obvius->config->param('obvius_dir') . "/bin/perform_order --site " .
                 $obvius->config->param('name') . " " . $queue_id . "' | /usr/bin/at '$time_part $date_part'";
@@ -210,6 +210,26 @@ sub perform_command_publish {
     else {
         return ('ERROR', ['Could not publish version', ' (' . $vdoc->Version . ')']);
     }
+}
+
+sub perform_command_perlscript {
+    my ($obvius, %info) = @_;
+    my %args = %{$info{args}};
+    if ($args{script} =~ m{(\.\.)|(&&)|(\|)|((^|\s)/)}) {
+        return ('ERROR', ["Will not execute script outside /var/www/www.ku.dk/"]);
+    }
+    my $script = "/var/www/www.ku.dk/".$args{script};
+    if (-e $script) {
+        my @params;
+        if ($args{params}) {
+            @params = @{$args{params}};
+        }
+        system("perl $script", @params);
+        return ('OK', ["$script executed"]);
+    } else {
+        return ('ERROR', ["Did not find script $script"]);
+    }
+    # TODO: create a view for monitoring job status (see MR 149)
 }
 
 # Internal method: _delete_documents_recursive - given a
