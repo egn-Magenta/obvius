@@ -111,6 +111,13 @@ report_status_message($order, $status, $message);
 my $cache = WebObvius::Cache::Cache->new($obvius);
 $cache->find_and_flush($obvius->modified) if ($obvius->modified);
 
+# Skip email if this is a perl script
+if ($do_order{command} eq "perlscript") {
+    # Don't send mail when we run a perlscript.
+    exit 0;
+}
+# TODO: clean up mail sending
+
 my $smtp = $obvius->config->param('smtp') || 'localhost';
 # Send email:
 
