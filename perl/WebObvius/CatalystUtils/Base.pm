@@ -101,7 +101,7 @@ sub fakerequest {
 }
 
 sub admin_auth_check {
-    my ($c) = @_;
+    my ($c, $return_success_or_fail) = @_;
 
     my $auth_res = $c->siteconfig->{admin}->session_authen_handler(
         $c->fakerequest
@@ -113,8 +113,11 @@ sub admin_auth_check {
     }
 
     if (! grep { $auth_res == $_ } (0, 200)) {
-        return $c->detach();
+        # If $return_success_or_fail is set, return failure to calling method
+        # otherwise detach and let $c->response redirect to login
+        return $return_success_or_fail ? 0 : $c->detach();
     }
+    return 1;
 }
 
 sub set_admin_translations {
