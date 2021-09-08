@@ -224,7 +224,10 @@ sub perform_command_perlscript {
         if ($args{params}) {
             @params = @{$args{params}};
         }
-        system("perl $script", @params);
+        my $exit_code = system("perl $script", @params);
+        if ($exit_code != 0) {
+            return ('ERROR', ["$script returned non-zero exit code"])
+        }
         return ('OK', ["$script executed"]);
     } else {
         return ('ERROR', ["Did not find script $script"]);
