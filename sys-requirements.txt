@@ -9,6 +9,7 @@ make
 gcc
 libperl-dev
 libapache2-mod-apreq2
+libapache2-mod-auth-openidc
 libapache2-request-perl
 libapache-session-perl
 
