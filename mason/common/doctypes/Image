@@ -15,7 +15,9 @@
 </table>
 
 <p>
-% if (!defined($vdoc->Width) || !$vdoc->Width || !defined($vdoc->Height) || $vdoc->Height) {
+% if ($file_missing) {
+  <div class="error"><& /shared/msg, text=>'Filen eksisterer ikke' &></div>
+% } elsif (!defined($vdoc->Width) || !$vdoc->Width || !defined($vdoc->Height) || $vdoc->Height) {
   <img src="<% $linkuri %>" alt="Picture: <% $vdoc->field('short_title') %>" /><br />
 %} else {
   <img width="<% $vdoc->Width %>" height="<% $vdoc->Height %>" src="<% $linkuri %>"
@@ -39,6 +41,17 @@ my $obvius_version=$output->param('_incoming_obvius_version');
 my $linkuri=$prefix . $uri;
 $linkuri =~ s/[\/]$//;
 $linkuri .= "?obvius_version=$obvius_version" if (defined $obvius_version);
+
+my $value=$vdoc->field('uploadfile');
+my $file_missing = 0;
+if ($value) {
+    my $full_path = $obvius->config->param('docs_dir') . '/' . $value;
+    $full_path =~ s{//}{/}g;
+    if (! -f $full_path) {
+        $file_missing = 1;
+    }
+}
+
 </%init>
 %
 <%once>

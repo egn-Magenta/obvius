@@ -40,6 +40,7 @@ use Obvius::DocType;
 use Image::Magick;
 use File::Path;
 use Data::Dumper;
+use WebObvius::HttpStatusException;
 
 our @ISA = qw( Obvius::DocType );
 our $VERSION="1.0";
@@ -65,7 +66,7 @@ sub get_data {
         $path =~ s!/+!/!g;
         my $fh;
         $path =~ s{\s+$}{}s;
-        open($fh, $path) || die "File not found: $path";
+        open($fh, $path) || die(WebObvius::HttpStatusException::HTTP404);
         eval {
             local $/ = undef;
             $data = <$fh>;
