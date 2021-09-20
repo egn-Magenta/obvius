@@ -545,6 +545,9 @@ msgstr "Fieldset"
 msgid "Fieldset End"
 msgstr "Fieldset End"
 
+msgid "Filen eksisterer ikke"
+msgstr "The file does not exist"
+
 msgid "Find"
 msgstr "Find"
 

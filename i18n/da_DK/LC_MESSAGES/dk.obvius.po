@@ -579,6 +579,9 @@ msgstr "Feltområde"
 msgid "Fieldset End"
 msgstr "Afslutning af feltområde"
 
+msgid "Filen eksisterer ikke"
+msgstr ""
+
 msgid "Find"
 msgstr "Find"
 

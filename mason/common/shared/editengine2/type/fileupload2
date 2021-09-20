@@ -3,7 +3,11 @@
 <& /shared/msg, text=>'Current value' &>: <% $value->{value} |h %>
 %if($value->{value}) {
 <input type="hidden" name="obvius_upload_<% $field->{name} %>_old_value" value="<% $value->{value} |h %>" />
+%if($file_missing) {
+<div class="error"><& /shared/msg, text=>'Filen eksisterer ikke' &></div>
+%} else {
 <input type="checkbox" name="obvius_upload_<% $field->{name} %>_delete" /> <& /shared/msg, text=>'Delete' &>
+%}
 %}
 %if($field->{options} && $field->{options}->{get_image_dimensions_from_upload}) {
 <input type="hidden" name="obvius_upload_<% $field->{name} %>_get_image_dimensions" value="1" />
@@ -16,6 +20,16 @@ $field
 $value=>{}
 $style
 </%args>
+<%init>
+my $file_missing = 0;
+if ($value->{value}) {
+    my $full_path = $obvius->config->param('docs_dir') . '/' . $value->{value};
+    $full_path =~ s{//}{/}g;
+    if (! -f $full_path) {
+        $file_missing = 1;
+    }
+}
+</%init>
 %
 </%method>
 %

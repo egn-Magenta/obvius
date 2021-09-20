@@ -402,7 +402,8 @@ sub handler ($$) {
      # it possible to serve a static file already present beneath the document
      # root.
      if (!$is_admin || $req->uri !~ m|/$|) {
-          my $upgraded_req = WebObvius::Apache::apache_module('Request')-> new($req);
+         eval {
+             my $upgraded_req = WebObvius::Apache::apache_module('Request')->new($req);
 
           # Check if we should just serve data using an internal redirect:
           my $other_path = $doctype->internal_redirect($doc, $vdoc, $obvius, $upgraded_req, $output);
@@ -438,6 +439,21 @@ sub handler ($$) {
 
 	       return $status;
 	  }
+         };
+         if (my $exception = $@) {
+             if (ref $exception and $exception->UNIVERSAL::isa('WebObvius::HttpStatusException')) {
+                 $req->status($exception->code);
+                 if ($exception->message) {
+                     $req->set_content_length(length($exception->message));
+                     $req->send_http_header;
+                     $req->print($exception->message);
+                 }
+                 return $exception->code;
+             } else {
+                 # Rethrow exception
+                 die $exception;
+             }
+         }
      }
 
      if ($output->param("redirect")) {
