@@ -16,7 +16,7 @@
 
 <p>
 % if ($file_missing) {
-  <div class="error"><& /shared/msg, text=>'Filen eksisterer ikke' &></div>
+  <div class="error"><% __('Filen eksisterer ikke') %></div>
 % } elsif (!defined($vdoc->Width) || !$vdoc->Width || !defined($vdoc->Height) || $vdoc->Height) {
   <img src="<% $linkuri %>" alt="Picture: <% $vdoc->field('short_title') %>" /><br />
 %} else {
