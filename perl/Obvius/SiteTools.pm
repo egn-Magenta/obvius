@@ -547,8 +547,10 @@ sub hash_diff {
 
 sub convert_datetime_to_ddmmyyyy {
     my ($datetime) = @_;
-    my $date = $date_parser->parse_datetime($datetime);
-    return $date_format->format_datetime($date);
+    if ($datetime) {
+        my $date = $date_parser->parse_datetime($datetime);
+        return $date ? $date_format->format_datetime($date) : undef;
+    }
 }
 
 1;
