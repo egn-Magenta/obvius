@@ -6,7 +6,6 @@ use warnings;
 use Scalar::Util qw (blessed);
 use URI::Escape;
 use WebObvius::Rewriter::RewriteRule qw(REWRITE);
-use Data::Dumper;
 
 sub new {
     my ($class, $config, %args) = @_;
