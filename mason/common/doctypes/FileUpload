@@ -19,6 +19,8 @@ $output
 </%args>
 %
 <%init>
+use Obvius::Translations qw(set_translation_lang);
+set_translation_lang($r->notes('preferred_language') || 'da');
 $obvius->get_version_fields($vdoc, [qw(title short_title teaser size mimetype uploadfile)]);
 
 my $obvius_version=$output->param('_incoming_obvius_version');

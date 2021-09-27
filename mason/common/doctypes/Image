@@ -33,6 +33,7 @@ $output
 </%args>
 %
 <%init>
+set_translation_lang($r->notes('preferred_language') || 'da');
 $obvius->get_version_fields($vdoc, [qw(title short_title width height size mimetype)]);
 my $title = $vdoc->Title;
 
@@ -55,6 +56,7 @@ if ($value) {
 </%init>
 %
 <%once>
+use Obvius::Translations qw(set_translation_lang);
 use Number::Bytes::Human qw(format_bytes);
 my @fields=(
     { name=>'mimetype', title=>'MIME-type', },
