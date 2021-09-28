@@ -5,7 +5,7 @@
 %    my $value=$vdoc->field($field->{name});
 %    if (defined $value) {
 <tr>
-<td><% $field->{title} %>:</td>
+<td><% __($field->{title}) %>:</td>
 <td>
 <% exists($field->{display}) ? $field->{display}($value) : $value %><% (defined $field->{unit} ? ' ' . $field->{unit} : '') %>
 </td>
