@@ -6,6 +6,7 @@ use warnings;
 use Scalar::Util qw (blessed);
 use URI::Escape;
 use WebObvius::Rewriter::RewriteRule qw(REWRITE);
+use Data::Dumper;
 
 sub new {
     my ($class, $config, %args) = @_;
@@ -48,9 +49,10 @@ sub add_rewriters {
 
 sub rewrite {
     my ($this, $input) = @_;
-    my %args = split(/[?]/, $input);
+    my %args = split(/[?]/, $input, 12);
     $args{querystring} = uri_unescape($args{querystring}) if($args{querystring});
-    
+    $args{method} ||= 'NONE';
+
     my $is_admin = $args{uri} =~ m!^/admin/!;
     
     my $rewriters = $is_admin ? $this->{admin_rewriters} : $this->{rewriters};
@@ -68,10 +70,9 @@ sub rewrite {
 
         $rewritten = 1;
         $args{uri} = $url unless($url eq  '-');
-
         return ("$action:$args{uri}") if($action ne REWRITE);
     }
-    
+
     return $rewritten ? (REWRITE . ":$args{uri}") : "NULL";
 }
 
