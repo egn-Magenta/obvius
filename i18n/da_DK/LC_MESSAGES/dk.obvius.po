@@ -156,6 +156,9 @@ msgstr "Boks"
 msgid "Box-status updated"
 msgstr "Boks-status opdateret"
 
+msgid "Bredde"
+msgstr ""
+
 # Imported from old translations
 msgid "By moderator"
 msgstr "Af moderator"
@@ -699,6 +702,9 @@ msgstr "Skjul denne version"
 msgid "High priority"
 msgstr "Høj prioritet"
 
+msgid "Højde"
+msgstr ""
+
 # Imported from old translations
 msgid "If.."
 msgstr "Hvis.."
@@ -788,6 +794,9 @@ msgstr "Link til offentligt website"
 # Imported from old translations
 msgid "Low priority"
 msgstr "Lav prioritet"
+
+msgid "MIME-type"
+msgstr ""
 
 # Imported from old translations
 msgid "Mandatory"
@@ -1009,6 +1018,9 @@ msgstr "Stien skal have en \"/\" både først og sidst"
 # Imported from old translations
 msgid "Perform"
 msgstr "Udfør"
+
+msgid "Placering"
+msgstr ""
 
 # Imported from old translations
 msgid "Please choose a function to perform"
@@ -1270,6 +1282,9 @@ msgstr "Start"
 # Imported from old translations
 msgid "Start editing"
 msgstr "Begynd redigering"
+
+msgid "Størrelse"
+msgstr ""
 
 # Imported from old translations
 msgid "Subdocuments"

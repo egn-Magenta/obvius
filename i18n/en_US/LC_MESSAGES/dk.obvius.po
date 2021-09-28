@@ -141,6 +141,9 @@ msgstr "Box"
 msgid "Box-status updated"
 msgstr "Box-status updated"
 
+msgid "Bredde"
+msgstr "Width"
+
 # Imported from old translations
 msgid "By moderator"
 msgstr "By moderator"
@@ -655,6 +658,9 @@ msgstr "Hide this version"
 msgid "High priority"
 msgstr "High priority"
 
+msgid "Højde"
+msgstr "Height"
+
 # Imported from old translations
 msgid "If.."
 msgstr "If.."
@@ -736,6 +742,9 @@ msgstr "Link to public website"
 # Imported from old translations
 msgid "Low priority"
 msgstr "Low priority"
+
+msgid "MIME-type"
+msgstr ""
 
 # Imported from old translations
 msgid "Mandatory"
@@ -931,6 +940,9 @@ msgstr "Path must start and end with a \"/\" character"
 
 msgid "Perform"
 msgstr "Perform"
+
+msgid "Placering"
+msgstr "Alignment"
 
 # Imported from old translations
 msgid "Please choose a function to perform"
@@ -1173,6 +1185,9 @@ msgstr "Start"
 # Imported from old translations
 msgid "Start editing"
 msgstr "Start editing"
+
+msgid "Størrelse"
+msgstr "Size"
 
 # Imported from old translations
 msgid "Subdocuments"
