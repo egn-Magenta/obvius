@@ -938,6 +938,40 @@ sub db_insert_docparams {
     return;
 }
 
+sub db_insert_docparam {
+    my ($this, $doc, $name, $value) = @_;
+    $this->tracer($doc, $name, $value) if($this->{DEBUG});
+    $this->{LOG}->info("====> Inserting docparam $name for docid " . $doc->Id . "...");
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'docparms',
+                                            });
+    $set->Insert({
+                    docid => $doc->Id,
+                    name => $name,
+                    value => $value,
+                });
+    $set->Disconnect;
+
+    return;
+}
+
+sub db_delete_docparam {
+    my ($this, $doc, $name) = @_;
+
+    $this->tracer($doc) if($this->{DEBUG});
+
+    $this->{LOG}->info("====> Deleting docparam $name for docid " . $doc->Id . "...");
+
+    my $set = DBIx::Recordset->SetupObject ({'!DataSource' => $this->{DB},
+                                            '!Table'      => 'docparms',
+                                            });
+    $set->Delete({docid => $doc->Id, name => $name});
+    $set->Disconnect;
+
+    return;
+}
+
 sub db_delete_docparams {
     my ($this, $doc) = @_;
 

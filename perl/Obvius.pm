@@ -1756,6 +1756,45 @@ sub get_docparams_recursive {
     return $result;
 }
 
+# Sets a single docparam
+sub set_docparam {
+    my ($this, $doc, $name, $value, $errorref) = @_;
+
+    if (!$this->can_set_docparams($doc)) {
+        if ($errorref) {
+            $$errorref = "User $this->{USER} does not have access to set docparams for this document";
+        }
+        return undef;
+    }
+
+    $this->db_begin;
+    eval {
+        $this->{LOG}->info("====> Setting docparam ... deleting old");
+        $this->db_delete_docparam($doc, $name);
+        $this->{LOG}->info("====> Setting docparam ... inserting new");
+        $this->db_insert_docparam($doc, $name, $value);
+	$this->db_commit;
+    };
+
+    if($@) {
+        $this->{DB_Error} = $@;
+        $this->db_rollback;
+        $this->{LOG}->error("====> Setting docparam ... failed ($@)");
+        $$errorref = $@ if($errorref);
+        return undef;
+    }
+
+    $this->register_modified('docid' => $doc->Id, clear_recursively => 1);
+    undef $this->{DB_Error};
+    $this->{LOG}->info("====> Setting docparam ... done");
+
+    # Delete any cached docparams on the $doc.
+    delete $doc->{DOCPARAMS};
+
+    return 1;
+
+}
+
 # Setting docparams
 sub set_docparams {
     my ($this, $doc, $params, $errorref) = @_;
