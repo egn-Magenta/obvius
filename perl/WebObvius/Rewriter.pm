@@ -48,9 +48,10 @@ sub add_rewriters {
 
 sub rewrite {
     my ($this, $input) = @_;
-    my %args = split(/[?]/, $input);
+    # There are 6 key-value pairs in our input, with the last value possibly containing our separator, so only split 6*2 times
+    my %args = split(/[?]/, $input, 12);
     $args{querystring} = uri_unescape($args{querystring}) if($args{querystring});
-    
+
     my $is_admin = $args{uri} =~ m!^/admin/!;
     
     my $rewriters = $is_admin ? $this->{admin_rewriters} : $this->{rewriters};
@@ -68,10 +69,9 @@ sub rewrite {
 
         $rewritten = 1;
         $args{uri} = $url unless($url eq  '-');
-
         return ("$action:$args{uri}") if($action ne REWRITE);
     }
-    
+
     return $rewritten ? (REWRITE . ":$args{uri}") : "NULL";
 }
 
