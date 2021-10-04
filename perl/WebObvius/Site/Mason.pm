@@ -405,59 +405,57 @@ sub handler ($$) {
     # it possible to serve a static file already present beneath the document
     # root.
     if (!$is_admin || $req->uri !~ m|/$|) {
-        eval {
-            my $upgraded_req = WebObvius::Apache::apache_module('Request')->new($req);
 
-            # Check if we should just serve data using an internal redirect:
-            my $other_path = $doctype->internal_redirect($doc, $vdoc, $obvius, $upgraded_req, $output);
 
-            # Certain characters trip apache up, causing a 404 error if we attempt to feed it an invalid path
-            # This is especially true for url markers (?&=#%)
-            if ($other_path && $other_path =~ m/^[^?&=#%]+$/) {
-
-                # What we do here is non-essential; just letting apache serve the file directly, instead of us proxying it
-                $upgraded_req->internal_redirect($other_path);
-            }
-
-            my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) =
-              $doctype->raw_document_data($doc, $vdoc, $obvius, $upgraded_req, $output);
-
-            if ($data || $path) {
-                my %args = (mime_type => $mime_type,
-                    data => $data,
-                    output_filename => $filename,
-                    con_disp => $con_disp,
-                    path => $path);
-                if ($extra_headers){
-                    $req->header_out($_ => $extra_headers->{$_}) for keys %$extra_headers;
-                }
-                my $status = defined $data ?
-                  $this->output_data($req, %args) :
-                  $this->output_file($req, %args);
-                if ($is_admin) {
-                    $req->no_cache(1);
-                }
-                if ($status == OK) {
-                    execute_cache($obvius, $req, $data, $filename);
-                }
-
-                return $status;
-            }
+        # Handle internal redirect
+        my $upgraded_req = WebObvius::Apache::apache_module('Request')->new($req);
+        my $other_path = eval {
+            $doctype->internal_redirect($doc, $vdoc, $obvius, $upgraded_req, $output)
         };
-        if (my $exception = $@) {
-            if (ref $exception and $exception->UNIVERSAL::isa('WebObvius::HttpStatusException')) {
-                $req->status($exception->code);
-                if ($exception->message) {
-                    $req->set_content_length(length($exception->message));
-                    $req->send_http_header;
-                    $req->print($exception->message);
-                }
-                return $exception->code;
-            } else {
-                # Rethrow exception
-                die $exception;
-            }
+
+        if(my $exception = $@) {
+            return $this->handle_obvius_exception($req, $exception);
         }
+
+        # Certain characters trip apache up, causing a 404 error if we attempt to feed it an invalid path
+        # This is especially true for url markers (?&=#%)
+        if($other_path && $other_path =~ m/^[^?&=#%]+$/) {
+            # What we do here is non-essential; just letting apache serve the file directly, instead of us proxying it
+            $upgraded_req->internal_redirect($other_path);
+            return OK;
+        }
+
+        # Handle raw_document_data
+        my ($mime_type, $data, $filename, $con_disp, $path, $extra_headers) = eval {
+            $doctype->raw_document_data($doc, $vdoc, $obvius, $upgraded_req, $output);
+        };
+
+        if(my $exception = $@) {
+            return $this->handle_obvius_exception($req, $exception);
+        }
+
+        if ($data || $path) {
+            my %args = (mime_type => $mime_type,
+                data => $data,
+                output_filename => $filename,
+                con_disp => $con_disp,
+                path => $path);
+            if ($extra_headers){
+                $req->header_out($_ => $extra_headers->{$_}) for keys %$extra_headers;
+            }
+            my $status = defined $data ?
+                $this->output_data($req, %args) :
+                $this->output_file($req, %args);
+            if ($is_admin) {
+                $req->no_cache(1);
+            }
+            if ($status == OK) {
+                execute_cache($obvius, $req, $data, $filename);
+            }
+
+            return $status;
+        }
+
     }
 
     if ($output->param("redirect")) {
@@ -510,6 +508,23 @@ sub handler ($$) {
     execute_cache($obvius, $req, \$html);
 
     return $status;
+}
+
+sub handle_obvius_exception {
+    my ($self, $req, $exception) = @_;
+
+    if (ref $exception && $exception->UNIVERSAL::isa('WebObvius::HttpStatusException')) {
+        $req->status($exception->code);
+        if ($exception->message) {
+            $req->set_content_length(length($exception->message));
+            $req->send_http_header;
+            $req->print($exception->message);
+        }
+        return $exception->code;
+    } else {
+        # Rethrow exception
+        die $exception;
+    }
 }
 
 sub execute_cache {
