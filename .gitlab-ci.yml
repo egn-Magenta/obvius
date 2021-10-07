@@ -8,7 +8,9 @@ variables:
     KANIKO_VERSION: v1.6.0
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
     IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+    IMAGE_SHA_EXPERIMENTAL: ${CI_REGISTRY_IMAGE}:buildkit-${CI_COMMIT_SHA}
     IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:latest
+    IMAGE_LATEST_EXPERIMENTAL: ${RELEASE_REGISTRY_IMAGE}:latest-buildkit
 
 # Lint/Build stage
 #############
@@ -59,6 +61,34 @@ build:
         --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
         --destination=${IMAGE_SHA}
         --cache=true
+
+Build image (experimental):
+    stage: lint-build
+    rules:
+      - if: $CI_COMMIT_BRANCH
+    needs: []
+    tags:
+      - buildkit
+    image:
+      name: moby/buildkit:rootless
+      entrypoint: [ "sh", "-c" ]
+    variables:
+      BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+    before_script:
+      - |
+        mkdir ~/.docker
+        ci_auth=$(echo -n "$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD" | base64)
+        release_auth=$(echo -n "$RELEASE_REGISTRY_USER:$RELEASE_REGISTRY_PASSWORD" | base64)
+        echo "{\"auths\": {\"$CI_REGISTRY\": {\"auth\": \"$ci_auth\"}, \"$RELEASE_REGISTRY\": {\"auth\": \"$release_auth\"}}}" > ~/.docker/config.json
+    script:
+      - |
+        buildctl-daemonless.sh build \
+            --frontend=dockerfile.v0 \
+            --local context=$CI_PROJECT_DIR \
+            --local dockerfile=$CI_PROJECT_DIR/docker \
+            --import-cache type=registry,ref=$IMAGE_SHA_EXPERIMENTAL \
+            --export-cache type=inline \
+            --output type=image,name=$IMAGE_SHA_EXPERIMENTAL,push=true
 
 unit-test:
     stage: test
@@ -135,6 +165,17 @@ release-latest:
             --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
             "docker://${IMAGE_SHA}"
             "docker://${IMAGE_LATEST}"
+
+release-latest-experimental:
+    <<: *release-default
+    rules:
+        - if: $CI_COMMIT_REF_NAME == "master"
+    script:
+        - skopeo copy
+            --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+            --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+            "docker://${IMAGE_SHA_EXPERIMENTAL}"
+            "docker://${IMAGE_LATEST_EXPERIMENTAL}"
 
 Trigger KU rebuild:
     stage: trigger
