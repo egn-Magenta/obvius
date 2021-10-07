@@ -7,6 +7,7 @@ stages:
 variables:
     KANIKO_VERSION: v1.6.0
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
+    IMAGE_CACHE_REGISTRY: $CI_REGISTRY_IMAGE/cache
     IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     IMAGE_SHA_EXPERIMENTAL: ${CI_REGISTRY_IMAGE}:buildkit-${CI_COMMIT_SHA}
     IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:latest
@@ -74,6 +75,7 @@ Build image (experimental):
       entrypoint: [ "sh", "-c" ]
     variables:
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+      BUILDKIT_PROGRESS: plain
     before_script:
       - |
         mkdir ~/.docker
@@ -86,8 +88,8 @@ Build image (experimental):
             --frontend=dockerfile.v0 \
             --local context=$CI_PROJECT_DIR \
             --local dockerfile=$CI_PROJECT_DIR/docker \
-            --import-cache type=registry,ref=$IMAGE_SHA_EXPERIMENTAL \
-            --export-cache type=inline \
+            --import-cache type=registry,ref=$IMAGE_CACHE_REGISTRY \
+            --export-cache type=registry,ref=$IMAGE_CACHE_REGISTRY \
             --output type=image,name=$IMAGE_SHA_EXPERIMENTAL,push=true
 
 unit-test:
