@@ -7,9 +7,9 @@ package WebObvius::Admin;
 # Copyright (C) 2001-2005 Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #                         aparte A/S, Denmark (http://www.aparte.dk/),
 #
-# Authors: Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
-#          René Seindal,
-#          Adam Sjøgren (asjo@magenta-aps.dk),
+# Authors: JÃ¸rgen Ulrik B. Krag (jubk@magenta-aps.dk)
+#          RenÃ© Seindal,
+#          Adam SjÃ¸gren (asjo@magenta-aps.dk),
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -88,54 +88,6 @@ sub prepare_edit {
     return $sessionid;
 }
 
-
-########################################################################
-#
-#	Session handling
-#
-########################################################################
-
-# get_session - if given a string with a session id, tries to get the
-#               corresponding session. If the argument is undefined, a
-#               new session is created and returned. Returns a
-#               hash-ref to the session on success and undef on
-#               failure.
-#		The $obvius argument is optional. If it is not provided
-#		a new database connection will be made.
-sub get_session {
-    my ($this, $id, $obvius) = @_;
-
-    my %args = ( TableName => "apache_edit_sessions" );
-
-    if($obvius) {
-	$args{Handle} = $obvius->dbh;
-	$args{LockHandle} = $obvius->dbh;
-    } else {
-	# If an obvius object was not provided, create new connections
-	my $conf = $this->param('obvius_config');
-	$args{DataSource} = $args{LockDataSource} = $conf->param('dsn');
-	$args{UserName} = $args{LockUserName} = $conf->param('normal_db_login');
-	$args{Password} = $args{LockPassword} = $conf->param('normal_db_passwd');
-    }
-    
-    my %session;
-    eval {
-	tie %session, 'Apache::Session::MySQL', $id, \%args;
-    };
-    if ($@) {
-	warn "Can't get session data $id: $@\n\t";
-	return undef;
-    }
-
-    return \%session;
-}
-
-sub release_session {
-    my ($this, $session) = @_;
-
-    untie %$session;
-}
-
 1;
 __END__
 
@@ -158,9 +110,9 @@ None by default.
 
 =head1 AUTHOR
 
-Jørgen Ulrik B. Krag <lt>krag@aparte.dk<gt>
-René Seindal
-Adam Sjøgren <lt>asjo@aparte-test.dk<gt>
+JÃ¸rgen Ulrik B. Krag <lt>krag@aparte.dk<gt>
+RenÃ© Seindal
+Adam SjÃ¸gren <lt>asjo@aparte-test.dk<gt>
 
 =head1 SEE ALSO
 

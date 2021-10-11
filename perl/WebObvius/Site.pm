@@ -34,6 +34,8 @@ package WebObvius::Site;
 use strict;
 use warnings;
 
+use Carp;
+
 use Obvius;
 use Obvius::Data;
 use Obvius::Translations ();
@@ -775,16 +777,42 @@ sub get_session {
         $args{Password} = $args{LockPassword} = $conf->param('normal_db_passwd');
     }
 
-    my %session;
+    my $session;
     eval {
-        tie %session, 'Apache::Session::MySQL', $id, \%args;
+        my %tmp;
+        tie %tmp, 'Apache::Session::MySQL', $id, \%args;
+        $session = \%tmp;
     };
-    if ($@) {
-        warn "Can't get session data $id: $@\n\t";
-        return undef;
+    if (my $error = $@) {
+        # Only get first line of error message
+        $error =~ s{\n.*}{}s;
+
+        # Tried to use carp for this, but that causes the warning to be issued
+        # from one level too low in the stack, so we stick to warn.
+        carp "SessionError: Can't get session data $id: $error";
+
+        # Try to create an empty session with a warning to the user about the
+        # lost session.
+        eval {
+            my %tmp;
+            tie %tmp, 'Apache::Session::MySQL', undef, \%args;
+
+            # Set warning for user
+            $tmp{status} = 'INFO';
+            $tmp{message} = Obvius::Translations::gettext(
+                'Your edit session has expired.'
+            );
+
+            $session = \%tmp;
+        };
+        if (my $error = $@) {
+            # Only get first line of error message
+            $error =~ s{\n.*}{}s;
+            carp "NewSessionError: Could not create a new session: $error";
+        }
     }
 
-    return \%session;
+    return $session;
 }
 
 sub release_session {
