@@ -512,6 +512,9 @@ msgstr "Redigér nøgleord"
 msgid "Edit option"
 msgstr "Redigér muligheder"
 
+msgid "Your edit session has expired."
+msgstr "Din redigeringssession er udløbet."
+
 # Imported from old translations
 msgid "Edit validaterule"
 msgstr "Redigér valideringsregel"

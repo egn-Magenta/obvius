@@ -481,6 +481,9 @@ msgstr "Edit keyword"
 msgid "Edit option"
 msgstr "Edit option"
 
+msgid "Your edit session has expired."
+msgstr "Your edit session has expired."
+
 # Imported from old translations
 msgid "Edit validaterule"
 msgstr "Edit validaterule"
