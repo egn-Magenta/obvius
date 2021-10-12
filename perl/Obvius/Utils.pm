@@ -8,7 +8,7 @@ package Obvius::Utils;
 #                    Magenta Aps, Denmark (http://www.magenta-aps.dk/)
 #                    aparte A/S, Denmark (http://www.aparte.dk/),
 #
-# Authors: Adam Sjøgren (asjo@magenta-aps.dk),
+# Authors: Adam Sjgren (asjo@magenta-aps.dk),
 #          Jørgen Ulrik B. Krag (jubk@magenta-aps.dk)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,12 @@ package Obvius::Utils;
 use strict;
 use warnings;
 
+use base qw(Exporter);
 our $VERSION="1.0";
+
+our @EXPORT_OK = qw(
+    monthname
+);
 
 ########################################################################
 #
@@ -583,6 +588,23 @@ sub update_loginuser {
     undef $this->{DB_Error};
     $this->{LOG}->info("====> Update " . $prefix . "loginuser ... done");
     return 1;
+}
+
+########################################################################
+#
+#	General utility methods
+#
+########################################################################
+
+# Returns lowercase month name from a number (1-12)
+# The result may be inserted in a translation, e.g. __(Obvius::Utils::monthname($month))
+sub monthname_from_number {
+    my ($monthnumber) = @_;
+    if (!$monthnumber || $monthnumber < 1 || $monthnumber > 12) {
+        return undef;
+    }
+    my @months = qw(none january february march april may june july august september october november december);
+    return $months[$monthnumber];
 }
 
 1;
