@@ -123,6 +123,10 @@ sub create_or_update_database {
         if(!$self->_check_obvius_schema_exists) {
             $self->logger()->info('Schema not found, running DDL');
             $self->_run_ddl( $self->schema_file() );
+            $self->logger()->info('Flushing tables');
+            $self->_switch_to_privileged_user;
+            $self->_run_command([$self->_cli_args(), '-e FLUSH TABLES']);
+            $self->_switch_to_normal_user;
         }
     }
     else {
