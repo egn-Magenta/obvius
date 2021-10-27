@@ -1,0 +1,51 @@
+# This is the default perltidyrc file for Obvius. If you make changes to
+# this file, make sure to add a comment explaining why.
+
+# Brace tightness = 2 = tight
+#
+# Examples:
+#    $obj->{ $parsed_sql->{ 'table' }[0] };    # -bt=0
+#    $obj->{ $parsed_sql->{'table'}[0] };      # -bt=1 (default)
+#    $obj->{$parsed_sql->{'table'}[0]};        # -bt=2
+#
+-bt=2
+
+# Paren tightness = 2 = tight
+#
+# Examples:
+#   if ( ( my $len_tab = length( $tabstr ) ) > 0 ) {  # -pt=0
+#   if ( ( my $len_tab = length($tabstr) ) > 0 ) {    # -pt=1 (default)
+#   if ((my $len_tab = length($tabstr)) > 0) {        # -pt=2
+#
+-pt=2
+
+# Maximum line length = 120
+-l=120
+
+# cuddled else; use this style: '} else {'
+-ce
+
+# Closing tokens (except for block braces) are controlled by -vtc=n, or --vertical-tightness-closing=n, where
+#
+#   -vtc=0 always break a line before a closing token (default),
+#   -vtc=1 do not break before a closing token which is followed
+#          by a semicolon or another closing token, and is not in
+#          a list environment.
+#   -vtc=2 never break before a closing token.
+#
+# For examples see http://perltidy.sourceforge.net/stylekey.html#Closing-Token-Placement
+#
+-vtc=0
+
+# Closing token for lists and blocks should not be indented. So
+#
+# my @list = (
+#     "a", "b",
+# );
+#
+# instead of
+#
+# my @list = (
+#              "a", "b",
+#            );
+-cti=0

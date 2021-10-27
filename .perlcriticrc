@@ -1,0 +1,86 @@
+# This is the default perlcriticrc file for Magentas Obvius developer setup.
+# If you make changes to this file make sure to add a comment about why
+# that particular change was introduced.
+
+# Legacy code in Obvius will often open filehandles well before they are used
+# This allows for a decent amount of lines between call to open(...) and use
+# of the filehandle.
+[InputOutput::RequireBriefOpen]
+lines = 15
+
+# Certain frameworks use what looks like unused private subroutines. Allow
+# these when the relevant frameworks are used.
+[Subroutines::ProhibitUnusedPrivateSubroutines]
+skip_when_using = Moose::Role Moo::Role Role::Tiny
+
+# For now we do not require our code to match to perltidy, but we might change
+# this at a later time, when we have a stable perltidy setup.
+[-CodeLayout::RequireTidyCode]
+
+# Lots and lots of perlmodules in Obvius without specific versioning. Since we
+# do not track versioning on a perl-module basis, skip the check for now.
+[-Modules::RequireVersionVar]
+
+# Allow strange variables like $|, $. and $^ for now. Cleaning these up will be
+# a job for a later time.
+[-Variables::ProhibitPunctuationVars]
+
+# Supposed to make reading of print statements that uses explicit filehandles
+# more readable, but it would break a lot of Obvius code.
+[-InputOutput::RequireBracedFileHandleWithPrint]
+
+# Forces checks for return status of stuff like `open`. Disabled for now as
+# code might need major rewrites to make it work.
+[-InputOutput::RequireCheckedSyscalls]
+
+# Enforces that any "magic number" used in code should be stored in some kind
+# of variable that explains what the number means. We have tons of magic numbers
+# in legacy code, so we disable this to reduce noise.
+[-ValuesAndExpressions::ProhibitMagicNumbers]
+
+# Forces usage of q{} instead of '' to increase legibility. We do not find that
+# this is needed.
+[-ValuesAndExpressions::ProhibitEmptyQuotes]
+
+# Enforces a certain set of POD documentation sections. We do not wish to require
+# this for the full Obvius codebase.
+[-Documentation::RequirePodSections]
+
+# Forces use of carp instead of die to ensure you know which caller triggered an
+# exception. Enabled all places except in the `main::` namespace, which means
+# you can use `die` in scripts where you do not wrap logic in separate methods.
+[ErrorHandling::RequireCarping]
+allow_in_main_unless_in_subroutine=1
+
+# Forces POD documentation to be at end. We do not want to enforce any POD
+# requirements yet.
+[-Documentation::RequirePodAtEnd]
+
+# Disallows multiline strings. We use a lot of q| ... | multiline strings for
+# SQL that would break if we enable this.
+[-ValuesAndExpressions::ProhibitImplicitNewlines]
+
+# Complains if you use `return undef` instead of just `return`, which might
+# cause problems if the method is called in list context and the resulting
+# list is checked for "thruthiness". We ignore this as it makes a lot of
+# noise with the current codebase.
+[-Subroutines::ProhibitExplicitReturnUndef]
+
+
+## Suggestions for altered severity
+# Complains about regular expressions with delimiters other than // and {}
+# default severity: brutal
+# [RegularExpressions::ProhibitUnusualDelimiters]
+
+# Prohibits `unless`; promote the use of `if` instead
+# default severity: cruel
+# [ControlStructures::ProhibitUnlessBlocks]
+
+# Prohibits `until`; promote the use of `while` instead
+# We do have a few `do ... until` blocks in the code
+# default severity: cruel
+# [ControlStructures::ProhibitUntilBlocks]
+
+# Prohibits control statements after the statement they control
+# default severity: cruel
+# [ControlStructures::ProhibitPostfixControls]
