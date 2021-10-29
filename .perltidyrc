@@ -49,3 +49,19 @@
 #              "a", "b",
 #            );
 -cti=0
+
+# Whitespace should not be aligned. Without `-naws`:
+#
+# my $a = 123;
+# my $longer_varname = 123;
+#
+# becomes
+#
+# my $a              = 123;
+# my $longer_varname = 123;
+#
+# From the official docs:
+# > If you do not want any whitespace added, but are willing to have some
+# > whitespace deleted, use -naws. (Use -fws to leave whitespace completely
+# > unchanged).
+-naws
