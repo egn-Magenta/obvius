@@ -590,6 +590,16 @@ sub update_loginuser {
     return 1;
 }
 
+my @months = qw(zero january february march april may june july august september october november december);
+my @months_short = qw(zero jan feb mar apr may jun jul aug sep oct nov dec);
+
+sub monthnames {
+    return @months;
+}
+sub monthnames_short {
+    return @months_short;
+}
+
 ########################################################################
 #
 #	General utility methods
@@ -599,12 +609,11 @@ sub update_loginuser {
 # Returns lowercase month name from a number (1-12)
 # The result may be inserted in a translation, e.g. __(Obvius::Utils::monthname($month))
 sub monthname_from_number {
-    my ($monthnumber) = @_;
+    my ($monthnumber, $short) = @_;
     if (!$monthnumber || $monthnumber < 1 || $monthnumber > 12) {
         return undef;
     }
-    my @months = qw(none january february march april may june july august september october november december);
-    return $months[$monthnumber];
+    return $short ? $months_short[$monthnumber] : $months[$monthnumber];
 }
 
 1;
