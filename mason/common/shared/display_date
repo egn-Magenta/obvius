@@ -4,11 +4,12 @@ $month =>'long'
 </%args>
 %
 <%init>
+use Obvius::Utils;
 my $display_date;
 my ($year, $mon, $day) = $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
 
 if ($month eq 'long') {
-    my $long_month = $m->scomp('/shared/msg', text=>$month_desc[$mon]);
+    my $long_month = $m->scomp('/shared/msg', text=>Obvius::Utils::monthname_from_number($mon));
     if ($vdoc->Lang eq 'da') {
         $display_date = "$day. $long_month $year";
     } else {
@@ -23,14 +24,9 @@ if ($month eq 'long') {
         $display_date = "$year.$mon.$day";
     }
 } else {
-    my $short_month = $m->scomp('/shared/msg', text=>$month_short[$mon]);
+    my $short_month = $m->scomp('/shared/msg', text=>Obvius::Utils::monthname_from_number($mon, 1));
     $display_date = "$day. $short_month $year";
 }
 </%init>
-%
-<%once>
-my @month_desc = qw(none january february march april may june july august september october november december);
-my @month_short = qw (none jan feb mar apr may jun jul aug sep oct nov dec);
-</%once>
 %
 <% $display_date %>
