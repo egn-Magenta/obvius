@@ -16,10 +16,6 @@ use File::Compare;
 
 use Data::Dumper;
 
-### To run this test properly, copy images from t/testimages/input to t/testimages
-### Otherwise, this test is a no-op
-### See image-test job in gitlab-ci for example usage
-
 # Setup folders
 my @input_files = glob 't/testimages/*';
 @input_files = grep { -f } @input_files; # Filter out directories
