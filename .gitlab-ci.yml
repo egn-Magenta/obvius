@@ -52,7 +52,7 @@ build-nocache:
       --destination=${IMAGE_SHA}
       --cache=false
 
-build:
+Build image:
     <<: *build-default
     except:
         - schedules
@@ -95,6 +95,7 @@ Build image (experimental):
 unit-test: &unit-test
     stage: test
     image: ${IMAGE_SHA}
+    needs: ["Build image"]
     variables:
         GIT_STRATEGY: none
         COVERAGE_FOLDER: db-cover
@@ -111,6 +112,20 @@ unit-test: &unit-test
         # Run tests using JUnit formatter
         - prove -r --formatter=TAP::Formatter::JUnit --timer t/| tee $CI_PROJECT_DIR/$COVERAGE_FOLDER/junit.xml
     coverage: /^Total.*\s(\d+\.\d)$/
+    artifacts:
+        when: always
+        paths:
+          - $CI_PROJECT_DIR/$COVERAGE_FOLDER/
+        reports:
+            junit: $CI_PROJECT_DIR/$COVERAGE_FOLDER/junit.xml
+
+
+unit-test-experimental:
+    <<: *unit-test
+    image: ${IMAGE_SHA_EXPERIMENTAL}
+    needs: ["Build image (experimental)"]
+    variables:
+        COVERAGE_FOLDER: db-cover-experimental
     artifacts:
         when: always
         paths:
