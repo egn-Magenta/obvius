@@ -471,6 +471,20 @@ sub special_actions {
                 args => ['NyNyhedsliste']
             }
         ],
+        BredNyhed => [
+            {
+                command => 'clear_doctype',
+                args => ['Nyhedsliste']
+            },
+            {
+                command => 'rightbox_clear',
+                args => ['newslists']
+            },
+            {
+                command => 'clear_doctype',
+                args => ['NyNyhedsliste']
+            }
+        ],
         CalendarEvent => [
             {
                 command => 'clear_doctype',
