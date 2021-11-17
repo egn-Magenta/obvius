@@ -103,8 +103,9 @@ sub fakerequest {
 sub admin_auth_check {
     my ($c, $return_success_or_fail) = @_;
 
+    my $req = $c->fakerequest;
     my $auth_res = $c->siteconfig->{admin}->session_authen_handler(
-        $c->fakerequest
+        $req
     );
     if (my $status = $c->response->status) {
         if (!$auth_res) {
@@ -117,6 +118,8 @@ sub admin_auth_check {
         # otherwise detach and let $c->response redirect to login
         return $return_success_or_fail ? 0 : $c->detach();
     }
+    # Ensure the username is stored on the obvius obj for later use
+    $c->obvius->{USER} = $req->notes('user');
     return 1;
 }
 
