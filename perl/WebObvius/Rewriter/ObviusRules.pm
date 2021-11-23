@@ -146,8 +146,13 @@ sub setup {
         $map_file,
         $this->{roothost},
         debug => 1,
-        default_https_roothost => $config->param('https_roothost')
+        default_https_roothost => $config->param('https_roothost'),
+        obvius_config => $config,
     );
+
+    $this->{no_canonical_hostnames} = $config->param(
+        'feature_flag_no_canonical_hostnames'
+    ) ? 1: 0,
 }
 
 sub hostmap {
@@ -231,6 +236,20 @@ sub rewrite {
     # it:
     my ($new_uri, $new_host, undef, undef, $protocol)
         = $this->hostmap->translate_uri($lookup_uri, $hostname, $protocol_in);
+
+    # If we do not want to redirect to canonical hostnames, change our found
+    # subsite hostname to match the incoming hostname. This will disable the
+    # redirect. However, do not do this when redirecting to and from any of
+    # the roothost domains.
+    if($this->{no_canonical_hostnames} && $new_host) {
+        my $incoming_hostname = lc($args{hostname});
+        my @roothost_domains = ($roothost, $hostmap->https_roothost);
+        my $incoming_is_roothost = grep { $_ eq $incoming_hostname } @roothost_domains;
+        my $new_host_is_roothost = grep { $_ eq $new_host } @roothost_domains;
+        if(!$incoming_is_roothost && !$new_host_is_roothost) {
+            $new_host = $hostname;
+        }
+    }
 
     if(($protocol ne $protocol_in) or ($new_host and $new_host ne $hostname)) {
         if($no_ending_slash) {
