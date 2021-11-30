@@ -215,10 +215,12 @@ sub perform_command_publish {
 sub perform_command_perlscript {
     my ($obvius, %info) = @_;
     my %args = %{$info{args}};
+    my $sitebase = $obvius->config->param('sitebase');
+
     if ($args{script} =~ m{(\.\.)|(&&)|(\|)|((^|\s)/)}) {
-        return ('ERROR', ["Will not execute script outside /var/www/www.ku.dk/"]);
+        return ('ERROR', ["Will not execute script outside $sitebase"]);
     }
-    my $script = "/var/www/www.ku.dk/".$args{script};
+    my $script = $sitebase . $args{script};
     if (-e $script) {
         my @params;
         if ($args{params}) {
