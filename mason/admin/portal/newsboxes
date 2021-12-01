@@ -56,7 +56,6 @@ foreach my $subdoc (@$subdocs) {
 my %on=();
 my $newsbox_doctype=$obvius->get_doctype_by_name('Newsbox');
 if (!$newsbox_doctype) {
-    $obvius->log->notice('admin/portal/newsboxes: No document type Newsbox found');
     return;
 }
 
