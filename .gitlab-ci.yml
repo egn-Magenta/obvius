@@ -179,11 +179,6 @@ unit-test-experimental:
 .release-default: &release-default
     stage: release
     image: alpine
-    # Don't release scheduled builds
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "schedule"
-          when: never
-        - when: on_success
     variables:
         GIT_STRATEGY: none # We do not need the source code
     tags:
@@ -195,6 +190,8 @@ unit-test-experimental:
 release-latest:
     <<: *release-default
     rules:
+        - if: $CI_PIPELINE_SOURCE == "schedule"
+          when: never
         - if: $CI_COMMIT_REF_NAME == "master"
     script:
         - skopeo copy
@@ -206,6 +203,8 @@ release-latest:
 release-latest-experimental:
     <<: *release-default
     rules:
+        - if: $CI_PIPELINE_SOURCE == "schedule"
+          when: never
         - if: $CI_COMMIT_REF_NAME == "master"
     script:
         - skopeo copy
@@ -220,12 +219,10 @@ Trigger KU rebuild:
     rules:
         - if: $CI_PIPELINE_SOURCE == "schedule"
           when: never
-        - when: on_success
+        - if: $CI_COMMIT_REF_NAME == "master"
     variables:
         GIT_STRATEGY: none # We do not need the source code
     before_script:
         - apk add curl
-    rules:
-        - if: $CI_COMMIT_REF_NAME == "master"
     script:
         - "curl -X POST -F token=$CI_JOB_TOKEN -F ref=$CI_COMMIT_REF_NAME https://git.magenta.dk/api/v4/projects/72/trigger/pipeline"
