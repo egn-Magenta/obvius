@@ -459,9 +459,15 @@ sub db_insert_vfields {
 
 	# XXX Should use doctype
 	my $fspec = $this->get_fieldspec($k);
-	die "Abort - fieldspec for $k  not found" unless ($fspec);
+    if (!$fspec) {
+        warn("No fspec for $k; not inserting field");
+        next;
+    }
 	my $ftype = $fspec->param('fieldtype');
-	die "Abort - fieldtype for $k not found" unless ($ftype);
+    if (!$ftype) {
+        warn("No fspec for $k; not inserting field");
+        next;
+    }
 
 	my $value_field = $ftype->param('value_field');
 	die "Abort - value_field for $k not found" unless ($value_field);
