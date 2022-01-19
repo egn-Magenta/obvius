@@ -588,6 +588,9 @@ msgstr "Afslutning af feltområde"
 msgid "Filen eksisterer ikke"
 msgstr ""
 
+msgid "Filen er tom"
+msgstr ""
+
 msgid "Find"
 msgstr "Find"
 
