@@ -75,6 +75,10 @@ sub get_data {
         if ($@) {
             die $@;
         }
+        # If file exists but is empty, treat it as non-existing
+        if (!$data) {
+            die(WebObvius::HttpStatusException::HTTP404)
+        }
     } else {
         $data = $vdoc->field('data');
     }
