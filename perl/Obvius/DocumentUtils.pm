@@ -6,6 +6,7 @@ use Obvius;
 use Obvius::Hostmap;
 use Obvius::Config;
 use Obvius::Log;
+use POSIX qw(strftime);
 
 =head1 OBJECT-ORIENTED METHODS
 
@@ -150,6 +151,9 @@ sub create_new_document_version {
         my Obvius::Version $new_vdoc = $obvius->get_version($doc, $new_version_string);
         $new_vdoc->param('publish_fields', $copy_publish_fields);
         die "Could not get new version" unless $new_vdoc;
+
+        # Set publish time to right now
+        $new_vdoc->publish_fields->param(PUBLISHED => strftime('%Y-%m-%d %H:%M:%S', localtime));
 
         my $error = '';
         $obvius->publish_version($new_vdoc, \$error);
