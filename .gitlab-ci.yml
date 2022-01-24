@@ -12,9 +12,9 @@ variables:
     RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/obvius-core
     IMAGE_CACHE_REGISTRY: $CI_REGISTRY_IMAGE/cache
     IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
-    IMAGE_SHA_EXPERIMENTAL: ${CI_REGISTRY_IMAGE}:buildkit-${CI_COMMIT_SHA}
+    IMAGE_SHA_LEGACY: ${CI_REGISTRY_IMAGE}:kaniko-${CI_COMMIT_SHA}
     IMAGE_LATEST: ${RELEASE_REGISTRY_IMAGE}:latest
-    IMAGE_LATEST_EXPERIMENTAL: ${RELEASE_REGISTRY_IMAGE}:latest-buildkit
+    IMAGE_LATEST_LEGACY: ${RELEASE_REGISTRY_IMAGE}:latest-kaniko
 
 # Only run pipeline when pushing a tag or a branch.
 # This is a workaround for a bug causing detached pipelines on MRs
@@ -39,7 +39,7 @@ Lint dockerfile:
         # Run hadolint on every Dockerfile
         - fd Dockerfile --exec hadolint
 
-.build-default: &build-default
+.build-default-legacy: &build-default-legacy
     stage: lint-build
     image:
         name: gcr.io/kaniko-project/executor:${KANIKO_VERSION}-debug
@@ -51,8 +51,8 @@ Lint dockerfile:
 
 # Disables cache to ensure upstream image is updated
 # Scheduled build ensures that cache for continuous builds will be populated & fresh
-Build image (no cache):
-    <<: *build-default
+Build image (legacy, no cache):
+    <<: *build-default-legacy
     rules:
         - if: $CI_PIPELINE_SOURCE == "schedule"
           when: on_success
@@ -61,11 +61,11 @@ Build image (no cache):
     - /kaniko/executor
       --context=$CI_PROJECT_DIR
       --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
-      --destination=${IMAGE_SHA}
+      --destination=${IMAGE_SHA_LEGACY}
       --cache=false
 
-Build image:
-    <<: *build-default
+Build image (legacy):
+    <<: *build-default-legacy
     rules:
         - if: $CI_PIPELINE_SOURCE == "schedule"
           when: never
@@ -74,10 +74,10 @@ Build image:
       - /kaniko/executor
         --context=$CI_PROJECT_DIR
         --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
-        --destination=${IMAGE_SHA}
+        --destination=${IMAGE_SHA_LEGACY}
         --cache=true
 
-.build-default-experimental: &build-default-experimental
+.build-default: &build-default
     stage: lint-build
     rules:
       - if: $CI_COMMIT_BRANCH
@@ -94,11 +94,10 @@ Build image:
       - |
         mkdir ~/.docker
         ci_auth=$(echo -n "$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD" | base64)
-        release_auth=$(echo -n "$RELEASE_REGISTRY_USER:$RELEASE_REGISTRY_PASSWORD" | base64)
-        echo "{\"auths\": {\"$CI_REGISTRY\": {\"auth\": \"$ci_auth\"}, \"$RELEASE_REGISTRY\": {\"auth\": \"$release_auth\"}}}" > ~/.docker/config.json
+        echo "{\"auths\": {\"$CI_REGISTRY\": {\"auth\": \"$ci_auth\"}}}" > ~/.docker/config.json
 
-Build image (experimental):
-    <<: *build-default-experimental
+Build image:
+    <<: *build-default
     rules:
         - if: $CI_PIPELINE_SOURCE == "schedule"
           when: never
@@ -111,10 +110,10 @@ Build image (experimental):
             --local dockerfile=$CI_PROJECT_DIR/docker \
             --import-cache type=registry,ref=$IMAGE_CACHE_REGISTRY \
             --export-cache type=registry,ref=$IMAGE_CACHE_REGISTRY \
-            --output type=image,name=$IMAGE_SHA_EXPERIMENTAL,push=true
+            --output type=image,name=$IMAGE_SHA,push=true
 
-Build image (experimental, no cache):
-    <<: *build-default-experimental
+Build image (no cache):
+    <<: *build-default
     rules:
         - if: $CI_PIPELINE_SOURCE == "schedule"
           when: on_success
@@ -126,7 +125,7 @@ Build image (experimental, no cache):
             --local context=$CI_PROJECT_DIR \
             --local dockerfile=$CI_PROJECT_DIR/docker \
             --export-cache type=registry,ref=$IMAGE_CACHE_REGISTRY \
-            --output type=image,name=$IMAGE_SHA_EXPERIMENTAL,push=true
+            --output type=image,name=$IMAGE_SHA,push=true
 
 unit-test: &unit-test
     stage: test
@@ -160,12 +159,12 @@ unit-test: &unit-test
             junit: $CI_PROJECT_DIR/$COVERAGE_FOLDER/junit.xml
 
 
-unit-test-experimental:
+unit-test-legacy:
     <<: *unit-test
-    image: ${IMAGE_SHA_EXPERIMENTAL}
-    needs: ["Build image (experimental)"]
+    image: ${IMAGE_SHA_LEGACY}
+    needs: ["Build image (legacy)"]
     variables:
-        COVERAGE_FOLDER: db-cover-experimental
+        COVERAGE_FOLDER: db-cover-legacy
     artifacts:
         when: always
         paths:
@@ -200,7 +199,7 @@ release-latest:
             "docker://${IMAGE_SHA}"
             "docker://${IMAGE_LATEST}"
 
-release-latest-experimental:
+release-latest-legacy:
     <<: *release-default
     rules:
         - if: $CI_PIPELINE_SOURCE == "schedule"
@@ -210,8 +209,8 @@ release-latest-experimental:
         - skopeo copy
             --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
             --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
-            "docker://${IMAGE_SHA_EXPERIMENTAL}"
-            "docker://${IMAGE_LATEST_EXPERIMENTAL}"
+            "docker://${IMAGE_SHA_LEGACY}"
+            "docker://${IMAGE_LATEST_LEGACY}"
 
 Trigger KU rebuild:
     stage: trigger
