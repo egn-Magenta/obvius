@@ -49,8 +49,9 @@ my $value=$vdoc->field('uploadfile');
 my $file_missing = 0;
 my $file_empty = 0;
 if ($value) {
+    $value =~ s{\s+$}{}s; # Remove trailing space and newlines
     my $full_path = $obvius->config->param('docs_dir') . '/' . $value;
-    $full_path =~ s{//}{/}g;
+    $full_path =~ s{//+}{/}g;
     if (! -f $full_path) {
         $file_missing = 1;
     }

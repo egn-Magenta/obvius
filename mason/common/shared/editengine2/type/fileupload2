@@ -1,8 +1,8 @@
 <%method block>\
 <& util/label, name=>$prefix . $field->{name}, label=>$field->{label}, field=>$field &>
-<& /shared/msg, text=>'Current value' &>: <% $value->{value} |h %>
-%if($value->{value}) {
-<input type="hidden" name="obvius_upload_<% $field->{name} %>_old_value" value="<% $value->{value} |h %>" />
+<& /shared/msg, text=>'Current value' &>: <% $val |h %>
+%if($val) {
+<input type="hidden" name="obvius_upload_<% $field->{name} %>_old_value" value="<% $val |h %>" />
 %if($file_missing) {
 <div class="error"><& /shared/msg, text=>'Filen eksisterer ikke' &></div>
 %} elsif($file_empty) {
@@ -25,9 +25,11 @@ $style
 <%init>
 my $file_missing = 0;
 my $file_empty = 0;
-if ($value->{value}) {
-    my $full_path = $obvius->config->param('docs_dir') . '/' . $value->{value};
-    $full_path =~ s{//}{/}g;
+my $val;
+if ($val = $value->{value}) {
+    $val =~ s{\s+$}{}s; # Remove trailing space and newlines
+    my $full_path = $obvius->config->param('docs_dir') . '/' . $val;
+    $full_path =~ s{//+}{/}g;
     if (! -f $full_path) {
         $file_missing = 1;
     }
