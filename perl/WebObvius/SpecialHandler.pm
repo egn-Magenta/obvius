@@ -47,7 +47,7 @@ sub set_cookie {
     );
 
     for my $k (qw(expires domain path secure)) {
-        $args{$k} = $extra{$k} if(defined($extra{$k}));
+        $args{"-$k"} = $extra{$k} if(defined($extra{$k}));
     }
 
     my $cookie = new CGI::Cookie(%args);
