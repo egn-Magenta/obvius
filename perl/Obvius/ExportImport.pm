@@ -75,6 +75,13 @@ sub new {
         'versions' => {}  # Versions on docids that we have imported. Does not include anything we have not imported. This means that preexisting documents will not show up here.
     };
 
+    $self->{'export_types'} = [
+        'documents',
+        'docparams',
+        'versions',
+        'vfields',
+        'proxies'
+    ];
 
     $self->{'export_functions'} = {
         'documents' => 'export_document',
@@ -82,7 +89,6 @@ sub new {
         'versions'  => 'export_version',
         'vfields'   => 'export_vfield',
         'proxies'   => 'export_proxy',
-        'subsites'  => 'export_subsite',
     };
     $self->{'import_functions'} = {
         'documents' => 'import_document',
@@ -90,8 +96,15 @@ sub new {
         'versions'  => 'import_version',
         'vfields'   => 'import_vfield',
         'proxies'   => 'import_proxy',
-        'subsites'  => 'import_subsite',
     };
+    $self->{'list_functions'} = {
+        'documents' => 'list_documents',
+        'docparams' => 'list_docparams',
+        'versions'  => 'list_versions',
+        'vfields'   => 'list_vfields',
+        'proxies'   => 'list_proxies'
+    };
+    $self->{'import_keys'} = ['documents', 'docparams', 'versions', 'vfields', 'proxies'];
 
     $self->{'fallback_owner'} = 'admin';
     $self->{'fallback_group'} = 'Admin';
@@ -205,55 +218,18 @@ sub export_to_folder {
 
     $self->{export_cache}->{basepath} = $self->obvius->get_doc_uri($head_doc);
 
-    my $documents = $self->list_documents($head_docid, 1);
-    my $document_file = IO::File->new("$tmp_folder/documents.json", "w");
-    if (!defined($document_file)) {
-        die "Cannot create file $tmp_folder/documents.json\n";
+    my ($documents, $versions);
+    for my $type (@{$self->{export_types}}) {
+        my $list_function = $self->{list_functions}->{$type};
+        my $items;
+        ($items, $documents, $versions) = $self->$list_function($head_docid, $documents, $versions);
+        my $file = IO::File->new("${tmp_folder}/${type}.json", "w");
+        if (!defined($file)) {
+            die "Cannot create file $tmp_folder/${type}.json\n";
+        }
+        $self->export_items($items, $type, $file, 0);
+        $file->close();
     }
-    $self->export_items($documents, 'documents', $document_file, 0);
-    $document_file->close();
-
-    my $docparams = $self->list_docparms($documents);
-    my $docparams_file = IO::File->new("$tmp_folder/docparams.json", "w");
-    if (!defined($docparams_file)) {
-        die "Cannot create file $tmp_folder/docparams.json\n";
-    }
-    $self->export_items($docparams, 'docparams', $docparams_file, 0);
-    $docparams_file->close();
-
-    my $versions = $self->list_versions($documents);
-    my $version_file = IO::File->new("$tmp_folder/versions.json", "w");
-    if (!defined($version_file)) {
-        die "Cannot create file $tmp_folder/versions.json\n";
-    }
-    $self->export_items($versions, 'versions', $version_file, 0);
-    $version_file->close();
-
-    my $vfields = $self->list_vfields($versions);
-    my $vfield_file = IO::File->new("$tmp_folder/vfields.json", "w");
-    if (!defined($vfield_file)) {
-        die "Cannot create file $tmp_folder/vfields.json\n";
-    }
-    $self->export_items($vfields, 'vfields', $vfield_file, 0);
-    $vfield_file->close();
-
-    $self->export_files("$tmp_folder/files", $vfields);
-
-    my $proxies = $self->list_internal_proxies($documents);
-    my $proxy_file = IO::File->new("$tmp_folder/proxies.json", "w");
-    if (!defined($proxy_file)) {
-        die "Cannot create file $tmp_folder/proxies.json\n";
-    }
-    $self->export_items($proxies, 'proxies', $proxy_file, 0);
-    $proxy_file->close();
-
-    my $subsites = $self->list_subsites($documents);
-    my $subsite_file = IO::File->new("$tmp_folder/subsites.json", 'w');
-    if (!defined($subsite_file)) {
-        die "Cannot create file $tmp_folder/subsites.json\n";
-    }
-    $self->export_items($subsites, 'subsites', $subsite_file, 0);
-    $subsite_file->close();
 
     if ($self->{options}->{'zip'}) {
         my $zip = Archive::Zip->new();
@@ -297,8 +273,7 @@ sub import_from_folder {
     use warnings;
 
     eval {
-        my @type_keys = ('documents', 'docparams', 'versions', 'vfields', 'proxies', 'subsites');
-        for my $type_key (@type_keys) {
+        for my $type_key (@{$self->{'import_keys'}}) {
             my $filename = "$folder/$type_key.json";
             if (-e $filename) {
                 my $file = IO::File->new("$folder/$type_key.json", "r");
@@ -394,7 +369,7 @@ sub path_length {
 }
 
 sub list_documents {
-    my ($self, $head_docid) = @_;
+    my ($self, $head_docid, $documents, $versions) = @_;
     # A future release may want to introduce filtering
     my @docs;
     my $depth = $self->{options}->{depth};
@@ -422,7 +397,7 @@ sub list_documents {
     }
 
     @docs = sort { $self->path_length($a) <=> $self->path_length($b) } @docs;
-    return \@docs;
+    return \@docs, \@docs, undef;
 }
 
 # $remaining_depth is either -1 (infinite), 0 (don't recurse any further) or positive
@@ -440,8 +415,8 @@ sub list_doc_tree {
     return \@docs;
 }
 
-sub list_internal_proxies {
-    my ($self, $documents) = @_;
+sub list_proxies {
+    my ($self, $head_docid, $documents, $versions) = @_;
     my @docids = map { ref($_) ? $_->Id : $_ } @{$documents};
     my $rows = $self->obvius->execute_select(
         "select id, docid, dependent_on, version
@@ -449,20 +424,20 @@ sub list_internal_proxies {
         where docid in (" . join(",", map { "?" } @docids) . ")",
         @docids
     );
-    return $rows;
+    return $rows, $documents, $versions;
 }
 
-sub list_docparms {
-    my ($self, $documents) = @_;
+sub list_docparams {
+    my ($self, $head_docid, $documents, $versions) = @_;
     my @docparams;
     for my $document (@$documents) {
         push(@docparams, values(%{$self->obvius->get_docparams($document)}));
     }
-    return \@docparams;
+    return \@docparams, $documents, $versions;
 }
 
 sub list_versions {
-    my ($self, $documents) = @_;
+    my ($self, $head_docid, $documents, $versions) = @_;
     # A future release may want to introduce filtering
     my $version_depth = $self->{options}->{version_depth};
     my $only_public_or_latest_version = $self->{options}->{only_public_or_latest_version};
@@ -483,27 +458,17 @@ sub list_versions {
             }
         }
     }
-    return \@versions;
+    return \@versions, $documents, \@versions;
 }
 
 sub list_vfields {
-    my ($self, $versions) = @_;
+    my ($self, $head_docid, $documents, $versions) = @_;
     # A future release may want to introduce filtering
     my @vfields;
     for my $version (@$versions) {
         push(@vfields, map { { 'vfield' => $_, 'version' => $version } } $self->obvius->get_version_fields($version, 1000));
     }
-    return \@vfields;
-}
-
-sub list_subsites {
-    my ($self, $documents) = @_;
-
-    my @docids = map { ref($_) ? $_->Id : $_ } @{$documents};
-    my $docid_str = join q{,}, @docids;
-    my $subsites = $self->obvius->execute_select("SELECT * from subsites2 where root_docid in ($docid_str)");
-
-    return $subsites;
+    return \@vfields, $documents, $versions;
 }
 
 sub find_referred_docids {
@@ -542,7 +507,7 @@ sub find_referred_docids {
     }
 
     my @p = ($docid);
-    my $proxies = $self->list_internal_proxies(\@p);
+    my $proxies = $self->list_proxies(\@p);
     for my $proxy (@{$proxies}) {
         my $ref_docid = $proxy->{'dependent_on'};
         if (!exists($references->{$ref_docid})) {
@@ -1075,117 +1040,6 @@ sub import_proxy {
     }
 }
 
-sub export_subsite {
-    my ($self, $subsite, $file, $indent_size) = @_;
-    if (!defined($indent_size)) {
-        $indent_size = 0;
-    }
-    my $i = " " x $indent_size;
-
-    # TODO Handle differing website categories
-    # ID as well as en and da names may be non-existing
-    # For now, set to 1 which we can assume exists
-    $subsite->{website_category_id} = 1;
-    my %data = %{$subsite};
-
-    # Add secondary domains to exported data
-    my @secondary_domains;
-    # Fetch secondary domains
-    my $sth = $self->obvius->dbh->prepare(q|
-        select domain
-        from subsites_secondary_domains
-        where subsite_id = ?
-        order by seqno
-    |);
-    $sth->execute($subsite->{id});
-    while(my ($domain) = $sth->fetchrow_array) {
-        push(@secondary_domains, $domain);
-    }
-    if(@secondary_domains) {
-        $data{secondary_domains} = \@secondary_domains;
-    }
-
-    # Add subsite base domain to data
-    if(my $local_base = $self->obvius->config->param('subsite_base_domain')) {
-        $data{subsite_base_domain} = $local_base;
-    }
-
-    my $output = $json->encode(\%data);
-    $output =~ s/^\s+|\s+$//;
-    $output =~ s/\n/\n$i/g;
-    $output = $i.$output;
-
-    print $file $output;
-}
-
-sub import_subsite {
-    my ($self, $obj) = @_;
-
-    my $src_docid = $obj->{'root_docid'};
-    my $dest_docid = $self->{'import_cache'}->{'docids'}->{$src_docid};
-    if (!defined($dest_docid)) {
-        die("Subsite import needed to find already imported document with source docid=$src_docid. None found.\n");
-    }
-
-    if ($self->subsite_exists($dest_docid)) {
-        #print "A subsite with root_docid $dest_docid already exists. Skipping\n";
-        return;
-    }
-    $obj->{'root_docid'} = $dest_docid;
-    $obj->{'id'} = undef;
-
-    my @secondary_domains;
-    if(my $secondary_domain_list = delete $obj->{secondary_domains}) {
-        if(ref($secondary_domain_list) ne 'ARRAY') {
-            $secondary_domain_list = [$secondary_domain_list];
-        }
-        @secondary_domains = @$secondary_domain_list;
-    }
-
-    # Adjust domains to local base
-    if(my $remote_base = delete $obj->{subsite_base_domain}) {
-        $obj->{domain} = $self->adjust_domain($remote_base, $obj->{domain});
-        @secondary_domains = map {
-            $self->adjust_domain($remote_base, $_)
-        } @secondary_domains;
-    }
-
-    my $sql = SQL::Abstract->new();
-    my ($query, @bind) = $sql->insert('subsites2', $obj);
-    my $sth = $self->obvius->dbh->prepare($query);
-    $sth->execute(@bind);
-    my $id = $sth->{mysql_insertid};
-    $sth->finish;
-
-    if($id && @secondary_domains) {
-        my $sec_sth = $self->obvius->dbh->prepare(q|
-            insert into subsites_secondary_domains
-                (subsite_id, seqno, domain)
-            values
-                (?, ?, ?)
-        |);
-        my $seqno = 0;
-        foreach my $domain (@secondary_domains) {
-            $sec_sth->execute($id, ++$seqno, $domain);
-        }
-    }
-
-    # Register cache modification
-    $self->obvius->register_modified(
-        synchronized => 1, action=>'update_subsite_files'
-    );
-}
-
-sub subsite_exists {
-    my ($self, $root_docid) = @_;
-
-    my $res = $self->obvius->execute_select("SELECT 1 FROM subsites2 WHERE root_docid = $root_docid");
-    if (scalar @{$res}) {
-        return 1;
-    }
-    return 0;
-}
-
 sub read_file {
     my ($filename, $descriptor) = @_;
     if (!defined($descriptor)) {
@@ -1327,6 +1181,9 @@ Arguments:
 sub fetch_remote_dump {
     my ($self, $host, $path_and_filename, %options) = @_;
 
+    # Make sure $path_and_filename begins with a single slash
+    $path_and_filename =~ s{^/*}{/};
+
     # Separate filename from path
     my ($path, $filename) = ($path_and_filename =~ m{(.*/)([^/]+)$}x);
     if(!$path) {
@@ -1352,7 +1209,8 @@ sub fetch_remote_dump {
     }
 
     my $proto = $options{protocol} || 'https';
-    my $url = "${proto}://${host}/:obvius/dumps${path_and_filename}";
+    my $dump_service_uri = $options{dump_service_uri} || ':obvius/dumps';
+    my $url = "${proto}://${host}/${dump_service_uri}${path_and_filename}";
 
     my $ua = $self->remote_dumps_useragent($host, %options);
 
@@ -1369,11 +1227,13 @@ sub fetch_remote_dump {
             return $self->store_remote_dump_from_response(
                 $host, $path_and_filename, $res
             );
+        } else {
+            croak "Remote dump at $url has failed";
         }
     }
 
     if($res->code == 500) {
-        croak "Remote dump at $url has filed";
+        croak "Remote dump at $url has failed";
     }
 
     my $code = $res->code;
@@ -1426,7 +1286,8 @@ sub create_remote_dump {
 
     my $proto = $options{protocol} || 'https';
     my $base_url = "${proto}://${host}";
-    my $url = $base_url . "/:obvius/dumps${path}";
+    my $dump_service_uri = $options{dump_service_uri} || ':obvius/dumps';
+    my $url = $base_url . "/${dump_service_uri}${path}";
 
     my $ua = $self->remote_dumps_useragent($host, %options);
 
