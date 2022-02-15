@@ -42,6 +42,7 @@ if (!$config_name) {
 }
 
 my $config = Obvius::Config->new($config_name);
+my $obvius = Obvius->new($config);
 my $docpaths = $config->param('scheduled_export_paths');
 
 if (!$docpaths) {
@@ -58,7 +59,13 @@ if (!($importexport_dir =~ m{^/})) {
 my @docpaths = split(',', $docpaths);
 my $local_root = $config->param('importexport_dir') . '/local';
 
-my $exporter = Obvius::ExportImport->new($config_name);
+# Dynamically select and instantiate class
+my $perlname = $config->param('perlname');
+my $module = "${perlname}::ExportImport";
+require "${perlname}/ExportImport.pm";
+my $exporter = $module->new($obvius);
+
+
 $exporter->set_options({
     depth => -1,
     version_depth => -1,
