@@ -306,8 +306,8 @@ sub _copy_documents_recursive {
     my ($obvius, $source_doc, $dest_doc, $new_doc_name, %options)=@_;
 
     my $count=0;
-    my ($result, $message, $new_dest_doc)=_copy_single_document(
-	$obvius, $source_doc, $dest_doc, $new_doc_name, %options
+    my ($result, $message, $new_dest_doc)=$obvius->_copy_single_document(
+	$source_doc, $dest_doc, $new_doc_name, %options
     );
     return ($result, $message, $count) if ($result ne 'OK');
     $count++;
@@ -410,8 +410,8 @@ sub perform_command_copy {
         return ($status, $message);
     }
     else {
-        my @result = _copy_single_document(
-	    $obvius, $doc, $destdoc, $dest_name, %{ $info{args} }
+        my @result = $obvius->_copy_single_document(
+	    $doc, $destdoc, $dest_name, %{ $info{args} }
 	);
         if($info{args}->{change_owner_to}) {
             my $dest_uri = sprintf('%s/%s/', $destination, $dest_name);

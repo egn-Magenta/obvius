@@ -70,6 +70,9 @@ our @EXPORT = qw(OBVIUS_OK OBVIUS_DECLINE OBVIUS_ERROR);
 our @EXPORT_OK = ();
 our %EXPORT_TAGS = ();
 
+# Flag that determines whether we've already dynamically loaded overriden modules
+my $isa_has_been_overridden = 0;
+
 use constant OBVIUS_ERROR => 0;
 use constant OBVIUS_OK => 1;
 use constant OBVIUS_DECLINE => 2;
@@ -152,6 +155,20 @@ sub new {
     }
 
     $this->{dbprocedures} = Obvius::DBProcedures->new($this->dbh);
+
+    # Hack incoming:
+    # For every parent class, eg. Obvius::SomeClass, look for $perlname::Overrides::Obvius::SomeClass
+    # and replace the vanilla version with the overridden version if an override exists (and is able to load)
+    if (!$isa_has_been_overridden) {
+        for (@ISA) {
+            my $override_module = $obvius_config->param('perlname') . "::Overrides::$_";
+            if (eval ("require $override_module")) {
+                print "Replacing $_ with $override_module\n" if ($this->{DEBUG});
+                $_ = $override_module;
+            }
+        }
+        $isa_has_been_overridden = 1;
+    }
 
     return $this;
 }
